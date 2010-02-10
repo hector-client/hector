@@ -1,0 +1,188 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>me.prettyprint</groupId>
+  <artifactId>cassandra-java-client</artifactId>
+  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <name>cassandra-java-client</name>
+  <description>Cassandra Java Client Library</description>
+  <url>http://github.com/rantav/cassandra-java-client</url>
+
+  <repositories>
+    <!-- for download spy-memcached client -->
+    <repository>
+      <id>spy</id>
+      <name>Spy Repository</name>
+      <layout>default</layout>
+      <url>http://bleu.west.spy.net/~dustin/m2repo/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <issueManagement>
+    <system>github</system>
+    <url>http://github.com/rantav/cassandra-java-client/issues</url>
+  </issueManagement>
+
+  <developers>
+    <developer>
+      <name>Ran Tavory</name>
+      <id>rantav</id>
+      <email>rantav@gmail.com</email>
+    </developer>
+  </developers>
+
+  <!--
+  - relative lib
+  -->
+  <dependencies>
+    <dependency>
+      <groupId>commons-pool</groupId>
+      <artifactId>commons-pool</artifactId>
+      <version>1.5.3</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.4</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-pool</groupId>
+      <artifactId>commons-pool</artifactId>
+      <version>1.5.3</version>
+    </dependency>
+    <dependency>
+      <groupId>libthrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>820831</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/libthrift-r820831.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra</artifactId>
+      <version>0.5.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/apache-cassandra-incubating-0.5.0.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.5.8</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>1.5.8</version>
+    </dependency>
+    <!--
+    <dependency>
+      <groupId>spy</groupId>
+      <artifactId>memcached</artifactId>
+      <version>2.5rc1</version>
+    </dependency>
+    -->
+
+    <!-- Testing Dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.6</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+
+  <build>
+    <plugins>
+      <!-- Setup the build for JAVA 1.6  -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.6</source>
+          <target>1.6</target>
+          <optimize>true</optimize>
+          <debug>true</debug>
+          <showDeprecation>true</showDeprecation>
+          <showWarnings>true</showWarnings>
+        </configuration>
+      </plugin>
+
+      <!-- Configure the JUnit Env -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <systemProperties>
+            <property>
+              <name>storage-config</name>
+              <value>${basedir}/src/test/conf</value>
+            </property>
+          </systemProperties>
+          <forkMode>always</forkMode>
+        </configuration>
+      </plugin>
+
+      <!-- cobertura code coverage reports -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.0</version>
+        <configuration>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>taglist-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <links>
+            <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
+            <link>http://logging.apache.org/log4j/docs/api/</link>
+          </links>
+          <!--
+          <stylesheetfile>${basedir}/../etc/css/stylesheet.css</stylesheetfile>
+          -->
+          <linksource>true</linksource>
+          <maxmemory>900m</maxmemory>
+          <source>1.6</source>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>cobertura-maven-plugin</artifactId>
+        <version>2.2</version>
+        <configuration>
+          <formats>
+            <format>html</format>
+            <format>xml</format>
+          </formats>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>
