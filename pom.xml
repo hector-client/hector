@@ -9,6 +9,11 @@
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/cassandra-java-client</url>
 
+  <properties>
+    <!-- Set default encoding to UTF-8 -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+
   <repositories>
     <!-- for download spy-memcached client -->
     <repository>
