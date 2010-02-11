@@ -4,6 +4,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.model.Keyspace;
 
+import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.ConsistencyLevel;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.thrift.TException;
@@ -20,10 +21,10 @@ public interface CassandraClient {
 
   static final int DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
 
-//  /**
-//   * @return the underline cassandra thrift object, all remote calls will be sent to this client.
-//   */
-//  Cassandra.Client getCassandra();
+  /**
+   * @return the underline cassandra thrift object, all remote calls will be sent to this client.
+   */
+  Cassandra.Client getCassandra();
 
   /**
    * Return given key space, if keySpaceName not exist, will throw an exception.

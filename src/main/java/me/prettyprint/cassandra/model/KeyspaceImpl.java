@@ -5,7 +5,9 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 
+import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.Column;
+import org.apache.cassandra.service.ColumnOrSuperColumn;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.InvalidRequestException;
@@ -24,17 +26,27 @@ import org.apache.thrift.TException;
  */
 /*package*/ class KeyspaceImpl implements Keyspace {
 
+  private static String CF_COMPAREWITH = "CompareWith" ;
+  private static String CF_DESC = "Desc" ;
+  private static String CF_TYPE = "Type" ;
+  private static String CF_TYPE_STANDARD = "Standard" ;
+  private static String CF_TYPE_SUPER = "Super" ;
+  private static String CF_FLUSHPERIOD = "FlushPeriodInMinutes" ;
+
   private final CassandraClient client;
+  /** The cassandra thrift proxy */
+  private final Cassandra.Client cassandra;
   private final String keyspaceName;
   private final Map<String, Map<String, String>> keyspaceDesc;
   private final int consistencyLevel;
 
-  public KeyspaceImpl(CassandraClient cassandraClient, String keyspaceName,
+  public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel) {
-    this.client = cassandraClient;
+    this.client = client;
     this.consistencyLevel = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
+    this.cassandra = client.getCassandra();
   }
 
   @Override
@@ -58,8 +70,9 @@ import org.apache.thrift.TException;
   @Override
   public Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
       NotFoundException, UnavailableException, TException, TimedOutException {
-    // TODO Auto-generated method stub
-    return null;
+    valideColumnPath(columnPath);
+    ColumnOrSuperColumn cosc = cassandra.get(keyspaceName, key, columnPath, consistencyLevel);
+    return cosc == null ? null : cosc.getColumn();
   }
 
   @Override
@@ -117,8 +130,8 @@ import org.apache.thrift.TException;
   @Override
   public void insert(String key, ColumnPath columnPath, byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    // TODO Auto-generated method stub
-
+    valideColumnPath(columnPath);
+    cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistencyLevel);
   }
 
   @Override
@@ -162,13 +175,40 @@ import org.apache.thrift.TException;
   @Override
   public void remove(String key, ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    // TODO Auto-generated method stub
-
+    cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistencyLevel);
   }
 
   @Override
   public String getKeyspaceName() {
     return keyspaceName;
+  }
+
+  private long createTimeStamp() {
+    return System.currentTimeMillis();
+  }
+
+  /**
+   * Make sure that if the given column path was a Column.
+   * Throws an InvalidRequestException if not.
+   * @param columnPath
+   * @throws InvalidRequestException if either the column family does not exist or that it's type
+   * does not match (super)..
+   */
+  private void valideColumnPath(ColumnPath columnPath) throws InvalidRequestException {
+    String cf = columnPath.getColumn_family();
+    Map<String, String> cfdefine;
+    if ((cfdefine = keyspaceDesc.get(cf)) != null){
+      if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
+        // if the column family is a standard column
+        return;
+      } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
+          && columnPath.getSuper_column() != null
+          && columnPath.getColumn() != null) {
+        // if the column family is a super column and also give the super_column name
+        return;
+      }
+    }
+    throw new InvalidRequestException("The specified column family does not exist: " + cf);
   }
 
 }

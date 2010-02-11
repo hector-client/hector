@@ -9,6 +9,7 @@ import me.prettyprint.cassandra.model.KeyspaceFactory;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.NotFoundException;
+import org.apache.cassandra.service.Cassandra.Client;
 import org.apache.thrift.TException;
 
 /**
@@ -130,5 +131,10 @@ import org.apache.thrift.TException;
     b.append(consistencyLevel);
     b.append(']');
     return b.toString();
+  }
+
+  @Override
+  public Client getCassandra() {
+    return cassandra;
   }
 }
