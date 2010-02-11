@@ -7,12 +7,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
+
+import me.prettyprint.cassandra.model.Keyspace;
 
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
+import org.apache.cassandra.service.ConsistencyLevel;
 import org.apache.cassandra.service.EmbeddedCassandraService;
+import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.utils.FileUtils;
+import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -26,6 +33,8 @@ public class CassandraClientTest {
   private static EmbeddedCassandraService cassandra;
 
   private static final String TMP = "tmp";
+
+  private CassandraClient client;
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -59,39 +68,61 @@ public class CassandraClientTest {
     rmdir(TMP);
   }
 
-  @Test
-  public void testGetKeySpaceString() {
-    fail("Not yet implemented");
+  @Before
+  public void setupCase() {
+    client = new CassandraClientFactory().create();
   }
 
   @Test
-  public void testGetKeySpaceStringConsistencyLevel() {
-    fail("Not yet implemented");
+  public void testGetKeySpaceString()
+      throws IllegalArgumentException, NotFoundException, TException {
+    Keyspace k = client.getKeySpace("Keyspace1");
+    assertNotNull(k);
+    assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
   }
 
   @Test
-  public void testGetStringProperty() {
-    fail("Not yet implemented");
+  public void testGetKeySpaceStringConsistencyLevel()
+      throws IllegalArgumentException, NotFoundException, TException {
+    Keyspace k = client.getKeySpace("Keyspace1", ConsistencyLevel.ALL);
+    assertNotNull(k);
+    assertEquals(ConsistencyLevel.ALL, k.getConsistencyLevel());
+
+    k = client.getKeySpace("Keyspace1", ConsistencyLevel.ZERO);
+    assertNotNull(k);
+    assertEquals(ConsistencyLevel.ZERO, k.getConsistencyLevel());
+  }
+
+  @Test
+  public void testGetStringProperty() throws TException {
+    String prop = client.getStringProperty("cluster name");
+    assertEquals("Test Cluster", prop);
   }
 
   @Test
   public void testGetKeyspaces() {
-    fail("Not yet implemented");
+    List<String> spaces = client.getKeyspaces();
+    assertNotNull(spaces);
+    assertEquals(1, spaces.size());
+    assertEquals("Keyspace1", spaces.get(1));
   }
 
   @Test
   public void testGetClusterName() {
-    fail("Not yet implemented");
+    String name = client.getClusterName();
+    assertEquals("Test Cluster", name);
   }
 
   @Test
   public void testGetTokenMap() {
-    fail("Not yet implemented");
+    String map = client.getTokenMap();
+    assertEquals("TODO", map);
   }
 
   @Test
   public void testGetConfigFile() {
-    fail("Not yet implemented");
+    String map = client.getConfigFile();
+    assertEquals("TODO", map);
   }
 
   private static void rmdir(String dir) throws IOException {

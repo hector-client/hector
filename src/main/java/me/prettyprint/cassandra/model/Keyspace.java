@@ -8,6 +8,7 @@ import me.prettyprint.cassandra.service.CassandraClient;
 import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
+import org.apache.cassandra.service.ConsistencyLevel;
 import org.apache.cassandra.service.InvalidRequestException;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
@@ -182,4 +183,8 @@ public interface Keyspace {
       String start, String finish, int count)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
+  /**
+   * @return The consistency level held by this keyspace instance.
+   */
+  public ConsistencyLevel getConsistencyLevel();
 }

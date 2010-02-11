@@ -4,7 +4,6 @@ import java.util.List;
 
 import me.prettyprint.cassandra.model.Keyspace;
 
-import org.apache.cassandra.service.ConsistencyLevel;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.thrift.TException;
 
@@ -36,7 +35,7 @@ import org.apache.thrift.TException;
   }
 
   @Override
-  public Keyspace getKeySpace(String keySpaceName, ConsistencyLevel consitencyLevel)
+  public Keyspace getKeySpace(String keySpaceName, int consitencyLevel)
       throws IllegalArgumentException, NotFoundException, TException {
     // TODO Auto-generated method stub
     return null;

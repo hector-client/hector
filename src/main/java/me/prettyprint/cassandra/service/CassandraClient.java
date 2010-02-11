@@ -41,7 +41,7 @@ public interface CassandraClient {
   /**
    * Gets s keyspace with the specified consistency level.
    */
-  Keyspace getKeySpace(String keySpaceName, ConsistencyLevel consitencyLevel)
+  Keyspace getKeySpace(String keySpaceName, int consitencyLevel)
       throws IllegalArgumentException, NotFoundException, TException;
 
 
