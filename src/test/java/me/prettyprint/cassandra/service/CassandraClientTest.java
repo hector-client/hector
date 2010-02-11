@@ -69,8 +69,8 @@ public class CassandraClientTest {
   }
 
   @Before
-  public void setupCase() {
-    client = new CassandraClientFactory().create();
+  public void setupCase() throws TTransportException, TException {
+    client = new CassandraClientFactory().create("localhost", 9170);
   }
 
   @Test
@@ -108,7 +108,7 @@ public class CassandraClientTest {
   }
 
   @Test
-  public void testGetClusterName() {
+  public void testGetClusterName() throws TException {
     String name = client.getClusterName();
     assertEquals("Test Cluster", name);
   }

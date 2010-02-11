@@ -63,8 +63,9 @@ public interface CassandraClient {
 
   /**
    * @return target server cluster name
+   * @throws TException
    */
-  String getClusterName();
+  String getClusterName() throws TException;
 
 
   /**
