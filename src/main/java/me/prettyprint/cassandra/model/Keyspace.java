@@ -8,7 +8,6 @@ import me.prettyprint.cassandra.service.CassandraClient;
 import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
-import org.apache.cassandra.service.ConsistencyLevel;
 import org.apache.cassandra.service.InvalidRequestException;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
@@ -27,7 +26,7 @@ public interface Keyspace {
   /**
    * @return The cassandra client object used to obtain this KeySpace.
    */
-  public CassandraClient getClient();
+  CassandraClient getClient();
 
   /**
    * Get the Column at the given columnPath.
@@ -37,7 +36,7 @@ public interface Keyspace {
    * @throws NotFoundException
    *           if no value exists for the column
    */
-  public Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
+  Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
       NotFoundException, UnavailableException, TException, TimedOutException;
 
   /**
@@ -51,7 +50,7 @@ public interface Keyspace {
    * @throws NotFoundException
    *           when a supercolumn is not found
    */
-  public SuperColumn getSuperColumn(String key, ColumnPath columnPath)
+  SuperColumn getSuperColumn(String key, ColumnPath columnPath)
       throws InvalidRequestException, NotFoundException, UnavailableException, TException,
       TimedOutException;
 
@@ -70,7 +69,7 @@ public interface Keyspace {
    * @throws NotFoundException
    *           when a supercolumn is not found
    */
-  public SuperColumn getSuperColumn(String key, ColumnPath columnPath, boolean reversed, int size)
+  SuperColumn getSuperColumn(String key, ColumnPath columnPath, boolean reversed, int size)
       throws InvalidRequestException, NotFoundException, UnavailableException, TException,
       TimedOutException;
 
@@ -81,14 +80,14 @@ public interface Keyspace {
    * by the given predicate. If no matching values are found, an empty list is
    * returned.
    */
-  public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
+  List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
       throws InvalidRequestException, NotFoundException, UnavailableException, TException,
       TimedOutException;
 
   /**
    * Get the group of superColumn contained by columnParent.
    */
-  public List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
+  List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
       SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
       UnavailableException, TException, TimedOutException;
 
@@ -100,7 +99,7 @@ public interface Keyspace {
    * and superColumn references of the ColumnOrSuperColumn object it maps to
    * will be null.
    */
-  public Map<String, Column> multigetColumn(List<String> keys, ColumnPath columnPath)
+  Map<String, Column> multigetColumn(List<String> keys, ColumnPath columnPath)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
   /**
@@ -111,7 +110,7 @@ public interface Keyspace {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  public Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath)
+  Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
   /**
@@ -122,7 +121,7 @@ public interface Keyspace {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  public Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath,
+  Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath,
       boolean reversed, int size) throws InvalidRequestException, UnavailableException, TException,
       TimedOutException;
 
@@ -130,7 +129,7 @@ public interface Keyspace {
    * Performs a get_slice for columnParent and predicate for the given keys in
    * parallel.
    */
-  public Map<String, List<Column>> multigetSlice(List<String> keys, ColumnParent columnParent,
+  Map<String, List<Column>> multigetSlice(List<String> keys, ColumnParent columnParent,
       SlicePredicate predicate) throws InvalidRequestException, UnavailableException, TException,
       TimedOutException;
 
@@ -138,20 +137,20 @@ public interface Keyspace {
    * Performs a get_slice for a superColumn columnParent and predicate for the
    * given keys in parallel.
    */
-  public Map<String, List<SuperColumn>> multigetSuperSlice(List<String> keys,
+  Map<String, List<SuperColumn>> multigetSuperSlice(List<String> keys,
       ColumnParent columnParent, SlicePredicate predicate) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException;
 
   /**
    * Inserts a column.
    */
-  public void insert(String key, ColumnPath columnPath, byte[] value)
+  void insert(String key, ColumnPath columnPath, byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
   /**
    * Insert Columns or SuperColumns across different Column Families for the same row key.
    */
-  public void batchInsert(String key, Map<String, List<Column>> cfmap,
+  void batchInsert(String key, Map<String, List<Column>> cfmap,
       Map<String, List<SuperColumn>> superColumnMap) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException;
 
@@ -162,29 +161,31 @@ public interface Keyspace {
    * you can remove the entire row by just specifying the ColumnFamily, or you can remove
    * a SuperColumn or a single Column by specifying those levels too.
    */
-  public void remove(String key, ColumnPath columnPath) throws InvalidRequestException,
+  void remove(String key, ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException;
 
   /**
    * get a description of the specified keyspace
    */
-  public Map<String, Map<String, String>> describeKeyspace() throws NotFoundException, TException;
+  Map<String, Map<String, String>> describeKeyspace() throws NotFoundException, TException;
 
   /**
    * Counts the columns present in columnParent.
    */
-  public int getCount(String key, ColumnParent columnParent) throws InvalidRequestException,
+  int getCount(String key, ColumnParent columnParent) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException;
 
   /**
    * returns a subset of columns for a range of keys.
    */
-  public List<String> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
+  List<String> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
   /**
    * @return The consistency level held by this keyspace instance.
    */
-  public ConsistencyLevel getConsistencyLevel();
+  int getConsistencyLevel();
+
+  String getKeyspaceName();
 }

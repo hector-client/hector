@@ -34,14 +34,14 @@ public interface CassandraClient {
    * <p>
    * Uses the default consistency level, {@link #DEFAULT_CONSISTENCY_LEVEL}
    */
-  Keyspace getKeySpace(String keySpaceName)
+  Keyspace getKeySpace(String keyspaceName)
       throws IllegalArgumentException, NotFoundException, TException;
 
 
   /**
    * Gets s keyspace with the specified consistency level.
    */
-  Keyspace getKeySpace(String keySpaceName, int consitencyLevel)
+  Keyspace getKeySpace(String keyspaceName, int consistencyLevel)
       throws IllegalArgumentException, NotFoundException, TException;
 
 

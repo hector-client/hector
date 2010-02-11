@@ -2,8 +2,10 @@ package me.prettyprint.cassandra.service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.model.Keyspace;
+import me.prettyprint.cassandra.model.KeyspaceFactory;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.NotFoundException;
@@ -28,7 +30,7 @@ import org.apache.thrift.TException;
 
   private List<String> keyspaces;
 
-  private HashMap<String, Keyspace> keyspaceMap;
+  private final HashMap<String, Keyspace> keyspaceMap = new HashMap<String, Keyspace>();
 
   private String clusterName;
 
@@ -38,8 +40,12 @@ import org.apache.thrift.TException;
 
   private String serverVersion;
 
-  public CassandraClientImpl(Cassandra.Client cassandraThriftClient) {
+  private final KeyspaceFactory keyspaceFactory;
+
+  public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
+      KeyspaceFactory keyspaceFactory) {
     cassandra = cassandraThriftClient;
+    this.keyspaceFactory = keyspaceFactory;
   }
 
   @Override
@@ -61,15 +67,26 @@ import org.apache.thrift.TException;
   @Override
   public Keyspace getKeySpace(String keySpaceName) throws IllegalArgumentException,
       NotFoundException, TException {
-    // TODO Auto-generated method stub
-    return null;
+    return getKeySpace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL);
   }
 
   @Override
-  public Keyspace getKeySpace(String keySpaceName, int consitencyLevel)
+  public Keyspace getKeySpace(String keyspaceName, int consistencyLevel)
       throws IllegalArgumentException, NotFoundException, TException {
-    // TODO Auto-generated method stub
-    return null;
+    String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel);
+    Keyspace keyspace = keyspaceMap.get(keyspaceMapKey);
+    if (keyspace == null) {
+      if (getKeyspaces().contains(keyspaceName)) {
+        Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
+        keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel);
+        keyspaceMap.put(keyspaceMapKey , keyspace);
+      }else{
+        throw new IllegalArgumentException(
+            "request key space not exist, keyspaceName=" + keyspaceName);
+      }
+    }
+    return keyspace;
+
   }
 
   @Override
@@ -100,4 +117,18 @@ import org.apache.thrift.TException;
     }
     return serverVersion;
    }
+
+  /**
+   * Creates a unique map name for the keyspace and its consistency level
+   * @param keyspaceName
+   * @param consistencyLevel
+   * @return
+   */
+  private String buildKeyspaceMapName(String keyspaceName, int consistencyLevel) {
+    StringBuilder b = new StringBuilder(keyspaceName);
+    b.append('[');
+    b.append(consistencyLevel);
+    b.append(']');
+    return b.toString();
+  }
 }

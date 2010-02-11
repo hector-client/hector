@@ -79,6 +79,14 @@ public class CassandraClientTest {
     Keyspace k = client.getKeySpace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
+
+    // negative path
+    try {
+      k = client.getKeySpace("KeyspaceDoesntExist");
+      fail("Should have thrown an exception IllegalArgumentException");
+    } catch (IllegalArgumentException e) {
+      // good
+    }
   }
 
   @Test

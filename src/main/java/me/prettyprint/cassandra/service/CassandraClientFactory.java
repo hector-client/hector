@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.model.KeyspaceFactory;
+
 import org.apache.cassandra.service.Cassandra;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -17,7 +19,7 @@ import org.apache.thrift.transport.TTransportException;
 public class CassandraClientFactory {
 
   public CassandraClient create(String url, int port) throws TTransportException, TException {
-    return new CassandraClientImpl(createThriftClient(url, port));
+    return new CassandraClientImpl(createThriftClient(url, port), new KeyspaceFactory());
   }
 
   public Cassandra.Client createThriftClient(String  url, int port)
