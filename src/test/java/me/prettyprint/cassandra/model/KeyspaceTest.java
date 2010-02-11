@@ -3,11 +3,13 @@ package me.prettyprint.cassandra.model;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientFactory;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
+import org.apache.cassandra.service.NotFoundException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
@@ -25,6 +27,7 @@ public class KeyspaceTest {
   private static EmbeddedServerHelper embedded;
 
   private CassandraClient client;
+  private Keyspace keyspace;
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -45,14 +48,16 @@ public class KeyspaceTest {
   }
 
   @Before
-  public void setupCase() throws TTransportException, TException {
+  public void setupCase()
+      throws TTransportException, TException, IllegalArgumentException, NotFoundException {
     client = new CassandraClientFactory().create("localhost", 9170);
+    keyspace = client.getKeySpace("Keyspace1");
   }
 
 
   @Test
   public void testGetClient() {
-    fail("Not yet implemented");
+    assertEquals(client, keyspace.getClient());
   }
 
   @Test
@@ -121,8 +126,10 @@ public class KeyspaceTest {
   }
 
   @Test
-  public void testDescribeKeyspace() {
-    fail("Not yet implemented");
+  public void testDescribeKeyspace() throws NotFoundException, TException {
+    Map<String, Map<String, String>> description = keyspace.describeKeyspace();
+    assertNotNull(description);
+    assertEquals(4, description.size());
   }
 
   @Test
@@ -137,12 +144,12 @@ public class KeyspaceTest {
 
   @Test
   public void testGetConsistencyLevel() {
-    fail("Not yet implemented");
+    assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, keyspace.getConsistencyLevel());
   }
 
   @Test
   public void testGetKeyspaceName() {
-    fail("Not yet implemented");
+    assertEquals("Keyspace1", keyspace.getKeyspaceName());
   }
 
 }
