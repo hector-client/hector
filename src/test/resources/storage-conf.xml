@@ -1,20 +1,16 @@
 <Storage>
   <ClusterName>Test Cluster</ClusterName>
   <Keyspaces>
-    <Keyspace Name="Keyspace1">
+      <Keyspace Name="Keyspace1">
       <ColumnFamily CompareWith="BytesType"
                     Name="Standard1"
-                    RowsCached="10%"
-                    KeysCachedFraction="0"/>
+                    FlushPeriodInMinutes="60"/>
       <ColumnFamily CompareWith="UTF8Type" Name="Standard2"/>
       <ColumnFamily CompareWith="TimeUUIDType" Name="StandardByUUID1"/>
       <ColumnFamily ColumnType="Super"
                     CompareWith="UTF8Type"
                     CompareSubcolumnsWith="UTF8Type"
-                    Name="Super1"
-                    RowsCached="1000"
-                    KeysCachedFraction="0"
-                    Comment="A column family with supercolumns, whose column and subcolumn names are UTF8 strings"/>
+                    Name="Super1"/>
     </Keyspace>
   </Keyspaces>
 
