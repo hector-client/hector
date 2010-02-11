@@ -100,11 +100,12 @@ public class CassandraClientTest {
   }
 
   @Test
-  public void testGetKeyspaces() {
+  public void testGetKeyspaces() throws TException {
     List<String> spaces = client.getKeyspaces();
     assertNotNull(spaces);
-    assertEquals(1, spaces.size());
-    assertEquals("Keyspace1", spaces.get(1));
+    // There should be two spaces: Keyspace1 and system
+    assertEquals(2, spaces.size());
+    assertTrue("Keyspace1".equals(spaces.get(0)) || "Keyspace1".equals(spaces.get(1)));
   }
 
   @Test
@@ -114,15 +115,17 @@ public class CassandraClientTest {
   }
 
   @Test
-  public void testGetTokenMap() {
+  public void testGetTokenMap() throws TException {
     String map = client.getTokenMap();
-    assertEquals("TODO", map);
+    assertNotNull(map);
+    assertTrue(map.indexOf("127.0.0.1") > 0);
   }
 
   @Test
-  public void testGetConfigFile() {
-    String map = client.getConfigFile();
-    assertEquals("TODO", map);
+  public void testGetConfigFile() throws TException {
+    String config = client.getConfigFile();
+    assertNotNull(config);
+    assertTrue(config.length() > 0);
   }
 
   private static void rmdir(String dir) throws IOException {

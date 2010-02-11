@@ -26,7 +26,7 @@ import org.apache.thrift.TException;
   /** The thrift object */
   private final Cassandra.Client cassandra;
 
-//  private List<String> keyspaces;
+  private List<String> keyspaces;
 
   private HashMap<String, Keyspace> keyspaceMap;
 
@@ -45,15 +45,17 @@ import org.apache.thrift.TException;
   @Override
   public String getClusterName() throws TException {
     if (clusterName == null) {
-      clusterName = cassandra.get_string_property(PROP_CLUSTER_NAME);
+      clusterName = getStringProperty(PROP_CLUSTER_NAME);
     }
     return clusterName;
   }
 
   @Override
-  public String getConfigFile() {
-    // TODO Auto-generated method stub
-    return null;
+  public String getConfigFile() throws TException {
+    if (configFile == null) {
+      configFile = getStringProperty(PROP_CONFIG_FILE);
+    }
+    return configFile;
   }
 
   @Override
@@ -71,21 +73,31 @@ import org.apache.thrift.TException;
   }
 
   @Override
-  public List<String> getKeyspaces() {
-    // TODO Auto-generated method stub
-    return null;
+  public List<String> getKeyspaces() throws TException {
+    if (keyspaces == null) {
+      keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
+    }
+    return keyspaces;
   }
 
   @Override
   public String getStringProperty(String propertyName) throws TException {
-    // TODO Auto-generated method stub
-    return null;
+    return cassandra.get_string_property(propertyName);
   }
 
   @Override
-  public String getTokenMap() {
-    // TODO Auto-generated method stub
-    return null;
+  public String getTokenMap() throws TException {
+    if (tokenMap == null) {
+      tokenMap = getStringProperty(PROP_TOKEN_MAP);
+    }
+    return tokenMap;
   }
 
+  @Override
+  public String getServerVersion() throws TException {
+    if (serverVersion == null) {
+      serverVersion = getStringProperty(PROP_VERSION);
+    }
+    return serverVersion;
+   }
 }

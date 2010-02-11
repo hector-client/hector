@@ -58,12 +58,11 @@ public interface CassandraClient {
   /**
    * @return all keyspaces name of this client.
    */
-  List<String> getKeyspaces();
+  List<String> getKeyspaces() throws TException;
 
 
   /**
    * @return target server cluster name
-   * @throws TException
    */
   String getClusterName() throws TException;
 
@@ -71,11 +70,16 @@ public interface CassandraClient {
   /**
    * @return the tokens map.
    */
-  String getTokenMap();
+  String getTokenMap() throws TException;
 
 
   /**
    * @return config file content.
    */
-  String getConfigFile();
+  String getConfigFile() throws TException;
+
+  /**
+   * @return Server version
+   */
+  String getServerVersion() throws TException;
 }
