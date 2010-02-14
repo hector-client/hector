@@ -34,6 +34,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -519,6 +520,7 @@ public class KeyspaceTest {
   }
 
   @Test
+  @Ignore("Not implemented yet")
   public void testGetRangeSlice() {
     fail("Not yet implemented");
   }
