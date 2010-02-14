@@ -47,10 +47,6 @@ import org.slf4j.LoggerFactory;
         throws InvalidRequestException, UnavailableException, TException, TimedOutException;
   }
 
-  private static String CF_TYPE = "Type" ;
-  private static String CF_TYPE_STANDARD = "Standard" ;
-  private static String CF_TYPE_SUPER = "Super" ;
-
   private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
 
   private CassandraClient client;
@@ -477,6 +473,9 @@ import org.slf4j.LoggerFactory;
     return null;
   }
 
+  /**
+   * Defines the behavior of an insert operation
+   */
   private class InsertOperation implements Operation {
     private final String keyspace;
     private final String key;

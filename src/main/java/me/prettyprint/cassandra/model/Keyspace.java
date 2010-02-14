@@ -24,6 +24,10 @@ import org.apache.thrift.TException;
  */
 public interface Keyspace {
 
+  public static String CF_TYPE = "Type" ;
+  public static String CF_TYPE_STANDARD = "Standard" ;
+  public static String CF_TYPE_SUPER = "Super" ;
+
   /**
    * @return The cassandra client object used to obtain this KeySpace.
    */

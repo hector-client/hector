@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import static org.mockito.Mockito.mock;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import static org.junit.Assert.assertEquals;
@@ -17,6 +18,7 @@ import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientFactory;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.service.Column;
@@ -536,7 +538,25 @@ public class KeyspaceTest {
   }
 
   @Test
-  public void testFailover() {
-    //TODO
+  public void testFailover() throws TException, InvalidRequestException, UnavailableException,
+      TimedOutException {
+    CassandraClient client = mock(CassandraClient.class);
+    String keyspaceName = "Keyspace1";
+    Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String,String>>();
+    Map<String, String> keyspace1Desc = new HashMap<String, String>();
+    keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
+    keyspaceDesc.put("Standard1", keyspace1Desc);
+    int consistencyLevel = 1;
+    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
+    CassandraClientFactory clientFactory = mock(CassandraClientFactory.class);
+
+    // Create one positive pass without failures
+    FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
+    Keyspace ks = new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
+        failoverPolicy, clientFactory);
+
+    ks.insert("key", cp, bytes("value"));
+
+
   }
 }
