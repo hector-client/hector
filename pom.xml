@@ -46,6 +46,7 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
+          <forkMode>always</forkMode>
           <additionalClasspathElements>
             <additionalClasspathElement>${basedir}/testlib/google-collections-1.0-rc1.jar</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/testlib/clhm-production-1.0.jar</additionalClasspathElement>
