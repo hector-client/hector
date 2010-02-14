@@ -130,4 +130,10 @@ public interface CassandraClient {
   public int getPort();
 
   public String getUrl();
+
+  /**
+   * Tells all instanciated keyspaces to update their known hosts
+   */
+  void updateKnownHosts() throws TException;
+
 }

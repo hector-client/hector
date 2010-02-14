@@ -29,6 +29,7 @@ import org.apache.thrift.TException;
   /** The thrift object */
   private final Cassandra.Client cassandra;
 
+  /** List of known keyspaces */
   private List<String> keyspaces;
 
   private final HashMap<String, Keyspace> keyspaceMap = new HashMap<String, Keyspace>();
@@ -182,5 +183,14 @@ import org.apache.thrift.TException;
   @Override
   public String getUrl() {
     return url;
+  }
+
+  @Override
+  public void updateKnownHosts() throws TException {
+    // TODO(ran): Add this to JMX
+    // Iterate over all keyspaces and ask them to update known hosts
+    for (Keyspace k: keyspaceMap.values()) {
+      k.updateKnownHosts();
+    }
   }
 }

@@ -600,7 +600,7 @@ public class KeyspaceTest {
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; " +
-      		"FAIL_FAST");
+          "FAIL_FAST");
     } catch (TimedOutException e) {
       // ok
     }
@@ -615,7 +615,7 @@ public class KeyspaceTest {
     verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
         (byte[])anyObject(), anyLong(), anyInt());
     verify(clientFactory).create("h3", 111);
-    
+
     // make both h1 and h3 fail
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientFactory);
@@ -625,12 +625,12 @@ public class KeyspaceTest {
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; " +
-      		"ON_FAIL_TRY_ONE_NEXT_AVAILABLE");
+          "ON_FAIL_TRY_ONE_NEXT_AVAILABLE");
     } catch (TimedOutException e) {
       // ok
     }
-    
-    
+
+
     // Now try the full cycle
     // h1 fails, h3 fails, h2 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
@@ -640,7 +640,7 @@ public class KeyspaceTest {
     ks.insert("key", cp, bytes("value"));
     verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
         (byte[])anyObject(), anyLong(), anyInt());
-    
+
     // now fail them all. h1 fails, h2 fails, h3 fails
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientFactory);
@@ -654,6 +654,5 @@ public class KeyspaceTest {
     } catch (TimedOutException e) {
       // ok
     }
-
   }
 }

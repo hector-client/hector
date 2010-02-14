@@ -198,4 +198,9 @@ public interface Keyspace {
    * @return The failover policy used by this keyspace.
    */
   FailoverPolicy getFailoverPolicy();
+
+  /**
+   * Updates the list of known hosts.
+   */
+  void updateKnownHosts() throws TException;
 }

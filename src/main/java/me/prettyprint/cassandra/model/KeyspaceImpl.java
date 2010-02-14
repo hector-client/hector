@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
   private final FailoverPolicy failoverPolicy;
 
   /** List of all known remote cassandra nodes */
-  private List<String> knownHosts = new ArrayList<String>();
+  List<String> knownHosts = new ArrayList<String>();
 
   private final CassandraClientFactory clientFactory;
 
@@ -427,7 +427,7 @@ import org.slf4j.LoggerFactory;
       return;
     }
     // learn about other cassandra hosts in the ring
-    updateHostsList();
+    updateKnownHosts();
   }
 
   /**
@@ -435,7 +435,7 @@ import org.slf4j.LoggerFactory;
    *
    * @throws TException
    */
-  private void updateHostsList() throws TException {
+  public void updateKnownHosts() throws TException {
     Map<String, String> map = getClient().getTokenMap(true);
     knownHosts.clear();
     for (Map.Entry<String, String> entry: map.entrySet()) {
@@ -454,7 +454,7 @@ import org.slf4j.LoggerFactory;
 
     // Acquire a new client
     // TODO(ran) acquire from connection pool
-    
+
     // assume they use the same port
     client = clientFactory.create(getNextHost(client.getUrl()), client.getPort());
     cassandra = client.getCassandra();
