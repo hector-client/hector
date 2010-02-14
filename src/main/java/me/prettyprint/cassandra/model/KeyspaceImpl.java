@@ -94,8 +94,15 @@ import org.slf4j.LoggerFactory;
       }
     }
 
-    // do really insert
-    cassandra.batch_insert(keyspaceName , key, cfmap , consistencyLevel);
+    Operation insert = new Operation(keyspaceName, key, null /*columnPath*/, null /*value*/,
+        cfmap, createTimeStamp(), consistencyLevel) {
+      @Override
+      public void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+          TException, TimedOutException {
+        cassandra.batch_insert(keyspaceName , key, cfmap , consistencyLevel);
+      }
+    };
+    performOperationWithFailover(insert);
   }
 
   @Override
@@ -195,7 +202,7 @@ import org.slf4j.LoggerFactory;
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
     Operation insert = new Operation(keyspaceName, key, columnPath, value,
-        createTimeStamp(), consistencyLevel) {
+        null /*cfmap*/, createTimeStamp(), consistencyLevel) {
       @Override
       public void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -203,25 +210,6 @@ import org.slf4j.LoggerFactory;
       }
     };
     performOperationWithFailover(insert);
-  }
-
-  private void performOperationWithFailover(Operation op)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
-    while (retries > 0) {
-      --retries;
-      try {
-        op.execute(cassandra);
-        return;
-      } catch (TimedOutException e) {
-        log.warn("Got a TimedOutException. Num of retries: {}", retries);
-        if (retries == 0) {
-          throw e;
-        } else {
-          skipToNextHost();
-        }
-      }
-    }
   }
 
   @Override
@@ -444,6 +432,7 @@ import org.slf4j.LoggerFactory;
    * @throws TException
    */
   private void skipToNextHost() throws TTransportException, TException {
+    log.info("Skipping to next host. Current host is: {}", client.getUrl());
     // Release client first
     // TODO(ran): release client from connection pool
 
@@ -453,6 +442,7 @@ import org.slf4j.LoggerFactory;
     // assume they use the same port
     client = clientFactory.create(getNextHost(client.getUrl()), client.getPort());
     cassandra = client.getCassandra();
+    log.info("Skipped host. New host is: {}", client.getUrl());
   }
 
   /**
@@ -473,6 +463,32 @@ import org.slf4j.LoggerFactory;
   }
 
   /**
+   * Performs the operation and retries in in case the class is configured for retries, and there
+   * are enough hosts to try and the error was {@link TimedOutException}.
+   */
+  private void performOperationWithFailover(Operation op)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
+    while (retries > 0) {
+      --retries;
+      log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
+     try {
+        op.execute(cassandra);
+        log.debug("Operation succeeded on {}", client.getUrl());
+        return;
+      } catch (TimedOutException e) {
+        log.warn("Got a TimedOutException. Num of retries: {}", retries);
+        if (retries == 0) {
+          throw e;
+        } else {
+          skipToNextHost();
+        }
+      }
+    }
+  }
+
+
+  /**
    * Defines an operation on cassandra.
    */
   private abstract static class Operation {
@@ -481,21 +497,25 @@ import org.slf4j.LoggerFactory;
     protected final String key;
     protected final ColumnPath columnPath;
     protected final byte[] value;
-    protected long timestamp;
-    protected int consistency;
+    protected final Map<String, List<ColumnOrSuperColumn>> cfmap;
+    protected final long timestamp;
+    protected final int consistency;
+
 
     public Operation(String keyspace,
         String key,
         ColumnPath columnPath,
         byte[] value,
+        Map<String, List<ColumnOrSuperColumn>> cfmap,
         long timestamp,
         int consistency) {
+      this.keyspace = keyspace;
       this.key = key;
       this.columnPath = columnPath;
       this.value = value;
+      this.cfmap = cfmap;
       this.timestamp = timestamp;
       this.consistency = consistency;
-      this.keyspace = keyspace;
     }
 
     /**
