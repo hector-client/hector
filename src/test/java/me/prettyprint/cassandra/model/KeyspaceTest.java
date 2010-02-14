@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.model;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyBoolean;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import static org.junit.Assert.assertEquals;
@@ -21,6 +23,7 @@ import me.prettyprint.cassandra.service.CassandraClientFactory;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
+import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
@@ -541,6 +544,7 @@ public class KeyspaceTest {
   public void testFailover() throws TException, InvalidRequestException, UnavailableException,
       TimedOutException {
     CassandraClient client = mock(CassandraClient.class);
+    Cassandra.Client cassandra = mock(Cassandra.Client.class);
     String keyspaceName = "Keyspace1";
     Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String,String>>();
     Map<String, String> keyspace1Desc = new HashMap<String, String>();
@@ -550,12 +554,22 @@ public class KeyspaceTest {
     ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
     CassandraClientFactory clientFactory = mock(CassandraClientFactory.class);
 
+    // The token map represents the list of available servers.
+    Map<String, String> tokenMap = new HashMap<String, String>();
+    tokenMap.put("t1", "h1");
+    tokenMap.put("t2", "h2");
+    tokenMap.put("t3", "h3");
+
+    when(client.getCassandra()).thenReturn(cassandra);
+    when(client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
     Keyspace ks = new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientFactory);
 
     ks.insert("key", cp, bytes("value"));
+
+    // now fail the call and make sure it fails fast
 
 
   }

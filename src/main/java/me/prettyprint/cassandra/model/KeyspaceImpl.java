@@ -422,6 +422,8 @@ import org.slf4j.LoggerFactory;
    */
   private void initFailover() throws TException {
     if (failoverPolicy == FailoverPolicy.FAIL_FAST) {
+      knownHosts.clear();
+      knownHosts.add(client.getUrl());
       return;
     }
     // learn about other cassandra hosts in the ring
