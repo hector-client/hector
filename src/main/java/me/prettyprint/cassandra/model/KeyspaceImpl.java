@@ -94,44 +94,31 @@ import org.slf4j.LoggerFactory;
       }
     }
 
-    Operation insert = new Operation(keyspaceName, key, null /*columnPath*/, null /*value*/,
-        cfmap, createTimeStamp(), consistencyLevel) {
+    Operation<Void> batchInsert = new Operation<Void>(keyspaceName, key, null /*columnPath*/,
+        null /*value*/, cfmap, null /*columnParent*/, createTimeStamp(), consistencyLevel) {
       @Override
-      public void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         cassandra.batch_insert(keyspaceName , key, cfmap , consistencyLevel);
+        return null;
       }
     };
-    performOperationWithFailover(insert);
-  }
-
-  @Override
-  public Map<String, Map<String, String>> describeKeyspace() throws NotFoundException, TException {
-    return keyspaceDesc;
-  }
-
-  @Override
-  public CassandraClient getClient() {
-    return client;
-  }
-
-  @Override
-  public Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
-      NotFoundException, UnavailableException, TException, TimedOutException {
-    valideColumnPath(columnPath);
-    ColumnOrSuperColumn cosc = cassandra.get(keyspaceName, key, columnPath, consistencyLevel);
-    return cosc == null ? null : cosc.getColumn();
-  }
-
-  @Override
-  public int getConsistencyLevel() {
-    return consistencyLevel;
+    performOperationWithFailover(batchInsert);
   }
 
   @Override
   public int getCount(String key, ColumnParent columnParent) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    return cassandra.get_count(keyspaceName, key, columnParent, consistencyLevel);
+    Operation<Integer> getCount = new Operation<Integer>(keyspaceName, key, null /*columnPath*/,
+        null /*value*/, null /*cfmap*/, columnParent, createTimeStamp(), consistencyLevel) {
+      @Override
+      public Integer execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+          TException, TimedOutException {
+        return cassandra.get_count(keyspaceName, key, columnParent, consistencyLevel);
+      }
+    };
+    performOperationWithFailover(getCount);
+    return getCount.getResult();
   }
 
   @Override
@@ -201,12 +188,13 @@ import org.slf4j.LoggerFactory;
   public void insert(String key, ColumnPath columnPath, byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
-    Operation insert = new Operation(keyspaceName, key, columnPath, value,
-        null /*cfmap*/, createTimeStamp(), consistencyLevel) {
+    Operation<Void> insert = new Operation<Void>(keyspaceName, key, columnPath, value,
+        null /*cfmap*/, null /*columnParent*/, createTimeStamp(), consistencyLevel) {
       @Override
-      public void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         cassandra.insert(keyspace, key, columnPath, value, timestamp, consistency);
+        return null;
       }
     };
     performOperationWithFailover(insert);
@@ -314,6 +302,29 @@ import org.slf4j.LoggerFactory;
   @Override
   public String getKeyspaceName() {
     return keyspaceName;
+  }
+
+  @Override
+  public Map<String, Map<String, String>> describeKeyspace() throws NotFoundException, TException {
+    return keyspaceDesc;
+  }
+
+  @Override
+  public CassandraClient getClient() {
+    return client;
+  }
+
+  @Override
+  public Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
+      NotFoundException, UnavailableException, TException, TimedOutException {
+    valideColumnPath(columnPath);
+    ColumnOrSuperColumn cosc = cassandra.get(keyspaceName, key, columnPath, consistencyLevel);
+    return cosc == null ? null : cosc.getColumn();
+  }
+
+  @Override
+  public int getConsistencyLevel() {
+    return consistencyLevel;
   }
 
   private long createTimeStamp() {
@@ -466,14 +477,16 @@ import org.slf4j.LoggerFactory;
    * Performs the operation and retries in in case the class is configured for retries, and there
    * are enough hosts to try and the error was {@link TimedOutException}.
    */
-  private void performOperationWithFailover(Operation op)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+  @SuppressWarnings("unchecked")
+  private void performOperationWithFailover(Operation op) throws InvalidRequestException,
+      UnavailableException, TException, TimedOutException {
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
     while (retries > 0) {
       --retries;
       log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
-     try {
-        op.execute(cassandra);
+      try {
+        // Perform operation and save its result value (if it has one)
+        op.setResult(op.execute(cassandra));
         log.debug("Operation succeeded on {}", client.getUrl());
         return;
       } catch (TimedOutException e) {
@@ -489,24 +502,29 @@ import org.slf4j.LoggerFactory;
 
 
   /**
-   * Defines an operation on cassandra.
+   * Defines the interface of an operation performed on cassandra
+   *
+   * @param <T> The result type of the operation (if it has a result), such as the result of
+   *    get_count or get_column
    */
-  private abstract static class Operation {
+  private abstract static class Operation<T> {
 
     protected final String keyspace;
     protected final String key;
     protected final ColumnPath columnPath;
     protected final byte[] value;
     protected final Map<String, List<ColumnOrSuperColumn>> cfmap;
+    protected final ColumnParent columnParent;
     protected final long timestamp;
     protected final int consistency;
-
+    protected T result;
 
     public Operation(String keyspace,
         String key,
         ColumnPath columnPath,
         byte[] value,
         Map<String, List<ColumnOrSuperColumn>> cfmap,
+        ColumnParent columnParent,
         long timestamp,
         int consistency) {
       this.keyspace = keyspace;
@@ -514,14 +532,28 @@ import org.slf4j.LoggerFactory;
       this.columnPath = columnPath;
       this.value = value;
       this.cfmap = cfmap;
+      this.columnParent = columnParent;
       this.timestamp = timestamp;
       this.consistency = consistency;
+    }
+
+    public void setResult(T executionResult) {
+      result = executionResult;
+    }
+
+    /**
+     *
+     * @return The result of the operation, if this is an operation that has a result (such as
+     *    getColumn etc.
+     */
+    public T getResult() {
+      return result;
     }
 
     /**
      * Performs the operation on the given cassandra instance.
      */
-    public abstract void execute(Cassandra.Client cassandra)
+    public abstract T execute(Cassandra.Client cassandra)
         throws InvalidRequestException, UnavailableException, TException, TimedOutException;
   }
 }
