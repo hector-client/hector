@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
@@ -188,4 +189,9 @@ public interface Keyspace {
   int getConsistencyLevel();
 
   String getKeyspaceName();
+
+  /**
+   * @return The failover policy used by this keyspace.
+   */
+  FailoverPolicy getFailoverPolicy();
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.Column;
@@ -45,13 +46,18 @@ import org.apache.thrift.TException;
 
   private final int consistencyLevel;
 
+  private final FailoverPolicy failoverPolicy;
+
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
-      Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel) {
+      Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
+      FailoverPolicy failoverPolicy) {
     this.client = client;
     this.consistencyLevel = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
     this.cassandra = client.getCassandra();
+    this.failoverPolicy = failoverPolicy;
+    initFailover();
   }
 
   @Override
@@ -362,6 +368,15 @@ import org.apache.thrift.TException;
       list.add(col.getSuper_column());
     }
     return list;
+  }
+
+  @Override
+  public FailoverPolicy getFailoverPolicy() {
+    return failoverPolicy;
+  }
+
+  private void initFailover() {
+    // TODO Auto-generated method stub
   }
 
 }

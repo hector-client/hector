@@ -22,6 +22,33 @@ public interface CassandraClient {
   static final int DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
 
   /**
+   * What should the client do if a call to cassandra node fails and we suspect that the node is
+   * down. (e.g. it's a communication error, not an application error).
+   *
+   * {@value #FAIL_FAST} will return the error as is to the user and not try anything smart
+   *
+   * {@value #ON_FAIL_TRY_ONE_NEXT_AVAILABLE} will try one more random server before returning to the
+   * user with an error
+   *
+   * {@value #ON_FAIL_TRY_ALL_AVAILABLE} will try all available servers in the cluster before giving
+   * up and returning the communication error to the user.
+   *
+   */
+  public enum FailoverPolicy {
+
+    /** On communication failure, just return the error to the client and don't retry */
+    FAIL_FAST,
+    /** On commonication error try one more server before giving up */
+    ON_FAIL_TRY_ONE_NEXT_AVAILABLE,
+    /** On communication error try all known servers before giving up */
+    ON_FAIL_TRY_ALL_AVAILABLE;
+
+  }
+
+  static final FailoverPolicy DEFAULT_FAILOVER_POLICY =
+      FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+
+  /**
    * @return the underline cassandra thrift object, all remote calls will be sent to this client.
    */
   Cassandra.Client getCassandra();
@@ -34,6 +61,8 @@ public interface CassandraClient {
    * provide it.
    * <p>
    * Uses the default consistency level, {@link #DEFAULT_CONSISTENCY_LEVEL}
+   * <p>
+   * Uses the default failover policy {@link #DEFAULT_FAILOVER_POLICY}
    */
   Keyspace getKeySpace(String keyspaceName)
       throws IllegalArgumentException, NotFoundException, TException;
@@ -42,7 +71,7 @@ public interface CassandraClient {
   /**
    * Gets s keyspace with the specified consistency level.
    */
-  Keyspace getKeySpace(String keyspaceName, int consistencyLevel)
+  Keyspace getKeySpace(String keyspaceName, int consistencyLevel, FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException;
 
 

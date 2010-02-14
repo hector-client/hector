@@ -68,18 +68,20 @@ import org.apache.thrift.TException;
   @Override
   public Keyspace getKeySpace(String keySpaceName) throws IllegalArgumentException,
       NotFoundException, TException {
-    return getKeySpace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL);
+    return getKeySpace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
-  public Keyspace getKeySpace(String keyspaceName, int consistencyLevel)
+  public Keyspace getKeySpace(String keyspaceName, int consistencyLevel,
+      FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException {
-    String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel);
+    String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
     Keyspace keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
       if (getKeyspaces().contains(keyspaceName)) {
         Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-        keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel);
+        keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel,
+            failoverPolicy);
         keyspaceMap.put(keyspaceMapKey , keyspace);
       }else{
         throw new IllegalArgumentException(
@@ -87,7 +89,6 @@ import org.apache.thrift.TException;
       }
     }
     return keyspace;
-
   }
 
   @Override
@@ -125,10 +126,13 @@ import org.apache.thrift.TException;
    * @param consistencyLevel
    * @return
    */
-  private String buildKeyspaceMapName(String keyspaceName, int consistencyLevel) {
+  private String buildKeyspaceMapName(String keyspaceName, int consistencyLevel,
+      FailoverPolicy failoverPolicy) {
     StringBuilder b = new StringBuilder(keyspaceName);
     b.append('[');
     b.append(consistencyLevel);
+    b.append(',');
+    b.append(failoverPolicy);
     b.append(']');
     return b.toString();
   }

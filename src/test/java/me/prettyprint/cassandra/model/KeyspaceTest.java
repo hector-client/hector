@@ -79,7 +79,7 @@ public class KeyspaceTest {
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
       NotFoundException {
     client = new CassandraClientFactory().create("localhost", 9170);
-    keyspace = client.getKeySpace("Keyspace1", 1);
+    keyspace = client.getKeySpace("Keyspace1", 1, CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
 
   @Test
@@ -535,4 +535,8 @@ public class KeyspaceTest {
     assertEquals("Keyspace1", keyspace.getKeyspaceName());
   }
 
+  @Test
+  public void testFailover() {
+    //TODO
+  }
 }

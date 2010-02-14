@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 /**
  *
@@ -12,7 +13,9 @@ import me.prettyprint.cassandra.service.CassandraClient;
 public class KeyspaceFactory {
 
   public Keyspace create(CassandraClient cassandraClient, String keyspaceName,
-      Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel) {
-    return new KeyspaceImpl(cassandraClient, keyspaceName, keyspaceDesc, consistencyLevel);
+      Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
+      FailoverPolicy failoverPolicy) {
+    return new KeyspaceImpl(cassandraClient, keyspaceName, keyspaceDesc, consistencyLevel,
+        failoverPolicy);
   }
 }

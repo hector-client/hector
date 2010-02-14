@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.Keyspace;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.service.ConsistencyLevel;
@@ -71,15 +72,26 @@ public class CassandraClientTest {
   }
 
   @Test
-  public void testGetKeySpaceStringConsistencyLevel()
+  public void testGetKeySpaceConsistencyLevel()
       throws IllegalArgumentException, NotFoundException, TException {
-    Keyspace k = client.getKeySpace("Keyspace1", ConsistencyLevel.ALL);
+    Keyspace k = client.getKeySpace("Keyspace1", ConsistencyLevel.ALL,
+        CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
     assertEquals(ConsistencyLevel.ALL, k.getConsistencyLevel());
 
-    k = client.getKeySpace("Keyspace1", ConsistencyLevel.ZERO);
+    k = client.getKeySpace("Keyspace1", ConsistencyLevel.ZERO,
+        CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
     assertEquals(ConsistencyLevel.ZERO, k.getConsistencyLevel());
+  }
+
+  @Test
+  public void testGetKeySpaceFailoverPolicy()
+      throws IllegalArgumentException, NotFoundException, TException {
+    Keyspace k = client.getKeySpace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
+        FailoverPolicy.FAIL_FAST);
+    assertNotNull(k);
+    assertEquals(FailoverPolicy.FAIL_FAST, k.getFailoverPolicy());
   }
 
   @Test
