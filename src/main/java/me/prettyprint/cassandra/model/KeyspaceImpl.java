@@ -38,7 +38,11 @@ import org.slf4j.LoggerFactory;
   /**
    * Defines an operation on cassandra.
    */
-  private abstract class Operation {
+  private interface Operation {
+
+    /**
+     * Performs the operation on the given cassandra instance.
+     */
     public abstract void execute(Cassandra.Client cassandra)
         throws InvalidRequestException, UnavailableException, TException, TimedOutException;
   }
@@ -473,7 +477,7 @@ import org.slf4j.LoggerFactory;
     return null;
   }
 
-  private class InsertOperation extends Operation {
+  private class InsertOperation implements Operation {
     private final String keyspace;
     private final String key;
     private final ColumnPath columnPath;
