@@ -1,8 +1,13 @@
 package me.prettyprint.cassandra.model;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import static org.junit.Assert.assertEquals;
@@ -570,6 +575,15 @@ public class KeyspaceTest {
     ks.insert("key", cp, bytes("value"));
 
     // now fail the call and make sure it fails fast
+    doThrow(new TimedOutException()).when(cassandra).
+        insert(anyString(), anyString(), (ColumnPath) anyObject(), (byte[])anyObject(),
+            anyLong(), anyInt());
+    try {
+      ks.insert("key", cp, bytes("value"));
+      fail("Should not have gotten here. The method should have failed with TimedOutException");
+    } catch (TimedOutException e) {
+      // ok
+    }
 
 
   }
