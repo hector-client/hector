@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.model.Keyspace;
 
@@ -96,11 +97,15 @@ public interface CassandraClient {
    */
   String getClusterName() throws TException;
 
-
   /**
-   * @return the tokens map.
+   * Gets the token map with an option to refresh the value from cassandra.
+   * If fresh is false, a local cached value may be returned.
+   *
+   * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
+   *  a possibly cached value.
+   * @return  a map from tokens to hosts.
    */
-  String getTokenMap() throws TException;
+  Map<String, String> getTokenMap(boolean fresh) throws TException;
 
 
   /**

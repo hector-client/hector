@@ -35,7 +35,7 @@ import org.apache.thrift.TException;
 
   private String clusterName;
 
-  private String tokenMap;
+  private Map<String, String> tokenMap;
 
   private String configFile;
 
@@ -105,9 +105,19 @@ import org.apache.thrift.TException;
   }
 
   @Override
-  public String getTokenMap() throws TException {
-    if (tokenMap == null) {
-      tokenMap = getStringProperty(PROP_TOKEN_MAP);
+  public Map<String, String> getTokenMap(boolean fresh) throws TException {
+    if (tokenMap == null || fresh) {
+      tokenMap = new HashMap<String, String>();
+      String strTokens = getStringProperty(PROP_TOKEN_MAP);
+      // Parse the result of the form {"token1":"host1","token2":"host2"}
+      strTokens = trimBothSides(strTokens);
+      String[] tokenPairs = strTokens.split(",");
+      for (String tokenPair: tokenPairs) {
+        String[] keyValue = tokenPair.split(":");
+        String token = trimBothSides(keyValue[0]);
+        String host = trimBothSides(keyValue[1]);
+        tokenMap.put(token, host);
+      }
     }
     return tokenMap;
   }
@@ -140,5 +150,18 @@ import org.apache.thrift.TException;
   @Override
   public Client getCassandra() {
     return cassandra;
+  }
+
+  /**
+   * Trims the string, one char from each side.
+   * For example, this: asdf becomes this: sd
+   * Useful in those cases:  "asdf" => asdf
+   * @param str
+   * @return
+   */
+  private String trimBothSides(String str) {
+    str = str.substring(1);
+    str = str.substring(0, str.length() - 1);
+    return str;
   }
 }
