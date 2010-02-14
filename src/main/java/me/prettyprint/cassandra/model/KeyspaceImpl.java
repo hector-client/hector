@@ -454,6 +454,8 @@ import org.slf4j.LoggerFactory;
 
     // Acquire a new client
     // TODO(ran) acquire from connection pool
+    
+    // assume they use the same port
     client = clientFactory.create(getNextHost(client.getUrl()), client.getPort());
     cassandra = client.getCassandra();
   }
@@ -466,7 +468,7 @@ import org.slf4j.LoggerFactory;
     int size = knownHosts.size();
     assert size > 1;
     for (int i = 0; i < knownHosts.size(); ++i) {
-      if (url.equals(knownHosts.get(size))) {
+      if (url.equals(knownHosts.get(i))) {
         // found this host. Return the next one in the array
         return knownHosts.get((i + 1) % size);
       }
