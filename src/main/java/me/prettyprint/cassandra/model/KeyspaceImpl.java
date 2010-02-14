@@ -35,6 +35,14 @@ import org.slf4j.LoggerFactory;
  */
 /*package*/ class KeyspaceImpl implements Keyspace {
 
+  /**
+   * Defines an operation on cassandra.
+   */
+  private abstract class Operation {
+    public abstract void execute(Cassandra.Client cassandra)
+        throws InvalidRequestException, UnavailableException, TException, TimedOutException;
+  }
+
   private static String CF_TYPE = "Type" ;
   private static String CF_TYPE_STANDARD = "Standard" ;
   private static String CF_TYPE_SUPER = "Super" ;
@@ -197,11 +205,18 @@ import org.slf4j.LoggerFactory;
   public void insert(String key, ColumnPath columnPath, byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
+    Operation insert = new InsertOperation(keyspaceName, key, columnPath, value,
+        createTimeStamp(), consistencyLevel);
+    performOperationWithFailover(insert);
+  }
+
+  private void performOperationWithFailover(Operation op)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
     while (retries > 0) {
       --retries;
       try {
-        cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistencyLevel);
+        op.execute(cassandra);
         return;
       } catch (TimedOutException e) {
         log.warn("Got a TimedOutException. Num of retries: {}", retries);
@@ -458,4 +473,32 @@ import org.slf4j.LoggerFactory;
     return null;
   }
 
+  private class InsertOperation extends Operation {
+    private final String keyspace;
+    private final String key;
+    private final ColumnPath columnPath;
+    private final byte[] value;
+    private long timestamp;
+    private int consistency;
+
+    public InsertOperation(String keyspace,
+        String key,
+        ColumnPath columnPath,
+        byte[] value,
+        long timestamp,
+        int consistency) {
+      this.key = key;
+      this.columnPath = columnPath;
+      this.value = value;
+      this.timestamp = timestamp;
+      this.consistency = consistency;
+      this.keyspace = keyspace;
+    }
+
+    @Override
+    public void execute(Cassandra.Client cassandra)
+        throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      cassandra.insert(keyspace, key, columnPath, value, timestamp, consistency);
+    }
+  }
 }
