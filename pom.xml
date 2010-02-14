@@ -2,12 +2,12 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.prettyprint</groupId>
-  <artifactId>cassandra-java-client</artifactId>
+  <artifactId>hector</artifactId>
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
-  <name>cassandra-java-client</name>
+  <name>hector</name>
   <description>Cassandra Java Client Library</description>
-  <url>http://github.com/rantav/cassandra-java-client</url>
+  <url>http://github.com/rantav/hector</url>
 
   <properties>
     <!-- Set default encoding to UTF-8 -->
@@ -29,7 +29,7 @@
 
   <issueManagement>
     <system>github</system>
-    <url>http://github.com/rantav/cassandra-java-client/issues</url>
+    <url>http://github.com/rantav/hector/issues</url>
   </issueManagement>
 
   <developers>
@@ -149,39 +149,13 @@
       <version>4.6</version>
       <scope>test</scope>
     </dependency>
-    <!--
     <dependency>
-      <groupId>com.google.collections</groupId>
-      <artifactId>google-collections</artifactId>
-      <version>1.0-rc1</version>
-      <scope>t</scope>
-      <systemPath>${basedir}/testlib/google-collections-1.0-rc1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>high-scale-lib</groupId>
-      <artifactId>high-scale-lib</artifactId>
-      <version>1.0</version>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.4</version>
       <scope>test</scope>
-      <systemPath>${basedir}/testlib/high-scale-lib-1.0.jar</systemPath>
     </dependency>
-    <dependency>
-      <groupId>flexjson</groupId>
-      <artifactId>flexjson</artifactId>
-      <version>1.7</version>
-      <scope>test</scope>
-      <systemPath>${basedir}/testlib/flexjson-1.7.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>clhm-production</groupId>
-      <artifactId>clhm-production</artifactId>
-      <version>1.0</version>
-      <scope>test</scope>
-      <systemPath>${basedir}/testlib/clhm-production-1.0.jar</systemPath>
-    </dependency>
-    -->
   </dependencies>
-
-
 
   <reporting>
     <plugins>
@@ -209,9 +183,6 @@
             <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
             <link>http://logging.apache.org/log4j/docs/api/</link>
           </links>
-          <!--
-          <stylesheetfile>${basedir}/../etc/css/stylesheet.css</stylesheetfile>
-          -->
           <linksource>true</linksource>
           <maxmemory>900m</maxmemory>
           <source>1.6</source>
