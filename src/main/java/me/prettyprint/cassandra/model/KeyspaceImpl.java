@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.CassandraClientFactory;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.service.Cassandra;
@@ -22,6 +23,9 @@ import org.apache.cassandra.service.SuperColumn;
 import org.apache.cassandra.service.TimedOutException;
 import org.apache.cassandra.service.UnavailableException;
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implamentation of a keyspace
@@ -35,10 +39,12 @@ import org.apache.thrift.TException;
   private static String CF_TYPE_STANDARD = "Standard" ;
   private static String CF_TYPE_SUPER = "Super" ;
 
-  private final CassandraClient client;
+  private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
+
+  private CassandraClient client;
 
   /** The cassandra thrift proxy */
-  private final Cassandra.Client cassandra;
+  private Cassandra.Client cassandra;
 
   private final String keyspaceName;
 
@@ -48,15 +54,21 @@ import org.apache.thrift.TException;
 
   private final FailoverPolicy failoverPolicy;
 
+  /** List of all known remote cassandra nodes */
+  private List<String> knownHosts = new ArrayList<String>();
+
+  private final CassandraClientFactory clientFactory;
+
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy) {
+      FailoverPolicy failoverPolicy, CassandraClientFactory clientFactory) throws TException {
     this.client = client;
     this.consistencyLevel = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
     this.cassandra = client.getCassandra();
     this.failoverPolicy = failoverPolicy;
+    this.clientFactory = clientFactory;
     initFailover();
   }
 
@@ -185,7 +197,21 @@ import org.apache.thrift.TException;
   public void insert(String key, ColumnPath columnPath, byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
-    cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistencyLevel);
+    int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
+    while (retries > 0) {
+      --retries;
+      try {
+        cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistencyLevel);
+        return;
+      } catch (TimedOutException e) {
+        log.warn("Got a TimedOutException. Num of retries: {}", retries);
+        if (retries == 0) {
+          throw e;
+        } else {
+          skipToNextHost();
+        }
+      }
+    }
   }
 
   @Override
@@ -375,8 +401,61 @@ import org.apache.thrift.TException;
     return failoverPolicy;
   }
 
-  private void initFailover() {
-    // TODO Auto-generated method stub
+  /**
+   * Initializes the ring info so we can handle failover if this happens later.
+   * @throws TException
+   */
+  private void initFailover() throws TException {
+    if (failoverPolicy == FailoverPolicy.FAIL_FAST) {
+      return;
+    }
+    // learn about other cassandra hosts in the ring
+    updateHostsList();
+  }
+
+  /**
+   * Uses the current known host to query about all other hosts in the ring.
+   *
+   * @throws TException
+   */
+  private void updateHostsList() throws TException {
+    Map<String, String> map = getClient().getTokenMap(true);
+    knownHosts.clear();
+    for (Map.Entry<String, String> entry: map.entrySet()) {
+      knownHosts.add(entry.getValue());
+    }
+  }
+
+  /**
+   * Updates the
+   * @throws TTransportException
+   * @throws TException
+   */
+  private void skipToNextHost() throws TTransportException, TException {
+    // Release client first
+    // TODO(ran): release client from connection pool
+
+    // Acquire a new client
+    // TODO(ran) acquire from connection pool
+    client = clientFactory.create(getNextHost(client.getUrl()), client.getPort());
+    cassandra = client.getCassandra();
+  }
+
+  /**
+   * Finds the next host in the knownHosts.
+   * Next is the one after the given url (modulo the number of elemens in the list)
+   */
+  private String getNextHost(String url) {
+    int size = knownHosts.size();
+    assert size > 1;
+    for (int i = 0; i < knownHosts.size(); ++i) {
+      if (url.equals(knownHosts.get(size))) {
+        // found this host. Return the next one in the array
+        return knownHosts.get((i + 1) % size);
+      }
+    }
+    log.error("The URL {} wasn't found in the knownHosts", url);
+    return null;
   }
 
 }

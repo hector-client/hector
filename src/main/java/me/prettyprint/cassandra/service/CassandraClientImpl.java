@@ -43,10 +43,19 @@ import org.apache.thrift.TException;
 
   private final KeyspaceFactory keyspaceFactory;
 
+  private final int port;
+
+  private final String url;
+
+  private final CassandraClientFactory clientFactory;
+
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory) {
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientFactory clientFactory) {
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
+    this.port = port;
+    this.url = url;
+    this.clientFactory = clientFactory;
   }
 
   @Override
@@ -81,7 +90,7 @@ import org.apache.thrift.TException;
       if (getKeyspaces().contains(keyspaceName)) {
         Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
         keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel,
-            failoverPolicy);
+            failoverPolicy, clientFactory);
         keyspaceMap.put(keyspaceMapKey , keyspace);
       }else{
         throw new IllegalArgumentException(
@@ -163,5 +172,15 @@ import org.apache.thrift.TException;
     str = str.substring(1);
     str = str.substring(0, str.length() - 1);
     return str;
+  }
+
+  @Override
+  public int getPort() {
+    return port;
+  }
+
+  @Override
+  public String getUrl() {
+    return url;
   }
 }

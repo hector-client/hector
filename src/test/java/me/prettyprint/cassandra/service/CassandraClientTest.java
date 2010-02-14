@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.model.Keyspace;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
@@ -117,9 +118,11 @@ public class CassandraClientTest {
 
   @Test
   public void testGetTokenMap() throws TException {
-    String map = client.getTokenMap();
+    Map<String, String> map = client.getTokenMap(false);
     assertNotNull(map);
-    assertTrue(map.indexOf("127.0.0.1") > 0);
+    for (Map.Entry<String, String> entry: map.entrySet()) {
+      assertEquals("127.0.0.1", entry.getValue());
+    }
   }
 
   @Test

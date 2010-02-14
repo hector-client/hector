@@ -38,12 +38,21 @@ public interface CassandraClient {
   public enum FailoverPolicy {
 
     /** On communication failure, just return the error to the client and don't retry */
-    FAIL_FAST,
-    /** On commonication error try one more server before giving up */
-    ON_FAIL_TRY_ONE_NEXT_AVAILABLE,
+    FAIL_FAST(0),
+    /** On communication error try one more server before giving up */
+    ON_FAIL_TRY_ONE_NEXT_AVAILABLE(1),
     /** On communication error try all known servers before giving up */
-    ON_FAIL_TRY_ALL_AVAILABLE;
+    ON_FAIL_TRY_ALL_AVAILABLE(Integer.MAX_VALUE - 1);
 
+    private final int numRetries;
+
+    FailoverPolicy(int numRetries) {
+      this.numRetries = numRetries;
+    }
+
+    public int getNumRetries() {
+      return numRetries;
+    }
   }
 
   static final FailoverPolicy DEFAULT_FAILOVER_POLICY =
@@ -117,4 +126,8 @@ public interface CassandraClient {
    * @return Server version
    */
   String getServerVersion() throws TException;
+
+  public int getPort();
+
+  public String getUrl();
 }

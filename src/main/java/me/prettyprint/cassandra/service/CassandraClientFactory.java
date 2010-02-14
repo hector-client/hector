@@ -19,10 +19,11 @@ import org.apache.thrift.transport.TTransportException;
 public class CassandraClientFactory {
 
   public CassandraClient create(String url, int port) throws TTransportException, TException {
-    return new CassandraClientImpl(createThriftClient(url, port), new KeyspaceFactory());
+    return new CassandraClientImpl(createThriftClient(url, port), new KeyspaceFactory(), url, port,
+        this);
   }
 
-  public Cassandra.Client createThriftClient(String  url, int port)
+  private Cassandra.Client createThriftClient(String  url, int port)
       throws TTransportException , TException {
     TTransport tr = new TSocket(url, port);
     TProtocol proto = new TBinaryProtocol(tr);
