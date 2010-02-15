@@ -11,6 +11,8 @@ import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.Cassandra.Client;
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the client interface.
@@ -25,6 +27,9 @@ import org.apache.thrift.TException;
   private final static String PROP_TOKEN_MAP = "token map";
   private final static String PROP_KEYSPACE = "keyspaces";
   private final static String PROP_VERSION = "version";
+
+  @SuppressWarnings("unused")
+  private static final Logger log = LoggerFactory.getLogger(CassandraClientImpl.class);
 
   /** The thrift object */
   private final Cassandra.Client cassandra;

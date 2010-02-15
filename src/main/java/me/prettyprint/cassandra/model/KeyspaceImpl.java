@@ -8,7 +8,9 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientFactory;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.Column;
@@ -56,9 +58,12 @@ import org.slf4j.LoggerFactory;
 
   private final CassandraClientFactory clientFactory;
 
+  private final CassandraClientMonitor monitor;
+
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientFactory clientFactory) throws TException {
+      FailoverPolicy failoverPolicy, CassandraClientFactory clientFactory,
+      CassandraClientMonitor monitor) throws TException {
     this.client = client;
     this.consistencyLevel = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
@@ -66,6 +71,7 @@ import org.slf4j.LoggerFactory;
     this.cassandra = client.getCassandra();
     this.failoverPolicy = failoverPolicy;
     this.clientFactory = clientFactory;
+    this.monitor = monitor;
     initFailover();
   }
 
@@ -95,7 +101,8 @@ import org.slf4j.LoggerFactory;
     }
 
     Operation<Void> batchInsert = new Operation<Void>(keyspaceName, key, null /*columnPath*/,
-        null /*value*/, cfmap, null /*columnParent*/, createTimeStamp(), consistencyLevel) {
+        null /*value*/, cfmap, null /*columnParent*/, createTimeStamp(), consistencyLevel,
+        Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -103,21 +110,22 @@ import org.slf4j.LoggerFactory;
         return null;
       }
     };
-    performOperationWithFailover(batchInsert);
+    operateWithFailover(batchInsert);
   }
 
   @Override
   public int getCount(String key, ColumnParent columnParent) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
     Operation<Integer> getCount = new Operation<Integer>(keyspaceName, key, null /*columnPath*/,
-        null /*value*/, null /*cfmap*/, columnParent, createTimeStamp(), consistencyLevel) {
+        null /*value*/, null /*cfmap*/, columnParent, createTimeStamp(), consistencyLevel,
+        Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public Integer execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         return cassandra.get_count(keyspaceName, key, columnParent, consistencyLevel);
       }
     };
-    performOperationWithFailover(getCount);
+    operateWithFailover(getCount);
     return getCount.getResult();
   }
 
@@ -189,7 +197,8 @@ import org.slf4j.LoggerFactory;
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
     Operation<Void> insert = new Operation<Void>(keyspaceName, key, columnPath, value,
-        null /*cfmap*/, null /*columnParent*/, createTimeStamp(), consistencyLevel) {
+        null /*cfmap*/, null /*columnParent*/, createTimeStamp(), consistencyLevel,
+        Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -197,7 +206,7 @@ import org.slf4j.LoggerFactory;
         return null;
       }
     };
-    performOperationWithFailover(insert);
+    operateWithFailover(insert);
   }
 
   @Override
@@ -453,6 +462,7 @@ import org.slf4j.LoggerFactory;
     // assume they use the same port
     client = clientFactory.create(getNextHost(client.getUrl()), client.getPort());
     cassandra = client.getCassandra();
+    monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
     log.info("Skipped host. New host is: {}", client.getUrl());
   }
 
@@ -478,28 +488,51 @@ import org.slf4j.LoggerFactory;
    * are enough hosts to try and the error was {@link TimedOutException}.
    */
   @SuppressWarnings("unchecked")
-  private void performOperationWithFailover(Operation op) throws InvalidRequestException,
+  private void operateWithFailover(Operation op) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
-    while (retries > 0) {
-      --retries;
-      log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
-      try {
-        // Perform operation and save its result value (if it has one)
-        op.setResult(op.execute(cassandra));
-        log.debug("Operation succeeded on {}", client.getUrl());
-        return;
-      } catch (TimedOutException e) {
-        log.warn("Got a TimedOutException. Num of retries: {}", retries);
-        if (retries == 0) {
-          throw e;
-        } else {
-          skipToNextHost();
+    try {
+      while (retries > 0) {
+        --retries;
+        log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
+        try {
+          // Perform operation and save its result value
+          op.executeAndSetResult(cassandra);
+          monitor.incCounter(op.successCounter);
+          log.debug("Operation succeeded on {}", client.getUrl());
+          return;
+        } catch (TimedOutException e) {
+          log.warn("Got a TimedOutException. Num of retries: {}", retries);
+          monitor.incCounter(Counter.TIMED_OUT_EXCEPTIONS);
+          if (retries == 0) {
+            throw e;
+          } else {
+            skipToNextHost();
+          }
+        } catch (UnavailableException e) {
+          log.warn("Got a UnavailableException. Num of retries: {}", retries);
+          monitor.incCounter(Counter.UNAVAILABLE_EXCEPTIONS);
+          if (retries == 0) {
+            throw e;
+          } else {
+            skipToNextHost();
+          }
         }
       }
+    } catch (InvalidRequestException e) {
+      monitor.incCounter(op.failCounter);
+      throw e;
+    } catch (UnavailableException e) {
+      monitor.incCounter(op.failCounter);
+      throw e;
+    } catch (TException e) {
+      monitor.incCounter(op.failCounter);
+      throw e;
+    } catch (TimedOutException e) {
+      monitor.incCounter(op.failCounter);
+      throw e;
     }
   }
-
 
   /**
    * Defines the interface of an operation performed on cassandra
@@ -517,6 +550,8 @@ import org.slf4j.LoggerFactory;
     protected final ColumnParent columnParent;
     protected final long timestamp;
     protected final int consistency;
+    protected final Counter successCounter;
+    protected final Counter failCounter;
     protected T result;
 
     public Operation(String keyspace,
@@ -526,7 +561,9 @@ import org.slf4j.LoggerFactory;
         Map<String, List<ColumnOrSuperColumn>> cfmap,
         ColumnParent columnParent,
         long timestamp,
-        int consistency) {
+        int consistency,
+        Counter successCounter,
+        Counter failCounter) {
       this.keyspace = keyspace;
       this.key = key;
       this.columnPath = columnPath;
@@ -535,6 +572,8 @@ import org.slf4j.LoggerFactory;
       this.columnParent = columnParent;
       this.timestamp = timestamp;
       this.consistency = consistency;
+      this.successCounter = successCounter;
+      this.failCounter = failCounter;
     }
 
     public void setResult(T executionResult) {
@@ -555,5 +594,10 @@ import org.slf4j.LoggerFactory;
      */
     public abstract T execute(Cassandra.Client cassandra)
         throws InvalidRequestException, UnavailableException, TException, TimedOutException;
+
+    public void executeAndSetResult(Cassandra.Client cassandra)
+        throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      setResult(execute(cassandra));
+    }
   }
 }

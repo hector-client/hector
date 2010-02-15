@@ -26,6 +26,7 @@ import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientFactory;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
@@ -563,6 +564,7 @@ public class KeyspaceTest {
     int consistencyLevel = 1;
     ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
     CassandraClientFactory clientFactory = mock(CassandraClientFactory.class);
+    CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
     // The token map represents the list of available servers.
     Map<String, String> tokenMap = new HashMap<String, String>();
@@ -589,7 +591,7 @@ public class KeyspaceTest {
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientFactory);
+        failoverPolicy, clientFactory, monitor);
 
     ks.insert("key", cp, bytes("value"));
 
@@ -609,7 +611,7 @@ public class KeyspaceTest {
     // h1 fails, h3 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ONE_NEXT_AVAILABLE;
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientFactory);
+        failoverPolicy, clientFactory, monitor);
 
     ks.insert("key", cp, bytes("value"));
     verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
@@ -618,7 +620,7 @@ public class KeyspaceTest {
 
     // make both h1 and h3 fail
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientFactory);
+        failoverPolicy, clientFactory, monitor);
     doThrow(new TimedOutException()).when(h3cassandra).
       insert(anyString(), anyString(), (ColumnPath) anyObject(), (byte[])anyObject(),
         anyLong(), anyInt());
@@ -635,7 +637,7 @@ public class KeyspaceTest {
     // h1 fails, h3 fails, h2 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientFactory);
+        failoverPolicy, clientFactory, monitor);
 
     ks.insert("key", cp, bytes("value"));
     verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
@@ -643,7 +645,7 @@ public class KeyspaceTest {
 
     // now fail them all. h1 fails, h2 fails, h3 fails
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientFactory);
+        failoverPolicy, clientFactory, monitor);
     doThrow(new TimedOutException()).when(h2cassandra).
       insert(anyString(), anyString(), (ColumnPath) anyObject(), (byte[])anyObject(),
         anyLong(), anyInt());
