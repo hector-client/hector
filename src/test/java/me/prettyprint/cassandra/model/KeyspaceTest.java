@@ -37,6 +37,7 @@ import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.InvalidRequestException;
+import org.apache.cassandra.service.KeySlice;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
 import org.apache.cassandra.service.SliceRange;
@@ -48,7 +49,6 @@ import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -536,9 +536,31 @@ public class KeyspaceTest {
   }
 
   @Test
-  @Ignore("Not implemented yet")
-  public void testGetRangeSlice() {
-    fail("Not yet implemented");
+  public void testGetRangeSlice() throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException, NotFoundException {
+    for (int i = 0; i < 10; i++) {
+      ColumnPath cp = new ColumnPath("Standard2", null, bytes("testGetRangeSlice_" + i));
+      keyspace.insert("testGetRangeSlice0", cp, bytes("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice1", cp, bytes("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice2", cp, bytes("testGetRangeSlice_Value_" + i));
+    }
+
+    // get value
+    ColumnParent clp = new ColumnParent("Standard2", null);
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SlicePredicate sp = new SlicePredicate(null, sr);
+    List<KeySlice> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0",
+        "testGetRangeSlice3", 5);
+
+    assertNotNull(keySlices);
+    assertEquals(3, keySlices.size());
+    assertEquals("testGetRangeSlice0", keySlices.get(0).getKey());
+    assertEquals(10, keySlices.get(0).getColumns().size());
+
+    ColumnPath cp = new ColumnPath("Standard2", null, null);
+    keyspace.remove("testGetRanageSlice0", cp);
+    keyspace.remove("testGetRanageSlice1", cp);
+    keyspace.remove("testGetRanageSlice2", cp);
   }
 
   @Test

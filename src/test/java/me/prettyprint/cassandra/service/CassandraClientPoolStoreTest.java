@@ -79,8 +79,6 @@ public class CassandraClientPoolStoreTest {
     assertNotNull(ks);
     assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
     store.updateKnownHosts();
-    
-    JmxMonitor.INSTANCE.getCassandraMonitor().setPoolStore(store);
     assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
   }
 }

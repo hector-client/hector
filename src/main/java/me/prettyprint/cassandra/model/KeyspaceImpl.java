@@ -21,6 +21,7 @@ import org.apache.cassandra.service.ColumnOrSuperColumn;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.InvalidRequestException;
+import org.apache.cassandra.service.KeySlice;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
 import org.apache.cassandra.service.SliceRange;
@@ -104,7 +105,7 @@ import org.slf4j.LoggerFactory;
 
     Operation<Void> batchInsert = new Operation<Void>(keyspaceName, key, null /* keys */,
         null /* columnPath */, null /* value */, cfmap, null /* columnParent */, createTimeStamp(),
-        consistencyLevel, null /* predicate */, null /* sliceRange */, Counter.WRITE_SUCCESS,
+        consistencyLevel, null /* predicate */, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.WRITE_SUCCESS,
         Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
@@ -121,7 +122,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     Operation<Integer> getCount = new Operation<Integer>(keyspaceName, key, null /* keys */,
         null /* columnPath */, null /* value */, null /* cfmap */, columnParent, 0 /* timestamp */,
-        consistencyLevel, null /* predicate */, null /* sliceRange */, Counter.READ_SUCCESS,
+        consistencyLevel, null /* predicate */, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.READ_SUCCESS,
         Counter.READ_FAIL) {
       @Override
       public Integer execute(Client cassandra) throws InvalidRequestException,
@@ -134,21 +135,33 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<String> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
+  public List<KeySlice> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count) throws InvalidRequestException, UnavailableException,
       TException, TimedOutException {
-    // TODO Auto-generated method stub
-    return null;
+    Operation<List<KeySlice>> op = new Operation<List<KeySlice>>(keyspaceName, null /*key*/, null /* keys */,
+        null /* columnPath */, null /* value */, null /* cfmap */, columnParent, 0 /* timestamp */,
+        consistencyLevel, predicate, null /* sliceRange */, start, finish, count,
+        Counter.READ_SUCCESS, Counter.READ_FAIL) {
+      @Override
+      public List<KeySlice> execute(Client cassandra) throws InvalidRequestException,
+          UnavailableException, TException, TimedOutException {
+        List<KeySlice> keySlices = cassandra.get_range_slice(keyspace, columnParent,
+            predicate, start, finish, count, consistency);
+
+        return keySlices;
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
   }
 
   @Override
   public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
       throws InvalidRequestException, NotFoundException, UnavailableException, TException,
       TimedOutException {
-
     Operation<List<Column>> op = new Operation<List<Column>>(keyspaceName, key, null /* keys */,
         null /* columnPath */, null /* value */, null /* cfmap */, columnParent, 0 /* timestamp */,
-        consistencyLevel, predicate, null /* sliceRange */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+        consistencyLevel, predicate, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public List<Column> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -186,7 +199,7 @@ import org.slf4j.LoggerFactory;
 
     Operation<SuperColumn> getCount = new Operation<SuperColumn>(keyspaceName, key,
         null /* keys */, columnPath, null /* value */, null /* cfmap */, null /* columnParent */,
-        0 /* timestamp */, consistencyLevel, null /* predicate */, sliceRange,
+        0 /* timestamp */, consistencyLevel, null /* predicate */, sliceRange, null /*start*/, null /*finish*/, 0 /*count*/,
         Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public SuperColumn execute(Client cassandra) throws InvalidRequestException,
@@ -208,7 +221,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     Operation<List<SuperColumn>> getCount = new Operation<List<SuperColumn>>(keyspaceName, key,
         null /* keys */, null /* columnPath */, null /* value */, null /* cfmap */, columnParent,
-        0 /* timestamp */, consistencyLevel, predicate, null /* sliceRange */,
+        0 /* timestamp */, consistencyLevel, predicate, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/,
         Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
@@ -235,7 +248,7 @@ import org.slf4j.LoggerFactory;
     valideColumnPath(columnPath);
     Operation<Void> insert = new Operation<Void>(keyspaceName, key, null /* keys */, columnPath,
         value, null /* cfmap */, null /* columnParent */, createTimeStamp(), consistencyLevel,
-        null /* predicate */, null /* sliceRange */, Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
+        null /* predicate */, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -254,7 +267,7 @@ import org.slf4j.LoggerFactory;
     Operation<Map<String, Column>> getCount = new Operation<Map<String, Column>>(keyspaceName,
         null /* key */, keys, columnPath, null /* value */, null /* cfmap */,
         null /* columnParent */, 0 /* timestamp */, consistencyLevel, null /* predicate */,
-        null /* sliceRange */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+        null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public Map<String, Column> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -281,7 +294,7 @@ import org.slf4j.LoggerFactory;
     Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
         keyspaceName, null /* key */, keys, null /* columnPath */, null /* value */,
         null /* cfmap */, columnParent, 0 /* timestamp */, consistencyLevel, predicate,
-        null /* sliceRange */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+        null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -339,7 +352,7 @@ import org.slf4j.LoggerFactory;
     Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
         keyspaceName, null /* key */, keys, null /* columnPath */, null /* value */,
         null /* cfmap */, columnParent, 0 /* timestamp */, consistencyLevel, predicate,
-        null /* sliceRange */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+        null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.READ_SUCCESS, Counter.READ_FAIL) {
       @Override
       public Map<String, List<SuperColumn>> execute(Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
@@ -382,7 +395,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     Operation<Void> op = new Operation<Void>(keyspaceName, key, null /* keys */, columnPath,
         null /* value */, null /* cfmap */, null /* columnParent */, createTimeStamp(),
-        consistencyLevel, null /* predicate */, null /* sliceRange */, Counter.WRITE_SUCCESS,
+        consistencyLevel, null /* predicate */, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.WRITE_SUCCESS,
         Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
@@ -417,7 +430,7 @@ import org.slf4j.LoggerFactory;
 
     Operation<Column> op = new Operation<Column>(keyspaceName, key, null /* keys */, columnPath,
         null /* value */, null /* cfmap */, null /* columnParent */, 0 /* timestamp */,
-        consistencyLevel, null /* predicate */, null /* sliceRange */, Counter.READ_SUCCESS,
+        consistencyLevel, null /* predicate */, null /* sliceRange */, null /*start*/, null /*finish*/, 0 /*count*/, Counter.READ_SUCCESS,
         Counter.READ_FAIL) {
       @Override
       public Column execute(Client cassandra) throws InvalidRequestException, UnavailableException,
@@ -560,6 +573,7 @@ import org.slf4j.LoggerFactory;
 
   /**
    * Updates the
+   *
    * @throws Exception
    * @throws PoolExhaustedException
    * @throws IllegalStateException
@@ -682,13 +696,16 @@ import org.slf4j.LoggerFactory;
     protected final Counter successCounter;
     protected final Counter failCounter;
     protected final SliceRange sliceRange;
+    protected final String start;
+    protected final String finish;
+    protected final int count;
     protected T result;
     private NotFoundException exception;
 
     public Operation(String keyspace, String key, List<String> keys, ColumnPath columnPath,
         byte[] value, Map<String, List<ColumnOrSuperColumn>> cfmap, ColumnParent columnParent,
         long timestamp, int consistency, SlicePredicate predicate, SliceRange sliceRange,
-        Counter successCounter, Counter failCounter) {
+        String start, String finish, int count, Counter successCounter, Counter failCounter) {
       this.keyspace = keyspace;
       this.key = key;
       this.keys = keys;
@@ -700,6 +717,9 @@ import org.slf4j.LoggerFactory;
       this.consistency = consistency;
       this.predicate = predicate;
       this.sliceRange = sliceRange;
+      this.start = start;
+      this.finish = finish;
+      this.count = count;
       this.successCounter = successCounter;
       this.failCounter = failCounter;
     }

@@ -11,6 +11,7 @@ import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.InvalidRequestException;
+import org.apache.cassandra.service.KeySlice;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
 import org.apache.cassandra.service.SuperColumn;
@@ -184,7 +185,7 @@ public interface Keyspace {
   /**
    * returns a subset of columns for a range of keys.
    */
-  List<String> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
+  List<KeySlice> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
