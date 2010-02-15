@@ -48,10 +48,9 @@ public enum JmxMonitor {
     mbs.registerMBean(monitoringInterface, oName);
   }
 
-  public CassandraClientMonitor getCassandraMonitor(CassandraClient client) {
+  public CassandraClientMonitor getCassandraMonitor() {
     if (cassandraClientMonitor == null) {
       cassandraClientMonitor = new CassandraClientMonitor();
-      cassandraClientMonitor.addClient(client);
       try {
         registerMonitor(CassandraClientMonitor.class.getName(), "hector", cassandraClientMonitor);
       } catch (MalformedObjectNameException e) {

@@ -17,25 +17,11 @@ import org.apache.thrift.TException;
  */
 public class KeyspaceFactory {
 
-  /**
-   *
-   * @param client
-   * @param keyspaceName
-   * @param keyspaceDesc
-   * @param consistencyLevel
-   * @param failoverPolicy
-   * @param clientPool A pool that may be used to obtain new clients in case the current client
-   *  fails
-   * @return
-   * @throws TException
-   */
   public Keyspace create(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPoolStore clientPools)
       throws TException {
-
-    CassandraClientMonitor monitor = null;
-    monitor = JmxMonitor.INSTANCE.getCassandraMonitor(client);
+    CassandraClientMonitor monitor = JmxMonitor.INSTANCE.getCassandraMonitor();
     return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
   }

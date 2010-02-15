@@ -55,6 +55,8 @@ import org.slf4j.LoggerFactory;
 
   private final CassandraClientPoolStore clientPools;
 
+  private boolean closed = false;
+
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPoolStore clientPools) {
     cassandra = cassandraThriftClient;
@@ -192,6 +194,9 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void updateKnownHosts() throws TException {
+    if (closed) {
+      return;
+    }
     // Iterate over all keyspaces and ask them to update known hosts
     for (Keyspace k: keyspaceMap.values()) {
       k.updateKnownHosts();
@@ -207,5 +212,15 @@ import org.slf4j.LoggerFactory;
     b.append(getPort());
     b.append(">");
     return b.toString();
+  }
+
+  @Override
+  public void markAsClosed() {
+    closed = true;
+  }
+
+  @Override
+  public boolean isClosed() {
+    return closed;
   }
 }

@@ -136,4 +136,8 @@ public interface CassandraClient {
    */
   void updateKnownHosts() throws TException;
 
+  void markAsClosed();
+
+  boolean isClosed();
+
 }

@@ -85,6 +85,7 @@ public class CassandraClientFactory extends BasePoolableObjectFactory
     Cassandra.Client client = cclient.getCassandra();
     client.getInputProtocol().getTransport().close();
     client.getOutputProtocol().getTransport().close();
+    cclient.markAsClosed();
   }
 
 }

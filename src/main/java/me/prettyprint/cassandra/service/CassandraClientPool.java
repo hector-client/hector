@@ -36,9 +36,10 @@ public interface CassandraClientPool {
   public static final int DEFAULT_MAX_ACTIVE = 50;
 
   /**
-   * The default max wait time when exhausted happens, default value is 20 seconds
+   * The default max wait time when exhausted happens, default value is negative, which means
+   * it'll block indefinitely.
    */
-  public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = 20 * 1000  ;
+  public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
 
   /**
    * The default max idle number is 5, so if clients keep idle, the total connection
@@ -48,9 +49,6 @@ public interface CassandraClientPool {
 
   /**
    * Obtain a client instance from the pool.
-   *
-   * Any client may be returned. In order to obtain a client connected to a specific url+port use
-   * {@link #borrowClient(String, int)}
    *
    * If there's an available client in the pool, a client is immediately returned.
    * If there's no available client then the behavior depends on whether the pool is exhausted and
@@ -73,12 +71,6 @@ public interface CassandraClientPool {
    */
   CassandraClient borrowClient() throws Exception, PoolExhaustedException,
       IllegalStateException;
-
-//  /**
-//   * Borrows a client specifically connected to the given url+port.
-//   */
-//  CassandraClient borrowClient(String url, int port) throws Exception, PoolExhaustedException,
-//      IllegalStateException;
 
   /**
    * Returns a client to pool.
@@ -124,4 +116,12 @@ public interface CassandraClientPool {
    * cause them to throw an IllegalStateException.
    */
   void close();
+
+  boolean isExhausted();
+
+  String getName();
+
+  int getNumBlockedThreads();
+
+  void updateKnownHosts();
 }
