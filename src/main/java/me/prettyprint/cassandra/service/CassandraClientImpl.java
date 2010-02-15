@@ -192,7 +192,6 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void updateKnownHosts() throws TException {
-    // TODO(ran): Add this to JMX
     // Iterate over all keyspaces and ask them to update known hosts
     for (Keyspace k: keyspaceMap.values()) {
       k.updateKnownHosts();

@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import org.apache.thrift.TException;
+
 /**
  * Defines the various JMX methods the CassandraClientMonitor exposes.
  *
@@ -15,4 +17,6 @@ public interface CassandraClientMonitorMBean {
   long getTimedOutCount();
   long getUnavailableCount();
   long getSkipHostSuccess();
+
+  public void updateKnownHosts() throws TException;
 }
