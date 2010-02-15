@@ -759,7 +759,6 @@ import org.slf4j.LoggerFactory;
     public NotFoundException getException() {
       return exception;
     }
-
   }
 
   @Override
@@ -767,5 +766,14 @@ import org.slf4j.LoggerFactory;
     Set<String> hosts = new HashSet<String>();
     hosts.addAll(knownHosts);
     return hosts;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder();
+    b.append("KeyspaceImpl<");
+    b.append(getClient());
+    b.append(">");
+    return super.toString();
   }
 }
