@@ -26,12 +26,18 @@ import org.apache.commons.pool.PoolableObjectFactory;
  */
 public interface CassandraClientPool {
 
-  public enum ExhaustedPolicy {
+  enum ExhaustedPolicy {
     WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_GROW, WHEN_EXHAUSTED_BLOCK
   }
 
+  public static final ExhaustedPolicy DEFAULT_EXHAUSTED_POLICY =
+      ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
+
   /**
    * Obtain a client instance from the pool.
+   *
+   * Any client may be returned. In order to obtain a client connected to a specific url+port use
+   * {@link #borrowClient(String, int)}
    *
    * If there's an available client in the pool, a client is immediately returned.
    * If there's no available client then the behavior depends on whether the pool is exhausted and
@@ -52,8 +58,14 @@ public interface CassandraClientPool {
    *           when the pool is exhausted and cannot or will not return another
    *           instance.
    */
-  public CassandraClient borrowClient() throws Exception, PoolExhaustedException,
-      IllegalStateException;;
+  CassandraClient borrowClient() throws Exception, PoolExhaustedException,
+      IllegalStateException;
+
+  /**
+   * Borrows a client specifically connected to the given url+port.
+   */
+  CassandraClient borrowClient(String url, int port) throws Exception, PoolExhaustedException,
+      IllegalStateException;
 
   /**
    * Returns a client to pool.
@@ -62,7 +74,7 @@ public interface CassandraClientPool {
    * @param client
    * @throws Exception if the client was not borrowed from this pool.
    */
-  public void releaseClient(CassandraClient client) throws Exception;
+  void releaseClient(CassandraClient client) throws Exception;
 
   /**
    * Returns the number of currently available client number.
@@ -74,7 +86,7 @@ public interface CassandraClientPool {
    *
    * @return available client in pool
    */
-  public int getAvailableNum();
+  int getAvailableNum();
 
   /**
    * Returns the number of clients that may be borrowed before the pool is exhausted.
@@ -84,19 +96,19 @@ public interface CassandraClientPool {
    *
    * @return Number of clients that may be borrowed before the pool is exhausted.
    */
-  public int getNumBeforeExhausted();
+  int getNumBeforeExhausted();
 
   /**
    * Returns the number of currently borrowed clients.
    *
    * @return
    */
-  public int getActiveNum();
+  int getActiveNum();
 
   /**
    * Closes the pool, frees all resources.
    * Calling borrowClient() or releaseClient() after invoking this method on a pool will
    * cause them to throw an IllegalStateException.
    */
-  public void close();
+  void close();
 }

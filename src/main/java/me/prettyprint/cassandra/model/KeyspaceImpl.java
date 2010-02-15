@@ -7,8 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.CassandraClientFactory;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.CassandraClientPool;
+import me.prettyprint.cassandra.service.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 
@@ -26,7 +27,6 @@ import org.apache.cassandra.service.TimedOutException;
 import org.apache.cassandra.service.UnavailableException;
 import org.apache.cassandra.service.Cassandra.Client;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,13 +56,13 @@ import org.slf4j.LoggerFactory;
   /** List of all known remote cassandra nodes */
   List<String> knownHosts = new ArrayList<String>();
 
-  private final CassandraClientFactory clientFactory;
+  private final CassandraClientPool clientPool;
 
   private final CassandraClientMonitor monitor;
 
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientFactory clientFactory,
+      FailoverPolicy failoverPolicy, CassandraClientPool clientPool,
       CassandraClientMonitor monitor) throws TException {
     this.client = client;
     this.consistencyLevel = consistencyLevel;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
     this.keyspaceName = keyspaceName;
     this.cassandra = client.getCassandra();
     this.failoverPolicy = failoverPolicy;
-    this.clientFactory = clientFactory;
+    this.clientPool = clientPool;
     this.monitor = monitor;
     initFailover();
   }
@@ -558,23 +558,25 @@ import org.slf4j.LoggerFactory;
 
   /**
    * Updates the
-   *
-   * @throws TTransportException
-   * @throws TException
+   * @throws Exception
+   * @throws PoolExhaustedException
+   * @throws IllegalStateException
    */
-  private void skipToNextHost() throws TTransportException, TException {
+  private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
-    // Release client first
-    // TODO(ran): release client from connection pool
+    synchronized (clientPool) {
+      try {
+        clientPool.releaseClient(client);
+      } catch (Exception e) {
+        log.error("Unable to release client {}. Will continue anyhow.", client);
+      }
 
-    // Acquire a new client
-    // TODO(ran) acquire from connection pool
-
-    // assume they use the same port
-    client = clientFactory.create(getNextHost(client.getUrl()), client.getPort());
-    cassandra = client.getCassandra();
-    monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
-    log.info("Skipped host. New host is: {}", client.getUrl());
+      // assume they use the same port
+      client = clientPool.borrowClient(getNextHost(client.getUrl()), client.getPort());
+      cassandra = client.getCassandra();
+      monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
+      log.info("Skipped host. New host is: {}", client.getUrl());
+    }
   }
 
   /**
@@ -643,6 +645,16 @@ import org.slf4j.LoggerFactory;
     } catch (TimedOutException e) {
       monitor.incCounter(op.failCounter);
       throw e;
+    } catch (PoolExhaustedException e) {
+      log.warn("Pool is exhausted", e);
+      monitor.incCounter(Counter.POOL_EXHAUSTED);
+      throw new UnavailableException();
+    } catch (IllegalStateException e) {
+      log.error("Client Pool is already closed, cannot obtain new clients.", e);
+      throw new UnavailableException();
+    } catch (Exception e) {
+      log.error("Cannot retry failover, got an Exception", e);
+      throw new UnavailableException();
     }
   }
 

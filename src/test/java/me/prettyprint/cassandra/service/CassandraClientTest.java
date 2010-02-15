@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import static org.mockito.Mockito.mock;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +34,8 @@ public class CassandraClientTest {
 
   private CassandraClient client;
 
+  private CassandraClientPool pool;
+
   /**
    * Set embedded cassandra up and spawn it in a new thread.
    *
@@ -53,7 +56,8 @@ public class CassandraClientTest {
 
   @Before
   public void setupCase() throws TTransportException, TException {
-    client = new CassandraClientFactory().create("localhost", 9170);
+    pool = mock(CassandraClientPool.class);
+    client = new CassandraClientFactory(pool).create("localhost", 9170);
   }
 
   @Test

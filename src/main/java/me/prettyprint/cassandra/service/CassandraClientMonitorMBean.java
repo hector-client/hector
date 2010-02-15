@@ -17,6 +17,7 @@ public interface CassandraClientMonitorMBean {
   long getTimedOutCount();
   long getUnavailableCount();
   long getSkipHostSuccess();
+  long getPoolExhaustedCount();
 
   public void updateKnownHosts() throws TException;
 }

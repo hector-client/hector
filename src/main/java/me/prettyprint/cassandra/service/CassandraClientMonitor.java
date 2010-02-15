@@ -29,6 +29,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     WRITE_FAIL,
     READ_SUCCESS,
     READ_FAIL,
+    POOL_EXHAUSTED,
 
   }
 
@@ -99,5 +100,10 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
         c.updateKnownHosts();
       }
     }
+  }
+
+  @Override
+  public long getPoolExhaustedCount() {
+    return counters.get(Counter.POOL_EXHAUSTED).longValue();
   }
 }

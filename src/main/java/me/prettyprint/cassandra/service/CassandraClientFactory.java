@@ -18,9 +18,18 @@ import org.apache.thrift.transport.TTransportException;
  */
 public class CassandraClientFactory {
 
+  /**
+   * The pool associated with this client factory.
+   */
+  private final CassandraClientPool pool;
+
+  public CassandraClientFactory(CassandraClientPool pool) {
+    this.pool = pool;
+  }
+
   public CassandraClient create(String url, int port) throws TTransportException, TException {
     return new CassandraClientImpl(createThriftClient(url, port), new KeyspaceFactory(), url, port,
-        this);
+        pool);
   }
 
   private Cassandra.Client createThriftClient(String  url, int port)

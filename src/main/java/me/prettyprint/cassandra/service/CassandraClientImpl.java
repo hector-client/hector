@@ -53,15 +53,15 @@ import org.slf4j.LoggerFactory;
 
   private final String url;
 
-  private final CassandraClientFactory clientFactory;
+  private final CassandraClientPool clientPool;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientFactory clientFactory) {
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPool) {
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
     this.port = port;
     this.url = url;
-    this.clientFactory = clientFactory;
+    this.clientPool = clientPool;
   }
 
   @Override
@@ -96,7 +96,7 @@ import org.slf4j.LoggerFactory;
       if (getKeyspaces().contains(keyspaceName)) {
         Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
         keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel,
-            failoverPolicy, clientFactory);
+            failoverPolicy, clientPool);
         keyspaceMap.put(keyspaceMapKey , keyspace);
       }else{
         throw new IllegalArgumentException(
