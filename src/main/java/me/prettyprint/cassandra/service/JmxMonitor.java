@@ -48,11 +48,20 @@ public enum JmxMonitor {
     mbs.registerMBean(monitoringInterface, oName);
   }
 
-  public CassandraClientMonitor getCassandraMonitor() throws MalformedObjectNameException,
-      InstanceAlreadyExistsException, MBeanRegistrationException, NotCompliantMBeanException {
+  public CassandraClientMonitor getCassandraMonitor() {
     if (cassandraClientMonitor == null) {
       cassandraClientMonitor = new CassandraClientMonitor();
-      registerMonitor(CassandraClientMonitor.class.getName(), "hector", cassandraClientMonitor);
+      try {
+        registerMonitor(CassandraClientMonitor.class.getName(), "hector", cassandraClientMonitor);
+      } catch (MalformedObjectNameException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (InstanceAlreadyExistsException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (MBeanRegistrationException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (NotCompliantMBeanException e) {
+        log.error("Unable to register JMX monitor", e);
+      }
     }
     return cassandraClientMonitor;
   }
