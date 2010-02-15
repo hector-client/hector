@@ -9,7 +9,13 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   private final Map<Counter, AtomicLong> counters;
 
   public enum Counter {
-    TIMED_OUT_EXCEPTIONS, SKIP_HOST_SUCCESS, WRITE_SUCCESS, WRITE_FAIL, READ_SUCCESS, READ_FAIL, UNAVAILABLE_EXCEPTIONS
+    TIMED_OUT_EXCEPTIONS,
+    UNAVAILABLE_EXCEPTIONS,
+    SKIP_HOST_SUCCESS,
+    WRITE_SUCCESS,
+    WRITE_FAIL,
+    READ_SUCCESS,
+    READ_FAIL,
 
   }
 
@@ -27,5 +33,35 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public long getWriteSuccess() {
     return counters.get(Counter.WRITE_SUCCESS).longValue();
+  }
+
+  @Override
+  public long getReadFail() {
+    return counters.get(Counter.READ_FAIL).longValue();
+  }
+
+  @Override
+  public long getReadSuccess() {
+    return counters.get(Counter.READ_SUCCESS).longValue();
+  }
+
+  @Override
+  public long getSkipHostSuccess() {
+    return counters.get(Counter.SKIP_HOST_SUCCESS).longValue();
+  }
+
+  @Override
+  public long getTimedOutCount() {
+    return counters.get(Counter.TIMED_OUT_EXCEPTIONS).longValue();
+  }
+
+  @Override
+  public long getUnavailableCount() {
+    return counters.get(Counter.UNAVAILABLE_EXCEPTIONS).longValue();
+  }
+
+  @Override
+  public long getWriteFail() {
+    return counters.get(Counter.WRITE_FAIL).longValue();
   }
 }

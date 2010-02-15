@@ -60,8 +60,9 @@ public enum JmxMonitor {
   private String generateMonitorName(String className, String monitorType) {
     StringBuilder sb = new StringBuilder();
     sb.append(className);
-    sb.append(":");
-    sb.append("ServiceType=Hector");
+    sb.append(":ServiceType=Hector-");
+    // append the classloader name so we have unique names in web apps.
+    sb.append(getClass().getClassLoader().toString());
     if (null != monitorType && monitorType.length() > 0) {
       sb.append(",MonitorType=" + monitorType);
     }
