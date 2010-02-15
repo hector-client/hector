@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import java.lang.management.ManagementFactory;
+import java.net.URL;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -52,7 +53,7 @@ public enum JmxMonitor {
     if (cassandraClientMonitor == null) {
       cassandraClientMonitor = new CassandraClientMonitor();
       try {
-        registerMonitor(CassandraClientMonitor.class.getName(), "hector", cassandraClientMonitor);
+        registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector", cassandraClientMonitor);
       } catch (MalformedObjectNameException e) {
         log.error("Unable to register JMX monitor", e);
       } catch (InstanceAlreadyExistsException e) {
@@ -69,12 +70,47 @@ public enum JmxMonitor {
   private String generateMonitorName(String className, String monitorType) {
     StringBuilder sb = new StringBuilder();
     sb.append(className);
-    sb.append(":ServiceType=Hector-");
+    sb.append(":ServiceType=");
     // append the classloader name so we have unique names in web apps.
-    sb.append(getClass().getClassLoader().toString());
+    sb.append(getUniqueClassloaderIdentifier());
     if (null != monitorType && monitorType.length() > 0) {
       sb.append(",MonitorType=" + monitorType);
     }
     return sb.toString();
   }
+
+  /**
+   * Generates a unique, but still nice and predictable name representing this classloader so that
+   * even apps operating under a web server such as tomcat with multiple classloaders would bee able
+   * to register each with its own unique mbean.
+   */
+  private String getUniqueClassloaderIdentifier() {
+    String contextPath = getContextPath();
+    if (contextPath != null) {
+      return contextPath;
+    }
+    return "hector";
+  }
+
+  /**
+   * Tries to guess a context path for the running application.
+   * If this is a web application running under a tomcat server this will work.
+   * If unsuccessful, returns null.
+   * @return A string representing the current context path or null if it cannot be determined.
+   */
+  private String getContextPath() {
+    URL url = getClass().getClassLoader().getResource("/");
+    if (url != null) {
+      String[] elements = url.toString().split("/");
+      for (int i = elements.length - 1; i > 0; --i) {
+        // URLs look like this: file:/.../ImageServer/WEB-INF/classes/
+        // And we want that part that's just before WEB-INF
+        if ("WEB-INF".equals(elements[i])) {
+          return elements[i - 1];
+        }
+      }
+    }
+    return null;
+  }
+
 }

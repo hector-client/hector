@@ -183,7 +183,17 @@ import org.slf4j.LoggerFactory;
       }
     }
     // perform cleanup
-    liveClientsFromPool.retainAll(removed);
+    liveClientsFromPool.removeAll(removed);
+  }
 
+  @Override
+  public Set<String> getKnownHosts() {
+    Set<String> hosts = new HashSet<String>();
+    for (CassandraClient c: liveClientsFromPool) {
+      if (!c.isClosed()) {
+        hosts.addAll(c.getKnownHosts());
+      }
+    }
+    return hosts;
   }
 }

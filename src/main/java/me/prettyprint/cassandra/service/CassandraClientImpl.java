@@ -1,8 +1,10 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.prettyprint.cassandra.model.Keyspace;
 import me.prettyprint.cassandra.model.KeyspaceFactory;
@@ -222,5 +224,18 @@ import org.slf4j.LoggerFactory;
   @Override
   public boolean isClosed() {
     return closed;
+  }
+
+  @Override
+  public Set<String> getKnownHosts() {
+    Set<String> hosts = new HashSet<String>();
+    if (closed) {
+      return hosts;
+    }
+    // Iterate over all keyspaces and ask them to update known hosts
+    for (Keyspace k: keyspaceMap.values()) {
+      hosts.addAll(k.getKnownHosts());
+    }
+    return hosts;
   }
 }

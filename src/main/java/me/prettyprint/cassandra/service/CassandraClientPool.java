@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Set;
+
 import org.apache.commons.pool.PoolableObjectFactory;
 
 /**
@@ -124,4 +126,6 @@ public interface CassandraClientPool {
   int getNumBlockedThreads();
 
   void updateKnownHosts();
+
+  Set<String> getKnownHosts();
 }

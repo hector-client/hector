@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.thrift.TException;
@@ -27,7 +28,6 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     READ_SUCCESS,
     READ_FAIL,
     POOL_EXHAUSTED,
-
   }
 
   public CassandraClientMonitor() {
@@ -92,7 +92,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
   @Override
-  public String[] getExhaustedPoolNames() {
+  public Set<String> getExhaustedPoolNames() {
     return poolStore.getExhaustedPoolNames();
   }
 
@@ -122,7 +122,12 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
   @Override
-  public String[] getPoolNames() {
+  public Set<String> getPoolNames() {
     return poolStore.getPoolNames();
+  }
+
+  @Override
+  public Set<String> getKnownHosts() {
+    return poolStore.getKnownHosts();
   }
 }

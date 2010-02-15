@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /*package*/ class CassandraClientPoolStoreImpl implements CassandraClientPoolStore {
 
@@ -23,14 +23,14 @@ import java.util.Map;
   }
 
   @Override
-  public String[] getExhaustedPoolNames() {
-    List<String> hosts = new ArrayList<String>();
+  public Set<String> getExhaustedPoolNames() {
+    Set<String> hosts = new HashSet<String>();
     for (CassandraClientPool pool: pools.values()) {
       if (pool.isExhausted()) {
         hosts.add(pool.getName());
       }
     }
-    return hosts.toArray(new String[]{});
+    return hosts;
   }
 
   @Override
@@ -90,12 +90,12 @@ import java.util.Map;
   }
 
   @Override
-  public String[] getPoolNames() {
-    List<String> names = new ArrayList<String>();
+  public Set<String> getPoolNames() {
+    Set<String> names = new HashSet<String>();
     for (CassandraClientPool pool: pools.values()) {
       names.add(pool.getName());
     }
-    return names.toArray(new String[]{});
+    return names;
   }
 
   @Override
@@ -108,5 +108,14 @@ import java.util.Map;
     for (CassandraClientPool pool: pools.values()) {
       pool.updateKnownHosts();
     }
+  }
+
+  @Override
+  public Set<String> getKnownHosts() {
+    Set<String> hosts = new HashSet<String>();
+    for (CassandraClientPool pool: pools.values()) {
+      hosts.addAll(pool.getKnownHosts());
+    }
+    return hosts;
   }
 }

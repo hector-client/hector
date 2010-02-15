@@ -3,8 +3,10 @@ package me.prettyprint.cassandra.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
@@ -738,5 +740,12 @@ import org.slf4j.LoggerFactory;
       return exception;
     }
 
+  }
+
+  @Override
+  public Set<String> getKnownHosts() {
+    Set<String> hosts = new HashSet<String>();
+    hosts.addAll(knownHosts);
+    return hosts;
   }
 }

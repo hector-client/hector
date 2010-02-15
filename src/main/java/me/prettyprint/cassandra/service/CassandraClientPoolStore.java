@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Set;
+
 /**
  * Holds the list of all available pools, keyed by their url:port.
  *
@@ -37,9 +39,9 @@ public interface CassandraClientPoolStore {
    */
   void updateKnownHosts();
 
-  String[] getExhaustedPoolNames();
+  Set<String> getExhaustedPoolNames();
 
-  String[] getPoolNames();
+  Set<String> getPoolNames();
 
   int getNumPools();
 
@@ -50,4 +52,6 @@ public interface CassandraClientPoolStore {
   int getNumBlockedThreads();
 
   int getNumActive();
+
+  Set<String> getKnownHosts();
 }

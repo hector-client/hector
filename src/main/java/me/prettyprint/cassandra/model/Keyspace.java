@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
@@ -203,4 +204,6 @@ public interface Keyspace {
    * Updates the list of known hosts.
    */
   void updateKnownHosts() throws TException;
+
+  Set<String> getKnownHosts();
 }
