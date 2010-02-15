@@ -4,7 +4,7 @@
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.5.0</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -92,6 +92,17 @@
         <version>2.0</version>
         <configuration>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
@@ -208,4 +219,11 @@
       </plugin>
     </plugins>
   </reporting>
+  <distributionManagement>
+    <repository>
+      <id>nexus</id>
+      <name>nexus</name>
+      <url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
+    </repository>
+  </distributionManagement>
 </project>
