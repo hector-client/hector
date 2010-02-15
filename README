@@ -1,12 +1,19 @@
 A high level cassandra java client.
-Hector <http://en.wikipedia.org/wiki/Hector> is cassandra's <http://en.wikipedia.org/wiki/Cassandra>  brother
+Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
+Hector is the greatest warrior in the greek mithology, buit Troy and brother of Cassandra
+http://en.wikipedia.org/wiki/Hector
+http://en.wikipedia.org/wiki/Cassandra
+
+
 This client provides:
 
  o high level and object oriented interface to cassandra
  o failover behavior
  o connection pooling
- o load balancing
  o JMX conters for monitoring
 
-Initially inspired by http://code.google.com/p/cassandra-java-client/
+TODO:
+ o load balancing
+
+The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 
