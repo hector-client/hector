@@ -18,7 +18,7 @@ import java.util.Map;
 
   @Override
   public CassandraClient borrowClient(String url, int port)
-    throws IllegalStateException, PoolExhaustedException, Exception {
+      throws IllegalStateException, PoolExhaustedException, Exception {
     return getPool(url, port).borrowClient();
   }
 

@@ -117,6 +117,7 @@ import org.slf4j.LoggerFactory;
   public void releaseClient(CassandraClient client) throws Exception {
     liveClientsFromPool.remove(client);
     pool.returnObject(client);
+    client.markAsClosed();
   }
 
   private GenericObjectPool createPool() {
