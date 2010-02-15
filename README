@@ -4,7 +4,7 @@ This client provides:
 
  o high level and object oriented interface to cassandra
  o failover behavior
- o connection pulling
+ o connection pooling
  o load balancing
  o JMX conters for monitoring
 
