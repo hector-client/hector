@@ -8,7 +8,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
-import me.prettyprint.cassandra.service.CassandraClientPool;
+import me.prettyprint.cassandra.service.CassandraClientPoolStore;
 import me.prettyprint.cassandra.service.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
@@ -56,13 +56,13 @@ import org.slf4j.LoggerFactory;
   /** List of all known remote cassandra nodes */
   List<String> knownHosts = new ArrayList<String>();
 
-  private final CassandraClientPool clientPool;
+  private final CassandraClientPoolStore clientPools;
 
   private final CassandraClientMonitor monitor;
 
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPool clientPool,
+      FailoverPolicy failoverPolicy, CassandraClientPoolStore clientPools,
       CassandraClientMonitor monitor) throws TException {
     this.client = client;
     this.consistencyLevel = consistencyLevel;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
     this.keyspaceName = keyspaceName;
     this.cassandra = client.getCassandra();
     this.failoverPolicy = failoverPolicy;
-    this.clientPool = clientPool;
+    this.clientPools = clientPools;
     this.monitor = monitor;
     initFailover();
   }
@@ -564,15 +564,15 @@ import org.slf4j.LoggerFactory;
    */
   private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
-    synchronized (clientPool) {
+    synchronized (clientPools) {
       try {
-        clientPool.releaseClient(client);
+        clientPools.releaseClient(client);
       } catch (Exception e) {
         log.error("Unable to release client {}. Will continue anyhow.", client);
       }
 
       // assume they use the same port
-      client = clientPool.borrowClient(getNextHost(client.getUrl()), client.getPort());
+      client = clientPools.borrowClient(getNextHost(client.getUrl()), client.getPort());
       cassandra = client.getCassandra();
       monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
       log.info("Skipped host. New host is: {}", client.getUrl());

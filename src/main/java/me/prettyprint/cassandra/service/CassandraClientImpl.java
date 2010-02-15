@@ -53,15 +53,15 @@ import org.slf4j.LoggerFactory;
 
   private final String url;
 
-  private final CassandraClientPool clientPool;
+  private final CassandraClientPoolStore clientPools;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPool) {
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPoolStore clientPools) {
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
     this.port = port;
     this.url = url;
-    this.clientPool = clientPool;
+    this.clientPools = clientPools;
   }
 
   @Override
@@ -96,7 +96,7 @@ import org.slf4j.LoggerFactory;
       if (getKeyspaces().contains(keyspaceName)) {
         Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
         keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel,
-            failoverPolicy, clientPool);
+            failoverPolicy, clientPools);
         keyspaceMap.put(keyspaceMapKey , keyspace);
       }else{
         throw new IllegalArgumentException(
@@ -196,5 +196,16 @@ import org.slf4j.LoggerFactory;
     for (Keyspace k: keyspaceMap.values()) {
       k.updateKnownHosts();
     }
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder b = new StringBuilder();
+    b.append("CassandraClient<");
+    b.append(getUrl());
+    b.append(":");
+    b.append(getPort());
+    b.append(">");
+    return b.toString();
   }
 }

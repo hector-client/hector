@@ -4,7 +4,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
-import me.prettyprint.cassandra.service.CassandraClientPool;
+import me.prettyprint.cassandra.service.CassandraClientPoolStore;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
@@ -31,12 +31,12 @@ public class KeyspaceFactory {
    */
   public Keyspace create(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPool clientPool)
+      FailoverPolicy failoverPolicy, CassandraClientPoolStore clientPools)
       throws TException {
 
     CassandraClientMonitor monitor = null;
     monitor = JmxMonitor.INSTANCE.getCassandraMonitor(client);
     return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPool, monitor);
+        failoverPolicy, clientPools, monitor);
   }
 }
