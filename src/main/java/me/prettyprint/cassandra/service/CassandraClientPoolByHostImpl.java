@@ -41,14 +41,14 @@ import org.slf4j.LoggerFactory;
   private final Set<CassandraClient> liveClientsFromPool;
 
   public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
-      CassandraClientPoolStore pools) {
+      CassandraClientPool pools) {
     this(cassandraUrl, cassandraPort, pools, DEFAULT_MAX_ACTIVE,
         DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED,
         DEFAULT_MAX_IDLE, DEFAULT_EXHAUSTED_POLICY);
   }
 
   public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
-      CassandraClientPoolStore pools, int maxActive,
+      CassandraClientPool pools, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy) {
     this(cassandraUrl, cassandraPort, pools, maxActive, maxWait, maxIdle, exhaustedPolicy,
         new CassandraClientFactory(pools, cassandraUrl, cassandraPort));
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
   }
 
   public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
-      CassandraClientPoolStore pools, int maxActive,
+      CassandraClientPool pools, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy,
       CassandraClientFactory clientFactory) {
     log.debug("Creating new connection pool for {}:{}", cassandraUrl, cassandraPort);

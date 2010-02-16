@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
   private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
   private final Map<Counter, AtomicLong> counters;
 
-  private CassandraClientPoolStore poolStore;
+  private CassandraClientPool poolStore;
 
   /**
    * List of available JMX counts
@@ -87,7 +87,7 @@ import org.slf4j.LoggerFactory;
     return counters.get(Counter.POOL_EXHAUSTED).longValue();
   }
 
-  public void setPoolStore(CassandraClientPoolStore store) {
+  public void setPoolStore(CassandraClientPool store) {
     poolStore = store;
   }
 

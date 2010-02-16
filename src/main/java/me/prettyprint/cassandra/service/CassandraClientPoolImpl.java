@@ -5,14 +5,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-/*package*/ class CassandraClientPoolStoreImpl implements CassandraClientPoolStore {
+/*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
 
   /**
    * Mapping b/w the host identifier (url:port) and the pool used to store connections to it.
    */
   private final Map<String, CassandraClientPoolByHost> pools;
 
-  public CassandraClientPoolStoreImpl() {
+  public CassandraClientPoolImpl() {
     pools = new HashMap<String, CassandraClientPoolByHost>();
   }
 

@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientFactory;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
-import me.prettyprint.cassandra.service.CassandraClientPoolStore;
+import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.service.KeyspaceImpl;
 import me.prettyprint.cassandra.service.PoolExhaustedException;
@@ -72,7 +72,7 @@ public class KeyspaceTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
-  private CassandraClientPoolStore pools;
+  private CassandraClientPool pools;
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -95,7 +95,7 @@ public class KeyspaceTest {
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
       NotFoundException {
-    pools = mock(CassandraClientPoolStore.class);
+    pools = mock(CassandraClientPool.class);
     client = new CassandraClientFactory(pools, "localhost", 9170).create();
     keyspace = client.getKeySpace("Keyspace1", 1, CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
@@ -590,7 +590,7 @@ public class KeyspaceTest {
     keyspaceDesc.put("Standard1", keyspace1Desc);
     int consistencyLevel = 1;
     ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
-    CassandraClientPoolStore clientPools = mock(CassandraClientPoolStore.class);
+    CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
     // The token map represents the list of available servers.

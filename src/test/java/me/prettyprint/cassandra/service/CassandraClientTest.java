@@ -33,7 +33,7 @@ public class CassandraClientTest {
 
   private CassandraClient client;
 
-  private CassandraClientPoolStore pools;
+  private CassandraClientPool pools;
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -55,7 +55,7 @@ public class CassandraClientTest {
 
   @Before
   public void setupCase() throws TTransportException, TException {
-    pools = mock(CassandraClientPoolStore.class);
+    pools = mock(CassandraClientPool.class);
     client = new CassandraClientFactory(pools, "localhost", 9170).create();
   }
 

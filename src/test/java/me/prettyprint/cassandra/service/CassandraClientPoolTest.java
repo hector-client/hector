@@ -1,12 +1,17 @@
 package me.prettyprint.cassandra.service;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import me.prettyprint.cassandra.service.CassandraClientPoolByHost.ExhaustedPolicy;
+import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
+
+import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
+
+import org.apache.thrift.transport.TTransportException;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -16,105 +21,63 @@ import org.junit.Test;
  */
 public class CassandraClientPoolTest {
 
-  private CassandraClientPoolByHost pool;
-  private CassandraClientFactory factory;
-  private CassandraClientPoolStore poolStore;
+  private CassandraClientPool store;
+  private static EmbeddedServerHelper embedded;
+
+  /**
+   * Set embedded cassandra up and spawn it in a new thread.
+   *
+   * @throws TTransportException
+   * @throws IOException
+   * @throws InterruptedException
+   */
+  @BeforeClass
+  public static void setup() throws TTransportException, IOException, InterruptedException {
+    embedded = new EmbeddedServerHelper();
+    embedded.setup();
+  }
+
+  @AfterClass
+  public static void teardown() throws IOException {
+    embedded.teardown();
+  }
 
   @Before
-  public void setupTest() throws Exception {
-    factory = mock(CassandraClientFactory.class);
-    poolStore = mock(CassandraClientPoolStore.class);
-    CassandraClient createdClient = mock(CassandraClient.class);
-    when(factory.makeObject()).thenReturn(createdClient);
-
-    pool = new CassandraClientPoolByHostImpl("url", 1111, poolStore, 50 /*maxActive*/,
-        10000 /*maxWait*/, 5 /*maxIdle*/, ExhaustedPolicy.WHEN_EXHAUSTED_FAIL,
-        factory);
+  public void setupTest() {
+    store = new CassandraClientPoolImpl();
   }
 
   @Test
-  public void testCounters() throws IllegalStateException, PoolExhaustedException, Exception {
-
-    assertEquals(0, pool.getNumIdle());
-    assertEquals(50, pool.getNumBeforeExhausted());
-    assertEquals(0, pool.getNumActive());
-
-    // now borrow one client
-    CassandraClient c = pool.borrowClient();
-    assertEquals(0, pool.getNumIdle());
-    assertEquals(49, pool.getNumBeforeExhausted());
-    assertEquals(1, pool.getNumActive());
-
-    // And release it
-    pool.releaseClient(c);
-    assertEquals(1, pool.getNumIdle());
-    assertEquals(50, pool.getNumBeforeExhausted());
-    assertEquals(0, pool.getNumActive());
+  public void testGetPool() {
+    CassandraClientPoolByHost pool = store.getPool("x", 1);
+    assertNotNull(pool);
   }
 
   @Test
   public void testBorrowClient() throws IllegalStateException, PoolExhaustedException, Exception {
-    CassandraClient client = pool.borrowClient();
+    CassandraClient client = store.borrowClient("localhost", 9170);
     assertNotNull(client);
-    pool.releaseClient(client);
-
-    // now try to exhaust a pool
-    for (int i = 0; i < 51; ++i) {
-      try {
-        client = pool.borrowClient();
-        assertNotNull("After iteration " + i + " the returned client is null", client);
-        if (i > 49) {
-          fail("Pool should have been exhausted at 49. Now i=" + i);
-        }
-      } catch (PoolExhaustedException e) {
-        assertEquals("Shoudld be exhausted at 50", 50, i);
-      }
-    }
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
   }
 
   @Test
   public void testReleaseClient() throws IllegalStateException, PoolExhaustedException, Exception {
-    //  borrow one client
-    CassandraClient c = pool.borrowClient();
-    assertEquals(0, pool.getNumIdle());
-    assertEquals(49, pool.getNumBeforeExhausted());
-    assertEquals(1, pool.getNumActive());
-
-    // And release it
-    pool.releaseClient(c);
-    assertEquals(1, pool.getNumIdle());
-    assertEquals(50, pool.getNumBeforeExhausted());
-    assertEquals(0, pool.getNumActive());
-
-    // And borrow again
-    c = pool.borrowClient();
-    assertEquals(0, pool.getNumIdle());
-    assertEquals(49, pool.getNumBeforeExhausted());
-    assertEquals(1, pool.getNumActive());
-    // and again
-    c = pool.borrowClient();
-    assertEquals(0, pool.getNumIdle());
-    assertEquals(48, pool.getNumBeforeExhausted());
-    assertEquals(2, pool.getNumActive());
-    // And release one
-    pool.releaseClient(c);
-    assertEquals(1, pool.getNumIdle());
-    assertEquals(49, pool.getNumBeforeExhausted());
-    assertEquals(1, pool.getNumActive());
+    CassandraClient client = store.borrowClient("localhost", 9170);
+    assertNotNull(client);
+    store.releaseClient(client);
+    assertTrue("Client should be closed", client.isClosed());
   }
 
   @Test
-  public void testClose() throws PoolExhaustedException, Exception {
-    pool.close();
-    // This should not throw an exception
-    pool.close();
-
-    // This should throw an exception
-    try {
-      pool.borrowClient();
-      fail("The borrowClient should have failed with IllegalStateException");
-    } catch (IllegalStateException e) {
-      // OK
-    }
+  public void testUpdateKnownHostsList()
+      throws IllegalStateException, PoolExhaustedException, Exception {
+    CassandraClient client = store.borrowClient("localhost", 9170);
+    assertNotNull(client);
+    Keyspace ks = client.getKeySpace("Keyspace1");
+    assertNotNull(ks);
+    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
+    store.updateKnownHosts();
+    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
   }
 }

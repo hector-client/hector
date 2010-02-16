@@ -55,13 +55,13 @@ import org.slf4j.LoggerFactory;
   /** List of all known remote cassandra nodes */
   List<String> knownHosts = new ArrayList<String>();
 
-  private final CassandraClientPoolStore clientPools;
+  private final CassandraClientPool clientPools;
 
   private final CassandraClientMonitor monitor;
 
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPoolStore clientPools,
+      FailoverPolicy failoverPolicy, CassandraClientPool clientPools,
       CassandraClientMonitor monitor) throws TException {
     this.client = client;
     this.consistencyLevel = consistencyLevel;

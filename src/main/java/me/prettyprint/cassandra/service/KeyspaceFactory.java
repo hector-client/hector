@@ -16,7 +16,7 @@ import org.apache.thrift.TException;
 
   public Keyspace create(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPoolStore clientPools)
+      FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
       throws TException {
     CassandraClientMonitor monitor = JmxMonitor.INSTANCE.getCassandraMonitor();
     return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,

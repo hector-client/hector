@@ -27,7 +27,7 @@ import java.util.Set;
  * @author Ran Tavory (rantav@gmain.com)
  *
  */
-public interface CassandraClientPoolStore {
+public interface CassandraClientPool {
 
   /**
    * Gets a pool defined by url:port

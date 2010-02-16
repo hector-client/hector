@@ -26,11 +26,11 @@ import org.slf4j.LoggerFactory;
   /**
    * The pool associated with this client factory.
    */
-  private final CassandraClientPoolStore pools;
+  private final CassandraClientPool pools;
   private final String url;
   private final int port;
 
-  public CassandraClientFactory(CassandraClientPoolStore pools, String url, int port) {
+  public CassandraClientFactory(CassandraClientPool pools, String url, int port) {
     this.pools = pools;
     this.url = url;
     this.port = port;

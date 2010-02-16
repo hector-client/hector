@@ -53,12 +53,12 @@ import org.slf4j.LoggerFactory;
 
   private final String url;
 
-  private final CassandraClientPoolStore clientPools;
+  private final CassandraClientPool clientPools;
 
   private boolean closed = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPoolStore clientPools) {
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools) {
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
     this.port = port;
