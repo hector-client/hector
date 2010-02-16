@@ -5,7 +5,7 @@ import java.util.Set;
 import org.apache.commons.pool.PoolableObjectFactory;
 
 /**
- * A cassandra client pool.
+ * A cassandra client pool per one cassandra host.
  *
  * To obtain new CassandraClient object invoke borrowClient(). Once the application
  * is done, releaseClient().
@@ -26,7 +26,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
  *
  * @author rantav
  */
-/*package*/ interface CassandraClientPool {
+/*package*/ interface CassandraClientPoolByHost {
 
   enum ExhaustedPolicy {
     WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_GROW, WHEN_EXHAUSTED_BLOCK

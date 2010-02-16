@@ -49,7 +49,7 @@ public class CassandraClientPoolStoreTest {
 
   @Test
   public void testGetPool() {
-    CassandraClientPool pool = store.getPool("x", 1);
+    CassandraClientPoolByHost pool = store.getPool("x", 1);
     assertNotNull(pool);
   }
 

@@ -13,9 +13,9 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
+/*package*/ class CassandraClientPoolByHostImpl implements CassandraClientPoolByHost {
 
-  private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolByHostImpl.class);
 
   private final CassandraClientFactory clientFactory;
   private final String url;
@@ -40,14 +40,14 @@ import org.slf4j.LoggerFactory;
    */
   private final Set<CassandraClient> liveClientsFromPool;
 
-  public CassandraClientPoolImpl(String cassandraUrl, int cassandraPort,
+  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
       CassandraClientPoolStore pools) {
     this(cassandraUrl, cassandraPort, pools, DEFAULT_MAX_ACTIVE,
         DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED,
         DEFAULT_MAX_IDLE, DEFAULT_EXHAUSTED_POLICY);
   }
 
-  public CassandraClientPoolImpl(String cassandraUrl, int cassandraPort,
+  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
       CassandraClientPoolStore pools, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy) {
     this(cassandraUrl, cassandraPort, pools, maxActive, maxWait, maxIdle, exhaustedPolicy,
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
   }
 
-  public CassandraClientPoolImpl(String cassandraUrl, int cassandraPort,
+  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
       CassandraClientPoolStore pools, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy,
       CassandraClientFactory clientFactory) {

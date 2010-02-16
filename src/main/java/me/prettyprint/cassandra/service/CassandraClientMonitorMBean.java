@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraClientPool.ExhaustedPolicy;
+import me.prettyprint.cassandra.service.CassandraClientPoolByHost.ExhaustedPolicy;
 
 import org.apache.thrift.TException;
 

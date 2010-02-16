@@ -35,7 +35,7 @@ public interface CassandraClientPoolStore {
    * @param port
    * @return
    */
-  CassandraClientPool getPool(String url, int port);
+  CassandraClientPoolByHost getPool(String url, int port);
 
   /**
    * Borrows a client from the pool defined by url:port

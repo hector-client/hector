@@ -10,10 +10,10 @@ import java.util.Set;
   /**
    * Mapping b/w the host identifier (url:port) and the pool used to store connections to it.
    */
-  private final Map<String, CassandraClientPool> pools;
+  private final Map<String, CassandraClientPoolByHost> pools;
 
   public CassandraClientPoolStoreImpl() {
-    pools = new HashMap<String, CassandraClientPool>();
+    pools = new HashMap<String, CassandraClientPoolByHost>();
   }
 
   @Override
@@ -25,7 +25,7 @@ import java.util.Set;
   @Override
   public Set<String> getExhaustedPoolNames() {
     Set<String> hosts = new HashSet<String>();
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       if (pool.isExhausted()) {
         hosts.add(pool.getName());
       }
@@ -36,7 +36,7 @@ import java.util.Set;
   @Override
   public int getNumActive() {
     int count = 0;
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       count += pool.getNumActive();
     }
     return count;
@@ -45,7 +45,7 @@ import java.util.Set;
   @Override
   public int getNumBlockedThreads() {
     int count = 0;
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       count += pool.getNumBlockedThreads();
     }
     return count;
@@ -54,7 +54,7 @@ import java.util.Set;
   @Override
   public int getNumExhaustedPools() {
     int count = 0;
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       if (pool.isExhausted()) {
         ++count;
       }
@@ -65,7 +65,7 @@ import java.util.Set;
   @Override
   public int getNumIdle() {
     int count = 0;
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       count += pool.getNumIdle();
     }
     return count;
@@ -77,12 +77,12 @@ import java.util.Set;
   }
 
   @Override
-  public CassandraClientPool getPool(String url, int port) {
+  public CassandraClientPoolByHost getPool(String url, int port) {
     String key = url + ":" + port;
-    CassandraClientPool pool = pools.get(key);
+    CassandraClientPoolByHost pool = pools.get(key);
     if (pool == null) {
       synchronized (pools) {
-        pool = new CassandraClientPoolImpl(url, port, this);
+        pool = new CassandraClientPoolByHostImpl(url, port, this);
         pools.put(key, pool);
       }
     }
@@ -92,7 +92,7 @@ import java.util.Set;
   @Override
   public Set<String> getPoolNames() {
     Set<String> names = new HashSet<String>();
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       names.add(pool.getName());
     }
     return names;
@@ -105,7 +105,7 @@ import java.util.Set;
 
   @Override
   public void updateKnownHosts() {
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       pool.updateKnownHosts();
     }
   }
@@ -113,7 +113,7 @@ import java.util.Set;
   @Override
   public Set<String> getKnownHosts() {
     Set<String> hosts = new HashSet<String>();
-    for (CassandraClientPool pool: pools.values()) {
+    for (CassandraClientPoolByHost pool: pools.values()) {
       hosts.addAll(pool.getKnownHosts());
     }
     return hosts;

@@ -4,7 +4,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import me.prettyprint.cassandra.service.CassandraClientPool.ExhaustedPolicy;
+import me.prettyprint.cassandra.service.CassandraClientPoolByHost.ExhaustedPolicy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import org.junit.Test;
  */
 public class CassandraClientPoolTest {
 
-  private CassandraClientPool pool;
+  private CassandraClientPoolByHost pool;
   private CassandraClientFactory factory;
   private CassandraClientPoolStore poolStore;
 
@@ -27,7 +27,7 @@ public class CassandraClientPoolTest {
     CassandraClient createdClient = mock(CassandraClient.class);
     when(factory.makeObject()).thenReturn(createdClient);
 
-    pool = new CassandraClientPoolImpl("url", 1111, poolStore, 50 /*maxActive*/,
+    pool = new CassandraClientPoolByHostImpl("url", 1111, poolStore, 50 /*maxActive*/,
         10000 /*maxWait*/, 5 /*maxIdle*/, ExhaustedPolicy.WHEN_EXHAUSTED_FAIL,
         factory);
   }
