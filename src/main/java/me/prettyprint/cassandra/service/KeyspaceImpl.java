@@ -573,6 +573,7 @@ import org.slf4j.LoggerFactory;
     // Now query for more hosts. If the query fails, then even this client is now "known"
     try {
       Map<String, String> map = getClient().getTokenMap(true);
+      knownHosts.clear();
       for (Map.Entry<String, String> entry : map.entrySet()) {
         knownHosts.add(entry.getValue());
       }
@@ -598,8 +599,13 @@ import org.slf4j.LoggerFactory;
         log.error("Unable to release client {}. Will continue anyhow.", client);
       }
 
+      String nextHost = getNextHost(client.getUrl());
+      if (nextHost == null) {
+        log.error("Unable to find next host to skip to at {}", toString());
+        return;
+      }
       // assume they use the same port
-      client = clientPools.borrowClient(getNextHost(client.getUrl()), client.getPort());
+      client = clientPools.borrowClient(nextHost, client.getPort());
       cassandra = client.getCassandra();
       monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
       log.info("Skipped host. New host is: {}", client.getUrl());
@@ -609,10 +615,13 @@ import org.slf4j.LoggerFactory;
   /**
    * Finds the next host in the knownHosts. Next is the one after the given url
    * (modulo the number of elemens in the list)
+   * @return URL of the next presumably available host. null if none can be found.
    */
   private String getNextHost(String url) {
     int size = knownHosts.size();
-    assert size > 1;
+    if (size < 1) {
+      return null;
+    }
     for (int i = 0; i < knownHosts.size(); ++i) {
       if (url.equals(knownHosts.get(i))) {
         // found this host. Return the next one in the array

@@ -43,11 +43,29 @@ import org.slf4j.LoggerFactory;
 
   private Cassandra.Client createThriftClient(String  url, int port)
       throws TTransportException , TException {
-    TTransport tr = new TSocket(url, port);
+    TTransport tr = new TSocket(url, port, getTimeout());
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
     tr.open();
+
     return client;
+  }
+
+  /**
+   * Gets an environment variable CASSANDRA_THRIFT_SOCKET_TIMEOUT value.
+   * If doesn't exist, returns 0.
+   */
+  private int getTimeout() {
+    String timeoutStr = System.getProperty("CASSANDRA_THRIFT_SOCKET_TIMEOUT");
+    if (timeoutStr == null || timeoutStr.length() == 0) {
+      return 0;
+    }
+    try {
+      return Integer.valueOf(timeoutStr);
+    } catch (NumberFormatException e) {
+      log.error("Invalid value for CASSANDRA_THRIFT_SOCKET_TIMEOUT", e);
+      return 0;
+    }
   }
 
   @Override
