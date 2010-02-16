@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * <pre>
  *
- * CassandraClient client = clientpool.borrowClient();
+ * CassandraClient client = clientpool.borrowClient(hostname, port);
  * try {
  *   // do something with client and buessiness logic
  * } catch (Exception e) {
