@@ -26,6 +26,7 @@ import org.apache.cassandra.service.TimedOutException;
 import org.apache.cassandra.service.UnavailableException;
 import org.apache.cassandra.service.Cassandra.Client;
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -565,10 +566,19 @@ import org.slf4j.LoggerFactory;
    * @throws TException
    */
   public void updateKnownHosts() throws TException {
-    Map<String, String> map = getClient().getTokenMap(true);
+    // When update starts we only know of this client, nothing else
     knownHosts.clear();
-    for (Map.Entry<String, String> entry : map.entrySet()) {
-      knownHosts.add(entry.getValue());
+    knownHosts.add(getClient().getUrl());
+
+    // Now query for more hosts. If the query fails, then even this client is now "known"
+    try {
+      Map<String, String> map = getClient().getTokenMap(true);
+      for (Map.Entry<String, String> entry : map.entrySet()) {
+        knownHosts.add(entry.getValue());
+      }
+    } catch (TException e) {
+      knownHosts.clear();
+      log.error("Cannot query tokenMap; Keyspace {} is now disconnected", toString());
     }
   }
 
@@ -648,6 +658,14 @@ import org.slf4j.LoggerFactory;
           } else {
             skipToNextHost();
             monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
+          }
+        } catch (TTransportException e) {
+          log.warn("Got a TTransportException. Num of retries: {}", retries);
+          if (retries == 0) {
+            throw e;
+          } else {
+            skipToNextHost();
+            monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
           }
         }
       }

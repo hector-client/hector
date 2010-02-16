@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
   public enum Counter {
     RECOVERABLE_TIMED_OUT_EXCEPTIONS,
     RECOVERABLE_UNAVAILABLE_EXCEPTIONS,
+    RECOVERABLE_TRANSPORT_EXCEPTIONS,
     SKIP_HOST_SUCCESS,
     WRITE_SUCCESS,
     WRITE_FAIL,
@@ -127,5 +128,10 @@ import org.slf4j.LoggerFactory;
   @Override
   public Set<String> getKnownHosts() {
     return poolStore.getKnownHosts();
+  }
+
+  @Override
+  public long getRecoverableTransportExceptionCount() {
+    return counters.get(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS).longValue();
   }
 }

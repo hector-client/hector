@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
+import org.apache.thrift.TException;
+
 /**
  * Holds the list of all available pools, keyed by their url:port.
  *
@@ -53,8 +55,9 @@ public interface CassandraClientPool {
 
   /**
    * Tells all the clients in the pool to update their list of known hosts.
+   * @throws TException
    */
-  void updateKnownHosts();
+  void updateKnownHosts() throws TException;
 
   Set<String> getExhaustedPoolNames();
 

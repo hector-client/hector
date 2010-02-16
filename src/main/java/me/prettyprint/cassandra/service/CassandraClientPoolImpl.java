@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.thrift.TException;
+
 /*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
 
   /**
@@ -104,7 +106,7 @@ import java.util.Set;
   }
 
   @Override
-  public void updateKnownHosts() {
+  public void updateKnownHosts() throws TException {
     for (CassandraClientPoolByHost pool: pools.values()) {
       pool.updateKnownHosts();
     }

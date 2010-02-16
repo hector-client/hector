@@ -4,7 +4,8 @@
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
-  <version>0.5.0</version>
+  <!-- The version follows Cassandra's major version changes, e.g. 0.5.0 goes with the 0.5.0 cassandra release-->
+  <version>0.5.0-1</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>

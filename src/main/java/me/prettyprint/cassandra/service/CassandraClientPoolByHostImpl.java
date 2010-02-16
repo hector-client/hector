@@ -169,7 +169,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void updateKnownHosts() {
+  public void updateKnownHosts() throws TException {
     Set<CassandraClient> removed = new HashSet<CassandraClient>();
     for (CassandraClient c: liveClientsFromPool) {
       if (c.isClosed()) {
@@ -179,6 +179,7 @@ import org.slf4j.LoggerFactory;
           c.updateKnownHosts();
         } catch (TException e) {
           log.error("Unable to update hosts list at {}", c, e);
+          throw e;
         }
       }
     }

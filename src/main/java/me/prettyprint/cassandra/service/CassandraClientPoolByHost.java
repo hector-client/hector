@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.util.Set;
 
 import org.apache.commons.pool.PoolableObjectFactory;
+import org.apache.thrift.TException;
 
 /**
  * A cassandra client pool per one cassandra host.
@@ -125,7 +126,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
 
   int getNumBlockedThreads();
 
-  void updateKnownHosts();
+  void updateKnownHosts() throws TException;
 
   Set<String> getKnownHosts();
 }

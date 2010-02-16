@@ -18,6 +18,7 @@ public interface CassandraClientMonitorMBean {
   long getReadFail();
   long getRecoverableTimedOutCount();
   long getRecoverableUnavailableCount();
+  long getRecoverableTransportExceptionCount();
   long getSkipHostSuccess();
   long getPoolExhaustedCount();
 
