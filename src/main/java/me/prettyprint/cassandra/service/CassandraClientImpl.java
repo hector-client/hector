@@ -6,8 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import me.prettyprint.cassandra.model.Keyspace;
-import me.prettyprint.cassandra.model.KeyspaceFactory;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.NotFoundException;

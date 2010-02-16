@@ -9,7 +9,7 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraClientMonitor implements CassandraClientMonitorMBean {
+/*package*/ class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
   private final Map<Counter, AtomicLong> counters;

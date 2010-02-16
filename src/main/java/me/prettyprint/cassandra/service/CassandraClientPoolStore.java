@@ -7,6 +7,23 @@ import java.util.Set;
  *
  * This class is a simple multiplexer b/w the different client pools, keyed by url:port.
  *
+ * To obtain new CassandraClient object invoke borrowClient(). Once the application
+ * is done, releaseClient().
+ *
+ *Example code:
+ *
+ * <pre>
+ *
+ * CassandraClient client = clientpool.borrowClient();
+ * try {
+ *   // do something with client and buessiness logic
+ * } catch (Exception e) {
+ *   // process exception
+ * } finally {
+ *   clientpool.releaseClient(client);
+ * }
+ * </pre>
+ *
  * @author Ran Tavory (rantav@gmain.com)
  *
  */

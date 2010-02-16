@@ -1,10 +1,10 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraClient;
+
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.service.Column;
@@ -24,7 +24,7 @@ import org.apache.thrift.TException;
  *
  * @author rantav
  */
-public interface Keyspace {
+/*package*/ interface Keyspace {
 
   public static String CF_TYPE = "Type" ;
   public static String CF_TYPE_STANDARD = "Standard" ;

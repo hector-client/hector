@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,10 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
-import me.prettyprint.cassandra.service.CassandraClientPoolStore;
-import me.prettyprint.cassandra.service.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 
@@ -39,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/* package */class KeyspaceImpl implements Keyspace {
+/*package*/ class KeyspaceImpl implements Keyspace {
 
   private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
 

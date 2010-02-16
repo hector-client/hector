@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-public enum JmxMonitor {
+/*package*/ enum JmxMonitor {
   INSTANCE;
 
   private static final Logger log = LoggerFactory.getLogger(JmxMonitor.class);

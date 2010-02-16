@@ -1,11 +1,8 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.service;
 
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
-import me.prettyprint.cassandra.service.CassandraClientPoolStore;
-import me.prettyprint.cassandra.service.JmxMonitor;
+
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.thrift.TException;
@@ -15,7 +12,7 @@ import org.apache.thrift.TException;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class KeyspaceFactory {
+/*package*/ class KeyspaceFactory {
 
   public Keyspace create(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,

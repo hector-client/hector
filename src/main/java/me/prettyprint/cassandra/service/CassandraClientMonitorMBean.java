@@ -12,7 +12,7 @@ import org.apache.thrift.TException;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-public interface CassandraClientMonitorMBean {
+/*package*/ interface CassandraClientMonitorMBean {
 
   long getWriteSuccess();
   long getReadSuccess();

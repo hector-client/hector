@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.model.KeyspaceFactory;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.commons.pool.BasePoolableObjectFactory;
@@ -20,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class CassandraClientFactory extends BasePoolableObjectFactory
+/*package*/ class CassandraClientFactory extends BasePoolableObjectFactory
     implements PoolableObjectFactory {
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientFactory.class);

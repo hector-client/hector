@@ -26,7 +26,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
  *
  * @author rantav
  */
-public interface CassandraClientPool {
+/*package*/ interface CassandraClientPool {
 
   enum ExhaustedPolicy {
     WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_GROW, WHEN_EXHAUSTED_BLOCK
