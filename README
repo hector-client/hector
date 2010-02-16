@@ -1,16 +1,16 @@
 A high level cassandra java client.
 Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
-Hector is the greatest warrior in the greek mithology, buit Troy and brother of Cassandra
+Hector is the greatest warrior in the greek mithology, Troy's builder and brother of Cassandra
 http://en.wikipedia.org/wiki/Hector
 http://en.wikipedia.org/wiki/Cassandra
 
 
 This client provides:
 
- o high level and object oriented interface to cassandra
- o failover behavior
- o connection pooling
- o JMX conters for monitoring
+ o high level, simple object oriented interface to cassandra
+ o failover behavior on the client side
+ o connection pooling for improved performance and scalability
+ o JMX conters for monitoring and management
 
 TODO:
  o load balancing
