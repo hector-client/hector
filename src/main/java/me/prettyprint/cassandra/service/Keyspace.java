@@ -24,7 +24,7 @@ import org.apache.thrift.TException;
  *
  * @author rantav
  */
-/*package*/ interface Keyspace {
+public interface Keyspace {
 
   public static String CF_TYPE = "Type" ;
   public static String CF_TYPE_STANDARD = "Standard" ;

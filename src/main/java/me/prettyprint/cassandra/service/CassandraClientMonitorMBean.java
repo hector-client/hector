@@ -14,12 +14,10 @@ import org.apache.thrift.TException;
  */
 /*package*/ interface CassandraClientMonitorMBean {
 
-  long getWriteSuccess();
-  long getReadSuccess();
   long getWriteFail();
   long getReadFail();
-  long getTimedOutCount();
-  long getUnavailableCount();
+  long getRecoverableTimedOutCount();
+  long getRecoverableUnavailableCount();
   long getSkipHostSuccess();
   long getPoolExhaustedCount();
 

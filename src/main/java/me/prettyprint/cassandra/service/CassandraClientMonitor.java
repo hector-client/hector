@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
    * List of available JMX counts
    */
   public enum Counter {
-    TIMED_OUT_EXCEPTIONS,
-    UNAVAILABLE_EXCEPTIONS,
+    RECOVERABLE_TIMED_OUT_EXCEPTIONS,
+    RECOVERABLE_UNAVAILABLE_EXCEPTIONS,
     SKIP_HOST_SUCCESS,
     WRITE_SUCCESS,
     WRITE_FAIL,
@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
     counters.get(counterType).incrementAndGet();
   }
 
-  @Override
   public long getWriteSuccess() {
     return counters.get(Counter.WRITE_SUCCESS).longValue();
   }
@@ -51,7 +50,6 @@ import org.slf4j.LoggerFactory;
     return counters.get(Counter.READ_FAIL).longValue();
   }
 
-  @Override
   public long getReadSuccess() {
     return counters.get(Counter.READ_SUCCESS).longValue();
   }
@@ -62,13 +60,13 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public long getTimedOutCount() {
-    return counters.get(Counter.TIMED_OUT_EXCEPTIONS).longValue();
+  public long getRecoverableTimedOutCount() {
+    return counters.get(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS).longValue();
   }
 
   @Override
-  public long getUnavailableCount() {
-    return counters.get(Counter.UNAVAILABLE_EXCEPTIONS).longValue();
+  public long getRecoverableUnavailableCount() {
+    return counters.get(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS).longValue();
   }
 
   @Override
