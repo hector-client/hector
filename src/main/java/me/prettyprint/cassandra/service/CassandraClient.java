@@ -142,4 +142,6 @@ public interface CassandraClient {
 
   Set<String> getKnownHosts();
 
+  String getIp();
+
 }

@@ -44,7 +44,7 @@ public class CassandraClientPoolTest {
 
   @Before
   public void setupTest() {
-    store = new CassandraClientPoolImpl();
+    store = CassandraClientPoolImpl.INSTANCE;
   }
 
   @Test
@@ -66,7 +66,6 @@ public class CassandraClientPoolTest {
     CassandraClient client = store.borrowClient("localhost", 9170);
     assertNotNull(client);
     store.releaseClient(client);
-    assertTrue("Client should be closed", client.isClosed());
   }
 
   @Test

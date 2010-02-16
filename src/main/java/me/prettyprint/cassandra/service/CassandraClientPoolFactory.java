@@ -8,7 +8,7 @@ package me.prettyprint.cassandra.service;
 public class CassandraClientPoolFactory {
 
   public CassandraClientPool create() {
-    CassandraClientPool store = new CassandraClientPoolImpl();
+    CassandraClientPool store = CassandraClientPoolImpl.INSTANCE;
     CassandraClientMonitor monitor = JmxMonitor.INSTANCE.getCassandraMonitor();
     monitor.setPoolStore(store);
     return store;

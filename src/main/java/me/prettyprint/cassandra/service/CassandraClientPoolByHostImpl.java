@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
   private final CassandraClientFactory clientFactory;
   private final String url;
+  private final String name;
   private final int port;
   private final int maxActive;
   private final int maxIdle;
@@ -40,28 +41,29 @@ import org.slf4j.LoggerFactory;
    */
   private final Set<CassandraClient> liveClientsFromPool;
 
-  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
+  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
       CassandraClientPool pools) {
-    this(cassandraUrl, cassandraPort, pools, DEFAULT_MAX_ACTIVE,
+    this(cassandraUrl, cassandraPort, name, pools, DEFAULT_MAX_ACTIVE,
         DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED,
         DEFAULT_MAX_IDLE, DEFAULT_EXHAUSTED_POLICY);
   }
 
-  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
+  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
       CassandraClientPool pools, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy) {
-    this(cassandraUrl, cassandraPort, pools, maxActive, maxWait, maxIdle, exhaustedPolicy,
+    this(cassandraUrl, cassandraPort, name, pools, maxActive, maxWait, maxIdle, exhaustedPolicy,
         new CassandraClientFactory(pools, cassandraUrl, cassandraPort));
 
   }
 
-  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort,
+  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
       CassandraClientPool pools, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy,
       CassandraClientFactory clientFactory) {
     log.debug("Creating new connection pool for {}:{}", cassandraUrl, cassandraPort);
     url = cassandraUrl;
     port = cassandraPort;
+    this.name = name;
     this.maxActive = maxActive;
     this.maxIdle = maxIdle;
     this.maxWaitTimeWhenExhausted = maxWait;
@@ -117,7 +119,6 @@ import org.slf4j.LoggerFactory;
   public void releaseClient(CassandraClient client) throws Exception {
     liveClientsFromPool.remove(client);
     pool.returnObject(client);
-    client.markAsClosed();
   }
 
   private GenericObjectPool createPool() {
@@ -153,7 +154,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public String getName() {
-    return url + ":" + port;
+    return name;
   }
 
   @Override

@@ -599,10 +599,10 @@ import org.slf4j.LoggerFactory;
         log.error("Unable to release client {}. Will continue anyhow.", client);
       }
 
-      String nextHost = getNextHost(client.getUrl());
+      String nextHost = getNextHost(client.getUrl(), client.getIp());
       if (nextHost == null) {
         log.error("Unable to find next host to skip to at {}", toString());
-        return;
+        throw new TException("Unable to failover to next host");
       }
       // assume they use the same port
       client = clientPools.borrowClient(nextHost, client.getPort());
@@ -617,13 +617,13 @@ import org.slf4j.LoggerFactory;
    * (modulo the number of elemens in the list)
    * @return URL of the next presumably available host. null if none can be found.
    */
-  private String getNextHost(String url) {
+  private String getNextHost(String url, String ip) {
     int size = knownHosts.size();
     if (size < 1) {
       return null;
     }
     for (int i = 0; i < knownHosts.size(); ++i) {
-      if (url.equals(knownHosts.get(i))) {
+      if (url.equals(knownHosts.get(i)) || ip.equals(knownHosts.get(i))) {
         // found this host. Return the next one in the array
         return knownHosts.get((i + 1) % size);
       }
@@ -653,7 +653,7 @@ import org.slf4j.LoggerFactory;
           log.debug("Operation succeeded on {}", client.getUrl());
           return;
         } catch (TimedOutException e) {
-          log.warn("Got a TimedOutException. Num of retries: {}", retries);
+          log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
           if (retries == 0) {
             throw e;
           } else {
@@ -661,7 +661,7 @@ import org.slf4j.LoggerFactory;
             monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
           }
         } catch (UnavailableException e) {
-          log.warn("Got a UnavailableException. Num of retries: {}", retries);
+          log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(), retries);
           if (retries == 0) {
             throw e;
           } else {
@@ -669,7 +669,7 @@ import org.slf4j.LoggerFactory;
             monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
           }
         } catch (TTransportException e) {
-          log.warn("Got a TTransportException. Num of retries: {}", retries);
+          log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(), retries);
           if (retries == 0) {
             throw e;
           } else {

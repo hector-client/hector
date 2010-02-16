@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,12 +57,12 @@ import org.junit.Test;
 /**
  * For the tests we assume the following structure:
  *
- * &lt;Keyspaces&gt;
- *  &lt;Keyspace Name="Keyspace1"&gt;
- *    &lt;ColumnFamily CompareWith="BytesType" Name="Standard1" FlushPeriodInMinutes="60"/&gt;
- *    &lt;ColumnFamily CompareWith="UTF8Type" Name="Standard2"/&gt;
- *    &lt;ColumnFamily CompareWith="TimeUUIDType" Name="StandardByUUID1"/&gt;
- *    &lt;ColumnFamily ColumnType="Super" CompareWith="UTF8Type" CompareSubcolumnsWith="UTF8Type" Name="Super1"/&gt;
+ * &lt;Keyspaces&gt; &lt;Keyspace Name="Keyspace1"&gt; &lt;ColumnFamily
+ * CompareWith="BytesType" Name="Standard1" FlushPeriodInMinutes="60"/&gt;
+ * &lt;ColumnFamily CompareWith="UTF8Type" Name="Standard2"/&gt;
+ * &lt;ColumnFamily CompareWith="TimeUUIDType" Name="StandardByUUID1"/&gt;
+ * &lt;ColumnFamily ColumnType="Super" CompareWith="UTF8Type"
+ * CompareSubcolumnsWith="UTF8Type" Name="Super1"/&gt;
  *
  * @author Ran Tavory (rantav@gmail.com)
  *
@@ -94,7 +95,7 @@ public class KeyspaceTest {
 
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
-      NotFoundException {
+      NotFoundException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
     client = new CassandraClientFactory(pools, "localhost", 9170).create();
     keyspace = client.getKeySpace("Keyspace1", 1, CassandraClient.DEFAULT_FAILOVER_POLICY);
@@ -584,7 +585,7 @@ public class KeyspaceTest {
     Cassandra.Client h2cassandra = mock(Cassandra.Client.class);
     Cassandra.Client h3cassandra = mock(Cassandra.Client.class);
     String keyspaceName = "Keyspace1";
-    Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String,String>>();
+    Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String, String>>();
     Map<String, String> keyspace1Desc = new HashMap<String, String>();
     keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.put("Standard1", keyspace1Desc);
@@ -609,8 +610,11 @@ public class KeyspaceTest {
     when(h2client.getPort()).thenReturn(111);
     when(h3client.getPort()).thenReturn(111);
     when(h1client.getUrl()).thenReturn("h1");
+    when(h1client.getIp()).thenReturn("ip1");
     when(h2client.getUrl()).thenReturn("h2");
+    when(h2client.getIp()).thenReturn("ip2");
     when(h3client.getUrl()).thenReturn("h3");
+    when(h3client.getIp()).thenReturn("ip3");
     when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
     when(clientPools.borrowClient("h3", 111)).thenReturn(h3client);
@@ -623,13 +627,12 @@ public class KeyspaceTest {
     ks.insert("key", cp, bytes("value"));
 
     // now fail the call and make sure it fails fast
-    doThrow(new TimedOutException()).when(h1cassandra).
-        insert(anyString(), anyString(), (ColumnPath) anyObject(), (byte[])anyObject(),
-            anyLong(), anyInt());
+    doThrow(new TimedOutException()).when(h1cassandra).insert(anyString(), anyString(),
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
     try {
       ks.insert("key", cp, bytes("value"));
-      fail("Should not have gotten here. The method should have failed with TimedOutException; " +
-          "FAIL_FAST");
+      fail("Should not have gotten here. The method should have failed with TimedOutException; "
+          + "FAIL_FAST");
     } catch (TimedOutException e) {
       // ok
     }
@@ -637,49 +640,46 @@ public class KeyspaceTest {
     // Now try the ON_FAIL_TRY_ONE_NEXT_AVAILABLE policy
     // h1 fails, h3 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ONE_NEXT_AVAILABLE;
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPools, monitor);
+    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+        clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
     verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
-        (byte[])anyObject(), anyLong(), anyInt());
+        (byte[]) anyObject(), anyLong(), anyInt());
     verify(clientPools).borrowClient("h3", 111);
 
     // make both h1 and h3 fail
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPools, monitor);
-    doThrow(new TimedOutException()).when(h3cassandra).
-      insert(anyString(), anyString(), (ColumnPath) anyObject(), (byte[])anyObject(),
-        anyLong(), anyInt());
+    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+        clientPools, monitor);
+    doThrow(new TimedOutException()).when(h3cassandra).insert(anyString(), anyString(),
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
     try {
       ks.insert("key", cp, bytes("value"));
-      fail("Should not have gotten here. The method should have failed with TimedOutException; " +
-          "ON_FAIL_TRY_ONE_NEXT_AVAILABLE");
+      fail("Should not have gotten here. The method should have failed with TimedOutException; "
+          + "ON_FAIL_TRY_ONE_NEXT_AVAILABLE");
     } catch (TimedOutException e) {
       // ok
     }
 
-
     // Now try the full cycle
     // h1 fails, h3 fails, h2 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPools, monitor);
+    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+        clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
     verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
-        (byte[])anyObject(), anyLong(), anyInt());
+        (byte[]) anyObject(), anyLong(), anyInt());
 
     // now fail them all. h1 fails, h2 fails, h3 fails
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPools, monitor);
-    doThrow(new TimedOutException()).when(h2cassandra).
-      insert(anyString(), anyString(), (ColumnPath) anyObject(), (byte[])anyObject(),
-        anyLong(), anyInt());
+    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+        clientPools, monitor);
+    doThrow(new TimedOutException()).when(h2cassandra).insert(anyString(), anyString(),
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
     try {
       ks.insert("key", cp, bytes("value"));
-      fail("Should not have gotten here. The method should have failed with TimedOutException; " +
-          "ON_FAIL_TRY_ALL_AVAILABLE");
+      fail("Should not have gotten here. The method should have failed with TimedOutException; "
+          + "ON_FAIL_TRY_ALL_AVAILABLE");
     } catch (TimedOutException e) {
       // ok
     }

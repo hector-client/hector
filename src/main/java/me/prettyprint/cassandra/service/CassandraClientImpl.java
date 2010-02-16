@@ -1,11 +1,12 @@
 package me.prettyprint.cassandra.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.NotFoundException;
@@ -52,18 +53,25 @@ import org.slf4j.LoggerFactory;
   private final int port;
 
   private final String url;
+  private final String ip;
 
   private final CassandraClientPool clientPools;
 
   private boolean closed = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools) {
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools)
+      throws UnknownHostException {
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
     this.port = port;
     this.url = url;
+    ip = getIpString(url);
     this.clientPools = clientPools;
+  }
+
+  private static String getIpString(String url) throws UnknownHostException {
+    return InetAddress.getByName(url).getHostAddress();
   }
 
   @Override
@@ -235,5 +243,10 @@ import org.slf4j.LoggerFactory;
       hosts.addAll(k.getKnownHosts());
     }
     return hosts;
+  }
+
+  @Override
+  public String getIp() {
+    return ip;
   }
 }

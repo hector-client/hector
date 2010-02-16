@@ -82,7 +82,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public long getPoolExhaustedCount() {
+  public long getNumPoolExhaustedEventCount() {
     return counters.get(Counter.POOL_EXHAUSTED).longValue();
   }
 
@@ -111,7 +111,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public int getNumIdle() {
+  public int getNumIdleConnections() {
     return poolStore.getNumIdle();
   }
 

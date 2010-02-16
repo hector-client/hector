@@ -1,20 +1,34 @@
 package me.prettyprint.cassandra.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.thrift.TException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-/*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
+/**
+ * We declare this pool as enum to make sure it stays a singlton in the system so clients may
+ * efficiently be reused.
+ *
+ * @author Ran Tavory (ran@outbain.com)
+ *
+ */
+/*package*/ enum CassandraClientPoolImpl implements CassandraClientPool {
 
+  INSTANCE;
+
+  private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolImpl.class);
   /**
    * Mapping b/w the host identifier (url:port) and the pool used to store connections to it.
    */
   private final Map<String, CassandraClientPoolByHost> pools;
 
-  public CassandraClientPoolImpl() {
+  private CassandraClientPoolImpl() {
     pools = new HashMap<String, CassandraClientPoolByHost>();
   }
 
@@ -80,12 +94,12 @@ import org.apache.thrift.TException;
 
   @Override
   public CassandraClientPoolByHost getPool(String url, int port) {
-    String key = url + ":" + port;
+    PoolKey key = new PoolKey(url, port);
     CassandraClientPoolByHost pool = pools.get(key);
     if (pool == null) {
       synchronized (pools) {
-        pool = new CassandraClientPoolByHostImpl(url, port, this);
-        pools.put(key, pool);
+        pool = new CassandraClientPoolByHostImpl(url, port, key.name, this);
+        pools.put(key.ip, pool);
       }
     }
     return pool;
@@ -119,5 +133,37 @@ import org.apache.thrift.TException;
       hosts.addAll(pool.getKnownHosts());
     }
     return hosts;
+  }
+  
+  private class PoolKey {
+    @SuppressWarnings("unused")
+    private final String url, ip;
+    @SuppressWarnings("unused")
+    private final int port;
+    private final String name;
+    
+    public PoolKey(String url, int port) {
+      this.port = port;
+      StringBuilder b = new StringBuilder();
+      InetAddress address;
+      String turl, tip;
+      try {
+        address = InetAddress.getByName(url);
+        turl = address.getHostName();
+        tip = address.getHostAddress();
+      } catch (UnknownHostException e) {
+        log.error("Unable to resolve host {}", url);
+        turl = url;
+        tip = url;
+      }
+      this.url = turl;
+      ip = tip;
+      b.append(url);
+      b.append("(");
+      b.append(ip);
+      b.append("):");
+      b.append(port);
+      name = b.toString();
+    }
   }
 }

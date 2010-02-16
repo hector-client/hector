@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Map;
 
@@ -54,14 +55,14 @@ public class CassandraClientTest {
   }
 
   @Before
-  public void setupCase() throws TTransportException, TException {
+  public void setupCase() throws TTransportException, TException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
     client = new CassandraClientFactory(pools, "localhost", 9170).create();
   }
 
   @Test
-  public void testGetKeySpaceString()
-      throws IllegalArgumentException, NotFoundException, TException {
+  public void testGetKeySpaceString() throws IllegalArgumentException, NotFoundException,
+      TException {
     Keyspace k = client.getKeySpace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
@@ -76,8 +77,8 @@ public class CassandraClientTest {
   }
 
   @Test
-  public void testGetKeySpaceConsistencyLevel()
-      throws IllegalArgumentException, NotFoundException, TException {
+  public void testGetKeySpaceConsistencyLevel() throws IllegalArgumentException, NotFoundException,
+      TException {
     Keyspace k = client.getKeySpace("Keyspace1", ConsistencyLevel.ALL,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
@@ -90,8 +91,8 @@ public class CassandraClientTest {
   }
 
   @Test
-  public void testGetKeySpaceFailoverPolicy()
-      throws IllegalArgumentException, NotFoundException, TException {
+  public void testGetKeySpaceFailoverPolicy() throws IllegalArgumentException, NotFoundException,
+      TException {
     Keyspace k = client.getKeySpace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
         FailoverPolicy.FAIL_FAST);
     assertNotNull(k);
@@ -123,7 +124,7 @@ public class CassandraClientTest {
   public void testGetTokenMap() throws TException {
     Map<String, String> map = client.getTokenMap(false);
     assertNotNull(map);
-    for (Map.Entry<String, String> entry: map.entrySet()) {
+    for (Map.Entry<String, String> entry : map.entrySet()) {
       assertEquals("127.0.0.1", entry.getValue());
     }
   }

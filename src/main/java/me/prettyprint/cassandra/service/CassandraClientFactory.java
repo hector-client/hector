@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.service;
 
 
+import java.net.UnknownHostException;
+
 import org.apache.cassandra.service.Cassandra;
 import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.PoolableObjectFactory;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
     this.port = port;
   }
 
-  public CassandraClient create() throws TTransportException, TException {
+  public CassandraClient create() throws TTransportException, TException, UnknownHostException {
     return new CassandraClientImpl(createThriftClient(url, port), new KeyspaceFactory(), url, port,
         pools);
   }
@@ -46,7 +48,15 @@ import org.slf4j.LoggerFactory;
     TTransport tr = new TSocket(url, port, getTimeout());
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
-    tr.open();
+    try {
+      tr.open();
+    } catch (TTransportException e) {
+      // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
+      // add details to it.
+      log.error("Unable to open transport to " + url + ":" + port, e);
+      throw new TTransportException("Unable to open transport to " + url + ":" + port + " , " +
+          e.getLocalizedMessage(), e);
+    }
 
     return client;
   }
@@ -93,7 +103,7 @@ import org.slf4j.LoggerFactory;
     return validateClient((CassandraClient)obj);
   }
 
-  private boolean validateClient(me.prettyprint.cassandra.service.CassandraClient obj) {
+  private boolean validateClient(CassandraClient obj) {
     // TODO send fast and easy request to cassandra
     return true;
   }

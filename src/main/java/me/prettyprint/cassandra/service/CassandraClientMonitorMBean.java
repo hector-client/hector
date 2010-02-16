@@ -20,7 +20,7 @@ public interface CassandraClientMonitorMBean {
   long getRecoverableUnavailableCount();
   long getRecoverableTransportExceptionCount();
   long getSkipHostSuccess();
-  long getPoolExhaustedCount();
+  long getNumPoolExhaustedEventCount();
 
   /**
    * Number of existing connection pools.
@@ -36,7 +36,7 @@ public interface CassandraClientMonitorMBean {
   /**
    * Total number of idle clients in all client pools
    */
-  int getNumIdle();
+  int getNumIdleConnections();
 
   /**
    * Total number of active clients in all client pools
