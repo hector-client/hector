@@ -56,12 +56,12 @@ import org.junit.Test;
 /**
  * For the tests we assume the following structure:
  *
- * &lt;Keyspaces&gt; &lt;Keyspace Name="Keyspace1"&gt; &lt;ColumnFamily
- * CompareWith="BytesType" Name="Standard1" FlushPeriodInMinutes="60"/&gt;
- * &lt;ColumnFamily CompareWith="UTF8Type" Name="Standard2"/&gt;
- * &lt;ColumnFamily CompareWith="TimeUUIDType" Name="StandardByUUID1"/&gt;
- * &lt;ColumnFamily ColumnType="Super" CompareWith="UTF8Type"
- * CompareSubcolumnsWith="UTF8Type" Name="Super1"/&gt;
+ * &lt;Keyspaces&gt;
+ *  &lt;Keyspace Name="Keyspace1"&gt;
+ *    &lt;ColumnFamily CompareWith="BytesType" Name="Standard1" FlushPeriodInMinutes="60"/&gt;
+ *    &lt;ColumnFamily CompareWith="UTF8Type" Name="Standard2"/&gt;
+ *    &lt;ColumnFamily CompareWith="TimeUUIDType" Name="StandardByUUID1"/&gt;
+ *    &lt;ColumnFamily ColumnType="Super" CompareWith="UTF8Type" CompareSubcolumnsWith="UTF8Type" Name="Super1"/&gt;
  *
  * @author Ran Tavory (rantav@gmail.com)
  *
