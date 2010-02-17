@@ -15,6 +15,8 @@ import org.apache.thrift.TException;
  * Client object, a high level handle to the remove cassandra service.
  * <p>
  * From a client you can obtain a Keyspace. A keyspace lets you write/read the remote cassandra.
+ * <p>
+ * Thread safely: The client is not thread safe, do not share it between threads!
  *
  * @author rantav
  */

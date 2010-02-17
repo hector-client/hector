@@ -24,6 +24,9 @@ import org.slf4j.LoggerFactory;
 /*package*/ class CassandraClientFactory extends BasePoolableObjectFactory
     implements PoolableObjectFactory {
 
+  /** Socket timeout */
+  private final int timeout;
+
   private static final Logger log = LoggerFactory.getLogger(CassandraClientFactory.class);
   /**
    * The pool associated with this client factory.
@@ -36,6 +39,7 @@ import org.slf4j.LoggerFactory;
     this.pools = pools;
     this.url = url;
     this.port = port;
+    timeout = getTimeout();
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
@@ -45,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
   private Cassandra.Client createThriftClient(String  url, int port)
       throws TTransportException , TException {
-    TTransport tr = new TSocket(url, port, getTimeout());
+    TTransport tr = new TSocket(url, port, timeout);
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
     try {
@@ -68,13 +72,14 @@ import org.slf4j.LoggerFactory;
   private int getTimeout() {
     String timeoutStr = System.getProperty("CASSANDRA_THRIFT_SOCKET_TIMEOUT");
     if (timeoutStr == null || timeoutStr.length() == 0) {
-      return 0;
-    }
-    try {
-      return Integer.valueOf(timeoutStr);
-    } catch (NumberFormatException e) {
-      log.error("Invalid value for CASSANDRA_THRIFT_SOCKET_TIMEOUT", e);
-      return 0;
+      return  0;
+    } else {
+      try {
+        return Integer.valueOf(timeoutStr);
+      } catch (NumberFormatException e) {
+        log.error("Invalid value for CASSANDRA_THRIFT_SOCKET_TIMEOUT", e);
+        return 0;
+      }
     }
   }
 
