@@ -591,9 +591,10 @@ import org.slf4j.LoggerFactory;
   private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
     try {
-      clientPools.releaseClient(client);
+      client.markAsError();
+      clientPools.invalidateClient(client);
     } catch (Exception e) {
-      log.error("Unable to release client {}. Will continue anyhow.", client);
+      log.error("Unable to invalidate client {}. Will continue anyhow.", client);
     }
 
     String nextHost = getNextHost(client.getUrl(), client.getIp());

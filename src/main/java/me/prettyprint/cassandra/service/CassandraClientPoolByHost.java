@@ -129,4 +129,10 @@ import org.apache.thrift.TException;
   void updateKnownHosts() throws TException;
 
   Set<String> getKnownHosts();
+
+  /**
+   * Take the client out of the pool.
+   * Use it if the client has errors.
+   */
+  void invalidateClient(CassandraClient client);
 }

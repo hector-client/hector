@@ -146,4 +146,8 @@ public interface CassandraClient {
 
   String getIp();
 
+  void markAsError();
+
+  boolean hasErrors();
+
 }

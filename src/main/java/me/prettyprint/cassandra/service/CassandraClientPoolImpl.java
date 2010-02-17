@@ -119,7 +119,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void releaseClient(CassandraClient client) throws Exception {
-    getPool(client.getUrl(), client.getPort()).releaseClient(client);
+    getPool(client).releaseClient(client);
   }
 
   @Override
@@ -137,14 +137,14 @@ import org.slf4j.LoggerFactory;
     }
     return hosts;
   }
-  
+
   private class PoolKey {
     @SuppressWarnings("unused")
     private final String url, ip;
     @SuppressWarnings("unused")
     private final int port;
     private final String name;
-    
+
     public PoolKey(String url, int port) {
       this.port = port;
       StringBuilder b = new StringBuilder();
@@ -169,4 +169,14 @@ import org.slf4j.LoggerFactory;
       name = b.toString();
     }
   }
+
+  @Override
+  public void invalidateClient(CassandraClient client) {
+    getPool(client).invalidateClient(client);
+
+  }
+  private CassandraClientPoolByHost getPool(CassandraClient c) {
+    return getPool(c.getUrl(), c.getPort());
+  }
+
 }

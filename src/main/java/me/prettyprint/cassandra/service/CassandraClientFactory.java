@@ -4,7 +4,6 @@ package me.prettyprint.cassandra.service;
 import java.net.UnknownHostException;
 
 import org.apache.cassandra.service.Cassandra;
-import org.apache.commons.pool.BasePoolableObjectFactory;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -21,8 +20,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/*package*/ class CassandraClientFactory extends BasePoolableObjectFactory
-    implements PoolableObjectFactory {
+/*package*/ class CassandraClientFactory implements PoolableObjectFactory {
 
   /** Socket timeout */
   private final int timeout;
@@ -90,7 +88,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void destroyObject(Object obj) throws Exception {
-    CassandraClient client = (CassandraClient)obj ;
+    CassandraClient client = (CassandraClient) obj ;
     log.debug("Close client {}", client);
     closeClient(client);
   }
@@ -105,12 +103,12 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public boolean validateObject(Object obj) {
-    return validateClient((CassandraClient)obj);
+    return validateClient((CassandraClient) obj);
   }
 
-  private boolean validateClient(CassandraClient obj) {
+  private boolean validateClient(CassandraClient client) {
     // TODO send fast and easy request to cassandra
-    return true;
+    return !client.isClosed() && !client.hasErrors();
   }
 
   private static void closeClient(CassandraClient cclient) {
@@ -118,6 +116,11 @@ import org.slf4j.LoggerFactory;
     client.getInputProtocol().getTransport().close();
     client.getOutputProtocol().getTransport().close();
     cclient.markAsClosed();
+  }
+
+  @Override
+  public void passivateObject(Object obj) throws Exception {
+    // TODO Auto-generated method stub
   }
 
 }

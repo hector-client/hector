@@ -74,4 +74,10 @@ public interface CassandraClientPool {
   int getNumActive();
 
   Set<String> getKnownHosts();
+
+  /**
+   * Use this method to invalidate the client and take it out of the pool.
+   * This is usually so when the client has errors.
+   */
+  void invalidateClient(CassandraClient client);
 }

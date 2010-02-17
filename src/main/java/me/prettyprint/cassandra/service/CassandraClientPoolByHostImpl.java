@@ -198,4 +198,13 @@ import org.slf4j.LoggerFactory;
     }
     return hosts;
   }
+
+  @Override
+  public void invalidateClient(CassandraClient client) {
+    try {
+      pool.invalidateObject(client);
+    } catch (Exception e) {
+      log.error("Unable to invalidate client " + client, e);
+    }
+  }
 }

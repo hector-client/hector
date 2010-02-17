@@ -64,6 +64,7 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientPool clientPools;
 
   private boolean closed = false;
+  private boolean hasErrors = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools)
@@ -257,5 +258,15 @@ import org.slf4j.LoggerFactory;
   @Override
   public String getIp() {
     return ip;
+  }
+
+  @Override
+  public boolean hasErrors() {
+    return hasErrors ;
+  }
+
+  @Override
+  public void markAsError() {
+    hasErrors = true;
   }
 }
