@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.cassandra.service.Cassandra;
 import org.apache.cassandra.service.NotFoundException;
@@ -31,6 +32,11 @@ import org.slf4j.LoggerFactory;
 
   @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(CassandraClientImpl.class);
+
+  /** Serial number of the client used to track client creation for debug purposes */
+  private static final AtomicLong serial = new AtomicLong(0);
+
+  private final long mySerial;
 
   /** The thrift object */
   private final Cassandra.Client cassandra;
@@ -62,6 +68,7 @@ import org.slf4j.LoggerFactory;
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools)
       throws UnknownHostException {
+    this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
     this.port = port;
@@ -218,6 +225,8 @@ import org.slf4j.LoggerFactory;
     b.append(getUrl());
     b.append(":");
     b.append(getPort());
+    b.append("-");
+    b.append(mySerial);
     b.append(">");
     return b.toString();
   }

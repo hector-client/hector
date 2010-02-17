@@ -95,7 +95,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public CassandraClientPoolByHost getPool(String url, int port) {
     PoolKey key = new PoolKey(url, port);
-    CassandraClientPoolByHost pool = pools.get(key);
+    CassandraClientPoolByHost pool = pools.get(key.ip);
     if (pool == null) {
       synchronized (pools) {
         pool = new CassandraClientPoolByHostImpl(url, port, key.name, this);
