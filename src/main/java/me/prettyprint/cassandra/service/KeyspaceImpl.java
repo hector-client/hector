@@ -584,32 +584,28 @@ import org.slf4j.LoggerFactory;
   }
 
   /**
-   * Updates the
+   * Updates the client member and cassandra member to the next host in the ring.
    *
-   * @throws Exception
-   * @throws PoolExhaustedException
-   * @throws IllegalStateException
+   * Returns the current client to the pool and retreives a new client from the next pool.
    */
   private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
-    synchronized (clientPools) {
-      try {
-        clientPools.releaseClient(client);
-      } catch (Exception e) {
-        log.error("Unable to release client {}. Will continue anyhow.", client);
-      }
-
-      String nextHost = getNextHost(client.getUrl(), client.getIp());
-      if (nextHost == null) {
-        log.error("Unable to find next host to skip to at {}", toString());
-        throw new TException("Unable to failover to next host");
-      }
-      // assume they use the same port
-      client = clientPools.borrowClient(nextHost, client.getPort());
-      cassandra = client.getCassandra();
-      monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
-      log.info("Skipped host. New host is: {}", client.getUrl());
+    try {
+      clientPools.releaseClient(client);
+    } catch (Exception e) {
+      log.error("Unable to release client {}. Will continue anyhow.", client);
     }
+
+    String nextHost = getNextHost(client.getUrl(), client.getIp());
+    if (nextHost == null) {
+      log.error("Unable to find next host to skip to at {}", toString());
+      throw new TException("Unable to failover to next host");
+    }
+    // assume they use the same port
+    client = clientPools.borrowClient(nextHost, client.getPort());
+    cassandra = client.getCassandra();
+    monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
+    log.info("Skipped host. New host is: {}", client.getUrl());
   }
 
   /**

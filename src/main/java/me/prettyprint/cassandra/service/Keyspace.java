@@ -20,7 +20,9 @@ import org.apache.cassandra.service.UnavailableException;
 import org.apache.thrift.TException;
 
 /**
- * The keyspace is a high level handle to all read/write operations to cassandra
+ * The keyspace is a high level handle to all read/write operations to cassandra.
+ *
+ * A Keyspace object is not thread safe. Use one keyspace per thread please!
  *
  * @author rantav
  */
