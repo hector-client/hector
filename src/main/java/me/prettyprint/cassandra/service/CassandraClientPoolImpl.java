@@ -98,8 +98,11 @@ import org.slf4j.LoggerFactory;
     CassandraClientPoolByHost pool = pools.get(key.ip);
     if (pool == null) {
       synchronized (pools) {
-        pool = new CassandraClientPoolByHostImpl(url, port, key.name, this);
-        pools.put(key.ip, pool);
+        pool = pools.get(key.ip);
+        if (pool == null) {
+          pool = new CassandraClientPoolByHostImpl(url, port, key.name, this);
+          pools.put(key.ip, pool);
+        }
       }
     }
     return pool;
