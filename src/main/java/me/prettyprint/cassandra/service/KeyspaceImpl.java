@@ -709,6 +709,8 @@ import org.slf4j.LoggerFactory;
    * @param <T>
    *          The result type of the operation (if it has a result), such as the
    *          result of get_count or get_column
+   *
+   * Oh closures, how I wish you were here...
    */
   private abstract static class Operation<T> {
 
