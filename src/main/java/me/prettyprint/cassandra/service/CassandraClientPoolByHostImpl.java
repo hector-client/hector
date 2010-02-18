@@ -44,17 +44,17 @@ import com.google.common.collect.ImmutableSet;
   private final Set<CassandraClient> liveClientsFromPool;
 
   public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
-      CassandraClientPool pools) {
-    this(cassandraUrl, cassandraPort, name, pools, DEFAULT_MAX_ACTIVE,
+      CassandraClientPool pools, CassandraClientMonitor clientMonitor) {
+    this(cassandraUrl, cassandraPort, name, pools, clientMonitor, DEFAULT_MAX_ACTIVE,
         DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED,
         DEFAULT_MAX_IDLE, DEFAULT_EXHAUSTED_POLICY);
   }
 
   public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
-      CassandraClientPool pools, int maxActive,
+      CassandraClientPool pools, CassandraClientMonitor clientMonitor, int maxActive,
       long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy) {
-    this(cassandraUrl, cassandraPort, name, pools, maxActive, maxWait, maxIdle, exhaustedPolicy,
-        new CassandraClientFactory(pools, cassandraUrl, cassandraPort));
+    this(cassandraUrl, cassandraPort, name, pools, maxActive, maxWait, maxIdle,
+        exhaustedPolicy, new CassandraClientFactory(pools, cassandraUrl, cassandraPort, clientMonitor));
 
   }
 
@@ -119,7 +119,6 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void releaseClient(CassandraClient client) throws Exception {
-    liveClientsFromPool.remove(client);
     pool.returnObject(client);
   }
 
@@ -216,4 +215,10 @@ import com.google.common.collect.ImmutableSet;
   public Set<CassandraClient> getLiveClients() {
     return ImmutableSet.copyOf(liveClientsFromPool);
   }
+
+  void reportDestroyed(CassandraClient client) {
+    log.debug("Client has been destroyed: {}", client);
+    liveClientsFromPool.remove(client);
+  }
+
 }

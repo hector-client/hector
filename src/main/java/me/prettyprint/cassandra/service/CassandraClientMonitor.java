@@ -1,8 +1,11 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.thrift.TException;
@@ -14,7 +17,7 @@ import org.slf4j.LoggerFactory;
   private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
   private final Map<Counter, AtomicLong> counters;
 
-  private CassandraClientPool poolStore;
+  private final Set<CassandraClientPool> pools;
 
   /**
    * List of available JMX counts
@@ -32,6 +35,8 @@ import org.slf4j.LoggerFactory;
   }
 
   public CassandraClientMonitor() {
+    // Use a high concurrency map.
+    pools = Collections.newSetFromMap(new ConcurrentHashMap<CassandraClientPool,Boolean>());
     counters = new HashMap<Counter, AtomicLong>();
     for (Counter counter: Counter.values()) {
       counters.put(counter, new AtomicLong(0));
@@ -77,8 +82,10 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void updateKnownHosts() throws TException {
-   log.info("Updating all known cassandra hosts on all clients ");
-   poolStore.updateKnownHosts();
+   log.info("Updating all known cassandra hosts on all clients");
+   for (CassandraClientPool pool: pools) {
+     pool.updateKnownHosts();
+   }
   }
 
   @Override
@@ -86,48 +93,76 @@ import org.slf4j.LoggerFactory;
     return counters.get(Counter.POOL_EXHAUSTED).longValue();
   }
 
-  public void setPoolStore(CassandraClientPool store) {
-    poolStore = store;
-  }
-
   @Override
   public Set<String> getExhaustedPoolNames() {
-    return poolStore.getExhaustedPoolNames();
+    Set<String> ret = new HashSet<String>();
+    for (CassandraClientPool pool: pools) {
+      ret.addAll(pool.getExhaustedPoolNames());
+    }
+    return ret;
   }
 
   @Override
   public int getNumActive() {
-    return poolStore.getNumActive();
+    int ret = 0;
+    for (CassandraClientPool pool: pools) {
+      ret += pool.getNumActive();
+    }
+    return ret;
   }
 
   @Override
   public int getNumBlockedThreads() {
-    return poolStore.getNumBlockedThreads();
+    int ret = 0;
+    for (CassandraClientPool pool: pools) {
+      ret += pool.getNumBlockedThreads();
+    }
+    return ret;
   }
 
   @Override
   public int getNumExhaustedPools() {
-    return poolStore.getNumExhaustedPools();
+    int ret = 0;
+    for (CassandraClientPool pool: pools) {
+      ret += pool.getNumExhaustedPools();
+    }
+    return ret;
   }
 
   @Override
   public int getNumIdleConnections() {
-    return poolStore.getNumIdle();
+    int ret = 0;
+    for (CassandraClientPool pool: pools) {
+      ret += pool.getNumIdle();
+    }
+    return ret;
   }
 
   @Override
   public int getNumPools() {
-    return poolStore.getNumPools();
+    int ret = 0;
+    for (CassandraClientPool pool: pools) {
+      ret += pool.getNumPools();
+    }
+    return ret;
   }
 
   @Override
   public Set<String> getPoolNames() {
-    return poolStore.getPoolNames();
+    Set<String> ret = new HashSet<String>();
+    for (CassandraClientPool pool: pools) {
+      ret.addAll(pool.getPoolNames());
+    }
+    return ret;
   }
 
   @Override
   public Set<String> getKnownHosts() {
-    return poolStore.getKnownHosts();
+    Set<String> ret = new HashSet<String>();
+    for (CassandraClientPool pool: pools) {
+      ret.addAll(pool.getKnownHosts());
+    }
+    return ret;
   }
 
   @Override
@@ -139,5 +174,9 @@ import org.slf4j.LoggerFactory;
   public long getRecoverableErrorCount() {
     return getRecoverableTimedOutCount() + getRecoverableTransportExceptionCount() +
         getRecoverableUnavailableCount();
+  }
+
+  public void addPool(CassandraClientPool pool) {
+    pools.add(pool);
   }
 }

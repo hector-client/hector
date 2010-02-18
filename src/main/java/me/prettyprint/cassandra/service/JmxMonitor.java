@@ -19,16 +19,32 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-/*package*/ enum JmxMonitor {
-  INSTANCE;
+/*package*/ class JmxMonitor {
 
   private static final Logger log = LoggerFactory.getLogger(JmxMonitor.class);
 
   private final MBeanServer mbs;
-  private CassandraClientMonitor cassandraClientMonitor;
+  private final CassandraClientMonitor cassandraClientMonitor;
 
-  private JmxMonitor() {
+  public JmxMonitor() {
     mbs = ManagementFactory.getPlatformMBeanServer();
+    cassandraClientMonitor = new CassandraClientMonitor();
+    try {
+      registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
+          cassandraClientMonitor);
+    } catch (MalformedObjectNameException e) {
+      log.error("Unable to register JMX monitor", e);
+    } catch (InstanceAlreadyExistsException e) {
+      log.error("Unable to register JMX monitor", e);
+    } catch (MBeanRegistrationException e) {
+      log.error("Unable to register JMX monitor", e);
+    } catch (NotCompliantMBeanException e) {
+      log.error("Unable to register JMX monitor", e);
+    }
+  }
+
+  public void addPool(CassandraClientPool pool) {
+    cassandraClientMonitor.addPool(pool);
   }
 
   public void registerMonitor(String name, String monitorType, Object monitoringInterface)
@@ -47,24 +63,6 @@ import org.slf4j.LoggerFactory;
     }
 
     mbs.registerMBean(monitoringInterface, oName);
-  }
-
-  public CassandraClientMonitor getCassandraMonitor() {
-    if (cassandraClientMonitor == null) {
-      cassandraClientMonitor = new CassandraClientMonitor();
-      try {
-        registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector", cassandraClientMonitor);
-      } catch (MalformedObjectNameException e) {
-        log.error("Unable to register JMX monitor", e);
-      } catch (InstanceAlreadyExistsException e) {
-        log.error("Unable to register JMX monitor", e);
-      } catch (MBeanRegistrationException e) {
-        log.error("Unable to register JMX monitor", e);
-      } catch (NotCompliantMBeanException e) {
-        log.error("Unable to register JMX monitor", e);
-      }
-    }
-    return cassandraClientMonitor;
   }
 
   private String generateMonitorName(String className, String monitorType) {
@@ -111,6 +109,10 @@ import org.slf4j.LoggerFactory;
       }
     }
     return null;
+  }
+
+  public CassandraClientMonitor getCassandraMonitor() {
+    return cassandraClientMonitor;
   }
 
 }

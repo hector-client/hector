@@ -15,20 +15,20 @@ public enum CassandraClientPoolFactory {
 
   INSTANCE;
 
-  private CassandraClientPool pool;
+  private final CassandraClientPool pool;
+
+  private final JmxMonitor jmx;
+
+  private CassandraClientPoolFactory() {
+    jmx = new JmxMonitor();
+    pool = createNew();
+  }
 
   /**
    * Get a reference to a reusable pool.
    * @return
    */
   public CassandraClientPool get() {
-    if (pool == null) {
-      synchronized (this) {
-        if (pool == null) {
-          pool = createNew();
-        }
-      }
-    }
     return pool;
   }
 
@@ -37,9 +37,8 @@ public enum CassandraClientPoolFactory {
    * @return
    */
   public CassandraClientPool createNew() {
-    CassandraClientPool store = new CassandraClientPoolImpl();
-    CassandraClientMonitor monitor = JmxMonitor.INSTANCE.getCassandraMonitor();
-    monitor.setPoolStore(store);
-    return store;
+    CassandraClientPool pool = new CassandraClientPoolImpl(jmx.getCassandraMonitor());
+    jmx.addPool(pool);
+    return pool;
   }
 }

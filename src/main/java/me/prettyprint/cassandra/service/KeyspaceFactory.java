@@ -14,12 +14,17 @@ import org.apache.thrift.TException;
  */
 /*package*/ class KeyspaceFactory {
 
+  private final CassandraClientMonitor clientMonitor;
+
+  public KeyspaceFactory(CassandraClientMonitor clientMonitor) {
+    this.clientMonitor = clientMonitor;
+  }
+
   public Keyspace create(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
       throws TException {
-    CassandraClientMonitor monitor = JmxMonitor.INSTANCE.getCassandraMonitor();
     return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPools, monitor);
+        failoverPolicy, clientPools, clientMonitor);
   }
 }

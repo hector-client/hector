@@ -74,6 +74,7 @@ public class KeyspaceTest {
   private CassandraClient client;
   private Keyspace keyspace;
   private CassandraClientPool pools;
+  private CassandraClientMonitor monitor;
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -97,7 +98,8 @@ public class KeyspaceTest {
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
       NotFoundException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
-    client = new CassandraClientFactory(pools, "localhost", 9170).create();
+    monitor = mock(CassandraClientMonitor.class);
+    client = new CassandraClientFactory(pools, "localhost", 9170, monitor).create();
     keyspace = client.getKeyspace("Keyspace1", 1, CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
 

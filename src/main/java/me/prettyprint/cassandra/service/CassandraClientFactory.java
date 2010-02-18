@@ -25,24 +25,28 @@ import org.slf4j.LoggerFactory;
   /** Socket timeout */
   private final int timeout;
 
+  private final CassandraClientMonitor clientMonitor;
+
   private static final Logger log = LoggerFactory.getLogger(CassandraClientFactory.class);
   /**
    * The pool associated with this client factory.
    */
-  private final CassandraClientPool pools;
+  private final CassandraClientPool pool;
   private final String url;
   private final int port;
 
-  public CassandraClientFactory(CassandraClientPool pools, String url, int port) {
-    this.pools = pools;
+  public CassandraClientFactory(CassandraClientPool pools, String url, int port,
+      CassandraClientMonitor clientMonitor) {
+    this.pool = pools;
     this.url = url;
     this.port = port;
     timeout = getTimeout();
+    this.clientMonitor = clientMonitor;
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
-    return new CassandraClientImpl(createThriftClient(url, port), new KeyspaceFactory(), url, port,
-        pools);
+    return new CassandraClientImpl(createThriftClient(url, port),
+        new KeyspaceFactory(clientMonitor), url, port, pool);
   }
 
   private Cassandra.Client createThriftClient(String  url, int port)
@@ -59,7 +63,6 @@ import org.slf4j.LoggerFactory;
       throw new TTransportException("Unable to open transport to " + url + ":" + port + " , " +
           e.getLocalizedMessage(), e);
     }
-
     return client;
   }
 
@@ -111,7 +114,8 @@ import org.slf4j.LoggerFactory;
     return !client.isClosed() && !client.hasErrors();
   }
 
-  private static void closeClient(CassandraClient cclient) {
+  private void closeClient(CassandraClient cclient) {
+    ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
     Cassandra.Client client = cclient.getCassandra();
     client.getInputProtocol().getTransport().close();
     client.getOutputProtocol().getTransport().close();

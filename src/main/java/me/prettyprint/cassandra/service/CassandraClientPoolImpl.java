@@ -26,8 +26,11 @@ import org.slf4j.LoggerFactory;
    */
   private final Map<String, CassandraClientPoolByHost> pools;
 
-  public CassandraClientPoolImpl() {
+  private final CassandraClientMonitor clientMonitor;
+
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     pools = new HashMap<String, CassandraClientPoolByHost>();
+    this.clientMonitor = clientMonitor;
   }
 
   @Override
@@ -98,7 +101,7 @@ import org.slf4j.LoggerFactory;
       synchronized (pools) {
         pool = pools.get(key.ip);
         if (pool == null) {
-          pool = new CassandraClientPoolByHostImpl(url, port, key.name, this);
+          pool = new CassandraClientPoolByHostImpl(url, port, key.name, this, clientMonitor);
           pools.put(key.ip, pool);
         }
       }
@@ -173,6 +176,11 @@ import org.slf4j.LoggerFactory;
     getPool(client).invalidateClient(client);
 
   }
+
+  void reportDestroyed(CassandraClient client) {
+    ((CassandraClientPoolByHostImpl) getPool(client)).reportDestroyed(client);
+  }
+
   private CassandraClientPoolByHost getPool(CassandraClient c) {
     return getPool(c.getUrl(), c.getPort());
   }
