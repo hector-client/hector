@@ -134,4 +134,10 @@ import org.slf4j.LoggerFactory;
   public long getRecoverableTransportExceptionCount() {
     return counters.get(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS).longValue();
   }
+
+  @Override
+  public long getRecoverableErrorCount() {
+    return getRecoverableTimedOutCount() + getRecoverableTransportExceptionCount() +
+        getRecoverableUnavailableCount();
+  }
 }

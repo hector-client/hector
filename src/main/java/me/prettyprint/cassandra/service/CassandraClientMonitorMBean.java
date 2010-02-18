@@ -4,7 +4,10 @@ import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClientPoolByHost.ExhaustedPolicy;
 
+import org.apache.cassandra.service.TimedOutException;
+import org.apache.cassandra.service.UnavailableException;
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TTransportException;
 
 /**
  * Defines the various JMX methods the CassandraClientMonitor exposes.
@@ -14,12 +17,50 @@ import org.apache.thrift.TException;
  */
 public interface CassandraClientMonitorMBean {
 
+  /**
+   * @return Number of failed (and not-recovered) writes.
+   */
   long getWriteFail();
+
+  /**
+   * @return Number of failed (and not recovered) reads.
+   */
   long getReadFail();
+
+  /**
+   * @return Number of {@link TimedOutException} that the client has been able to recover from by
+   * failing over to a different host in the ring.
+   */
   long getRecoverableTimedOutCount();
+
+  /**
+   * @return Number of {@link UnavailableException} that the client has been able to recover from by
+   * failing over to a different host in the ring.
+   */
   long getRecoverableUnavailableCount();
+
+  /**
+   * @return Number of {@link TTransportException} that the client has been able to recover from by
+   * failing over to a different host in the ring.
+   */
   long getRecoverableTransportExceptionCount();
+
+  /**
+   * Returns the total number of recoverable errors which is the sum of getRecoverableTimedOutCount,
+   * getRecoverableTimedOutCount and getRecoverableTransportExceptionCount
+   * @return the total number of recoverable errors by failing over the other hosts.
+   */
+  long getRecoverableErrorCount();
+
+  /**
+   * @return Number of times a skip-host was performed. Hosts are skipped when there are errors at
+   * the current host.
+   */
   long getSkipHostSuccess();
+
+  /**
+   * @return Number of times clients were requested when connection pools were exhausted.
+   */
   long getNumPoolExhaustedEventCount();
 
   /**
