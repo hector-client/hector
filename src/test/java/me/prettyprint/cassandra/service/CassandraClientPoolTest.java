@@ -47,7 +47,7 @@ public class CassandraClientPoolTest {
 
   @Before
   public void setupTest() {
-    store = CassandraClientPoolImpl.INSTANCE;
+    store = CassandraClientPoolFactory.INSTANCE.get();
   }
 
   @Test

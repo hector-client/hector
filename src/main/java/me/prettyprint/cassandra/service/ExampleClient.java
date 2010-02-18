@@ -15,7 +15,7 @@ import org.apache.cassandra.service.ColumnPath;
 public class ExampleClient {
 
   public static void main(String[] args) throws IllegalStateException, PoolExhaustedException, Exception {
-    CassandraClientPool pool = new CassandraClientPoolFactory().create();
+    CassandraClientPool pool = CassandraClientPoolFactory.INSTANCE.get();
     CassandraClient client = pool.borrowClient("tush", 9160);
     try {
       Keyspace keyspace = client.getKeyspace("Keyspace1");

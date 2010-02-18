@@ -18,9 +18,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-/*package*/ enum CassandraClientPoolImpl implements CassandraClientPool {
-
-  INSTANCE;
+/*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolImpl.class);
   /**
@@ -28,7 +26,7 @@ import org.slf4j.LoggerFactory;
    */
   private final Map<String, CassandraClientPoolByHost> pools;
 
-  private CassandraClientPoolImpl() {
+  public CassandraClientPoolImpl() {
     pools = new HashMap<String, CassandraClientPoolByHost>();
   }
 
