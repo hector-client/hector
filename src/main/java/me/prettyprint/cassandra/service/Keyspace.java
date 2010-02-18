@@ -196,7 +196,7 @@ public interface Keyspace {
    */
   int getConsistencyLevel();
 
-  String getKeyspaceName();
+  String getName();
 
   /**
    * @return The failover policy used by this keyspace.

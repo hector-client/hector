@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.0 goes with the 0.5.0 cassandra release-->
-  <version>0.5.0-2</version>
+  <version>0.5.0-3</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -14,19 +14,6 @@
     <!-- Set default encoding to UTF-8 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-
-  <repositories>
-    <!-- for download spy-memcached client -->
-    <repository>
-      <id>spy</id>
-      <name>Spy Repository</name>
-      <layout>default</layout>
-      <url>http://bleu.west.spy.net/~dustin/m2repo/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
 
   <issueManagement>
     <system>github</system>
@@ -49,7 +36,6 @@
         <configuration>
           <forkMode>always</forkMode>
           <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/testlib/google-collections-1.0-rc1.jar</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/testlib/clhm-production-1.0.jar</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/testlib/flexjson-1.7.jar</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/testlib/high-scale-lib-1.0.jar</additionalClasspathElement>
@@ -147,13 +133,11 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.5.8</version>
     </dependency>
-    <!--
     <dependency>
-      <groupId>spy</groupId>
-      <artifactId>memcached</artifactId>
-      <version>2.5rc1</version>
+      <groupId>com.google.collections</groupId>
+      <artifactId>google-collections</artifactId>
+      <version>1.0</version>
     </dependency>
-    -->
 
     <!-- Testing Dependencies -->
     <dependency>

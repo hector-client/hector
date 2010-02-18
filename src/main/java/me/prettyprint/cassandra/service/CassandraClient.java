@@ -76,14 +76,14 @@ public interface CassandraClient {
    * <p>
    * Uses the default failover policy {@link #DEFAULT_FAILOVER_POLICY}
    */
-  Keyspace getKeySpace(String keyspaceName)
+  Keyspace getKeyspace(String keyspaceName)
       throws IllegalArgumentException, NotFoundException, TException;
 
 
   /**
    * Gets s keyspace with the specified consistency level.
    */
-  Keyspace getKeySpace(String keyspaceName, int consistencyLevel, FailoverPolicy failoverPolicy)
+  Keyspace getKeyspace(String keyspaceName, int consistencyLevel, FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException;
 
 
@@ -149,5 +149,7 @@ public interface CassandraClient {
   void markAsError();
 
   boolean hasErrors();
+
+  void removeKeyspace(Keyspace k);
 
 }

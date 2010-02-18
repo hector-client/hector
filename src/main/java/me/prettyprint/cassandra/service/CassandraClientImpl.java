@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.cassandra.service.Cassandra;
@@ -44,7 +45,8 @@ import org.slf4j.LoggerFactory;
   /** List of known keyspaces */
   private List<String> keyspaces;
 
-  private final HashMap<String, Keyspace> keyspaceMap = new HashMap<String, Keyspace>();
+  private final ConcurrentHashMap<String, Keyspace> keyspaceMap =
+      new ConcurrentHashMap<String, Keyspace>();
 
   private String clusterName;
 
@@ -99,13 +101,13 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Keyspace getKeySpace(String keySpaceName) throws IllegalArgumentException,
+  public Keyspace getKeyspace(String keySpaceName) throws IllegalArgumentException,
       NotFoundException, TException {
-    return getKeySpace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
+    return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
-  public Keyspace getKeySpace(String keyspaceName, int consistencyLevel,
+  public Keyspace getKeyspace(String keyspaceName, int consistencyLevel,
       FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException {
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
@@ -118,7 +120,7 @@ import org.slf4j.LoggerFactory;
         keyspaceMap.put(keyspaceMapKey , keyspace);
       }else{
         throw new IllegalArgumentException(
-            "request key space not exist, keyspaceName=" + keyspaceName);
+            "Requested key space not exist, keyspaceName=" + keyspaceName);
       }
     }
     return keyspace;
@@ -268,5 +270,11 @@ import org.slf4j.LoggerFactory;
   @Override
   public void markAsError() {
     hasErrors = true;
+  }
+
+  @Override
+  public void removeKeyspace(Keyspace k) {
+    String key = buildKeyspaceMapName(k.getName(), k.getConsistencyLevel(), k.getFailoverPolicy());
+    keyspaceMap.remove(key);
   }
 }

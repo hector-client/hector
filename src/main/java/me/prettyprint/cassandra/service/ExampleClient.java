@@ -18,7 +18,7 @@ public class ExampleClient {
     CassandraClientPool pool = new CassandraClientPoolFactory().create();
     CassandraClient client = pool.borrowClient("tush", 9160);
     try {
-      Keyspace keyspace = client.getKeySpace("Keyspace1");
+      Keyspace keyspace = client.getKeyspace("Keyspace1");
       ColumnPath columnPath = new ColumnPath("Standard1", null, bytes("column-name"));
 
       // insert

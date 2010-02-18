@@ -135,4 +135,10 @@ import org.apache.thrift.TException;
    * Use it if the client has errors.
    */
   void invalidateClient(CassandraClient client);
+
+  /**
+   * @return Gets the set of all currently alive clients in the pool. This includes clients that
+   *    are borrowed as well as clients that are currently kept in the pool.
+   */
+  Set<CassandraClient> getLiveClients();
 }

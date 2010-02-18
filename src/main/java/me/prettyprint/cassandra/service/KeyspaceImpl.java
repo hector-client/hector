@@ -411,7 +411,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public String getKeyspaceName() {
+  public String getName() {
     return keyspaceName;
   }
 
@@ -591,8 +591,8 @@ import org.slf4j.LoggerFactory;
   private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
     try {
-      client.markAsError();
       clientPools.invalidateClient(client);
+      client.removeKeyspace(this);
     } catch (Exception e) {
       log.error("Unable to invalidate client {}. Will continue anyhow.", client);
     }

@@ -13,6 +13,8 @@ import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableSet;
+
 /*package*/ class CassandraClientPoolByHostImpl implements CassandraClientPoolByHost {
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolByHostImpl.class);
@@ -202,9 +204,16 @@ import org.slf4j.LoggerFactory;
   @Override
   public void invalidateClient(CassandraClient client) {
     try {
+      liveClientsFromPool.remove(client);
+      client.markAsError();
       pool.invalidateObject(client);
     } catch (Exception e) {
       log.error("Unable to invalidate client " + client, e);
     }
+  }
+
+  @Override
+  public Set<CassandraClient> getLiveClients() {
+    return ImmutableSet.copyOf(liveClientsFromPool);
   }
 }

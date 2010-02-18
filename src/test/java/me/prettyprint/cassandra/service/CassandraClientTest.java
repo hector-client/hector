@@ -63,13 +63,13 @@ public class CassandraClientTest {
   @Test
   public void testGetKeySpaceString() throws IllegalArgumentException, NotFoundException,
       TException {
-    Keyspace k = client.getKeySpace("Keyspace1");
+    Keyspace k = client.getKeyspace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
 
     // negative path
     try {
-      k = client.getKeySpace("KeyspaceDoesntExist");
+      k = client.getKeyspace("KeyspaceDoesntExist");
       fail("Should have thrown an exception IllegalArgumentException");
     } catch (IllegalArgumentException e) {
       // good
@@ -79,12 +79,12 @@ public class CassandraClientTest {
   @Test
   public void testGetKeySpaceConsistencyLevel() throws IllegalArgumentException, NotFoundException,
       TException {
-    Keyspace k = client.getKeySpace("Keyspace1", ConsistencyLevel.ALL,
+    Keyspace k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
     assertEquals(ConsistencyLevel.ALL, k.getConsistencyLevel());
 
-    k = client.getKeySpace("Keyspace1", ConsistencyLevel.ZERO,
+    k = client.getKeyspace("Keyspace1", ConsistencyLevel.ZERO,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
     assertEquals(ConsistencyLevel.ZERO, k.getConsistencyLevel());
@@ -93,7 +93,7 @@ public class CassandraClientTest {
   @Test
   public void testGetKeySpaceFailoverPolicy() throws IllegalArgumentException, NotFoundException,
       TException {
-    Keyspace k = client.getKeySpace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
+    Keyspace k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
         FailoverPolicy.FAIL_FAST);
     assertNotNull(k);
     assertEquals(FailoverPolicy.FAIL_FAST, k.getFailoverPolicy());
