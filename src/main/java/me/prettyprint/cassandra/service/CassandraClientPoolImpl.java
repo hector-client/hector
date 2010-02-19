@@ -185,4 +185,8 @@ import org.slf4j.LoggerFactory;
     return getPool(c.getUrl(), c.getPort());
   }
 
+  @Override
+  public void releaseKeyspace(Keyspace k) throws Exception {
+    releaseClient(k.getClient());
+  }
 }

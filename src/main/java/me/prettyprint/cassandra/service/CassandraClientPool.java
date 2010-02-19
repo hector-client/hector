@@ -54,6 +54,12 @@ public interface CassandraClientPool {
   void releaseClient(CassandraClient client) throws Exception;
 
   /**
+   * Returns the client associated with this keyspace to the connection pool.
+   * This is just short for releaseClient(k.getClient());
+   */
+  void releaseKeyspace(Keyspace k) throws Exception;
+
+  /**
    * Tells all the clients in the pool to update their list of known hosts.
    * @throws TException
    */
