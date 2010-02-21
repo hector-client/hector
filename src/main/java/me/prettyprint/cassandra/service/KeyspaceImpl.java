@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 
   private final Map<String, Map<String, String>> keyspaceDesc;
 
-  private final int consistencyLevel;
+  private final int consistency;
 
   private final FailoverPolicy failoverPolicy;
 
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws TException {
     this.client = client;
-    this.consistencyLevel = consistencyLevel;
+    this.consistency = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
     this.cassandra = client.getCassandra();
@@ -76,7 +76,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void batchInsert(String key, Map<String, List<Column>> columnMap,
+  public void batchInsert(final String key, Map<String, List<Column>> columnMap,
       Map<String, List<SuperColumn>> superColumnMap) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
     if (columnMap == null && superColumnMap == null) {
@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
 
     int size = (columnMap == null ? 0 : columnMap.size())
         + (columnMap == null ? 0 : columnMap.size());
-    Map<String, List<ColumnOrSuperColumn>> cfmap = new HashMap<String, List<ColumnOrSuperColumn>>(
+    final Map<String, List<ColumnOrSuperColumn>> cfmap = new HashMap<String, List<ColumnOrSuperColumn>>(
         size * 2);
 
     if (columnMap != null) {
@@ -100,49 +100,40 @@ import org.slf4j.LoggerFactory;
       }
     }
 
-    Operation<Void> batchInsert = new Operation<Void>(keyspaceName, key, null /* keys */,
-        null /* columnPath */, null /* value */, cfmap, null /* columnParent */, createTimeStamp(),
-        consistencyLevel, null /* predicate */, null /* sliceRange */, null /* start */,
-        null /* finish */, 0 /* count */, Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
+    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.batch_insert(keyspace, key, cfmap, consistency);
+        cassandra.batch_insert(keyspaceName, key, cfmap, consistency);
         return null;
       }
     };
-    operateWithFailover(batchInsert);
+    operateWithFailover(op);
   }
 
   @Override
-  public int getCount(String key, ColumnParent columnParent) throws InvalidRequestException,
+  public int getCount(final String key, final ColumnParent columnParent) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    Operation<Integer> getCount = new Operation<Integer>(keyspaceName, key, null /* keys */,
-        null /* columnPath */, null /* value */, null /* cfmap */, columnParent, 0 /* timestamp */,
-        consistencyLevel, null /* predicate */, null /* sliceRange */, null /* start */,
-        null /* finish */, 0 /* count */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<Integer> op = new Operation<Integer>(Counter.READ_FAIL) {
       @Override
       public Integer execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        return cassandra.get_count(keyspace, key, columnParent, consistency);
+        return cassandra.get_count(keyspaceName, key, columnParent, consistency);
       }
     };
-    operateWithFailover(getCount);
-    return getCount.getResult();
+    operateWithFailover(op);
+    return op.getResult();
   }
 
   @Override
-  public List<KeySlice> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
-      String start, String finish, int count) throws InvalidRequestException, UnavailableException,
+  public List<KeySlice> getRangeSlice(final ColumnParent columnParent, final SlicePredicate predicate,
+      final String start, final String finish, final int count) throws InvalidRequestException, UnavailableException,
       TException, TimedOutException {
-    Operation<List<KeySlice>> op = new Operation<List<KeySlice>>(keyspaceName, null /* key */,
-        null /* keys */, null /* columnPath */, null /* value */, null /* cfmap */, columnParent,
-        0 /* timestamp */, consistencyLevel, predicate, null /* sliceRange */, start, finish,
-        count, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<List<KeySlice>> op = new Operation<List<KeySlice>>(Counter.READ_FAIL) {
       @Override
       public List<KeySlice> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slice(keyspace, columnParent, predicate,
+        List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
             start, finish, count, consistency);
 
         return keySlices;
@@ -153,17 +144,14 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
+  public List<Column> getSlice(final String key, final ColumnParent columnParent, final SlicePredicate predicate)
       throws InvalidRequestException, NotFoundException, UnavailableException, TException,
       TimedOutException {
-    Operation<List<Column>> op = new Operation<List<Column>>(keyspaceName, key, null /* keys */,
-        null /* columnPath */, null /* value */, null /* cfmap */, columnParent, 0 /* timestamp */,
-        consistencyLevel, predicate, null /* sliceRange */, null /* start */, null /* finish */,
-        0 /* count */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<List<Column>> op = new Operation<List<Column>>(Counter.READ_FAIL) {
       @Override
       public List<Column> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspace, key, columnParent,
+        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
             predicate, consistency);
 
         if (cosclist == null) {
@@ -188,43 +176,37 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public SuperColumn getSuperColumn(String key, ColumnPath columnPath, boolean reversed, int size)
+  public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath, final boolean reversed, final int size)
       throws InvalidRequestException, NotFoundException, UnavailableException, TException,
       TimedOutException {
     valideSuperColumnPath(columnPath);
 
-    SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
+    final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
 
-    Operation<SuperColumn> getCount = new Operation<SuperColumn>(keyspaceName, key,
-        null /* keys */, columnPath, null /* value */, null /* cfmap */, null /* columnParent */,
-        0 /* timestamp */, consistencyLevel, null /* predicate */, sliceRange, null /* start */,
-        null /* finish */, 0 /* count */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<SuperColumn> op = new Operation<SuperColumn>(Counter.READ_FAIL) {
       @Override
       public SuperColumn execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         ColumnParent clp = new ColumnParent(columnPath.getColumn_family(),
             columnPath.getSuper_column());
         SlicePredicate sp = new SlicePredicate(null, sliceRange);
-        List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspace, key, clp, sp, consistency);
+        List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp, consistency);
         return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
       }
     };
-    operateWithFailover(getCount);
-    return getCount.getResult();
+    operateWithFailover(op);
+    return op.getResult();
   }
 
   @Override
-  public List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
-      SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
+  public List<SuperColumn> getSuperSlice(final String key, final ColumnParent columnParent,
+      final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
       UnavailableException, TException, TimedOutException {
-    Operation<List<SuperColumn>> getCount = new Operation<List<SuperColumn>>(keyspaceName, key,
-        null /* keys */, null /* columnPath */, null /* value */, null /* cfmap */, columnParent,
-        0 /* timestamp */, consistencyLevel, predicate, null /* sliceRange */, null /* start */,
-        null /* finish */, 0 /* count */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(Counter.READ_FAIL) {
       @Override
       public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspace, key, columnParent,
+        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
             predicate, consistency);
         if (cosclist == null) {
           return null;
@@ -236,42 +218,35 @@ import org.slf4j.LoggerFactory;
         return result;
       }
     };
-    operateWithFailover(getCount);
-    return getCount.getResult();
+    operateWithFailover(op);
+    return op.getResult();
   }
 
   @Override
-  public void insert(String key, ColumnPath columnPath, byte[] value)
+  public void insert(final String key, final ColumnPath columnPath, final byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
-    Operation<Void> insert = new Operation<Void>(keyspaceName, key, null /* keys */, columnPath,
-        value, null /* cfmap */, null /* columnParent */, createTimeStamp(), consistencyLevel,
-        null /* predicate */, null /* sliceRange */, null /* start */, null /* finish */,
-        0 /* count */, Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
+    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.insert(keyspace, key, columnPath, value, timestamp, consistency);
+        cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistency);
         return null;
       }
     };
-    operateWithFailover(insert);
+    operateWithFailover(op);
   }
 
   @Override
-  public Map<String, Column> multigetColumn(List<String> keys, ColumnPath columnPath)
+  public Map<String, Column> multigetColumn(final List<String> keys, final ColumnPath columnPath)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
 
-    Operation<Map<String, Column>> getCount = new Operation<Map<String, Column>>(keyspaceName,
-        null /* key */, keys, columnPath, null /* value */, null /* cfmap */,
-        null /* columnParent */, 0 /* timestamp */, consistencyLevel, null /* predicate */,
-        null /* sliceRange */, null /* start */, null /* finish */, 0 /* count */,
-        Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(Counter.READ_FAIL) {
       @Override
       public Map<String, Column> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspace, keys, columnPath,
+        Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspaceName, keys, columnPath,
             consistency);
         if (cfmap == null || cfmap.isEmpty()) {
           return Collections.emptyMap();
@@ -283,23 +258,20 @@ import org.slf4j.LoggerFactory;
         return result;
       }
     };
-    operateWithFailover(getCount);
-    return getCount.getResult();
+    operateWithFailover(op);
+    return op.getResult();
   }
 
   @Override
-  public Map<String, List<Column>> multigetSlice(List<String> keys, ColumnParent columnParent,
-      SlicePredicate predicate) throws InvalidRequestException, UnavailableException, TException,
+  public Map<String, List<Column>> multigetSlice(final List<String> keys, final ColumnParent columnParent,
+      final SlicePredicate predicate) throws InvalidRequestException, UnavailableException, TException,
       TimedOutException {
     Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
-        keyspaceName, null /* key */, keys, null /* columnPath */, null /* value */,
-        null /* cfmap */, columnParent, 0 /* timestamp */, consistencyLevel, predicate,
-        null /* sliceRange */, null /* start */, null /* finish */, 0 /* count */,
-        Counter.READ_SUCCESS, Counter.READ_FAIL) {
+        Counter.READ_FAIL) {
       @Override
       public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspace, keys,
+        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
             columnParent, predicate, consistency);
 
         Map<String, List<Column>> result = new HashMap<String, List<Column>>();
@@ -347,18 +319,15 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, List<SuperColumn>> multigetSuperSlice(List<String> keys,
-      ColumnParent columnParent, SlicePredicate predicate) throws InvalidRequestException,
+  public Map<String, List<SuperColumn>> multigetSuperSlice(final List<String> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
-        keyspaceName, null /* key */, keys, null /* columnPath */, null /* value */,
-        null /* cfmap */, columnParent, 0 /* timestamp */, consistencyLevel, predicate,
-        null /* sliceRange */, null /* start */, null /* finish */, 0 /* count */,
-        Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<Map<String, List<SuperColumn>>> getCount =
+      new Operation<Map<String, List<SuperColumn>>>(Counter.READ_FAIL) {
       @Override
       public Map<String, List<SuperColumn>> execute(Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspace, keys,
+        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
             columnParent, predicate, consistency);
 
         // if user not given super column name, the multiget_slice will return
@@ -393,16 +362,13 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void remove(String key, ColumnPath columnPath) throws InvalidRequestException,
+  public void remove(final String key, final ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    Operation<Void> op = new Operation<Void>(keyspaceName, key, null /* keys */, columnPath,
-        null /* value */, null /* cfmap */, null /* columnParent */, createTimeStamp(),
-        consistencyLevel, null /* predicate */, null /* sliceRange */, null /* start */,
-        null /* finish */, 0 /* count */, Counter.WRITE_SUCCESS, Counter.WRITE_FAIL) {
+    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.remove(keyspace, key, columnPath, timestamp, consistency);
+        cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistency);
         return null;
       }
     };
@@ -426,20 +392,17 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
+  public Column getColumn(final String key, final ColumnPath columnPath) throws InvalidRequestException,
       NotFoundException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
 
-    Operation<Column> op = new Operation<Column>(keyspaceName, key, null /* keys */, columnPath,
-        null /* value */, null /* cfmap */, null /* columnParent */, 0 /* timestamp */,
-        consistencyLevel, null /* predicate */, null /* sliceRange */, null /* start */,
-        null /* finish */, 0 /* count */, Counter.READ_SUCCESS, Counter.READ_FAIL) {
+    Operation<Column> op = new Operation<Column>(Counter.READ_FAIL) {
       @Override
       public Column execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(keyspace, key, columnPath, consistency);
+          cosc = cassandra.get(keyspaceName, key, columnPath, consistency);
         } catch (NotFoundException e) {
           setException(e);
           return null;
@@ -458,10 +421,10 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public int getConsistencyLevel() {
-    return consistencyLevel;
+    return consistency;
   }
 
-  private long createTimeStamp() {
+  private static long createTimeStamp() {
     return System.currentTimeMillis();
   }
 
@@ -714,45 +677,14 @@ import org.slf4j.LoggerFactory;
    */
   private abstract static class Operation<T> {
 
-    protected final String keyspace;
-    protected final String key;
-    protected final List<String> keys;
-    protected final ColumnPath columnPath;
-    protected final byte[] value;
-    protected final Map<String, List<ColumnOrSuperColumn>> cfmap;
-    protected final ColumnParent columnParent;
-    protected final long timestamp;
-    protected final int consistency;
-    protected final SlicePredicate predicate;
-    protected final Counter successCounter;
+    /** Counts failed attempts */
     protected final Counter failCounter;
-    protected final SliceRange sliceRange;
-    protected final String start;
-    protected final String finish;
-    protected final int count;
+
     protected T result;
     private NotFoundException exception;
 
-    public Operation(String keyspace, String key, List<String> keys, ColumnPath columnPath,
-        byte[] value, Map<String, List<ColumnOrSuperColumn>> cfmap, ColumnParent columnParent,
-        long timestamp, int consistency, SlicePredicate predicate, SliceRange sliceRange,
-        String start, String finish, int count, Counter successCounter, Counter failCounter) {
-      this.keyspace = keyspace;
-      this.key = key;
-      this.keys = keys;
-      this.columnPath = columnPath;
-      this.value = value;
-      this.cfmap = cfmap;
-      this.columnParent = columnParent;
-      this.timestamp = timestamp;
-      this.consistency = consistency;
-      this.predicate = predicate;
-      this.sliceRange = sliceRange;
-      this.start = start;
-      this.finish = finish;
-      this.count = count;
-      this.successCounter = successCounter;
-      this.failCounter = failCounter;
+    public Operation(Counter failedCounter) {
+      this.failCounter = failedCounter;
     }
 
     public void setResult(T executionResult) {
