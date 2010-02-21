@@ -117,7 +117,11 @@ import org.slf4j.LoggerFactory;
         Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
         keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel,
             failoverPolicy, clientPools);
-        keyspaceMap.put(keyspaceMapKey , keyspace);
+        Keyspace tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
+        if (tmp != null) {
+          // There was another put that got here before we did.
+          keyspace = tmp;
+        }
       }else{
         throw new IllegalArgumentException(
             "Requested key space not exist, keyspaceName=" + keyspaceName);
