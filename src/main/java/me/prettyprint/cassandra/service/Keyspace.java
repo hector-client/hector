@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.InvalidRequestException;
-import org.apache.cassandra.service.KeySlice;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
 import org.apache.cassandra.service.SuperColumn;
@@ -187,7 +185,14 @@ public interface Keyspace {
   /**
    * returns a subset of columns for a range of keys.
    */
-  List<KeySlice> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
+  Map<String, List<Column>> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
+      String start, String finish, int count)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException;
+
+  /**
+   * returns a subset of super columns for a range of keys.
+   */
+  Map<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 

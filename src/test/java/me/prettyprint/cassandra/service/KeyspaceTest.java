@@ -25,13 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.CassandraClientFactory;
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
-import me.prettyprint.cassandra.service.CassandraClientPool;
-import me.prettyprint.cassandra.service.Keyspace;
-import me.prettyprint.cassandra.service.KeyspaceImpl;
-import me.prettyprint.cassandra.service.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
@@ -40,7 +33,6 @@ import org.apache.cassandra.service.Column;
 import org.apache.cassandra.service.ColumnParent;
 import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.InvalidRequestException;
-import org.apache.cassandra.service.KeySlice;
 import org.apache.cassandra.service.NotFoundException;
 import org.apache.cassandra.service.SlicePredicate;
 import org.apache.cassandra.service.SliceRange;
@@ -554,18 +546,49 @@ public class KeyspaceTest {
     ColumnParent clp = new ColumnParent("Standard2", null);
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate(null, sr);
-    List<KeySlice> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0",
+    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0",
         "testGetRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(3, keySlices.size());
-    assertEquals("testGetRangeSlice0", keySlices.get(0).getKey());
-    assertEquals(10, keySlices.get(0).getColumns().size());
+    assertNotNull("testGetRangeSlice0 is null", keySlices.get("testGetRangeSlice0"));
+    assertEquals("testGetRangeSlice_Value_0", string(keySlices.get("testGetRangeSlice0").get(0).getValue()));
+    assertEquals(10, keySlices.get("testGetRangeSlice1").size());
 
     ColumnPath cp = new ColumnPath("Standard2", null, null);
     keyspace.remove("testGetRanageSlice0", cp);
     keyspace.remove("testGetRanageSlice1", cp);
     keyspace.remove("testGetRanageSlice2", cp);
+  }
+
+  @Test
+  public void testGetSuperRangeSlice() throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException, NotFoundException {
+    for (int i = 0; i < 10; i++) {
+      ColumnPath cp = new ColumnPath("Super1", bytes("SuperColumn_1"),
+          bytes("testGetSuperRangeSlice_" + i));
+      keyspace.insert("testGetSuperRangeSlice0", cp, bytes("testGetSuperRangeSlice_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlice1", cp, bytes("testGetSuperRangeSlice_Value_" + i));
+    }
+
+    // get value
+    ColumnParent clp = new ColumnParent("Super1", null);
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SlicePredicate sp = new SlicePredicate(null, sr);
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
+        "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
+
+    assertNotNull(keySlices);
+    assertEquals(2, keySlices.size());
+    assertNotNull("testGetSuperRangSlice0 is null", keySlices.get("testGetSuperRangeSlice0"));
+    assertEquals("testGetSuperRangeSlice_Value_0",
+        string(keySlices.get("testGetSuperRangeSlice0").get(0).getColumns().get(0).getValue()));
+    assertEquals(1, keySlices.get("testGetSuperRangeSlice1").size());
+    assertEquals(10, keySlices.get("testGetSuperRangeSlice1").get(0).getColumns().size());
+
+    ColumnPath cp = new ColumnPath("Super1", null, null);
+    keyspace.remove("testGetSuperRangeSlice0", cp);
+    keyspace.remove("testGetSuperRangeSlice1", cp);
   }
 
   @Test
