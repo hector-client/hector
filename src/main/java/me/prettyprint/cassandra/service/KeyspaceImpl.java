@@ -112,8 +112,8 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public int getCount(final String key, final ColumnParent columnParent) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+  public int getCount(final String key, final ColumnParent columnParent)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Integer> op = new Operation<Integer>(Counter.READ_FAIL) {
       @Override
       public Integer execute(Client cassandra) throws InvalidRequestException,
@@ -126,9 +126,9 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<KeySlice> getRangeSlice(final ColumnParent columnParent, final SlicePredicate predicate,
-      final String start, final String finish, final int count) throws InvalidRequestException, UnavailableException,
-      TException, TimedOutException {
+  public List<KeySlice> getRangeSlice(final ColumnParent columnParent,
+      final SlicePredicate predicate, final String start, final String finish, final int count)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<List<KeySlice>> op = new Operation<List<KeySlice>>(Counter.READ_FAIL) {
       @Override
       public List<KeySlice> execute(Client cassandra) throws InvalidRequestException,
@@ -144,9 +144,9 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<Column> getSlice(final String key, final ColumnParent columnParent, final SlicePredicate predicate)
-      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
-      TimedOutException {
+  public List<Column> getSlice(final String key, final ColumnParent columnParent,
+      final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
+      UnavailableException, TException, TimedOutException {
     Operation<List<Column>> op = new Operation<List<Column>>(Counter.READ_FAIL) {
       @Override
       public List<Column> execute(Client cassandra) throws InvalidRequestException,
@@ -176,13 +176,11 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath, final boolean reversed, final int size)
-      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
-      TimedOutException {
+  public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath,
+      final boolean reversed, final int size) throws InvalidRequestException, NotFoundException,
+      UnavailableException, TException, TimedOutException {
     valideSuperColumnPath(columnPath);
-
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
-
     Operation<SuperColumn> op = new Operation<SuperColumn>(Counter.READ_FAIL) {
       @Override
       public SuperColumn execute(Client cassandra) throws InvalidRequestException,
@@ -190,7 +188,8 @@ import org.slf4j.LoggerFactory;
         ColumnParent clp = new ColumnParent(columnPath.getColumn_family(),
             columnPath.getSuper_column());
         SlicePredicate sp = new SlicePredicate(null, sliceRange);
-        List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp, consistency);
+        List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
+            consistency);
         return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
       }
     };
@@ -263,9 +262,9 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, List<Column>> multigetSlice(final List<String> keys, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException {
+  public Map<String, List<Column>> multigetSlice(final List<String> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
         Counter.READ_FAIL) {
       @Override
@@ -320,10 +319,10 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Map<String, List<SuperColumn>> multigetSuperSlice(final List<String> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<SuperColumn>>> getCount =
-      new Operation<Map<String, List<SuperColumn>>>(Counter.READ_FAIL) {
+      final ColumnParent columnParent, final SlicePredicate predicate)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
+        Counter.READ_FAIL) {
       @Override
       public Map<String, List<SuperColumn>> execute(Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
@@ -392,8 +391,9 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Column getColumn(final String key, final ColumnPath columnPath) throws InvalidRequestException,
-      NotFoundException, UnavailableException, TException, TimedOutException {
+  public Column getColumn(final String key, final ColumnPath columnPath)
+      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
+      TimedOutException {
     valideColumnPath(columnPath);
 
     Operation<Column> op = new Operation<Column>(Counter.READ_FAIL) {
@@ -533,7 +533,8 @@ import org.slf4j.LoggerFactory;
     knownHosts.clear();
     knownHosts.add(getClient().getUrl());
 
-    // Now query for more hosts. If the query fails, then even this client is now "known"
+    // Now query for more hosts. If the query fails, then even this client is
+    // now "known"
     try {
       Map<String, String> map = getClient().getTokenMap(true);
       knownHosts.clear();
@@ -547,9 +548,11 @@ import org.slf4j.LoggerFactory;
   }
 
   /**
-   * Updates the client member and cassandra member to the next host in the ring.
+   * Updates the client member and cassandra member to the next host in the
+   * ring.
    *
-   * Returns the current client to the pool and retreives a new client from the next pool.
+   * Returns the current client to the pool and retreives a new client from the
+   * next pool.
    */
   private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
@@ -575,7 +578,9 @@ import org.slf4j.LoggerFactory;
   /**
    * Finds the next host in the knownHosts. Next is the one after the given url
    * (modulo the number of elemens in the list)
-   * @return URL of the next presumably available host. null if none can be found.
+   *
+   * @return URL of the next presumably available host. null if none can be
+   *         found.
    */
   private String getNextHost(String url, String ip) {
     int size = knownHosts.size();
@@ -609,7 +614,7 @@ import org.slf4j.LoggerFactory;
           // Perform operation and save its result value
           op.executeAndSetResult(cassandra);
           // hmmm don't count success, there are too many...
-          //monitor.incCounter(op.successCounter);
+          // monitor.incCounter(op.successCounter);
           log.debug("Operation succeeded on {}", client.getUrl());
           return;
         } catch (TimedOutException e) {
@@ -621,7 +626,8 @@ import org.slf4j.LoggerFactory;
             monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
           }
         } catch (UnavailableException e) {
-          log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(), retries);
+          log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
+              retries);
           if (retries == 0) {
             throw e;
           } else {
@@ -629,7 +635,8 @@ import org.slf4j.LoggerFactory;
             monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
           }
         } catch (TTransportException e) {
-          log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(), retries);
+          log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
+              retries);
           if (retries == 0) {
             throw e;
           } else {
@@ -673,7 +680,7 @@ import org.slf4j.LoggerFactory;
    *          The result type of the operation (if it has a result), such as the
    *          result of get_count or get_column
    *
-   * Oh closures, how I wish you were here...
+   *          Oh closures, how I wish you were here...
    */
   private abstract static class Operation<T> {
 
