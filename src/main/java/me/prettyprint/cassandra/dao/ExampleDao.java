@@ -9,11 +9,22 @@ import me.prettyprint.cassandra.service.Keyspace;
 /**
  * An example DAO (data access object) which uses the Command pattern.
  *
+ * This DAO is simple, it provides a get/insert/delte API for String values.
+ * The underlying cassandra implementation stores the values under Keyspace1.key.Standard1.v
+ * where key is the value's key, Standard1 is the name of the column family and "v" is just a column
+ * name that's used to hold the value.
+ * <p>
+ * what's interesting to notice here is that ease of operation that the command pattern provides.
+ * The pattern assumes only one keyspace is required to perform the operation (get/insert/remove)
+ * and injects it to the {@link Command#execute(Keyspace)} abstract method which is implemented
+ * by all the dao methods.
+ * The {@link Command#execute(String, int, String)} which is then invoked, takes care of creating
+ * the {@link Keyspace} instance and releasing it after the operation completes.
+ *
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
 public class ExampleDao {
-
 
   private final static String CASSANDRA_KEYSPACE = "Keyspace1";
   private final static int CASSANDRA_PORT = 9170;
