@@ -38,6 +38,9 @@ public class StringUtils {
    * @return
    */
   public static String string(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
     try {
       return new String(bytes, ENCODING);
     } catch (UnsupportedEncodingException e) {
