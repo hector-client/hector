@@ -33,6 +33,11 @@ public class ExampleDao {
   /** Column name where values are stored */
   private final String COLUMN_NAME = "v";
 
+  /**
+   * Insert a new value keyed by key
+   * @param key Key for the value
+   * @param value the String value to insert
+   */
   public void insert(final String key, final String value) throws Exception {
     execute(new Command<Void>(){
       public Void execute(final Keyspace ks) throws Exception {
@@ -42,6 +47,10 @@ public class ExampleDao {
     });
   }
 
+  /**
+   * Get a string value.
+   * @return The string value; null if no value exists for the given key.
+   */
   public String get(final String key) throws Exception {
     return execute(new Command<String>(){
       public String execute(final Keyspace ks) throws Exception {
@@ -50,11 +59,13 @@ public class ExampleDao {
         } catch (NotFoundException e) {
           return null;
         }
-
       }
     });
   }
 
+  /**
+   * Delete a key from cassandra
+   */
   public void delete(final String key) throws Exception {
     execute(new Command<Void>(){
       public Void execute(final Keyspace ks) throws Exception {
