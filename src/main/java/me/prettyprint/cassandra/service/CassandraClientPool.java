@@ -32,14 +32,6 @@ import org.apache.thrift.TException;
 public interface CassandraClientPool {
 
   /**
-   * Gets a pool defined by url:port
-   * @param url
-   * @param port
-   * @return
-   */
-  CassandraClientPoolByHost getPool(String url, int port);
-
-  /**
    * Borrows a client from the pool defined by url:port
    * @param url
    * @param port

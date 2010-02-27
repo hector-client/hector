@@ -93,7 +93,6 @@ import org.slf4j.LoggerFactory;
     return pools.size();
   }
 
-  @Override
   public CassandraClientPoolByHost getPool(String url, int port) {
     PoolKey key = new PoolKey(url, port);
     CassandraClientPoolByHost pool = pools.get(key.ip);
