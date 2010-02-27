@@ -24,7 +24,7 @@ import org.junit.Test;
  */
 public class CassandraClientPoolTest {
 
-  private CassandraClientPool store;
+  private CassandraClientPoolImpl store;
   private static EmbeddedServerHelper embedded;
 
   /**
@@ -47,7 +47,7 @@ public class CassandraClientPoolTest {
 
   @Before
   public void setupTest() {
-    store = CassandraClientPoolFactory.INSTANCE.get();
+    store = (CassandraClientPoolImpl) CassandraClientPoolFactory.INSTANCE.get();
   }
 
   @Test
