@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ====================================================================== -->
+<!-- Ant build file (http://ant.apache.org/) for Ant 1.6.2 or above.        -->
+<!-- ====================================================================== -->
+
+<project name="hector" default="package" basedir=".">
+
+  <!-- ====================================================================== -->
+  <!-- Build environment properties                                           -->
+  <!-- ====================================================================== -->
+  <property name="final-name" value="hector-0.5.0-5"/>
+  <property name="build.dir" value="target"/>
+  <property name="project.build.directory" value="${build.outputDir}"/>
+  <property name="test.reports" value="${build.dir}/test-reports"/>
+  <property name="reporting.outputDirectory" value="${build.dir}/site"/>
+  <property name="build.testResourceDir.0" value="src/test/resources"/>
+  <property name="build.testOutputDir" value="${build.dir}/test-classes"/>
+  <property name="project.build.sourceEncoding" value="UTF-8"/>
+  <property name="build.testDir.0" value="src/test/java"/>
+  <property name="build.srcDir.0" value="src/main/java"/>
+  <property name="build.outputDir" value="${build.dir}/classes"/>
+  <property name="build.testDir.0" value="src/test/java"/>
+  <property name="project.build.outputDirectory" value="${build.dir}"/>
+
+  <!-- ====================================================================== -->
+  <!-- Defining classpaths                                                    -->
+  <!-- ====================================================================== -->
+
+  <path id="build.classpath">
+    <fileset dir="${basedir}/lib/">
+      <include name="**/*.jar" />
+    </fileset>
+    <fileset dir="${basedir}/antlib/">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+  <path id="build.test.classpath">
+    <path refid="build.classpath"/>
+    <fileset dir="${basedir}/testlib/">
+      <include name="**/*.jar" />
+    </fileset>
+    <fileset dir="${basedir}/anttestlib/">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <!-- ====================================================================== -->
+  <!-- Cleaning up target                                                     -->
+  <!-- ====================================================================== -->
+
+  <target name="clean" description="Clean the output directory">
+    <delete dir="${build.dir}"/>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Compilation target                                                     -->
+  <!-- ====================================================================== -->
+
+  <target name="compile" description="Compile the code">
+    <mkdir dir="${build.outputDir}"/>
+    <javac destdir="${build.outputDir}"
+           nowarn="true"
+           debug="true"
+           optimize="true"
+           deprecation="true"
+           target="1.6"
+           verbose="false"
+           fork="false"
+           source="1.6">
+      <src>
+        <pathelement location="${build.srcDir.0}"/>
+      </src>
+      <classpath refid="build.classpath"/>
+    </javac>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Test-compilation target                                                -->
+  <!-- ====================================================================== -->
+
+  <target name="compile-tests"
+          depends="compile"
+          description="Compile the test code"
+          unless="test.skip">
+    <mkdir dir="${build.testOutputDir}"/>
+    <javac destdir="${build.testOutputDir}"
+           nowarn="true"
+           debug="true"
+           optimize="true"
+           deprecation="true"
+           target="1.6"
+           verbose="false"
+           fork="false"
+           source="1.6">
+      <src>
+        <pathelement location="${build.testDir.0}"/>
+      </src>
+      <classpath>
+        <path refid="build.test.classpath"/>
+        <pathelement location="${build.outputDir}"/>
+      </classpath>
+    </javac>
+    <copy todir="${build.testOutputDir}">
+      <fileset dir="${build.testResourceDir.0}"/>
+    </copy>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Run all tests                                                          -->
+  <!-- ====================================================================== -->
+
+  <target name="test"
+          depends="compile-tests"
+          unless="junit.skipped"
+          description="Run the test cases">
+    <mkdir dir="${test.reports}"/>
+    <junit printSummary="yes" haltonerror="true" haltonfailure="true" fork="true" dir=".">
+      <sysproperty key="basedir" value="."/>
+      <formatter type="xml"/>
+      <formatter type="plain" usefile="false"/>
+      <classpath>
+        <path refid="build.test.classpath"/>
+        <path refid="build.classpath"/>
+        <pathelement location="${build.outputDir}"/>
+        <pathelement location="${build.testOutputDir}"/>
+      </classpath>
+      <batchtest todir="${test.reports}" unless="test">
+        <fileset dir="${build.testDir.0}">
+          <include name="**/Test*.java"/>
+          <include name="**/*Test.java"/>
+          <include name="**/*TestCase.java"/>
+          <exclude name="**/*Abstract*Test.java"/>
+        </fileset>
+      </batchtest>
+      <batchtest todir="${test.reports}" if="test">
+        <fileset dir="${build.testDir.0}">
+          <include name="**/${test}.java"/>
+          <exclude name="**/*Abstract*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="test-junit-present">
+    <available classname="junit.framework.Test" property="junit.present"/>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Javadoc target                                                         -->
+  <!-- ====================================================================== -->
+
+  <target name="javadoc" description="Generates the Javadoc of the application">
+    <javadoc sourcepath="${build.srcDir.0}"
+             packagenames="*"
+             destdir="${reporting.outputDirectory}/apidocs"
+             access="protected"
+             old="false"
+             verbose="false"
+             version="true"
+             use="true"
+             author="true"
+             splitindex="false"
+             nodeprecated="false"
+             nodeprecatedlist="false"
+             notree="false"
+             noindex="false"
+             nohelp="false"
+             nonavbar="false"
+             serialwarn="false"
+             charset="ISO-8859-1"
+             source="1.6"
+             linksource="true"
+             breakiterator="false"
+             maxmemory="900m">
+      <link href="http://java.sun.com/j2se/1.6.0/docs/api/"/>
+      <link href="http://logging.apache.org/log4j/docs/api/"/>
+    </javadoc>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- Package target                                                         -->
+  <!-- ====================================================================== -->
+
+  <target name="package" depends="compile,test" description="Package the application">
+    <mkdir dir="${build.dir}"/>
+    <jar jarfile="${build.dir}/${final-name}.jar"
+         compress="true"
+         index="false"
+         basedir="${build.outputDir}"
+         excludes="**/package.html"/>
+  </target>
+
+  <!-- ====================================================================== -->
+  <!-- A dummy target for the package named after the type it creates         -->
+  <!-- ====================================================================== -->
+
+  <target name="jar" depends="package" description="Builds the jar for the application"/>
+</project>
