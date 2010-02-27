@@ -2,7 +2,6 @@ package me.prettyprint.cassandra.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
@@ -207,11 +206,4 @@ public interface Keyspace {
    * @return The failover policy used by this keyspace.
    */
   FailoverPolicy getFailoverPolicy();
-
-  /**
-   * Updates the list of known hosts.
-   */
-  void updateKnownHosts() throws TException;
-
-  Set<String> getKnownHosts();
 }

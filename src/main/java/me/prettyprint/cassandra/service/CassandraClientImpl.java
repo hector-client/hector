@@ -45,8 +45,8 @@ import org.slf4j.LoggerFactory;
   /** List of known keyspaces */
   private List<String> keyspaces;
 
-  private final ConcurrentHashMap<String, Keyspace> keyspaceMap =
-      new ConcurrentHashMap<String, Keyspace>();
+  private final ConcurrentHashMap<String, KeyspaceImpl> keyspaceMap =
+      new ConcurrentHashMap<String, KeyspaceImpl>();
 
   private String clusterName;
 
@@ -111,13 +111,13 @@ import org.slf4j.LoggerFactory;
       FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException {
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
-    Keyspace keyspace = keyspaceMap.get(keyspaceMapKey);
+    KeyspaceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
       if (getKeyspaces().contains(keyspaceName)) {
         Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-        keyspace = keyspaceFactory.create(this, keyspaceName, keyspaceDesc, consistencyLevel,
-            failoverPolicy, clientPools);
-        Keyspace tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
+        keyspace = (KeyspaceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+            consistencyLevel, failoverPolicy, clientPools);
+        KeyspaceImpl tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
         if (tmp != null) {
           // There was another put that got here before we did.
           keyspace = tmp;
@@ -220,7 +220,7 @@ import org.slf4j.LoggerFactory;
       return;
     }
     // Iterate over all keyspaces and ask them to update known hosts
-    for (Keyspace k: keyspaceMap.values()) {
+    for (KeyspaceImpl k: keyspaceMap.values()) {
       k.updateKnownHosts();
     }
   }
@@ -255,7 +255,7 @@ import org.slf4j.LoggerFactory;
       return hosts;
     }
     // Iterate over all keyspaces and ask them to update known hosts
-    for (Keyspace k: keyspaceMap.values()) {
+    for (KeyspaceImpl k: keyspaceMap.values()) {
       hosts.addAll(k.getKnownHosts());
     }
     return hosts;

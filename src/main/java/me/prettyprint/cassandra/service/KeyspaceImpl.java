@@ -764,7 +764,6 @@ import org.slf4j.LoggerFactory;
     }
   }
 
-  @Override
   public Set<String> getKnownHosts() {
     Set<String> hosts = new HashSet<String>();
     hosts.addAll(knownHosts);
