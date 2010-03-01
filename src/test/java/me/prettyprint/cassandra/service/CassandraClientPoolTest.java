@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 import java.io.IOException;
 
@@ -63,6 +64,40 @@ public class CassandraClientPoolTest {
     assertEquals("localhost", client.getUrl());
     assertEquals(9170, client.getPort());
   }
+
+  /**
+   * test the url:port format
+   */
+  @Test
+  public void testBorrowClient1() throws IllegalStateException, PoolExhaustedException, Exception {
+    CassandraClient client = store.borrowClient("localhost:9170");
+    assertNotNull(client);
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
+  }
+
+  /**
+   * test the url:port array format (load balanced)
+   */
+  @Test
+  public void testBorrowLbClient() throws IllegalStateException, PoolExhaustedException, Exception {
+    CassandraClient client = store.borrowClient(new String[] {"localhost:9170"});
+    assertNotNull(client);
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
+
+    client = store.borrowClient(new String[] {"localhost:9170", "localhost:9171", "localhost:9172"});
+    assertNotNull(client);
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
+
+    try {
+      client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
+      fail("Should not have boon able to obtain a client");
+    } catch (Exception e) {
+      // ok
+    }
+}
 
   @Test
   public void testReleaseClient() throws IllegalStateException, PoolExhaustedException, Exception {

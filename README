@@ -11,8 +11,6 @@ This client provides:
  o failover behavior on the client side
  o connection pooling for improved performance and scalability
  o JMX conters for monitoring and management
-
-TODO:
  o load balancing
 
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.

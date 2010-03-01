@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
     READ_SUCCESS,
     READ_FAIL,
     POOL_EXHAUSTED,
+    /** Load balance connection errors */
+    RECOVERABLE_LB_CONNECT_ERRORS,
   }
 
   public CassandraClientMonitor() {
@@ -173,10 +175,15 @@ import org.slf4j.LoggerFactory;
   @Override
   public long getRecoverableErrorCount() {
     return getRecoverableTimedOutCount() + getRecoverableTransportExceptionCount() +
-        getRecoverableUnavailableCount();
+        getRecoverableUnavailableCount() + getRecoverableLoadBalancedConnectErrors();
   }
 
   public void addPool(CassandraClientPool pool) {
     pools.add(pool);
+  }
+
+  @Override
+  public long getRecoverableLoadBalancedConnectErrors() {
+    return counters.get(Counter.RECOVERABLE_LB_CONNECT_ERRORS).longValue();
   }
 }

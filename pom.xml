@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.0 goes with the 0.5.0 cassandra release-->
-  <version>0.5.0-5</version>
+  <version>0.5.0-6</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -157,6 +157,11 @@
       <artifactId>mockito-all</artifactId>
       <version>1.8.2</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.mojo</groupId>
+      <artifactId>properties-maven-plugin</artifactId>
+      <version>1.0-alpha-2</version>
     </dependency>
   </dependencies>
 

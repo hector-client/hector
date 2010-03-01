@@ -2,10 +2,15 @@ package me.prettyprint.cassandra.service;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
@@ -24,12 +29,12 @@ import org.slf4j.LoggerFactory;
   /**
    * Mapping b/w the host identifier (url:port) and the pool used to store connections to it.
    */
-  private final Map<String, CassandraClientPoolByHost> pools;
+  private final Map<PoolKey, CassandraClientPoolByHost> pools;
 
   private final CassandraClientMonitor clientMonitor;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
-    pools = new HashMap<String, CassandraClientPoolByHost>();
+    pools = new HashMap<PoolKey, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
   }
 
@@ -95,13 +100,13 @@ import org.slf4j.LoggerFactory;
 
   public CassandraClientPoolByHost getPool(String url, int port) {
     PoolKey key = new PoolKey(url, port);
-    CassandraClientPoolByHost pool = pools.get(key.ip);
+    CassandraClientPoolByHost pool = pools.get(key);
     if (pool == null) {
       synchronized (pools) {
-        pool = pools.get(key.ip);
+        pool = pools.get(key);
         if (pool == null) {
           pool = new CassandraClientPoolByHostImpl(url, port, key.name, this, clientMonitor);
-          pools.put(key.ip, pool);
+          pools.put(key, pool);
         }
       }
     }
@@ -168,6 +173,25 @@ import org.slf4j.LoggerFactory;
       b.append(port);
       name = b.toString();
     }
+
+    @Override
+    public String toString() {
+      return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (! (obj instanceof PoolKey)) {
+        return false;
+      }
+      return ((PoolKey) obj).name.equals(name);
+    }
+
+    @Override
+    public int hashCode() {
+      return name.hashCode();
+    }
+
   }
 
   @Override
@@ -187,5 +211,37 @@ import org.slf4j.LoggerFactory;
   @Override
   public void releaseKeyspace(Keyspace k) throws Exception {
     releaseClient(k.getClient());
+  }
+
+  @Override
+  public CassandraClient borrowClient(String urlPort) throws IllegalStateException,
+      PoolExhaustedException, Exception {
+    int delim = urlPort.lastIndexOf(':');
+    String url = urlPort.substring(0, delim);
+    String strPort = urlPort.substring(delim + 1, urlPort.length());
+    int port = Integer.valueOf(strPort);
+    return borrowClient(url, port);
+  }
+
+  @Override
+  public CassandraClient borrowClient(String[] clientUrls) throws Exception {
+    List<String> clients = new ArrayList<String>(Arrays.asList(clientUrls));
+    while(!clients.isEmpty()) {
+      int rand = (int) (Math.random() * clients.size());
+      try {
+        return borrowClient(clients.get(rand));
+      } catch (Exception e) {
+        if (clients.size() > 1) {
+          log.warn("Unable to obtain client " + clients.get(rand) + " will try the next client", e);
+          clientMonitor.incCounter(Counter.RECOVERABLE_LB_CONNECT_ERRORS);
+          clients.remove(rand);
+        } else {
+          throw e;
+        }
+      }
+    }
+    // Method should never get here; an exception must have been thrown before, I'm only writing
+    // this to make the compiler happy.
+    return null;
   }
 }

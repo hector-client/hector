@@ -90,6 +90,8 @@ public interface CassandraClientMonitorMBean {
    */
   int getNumExhaustedPools();
 
+  long getRecoverableLoadBalancedConnectErrors();
+
   /**
    * List of exhausted pools.
    * @return
