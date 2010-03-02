@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
     POOL_EXHAUSTED,
     /** Load balance connection errors */
     RECOVERABLE_LB_CONNECT_ERRORS,
+    /** Connection time errors - unable to connect to host or something... */
+    CONNECT_ERROR,
   }
 
   public CassandraClientMonitor() {
@@ -185,5 +187,10 @@ import org.slf4j.LoggerFactory;
   @Override
   public long getRecoverableLoadBalancedConnectErrors() {
     return counters.get(Counter.RECOVERABLE_LB_CONNECT_ERRORS).longValue();
+  }
+
+  @Override
+  public long getNumConnectionErrors() {
+    return counters.get(Counter.CONNECT_ERROR).longValue();
   }
 }

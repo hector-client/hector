@@ -128,6 +128,10 @@ public class CassandraClientPoolTest {
     assertNotSame(client1, client2);
     store.invalidateClient(client1);
     assertTrue(client1.hasErrors());
+    
+    // try to release a client after it's been invalidated
+    store.releaseClient(client1);
+    
     store.releaseClient(client2);
     assertFalse(client2.hasErrors());
     CassandraClient client3 = store.borrowClient("localhost", 9170);

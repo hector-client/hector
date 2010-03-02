@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -589,12 +590,7 @@ import org.slf4j.LoggerFactory;
    */
   private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
-    try {
-      clientPools.invalidateClient(client);
-      client.removeKeyspace(this);
-    } catch (Exception e) {
-      log.error("Unable to invalidate client {}. Will continue anyhow.", client);
-    }
+    invalidate();
 
     String nextHost = getNextHost(client.getUrl(), client.getIp());
     if (nextHost == null) {
@@ -608,6 +604,20 @@ import org.slf4j.LoggerFactory;
     log.info("Skipped host. New host is: {}", client.getUrl());
   }
 
+  /**
+   * Invalidates this keyspace and client associated with it.
+   * This method should be used when the keyspace had errors.
+   * It returns the client to the pool and marks it as invalid (essentially taking taking the client
+   * out of the pool indefinitely) and removed the keyspace from the client.
+   */
+  private void invalidate() {
+    try {
+      clientPools.invalidateClient(client);
+      client.removeKeyspace(this);
+    } catch (Exception e) {
+      log.error("Unable to invalidate client {}. Will continue anyhow.", client);
+    }
+  }
   /**
    * Finds the next host in the knownHosts. Next is the one after the given url
    * (modulo the number of elemens in the list)
@@ -682,12 +692,15 @@ import org.slf4j.LoggerFactory;
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (UnavailableException e) {
+      invalidate();
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (TException e) {
+      invalidate();
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (TimedOutException e) {
+      invalidate();
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (PoolExhaustedException e) {
@@ -697,6 +710,10 @@ import org.slf4j.LoggerFactory;
       throw new UnavailableException();
     } catch (IllegalStateException e) {
       log.error("Client Pool is already closed, cannot obtain new clients.", e);
+      monitor.incCounter(op.failCounter);
+      throw new UnavailableException();
+    } catch (IOException e) {
+      invalidate();
       monitor.incCounter(op.failCounter);
       throw new UnavailableException();
     } catch (Exception e) {

@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.service;
 
 import java.net.UnknownHostException;
 
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+
 import org.apache.cassandra.service.Cassandra;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.thrift.TException;
@@ -60,6 +62,7 @@ import org.slf4j.LoggerFactory;
       // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
       // add details to it.
       log.error("Unable to open transport to " + url + ":" + port, e);
+      clientMonitor.incCounter(Counter.CONNECT_ERROR);
       throw new TTransportException("Unable to open transport to " + url + ":" + port + " , " +
           e.getLocalizedMessage(), e);
     }

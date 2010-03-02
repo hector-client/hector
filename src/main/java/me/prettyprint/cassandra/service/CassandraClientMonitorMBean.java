@@ -105,6 +105,12 @@ public interface CassandraClientMonitorMBean {
    */
   int getNumBlockedThreads();
 
+  /**
+   * How many times did initial connection failed.
+   * @return
+   */
+  long getNumConnectionErrors();
+
   public Set<String> getKnownHosts();
 
   /**
