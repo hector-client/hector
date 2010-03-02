@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.dao;
 
+import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.Keyspace;
@@ -42,7 +43,28 @@ public abstract class Command<OUTPUT> {
    * @throws Exception
    */
   public final OUTPUT execute(String host, int port, String keyspace) throws Exception {
-    Keyspace ks = getPool().borrowClient(host, port).getKeyspace(keyspace);
+    return execute(getPool().borrowClient(host, port), keyspace);
+  }
+
+  /**
+   * Same as {@link #execute(String, int, String)}
+   * @param hostPort host:port
+   */
+  public final OUTPUT execute(String hostPort, String keyspace) throws Exception {
+    return execute(getPool().borrowClient(hostPort), keyspace);
+  }
+
+  /**
+   * Same as {@link #execute(String, int, String)} but for a randomly chosen host from the list
+   * of host:port
+   * @param hostPort host:port array
+   */
+  public final OUTPUT execute(String[] hosts, String keyspace) throws Exception {
+    return execute(getPool().borrowClient(hosts), keyspace);
+  }
+
+  protected final OUTPUT execute(CassandraClient c, String keyspace) throws Exception {
+    Keyspace ks = c.getKeyspace(keyspace);
     try {
       return execute(ks);
     } finally {
