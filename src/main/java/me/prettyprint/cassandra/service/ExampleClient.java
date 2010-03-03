@@ -17,6 +17,9 @@ public class ExampleClient {
   public static void main(String[] args) throws IllegalStateException, PoolExhaustedException, Exception {
     CassandraClientPool pool = CassandraClientPoolFactory.INSTANCE.get();
     CassandraClient client = pool.borrowClient("tush", 9160);
+    // A load balanced version would look like this:
+    // CassandraClient client = pool.borrowClient(new String[] {"cas1:9160", "cas2:9160", "cas3:9160"});
+
     try {
       Keyspace keyspace = client.getKeyspace("Keyspace1");
       ColumnPath columnPath = new ColumnPath("Standard1", null, bytes("column-name"));
