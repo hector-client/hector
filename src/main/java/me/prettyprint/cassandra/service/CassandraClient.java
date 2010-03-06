@@ -79,9 +79,14 @@ public interface CassandraClient {
   Keyspace getKeyspace(String keyspaceName)
       throws IllegalArgumentException, NotFoundException, TException;
 
+  /**
+   * Gets s keyspace with the specified consistency level
+   */
+  Keyspace getKeyspace(String keyspaceName, int consistencyLevel)
+      throws IllegalArgumentException, NotFoundException, TException;
 
   /**
-   * Gets s keyspace with the specified consistency level.
+   * Gets s keyspace with the specified consistency level and failover policy
    */
   Keyspace getKeyspace(String keyspaceName, int consistencyLevel, FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException;

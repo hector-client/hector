@@ -43,7 +43,8 @@ public abstract class Command<OUTPUT> {
    * @throws Exception
    */
   public final OUTPUT execute(String host, int port, String keyspace) throws Exception {
-    return execute(getPool().borrowClient(host, port), keyspace);
+    return execute(getPool().borrowClient(host, port), keyspace,
+        CassandraClient.DEFAULT_CONSISTENCY_LEVEL);
   }
 
   /**
@@ -51,7 +52,8 @@ public abstract class Command<OUTPUT> {
    * @param hostPort host:port
    */
   public final OUTPUT execute(String hostPort, String keyspace) throws Exception {
-    return execute(getPool().borrowClient(hostPort), keyspace);
+    return execute(getPool().borrowClient(hostPort), keyspace,
+        CassandraClient.DEFAULT_CONSISTENCY_LEVEL);
   }
 
   /**
@@ -60,11 +62,20 @@ public abstract class Command<OUTPUT> {
    * @param hostPort host:port array
    */
   public final OUTPUT execute(String[] hosts, String keyspace) throws Exception {
-    return execute(getPool().borrowClient(hosts), keyspace);
+    return execute(getPool().borrowClient(hosts), keyspace,
+        CassandraClient.DEFAULT_CONSISTENCY_LEVEL);
   }
 
-  protected final OUTPUT execute(CassandraClient c, String keyspace) throws Exception {
-    Keyspace ks = c.getKeyspace(keyspace);
+  /**
+   * Same as {@link #execute(String[], String)} but with the given consistency level
+   */
+  public final OUTPUT execute(String[] hosts, String keyspace, int consistency) throws Exception {
+    return execute(getPool().borrowClient(hosts), keyspace, consistency);
+  }
+
+  protected final OUTPUT execute(CassandraClient c, String keyspace, int consistency)
+      throws Exception {
+    Keyspace ks = c.getKeyspace(keyspace, consistency);
     try {
       return execute(ks);
     } finally {

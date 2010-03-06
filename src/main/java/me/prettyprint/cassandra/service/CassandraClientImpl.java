@@ -107,6 +107,12 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
+  public Keyspace getKeyspace(String keySpaceName, int consistency) throws IllegalArgumentException,
+      NotFoundException, TException {
+    return getKeyspace(keySpaceName, consistency, DEFAULT_FAILOVER_POLICY);
+  }
+
+  @Override
   public Keyspace getKeyspace(String keyspaceName, int consistencyLevel,
       FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException {
