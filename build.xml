@@ -9,7 +9,7 @@
   <!-- ====================================================================== -->
   <!-- Build environment properties                                           -->
   <!-- ====================================================================== -->
-  <property name="version" value="0.5.0-7"/>
+  <property name="version" value="0.5.0-8"/>
   <property name="final-name" value="hector-${version}"/>
   <property name="build.dir" value="target"/>
   <property name="project.build.directory" value="${build.outputDir}"/>
@@ -20,6 +20,7 @@
   <property name="project.build.sourceEncoding" value="UTF-8"/>
   <property name="build.testDir.0" value="src/test/java"/>
   <property name="build.srcDir.0" value="src/main/java"/>
+  <property name="resources" value="src/main/resources"/>
   <property name="build.outputDir" value="${build.dir}/classes"/>
   <property name="build.testDir.0" value="src/test/java"/>
   <property name="project.build.outputDirectory" value="${build.dir}"/>
@@ -43,6 +44,9 @@
     </fileset>
     <fileset dir="${basedir}/anttestlib/">
       <include name="**/*.jar" />
+    </fileset>
+    <fileset dir="${resources}">
+      <include name="**/*" />
     </fileset>
   </path>
 
@@ -189,7 +193,9 @@
          compress="true"
          index="false"
          basedir="${build.outputDir}"
-         excludes="**/package.html"/>
+         excludes="**/package.html">
+      <fileset dir="${resources}"/>
+    </jar>
   </target>
 
   <!-- ====================================================================== -->

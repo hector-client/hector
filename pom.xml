@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.0 goes with the 0.5.0 cassandra release-->
-  <version>0.5.0-7</version>
+  <version>0.5.0-8</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -133,6 +133,12 @@
       <artifactId>slf4j-log4j12</artifactId>
       <version>1.5.8</version>
     </dependency>
+    <dependency>
+      <groupId>org.perf4j</groupId>
+      <artifactId>perf4j</artifactId>
+      <version>0.9.12</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>

@@ -10,6 +10,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
+import org.apache.log4j.xml.DOMConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,13 @@ import org.slf4j.LoggerFactory;
     }
 
     mbs.registerMBean(monitoringInterface, oName);
+
+    // Register perf4j monitors
+    registerPerf4J();
+  }
+
+  private void registerPerf4J() {
+    DOMConfigurator.configure(ExampleClient.class.getClassLoader().getResource("hectorLog4j.xml"));
   }
 
   private String generateMonitorName(String className, String monitorType) {

@@ -14,7 +14,8 @@ import org.apache.cassandra.service.ColumnPath;
  */
 public class ExampleClient {
 
-  public static void main(String[] args) throws IllegalStateException, PoolExhaustedException, Exception {
+  public static void main(String[] args) throws IllegalStateException, PoolExhaustedException,
+      Exception {
     CassandraClientPool pool = CassandraClientPoolFactory.INSTANCE.get();
     CassandraClient client = pool.borrowClient("tush", 9160);
     // A load balanced version would look like this:

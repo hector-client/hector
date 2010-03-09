@@ -28,11 +28,13 @@ import org.apache.cassandra.service.UnavailableException;
 import org.apache.cassandra.service.Cassandra.Client;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
+import org.perf4j.StopWatch;
+import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Implamentation of a keyspace
+ * Implementation of a Keyspace
  *
  * @author Ran Tavory (rantav@gmail.com)
  *
@@ -40,6 +42,16 @@ import org.slf4j.LoggerFactory;
 /* package */class KeyspaceImpl implements Keyspace {
 
   private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
+
+  /**
+   * Specifies the "type" of operation - read or write.
+   * It's used for perf4j, so should be in sync with hectorLog4j.xml
+   * @author Ran Tavory (ran@outbain.com)
+   *
+   */
+  private enum OperationType {
+    READ, WRITE;
+  }
 
   private CassandraClient client;
 
@@ -101,7 +113,7 @@ import org.slf4j.LoggerFactory;
       }
     }
 
-    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -115,7 +127,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public int getCount(final String key, final ColumnParent columnParent)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    Operation<Integer> op = new Operation<Integer>(Counter.READ_FAIL) {
+    Operation<Integer> op = new Operation<Integer>(OperationType.READ) {
       @Override
       public Integer execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -131,7 +143,7 @@ import org.slf4j.LoggerFactory;
       final SlicePredicate predicate, final String start, final String finish, final int count)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
-        Counter.READ_FAIL) {
+        OperationType.READ) {
       @Override
       public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -156,7 +168,7 @@ import org.slf4j.LoggerFactory;
       final SlicePredicate predicate, final String start, final String finish, final int count)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
-        Counter.READ_FAIL) {
+        OperationType.READ) {
       @Override
       public Map<String, List<SuperColumn>> execute(Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
@@ -181,7 +193,7 @@ import org.slf4j.LoggerFactory;
   public List<Column> getSlice(final String key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
       UnavailableException, TException, TimedOutException {
-    Operation<List<Column>> op = new Operation<List<Column>>(Counter.READ_FAIL) {
+    Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ) {
       @Override
       public List<Column> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -215,7 +227,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     valideSuperColumnPath(columnPath);
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
-    Operation<SuperColumn> op = new Operation<SuperColumn>(Counter.READ_FAIL) {
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
       @Override
       public SuperColumn execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -235,7 +247,7 @@ import org.slf4j.LoggerFactory;
   public List<SuperColumn> getSuperSlice(final String key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
       UnavailableException, TException, TimedOutException {
-    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(Counter.READ_FAIL) {
+    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ) {
       @Override
       public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -259,7 +271,7 @@ import org.slf4j.LoggerFactory;
   public void insert(final String key, final ColumnPath columnPath, final byte[] value)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
-    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -275,7 +287,7 @@ import org.slf4j.LoggerFactory;
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     valideColumnPath(columnPath);
 
-    Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(Counter.READ_FAIL) {
+    Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(OperationType.READ) {
       @Override
       public Map<String, Column> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -300,7 +312,7 @@ import org.slf4j.LoggerFactory;
       final ColumnParent columnParent, final SlicePredicate predicate)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
-        Counter.READ_FAIL) {
+        OperationType.READ) {
       @Override
       public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
@@ -356,7 +368,7 @@ import org.slf4j.LoggerFactory;
       final ColumnParent columnParent, final SlicePredicate predicate)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
-        Counter.READ_FAIL) {
+        OperationType.READ) {
       @Override
       public Map<String, List<SuperColumn>> execute(Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
@@ -397,7 +409,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public void remove(final String key, final ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    Operation<Void> op = new Operation<Void>(Counter.WRITE_FAIL) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
       public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -430,7 +442,7 @@ import org.slf4j.LoggerFactory;
       TimedOutException {
     valideColumnPath(columnPath);
 
-    Operation<Column> op = new Operation<Column>(Counter.READ_FAIL) {
+    Operation<Column> op = new Operation<Column>(OperationType.READ) {
       @Override
       public Column execute(Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
@@ -645,9 +657,9 @@ import org.slf4j.LoggerFactory;
    * retries, and there are enough hosts to try and the error was
    * {@link TimedOutException}.
    */
-  @SuppressWarnings("unchecked")
-  private void operateWithFailover(Operation op) throws InvalidRequestException,
+  private void operateWithFailover(Operation<?> op) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
+    final StopWatch stopWatch = new Slf4JStopWatch();
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
     try {
       while (retries > 0) {
@@ -659,6 +671,7 @@ import org.slf4j.LoggerFactory;
           // hmmm don't count success, there are too many...
           // monitor.incCounter(op.successCounter);
           log.debug("Operation succeeded on {}", client.getUrl());
+          stopWatch.stop(op.stopWatchTagName + ".success_");
           return;
         } catch (TimedOutException e) {
           log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
@@ -690,35 +703,43 @@ import org.slf4j.LoggerFactory;
       }
     } catch (InvalidRequestException e) {
       monitor.incCounter(op.failCounter);
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw e;
     } catch (UnavailableException e) {
       invalidate();
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (TException e) {
       invalidate();
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (TimedOutException e) {
       invalidate();
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
       throw e;
     } catch (PoolExhaustedException e) {
       log.warn("Pool is exhausted", e);
       monitor.incCounter(op.failCounter);
       monitor.incCounter(Counter.POOL_EXHAUSTED);
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     } catch (IllegalStateException e) {
       log.error("Client Pool is already closed, cannot obtain new clients.", e);
       monitor.incCounter(op.failCounter);
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     } catch (IOException e) {
       invalidate();
       monitor.incCounter(op.failCounter);
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     } catch (Exception e) {
       log.error("Cannot retry failover, got an Exception", e);
       monitor.incCounter(op.failCounter);
+      stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     }
   }
@@ -737,11 +758,16 @@ import org.slf4j.LoggerFactory;
     /** Counts failed attempts */
     protected final Counter failCounter;
 
+    /** The stopwatch used to measure operation performance */
+    protected final String stopWatchTagName;
+
     protected T result;
     private NotFoundException exception;
 
-    public Operation(Counter failedCounter) {
-      this.failCounter = failedCounter;
+    public Operation(OperationType operationType) {
+      this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
+          Counter.WRITE_FAIL;
+      this.stopWatchTagName = operationType.name();
     }
 
     public void setResult(T executionResult) {
