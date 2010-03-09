@@ -85,7 +85,7 @@ import org.slf4j.LoggerFactory;
     }
 
     int size = (columnMap == null ? 0 : columnMap.size())
-        + (columnMap == null ? 0 : columnMap.size());
+        + (superColumnMap == null ? 0 : superColumnMap.size());
     final Map<String, List<ColumnOrSuperColumn>> cfmap = new HashMap<String, List<ColumnOrSuperColumn>>(
         size * 2);
 
