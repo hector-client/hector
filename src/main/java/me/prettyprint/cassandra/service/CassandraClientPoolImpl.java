@@ -150,23 +150,23 @@ import org.slf4j.LoggerFactory;
     private final int port;
     private final String name;
 
-    public PoolKey(String url, int port) {
+    public PoolKey(String url2, int port) {
       this.port = port;
       StringBuilder b = new StringBuilder();
       InetAddress address;
       String turl, tip;
       try {
-        address = InetAddress.getByName(url);
-        turl = isPerformNameResolution() ? address.getHostName() : url;
+        address = InetAddress.getByName(url2);
+        turl = isPerformNameResolution() ? address.getHostName() : url2;
         tip = address.getHostAddress();
       } catch (UnknownHostException e) {
-        log.error("Unable to resolve host {}", url);
-        turl = url;
-        tip = url;
+        log.error("Unable to resolve host {}", url2);
+        turl = url2;
+        tip = url2;
       }
       this.url = turl;
       ip = tip;
-      b.append(url);
+      b.append(url2);
       b.append("(");
       b.append(ip);
       b.append("):");
