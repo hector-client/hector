@@ -74,7 +74,8 @@ import org.slf4j.LoggerFactory;
    * If doesn't exist, returns 0.
    */
   private int getTimeout() {
-    String timeoutStr = System.getProperty("CASSANDRA_THRIFT_SOCKET_TIMEOUT");
+    String timeoutStr = System.getProperty(
+        SystemProperties.CASSANDRA_THRIFT_SOCKET_TIMEOUT.toString());
     if (timeoutStr == null || timeoutStr.length() == 0) {
       return  0;
     } else {

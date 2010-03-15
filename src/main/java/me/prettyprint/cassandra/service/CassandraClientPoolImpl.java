@@ -157,7 +157,7 @@ import org.slf4j.LoggerFactory;
       String turl, tip;
       try {
         address = InetAddress.getByName(url);
-        turl = address.getHostName();
+        turl = isPerformNameResolution() ? address.getHostName() : url;
         tip = address.getHostAddress();
       } catch (UnknownHostException e) {
         log.error("Unable to resolve host {}", url);
@@ -174,6 +174,16 @@ import org.slf4j.LoggerFactory;
       name = b.toString();
     }
 
+    /**
+     * Checks whether name resolution should occur.
+     * @return
+     */
+    private boolean isPerformNameResolution() {
+      String sysprop = System.getProperty(
+          SystemProperties.HECTOR_PERFORM_NAME_RESOLUTION.toString());
+      return sysprop != null && Boolean.valueOf(sysprop);
+
+    }
     @Override
     public String toString() {
       return name;
