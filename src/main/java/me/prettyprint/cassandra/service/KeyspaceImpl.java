@@ -599,12 +599,16 @@ import org.slf4j.LoggerFactory;
    *
    * Returns the current client to the pool and retreives a new client from the
    * next pool.
+   * @param isRetrySameHostAgain should the skip operation try the same current host, or should it
+   * really skip to the next host in the ring?
    */
-  private void skipToNextHost() throws IllegalStateException, PoolExhaustedException, Exception {
+  private void skipToNextHost(boolean isRetrySameHostAgain) throws IllegalStateException,
+      PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
     invalidate();
 
-    String nextHost = getNextHost(client.getUrl(), client.getIp());
+    String nextHost = isRetrySameHostAgain ? client.getUrl() :
+        getNextHost(client.getUrl(), client.getIp());
     if (nextHost == null) {
       log.error("Unable to find next host to skip to at {}", toString());
       throw new TException("Unable to failover to next host");
@@ -661,13 +665,17 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     final StopWatch stopWatch = new Slf4JStopWatch();
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
+    boolean isFirst = true;
     try {
       while (retries > 0) {
-        --retries;
-        boolean success = operateWithFailoverSingleIteration(op, stopWatch, retries);
+        if (!isFirst) {
+          --retries;
+        }
+        boolean success = operateWithFailoverSingleIteration(op, stopWatch, retries, isFirst);
         if (success) {
           return;
         }
+        isFirst = false;
       }
     } catch (InvalidRequestException e) {
       monitor.incCounter(op.failCounter);
@@ -720,9 +728,10 @@ import org.slf4j.LoggerFactory;
    * @param op the operation to perform
    * @param stopWatch the stop watch measuring performance of this operation.
    * @param retries the number of retries left.
+   * @param isFirst is this the first iteraion?
    */
   private boolean operateWithFailoverSingleIteration(Operation<?> op, final StopWatch stopWatch,
-      int retries) throws InvalidRequestException, TException, TimedOutException,
+      int retries, boolean isFirst) throws InvalidRequestException, TException, TimedOutException,
       PoolExhaustedException, Exception, UnavailableException, TTransportException {
     log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
     try {
@@ -738,7 +747,7 @@ import org.slf4j.LoggerFactory;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost();
+        skipToNextHost(isFirst);
         monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
       }
     } catch (UnavailableException e) {
@@ -747,7 +756,7 @@ import org.slf4j.LoggerFactory;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost();
+        skipToNextHost(isFirst);
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (TTransportException e) {
@@ -756,7 +765,7 @@ import org.slf4j.LoggerFactory;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost();
+        skipToNextHost(isFirst);
         monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
       }
     }

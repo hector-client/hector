@@ -15,6 +15,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -755,7 +756,7 @@ public class KeyspaceTest {
     ks.insert("key", cp, bytes("value"));
 
     // Make sure the client is invalidated
-    verify(clientPools).invalidateClient(h1client);
+    verify(clientPools, times(2)).invalidateClient(h1client);
 
     // make sure the next call is to h2
     verify(h2client).getCassandra();
