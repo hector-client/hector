@@ -664,41 +664,9 @@ import org.slf4j.LoggerFactory;
     try {
       while (retries > 0) {
         --retries;
-        log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
-        try {
-          // Perform operation and save its result value
-          op.executeAndSetResult(cassandra);
-          // hmmm don't count success, there are too many...
-          // monitor.incCounter(op.successCounter);
-          log.debug("Operation succeeded on {}", client.getUrl());
-          stopWatch.stop(op.stopWatchTagName + ".success_");
+        boolean success = operateWithFailoverSingleIteration(op, stopWatch, retries);
+        if (success) {
           return;
-        } catch (TimedOutException e) {
-          log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
-          if (retries == 0) {
-            throw e;
-          } else {
-            skipToNextHost();
-            monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
-          }
-        } catch (UnavailableException e) {
-          log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
-              retries);
-          if (retries == 0) {
-            throw e;
-          } else {
-            skipToNextHost();
-            monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
-          }
-        } catch (TTransportException e) {
-          log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
-              retries);
-          if (retries == 0) {
-            throw e;
-          } else {
-            skipToNextHost();
-            monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
-          }
         }
       }
     } catch (InvalidRequestException e) {
@@ -742,6 +710,57 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     }
+  }
+
+  /**
+   * Runs a single iteration of the operation.
+   * If successful, then returns true.
+   * If unsuccessful, then if a skip operation was successful, return false. If a skip operation was
+   * unsuccessful or retries == 0, then throws an exception.
+   * @param op the operation to perform
+   * @param stopWatch the stop watch measuring performance of this operation.
+   * @param retries the number of retries left.
+   */
+  private boolean operateWithFailoverSingleIteration(Operation<?> op, final StopWatch stopWatch,
+      int retries) throws InvalidRequestException, TException, TimedOutException,
+      PoolExhaustedException, Exception, UnavailableException, TTransportException {
+    log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
+    try {
+      // Perform operation and save its result value
+      op.executeAndSetResult(cassandra);
+      // hmmm don't count success, there are too many...
+      // monitor.incCounter(op.successCounter);
+      log.debug("Operation succeeded on {}", client.getUrl());
+      stopWatch.stop(op.stopWatchTagName + ".success_");
+      return true;
+    } catch (TimedOutException e) {
+      log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
+      if (retries == 0) {
+        throw e;
+      } else {
+        skipToNextHost();
+        monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
+      }
+    } catch (UnavailableException e) {
+      log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
+          retries);
+      if (retries == 0) {
+        throw e;
+      } else {
+        skipToNextHost();
+        monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
+      }
+    } catch (TTransportException e) {
+      log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
+          retries);
+      if (retries == 0) {
+        throw e;
+      } else {
+        skipToNextHost();
+        monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
+      }
+    }
+    return false;
   }
 
   /**
