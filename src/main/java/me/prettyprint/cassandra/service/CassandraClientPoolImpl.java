@@ -37,6 +37,14 @@ import org.slf4j.LoggerFactory;
     pools = new HashMap<PoolKey, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
   }
+  
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, List<String> cassandraHosts) {
+    this(clientMonitor);
+    for ( String urlPort : cassandraHosts ) {
+      log.debug("Creating pool-by-host instance: {}", urlPort);    
+      getPool(parseHostFromUrl(urlPort),parsePortFromUrl(urlPort));  
+    }
+  }
 
   @Override
   public CassandraClient borrowClient(String url, int port)
@@ -225,11 +233,9 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public CassandraClient borrowClient(String urlPort) throws IllegalStateException,
-      PoolExhaustedException, Exception {
-    int delim = urlPort.lastIndexOf(':');
-    String url = urlPort.substring(0, delim);
-    String strPort = urlPort.substring(delim + 1, urlPort.length());
-    int port = Integer.valueOf(strPort);
+      PoolExhaustedException, Exception {    
+    String url = parseHostFromUrl(urlPort);    
+    int port = parsePortFromUrl(urlPort);
     return borrowClient(url, port);
   }
 
@@ -253,5 +259,13 @@ import org.slf4j.LoggerFactory;
     // Method should never get here; an exception must have been thrown before, I'm only writing
     // this to make the compiler happy.
     return null;
+  }
+  
+  private String parseHostFromUrl(String urlPort) {
+    return urlPort.substring(0, urlPort.lastIndexOf(':'));      
+  }
+  
+  private int parsePortFromUrl(String urlPort) {
+    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));  
   }
 }
