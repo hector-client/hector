@@ -1,17 +1,12 @@
 package me.prettyprint.cassandra.testutils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import me.prettyprint.cassandra.service.CassandraClientTest;
-
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
+import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.apache.cassandra.utils.FileUtils;
 import org.apache.thrift.transport.TTransportException;
+
+import java.io.*;
 
 /**
 *
@@ -63,7 +58,7 @@ public class EmbeddedServerHelper {
   /**
    * Copies a resource from within the jar to a directory.
    *
-   * @param resourceName
+   * @param resource
    * @param directory
    * @throws IOException
    */
