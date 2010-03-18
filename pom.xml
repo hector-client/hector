@@ -124,6 +124,22 @@
       <systemPath>${basedir}/lib/apache-cassandra-0.6.0-beta2.jar</systemPath>
     </dependency>
     <dependency>
+      <groupId>org.cliffc.high_scale_lib</groupId>
+      <artifactId>high-scale-lib</artifactId>
+      <!-- dunno the version - using what's included in cassandra 6.0B2-->  
+      <version>0.1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.reardencommerce</groupId>
+      <artifactId>clhm-production</artifactId>
+      <!-- dunno the version - using what's included in cassandra 6.0B2-->
+      <version>0.1.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/clhm-production.jar</systemPath>
+    </dependency>            
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>1.5.8</version>
@@ -169,6 +185,11 @@
       <artifactId>properties-maven-plugin</artifactId>
       <version>1.0-alpha-2</version>
     </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+    </dependency>       
   </dependencies>
 
   <reporting>
