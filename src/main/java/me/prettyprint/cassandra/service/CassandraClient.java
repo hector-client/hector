@@ -1,14 +1,13 @@
 package me.prettyprint.cassandra.service;
 
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.thrift.TException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
-import org.apache.cassandra.service.Cassandra;
-import org.apache.cassandra.service.ConsistencyLevel;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.thrift.TException;
 
 
 /**

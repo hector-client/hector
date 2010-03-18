@@ -1,12 +1,11 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import org.apache.cassandra.thrift.*;
+import org.apache.thrift.TException;
+
 import java.util.List;
 import java.util.Map;
-
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
-import org.apache.cassandra.service.*;
-import org.apache.thrift.TException;
 
 /**
  * The keyspace is a high level handle to all read/write operations to cassandra.
@@ -35,7 +34,7 @@ public interface Keyspace {
    *           if no value exists for the column
    */
   Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
-      NotFoundException, UnavailableException, TException, TimedOutException;
+          NotFoundException, UnavailableException, TException, TimedOutException;
 
   /**
    * Get the SuperColumn at the given columnPath.

@@ -1,9 +1,8 @@
 package me.prettyprint.cassandra.service;
 
-import org.apache.cassandra.service.Cassandra;
-import org.apache.cassandra.service.Cassandra.Client;
-import org.apache.cassandra.service.ConsistencyLevel;
-import org.apache.cassandra.service.NotFoundException;
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -99,7 +98,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public Keyspace getKeyspace(String keySpaceName) throws IllegalArgumentException,
-      NotFoundException, TException {
+          NotFoundException, TException {
     return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
@@ -190,7 +189,7 @@ import java.util.concurrent.atomic.AtomicLong;
   }
 
   @Override
-  public Client getCassandra() {
+  public Cassandra.Client getCassandra() {
     return cassandra;
   }
 
