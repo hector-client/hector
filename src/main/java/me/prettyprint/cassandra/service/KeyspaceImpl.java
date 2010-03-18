@@ -1,30 +1,8 @@
 package me.prettyprint.cassandra.service;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-
-import org.apache.cassandra.service.Cassandra;
-import org.apache.cassandra.service.Column;
-import org.apache.cassandra.service.ColumnOrSuperColumn;
-import org.apache.cassandra.service.ColumnParent;
-import org.apache.cassandra.service.ColumnPath;
-import org.apache.cassandra.service.InvalidRequestException;
-import org.apache.cassandra.service.KeySlice;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.cassandra.service.SlicePredicate;
-import org.apache.cassandra.service.SliceRange;
-import org.apache.cassandra.service.SuperColumn;
-import org.apache.cassandra.service.TimedOutException;
-import org.apache.cassandra.service.UnavailableException;
+import org.apache.cassandra.service.*;
 import org.apache.cassandra.service.Cassandra.Client;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -32,6 +10,9 @@ import org.perf4j.StopWatch;
 import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.*;
 
 /**
  * Implementation of a Keyspace
@@ -62,7 +43,7 @@ import org.slf4j.LoggerFactory;
 
   private final Map<String, Map<String, String>> keyspaceDesc;
 
-  private final int consistency;
+  private final ConsistencyLevel consistency;
 
   private final FailoverPolicy failoverPolicy;
 
@@ -74,7 +55,7 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientMonitor monitor;
 
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
-      Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
+      Map<String, Map<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws TException {
     this.client = client;
@@ -231,9 +212,12 @@ import org.slf4j.LoggerFactory;
       @Override
       public SuperColumn execute(Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
-        ColumnParent clp = new ColumnParent(columnPath.getColumn_family(),
-            columnPath.getSuper_column());
-        SlicePredicate sp = new SlicePredicate(null, sliceRange);
+        ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
+        clp.setSuper_column(columnPath.getSuper_column());
+
+        SlicePredicate sp = new SlicePredicate();
+        sp.setSlice_range(sliceRange);
+          
         List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
             consistency);
         return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
@@ -344,9 +328,13 @@ import org.slf4j.LoggerFactory;
     valideSuperColumnPath(columnPath);
 
     // only can get supercolumn by multigetSuperSlice
-    ColumnParent clp = new ColumnParent(columnPath.getColumn_family(), columnPath.getSuper_column());
+    ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
+    clp.setSuper_column(columnPath.getSuper_column());
+      
     SliceRange sr = new SliceRange(new byte[0], new byte[0], reversed, size);
-    SlicePredicate sp = new SlicePredicate(null, sr);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
+      
     Map<String, List<SuperColumn>> sclist = multigetSuperSlice(keys, clp, sp);
 
     if (sclist == null || sclist.isEmpty()) {
@@ -466,7 +454,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public int getConsistencyLevel() {
+  public ConsistencyLevel getConsistencyLevel() {
     return consistency;
   }
 
@@ -520,7 +508,9 @@ import org.slf4j.LoggerFactory;
   private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
     for (Column col : columns) {
-      list.add(new ColumnOrSuperColumn(col, null));
+        ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
+        columnOrSuperColumn.setColumn(col);
+        list.add(columnOrSuperColumn);
     }
     return list;
   }
@@ -528,7 +518,9 @@ import org.slf4j.LoggerFactory;
   private static List<ColumnOrSuperColumn> getSoscSuperList(List<SuperColumn> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
     for (SuperColumn col : columns) {
-      list.add(new ColumnOrSuperColumn(null, col));
+      ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
+      columnOrSuperColumn.setSuper_column(col);
+      list.add(columnOrSuperColumn);
     }
     return list;
   }

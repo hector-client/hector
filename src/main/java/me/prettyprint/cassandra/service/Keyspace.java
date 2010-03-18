@@ -5,15 +5,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
-import org.apache.cassandra.service.Column;
-import org.apache.cassandra.service.ColumnParent;
-import org.apache.cassandra.service.ColumnPath;
-import org.apache.cassandra.service.InvalidRequestException;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.cassandra.service.SlicePredicate;
-import org.apache.cassandra.service.SuperColumn;
-import org.apache.cassandra.service.TimedOutException;
-import org.apache.cassandra.service.UnavailableException;
+import org.apache.cassandra.service.*;
 import org.apache.thrift.TException;
 
 /**
@@ -198,7 +190,7 @@ public interface Keyspace {
   /**
    * @return The consistency level held by this keyspace instance.
    */
-  int getConsistencyLevel();
+  ConsistencyLevel getConsistencyLevel();
 
   String getName();
 

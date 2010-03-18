@@ -112,16 +112,16 @@
     <dependency>
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>820831</version>
+      <version>894924</version>
       <scope>system</scope>
-      <systemPath>${basedir}/lib/libthrift-r820831.jar</systemPath>
+      <systemPath>${basedir}/lib/libthrift-r894924.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra</artifactId>
       <version>0.5.1</version>
       <scope>system</scope>
-      <systemPath>${basedir}/lib/apache-cassandra-0.5.1.jar</systemPath>
+      <systemPath>${basedir}/lib/apache-cassandra-incubating-0.5.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

@@ -1,12 +1,12 @@
 package org.apache.cassandra.contrib.utils.service;
 
+import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.io.util.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
-import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.utils.FileUtils;
 
 /**
  * A cleanup utility that wipes the cassandra data directories.

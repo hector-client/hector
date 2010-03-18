@@ -23,7 +23,8 @@ public class ExampleClient {
 
     try {
       Keyspace keyspace = client.getKeyspace("Keyspace1");
-      ColumnPath columnPath = new ColumnPath("Standard1", null, bytes("column-name"));
+      ColumnPath columnPath = new ColumnPath("Standard1");
+      columnPath.setColumn(bytes("column-name"));
 
       // insert
       keyspace.insert("key", columnPath, bytes("value"));
