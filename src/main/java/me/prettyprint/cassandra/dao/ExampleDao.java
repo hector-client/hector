@@ -38,6 +38,8 @@ public class ExampleDao {
     public static void main(String[] args) throws Exception {
         ExampleDao ed = new ExampleDao();
         ed.insert("key1", "value1");
+
+        System.out.println(ed.get("key1"));
     }
 
     /**
