@@ -1,8 +1,8 @@
 package me.prettyprint.cassandra.dao;
 
 import me.prettyprint.cassandra.service.Keyspace;
-import org.apache.cassandra.service.ColumnPath;
-import org.apache.cassandra.service.NotFoundException;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.NotFoundException;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;

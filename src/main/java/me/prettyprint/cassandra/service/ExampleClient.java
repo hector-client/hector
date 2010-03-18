@@ -1,10 +1,10 @@
 package me.prettyprint.cassandra.service;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnPath;
+
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
-
-import org.apache.cassandra.service.Column;
-import org.apache.cassandra.service.ColumnPath;
 
 /**
  * Example client that uses the cassandra hector client.

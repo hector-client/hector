@@ -2,8 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-import org.apache.cassandra.service.*;
-import org.apache.cassandra.service.Cassandra.Client;
+import org.apache.cassandra.thrift.*;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.perf4j.StopWatch;
@@ -96,7 +95,7 @@ import java.util.*;
 
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         cassandra.batch_insert(keyspaceName, key, cfmap, consistency);
         return null;
@@ -110,7 +109,7 @@ import java.util.*;
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
     Operation<Integer> op = new Operation<Integer>(OperationType.READ) {
       @Override
-      public Integer execute(Client cassandra) throws InvalidRequestException,
+      public Integer execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         return cassandra.get_count(keyspaceName, key, columnParent, consistency);
       }
@@ -126,7 +125,7 @@ import java.util.*;
     Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
+      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
             start, finish, count, consistency);
@@ -151,7 +150,7 @@ import java.util.*;
     Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<SuperColumn>> execute(Client cassandra)
+      public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
         List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
             start, finish, count, consistency);
@@ -176,7 +175,7 @@ import java.util.*;
       UnavailableException, TException, TimedOutException {
     Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ) {
       @Override
-      public List<Column> execute(Client cassandra) throws InvalidRequestException,
+      public List<Column> execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
             predicate, consistency);
@@ -210,7 +209,7 @@ import java.util.*;
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
     Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
       @Override
-      public SuperColumn execute(Client cassandra) throws InvalidRequestException,
+      public SuperColumn execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
         clp.setSuper_column(columnPath.getSuper_column());
@@ -233,7 +232,7 @@ import java.util.*;
       UnavailableException, TException, TimedOutException {
     Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ) {
       @Override
-      public List<SuperColumn> execute(Client cassandra) throws InvalidRequestException,
+      public List<SuperColumn> execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
             predicate, consistency);
@@ -257,7 +256,7 @@ import java.util.*;
     valideColumnPath(columnPath);
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistency);
         return null;
@@ -273,7 +272,7 @@ import java.util.*;
 
     Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(OperationType.READ) {
       @Override
-      public Map<String, Column> execute(Client cassandra) throws InvalidRequestException,
+      public Map<String, Column> execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspaceName, keys, columnPath,
             consistency);
@@ -298,7 +297,7 @@ import java.util.*;
     Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<Column>> execute(Client cassandra) throws InvalidRequestException,
+      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
           UnavailableException, TException, TimedOutException {
         Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
             columnParent, predicate, consistency);
@@ -358,7 +357,7 @@ import java.util.*;
     Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<SuperColumn>> execute(Client cassandra)
+      public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
           throws InvalidRequestException, UnavailableException, TException, TimedOutException {
         Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
             columnParent, predicate, consistency);
@@ -399,7 +398,7 @@ import java.util.*;
       UnavailableException, TException, TimedOutException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistency);
         return null;
@@ -432,7 +431,7 @@ import java.util.*;
 
     Operation<Column> op = new Operation<Column>(OperationType.READ) {
       @Override
-      public Column execute(Client cassandra) throws InvalidRequestException, UnavailableException,
+      public Column execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
         ColumnOrSuperColumn cosc;
         try {

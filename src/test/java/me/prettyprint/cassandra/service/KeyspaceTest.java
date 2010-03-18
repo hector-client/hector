@@ -1,41 +1,27 @@
 package me.prettyprint.cassandra.service;
 
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
-import static me.prettyprint.cassandra.utils.StringUtils.string;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
-
-import org.apache.cassandra.service.*;
+import org.apache.cassandra.thrift.*;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.*;
+
+import static me.prettyprint.cassandra.utils.StringUtils.bytes;
+import static me.prettyprint.cassandra.utils.StringUtils.string;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * For the tests we assume the following structure:
@@ -79,7 +65,7 @@ public class KeyspaceTest {
 
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
-      NotFoundException, UnknownHostException {
+          NotFoundException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
     monitor = mock(CassandraClientMonitor.class);
     client = new CassandraClientFactory(pools, "localhost", 9170, monitor).create();

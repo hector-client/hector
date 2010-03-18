@@ -1,13 +1,10 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.Set;
-
 import me.prettyprint.cassandra.service.CassandraClientPoolByHost.ExhaustedPolicy;
-
-import org.apache.cassandra.service.TimedOutException;
-import org.apache.cassandra.service.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
+
+import java.util.Set;
 
 /**
  * Defines the various JMX methods the CassandraClientMonitor exposes.
@@ -28,13 +25,13 @@ public interface CassandraClientMonitorMBean {
   long getReadFail();
 
   /**
-   * @return Number of {@link TimedOutException} that the client has been able to recover from by
+   * @return Number of {@link org.apache.cassandra.thrift.TimedOutException} that the client has been able to recover from by
    * failing over to a different host in the ring.
    */
   long getRecoverableTimedOutCount();
 
   /**
-   * @return Number of {@link UnavailableException} that the client has been able to recover from by
+   * @return Number of {@link org.apache.cassandra.thrift.UnavailableException} that the client has been able to recover from by
    * failing over to a different host in the ring.
    */
   long getRecoverableUnavailableCount();

@@ -1,12 +1,10 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.Map;
-
-
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
-import org.apache.cassandra.service.ConsistencyLevel;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.thrift.TException;
+
+import java.util.Map;
 
 /**
  *
