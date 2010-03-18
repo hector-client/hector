@@ -20,29 +20,34 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-/*package*/ class JmxMonitor {
+public class JmxMonitor {
 
   private static final Logger log = LoggerFactory.getLogger(JmxMonitor.class);
 
-  private final MBeanServer mbs;
-  private final CassandraClientMonitor cassandraClientMonitor;
+  private MBeanServer mbs;
+  private CassandraClientMonitor cassandraClientMonitor;
 
-  public JmxMonitor() {
-    mbs = ManagementFactory.getPlatformMBeanServer();
-    cassandraClientMonitor = new CassandraClientMonitor();
-    try {
-      registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
-          cassandraClientMonitor);
-    } catch (MalformedObjectNameException e) {
-      log.error("Unable to register JMX monitor", e);
-    } catch (InstanceAlreadyExistsException e) {
-      log.error("Unable to register JMX monitor", e);
-    } catch (MBeanRegistrationException e) {
-      log.error("Unable to register JMX monitor", e);
-    } catch (NotCompliantMBeanException e) {
-      log.error("Unable to register JMX monitor", e);
-    }
+  public JmxMonitor() {    
+      this(new CassandraClientMonitor());    
   }
+  
+  public JmxMonitor(CassandraClientMonitor cassandraClientMonitor) {
+      mbs = ManagementFactory.getPlatformMBeanServer();
+      this.cassandraClientMonitor = cassandraClientMonitor;
+      try {
+        registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
+            cassandraClientMonitor);
+      } catch (MalformedObjectNameException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (InstanceAlreadyExistsException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (MBeanRegistrationException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (NotCompliantMBeanException e) {
+        log.error("Unable to register JMX monitor", e);
+      }
+    }
+
 
   public void addPool(CassandraClientPool pool) {
     cassandraClientMonitor.addPool(pool);
