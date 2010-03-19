@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
@@ -126,7 +126,7 @@
     <dependency>
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
-      <!-- dunno the version - using what's included in cassandra 6.0B2-->  
+      <!-- dunno the version - using what's included in cassandra 6.0B2-->
       <version>0.1.0</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
@@ -138,7 +138,7 @@
       <version>0.1.0</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/clhm-production.jar</systemPath>
-    </dependency>            
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -191,9 +191,9 @@
       <version>3.2.1</version>
     </dependency>
     <dependency>
-        <groupId>com.googlecode.json-simple</groupId>
-        <artifactId>json-simple</artifactId>
-        <version>1.1</version>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
     </dependency>
   </dependencies>
 
