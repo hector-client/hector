@@ -542,23 +542,18 @@ public class KeyspaceTest {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlice_" + i));
-      
+
       keyspace.insert("testGetRangeSlice0", cp, bytes("testGetRangeSlice_Value_" + i));
       keyspace.insert("testGetRangeSlice1", cp, bytes("testGetRangeSlice_Value_" + i));
       keyspace.insert("testGetRangeSlice2", cp, bytes("testGetRangeSlice_Value_" + i));
-      keyspace.insert("testGetRangeSlice3", cp, bytes("testGetRangeSlice_Value_" + i));
-      keyspace.insert("testGetRangeSlice4", cp, bytes("testGetRangeSlice_Value_" + i));  
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Standard2");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], true, 150);
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);  
-    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testG", "", 30);
-
-    // TODO: WTF sometimes testGetRangeSlice1 is missing. i dont get it... is insert broken??  
-    Map<String, List<Column>> map = keyspace.getRangeSlice(clp, sp, "", "", 30);
+    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0", "testGetRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(3, keySlices.size());
@@ -588,7 +583,8 @@ public class KeyspaceTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);  
-    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp, "s", "u", 5);
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
+            "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());
