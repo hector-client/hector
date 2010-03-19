@@ -127,15 +127,14 @@
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
       <!-- dunno the version - using what's included in cassandra 6.0B2-->
-      <version>0.1.0</version>
+      <version>1.0.0</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>com.reardencommerce</groupId>
       <artifactId>clhm-production</artifactId>
-      <!-- dunno the version - using what's included in cassandra 6.0B2-->
-      <version>0.1.0</version>
+      <version>1.0.0</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/clhm-production.jar</systemPath>
     </dependency>
