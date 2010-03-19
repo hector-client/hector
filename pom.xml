@@ -126,7 +126,6 @@
     <dependency>
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
-      <!-- dunno the version - using what's included in cassandra 6.0B2-->
       <version>1.0.0</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
@@ -188,11 +187,20 @@
       <groupId>commons-collections</groupId>
       <artifactId>commons-collections</artifactId>
       <version>3.2.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.googlecode.json-simple</groupId>
       <artifactId>json-simple</artifactId>
       <version>1.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-javautils</artifactId>
+      <systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
+      <version>1.0.0</version>
+      <scope>system</scope>
     </dependency>
   </dependencies>
 
