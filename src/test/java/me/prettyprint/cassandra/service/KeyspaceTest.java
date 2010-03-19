@@ -245,6 +245,7 @@ public class KeyspaceTest {
 
     ColumnPath cp = new ColumnPath("Standard2");
     keyspace.remove("testGetSlice_", cp);
+    keyspace.remove("testGetSlice", cp);
   }
 
   @Test
@@ -541,24 +542,29 @@ public class KeyspaceTest {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlice_" + i));
+      
       keyspace.insert("testGetRangeSlice0", cp, bytes("testGetRangeSlice_Value_" + i));
       keyspace.insert("testGetRangeSlice1", cp, bytes("testGetRangeSlice_Value_" + i));
       keyspace.insert("testGetRangeSlice2", cp, bytes("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice3", cp, bytes("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice4", cp, bytes("testGetRangeSlice_Value_" + i));  
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Standard2");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], true, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);  
-    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice1",
-        "testGetRangeSlice4", 5);
+    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testG", "", 30);
 
-//    assertNotNull(keySlices);
-////    assertEquals(3, keySlices.size());
-//    assertNotNull("testGetRangeSlice1 is null", keySlices.get("testGetRangeSlice1"));
-//    assertEquals("testGetRangeSlice_Value_1", string(keySlices.get("testGetRangeSlice1").get(0).getValue()));
-//    assertEquals(10, keySlices.get("testGetRangeSlice1").size());
+    // TODO: WTF sometimes testGetRangeSlice1 is missing. i dont get it... is insert broken??  
+    Map<String, List<Column>> map = keyspace.getRangeSlice(clp, sp, "", "", 30);
+
+    assertNotNull(keySlices);
+    assertEquals(3, keySlices.size());
+    assertNotNull("testGetRangeSlice1 is null", keySlices.get("testGetRangeSlice1"));
+    assertEquals("testGetRangeSlice_Value_0", string(keySlices.get("testGetRangeSlice1").get(0).getValue()));
+    assertEquals(10, keySlices.get("testGetRangeSlice1").size());
 
     ColumnPath cp = new ColumnPath("Standard2");
     keyspace.remove("testGetRanageSlice0", cp);
@@ -571,8 +577,7 @@ public class KeyspaceTest {
       TimedOutException, NotFoundException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Super1");
-
-      cp.setColumn(bytes("SuperColumn_1"));
+      cp.setSuper_column((bytes("SuperColumn_1")));
       cp.setColumn(bytes("testGetSuperRangeSlice_" + i));  
       keyspace.insert("testGetSuperRangeSlice0", cp, bytes("testGetSuperRangeSlice_Value_" + i));
       keyspace.insert("testGetSuperRangeSlice1", cp, bytes("testGetSuperRangeSlice_Value_" + i));
@@ -583,8 +588,7 @@ public class KeyspaceTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);  
-    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
-        "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp, "s", "u", 5);
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());
