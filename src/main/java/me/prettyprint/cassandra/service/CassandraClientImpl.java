@@ -98,7 +98,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public Keyspace getKeyspace(String keySpaceName) throws IllegalArgumentException,
-          NotFoundException, TException {
+      NotFoundException, TException {
     return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
