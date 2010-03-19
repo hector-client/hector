@@ -9,6 +9,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
@@ -661,7 +662,7 @@ public class KeyspaceTest {
 
     // now fail the call and make sure it fails fast
     doThrow(new TimedOutException()).when(h1cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), ConsistencyLevel.ONE);
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
@@ -678,14 +679,14 @@ public class KeyspaceTest {
 
     ks.insert("key", cp, bytes("value"));
     verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
-        (byte[]) anyObject(), anyLong(), ConsistencyLevel.ONE);
+        (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     verify(clientPools).borrowClient("h3", 111);
 
     // make both h1 and h3 fail
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
     doThrow(new TimedOutException()).when(h3cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), ConsistencyLevel.ZERO);
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
@@ -702,13 +703,13 @@ public class KeyspaceTest {
 
     ks.insert("key", cp, bytes("value"));
     verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
-        (byte[]) anyObject(), anyLong(), ConsistencyLevel.ZERO);
+        (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
 
     // now fail them all. h1 fails, h2 fails, h3 fails
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
     doThrow(new TimedOutException()).when(h2cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), ConsistencyLevel.ZERO);
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
@@ -759,7 +760,7 @@ public class KeyspaceTest {
 
     // fail the call, use a transport exception
     doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), ConsistencyLevel.ZERO);
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
 
     ks.insert("key", cp, bytes("value"));
 
