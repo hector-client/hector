@@ -28,25 +28,25 @@ public class JmxMonitor {
   private CassandraClientMonitor cassandraClientMonitor;
 
   public JmxMonitor() {    
-      this(new CassandraClientMonitor());    
+    this(new CassandraClientMonitor());    
   }
   
   public JmxMonitor(CassandraClientMonitor cassandraClientMonitor) {
-      mbs = ManagementFactory.getPlatformMBeanServer();
-      this.cassandraClientMonitor = cassandraClientMonitor;
-      try {
-        registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
-            cassandraClientMonitor);
-      } catch (MalformedObjectNameException e) {
-        log.error("Unable to register JMX monitor", e);
-      } catch (InstanceAlreadyExistsException e) {
-        log.error("Unable to register JMX monitor", e);
-      } catch (MBeanRegistrationException e) {
-        log.error("Unable to register JMX monitor", e);
-      } catch (NotCompliantMBeanException e) {
-        log.error("Unable to register JMX monitor", e);
-      }
+    mbs = ManagementFactory.getPlatformMBeanServer();
+    this.cassandraClientMonitor = cassandraClientMonitor;
+    try {
+      registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
+          cassandraClientMonitor);
+    } catch (MalformedObjectNameException e) {
+      log.error("Unable to register JMX monitor", e);
+    } catch (InstanceAlreadyExistsException e) {
+      log.error("Unable to register JMX monitor", e);
+    } catch (MBeanRegistrationException e) {
+      log.error("Unable to register JMX monitor", e);
+    } catch (NotCompliantMBeanException e) {
+      log.error("Unable to register JMX monitor", e);
     }
+  }
 
 
   public void addPool(CassandraClientPool pool) {
