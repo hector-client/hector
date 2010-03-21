@@ -38,9 +38,9 @@ import org.slf4j.LoggerFactory;
     this.clientMonitor = clientMonitor;
   }
   
-  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, List<String> cassandraHosts) {
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, String[] cassandraHosts) {
     this(clientMonitor);
-    for ( String urlPort : cassandraHosts ) {
+    for (String urlPort : cassandraHosts) {
       log.debug("Creating pool-by-host instance: {}", urlPort);    
       getPool(parseHostFromUrl(urlPort),parsePortFromUrl(urlPort));  
     }
