@@ -30,6 +30,14 @@ import org.apache.thrift.TException;
  *
  */
 public interface CassandraClientPool {
+  
+  /**
+   * Borrow a previously created CassandraClient. To be used when you have set up the 
+   * hosts before hand or you dont care about which host services the request
+   * @return
+   */
+  CassandraClient borrowClient() 
+      throws IllegalStateException, PoolExhaustedException, Exception;
 
   /**
    * Borrows a client from the pool defined by url:port

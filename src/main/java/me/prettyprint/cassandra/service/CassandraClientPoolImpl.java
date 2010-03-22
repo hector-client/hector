@@ -46,6 +46,27 @@ import org.slf4j.LoggerFactory;
     }
   }
 
+  
+  @Override
+  public CassandraClient borrowClient() throws IllegalStateException,
+        PoolExhaustedException, Exception {    
+    List<CassandraClientPoolByHost> clients = new ArrayList<CassandraClientPoolByHost>(pools.values());
+    while(!clients.isEmpty()) {
+      int rand = (int) (Math.random() * pools.size());
+      try {
+        return clients.get(rand).borrowClient();
+      } catch (Exception e) {
+        if (clients.size() > 1) {
+          log.warn("Unable to obtain previously existing client " + clients.get(rand) + " will try the next client", e);
+          clients.remove(rand);            
+        } else {
+          throw e;
+        }
+      }
+    }    
+    return null;
+  }
+
   @Override
   public CassandraClient borrowClient(String url, int port)
       throws IllegalStateException, PoolExhaustedException, Exception {
@@ -196,7 +217,7 @@ import org.slf4j.LoggerFactory;
     public String toString() {
       return name;
     }
-
+        
     @Override
     public boolean equals(Object obj) {
       if (! (obj instanceof PoolKey)) {
