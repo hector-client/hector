@@ -52,11 +52,11 @@ import org.slf4j.LoggerFactory;
         PoolExhaustedException, Exception {    
     List<CassandraClientPoolByHost> clients = new ArrayList<CassandraClientPoolByHost>(pools.values());
     while(!clients.isEmpty()) {
-      int rand = (int) (Math.random() * pools.size());
+      int rand = (int) (Math.random() * clients.size());
       try {
         return clients.get(rand).borrowClient();
       } catch (Exception e) {
-        if (clients.size() > 1) {
+        if (clients.size() > 0) {
           log.warn("Unable to obtain previously existing client " + clients.get(rand) + " will try the next client", e);
           clients.remove(rand);            
         } else {
