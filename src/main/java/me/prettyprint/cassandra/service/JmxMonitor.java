@@ -70,7 +70,12 @@ import org.slf4j.LoggerFactory;
   }
 
   private void registerPerf4J() {
-    DOMConfigurator.configure(ExampleClient.class.getClassLoader().getResource("hectorLog4j.xml"));
+    URL url = getClass().getClassLoader().getResource("hectorLog4j.xml");
+    if (url == null) {
+      log.error("Unable to locate hectorLog4j.xml; performance counters will not be exported");
+    } else {
+      DOMConfigurator.configure(url);
+    }
   }
 
   private String generateMonitorName(String className, String monitorType) {
