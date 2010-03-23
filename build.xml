@@ -45,9 +45,7 @@
     <fileset dir="${basedir}/anttestlib/">
       <include name="**/*.jar" />
     </fileset>
-    <fileset dir="${resources}">
-      <include name="**/*" />
-    </fileset>
+    <pathelement location="${resources}"/>
   </path>
 
   <!-- ====================================================================== -->
