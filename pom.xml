@@ -182,6 +182,7 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>3.0.0.RELEASE</version>
+      <scope>test</scope>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
