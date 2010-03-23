@@ -5,7 +5,7 @@ set -e
 set -u
 
 echo Running mvn install
-#mvn install
+mvn clean install
 
 # read the version from pom.xml
 version=$(sed -n "s/<version>\(.*\)<\/version>/\1/p" pom.xml | head -1)
