@@ -10,18 +10,22 @@ import org.apache.cassandra.service.ColumnPath;
 import org.apache.cassandra.service.NotFoundException;
 
 public class ExampleSpringDao {
-    
+  // statics for default values  
+  private static String CASSANDRA_KEYSPACE = "Keyspace1";
+  private static String CF_NAME = "Standard1";
+  private static String COLUMN_NAME = "v";    
+  // configurable values
   private String keyspace = CASSANDRA_KEYSPACE;
   private String columnFamilyName = CF_NAME;
   private String columnName = COLUMN_NAME;
   private int consistencyLevel = CassandraClient.DEFAULT_CONSISTENCY_LEVEL;
-    
-  private static String CASSANDRA_KEYSPACE = "Keyspace1";
-  private static String CF_NAME = "Standard1";
-  private static String COLUMN_NAME = "v";
-
+  // collaborator
   private CassandraClientPool cassandraClientPool;
     
+  /**
+   * Must be constructed with a CassandraClientPool
+   * @param cassandraClientPool
+   */
   public ExampleSpringDao(CassandraClientPool cassandraClientPool) {
     this.cassandraClientPool = cassandraClientPool;
   }
