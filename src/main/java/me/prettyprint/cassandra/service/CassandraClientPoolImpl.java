@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * efficiently be reused.
  *
  * @author Ran Tavory (ran@outbain.com)
+ * @author Nate McCall (nate@vervewireless.com)
  *
  */
 /*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
@@ -49,22 +50,14 @@ import org.slf4j.LoggerFactory;
   
   @Override
   public CassandraClient borrowClient() throws IllegalStateException,
-        PoolExhaustedException, Exception {    
-    List<CassandraClientPoolByHost> clients = new ArrayList<CassandraClientPoolByHost>(pools.values());
-    while(!clients.isEmpty()) {
-      int rand = (int) (Math.random() * clients.size());
-      try {
-        return clients.get(rand).borrowClient();
-      } catch (Exception e) {
-        if (clients.size() > 0) {
-          log.warn("Unable to obtain previously existing client " + clients.get(rand) + " will try the next client", e);
-          clients.remove(rand);            
-        } else {
-          throw e;
-        }
-      }
+        PoolExhaustedException, Exception {        
+    String[] clients = new String[pools.size()];
+    int x = 0;
+    for(PoolKey poolKey : pools.keySet()) {
+      clients[x] = poolKey.getUrlPort();
+      x++;
     }    
-    return null;
+    return borrowClient(clients);
   }
 
   @Override
@@ -201,6 +194,10 @@ import org.slf4j.LoggerFactory;
       b.append("):");
       b.append(port);
       name = b.toString();
+    }
+    
+    private String getUrlPort() {
+      return new StringBuilder(32).append(url).append(':').append(port).toString();
     }
 
     /**
