@@ -142,14 +142,12 @@
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.14</version>
-    </dependency>
-            
+    </dependency>            
     <dependency>
       <groupId>org.perf4j</groupId>
       <artifactId>perf4j</artifactId>
       <version>0.9.12</version>
     </dependency>
-
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
@@ -184,7 +182,6 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>3.0.0.RELEASE</version>
-      <scope>runtime</scope>
       <exclusions>
         <exclusion>
           <groupId>commons-logging</groupId>
