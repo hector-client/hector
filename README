@@ -13,8 +13,5 @@ This client provides:
  o JMX conters for monitoring and management
  o load balancing
 
-TODO:
- o Add more JMX stats, especially for read and write throughput management
-
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 
