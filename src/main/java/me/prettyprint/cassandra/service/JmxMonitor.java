@@ -20,16 +20,20 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-/*package*/ class JmxMonitor {
+public class JmxMonitor {
 
   private static final Logger log = LoggerFactory.getLogger(JmxMonitor.class);
 
-  private final MBeanServer mbs;
-  private final CassandraClientMonitor cassandraClientMonitor;
+  private MBeanServer mbs;
+  private CassandraClientMonitor cassandraClientMonitor;
 
-  public JmxMonitor() {
+  public JmxMonitor() {    
+    this(new CassandraClientMonitor());    
+  }
+  
+  public JmxMonitor(CassandraClientMonitor cassandraClientMonitor) {
     mbs = ManagementFactory.getPlatformMBeanServer();
-    cassandraClientMonitor = new CassandraClientMonitor();
+    this.cassandraClientMonitor = cassandraClientMonitor;
     try {
       registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
           cassandraClientMonitor);
@@ -43,6 +47,7 @@ import org.slf4j.LoggerFactory;
       log.error("Unable to register JMX monitor", e);
     }
   }
+
 
   public void addPool(CassandraClientPool pool) {
     cassandraClientMonitor.addPool(pool);

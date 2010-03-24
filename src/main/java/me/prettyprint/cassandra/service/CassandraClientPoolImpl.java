@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
  * efficiently be reused.
  *
  * @author Ran Tavory (ran@outbain.com)
+ * @author Nate McCall (nate@vervewireless.com)
  *
  */
 /*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
@@ -36,6 +37,27 @@ import org.slf4j.LoggerFactory;
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     pools = new HashMap<PoolKey, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
+  }
+  
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, String[] cassandraHosts) {
+    this(clientMonitor);
+    for (String urlPort : cassandraHosts) {
+      log.debug("Creating pool-by-host instance: {}", urlPort);    
+      getPool(parseHostFromUrl(urlPort),parsePortFromUrl(urlPort));  
+    }
+  }
+
+  
+  @Override
+  public CassandraClient borrowClient() throws IllegalStateException,
+        PoolExhaustedException, Exception {        
+    String[] clients = new String[pools.size()];
+    int x = 0;
+    for(PoolKey poolKey : pools.keySet()) {
+      clients[x] = poolKey.getUrlPort();
+      x++;
+    }    
+    return borrowClient(clients);
   }
 
   @Override
@@ -173,6 +195,10 @@ import org.slf4j.LoggerFactory;
       b.append(port);
       name = b.toString();
     }
+    
+    private String getUrlPort() {
+      return new StringBuilder(32).append(url).append(':').append(port).toString();
+    }
 
     /**
      * Checks whether name resolution should occur.
@@ -188,7 +214,7 @@ import org.slf4j.LoggerFactory;
     public String toString() {
       return name;
     }
-
+        
     @Override
     public boolean equals(Object obj) {
       if (! (obj instanceof PoolKey)) {
@@ -225,11 +251,9 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public CassandraClient borrowClient(String urlPort) throws IllegalStateException,
-      PoolExhaustedException, Exception {
-    int delim = urlPort.lastIndexOf(':');
-    String url = urlPort.substring(0, delim);
-    String strPort = urlPort.substring(delim + 1, urlPort.length());
-    int port = Integer.valueOf(strPort);
+      PoolExhaustedException, Exception {    
+    String url = parseHostFromUrl(urlPort);    
+    int port = parsePortFromUrl(urlPort);
     return borrowClient(url, port);
   }
 
@@ -253,5 +277,13 @@ import org.slf4j.LoggerFactory;
     // Method should never get here; an exception must have been thrown before, I'm only writing
     // this to make the compiler happy.
     return null;
+  }
+  
+  private String parseHostFromUrl(String urlPort) {
+    return urlPort.substring(0, urlPort.lastIndexOf(':'));      
+  }
+  
+  private int parsePortFromUrl(String urlPort) {
+    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));  
   }
 }
