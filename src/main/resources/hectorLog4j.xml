@@ -6,7 +6,7 @@
       into GroupedTimingStatistics messages which it sends on the
       file appender defined below
     -->
-    <appender name="CoalescingStatistics" class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+    <appender name="hector_CoalescingStatistics" class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
         <!--
           The TimeSlice option is used to determine the time window for which
           all received StopWatch logs are aggregated to create a single
@@ -47,7 +47,7 @@
     -->
     <logger name="org.perf4j.TimingLogger" additivity="false">
         <level value="info"/>
-        <appender-ref ref="CoalescingStatistics"/>
+        <appender-ref ref="hector_CoalescingStatistics"/>
     </logger>
 
 </log4j:configuration>
