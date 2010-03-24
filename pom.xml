@@ -148,11 +148,20 @@
       <version>1.5.8</version>
     </dependency>
     <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>1.5.8</version>
+    </dependency>
+    <dependency>
+      <groupId>log4j</groupId>
+      <artifactId>log4j</artifactId>
+      <version>1.2.14</version>
+    </dependency>            
+    <dependency>
       <groupId>org.perf4j</groupId>
       <artifactId>perf4j</artifactId>
       <version>0.9.12</version>
     </dependency>
-
     <dependency>
       <groupId>com.google.collections</groupId>
       <artifactId>google-collections</artifactId>
@@ -201,6 +210,24 @@
       <systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
       <version>1.0.0</version>
       <scope>system</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>3.0.0.RELEASE</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
+     </dependency>
+     <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+      <version>3.0.0.RELEASE</version>   
+      <scope>test</scope>               
     </dependency>
   </dependencies>
 

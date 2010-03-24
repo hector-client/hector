@@ -90,7 +90,19 @@ public class CassandraClientPoolTest {
     } catch (Exception e) {
       // ok
     }
-}
+  }
+  
+  @Test
+  public void testBorrowExistingClient() throws IllegalStateException, PoolExhaustedException, Exception {
+    // make sure we always have at least one good existing client
+    CassandraClient client = store.borrowClient(new String[] {"localhost:9170"});
+    store.releaseClient(client);
+    client = store.borrowClient();
+    assertNotNull(client);
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
+
+  }
 
   @Test
   public void testReleaseClient() throws IllegalStateException, PoolExhaustedException, Exception {
