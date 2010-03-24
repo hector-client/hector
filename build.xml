@@ -38,10 +38,10 @@
     </fileset>
   </path>
   <path id="build.test.classpath">
-    <path refid="build.classpath"/>
+    <path refid="build.classpath"/>  	
     <fileset dir="${basedir}/testlib/">
       <include name="**/*.jar" />
-    </fileset>
+    </fileset>   	
     <fileset dir="${basedir}/anttestlib/">
       <include name="**/*.jar" />
     </fileset>
@@ -125,8 +125,8 @@
       <classpath>
         <path refid="build.test.classpath"/>
         <path refid="build.classpath"/>
-        <pathelement location="${build.outputDir}"/>
-        <pathelement location="${build.testOutputDir}"/>
+        <pathelement location="${build.outputDir}"/> 
+        <pathelement location="${build.testOutputDir}"/> 
       </classpath>
       <batchtest todir="${test.reports}" unless="test">
         <fileset dir="${build.testDir.0}">
