@@ -113,7 +113,6 @@ import java.net.UnknownHostException;
   }
 
   private boolean validateClient(CassandraClient client) {
-    // TODO send fast and easy request to cassandra
     return !client.isClosed() && !client.hasErrors();
   }
 
@@ -127,7 +126,7 @@ import java.net.UnknownHostException;
 
   @Override
   public void passivateObject(Object obj) throws Exception {
-    // TODO Auto-generated method stub
+    // none
   }
 
 }

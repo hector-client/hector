@@ -234,7 +234,6 @@ import org.slf4j.LoggerFactory;
   @Override
   public void invalidateClient(CassandraClient client) {
     getPool(client).invalidateClient(client);
-
   }
 
   void reportDestroyed(CassandraClient client) {
@@ -286,5 +285,10 @@ import org.slf4j.LoggerFactory;
 
   private int parsePortFromUrl(String urlPort) {
     return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
+  }
+
+  @Override
+  public void invalidateAllConnectionsToHost(CassandraClient client) {
+    getPool(client).invalidateAll();
   }
 }

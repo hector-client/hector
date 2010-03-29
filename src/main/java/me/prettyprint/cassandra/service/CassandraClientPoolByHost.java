@@ -141,4 +141,9 @@ import org.apache.thrift.TException;
    *    are borrowed as well as clients that are currently kept in the pool.
    */
   Set<CassandraClient> getLiveClients();
+
+  /**
+   * Invalidates all current connections in the pool.
+   */
+  void invalidateAll();
 }

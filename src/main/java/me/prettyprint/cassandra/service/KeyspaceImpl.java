@@ -216,7 +216,7 @@ import java.util.*;
 
         SlicePredicate sp = new SlicePredicate();
         sp.setSlice_range(sliceRange);
-          
+
         List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
             consistency);
         return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
@@ -329,11 +329,11 @@ import java.util.*;
     // only can get supercolumn by multigetSuperSlice
     ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
     clp.setSuper_column(columnPath.getSuper_column());
-      
+
     SliceRange sr = new SliceRange(new byte[0], new byte[0], reversed, size);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
-      
+
     Map<String, List<SuperColumn>> sclist = multigetSuperSlice(keys, clp, sp);
 
     if (sclist == null || sclist.isEmpty()) {
@@ -592,11 +592,17 @@ import java.util.*;
    * next pool.
    * @param isRetrySameHostAgain should the skip operation try the same current host, or should it
    * really skip to the next host in the ring?
+   * @param invalidateAllConnectionsToCurrentHost If true, all connections to the current host
+   * should be invalidated.
    */
-  private void skipToNextHost(boolean isRetrySameHostAgain) throws IllegalStateException,
-      PoolExhaustedException, Exception {
+  private void skipToNextHost(boolean isRetrySameHostAgain,
+      boolean invalidateAllConnectionsToCurrentHost)
+      throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
     invalidate();
+    if (invalidateAllConnectionsToCurrentHost) {
+      clientPools.invalidateAllConnectionsToHost(client);
+    }
 
     String nextHost = isRetrySameHostAgain ? client.getUrl() :
         getNextHost(client.getUrl(), client.getIp());
@@ -604,6 +610,8 @@ import java.util.*;
       log.error("Unable to find next host to skip to at {}", toString());
       throw new TException("Unable to failover to next host");
     }
+
+
     // assume they use the same port
     client = clientPools.borrowClient(nextHost, client.getPort());
     cassandra = client.getCassandra();
@@ -738,7 +746,7 @@ import java.util.*;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost(isFirst);
+        skipToNextHost(isFirst, false);
         monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
       }
     } catch (UnavailableException e) {
@@ -747,7 +755,7 @@ import java.util.*;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost(isFirst);
+        skipToNextHost(isFirst, true);
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (TTransportException e) {
@@ -756,7 +764,7 @@ import java.util.*;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost(isFirst);
+        skipToNextHost(isFirst, true);
         monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
       }
     }

@@ -151,4 +151,9 @@ public interface CassandraClientPool {
    * This is usually so when the client has errors.
    */
   void invalidateClient(CassandraClient client);
+
+  /**
+   * Use this method to invalidate all client connections to the same host.
+   */
+  void invalidateAllConnectionsToHost(CassandraClient client);
 }
