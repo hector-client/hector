@@ -601,11 +601,17 @@ import org.slf4j.LoggerFactory;
    * next pool.
    * @param isRetrySameHostAgain should the skip operation try the same current host, or should it
    * really skip to the next host in the ring?
+   * @param invalidateAllConnectionsToCurrentHost If true, all connections to the current host
+   * should be invalidated.
    */
-  private void skipToNextHost(boolean isRetrySameHostAgain) throws IllegalStateException,
-      PoolExhaustedException, Exception {
+  private void skipToNextHost(boolean isRetrySameHostAgain,
+      boolean invalidateAllConnectionsToCurrentHost)
+      throws IllegalStateException, PoolExhaustedException, Exception {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
     invalidate();
+    if (invalidateAllConnectionsToCurrentHost) {
+      clientPools.invalidateAllConnectionsToHost(client);
+    }
 
     String nextHost = isRetrySameHostAgain ? client.getUrl() :
         getNextHost(client.getUrl(), client.getIp());
@@ -613,6 +619,8 @@ import org.slf4j.LoggerFactory;
       log.error("Unable to find next host to skip to at {}", toString());
       throw new TException("Unable to failover to next host");
     }
+
+
     // assume they use the same port
     client = clientPools.borrowClient(nextHost, client.getPort());
     cassandra = client.getCassandra();
@@ -747,7 +755,7 @@ import org.slf4j.LoggerFactory;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost(isFirst);
+        skipToNextHost(isFirst, false);
         monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
       }
     } catch (UnavailableException e) {
@@ -756,7 +764,7 @@ import org.slf4j.LoggerFactory;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost(isFirst);
+        skipToNextHost(isFirst, true);
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (TTransportException e) {
@@ -765,7 +773,7 @@ import org.slf4j.LoggerFactory;
       if (retries == 0) {
         throw e;
       } else {
-        skipToNextHost(isFirst);
+        skipToNextHost(isFirst, true);
         monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
       }
     }
