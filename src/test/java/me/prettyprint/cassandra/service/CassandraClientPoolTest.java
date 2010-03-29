@@ -98,7 +98,7 @@ public class CassandraClientPoolTest {
       // ok
     }
   }
-  
+
   @Test
   public void testBorrowExistingClient() throws IllegalStateException, PoolExhaustedException, Exception {
     // make sure we always have at least one good existing client
@@ -140,10 +140,10 @@ public class CassandraClientPoolTest {
     assertNotSame(client1, client2);
     store.invalidateClient(client1);
     assertTrue(client1.hasErrors());
-    
+
     // try to release a client after it's been invalidated
     store.releaseClient(client1);
-    
+
     store.releaseClient(client2);
     assertFalse(client2.hasErrors());
     CassandraClient client3 = store.borrowClient("localhost", 9170);
@@ -153,5 +153,31 @@ public class CassandraClientPoolTest {
         store.getPool("localhost", 9170).getLiveClients().contains(client1));
     assertTrue("client2 is in the liveClients set anymore",
         store.getPool("localhost", 9170).getLiveClients().contains(client2));
+  }
+
+  @Test
+  public void testInvalidateAll()
+      throws IllegalStateException, PoolExhaustedException, Exception {
+    CassandraClient client1 = store.borrowClient("localhost", 9170);
+    assertNotNull(client1);
+    CassandraClient client2 = store.borrowClient("localhost", 9170);
+    assertNotNull(client2);
+    assertNotSame(client1, client2);
+    store.invalidateAllConnectionsToHost(client1);
+    assertTrue(client1.hasErrors());
+    assertTrue(client2.hasErrors());
+
+    // now borrow a new client and make sure it's not one of the old clients
+    CassandraClient client3 = store.borrowClient("localhost", 9170);
+    assertNotNull(client3);
+    assertNotSame(client1, client3);
+    assertNotSame(client2, client3);
+
+    assertFalse("client1 should not be in the liveClients set anymore",
+        store.getPool("localhost", 9170).getLiveClients().contains(client1));
+    assertFalse("client2 should not be in the liveClients set anymore",
+        store.getPool("localhost", 9170).getLiveClients().contains(client2));
+    assertTrue("client3 should be in the liveClients set ",
+        store.getPool("localhost", 9170).getLiveClients().contains(client3));
   }
 }

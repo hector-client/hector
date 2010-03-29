@@ -126,7 +126,9 @@ import com.google.common.collect.ImmutableSet;
     GenericObjectPoolFactory poolFactory = new GenericObjectPoolFactory(clientFactory, maxActive,
         getObjectPoolExhaustedAction(exhaustedPolicy),
         maxWaitTimeWhenExhausted, maxIdle);
-    return (GenericObjectPool) poolFactory.createPool();
+    GenericObjectPool p = (GenericObjectPool) poolFactory.createPool();
+    p.setTestOnBorrow(true);
+    return p;
   }
 
   public static byte getObjectPoolExhaustedAction(ExhaustedPolicy exhaustedAction){
@@ -219,6 +221,13 @@ import com.google.common.collect.ImmutableSet;
   void reportDestroyed(CassandraClient client) {
     log.debug("Client has been destroyed: {}", client);
     liveClientsFromPool.remove(client);
+  }
+
+  @Override
+  public void invalidateAll() {
+    while (!liveClientsFromPool.isEmpty()) {
+      invalidateClient(liveClientsFromPool.iterator().next());
+    }
   }
 
 }

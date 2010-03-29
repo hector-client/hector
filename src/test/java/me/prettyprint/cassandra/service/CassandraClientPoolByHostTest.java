@@ -26,6 +26,7 @@ public class CassandraClientPoolByHostTest {
     poolStore = mock(CassandraClientPool.class);
     CassandraClient createdClient = mock(CassandraClient.class);
     when(factory.makeObject()).thenReturn(createdClient);
+    when(factory.validateObject(createdClient)).thenReturn(true);
 
     pool = new CassandraClientPoolByHostImpl("url", 1111, "name", poolStore, 50 /*maxActive*/,
         10000 /*maxWait*/, 5 /*maxIdle*/, ExhaustedPolicy.WHEN_EXHAUSTED_FAIL,

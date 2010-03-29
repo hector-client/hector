@@ -114,7 +114,6 @@ import org.slf4j.LoggerFactory;
   }
 
   private boolean validateClient(CassandraClient client) {
-    // TODO send fast and easy request to cassandra
     return !client.isClosed() && !client.hasErrors();
   }
 
@@ -128,7 +127,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void passivateObject(Object obj) throws Exception {
-    // TODO Auto-generated method stub
+    // none
   }
 
 }
