@@ -2,7 +2,6 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
-import org.apache.cassandra.service.Cassandra.batch_insert_args;
 import org.apache.thrift.TException;
 
 /**
@@ -10,15 +9,15 @@ import org.apache.thrift.TException;
  *
  * This class is a simple multiplexer b/w the different client pools, keyed by url:port.
  *
- * To obtain new CassandraClient object, invoke the appropriate borrowClient() for your 
- * intended usage (more details below). Once the application is done with the client, 
+ * To obtain new CassandraClient object, invoke the appropriate borrowClient() for your
+ * intended usage (more details below). Once the application is done with the client,
  * releaseClient().
- * 
- * Callers can interact with CassandraClientPool in one of two basic ways: 
+ *
+ * Callers can interact with CassandraClientPool in one of two basic ways:
  * <ul>
  * <li>Configuring connections before hand via dependency injection and using {@link #borrowClient()}</li>
  * <li>Providing a host or list of hosts at runtime to the overloaded versions of borrowClient</li>
- * </ul> 
+ * </ul>
  *
  * Example code where the client intends to manage to connections at the code level:
  *
@@ -33,31 +32,31 @@ import org.apache.thrift.TException;
  *   clientpool.releaseClient(client);
  * }
  * </pre>
- * 
- * Example code and configuration where CassandraClientPool has been configured with hosts via 
+ *
+ * Example code and configuration where CassandraClientPool has been configured with hosts via
  * SpringFramework:
- * 
+ *
  * <pre>
  * &#64;Resource
  * private CassandraClientPool cassandraClientPool;
  * ...
- * 
+ *
  * CassandraClient client = cassandraClientPool.borrowClient();
  * //... same as above
  * </pre>
- * 
+ *
  * In the configuration file, we would have:
- * 
+ *
  * <pre>
  * ...
  *   &lt;bean id="cassandraClientMonitor" class="me.prettyprint.cassandra.service.CassandraClientMonitor"/&gt;
- *   
+ *
  *   &lt;bean id="jmxMonitor" class="me.prettyprint.cassandra.service.JmxMonitor"&gt;
  *       &lt;constructor-arg&gt;&lt;ref bean="cassandraClientMonitor"/&gt;&lt;/constructor-arg&gt;
  *   &lt;/bean&gt;
- *   
+ *
  *   &lt;bean id="cassandraClientPoolFactory" class="me.prettyprint.cassandra.service.CassandraClientPoolFactory" factory-method="getInstance"/&gt;
- *   
+ *
  *   &lt;bean id="cassandraClientPool" factory-bean="cassandraClientPoolFactory" factory-method="createNew"&gt;
  *       &lt;constructor-arg&gt;
  *           &lt;list&gt;
@@ -73,13 +72,13 @@ import org.apache.thrift.TException;
  *
  */
 public interface CassandraClientPool {
-  
+
   /**
-   * Borrow a previously created CassandraClient. To be used when you have set up the 
+   * Borrow a previously created CassandraClient. To be used when you have set up the
    * hosts before hand or you dont care about which host services the request
    * @return
    */
-  CassandraClient borrowClient() 
+  CassandraClient borrowClient()
       throws IllegalStateException, PoolExhaustedException, Exception;
 
   /**

@@ -38,25 +38,25 @@ import org.slf4j.LoggerFactory;
     pools = new HashMap<PoolKey, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
   }
-  
+
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, String[] cassandraHosts) {
     this(clientMonitor);
     for (String urlPort : cassandraHosts) {
-      log.debug("Creating pool-by-host instance: {}", urlPort);    
-      getPool(parseHostFromUrl(urlPort),parsePortFromUrl(urlPort));  
+      log.debug("Creating pool-by-host instance: {}", urlPort);
+      getPool(parseHostFromUrl(urlPort),parsePortFromUrl(urlPort));
     }
   }
 
-  
+
   @Override
   public CassandraClient borrowClient() throws IllegalStateException,
-        PoolExhaustedException, Exception {        
+        PoolExhaustedException, Exception {
     String[] clients = new String[pools.size()];
     int x = 0;
     for(PoolKey poolKey : pools.keySet()) {
       clients[x] = poolKey.getUrlPort();
       x++;
-    }    
+    }
     return borrowClient(clients);
   }
 
@@ -166,9 +166,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private class PoolKey {
-    @SuppressWarnings("unused")
     private final String url, ip;
-    @SuppressWarnings("unused")
     private final int port;
     private final String name;
 
@@ -195,7 +193,7 @@ import org.slf4j.LoggerFactory;
       b.append(port);
       name = b.toString();
     }
-    
+
     private String getUrlPort() {
       return new StringBuilder(32).append(url).append(':').append(port).toString();
     }
@@ -214,7 +212,7 @@ import org.slf4j.LoggerFactory;
     public String toString() {
       return name;
     }
-        
+
     @Override
     public boolean equals(Object obj) {
       if (! (obj instanceof PoolKey)) {
@@ -251,8 +249,8 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public CassandraClient borrowClient(String urlPort) throws IllegalStateException,
-      PoolExhaustedException, Exception {    
-    String url = parseHostFromUrl(urlPort);    
+      PoolExhaustedException, Exception {
+    String url = parseHostFromUrl(urlPort);
     int port = parsePortFromUrl(urlPort);
     return borrowClient(url, port);
   }
@@ -278,12 +276,12 @@ import org.slf4j.LoggerFactory;
     // this to make the compiler happy.
     return null;
   }
-  
+
   private String parseHostFromUrl(String urlPort) {
-    return urlPort.substring(0, urlPort.lastIndexOf(':'));      
+    return urlPort.substring(0, urlPort.lastIndexOf(':'));
   }
-  
+
   private int parsePortFromUrl(String urlPort) {
-    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));  
+    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
   }
 }
