@@ -177,19 +177,22 @@ import org.slf4j.LoggerFactory;
       String turl, tip;
       try {
         address = InetAddress.getByName(url2);
-        turl = isPerformNameResolution() ? address.getHostName() : url2;
         tip = address.getHostAddress();
+        turl = isPerformNameResolution() ? address.getHostName() : tip;
       } catch (UnknownHostException e) {
         log.error("Unable to resolve host {}", url2);
         turl = url2;
         tip = url2;
       }
-      this.url = turl;
+      url = turl;
       ip = tip;
-      b.append(url2);
-      b.append("(");
-      b.append(ip);
-      b.append("):");
+      b.append(url);
+      if (isPerformNameResolution()) {
+        b.append("(");
+        b.append(ip);
+        b.append(")");
+      }
+      b.append(":");
       b.append(port);
       name = b.toString();
     }
