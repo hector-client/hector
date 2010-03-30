@@ -43,10 +43,15 @@ public class EmbeddedServerHelper {
     t.start();
   }
 
-  public void teardown() throws IOException {
+  public void teardown() {
     CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
-    cleaner.cleanupDataDirectories();
-    rmdir(TMP);
+
+    try {
+      cleaner.cleanupDataDirectories();
+      rmdir(TMP);
+    } catch (IOException e) {
+      // IGNORE
+    }
   }
 
   private static void rmdir(String dir) throws IOException {
