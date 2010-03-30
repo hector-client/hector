@@ -34,6 +34,9 @@ public class ExampleClient {
 
       System.out.println("Read from cassandra: " + string(col.getValue()));
 
+      // This line makes sure that even if the client had failures and recovered, a correct
+      // releaseClient is called, on the up to date client.
+      client = keyspace.getClient();
     } finally {
       // return client to pool. do it in a finally block to make sure it's executed
       pool.releaseClient(client);
