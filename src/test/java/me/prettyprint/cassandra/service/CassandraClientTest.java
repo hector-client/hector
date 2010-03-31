@@ -60,7 +60,7 @@ public class CassandraClientTest {
   public void setupCase() throws TTransportException, TException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
     monitor = mock(CassandraClientMonitor.class);
-    client = new CassandraClientFactory(pools, "localhost", 9170, monitor).create();
+    client = new CassandraClientFactory(pools, new CassandraHost("localhost", 9170), monitor).create();
   }
 
   @Test
