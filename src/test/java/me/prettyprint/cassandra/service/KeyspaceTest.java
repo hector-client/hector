@@ -92,7 +92,7 @@ public class KeyspaceTest {
       NotFoundException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
     monitor = mock(CassandraClientMonitor.class);
-    client = new CassandraClientFactory(pools, "localhost", 9170, monitor).create();
+    client = new CassandraClientFactory(pools, new CassandraHost("localhost", 9170), monitor).create();
     keyspace = client.getKeyspace("Keyspace1", 1, CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
 

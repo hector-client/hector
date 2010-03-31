@@ -37,12 +37,12 @@ import org.slf4j.LoggerFactory;
   private final String url;
   private final int port;
 
-  public CassandraClientFactory(CassandraClientPool pools, String url, int port,
+  public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
       CassandraClientMonitor clientMonitor) {
     this.pool = pools;
-    this.url = url;
-    this.port = port;
-    timeout = getTimeout();
+    this.url = cassandraHost.getUrl();
+    this.port = cassandraHost.getPort();
+    timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
   }
 
@@ -58,7 +58,7 @@ import org.slf4j.LoggerFactory;
     this.pool = new CassandraClientPoolImpl(this.clientMonitor);
     this.url = url;
     this.port = port;
-    timeout = getTimeout();
+    timeout = getTimeout(null);
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
@@ -85,22 +85,28 @@ import org.slf4j.LoggerFactory;
   }
 
   /**
-   * Gets an environment variable CASSANDRA_THRIFT_SOCKET_TIMEOUT value.
+   * If CassandraHost was not null we use {@link CassandraHost#getCassandraThriftSocketTimeout()}
+   * if it was greater than zero. Otherwise look for an environment
+   * variable name CASSANDRA_THRIFT_SOCKET_TIMEOUT value.
    * If doesn't exist, returns 0.
+   * @param cassandraHost 
    */
-  private int getTimeout() {
+  private int getTimeout(CassandraHost cassandraHost) {
+    int timeoutVar = 0;
+    if ( cassandraHost != null && cassandraHost.getCassandraThriftSocketTimeout() > 0 ) {
+      timeoutVar = cassandraHost.getCassandraThriftSocketTimeout();
+    } else {
     String timeoutStr = System.getProperty(
         SystemProperties.CASSANDRA_THRIFT_SOCKET_TIMEOUT.toString());
-    if (timeoutStr == null || timeoutStr.length() == 0) {
-      return  0;
-    } else {
+    if (timeoutStr != null && timeoutStr.length() > 0) {
       try {
-        return Integer.valueOf(timeoutStr);
+        timeoutVar = Integer.valueOf(timeoutStr);
       } catch (NumberFormatException e) {
         log.error("Invalid value for CASSANDRA_THRIFT_SOCKET_TIMEOUT", e);
-        return 0;
       }
     }
+    }
+    return timeoutVar;
   }
 
   @Override
