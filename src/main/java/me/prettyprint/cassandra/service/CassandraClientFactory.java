@@ -45,6 +45,21 @@ import java.net.UnknownHostException;
     this.clientMonitor = clientMonitor;
   }
 
+  /**
+   * CassandraClientFactory constructor.  A default {@link CassandraClientPool}
+   * and {@link CassandraClientMonitor} will be initialized.
+   *
+   * @param url
+   * @param port
+   */
+  public CassandraClientFactory(String url, int port) {
+    this.clientMonitor = new CassandraClientMonitor();
+    this.pool = new CassandraClientPoolImpl(this.clientMonitor);
+    this.url = url;
+    this.port = port;
+    timeout = getTimeout();
+  }
+
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
     return new CassandraClientImpl(createThriftClient(url, port),
         new KeyspaceFactory(clientMonitor), url, port, pool);
