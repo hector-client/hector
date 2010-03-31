@@ -16,15 +16,15 @@
     <bean id="cassandraClientPoolFactory" class="me.prettyprint.cassandra.service.CassandraClientPoolFactory" factory-method="getInstance"/>
     
     <bean id="cassandraClientPool" factory-bean="cassandraClientPoolFactory" factory-method="createNew" >
-        <constructor-arg>
-            <list>
-                <value>localhost:9170</value>
-            </list>
-        </constructor-arg>
+        <constructor-arg><ref bean="cassandraHostConfigurator"/></constructor-arg>
     </bean>
     
     <bean id="exampleSpringDao" class="me.prettyprint.cassandra.dao.ExampleSpringDao">
         <constructor-arg><ref bean="cassandraClientPool"/></constructor-arg>
+    </bean>
+    
+    <bean id="cassandraHostConfigurator" class="me.prettyprint.cassandra.service.CassandraHostConfigurator">
+        <constructor-arg value="localhost:9170"/>
     </bean>
 
 </beans>

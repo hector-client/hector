@@ -43,34 +43,26 @@ import com.google.common.collect.ImmutableSet;
    */
   private final Set<CassandraClient> liveClientsFromPool;
 
-  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
-      CassandraClientPool pools, CassandraClientMonitor clientMonitor) {
-    this(cassandraUrl, cassandraPort, name, pools, clientMonitor, DEFAULT_MAX_ACTIVE,
-        DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED,
-        DEFAULT_MAX_IDLE, DEFAULT_EXHAUSTED_POLICY);
+  public CassandraClientPoolByHostImpl(CassandraHost cassandraHost,
+      CassandraClientPool pools,
+      CassandraClientMonitor cassandraClientMonitor) {
+    this(cassandraHost, pools, cassandraClientMonitor, new CassandraClientFactory(pools, cassandraHost, cassandraClientMonitor));
   }
 
-  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
-      CassandraClientPool pools, CassandraClientMonitor clientMonitor, int maxActive,
-      long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy) {
-    this(cassandraUrl, cassandraPort, name, pools, maxActive, maxWait, maxIdle,
-        exhaustedPolicy, new CassandraClientFactory(pools, cassandraUrl, cassandraPort, clientMonitor));
-
-  }
-
-  public CassandraClientPoolByHostImpl(String cassandraUrl, int cassandraPort, String name,
-      CassandraClientPool pools, int maxActive,
-      long maxWait, int maxIdle, ExhaustedPolicy exhaustedPolicy,
-      CassandraClientFactory clientFactory) {
-    log.debug("Creating new connection pool for {}:{}", cassandraUrl, cassandraPort);
-    url = cassandraUrl;
-    port = cassandraPort;
-    this.name = name;
-    this.maxActive = maxActive;
-    this.maxIdle = maxIdle;
-    this.maxWaitTimeWhenExhausted = maxWait;
-    this.exhaustedPolicy = exhaustedPolicy;
-    this.clientFactory = clientFactory;
+  public CassandraClientPoolByHostImpl(CassandraHost cassandraHost,
+      CassandraClientPool pools,
+      CassandraClientMonitor cassandraClientMonitor,
+      CassandraClientFactory cassandraClientFactory) {
+    log.debug("Creating new connection pool for {}", cassandraHost.getUrlPort());
+    url = cassandraHost.getUrl();
+    port = cassandraHost.getPort();
+    this.name = cassandraHost.getName();
+    this.maxActive = cassandraHost.getMaxActive();
+    this.maxIdle = cassandraHost.getMaxIdle();
+    this.maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted();
+    this.exhaustedPolicy = cassandraHost.getExhaustedPolicy();   
+    this.clientFactory = cassandraClientFactory;    
+    
     blockedThreadsCount = new AtomicInteger(0);
     // Create a set implemented as a ConcurrentHashMap for performance and concurrency.
     liveClientsFromPool =

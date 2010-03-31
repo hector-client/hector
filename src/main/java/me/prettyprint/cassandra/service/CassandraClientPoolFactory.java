@@ -47,8 +47,8 @@ public enum CassandraClientPoolFactory {
     return pool;
   }
 
-  public CassandraClientPool createNew(String[] urlPorts) {
-    CassandraClientPool pool = new CassandraClientPoolImpl(jmx.getCassandraMonitor(), urlPorts);
+  public CassandraClientPool createNew(CassandraHostConfigurator cassandraHostConfigurator) {
+    CassandraClientPool pool = new CassandraClientPoolImpl(jmx.getCassandraMonitor(), cassandraHostConfigurator.buildCassandraHosts());
     jmx.addPool(pool);
     return pool;
   }
