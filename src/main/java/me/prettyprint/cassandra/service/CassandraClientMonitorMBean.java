@@ -1,10 +1,9 @@
 package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.service.CassandraClientPoolByHost.ExhaustedPolicy;
+import java.util.Set;
+
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
-
-import java.util.Set;
 
 /**
  * Defines the various JMX methods the CassandraClientMonitor exposes.

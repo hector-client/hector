@@ -29,13 +29,6 @@ import org.apache.thrift.TException;
  */
 /*package*/ interface CassandraClientPoolByHost {
 
-  enum ExhaustedPolicy {
-    WHEN_EXHAUSTED_FAIL, WHEN_EXHAUSTED_GROW, WHEN_EXHAUSTED_BLOCK
-  }
-
-  public static final ExhaustedPolicy DEFAULT_EXHAUSTED_POLICY =
-      ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
-
   public static final int DEFAULT_MAX_ACTIVE = 50;
 
   /**
