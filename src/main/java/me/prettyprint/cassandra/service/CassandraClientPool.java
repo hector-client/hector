@@ -58,11 +58,11 @@ import org.apache.thrift.TException;
  *   &lt;bean id="cassandraClientPoolFactory" class="me.prettyprint.cassandra.service.CassandraClientPoolFactory" factory-method="getInstance"/&gt;
  *
  *   &lt;bean id="cassandraClientPool" factory-bean="cassandraClientPoolFactory" factory-method="createNew"&gt;
- *       &lt;constructor-arg&gt;
- *           &lt;list&gt;
- *               &lt;value&gt;localhost:9170&lt;/value&gt;
- *           &lt;/list&gt;
- *       &lt;/constructor-arg&gt;
+ *       &lt;constructor-arg&gt;&lt;ref bean="cassandraHostConfigurator"/&gt;&lt;/constructor-arg&gt;
+ *   &lt;/bean&gt;
+ *   
+ *   &lt;bean id="cassandraHostConfigurator" class="me.prettyprint.cassandra.service.CassandraHostConfigurator"&gt;
+ *       &lt;constructor-arg value="localhost:9170"/&gt;
  *   &lt;/bean&gt;
  *   ...
  * </pre>
