@@ -14,17 +14,15 @@ package me.prettyprint.cassandra.service;
  */
 public enum CassandraClientPoolFactory {
 
-  INSTANCE;
+  INSTANCE;    
 
-  private final CassandraClientPool pool;
-
+  private static CassandraClientPool pool;  
   private final JmxMonitor jmx;
 
   private CassandraClientPoolFactory() {
-    jmx = new JmxMonitor();
-    pool = createNew();
+    jmx = new JmxMonitor();    
   }
-
+  
   public static CassandraClientPoolFactory getInstance() {
     return INSTANCE;
   }
@@ -34,6 +32,9 @@ public enum CassandraClientPoolFactory {
    * @return
    */
   public CassandraClientPool get() {
+    if (pool == null) {
+      pool = createNew();
+    }
     return pool;
   }
 
