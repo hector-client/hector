@@ -20,18 +20,17 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-public class JmxMonitor {
+/*package*/ enum JmxMonitor {
 
-  private static final Logger log = LoggerFactory.getLogger(JmxMonitor.class);
+  INSTANCE;
+
+  private final Logger log = LoggerFactory.getLogger(JmxMonitor.class);
 
   private MBeanServer mbs;
   private CassandraClientMonitor cassandraClientMonitor;
 
-  public JmxMonitor() {    
-    this(new CassandraClientMonitor());    
-  }
-  
-  public JmxMonitor(CassandraClientMonitor cassandraClientMonitor) {
+  private JmxMonitor() {
+    CassandraClientMonitor cassandraClientMonitor = new CassandraClientMonitor();
     mbs = ManagementFactory.getPlatformMBeanServer();
     this.cassandraClientMonitor = cassandraClientMonitor;
     try {
@@ -48,6 +47,9 @@ public class JmxMonitor {
     }
   }
 
+  public static JmxMonitor getInstance() {
+    return INSTANCE;
+  }
 
   public void addPool(CassandraClientPool pool) {
     cassandraClientMonitor.addPool(pool);
