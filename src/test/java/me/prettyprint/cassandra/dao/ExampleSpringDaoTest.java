@@ -7,13 +7,11 @@ import java.io.IOException;
 
 import javax.annotation.Resource;
 
-import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;
@@ -25,9 +23,9 @@ public class ExampleSpringDaoTest {
 
   @Resource
   private ExampleSpringDao exampleSpringDao;
-    
-    
-    
+
+
+
   private static EmbeddedServerHelper embedded;
 
   /**
@@ -47,14 +45,14 @@ public class ExampleSpringDaoTest {
   public static void teardown() throws IOException {
     embedded.teardown();
   }
-    
+
   @Test
-  public void testInsertGetDelete() throws Exception {        
+  public void testInsertGetDelete() throws Exception {
     assertNull(exampleSpringDao.get("key"));
     exampleSpringDao.insert("key", "value");
     assertEquals("value", exampleSpringDao.get("key"));
     exampleSpringDao.delete("key");
-    assertNull(exampleSpringDao.get("key"));   
+    assertNull(exampleSpringDao.get("key"));
   }
-    
+
 }
