@@ -60,9 +60,9 @@ import com.google.common.collect.ImmutableSet;
     this.maxActive = cassandraHost.getMaxActive();
     this.maxIdle = cassandraHost.getMaxIdle();
     this.maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted();
-    this.exhaustedPolicy = cassandraHost.getExhaustedPolicy();   
-    this.clientFactory = cassandraClientFactory;    
-    
+    this.exhaustedPolicy = cassandraHost.getExhaustedPolicy();
+    this.clientFactory = cassandraClientFactory;
+
     blockedThreadsCount = new AtomicInteger(0);
     // Create a set implemented as a ConcurrentHashMap for performance and concurrency.
     liveClientsFromPool =
@@ -120,6 +120,9 @@ import com.google.common.collect.ImmutableSet;
         maxWaitTimeWhenExhausted, maxIdle);
     GenericObjectPool p = (GenericObjectPool) poolFactory.createPool();
     p.setTestOnBorrow(true);
+    // maxIdle controls the maximum number of objects that can sit idle in the pool at any time.
+    // When negative, there is no limit to the number of objects that may be idle at one time.
+    p.setMaxIdle(-1);
     return p;
   }
 
