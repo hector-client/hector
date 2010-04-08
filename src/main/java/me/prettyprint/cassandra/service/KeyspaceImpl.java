@@ -1,5 +1,15 @@
 package me.prettyprint.cassandra.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import org.apache.cassandra.thrift.*;
@@ -132,7 +142,7 @@ import java.util.*;
         if (keySlices == null || keySlices.isEmpty()) {
           return Collections.emptyMap();
         }
-        Map<String, List<Column>> ret = new HashMap<String, List<Column>>(keySlices.size());
+        Map<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(keySlices.size());
         for (KeySlice keySlice : keySlices) {
           ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
         }
@@ -157,7 +167,7 @@ import java.util.*;
         if (keySlices == null || keySlices.isEmpty()) {
           return Collections.emptyMap();
         }
-        Map<String, List<SuperColumn>> ret = new HashMap<String, List<SuperColumn>>(
+        Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(
             keySlices.size());
         for (KeySlice keySlice : keySlices) {
           ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
@@ -340,7 +350,7 @@ import java.util.*;
       return Collections.emptyMap();
     }
 
-    HashMap<String, SuperColumn> result = new HashMap<String, SuperColumn>(keys.size() * 2);
+    Map<String, SuperColumn> result = new HashMap<String, SuperColumn>(keys.size() * 2);
     for (Map.Entry<String, List<SuperColumn>> entry : sclist.entrySet()) {
       List<SuperColumn> sclistByKey = entry.getValue();
       if (sclistByKey.size() > 0) {
