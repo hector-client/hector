@@ -770,7 +770,7 @@ public class KeyspaceTest {
     // This simulates a host we can connect to, but cannot perform operations on. The host is semi-
     // down
     doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
 
     ks.insert("key", cp, bytes("value"));
 
@@ -802,8 +802,8 @@ public class KeyspaceTest {
     Map<String, String> keyspace1Desc = new HashMap<String, String>();
     keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.put("Standard1", keyspace1Desc);
-    int consistencyLevel = 1;
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
+    ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+    ColumnPath cp = new ColumnPath("Standard1").setColumn(bytes("testFailover"));
     CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
