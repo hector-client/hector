@@ -606,7 +606,7 @@ import org.slf4j.LoggerFactory;
    */
   private void skipToNextHost(boolean isRetrySameHostAgain,
       boolean invalidateAllConnectionsToCurrentHost)
-      throws IllegalStateException, PoolExhaustedException, Exception {
+      throws SkipHostException {
     log.info("Skipping to next host. Current host is: {}", client.getUrl());
     invalidate();
     if (invalidateAllConnectionsToCurrentHost) {
@@ -617,12 +617,20 @@ import org.slf4j.LoggerFactory;
         getNextHost(client.getUrl(), client.getIp());
     if (nextHost == null) {
       log.error("Unable to find next host to skip to at {}", toString());
-      throw new TException("Unable to failover to next host");
+      throw new SkipHostException("Unable to failover to next host");
     }
 
 
-    // assume they use the same port
-    client = clientPools.borrowClient(nextHost, client.getPort());
+    // assume all hosts in the ring use the same port (cassandra's API only provides IPs, not ports)
+    try {
+      client = clientPools.borrowClient(nextHost, client.getPort());
+    } catch (IllegalStateException e) {
+      throw new SkipHostException(e);
+    } catch (PoolExhaustedException e) {
+      throw new SkipHostException(e);
+    } catch (Exception e) {
+      throw new SkipHostException(e);
+    }
     cassandra = client.getCassandra();
     monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
     log.info("Skipped host. New host is: {}", client.getUrl());
@@ -679,9 +687,14 @@ import org.slf4j.LoggerFactory;
         if (!isFirst) {
           --retries;
         }
-        boolean success = operateWithFailoverSingleIteration(op, stopWatch, retries, isFirst);
-        if (success) {
-          return;
+        try {
+          boolean success = operateWithFailoverSingleIteration(op, stopWatch, retries, isFirst);
+          if (success) {
+            return;
+          }
+        } catch (SkipHostException e) {
+          log.warn("Skip-host failed ", e);
+          // continue the loop to the next host.
         }
         isFirst = false;
       }
@@ -856,5 +869,24 @@ import org.slf4j.LoggerFactory;
     b.append(getClient());
     b.append(">");
     return super.toString();
+  }
+
+  /**
+   * An internal implementation excption used to signal that the skip-host action has failed.
+   * @author Ran Tavory (ran@outbain.com)
+   *
+   */
+  private static class SkipHostException extends Exception {
+
+    private static final long serialVersionUID = -6099636388926769255L;
+
+    public SkipHostException(String msg) {
+      super(msg);
+    }
+
+    public SkipHostException(Throwable t) {
+      super(t);
+    }
+
   }
 }
