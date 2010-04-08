@@ -721,8 +721,14 @@ public class KeyspaceTest {
     }
   }
 
+  /**
+   * Test case for bug http://github.com/rantav/hector/issues/closed#issue/8
+   * @throws IllegalStateException
+   * @throws PoolExhaustedException
+   * @throws Exception
+   */
   @Test
-  public void testFailover2() throws IllegalStateException, PoolExhaustedException, Exception {
+  public void testFailoverBug8() throws IllegalStateException, PoolExhaustedException, Exception {
     CassandraClient h1client = mock(CassandraClient.class);
     CassandraClient h2client = mock(CassandraClient.class);
     Cassandra.Client h1cassandra = mock(Cassandra.Client.class);
@@ -760,9 +766,76 @@ public class KeyspaceTest {
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
 
+    // fail the call, use a transport exception.
+    // This simulates a host we can connect to, but cannot perform operations on. The host is semi-
+    // down
+    doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+
+    ks.insert("key", cp, bytes("value"));
+
+    // Make sure the client is invalidated
+    verify(clientPools, times(2)).invalidateClient(h1client);
+
+    // make sure the next call is to h2
+    verify(h2client).getCassandra();
+
+    // Now run another insert on the same keyspace to make sure it can handle next writes.
+    ks.insert("key2", cp, bytes("value2"));
+  }
+
+  /**
+   * A test case for bug 14 http://github.com/rantav/hector/issues#issue/14
+   * A host goes down and can't even reconnect to it, so failover fails to skip to the next host.
+   * @throws Exception
+   * @throws PoolExhaustedException
+   * @throws IllegalStateException
+   */
+  @Test
+  public void testFailoverBug14() throws IllegalStateException, PoolExhaustedException, Exception {
+    CassandraClient h1client = mock(CassandraClient.class);
+    CassandraClient h2client = mock(CassandraClient.class);
+    Cassandra.Client h1cassandra = mock(Cassandra.Client.class);
+    Cassandra.Client h2cassandra = mock(Cassandra.Client.class);
+    String keyspaceName = "Keyspace1";
+    Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String, String>>();
+    Map<String, String> keyspace1Desc = new HashMap<String, String>();
+    keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
+    keyspaceDesc.put("Standard1", keyspace1Desc);
+    int consistencyLevel = 1;
+    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
+    CassandraClientPool clientPools = mock(CassandraClientPool.class);
+    CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
+
+    // The token map represents the list of available servers.
+    Map<String, String> tokenMap = new HashMap<String, String>();
+    tokenMap.put("t1", "h1");
+    tokenMap.put("t2", "h2");
+
+    when(h1client.getCassandra()).thenReturn(h1cassandra);
+    when(h2client.getCassandra()).thenReturn(h2cassandra);
+    when(h1client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
+    when(h2client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
+    when(h1client.getPort()).thenReturn(2);
+    when(h2client.getPort()).thenReturn(2);
+    when(h1client.getUrl()).thenReturn("h1");
+    when(h1client.getIp()).thenReturn("ip1");
+    when(h2client.getUrl()).thenReturn("h2");
+    when(h2client.getIp()).thenReturn("ip2");
+    when(clientPools.borrowClient("h1", 2)).thenReturn(h1client);
+    when(clientPools.borrowClient("h2", 2)).thenReturn(h2client);
+
+    FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+        failoverPolicy, clientPools, monitor);
+
     // fail the call, use a transport exception
     doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
         (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
+
+    // And also fail the call to borrowClient when trying to borrow from this host again.
+    // This is actually simulation the host down permanently (well, until the test ends at least...)
+    doThrow(new TException()).when(clientPools).borrowClient("h1", 2);
 
     ks.insert("key", cp, bytes("value"));
 
