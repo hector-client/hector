@@ -67,6 +67,7 @@ import java.net.UnknownHostException;
 
   private Cassandra.Client createThriftClient(String  url, int port)
       throws TTransportException , TException {
+    log.debug("Creating a new thrift connection to {}:{}", url, port);
     TTransport tr = new TSocket(url, port, timeout);
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
@@ -88,7 +89,7 @@ import java.net.UnknownHostException;
    * if it was greater than zero. Otherwise look for an environment
    * variable name CASSANDRA_THRIFT_SOCKET_TIMEOUT value.
    * If doesn't exist, returns 0.
-   * @param cassandraHost 
+   * @param cassandraHost
    */
   private int getTimeout(CassandraHost cassandraHost) {
     int timeoutVar = 0;
@@ -138,6 +139,7 @@ import java.net.UnknownHostException;
   }
 
   private void closeClient(CassandraClient cclient) {
+    log.debug("Closing client {}", cclient);
     ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
     Cassandra.Client client = cclient.getCassandra();
     client.getInputProtocol().getTransport().close();
