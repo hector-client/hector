@@ -107,7 +107,7 @@
     <dependency>
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>894924</version>
+      <version>917130</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
     </dependency>
