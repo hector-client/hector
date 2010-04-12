@@ -25,8 +25,14 @@ public class CassandraHost {
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
+  private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
+  
+  /**
+   * By default, we will use TSocket transport on thrift (matches default Cassandra configs)
+   */
+  public static final boolean DEFAULT_USE_FRAMED_THRIFT_TRANSPORT = false;
 
   /**
    * The default max wait time when exhausted happens, default value is negative, which means
@@ -157,6 +163,14 @@ public class CassandraHost {
 
   public void setCassandraThriftSocketTimeout(int cassandraThriftSocketTimeout) {
     this.cassandraThriftSocketTimeout = cassandraThriftSocketTimeout;
+  }
+
+  public boolean getUseThriftFramedTransport() {
+    return useThriftFramedTransport;
+  }
+
+  public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
+    this.useThriftFramedTransport = useThriftFramedTransport;
   }
 
   public static String parseHostFromUrl(String urlPort) {
