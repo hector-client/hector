@@ -5,6 +5,7 @@ import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -133,5 +134,13 @@ public class CassandraClientTest {
     String config = client.getConfigFile();
     assertNotNull(config);
     assertTrue(config.length() > 0);
+  }
+  
+  @Test 
+  public void testFramedTransport() throws TException, TTransportException, UnknownHostException {
+    CassandraHost cassandraHost = new CassandraHost("localhost", 9170);
+    cassandraHost.setUseThriftFramedTransport(true);
+    client = new CassandraClientFactory(pools, cassandraHost, monitor).create();
+    assertTrue(client.getCassandra().getInputProtocol().getTransport() instanceof TFramedTransport);
   }
 }
