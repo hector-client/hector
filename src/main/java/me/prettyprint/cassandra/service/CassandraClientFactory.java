@@ -7,6 +7,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -35,6 +36,7 @@ import java.net.UnknownHostException;
   private final CassandraClientPool pool;
   private final String url;
   private final int port;
+  private final boolean useThriftFramedTransport;
 
   public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
       CassandraClientMonitor clientMonitor) {
@@ -43,6 +45,7 @@ import java.net.UnknownHostException;
     this.port = cassandraHost.getPort();
     timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
+    this.useThriftFramedTransport = cassandraHost.getUseThriftFramedTransport();
   }
 
   /**
@@ -58,6 +61,7 @@ import java.net.UnknownHostException;
     this.url = url;
     this.port = port;
     timeout = getTimeout(null);
+    this.useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
@@ -68,7 +72,12 @@ import java.net.UnknownHostException;
   private Cassandra.Client createThriftClient(String  url, int port)
       throws TTransportException , TException {
     log.debug("Creating a new thrift connection to {}:{}", url, port);
-    TTransport tr = new TSocket(url, port, timeout);
+    TTransport tr;
+    if (useThriftFramedTransport) {
+      tr = new TFramedTransport(new TSocket(url, port, timeout));
+    } else {
+      tr = new TSocket(url, port, timeout);
+    }
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
     try {
