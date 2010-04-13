@@ -90,6 +90,4 @@ public class EmbeddedServerHelper {
   private static void mkdir(String dir) throws IOException {
     FileUtils.createDirectory(dir);
   }
-
-
 }
