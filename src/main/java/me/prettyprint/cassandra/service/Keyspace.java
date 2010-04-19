@@ -159,6 +159,13 @@ public interface Keyspace {
       UnavailableException, TException, TimedOutException;
   
   /**
+   * Call batch mutate with the BatchMutation object which encapsulates some of the complexity
+   * of the batch_mutate API signature
+   */
+  void batchMutate(BatchMutation batchMutation) throws InvalidRequestException, 
+      UnavailableException, TException, TimedOutException; 
+  
+  /**
    * Remove data from the row specified by key at the columnPath.
    *
    * Note that all the values in columnPath besides columnPath.column_family are truly optional:

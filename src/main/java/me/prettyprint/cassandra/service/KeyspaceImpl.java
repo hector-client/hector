@@ -140,6 +140,14 @@ import org.slf4j.LoggerFactory;
     operateWithFailover(op);
   }
   
+  
+  
+  @Override
+  public void batchMutate(BatchMutation batchMutate)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    batchMutate(batchMutate.getMutationMap());    
+  }
+
   @Override
   public int getCount(final String key, final ColumnParent columnParent)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {

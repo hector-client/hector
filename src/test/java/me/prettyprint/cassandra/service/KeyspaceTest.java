@@ -257,6 +257,63 @@ public class KeyspaceTest {
   } 
 
   @Test
+  public void testBatchMutateBatchMutation() throws IllegalArgumentException, NoSuchElementException,
+      IllegalStateException, NotFoundException, TException, Exception {
+    BatchMutation batchMutation = new BatchMutation();
+    List<String> columnFamilies = Arrays.asList("Standard1");
+    for (int i = 0; i < 10; i++) {                             
+      
+      for (int j = 0; j < 10; j++) {
+        Column col = new Column(bytes("testBatchMutateColumn_" + j),
+            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+        ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
+        cosc.setColumn(col);
+        batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, cosc);
+      }
+    }
+    keyspace.batchMutate(batchMutation);
+
+    // get value
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+
+        Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+        assertNotNull(col);
+        String value = string(col.getValue());
+        assertEquals("testBatchMutateColumn_value_" + j, value);
+
+      }
+    }
+    batchMutation = new BatchMutation();
+    // batch_mutate delete by key
+    for (int i = 0; i < 10; i++) {
+      SlicePredicate slicePredicate = new SlicePredicate();
+      for (int j = 0; j < 10; j++) {        
+        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));      
+      }
+      Deletion deletion = new Deletion(new Date().getTime());
+      deletion.setPredicate(slicePredicate);
+      batchMutation.addDeletion("testBatchMutateColumn_"+i, columnFamilies, deletion);      
+    }
+    keyspace.batchMutate(batchMutation);
+    // make sure the values are gone
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+        try {
+          Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+          fail();
+        } catch (NotFoundException e) {
+        }
+
+      }
+    }
+  } 
+  
+  @Test
   public void testGetClient() {
     assertEquals(client, keyspace.getClient());
   }
