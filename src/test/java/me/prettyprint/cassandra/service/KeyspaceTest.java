@@ -182,6 +182,79 @@ public class KeyspaceTest {
       }
     }
   }
+  
+  @Test
+  public void testBatchMutate() throws IllegalArgumentException, NoSuchElementException,
+      IllegalStateException, NotFoundException, TException, Exception {
+    Map<String, Map<String, List<Mutation>>> outerMutationMap = new HashMap<String, Map<String,List<Mutation>>>();
+    for (int i = 0; i < 10; i++) {
+            
+      Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
+            
+      ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
+      for (int j = 0; j < 10; j++) {
+        Column col = new Column(bytes("testBatchMutateColumn_" + j),
+            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+        //list.add(col);
+        ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
+        cosc.setColumn(col);
+        Mutation mutation = new Mutation();
+        mutation.setColumn_or_supercolumn(cosc);
+        mutations.add(mutation);
+      }
+      mutationMap.put("Standard1", mutations);            
+      outerMutationMap.put("testBatchMutateColumn_" + i, mutationMap);
+    }
+    keyspace.batchMutate(outerMutationMap);
+    // re-use later
+    outerMutationMap.clear();    
+
+    // get value
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+
+        Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+        assertNotNull(col);
+        String value = string(col.getValue());
+        assertEquals("testBatchMutateColumn_value_" + j, value);
+
+      }
+    }
+    
+    // batch_mutate delete by key
+    for (int i = 0; i < 10; i++) {
+      ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
+      Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
+      SlicePredicate slicePredicate = new SlicePredicate();
+      for (int j = 0; j < 10; j++) {        
+        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));      
+      }
+      Mutation mutation = new Mutation();
+      Deletion deletion = new Deletion(new Date().getTime());
+      deletion.setPredicate(slicePredicate);
+      mutation.setDeletion(deletion);      
+      mutations.add(mutation);
+
+      mutationMap.put("Standard1", mutations);
+      outerMutationMap.put("testBatchMutateColumn_"+i, mutationMap);
+    }
+    keyspace.batchMutate(outerMutationMap);
+    // make sure the values are gone
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+        try {
+          Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+          fail();
+        } catch (NotFoundException e) {
+        }
+
+      }
+    }
+  } 
 
   @Test
   public void testGetClient() {

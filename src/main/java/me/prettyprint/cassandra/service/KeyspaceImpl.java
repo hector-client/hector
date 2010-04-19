@@ -21,6 +21,7 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeySlice;
+import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -125,6 +126,20 @@ import org.slf4j.LoggerFactory;
     operateWithFailover(op);
   }
 
+  @Override
+  public void batchMutate(final Map<String, Map<String, List<Mutation>>> mutationMap)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+      @Override
+      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
+      TException, TimedOutException {
+        cassandra.batch_mutate(keyspaceName, mutationMap, consistency);
+        return null;
+      }
+    };
+    operateWithFailover(op);
+  }
+  
   @Override
   public int getCount(final String key, final ColumnParent columnParent)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {

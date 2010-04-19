@@ -152,6 +152,13 @@ public interface Keyspace {
       UnavailableException, TException, TimedOutException;
 
   /**
+   * Call batch mutate with the assembled mutationMap. This method is a direct pass-through 
+   * to the underlying Thrift API 
+   */
+  void batchMutate(Map<String, Map<String, List<Mutation>>> mutationMap) throws InvalidRequestException, 
+      UnavailableException, TException, TimedOutException;
+  
+  /**
    * Remove data from the row specified by key at the columnPath.
    *
    * Note that all the values in columnPath besides columnPath.column_family are truly optional:
