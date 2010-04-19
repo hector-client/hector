@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
     mbs = ManagementFactory.getPlatformMBeanServer();
     this.cassandraClientMonitor = cassandraClientMonitor;
     try {
-      registerMonitor(CassandraClientMonitor.class.getPackage().getName(), "hector",
+      registerMonitor("me.prettyprint.cassandra.service", "hector",
           cassandraClientMonitor);
     } catch (MalformedObjectNameException e) {
       log.error("Unable to register JMX monitor", e);
