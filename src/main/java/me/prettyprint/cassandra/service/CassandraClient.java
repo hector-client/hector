@@ -1,14 +1,13 @@
 package me.prettyprint.cassandra.service;
 
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.thrift.TException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-
-import org.apache.cassandra.service.Cassandra;
-import org.apache.cassandra.service.ConsistencyLevel;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.thrift.TException;
 
 
 /**
@@ -22,7 +21,7 @@ import org.apache.thrift.TException;
  */
 public interface CassandraClient {
 
-  static final int DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
+  static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
 
   /**
    * What should the client do if a call to cassandra node fails and we suspect that the node is
@@ -82,13 +81,13 @@ public interface CassandraClient {
   /**
    * Gets s keyspace with the specified consistency level
    */
-  Keyspace getKeyspace(String keyspaceName, int consistencyLevel)
+  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel)
       throws IllegalArgumentException, NotFoundException, TException;
 
   /**
    * Gets s keyspace with the specified consistency level and failover policy
    */
-  Keyspace getKeyspace(String keyspaceName, int consistencyLevel, FailoverPolicy failoverPolicy)
+  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException;
 
 

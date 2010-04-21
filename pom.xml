@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.5.0-9</version>
+  <version>0.6.0-11</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -107,16 +107,30 @@
     <dependency>
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>820831</version>
+      <version>917130</version>
       <scope>system</scope>
-      <systemPath>${basedir}/lib/libthrift-r820831.jar</systemPath>
+      <systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra</artifactId>
-      <version>0.5.0</version>
+      <version>0.6.0</version>
       <scope>system</scope>
-      <systemPath>${basedir}/lib/apache-cassandra-incubating-0.5.0.jar</systemPath>
+      <systemPath>${basedir}/lib/apache-cassandra-0.6.0.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>org.cliffc.high_scale_lib</groupId>
+      <artifactId>high-scale-lib</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>com.reardencommerce</groupId>
+      <artifactId>clhm-production</artifactId>
+      <version>1.0.0</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/clhm-production.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -172,6 +186,25 @@
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>properties-maven-plugin</artifactId>
       <version>1.0-alpha-2</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-javautils</artifactId>
+      <systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
+      <version>1.0.0</version>
+      <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

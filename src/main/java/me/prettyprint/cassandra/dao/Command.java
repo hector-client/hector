@@ -4,6 +4,7 @@ import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.Keyspace;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 
 /**
  * Provides an abstraction for running an operation, or a command on a cassandra keyspace.
@@ -59,7 +60,8 @@ public abstract class Command<OUTPUT> {
   /**
    * Same as {@link #execute(String, int, String)} but for a randomly chosen host from the list
    * of host:port
-   * @param hostPort host:port array
+   * @param hosts host:port array
+   * @param keyspace
    */
   public final OUTPUT execute(String[] hosts, String keyspace) throws Exception {
     return execute(getPool().borrowClient(hosts), keyspace,
@@ -69,11 +71,11 @@ public abstract class Command<OUTPUT> {
   /**
    * Same as {@link #execute(String[], String)} but with the given consistency level
    */
-  public final OUTPUT execute(String[] hosts, String keyspace, int consistency) throws Exception {
+  public final OUTPUT execute(String[] hosts, String keyspace, ConsistencyLevel consistency) throws Exception {
     return execute(getPool().borrowClient(hosts), keyspace, consistency);
   }
 
-  protected final OUTPUT execute(CassandraClient c, String keyspace, int consistency)
+  protected final OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency)
       throws Exception {
     Keyspace ks = c.getKeyspace(keyspace, consistency);
     try {

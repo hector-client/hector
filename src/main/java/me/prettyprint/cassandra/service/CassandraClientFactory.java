@@ -1,11 +1,8 @@
 package me.prettyprint.cassandra.service;
 
 
-import java.net.UnknownHostException;
-
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-
-import org.apache.cassandra.service.Cassandra;
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
@@ -16,6 +13,8 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.UnknownHostException;
 
 /**
  * Factory for {@link CassandraClient} objects.

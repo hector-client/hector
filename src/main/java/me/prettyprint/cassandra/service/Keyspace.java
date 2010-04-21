@@ -1,20 +1,11 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import org.apache.cassandra.thrift.*;
+import org.apache.thrift.TException;
+
 import java.util.List;
 import java.util.Map;
-
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
-import org.apache.cassandra.service.Column;
-import org.apache.cassandra.service.ColumnParent;
-import org.apache.cassandra.service.ColumnPath;
-import org.apache.cassandra.service.InvalidRequestException;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.cassandra.service.SlicePredicate;
-import org.apache.cassandra.service.SuperColumn;
-import org.apache.cassandra.service.TimedOutException;
-import org.apache.cassandra.service.UnavailableException;
-import org.apache.thrift.TException;
 
 /**
  * The keyspace is a high level handle to all read/write operations to cassandra.
@@ -43,7 +34,7 @@ public interface Keyspace {
    *           if no value exists for the column
    */
   Column getColumn(String key, ColumnPath columnPath) throws InvalidRequestException,
-      NotFoundException, UnavailableException, TException, TimedOutException;
+          NotFoundException, UnavailableException, TException, TimedOutException;
 
   /**
    * Get the SuperColumn at the given columnPath.
@@ -161,6 +152,20 @@ public interface Keyspace {
       UnavailableException, TException, TimedOutException;
 
   /**
+   * Call batch mutate with the assembled mutationMap. This method is a direct pass-through 
+   * to the underlying Thrift API 
+   */
+  void batchMutate(Map<String, Map<String, List<Mutation>>> mutationMap) throws InvalidRequestException, 
+      UnavailableException, TException, TimedOutException;
+  
+  /**
+   * Call batch mutate with the BatchMutation object which encapsulates some of the complexity
+   * of the batch_mutate API signature
+   */
+  void batchMutate(BatchMutation batchMutation) throws InvalidRequestException, 
+      UnavailableException, TException, TimedOutException; 
+  
+  /**
    * Remove data from the row specified by key at the columnPath.
    *
    * Note that all the values in columnPath besides columnPath.column_family are truly optional:
@@ -198,7 +203,7 @@ public interface Keyspace {
   /**
    * @return The consistency level held by this keyspace instance.
    */
-  int getConsistencyLevel();
+  ConsistencyLevel getConsistencyLevel();
 
   String getName();
 

@@ -6,11 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import me.prettyprint.cassandra.service.CassandraClientTest;
-
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
+import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.apache.cassandra.utils.FileUtils;
 import org.apache.thrift.transport.TTransportException;
 
 /**
@@ -68,13 +66,13 @@ public class EmbeddedServerHelper {
   /**
    * Copies a resource from within the jar to a directory.
    *
-   * @param resourceName
+   * @param resource
    * @param directory
    * @throws IOException
    */
   private static void copy(String resource, String directory) throws IOException {
     mkdir(directory);
-    InputStream is = CassandraClientTest.class.getResourceAsStream(resource);
+    InputStream is = EmbeddedServerHelper.class.getResourceAsStream(resource);
     String fileName = resource.substring(resource.lastIndexOf("/") + 1);
     File file = new File(directory + System.getProperty("file.separator") + fileName);
     OutputStream out = new FileOutputStream(file);

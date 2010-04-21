@@ -1,10 +1,10 @@
 package me.prettyprint.cassandra.service;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnPath;
+
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
-
-import org.apache.cassandra.service.Column;
-import org.apache.cassandra.service.ColumnPath;
 
 /**
  * Example client that uses the cassandra hector client.
@@ -23,7 +23,8 @@ public class ExampleClient {
 
     try {
       Keyspace keyspace = client.getKeyspace("Keyspace1");
-      ColumnPath columnPath = new ColumnPath("Standard1", null, bytes("column-name"));
+      ColumnPath columnPath = new ColumnPath("Standard1");
+      columnPath.setColumn(bytes("column-name"));
 
       // insert
       keyspace.insert("key", columnPath, bytes("value"));

@@ -1,21 +1,17 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.apache.cassandra.service.Cassandra;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.cassandra.service.Cassandra.Client;
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation of the client interface.
@@ -107,13 +103,13 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Keyspace getKeyspace(String keySpaceName, int consistency) throws IllegalArgumentException,
+  public Keyspace getKeyspace(String keySpaceName, ConsistencyLevel consistency) throws IllegalArgumentException,
       NotFoundException, TException {
     return getKeyspace(keySpaceName, consistency, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
-  public Keyspace getKeyspace(String keyspaceName, int consistencyLevel,
+  public Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, TException {
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
@@ -181,11 +177,11 @@ import org.slf4j.LoggerFactory;
    * @param consistencyLevel
    * @return
    */
-  private String buildKeyspaceMapName(String keyspaceName, int consistencyLevel,
+  private String buildKeyspaceMapName(String keyspaceName, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy) {
     StringBuilder b = new StringBuilder(keyspaceName);
     b.append('[');
-    b.append(consistencyLevel);
+    b.append(consistencyLevel.getValue());
     b.append(',');
     b.append(failoverPolicy);
     b.append(']');
@@ -193,7 +189,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Client getCassandra() {
+  public Cassandra.Client getCassandra() {
     return cassandra;
   }
 

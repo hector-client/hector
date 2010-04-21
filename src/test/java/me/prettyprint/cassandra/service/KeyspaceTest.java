@@ -1,51 +1,28 @@
 package me.prettyprint.cassandra.service;
 
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
-import static me.prettyprint.cassandra.utils.StringUtils.string;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.times;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
-
-import org.apache.cassandra.service.Cassandra;
-import org.apache.cassandra.service.Column;
-import org.apache.cassandra.service.ColumnParent;
-import org.apache.cassandra.service.ColumnPath;
-import org.apache.cassandra.service.InvalidRequestException;
-import org.apache.cassandra.service.NotFoundException;
-import org.apache.cassandra.service.SlicePredicate;
-import org.apache.cassandra.service.SliceRange;
-import org.apache.cassandra.service.SuperColumn;
-import org.apache.cassandra.service.TimedOutException;
-import org.apache.cassandra.service.UnavailableException;
+import org.apache.cassandra.thrift.*;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Matchers;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.*;
+
+import static me.prettyprint.cassandra.utils.StringUtils.bytes;
+import static me.prettyprint.cassandra.utils.StringUtils.string;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 
 /**
  * For the tests we assume the following structure:
@@ -89,11 +66,13 @@ public class KeyspaceTest {
 
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
-      NotFoundException, UnknownHostException {
+          NotFoundException, UnknownHostException {
     pools = mock(CassandraClientPool.class);
     monitor = mock(CassandraClientMonitor.class);
-    client = new CassandraClientFactory(pools, new CassandraHost("localhost", 9170), monitor).create();
-    keyspace = client.getKeyspace("Keyspace1", 1, CassandraClient.DEFAULT_FAILOVER_POLICY);
+    client = new CassandraClientFactory(pools,
+        new CassandraHost("localhost", 9170), monitor).create();
+    keyspace = client.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
+        CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
 
   @Test
@@ -101,7 +80,8 @@ public class KeyspaceTest {
       IllegalStateException, NotFoundException, Exception {
 
     // insert value
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testInsertAndGetAndRemove"));
+    ColumnPath cp = new ColumnPath("Standard1");
+    cp.setColumn(bytes("testInsertAndGetAndRemove"));
     for (int i = 0; i < 100; i++) {
       keyspace.insert("testInsertAndGetAndRemove_" + i, cp,
           bytes("testInsertAndGetAndRemove_value_" + i));
@@ -135,7 +115,8 @@ public class KeyspaceTest {
   public void testValideColumnPath() throws UnavailableException, TException, TimedOutException {
     // Try to insert invalid columns
     // insert value
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testValideColumnPath"));
+    ColumnPath cp = new ColumnPath("Standard1");
+    cp.setColumn(bytes("testValideColumnPath"));
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       keyspace.remove("testValideColumnPath", cp);
@@ -143,7 +124,8 @@ public class KeyspaceTest {
       fail("Should not have thrown an error for Standard1");
     }
 
-    cp = new ColumnPath("CFdoesNotExist", null, bytes("testInsertAndGetAndRemove"));
+    cp = new ColumnPath("CFdoesNotExist");
+    cp.setColumn(bytes("testInsertAndGetAndRemove"));
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with CFdoesNotExist");
@@ -151,7 +133,8 @@ public class KeyspaceTest {
       // ok
     }
 
-    cp = new ColumnPath("Standard1", bytes("testInsertAndGetAndRemove"), null);
+    cp = new ColumnPath("Standard1");
+    cp.setSuper_column(bytes("testInsertAndGetAndRemove"));
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
@@ -179,7 +162,9 @@ public class KeyspaceTest {
     // get value
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
-        ColumnPath cp = new ColumnPath("Standard1", null, bytes("testBatchInsertColumn_" + j));
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchInsertColumn_" + j));
+
         Column col = keyspace.getColumn("testBatchInsertColumn_" + i, cp);
         assertNotNull(col);
         String value = string(col.getValue());
@@ -191,12 +176,143 @@ public class KeyspaceTest {
     // remove value
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
-        ColumnPath cp = new ColumnPath("Standard1", null, bytes("testBatchInsertColumn_" + j));
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchInsertColumn_" + j));
         keyspace.remove("testBatchInsertColumn_" + i, cp);
       }
     }
   }
+  
+  @Test
+  public void testBatchMutate() throws IllegalArgumentException, NoSuchElementException,
+      IllegalStateException, NotFoundException, TException, Exception {
+    Map<String, Map<String, List<Mutation>>> outerMutationMap = new HashMap<String, Map<String,List<Mutation>>>();
+    for (int i = 0; i < 10; i++) {
+            
+      Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
+            
+      ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
+      for (int j = 0; j < 10; j++) {
+        Column col = new Column(bytes("testBatchMutateColumn_" + j),
+            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+        //list.add(col);
+        ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
+        cosc.setColumn(col);
+        Mutation mutation = new Mutation();
+        mutation.setColumn_or_supercolumn(cosc);
+        mutations.add(mutation);
+      }
+      mutationMap.put("Standard1", mutations);            
+      outerMutationMap.put("testBatchMutateColumn_" + i, mutationMap);
+    }
+    keyspace.batchMutate(outerMutationMap);
+    // re-use later
+    outerMutationMap.clear();    
 
+    // get value
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+
+        Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+        assertNotNull(col);
+        String value = string(col.getValue());
+        assertEquals("testBatchMutateColumn_value_" + j, value);
+
+      }
+    }
+    
+    // batch_mutate delete by key
+    for (int i = 0; i < 10; i++) {
+      ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
+      Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
+      SlicePredicate slicePredicate = new SlicePredicate();
+      for (int j = 0; j < 10; j++) {        
+        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));      
+      }
+      Mutation mutation = new Mutation();
+      Deletion deletion = new Deletion(new Date().getTime());
+      deletion.setPredicate(slicePredicate);
+      mutation.setDeletion(deletion);      
+      mutations.add(mutation);
+
+      mutationMap.put("Standard1", mutations);
+      outerMutationMap.put("testBatchMutateColumn_"+i, mutationMap);
+    }
+    keyspace.batchMutate(outerMutationMap);
+    // make sure the values are gone
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+        try {
+          Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+          fail();
+        } catch (NotFoundException e) {
+        }
+
+      }
+    }
+  } 
+
+  @Test
+  public void testBatchMutateBatchMutation() throws IllegalArgumentException, NoSuchElementException,
+      IllegalStateException, NotFoundException, TException, Exception {
+    BatchMutation batchMutation = new BatchMutation();
+    List<String> columnFamilies = Arrays.asList("Standard1");
+    for (int i = 0; i < 10; i++) {                             
+      
+      for (int j = 0; j < 10; j++) {
+        Column col = new Column(bytes("testBatchMutateColumn_" + j),
+            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+        ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
+        cosc.setColumn(col);
+        batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, cosc);
+      }
+    }
+    keyspace.batchMutate(batchMutation);
+
+    // get value
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+
+        Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+        assertNotNull(col);
+        String value = string(col.getValue());
+        assertEquals("testBatchMutateColumn_value_" + j, value);
+
+      }
+    }
+    batchMutation = new BatchMutation();
+    // batch_mutate delete by key
+    for (int i = 0; i < 10; i++) {
+      SlicePredicate slicePredicate = new SlicePredicate();
+      for (int j = 0; j < 10; j++) {        
+        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));      
+      }
+      Deletion deletion = new Deletion(new Date().getTime());
+      deletion.setPredicate(slicePredicate);
+      batchMutation.addDeletion("testBatchMutateColumn_"+i, columnFamilies, deletion);      
+    }
+    keyspace.batchMutate(batchMutation);
+    // make sure the values are gone
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+        try {
+          Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+          fail();
+        } catch (NotFoundException e) {
+        }
+
+      }
+    }
+  } 
+  
   @Test
   public void testGetClient() {
     assertEquals(client, keyspace.getClient());
@@ -218,7 +334,8 @@ public class KeyspaceTest {
     cfmap.put("Super1", superlist);
     keyspace.batchInsert("testGetSuperColumn_1", null, cfmap);
 
-    ColumnPath cp = new ColumnPath("Super1", bytes("SuperColumn_1"), null);
+    ColumnPath cp = new ColumnPath("Super1");
+    cp.setSuper_column(bytes("SuperColumn_1"));
     try {
       SuperColumn superc = keyspace.getSuperColumn("testGetSuperColumn_1", cp);
       assertNotNull(superc);
@@ -235,15 +352,17 @@ public class KeyspaceTest {
     // insert value
     ArrayList<String> columnnames = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
-      ColumnPath cp = new ColumnPath("Standard2", null, bytes("testGetSlice_" + i));
+      ColumnPath cp = new ColumnPath("Standard2");
+      cp.setColumn(bytes("testGetSlice_" + i));
       keyspace.insert("testGetSlice", cp, bytes("testGetSlice_Value_" + i));
       columnnames.add("testGetSlice_" + i);
     }
 
     // get value
-    ColumnParent clp = new ColumnParent("Standard2", null);
+    ColumnParent clp = new ColumnParent("Standard2");
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-    SlicePredicate sp = new SlicePredicate(null, sr);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
     List<Column> cols = keyspace.getSlice("testGetSlice", clp, sp);
 
     assertNotNull(cols);
@@ -256,8 +375,9 @@ public class KeyspaceTest {
     }
     assertEquals(columnnames, gotlist);
 
-    ColumnPath cp = new ColumnPath("Standard2", null, null);
+    ColumnPath cp = new ColumnPath("Standard2");
     keyspace.remove("testGetSlice_", cp);
+    keyspace.remove("testGetSlice", cp);
   }
 
   @Test
@@ -265,26 +385,31 @@ public class KeyspaceTest {
       IllegalStateException, NotFoundException, TException, Exception {
     // insert value
     for (int i = 0; i < 100; i++) {
-      ColumnPath cp = new ColumnPath("Super1", bytes("SuperColumn_1"), bytes("testGetSuperSlice_"
-          + i));
+      ColumnPath cp = new ColumnPath("Super1");
 
-      ColumnPath cp2 = new ColumnPath("Super1", bytes("SuperColumn_2"), bytes("testGetSuperSlice_"
-          + i));
+      cp.setSuper_column(bytes("SuperColumn_1"));
+      cp.setColumn(bytes("testGetSuperSlice_"+ i));
+
+      ColumnPath cp2 = new ColumnPath("Super1");
+
+      cp2.setSuper_column(bytes("SuperColumn_2"));
+      cp2.setColumn(bytes("testGetSuperSlice_" + i));
 
       keyspace.insert("testGetSuperSlice", cp, bytes("testGetSuperSlice_Value_" + i));
       keyspace.insert("testGetSuperSlice", cp2, bytes("testGetSuperSlice_Value_" + i));
     }
 
     // get value
-    ColumnParent clp = new ColumnParent("Super1", null);
+    ColumnParent clp = new ColumnParent("Super1");
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-    SlicePredicate sp = new SlicePredicate(null, sr);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
     List<SuperColumn> cols = keyspace.getSuperSlice("testGetSuperSlice", clp, sp);
 
     assertNotNull(cols);
     assertEquals(2, cols.size());
 
-    ColumnPath cp = new ColumnPath("Super1", null, null);
+    ColumnPath cp = new ColumnPath("Super1");
     keyspace.remove("testGetSuperSlice", cp);
   }
 
@@ -292,7 +417,8 @@ public class KeyspaceTest {
   public void testMultigetColumn() throws IllegalArgumentException, NoSuchElementException,
       IllegalStateException, NotFoundException, TException, Exception {
     // insert value
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testMultigetColumn"));
+    ColumnPath cp = new ColumnPath("Standard1");
+    cp.setColumn(bytes("testMultigetColumn"));
     ArrayList<String> keys = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
       keyspace.insert("testMultigetColumn_" + i, cp, bytes("testMultigetColumn_value_" + i));
@@ -329,7 +455,8 @@ public class KeyspaceTest {
     cfmap.put("Super1", superlist);
     keyspace.batchInsert("testMultigetSuperColumn_1", null, cfmap);
 
-    ColumnPath cp = new ColumnPath("Super1", bytes("SuperColumn_1"), null);
+    ColumnPath cp = new ColumnPath("Super1");
+    cp.setSuper_column(bytes("SuperColumn_1"));
     try {
       List<String> keys = new ArrayList<String>();
       keys.add("testMultigetSuperColumn_1");
@@ -346,16 +473,18 @@ public class KeyspaceTest {
   public void testMultigetSlice() throws IllegalArgumentException, NoSuchElementException,
       IllegalStateException, NotFoundException, TException, Exception {
     // insert value
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testMultigetSlice"));
+    ColumnPath cp = new ColumnPath("Standard1");
+    cp.setColumn(bytes("testMultigetSlice"));
     ArrayList<String> keys = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
       keyspace.insert("testMultigetSlice_" + i, cp, bytes("testMultigetSlice_value_" + i));
       keys.add("testMultigetSlice_" + i);
     }
     // get value
-    ColumnParent clp = new ColumnParent("Standard1", null);
+    ColumnParent clp = new ColumnParent("Standard1");
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-    SlicePredicate sp = new SlicePredicate(null, sr);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
     Map<String, List<Column>> ms = keyspace.multigetSlice(keys, clp, sp);
     for (int i = 0; i < 100; i++) {
       List<Column> cl = ms.get(keys.get(i));
@@ -396,9 +525,11 @@ public class KeyspaceTest {
       keys.add("testMultigetSuperSlice_2");
       keys.add("testMultigetSuperSlice_3");
 
-      ColumnParent clp = new ColumnParent("Super1", bytes("SuperColumn_1"));
+      ColumnParent clp = new ColumnParent("Super1");
+      clp.setSuper_column(bytes("SuperColumn_1"));
       SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-      SlicePredicate sp = new SlicePredicate(null, sr);
+      SlicePredicate sp = new SlicePredicate();
+      sp.setSlice_range(sr);
       Map<String, List<Column>> superc = keyspace.multigetSlice(keys, clp, sp);
 
       assertNotNull(superc);
@@ -409,7 +540,7 @@ public class KeyspaceTest {
 
     } finally {
       // insert value
-      ColumnPath cp = new ColumnPath("Super1", null, null);
+      ColumnPath cp = new ColumnPath("Super1");
       keyspace.remove("testMultigetSuperSlice_1", cp);
       keyspace.remove("testMultigetSuperSlice_2", cp);
       keyspace.remove("testMultigetSuperSlice_3", cp);
@@ -442,9 +573,10 @@ public class KeyspaceTest {
       keys.add("testMultigetSuperSlice_2");
       keys.add("testMultigetSuperSlice_3");
 
-      ColumnParent clp = new ColumnParent("Super1", null);
+      ColumnParent clp = new ColumnParent("Super1");
       SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-      SlicePredicate sp = new SlicePredicate(null, sr);
+      SlicePredicate sp = new SlicePredicate();
+      sp.setSlice_range(sr);
       Map<String, List<SuperColumn>> superc = keyspace.multigetSuperSlice(keys, clp, sp); // throw
 
       assertNotNull(superc);
@@ -457,7 +589,7 @@ public class KeyspaceTest {
       assertNotNull(scls.get(0).getColumns().get(0).value);
     } finally {
       // insert value
-      ColumnPath cp = new ColumnPath("Super1", null, null);
+      ColumnPath cp = new ColumnPath("Super1");
       keyspace.remove("testMultigetSuperSlice_1", cp);
     }
   }
@@ -488,9 +620,11 @@ public class KeyspaceTest {
       keys.add("testMultigetSuperSlice_2");
       keys.add("testMultigetSuperSlice_3");
 
-      ColumnParent clp = new ColumnParent("Super1", bytes("SuperColumn_1"));
+      ColumnParent clp = new ColumnParent("Super1");
+      clp.setSuper_column(bytes("SuperColumn_1"));
       SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-      SlicePredicate sp = new SlicePredicate(null, sr);
+      SlicePredicate sp = new SlicePredicate();
+      sp.setSlice_range(sr);
       Map<String, List<SuperColumn>> superc = keyspace.multigetSuperSlice(keys, clp, sp); // throw
 
       assertNotNull(superc);
@@ -503,7 +637,7 @@ public class KeyspaceTest {
       assertNotNull(scls.get(0).getColumns().get(0).value);
     } finally {
       // insert value
-      ColumnPath cp = new ColumnPath("Super1", null, null);
+      ColumnPath cp = new ColumnPath("Super1");
       keyspace.remove("testMultigetSuperSlice_1", cp);
     }
   }
@@ -520,16 +654,17 @@ public class KeyspaceTest {
       IllegalStateException, NotFoundException, TException, Exception {
     // insert values
     for (int i = 0; i < 100; i++) {
-      ColumnPath cp = new ColumnPath("Standard1", null, bytes("testInsertAndGetAndRemove_" + i));
+      ColumnPath cp = new ColumnPath("Standard1");
+      cp.setColumn(bytes("testInsertAndGetAndRemove_" + i));
       keyspace.insert("testGetCount", cp, bytes("testInsertAndGetAndRemove_value_" + i));
     }
 
     // get value
-    ColumnParent clp = new ColumnParent("Standard1", null);
+    ColumnParent clp = new ColumnParent("Standard1");
     int count = keyspace.getCount("testGetCount", clp);
     assertEquals(100, count);
 
-    ColumnPath cp = new ColumnPath("Standard1", null, null);
+    ColumnPath cp = new ColumnPath("Standard1");
     keyspace.remove("testGetCount", cp);
   }
 
@@ -537,26 +672,28 @@ public class KeyspaceTest {
   public void testGetRangeSlice() throws InvalidRequestException, UnavailableException, TException,
       TimedOutException, NotFoundException {
     for (int i = 0; i < 10; i++) {
-      ColumnPath cp = new ColumnPath("Standard2", null, bytes("testGetRangeSlice_" + i));
+      ColumnPath cp = new ColumnPath("Standard2");
+      cp.setColumn(bytes("testGetRangeSlice_" + i));
+
       keyspace.insert("testGetRangeSlice0", cp, bytes("testGetRangeSlice_Value_" + i));
       keyspace.insert("testGetRangeSlice1", cp, bytes("testGetRangeSlice_Value_" + i));
       keyspace.insert("testGetRangeSlice2", cp, bytes("testGetRangeSlice_Value_" + i));
     }
 
     // get value
-    ColumnParent clp = new ColumnParent("Standard2", null);
+    ColumnParent clp = new ColumnParent("Standard2");
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-    SlicePredicate sp = new SlicePredicate(null, sr);
-    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0",
-        "testGetRangeSlice3", 5);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
+    Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0", "testGetRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(3, keySlices.size());
-    assertNotNull("testGetRangeSlice0 is null", keySlices.get("testGetRangeSlice0"));
-    assertEquals("testGetRangeSlice_Value_0", string(keySlices.get("testGetRangeSlice0").get(0).getValue()));
+    assertNotNull("testGetRangeSlice1 is null", keySlices.get("testGetRangeSlice1"));
+    assertEquals("testGetRangeSlice_Value_0", string(keySlices.get("testGetRangeSlice1").get(0).getValue()));
     assertEquals(10, keySlices.get("testGetRangeSlice1").size());
 
-    ColumnPath cp = new ColumnPath("Standard2", null, null);
+    ColumnPath cp = new ColumnPath("Standard2");
     keyspace.remove("testGetRanageSlice0", cp);
     keyspace.remove("testGetRanageSlice1", cp);
     keyspace.remove("testGetRanageSlice2", cp);
@@ -566,18 +703,20 @@ public class KeyspaceTest {
   public void testGetSuperRangeSlice() throws InvalidRequestException, UnavailableException, TException,
       TimedOutException, NotFoundException {
     for (int i = 0; i < 10; i++) {
-      ColumnPath cp = new ColumnPath("Super1", bytes("SuperColumn_1"),
-          bytes("testGetSuperRangeSlice_" + i));
+      ColumnPath cp = new ColumnPath("Super1");
+      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setColumn(bytes("testGetSuperRangeSlice_" + i));
       keyspace.insert("testGetSuperRangeSlice0", cp, bytes("testGetSuperRangeSlice_Value_" + i));
       keyspace.insert("testGetSuperRangeSlice1", cp, bytes("testGetSuperRangeSlice_Value_" + i));
     }
 
     // get value
-    ColumnParent clp = new ColumnParent("Super1", null);
+    ColumnParent clp = new ColumnParent("Super1");
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-    SlicePredicate sp = new SlicePredicate(null, sr);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
     Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
-        "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
+            "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());
@@ -587,14 +726,14 @@ public class KeyspaceTest {
     assertEquals(1, keySlices.get("testGetSuperRangeSlice1").size());
     assertEquals(10, keySlices.get("testGetSuperRangeSlice1").get(0).getColumns().size());
 
-    ColumnPath cp = new ColumnPath("Super1", null, null);
+    ColumnPath cp = new ColumnPath("Super1");
     keyspace.remove("testGetSuperRangeSlice0", cp);
     keyspace.remove("testGetSuperRangeSlice1", cp);
   }
 
   @Test
   public void testGetConsistencyLevel() {
-    assertEquals(1, keyspace.getConsistencyLevel());
+    assertEquals(ConsistencyLevel.ONE, keyspace.getConsistencyLevel());
   }
 
   @Test
@@ -615,8 +754,9 @@ public class KeyspaceTest {
     Map<String, String> keyspace1Desc = new HashMap<String, String>();
     keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.put("Standard1", keyspace1Desc);
-    int consistencyLevel = 1;
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
+    ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+    ColumnPath cp = new ColumnPath("Standard1");
+    cp.setColumn(bytes("testFailover"));
     CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
@@ -654,7 +794,7 @@ public class KeyspaceTest {
 
     // now fail the call and make sure it fails fast
     doThrow(new TimedOutException()).when(h1cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
@@ -671,14 +811,14 @@ public class KeyspaceTest {
 
     ks.insert("key", cp, bytes("value"));
     verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
-        (byte[]) anyObject(), anyLong(), anyInt());
+        (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     verify(clientPools).borrowClient("h3", 111);
 
     // make both h1 and h3 fail
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
     doThrow(new TimedOutException()).when(h3cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
@@ -695,13 +835,13 @@ public class KeyspaceTest {
 
     ks.insert("key", cp, bytes("value"));
     verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
-        (byte[]) anyObject(), anyLong(), anyInt());
+        (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
 
     // now fail them all. h1 fails, h2 fails, h3 fails
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
     doThrow(new TimedOutException()).when(h2cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
@@ -728,8 +868,9 @@ public class KeyspaceTest {
     Map<String, String> keyspace1Desc = new HashMap<String, String>();
     keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.put("Standard1", keyspace1Desc);
-    int consistencyLevel = 1;
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
+    ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+    ColumnPath cp = new ColumnPath("Standard1");
+    cp.setColumn(bytes("testFailover"));
     CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
@@ -759,7 +900,7 @@ public class KeyspaceTest {
     // This simulates a host we can connect to, but cannot perform operations on. The host is semi-
     // down
     doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
 
     ks.insert("key", cp, bytes("value"));
 
@@ -791,8 +932,8 @@ public class KeyspaceTest {
     Map<String, String> keyspace1Desc = new HashMap<String, String>();
     keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.put("Standard1", keyspace1Desc);
-    int consistencyLevel = 1;
-    ColumnPath cp = new ColumnPath("Standard1", null, bytes("testFailover"));
+    ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+    ColumnPath cp = new ColumnPath("Standard1").setColumn(bytes("testFailover"));
     CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
@@ -820,7 +961,11 @@ public class KeyspaceTest {
 
     // fail the call, use a transport exception
     doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
-        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), anyInt());
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
+
+    // And also fail the call to borrowClient when trying to borrow from this host again.
+    // This is actually simulation the host down permanently (well, until the test ends at least...)
+    doThrow(new TException()).when(clientPools).borrowClient("h1", 2);
 
     // And also fail the call to borrowClient when trying to borrow from this host again.
     // This is actually simulation the host down permanently (well, until the test ends at least...)

@@ -1,11 +1,10 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.Map;
-
-
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.thrift.TException;
+
+import java.util.Map;
 
 /**
  *
@@ -21,7 +20,7 @@ import org.apache.thrift.TException;
   }
 
   public Keyspace create(CassandraClient client, String keyspaceName,
-      Map<String, Map<String, String>> keyspaceDesc, int consistencyLevel,
+      Map<String, Map<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
       throws TException {
     return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
