@@ -1,19 +1,29 @@
 package me.prettyprint.cassandra.service;
 
+import java.lang.String;
+
 public class CassandraHostConfigurator {
 
-  private final String hosts;
+  private String hosts;
   private int maxActive;
   private int maxIdle;
   private long maxWaitTimeWhenExhausted;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
   
+
+  public CassandraHostConfigurator() {
+    this.hosts = null;
+  }
+
   public CassandraHostConfigurator(String hosts) {
     this.hosts = hosts;
   }
   
   public CassandraHost[] buildCassandraHosts() {
+    if (this.hosts == null) {
+        return null;
+    }
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
@@ -32,6 +42,10 @@ public class CassandraHostConfigurator {
       cassandraHosts[x] = cassandraHost;
     }
     return cassandraHosts;
+  }
+
+  public void setHosts(String hosts) {
+    this.hosts = hosts;
   }
 
   public void setMaxActive(int maxActive) {
