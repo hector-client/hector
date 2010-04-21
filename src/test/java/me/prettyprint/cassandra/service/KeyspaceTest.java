@@ -994,6 +994,10 @@ public class KeyspaceTest {
     // This is actually simulation the host down permanently (well, until the test ends at least...)
     doThrow(new TException()).when(clientPools).borrowClient("h1", 2);
 
+    // And also fail the call to borrowClient when trying to borrow from this host again.
+    // This is actually simulation the host down permanently (well, until the test ends at least...)
+    doThrow(new TException()).when(clientPools).borrowClient("h1", 2);
+
     ks.insert("key", cp, bytes("value"));
 
     // Make sure the client is invalidated
