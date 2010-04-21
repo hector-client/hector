@@ -1,8 +1,49 @@
 package me.prettyprint.cassandra.service;
 
+import static me.prettyprint.cassandra.utils.StringUtils.bytes;
+import static me.prettyprint.cassandra.utils.StringUtils.string;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
-import org.apache.cassandra.thrift.*;
+
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.Deletion;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
+import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
@@ -10,19 +51,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
-
-import java.io.IOException;
-import java.net.UnknownHostException;
-import java.util.*;
-
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
-import static me.prettyprint.cassandra.utils.StringUtils.string;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
 
 /**
  * For the tests we assume the following structure:
@@ -182,15 +210,15 @@ public class KeyspaceTest {
       }
     }
   }
-  
+
   @Test
   public void testBatchMutate() throws IllegalArgumentException, NoSuchElementException,
       IllegalStateException, NotFoundException, TException, Exception {
     Map<String, Map<String, List<Mutation>>> outerMutationMap = new HashMap<String, Map<String,List<Mutation>>>();
     for (int i = 0; i < 10; i++) {
-            
+
       Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
-            
+
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
@@ -202,12 +230,12 @@ public class KeyspaceTest {
         mutation.setColumn_or_supercolumn(cosc);
         mutations.add(mutation);
       }
-      mutationMap.put("Standard1", mutations);            
+      mutationMap.put("Standard1", mutations);
       outerMutationMap.put("testBatchMutateColumn_" + i, mutationMap);
     }
     keyspace.batchMutate(outerMutationMap);
     // re-use later
-    outerMutationMap.clear();    
+    outerMutationMap.clear();
 
     // get value
     for (int i = 0; i < 10; i++) {
@@ -222,19 +250,19 @@ public class KeyspaceTest {
 
       }
     }
-    
+
     // batch_mutate delete by key
     for (int i = 0; i < 10; i++) {
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
       SlicePredicate slicePredicate = new SlicePredicate();
-      for (int j = 0; j < 10; j++) {        
-        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));      
+      for (int j = 0; j < 10; j++) {
+        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(new Date().getTime());
+      Deletion deletion = new Deletion(System.currentTimeMillis());
       deletion.setPredicate(slicePredicate);
-      mutation.setDeletion(deletion);      
+      mutation.setDeletion(deletion);
       mutations.add(mutation);
 
       mutationMap.put("Standard1", mutations);
@@ -247,28 +275,26 @@ public class KeyspaceTest {
         ColumnPath cp = new ColumnPath("Standard1");
         cp.setColumn(bytes("testBatchMutateColumn_" + j));
         try {
-          Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+          keyspace.getColumn("testBatchMutateColumn_" + i, cp);
           fail();
         } catch (NotFoundException e) {
         }
 
       }
     }
-  } 
+  }
 
   @Test
   public void testBatchMutateBatchMutation() throws IllegalArgumentException, NoSuchElementException,
       IllegalStateException, NotFoundException, TException, Exception {
     BatchMutation batchMutation = new BatchMutation();
     List<String> columnFamilies = Arrays.asList("Standard1");
-    for (int i = 0; i < 10; i++) {                             
-      
+    for (int i = 0; i < 10; i++) {
+
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
             bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
-        ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
-        cosc.setColumn(col);
-        batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, cosc);
+        batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
     keyspace.batchMutate(batchMutation);
@@ -290,12 +316,12 @@ public class KeyspaceTest {
     // batch_mutate delete by key
     for (int i = 0; i < 10; i++) {
       SlicePredicate slicePredicate = new SlicePredicate();
-      for (int j = 0; j < 10; j++) {        
-        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));      
+      for (int j = 0; j < 10; j++) {
+        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(new Date().getTime());
+      Deletion deletion = new Deletion(System.currentTimeMillis());
       deletion.setPredicate(slicePredicate);
-      batchMutation.addDeletion("testBatchMutateColumn_"+i, columnFamilies, deletion);      
+      batchMutation.addDeletion("testBatchMutateColumn_"+i, columnFamilies, deletion);
     }
     keyspace.batchMutate(batchMutation);
     // make sure the values are gone
@@ -304,15 +330,16 @@ public class KeyspaceTest {
         ColumnPath cp = new ColumnPath("Standard1");
         cp.setColumn(bytes("testBatchMutateColumn_" + j));
         try {
-          Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+          keyspace.getColumn("testBatchMutateColumn_" + i, cp);
           fail();
         } catch (NotFoundException e) {
+          // good, we want this to throw.
         }
 
       }
     }
-  } 
-  
+  }
+
   @Test
   public void testGetClient() {
     assertEquals(client, keyspace.getClient());
