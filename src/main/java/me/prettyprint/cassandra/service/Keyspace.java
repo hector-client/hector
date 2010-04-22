@@ -194,6 +194,13 @@ public interface Keyspace {
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
   /**
+   * returns a subset of columns for a range of keys.
+   */
+  Map<String, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate, 
+      KeyRange keyRange)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException;
+
+  /**
    * returns a subset of super columns for a range of keys.
    */
   Map<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
