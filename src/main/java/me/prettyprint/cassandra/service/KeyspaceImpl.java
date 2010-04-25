@@ -20,6 +20,7 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -173,6 +174,31 @@ import org.slf4j.LoggerFactory;
           UnavailableException, TException, TimedOutException {
         List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
             start, finish, count, consistency);
+        if (keySlices == null || keySlices.isEmpty()) {
+          return Collections.emptyMap();
+        }
+        Map<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(keySlices.size());
+        for (KeySlice keySlice : keySlices) {
+          ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
+        }
+        return ret;
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+
+  @Override
+  public Map<String, List<Column>> getRangeSlices(final ColumnParent columnParent,
+      final SlicePredicate predicate, final KeyRange keyRange)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
+        OperationType.READ) {
+      @Override
+      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
+          UnavailableException, TException, TimedOutException {
+        List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent, predicate,
+            keyRange, consistency);
         if (keySlices == null || keySlices.isEmpty()) {
           return Collections.emptyMap();
         }

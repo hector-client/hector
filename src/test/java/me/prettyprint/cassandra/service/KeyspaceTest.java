@@ -37,6 +37,7 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -724,6 +725,42 @@ public class KeyspaceTest {
     keyspace.remove("testGetRanageSlice0", cp);
     keyspace.remove("testGetRanageSlice1", cp);
     keyspace.remove("testGetRanageSlice2", cp);
+  }
+
+  @Test
+  public void testGetRangeSlices() throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException, NotFoundException {
+    for (int i = 0; i < 10; i++) {
+      ColumnPath cp = new ColumnPath("Standard2");
+      cp.setColumn(bytes("testGetRangeSlices_" + i));
+
+      keyspace.insert("testGetRangeSlices0", cp, bytes("testGetRangeSlices_Value_" + i));
+      keyspace.insert("testGetRangeSlices1", cp, bytes("testGetRangeSlices_Value_" + i));
+      keyspace.insert("testGetRangeSlices2", cp, bytes("testGetRangeSlices_Value_" + i));
+    }
+
+    // get value
+    ColumnParent clp = new ColumnParent("Standard2");
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
+
+    KeyRange range = new KeyRange();
+    range.setStart_key( "testGetRangeSlices0" );
+    range.setEnd_key( "testGetRangeSlices2" );
+
+    Map<String, List<Column>> keySlices = keyspace.getRangeSlices(clp, sp, range);
+
+    assertNotNull(keySlices);
+    assertEquals(3, keySlices.size());
+    assertNotNull("testGetRangeSlices1 is null", keySlices.get("testGetRangeSlices1"));
+    assertEquals("testGetRangeSlices_Value_0", string(keySlices.get("testGetRangeSlices1").get(0).getValue()));
+    assertEquals(10, keySlices.get("testGetRangeSlices1").size());
+
+    ColumnPath cp = new ColumnPath("Standard2");
+    keyspace.remove("testGetRanageSlices0", cp);
+    keyspace.remove("testGetRanageSlices1", cp);
+    keyspace.remove("testGetRanageSlices2", cp);
   }
 
   @Test
