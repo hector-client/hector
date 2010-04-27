@@ -16,28 +16,9 @@ import static org.junit.Assert.*;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class CassandraClientPoolTest {
+public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
 
   private CassandraClientPoolImpl store;
-  private static EmbeddedServerHelper embedded;
-
-  /**
-   * Set embedded cassandra up and spawn it in a new thread.
-   *
-   * @throws TTransportException
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
-    embedded = new EmbeddedServerHelper();
-    embedded.setup();
-  }
-
-  @AfterClass
-  public static void teardown() throws IOException {
-    embedded.teardown();
-  }
 
   @Before
   public void setupTest() {

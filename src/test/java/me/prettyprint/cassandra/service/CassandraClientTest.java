@@ -25,9 +25,7 @@ import static org.mockito.Mockito.mock;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class CassandraClientTest {
-
-  private static EmbeddedServerHelper embedded;
+public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
 
@@ -35,23 +33,6 @@ public class CassandraClientTest {
 
   private CassandraClientMonitor monitor;
 
-  /**
-   * Set embedded cassandra up and spawn it in a new thread.
-   *
-   * @throws TTransportException
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
-    embedded = new EmbeddedServerHelper();
-    embedded.setup();
-  }
-
-  @AfterClass
-  public static void teardown() throws IOException {
-    embedded.teardown();
-  }
 
   @Before
   public void setupCase() throws TTransportException, TException, UnknownHostException {

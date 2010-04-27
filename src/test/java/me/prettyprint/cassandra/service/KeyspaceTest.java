@@ -44,6 +44,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.TokenRange;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -66,32 +67,12 @@ import org.mockito.Matchers;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class KeyspaceTest {
-
-  private static EmbeddedServerHelper embedded;
+public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
   private CassandraClientPool pools;
   private CassandraClientMonitor monitor;
-
-  /**
-   * Set embedded cassandra up and spawn it in a new thread.
-   *
-   * @throws TTransportException
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
-    embedded = new EmbeddedServerHelper();
-    embedded.setup();
-  }
-
-  @AfterClass
-  public static void teardown() throws IOException {
-    embedded.teardown();
-  }
 
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
@@ -730,6 +711,7 @@ public class KeyspaceTest {
     assertNotNull(description);
     assertEquals(4, description.size());
   }
+
 
   @Test
   public void testGetCount() throws IllegalArgumentException, NoSuchElementException,
