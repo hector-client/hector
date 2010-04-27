@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,6 +83,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public String getClusterName() throws TException {
+    // TODO replace with meta data API
     if (clusterName == null) {
       clusterName = getStringProperty(PROP_CLUSTER_NAME);
     }
@@ -135,30 +137,35 @@ import java.util.concurrent.atomic.AtomicLong;
   @Override
   public List<String> getKeyspaces() throws TException {
     if (keyspaces == null) {
-      keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
+      keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
     }
     return keyspaces;
   }
 
   @Override
   public String getStringProperty(String propertyName) throws TException {
+    // TODO remove
     return cassandra.get_string_property(propertyName);
   }
 
   @Override
   public Map<String, String> getTokenMap(boolean fresh) throws TException {
     if (tokenMap == null || fresh) {
-      tokenMap = new HashMap<String, String>();
-      String strTokens = getStringProperty(PROP_TOKEN_MAP);
-      // Parse the result of the form {"token1":"host1","token2":"host2"}
-      strTokens = trimBothSides(strTokens);
-      String[] tokenPairs = strTokens.split(",");
-      for (String tokenPair: tokenPairs) {
-        String[] keyValue = tokenPair.split(":");
-        String token = trimBothSides(keyValue[0]);
-        String host = trimBothSides(keyValue[1]);
-        tokenMap.put(token, host);
+      tokenMap = new HashMap<String, String>();      
+      List<String> keyspaces = getKeyspaces();      
+      for (String keyspace : keyspaces) {
+        if ( keyspace.equals("system") ) 
+          continue;
+        List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
+        for (TokenRange tokenRange : tokenRanges) {
+          for( String host : tokenRange.getEndpoints() ) {
+            log.info("token start: {} end: {} host: {}", 
+                new Object[]{tokenRange.getStart_token(), tokenRange.getEnd_token(), host});
+            tokenMap.put(tokenRange.getStart_token()+"-"+tokenRange.getEnd_token(), host);
+          }
+        }
       }
+      
     }
     return tokenMap;
   }
@@ -218,6 +225,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public void updateKnownHosts() throws TException {
+    // TODO rebuild to use meta API
     if (closed) {
       return;
     }
@@ -252,6 +260,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public Set<String> getKnownHosts() {
+    // TODO update to use META API
     Set<String> hosts = new HashSet<String>();
     if (closed) {
       return hosts;
