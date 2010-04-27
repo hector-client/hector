@@ -528,7 +528,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private static long createTimeStamp() {
-    return System.currentTimeMillis();
+    return System.currentTimeMillis() * 1000;
   }
 
   /**
