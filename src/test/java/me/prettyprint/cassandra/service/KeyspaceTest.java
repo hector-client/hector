@@ -582,7 +582,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperSlice_value_" + j), createMicroTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -629,7 +629,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperSlice_value_" + j), createMicroTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -668,6 +668,10 @@ public class KeyspaceTest {
       ColumnPath cp = new ColumnPath("Super1");
       keyspace.remove("testMultigetSuperSlice_1", cp);
     }
+  }
+
+  private long createMicroTimestamp() {
+    return System.currentTimeMillis()*1000;
   }
 
   @Test
