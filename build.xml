@@ -134,6 +134,7 @@
           <include name="**/*Test.java"/>
           <include name="**/*TestCase.java"/>
           <exclude name="**/*Abstract*Test.java"/>
+          <exclude name="**/Base*Test.java"/>        	
         </fileset>
       </batchtest>
       <batchtest todir="${test.reports}" if="test">
