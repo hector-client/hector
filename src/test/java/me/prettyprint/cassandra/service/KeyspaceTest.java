@@ -340,6 +340,56 @@ public class KeyspaceTest {
       }
     }
   }
+  
+  @Test
+  public void testBatchUpdateInsertAndDelOnSame() throws IllegalArgumentException, NoSuchElementException,
+  IllegalStateException, NotFoundException, TException, Exception {
+
+    ColumnPath sta1 = new ColumnPath("Standard1");
+    sta1.setColumn(bytes("deleteThroughInserBatch_col"));
+
+    keyspace.insert("deleteThroughInserBatch_key", sta1, bytes("deleteThroughInserBatch_val"));
+    
+    Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
+    assertNotNull(found);
+    
+    BatchMutation batchMutation = new BatchMutation();
+    List<String> columnFamilies = Arrays.asList("Standard1");
+    for (int i = 0; i < 10; i++) {
+
+      for (int j = 0; j < 10; j++) {
+        Column col = new Column(bytes("testBatchMutateColumn_" + j),
+            bytes("testBatchMutateColumn_value_" + j), createMicroTimestamp());
+        batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
+      }
+    }
+    SlicePredicate slicePredicate = new SlicePredicate();
+    slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
+
+    Deletion deletion = new Deletion(createMicroTimestamp());
+    deletion.setPredicate(slicePredicate);
+    
+    batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);
+    keyspace.batchMutate(batchMutation);
+    try {
+      keyspace.getColumn("deleteThroughInserBatch_key", sta1);
+      fail("Should not have found a value here");
+    } catch (Exception e) {      
+    }
+    // get value
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+
+        Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+        assertNotNull(col);
+        String value = string(col.getValue());
+        assertEquals("testBatchMutateColumn_value_" + j, value);
+
+      }
+    }
+  }
 
   @Test
   public void testGetClient() {
