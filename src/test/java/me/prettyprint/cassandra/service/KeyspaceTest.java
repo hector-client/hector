@@ -582,7 +582,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperSlice_value_" + j), ((KeyspaceImpl) keyspace).createTimeStamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -616,57 +616,11 @@ public class KeyspaceTest {
       assertEquals(10, scls.get(0).getColumns().size());
       assertNotNull(scls.get(0).getColumns().get(0).value);
     } finally {
-      // insert value
+      // cleanup
       ColumnPath cp = new ColumnPath("Super1");
       keyspace.remove("testMultigetSuperSlice_1", cp);
-    }
-  }
-
-  @Test
-  public void testMultigetSuperSlice_1() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
-    HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
-    ArrayList<Column> list = new ArrayList<Column>(100);
-    for (int j = 0; j < 10; j++) {
-      Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), System.currentTimeMillis());
-      list.add(col);
-    }
-    ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
-    SuperColumn sc = new SuperColumn(bytes("SuperColumn_1"), list);
-    SuperColumn sc2 = new SuperColumn(bytes("SuperColumn_2"), list);
-    superlist.add(sc);
-    superlist.add(sc2);
-    cfmap.put("Super1", superlist);
-    keyspace.batchInsert("testMultigetSuperSlice_1", null, cfmap);
-    keyspace.batchInsert("testMultigetSuperSlice_2", null, cfmap);
-    keyspace.batchInsert("testMultigetSuperSlice_3", null, cfmap);
-
-    try {
-      List<String> keys = new ArrayList<String>();
-      keys.add("testMultigetSuperSlice_1");
-      keys.add("testMultigetSuperSlice_2");
-      keys.add("testMultigetSuperSlice_3");
-
-      ColumnParent clp = new ColumnParent("Super1");
-      clp.setSuper_column(bytes("SuperColumn_1"));
-      SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-      SlicePredicate sp = new SlicePredicate();
-      sp.setSlice_range(sr);
-      Map<String, List<SuperColumn>> superc = keyspace.multigetSuperSlice(keys, clp, sp); // throw
-
-      assertNotNull(superc);
-      assertEquals(3, superc.size());
-      List<SuperColumn> scls = superc.get("testMultigetSuperSlice_1");
-      assertNotNull(scls);
-      assertEquals(1, scls.size());
-      assertNotNull(scls.get(0).getColumns());
-      assertEquals(10, scls.get(0).getColumns().size());
-      assertNotNull(scls.get(0).getColumns().get(0).value);
-    } finally {
-      // insert value
-      ColumnPath cp = new ColumnPath("Super1");
-      keyspace.remove("testMultigetSuperSlice_1", cp);
+      keyspace.remove("testMultigetSuperSlice_2", cp);
+      keyspace.remove("testMultigetSuperSlice_3", cp);
     }
   }
 
@@ -845,6 +799,9 @@ public class KeyspaceTest {
     when(h2client.getIp()).thenReturn("ip2");
     when(h3client.getUrl()).thenReturn("h3");
     when(h3client.getIp()).thenReturn("ip3");
+    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h3client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
     when(clientPools.borrowClient("h3", 111)).thenReturn(h3client);
@@ -953,6 +910,8 @@ public class KeyspaceTest {
     when(h1client.getIp()).thenReturn("ip1");
     when(h2client.getUrl()).thenReturn("h2");
     when(h2client.getIp()).thenReturn("ip2");
+    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
 
@@ -1016,6 +975,8 @@ public class KeyspaceTest {
     when(h1client.getIp()).thenReturn("ip1");
     when(h2client.getUrl()).thenReturn("h2");
     when(h2client.getIp()).thenReturn("ip2");
+    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(clientPools.borrowClient("h1", 2)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 2)).thenReturn(h2client);
 

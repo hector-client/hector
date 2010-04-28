@@ -38,6 +38,8 @@ import java.util.concurrent.atomic.AtomicLong;
   /** The thrift object */
   private final Cassandra.Client cassandra;
 
+  private final TimestampResolution timestampResolution;
+
   /** List of known keyspaces */
   private List<String> keyspaces;
 
@@ -65,7 +67,8 @@ import java.util.concurrent.atomic.AtomicLong;
   private boolean hasErrors = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools)
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools,
+      TimestampResolution timestampResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
@@ -74,6 +77,7 @@ import java.util.concurrent.atomic.AtomicLong;
     this.url = url;
     ip = getIpString(url);
     this.clientPools = clientPools;
+    this.timestampResolution = timestampResolution;
   }
 
   private static String getIpString(String url) throws UnknownHostException {
@@ -282,5 +286,10 @@ import java.util.concurrent.atomic.AtomicLong;
   public void removeKeyspace(Keyspace k) {
     String key = buildKeyspaceMapName(k.getName(), k.getConsistencyLevel(), k.getFailoverPolicy());
     keyspaceMap.remove(key);
+  }
+
+  @Override
+  public TimestampResolution getTimestampResolution() {
+    return timestampResolution;
   }
 }

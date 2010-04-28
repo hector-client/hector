@@ -7,28 +7,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Encapsulates the information required for connecting to a Cassandra host. 
+ * Encapsulates the information required for connecting to a Cassandra host.
  * Also exposes pool configuration parameters for that host.
- * 
+ *
  * @author Nate McCall (nate@vervewireless.com)
  *
  */
 public class CassandraHost {
-  private Logger log = LoggerFactory.getLogger(CassandraHost.class);
+  private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
 
-  private final String url, ip;
-  private final int port;
-  private final String name;
-
-  private int maxActive = DEFAULT_MAX_ACTIVE;
-  private int maxIdle = DEFAULT_MAX_IDLE;
-  private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
-  private int cassandraThriftSocketTimeout;
-  private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
-  private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
-  
+
   /**
    * By default, we will use TSocket transport on thrift (matches default Cassandra configs)
    */
@@ -45,12 +35,27 @@ public class CassandraHost {
    * number will decrease to 5
    */
   public static final int DEFAULT_MAX_IDLE = 5 ;
-  
-  
+
+  public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
+      TimestampResolution.MICROSECONDS;
+
+  private final String url, ip;
+  private final int port;
+  private final String name;
+
+  private int maxActive = DEFAULT_MAX_ACTIVE;
+  private int maxIdle = DEFAULT_MAX_IDLE;
+  private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
+  private int cassandraThriftSocketTimeout;
+  private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
+  private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  private TimestampResolution timestampResolution = DEFAULT_TIMESTAMP_RESOLUTION;
+
+
   public CassandraHost(String urlPort) {
     this(parseHostFromUrl(urlPort), parsePortFromUrl(urlPort));
   }
-  
+
   public CassandraHost(String url2, int port) {
     this.port = port;
     StringBuilder b = new StringBuilder();
@@ -89,7 +94,6 @@ public class CassandraHost {
     return sysprop != null && Boolean.valueOf(sysprop);
 
   }
-
 
   public String getName() {
     return name;
@@ -155,8 +159,8 @@ public class CassandraHost {
 
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
-  }    
-  
+  }
+
   public int getCassandraThriftSocketTimeout() {
     return cassandraThriftSocketTimeout;
   }
@@ -174,11 +178,19 @@ public class CassandraHost {
   }
 
   public static String parseHostFromUrl(String urlPort) {
-    return urlPort.substring(0, urlPort.lastIndexOf(':'));      
+    return urlPort.substring(0, urlPort.lastIndexOf(':'));
   }
-  
+
   public static int parsePortFromUrl(String urlPort) {
-    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));  
+    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
+  }
+
+  public void setTimestampResolution(TimestampResolution timestampResolution) {
+    this.timestampResolution = timestampResolution;
+  }
+
+  public TimestampResolution getTimestampResolution() {
+    return timestampResolution;
   }
 
 
