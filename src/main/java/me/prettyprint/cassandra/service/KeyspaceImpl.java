@@ -140,13 +140,13 @@ import org.slf4j.LoggerFactory;
     };
     operateWithFailover(op);
   }
-  
-  
-  
+
+
+
   @Override
   public void batchMutate(BatchMutation batchMutate)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    batchMutate(batchMutate.getMutationMap());    
+    batchMutate(batchMutate.getMutationMap());
   }
 
   @Override
@@ -527,8 +527,19 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
-  private static long createTimeStamp() {
-    return System.currentTimeMillis() * 1000;
+  /*package*/ long createTimeStamp() {
+    long current = System.currentTimeMillis();
+    switch(client.getTimestampResolution()) {
+    case MICROSECONDS:
+      return current * 1000;
+    case MILLISECONDS:
+      return current;
+    case SECONDS:
+      return current / 1000;
+    default:
+      throw new RuntimeException("Unknown TimestampResolution: " +
+          client.getTimestampResolution());
+    }
   }
 
   /**
