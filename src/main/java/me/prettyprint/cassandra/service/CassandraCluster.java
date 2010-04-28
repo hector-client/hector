@@ -10,7 +10,8 @@ import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
 /**
- * A class to encapsulate the "meta data" portion of the thrift API
+ * A class to encapsulate the "Meta-API" portion of the thrift API, the definitions 
+ * historically at bottom of the cassandra.thrift file
  * 
  * @author Nate McCall (nate@vervewireless.com)
  */
@@ -32,7 +33,7 @@ public interface CassandraCluster {
    * Returns the Thrift API version. Note: this is not the version of Cassandra, but 
    * the underlying Thrift API
    */
-  String describeVersion() throws TTransportException, TException;
+  String describeThriftVersion() throws TTransportException, TException;
   
   /**
    * Describe the structure of the ring for a given Keyspace

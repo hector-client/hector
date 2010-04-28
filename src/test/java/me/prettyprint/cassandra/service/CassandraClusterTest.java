@@ -54,9 +54,9 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    * 
    */
   @Test
-  public void testDescribeVersion() throws TTransportException, TException, UnknownHostException {
+  public void testDescribeThriftVersion() throws TTransportException, TException, UnknownHostException {
     CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
-    assertEquals("2.1.0",cassandraCluster.describeVersion());
+    assertEquals("2.1.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test

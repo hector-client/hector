@@ -34,7 +34,7 @@ import org.apache.thrift.transport.TTransportException;
   }
 
   @Override
-  public String describeVersion() throws TTransportException, TException {
+  public String describeThriftVersion() throws TTransportException, TException {
     return cassandraClient.getCassandra().describe_version();
   }
 
