@@ -21,7 +21,7 @@ import java.util.Set;
  */
 public interface CassandraClient {
 
-  static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.DCQUORUM;
+  static final ConsistencyLevel DEFAULT_CONSISTENCY_LEVEL = ConsistencyLevel.QUORUM;
 
   /**
    * What should the client do if a call to cassandra node fails and we suspect that the node is
