@@ -1,5 +1,16 @@
 package me.prettyprint.cassandra.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.NotFoundException;
@@ -7,12 +18,6 @@ import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation of the client interface.
@@ -38,6 +43,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
   /** The thrift object */
   private final Cassandra.Client cassandra;
+
+  private final TimestampResolution timestampResolution;
 
   /** List of known keyspaces */
   private List<String> keyspaces;
@@ -66,7 +73,8 @@ import java.util.concurrent.atomic.AtomicLong;
   private boolean hasErrors = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools)
+      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools,
+      TimestampResolution timestampResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
@@ -75,6 +83,7 @@ import java.util.concurrent.atomic.AtomicLong;
     this.url = url;
     ip = getIpString(url);
     this.clientPools = clientPools;
+    this.timestampResolution = timestampResolution;
   }
 
   private static String getIpString(String url) throws UnknownHostException {
@@ -151,21 +160,21 @@ import java.util.concurrent.atomic.AtomicLong;
   @Override
   public Map<String, String> getTokenMap(boolean fresh) throws TException {
     if (tokenMap == null || fresh) {
-      tokenMap = new HashMap<String, String>();      
-      List<String> keyspaces = getKeyspaces();      
+      tokenMap = new HashMap<String, String>();
+      List<String> keyspaces = getKeyspaces();
       for (String keyspace : keyspaces) {
-        if ( keyspace.equals("system") ) 
+        if ( keyspace.equals("system") )
           continue;
         List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
         for (TokenRange tokenRange : tokenRanges) {
           for( String host : tokenRange.getEndpoints() ) {
-            log.info("token start: {} end: {} host: {}", 
+            log.info("token start: {} end: {} host: {}",
                 new Object[]{tokenRange.getStart_token(), tokenRange.getEnd_token(), host});
             tokenMap.put(tokenRange.getStart_token()+"-"+tokenRange.getEnd_token(), host);
           }
         }
       }
-      
+
     }
     return tokenMap;
   }
@@ -291,5 +300,10 @@ import java.util.concurrent.atomic.AtomicLong;
   public void removeKeyspace(Keyspace k) {
     String key = buildKeyspaceMapName(k.getName(), k.getConsistencyLevel(), k.getFailoverPolicy());
     keyspaceMap.remove(key);
+  }
+
+  @Override
+  public TimestampResolution getTimestampResolution() {
+    return timestampResolution;
   }
 }

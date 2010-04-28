@@ -16,7 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -44,13 +42,10 @@ import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.TokenRange;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
 
@@ -321,7 +316,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       }
     }
   }
-  
+
   @Test
   public void testBatchUpdateInsertAndDelOnSame() throws IllegalArgumentException, NoSuchElementException,
   IllegalStateException, NotFoundException, TException, Exception {
@@ -330,32 +325,32 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     sta1.setColumn(bytes("deleteThroughInserBatch_col"));
 
     keyspace.insert("deleteThroughInserBatch_key", sta1, bytes("deleteThroughInserBatch_val"));
-    
+
     Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
     assertNotNull(found);
-    
+
     BatchMutation batchMutation = new BatchMutation();
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), createMicroTimestamp());
+            bytes("testBatchMutateColumn_value_" + j), createTimestamp(keyspace));
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
 
-    Deletion deletion = new Deletion(createMicroTimestamp());
+    Deletion deletion = new Deletion(createTimestamp(keyspace));
     deletion.setPredicate(slicePredicate);
-    
+
     batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);
     keyspace.batchMutate(batchMutation);
     try {
       keyspace.getColumn("deleteThroughInserBatch_key", sta1);
       fail("Should not have found a value here");
-    } catch (Exception e) {      
+    } catch (Exception e) {
     }
     // get value
     for (int i = 0; i < 10; i++) {
@@ -613,7 +608,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), createMicroTimestamp());
+          bytes("testMultigetSuperSlice_value_" + j), createTimestamp(keyspace));
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -647,62 +642,16 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       assertEquals(10, scls.get(0).getColumns().size());
       assertNotNull(scls.get(0).getColumns().get(0).value);
     } finally {
-      // insert value
+      // cleanup
       ColumnPath cp = new ColumnPath("Super1");
       keyspace.remove("testMultigetSuperSlice_1", cp);
+      keyspace.remove("testMultigetSuperSlice_2", cp);
+      keyspace.remove("testMultigetSuperSlice_3", cp);
     }
   }
 
-  @Test
-  public void testMultigetSuperSlice_1() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
-    HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
-    ArrayList<Column> list = new ArrayList<Column>(100);
-    for (int j = 0; j < 10; j++) {
-      Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), createMicroTimestamp());
-      list.add(col);
-    }
-    ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
-    SuperColumn sc = new SuperColumn(bytes("SuperColumn_1"), list);
-    SuperColumn sc2 = new SuperColumn(bytes("SuperColumn_2"), list);
-    superlist.add(sc);
-    superlist.add(sc2);
-    cfmap.put("Super1", superlist);
-    keyspace.batchInsert("testMultigetSuperSlice_1", null, cfmap);
-    keyspace.batchInsert("testMultigetSuperSlice_2", null, cfmap);
-    keyspace.batchInsert("testMultigetSuperSlice_3", null, cfmap);
-
-    try {
-      List<String> keys = new ArrayList<String>();
-      keys.add("testMultigetSuperSlice_1");
-      keys.add("testMultigetSuperSlice_2");
-      keys.add("testMultigetSuperSlice_3");
-
-      ColumnParent clp = new ColumnParent("Super1");
-      clp.setSuper_column(bytes("SuperColumn_1"));
-      SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
-      SlicePredicate sp = new SlicePredicate();
-      sp.setSlice_range(sr);
-      Map<String, List<SuperColumn>> superc = keyspace.multigetSuperSlice(keys, clp, sp); // throw
-
-      assertNotNull(superc);
-      assertEquals(3, superc.size());
-      List<SuperColumn> scls = superc.get("testMultigetSuperSlice_1");
-      assertNotNull(scls);
-      assertEquals(1, scls.size());
-      assertNotNull(scls.get(0).getColumns());
-      assertEquals(10, scls.get(0).getColumns().size());
-      assertNotNull(scls.get(0).getColumns().get(0).value);
-    } finally {
-      // insert value
-      ColumnPath cp = new ColumnPath("Super1");
-      keyspace.remove("testMultigetSuperSlice_1", cp);
-    }
-  }
-
-  private long createMicroTimestamp() {
-    return System.currentTimeMillis()*1000;
+  private long createTimestamp(Keyspace k) {
+    return ((KeyspaceImpl) k).createTimeStamp();
   }
 
   @Test
@@ -881,6 +830,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     when(h2client.getIp()).thenReturn("ip2");
     when(h3client.getUrl()).thenReturn("h3");
     when(h3client.getIp()).thenReturn("ip3");
+    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h3client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
     when(clientPools.borrowClient("h3", 111)).thenReturn(h3client);
@@ -989,6 +941,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     when(h1client.getIp()).thenReturn("ip1");
     when(h2client.getUrl()).thenReturn("h2");
     when(h2client.getIp()).thenReturn("ip2");
+    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
 
@@ -1052,6 +1006,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     when(h1client.getIp()).thenReturn("ip1");
     when(h2client.getUrl()).thenReturn("h2");
     when(h2client.getIp()).thenReturn("ip2");
+    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
+    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(clientPools.borrowClient("h1", 2)).thenReturn(h1client);
     when(clientPools.borrowClient("h2", 2)).thenReturn(h2client);
 

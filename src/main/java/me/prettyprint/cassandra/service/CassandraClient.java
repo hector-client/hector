@@ -156,4 +156,6 @@ public interface CassandraClient {
 
   void removeKeyspace(Keyspace k);
 
+  TimestampResolution getTimestampResolution();
+
 }

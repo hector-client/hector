@@ -37,6 +37,7 @@ import java.net.UnknownHostException;
   private final String url;
   private final int port;
   private final boolean useThriftFramedTransport;
+  private final TimestampResolution timestampResolution;
 
   public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
       CassandraClientMonitor clientMonitor) {
@@ -46,6 +47,7 @@ import java.net.UnknownHostException;
     timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
     this.useThriftFramedTransport = cassandraHost.getUseThriftFramedTransport();
+    timestampResolution = cassandraHost.getTimestampResolution();
   }
 
   /**
@@ -62,11 +64,12 @@ import java.net.UnknownHostException;
     this.port = port;
     timeout = getTimeout(null);
     this.useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+    timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
     return new CassandraClientImpl(createThriftClient(url, port),
-        new KeyspaceFactory(clientMonitor), url, port, pool);
+        new KeyspaceFactory(clientMonitor), url, port, pool, timestampResolution);
   }
 
   private Cassandra.Client createThriftClient(String  url, int port)

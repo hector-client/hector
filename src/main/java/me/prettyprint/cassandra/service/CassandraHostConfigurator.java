@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.lang.String;
 
 public class CassandraHostConfigurator {
 
@@ -10,7 +9,8 @@ public class CassandraHostConfigurator {
   private long maxWaitTimeWhenExhausted;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
-  
+  private TimestampResolution timestampResolution;
+
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -19,7 +19,7 @@ public class CassandraHostConfigurator {
   public CassandraHostConfigurator(String hosts) {
     this.hosts = hosts;
   }
-  
+
   public CassandraHost[] buildCassandraHosts() {
     if (this.hosts == null) {
         return null;
@@ -27,18 +27,26 @@ public class CassandraHostConfigurator {
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
-      CassandraHost cassandraHost = new CassandraHost(hostVals[x]);     
-      if (maxActive > 0)
+      CassandraHost cassandraHost = new CassandraHost(hostVals[x]);
+      if (maxActive > 0) {
         cassandraHost.setMaxActive(maxActive);
-      if (maxIdle > 0)
+      }
+      if (maxIdle > 0) {
         cassandraHost.setMaxIdle(maxIdle);
-      if (maxWaitTimeWhenExhausted > 0) 
+      }
+      if (maxWaitTimeWhenExhausted > 0) {
         cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
-      if (cassandraThriftSocketTimeout > 0)
+      }
+      if (cassandraThriftSocketTimeout > 0) {
         cassandraHost.setCassandraThriftSocketTimeout(cassandraThriftSocketTimeout);
-      if (exhaustedPolicy != null)
+      }
+      if (exhaustedPolicy != null) {
         cassandraHost.setExhaustedPolicy(exhaustedPolicy);
-      
+      }
+      if (timestampResolution != null) {
+        cassandraHost.setTimestampResolution(timestampResolution);
+      }
+
       cassandraHosts[x] = cassandraHost;
     }
     return cassandraHosts;
@@ -67,6 +75,11 @@ public class CassandraHostConfigurator {
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
   }
-  
-  
+
+  /**
+   * @param resolutionString one of "SECONDS", "MILLISECONDS" or "MICROSECONDS"
+   */
+  public void setTimestampResolution(String resolutionString) {
+    timestampResolution = TimestampResolution.valueOf(resolutionString);
+  }
 }
