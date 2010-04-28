@@ -140,6 +140,30 @@ public class KeyspaceTest {
     }
   }
 
+  /**
+   * Test insertion of a supercolumn using insert
+   */
+  @Test
+  public void testInsertSuper() throws IllegalArgumentException, NoSuchElementException,
+      IllegalStateException, NotFoundException, Exception {
+
+    // insert value
+    ColumnPath cp = new ColumnPath("Super1");
+    cp.setColumn(bytes("testInsertSuper_column"));
+    cp.setSuper_column(bytes("testInsertSuper_super"));
+    keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value"));
+
+    // get value and assert
+    SuperColumn sc = keyspace.getSuperColumn("testInsertSuper_key", cp);
+    assertNotNull(sc);
+    assertEquals("testInsertSuper_super", string(sc.getName()));
+    assertEquals(1, sc.getColumns().size());
+    assertEquals("testInsertSuper_value", string(sc.getColumns().get(0).getValue()));
+
+    // remove value
+    keyspace.remove("testInsertSuper_super", cp);
+  }
+
   @Test
   public void testValideColumnPath() throws UnavailableException, TException, TimedOutException {
     // Try to insert invalid columns
