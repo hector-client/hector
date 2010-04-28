@@ -10,6 +10,11 @@ import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
+/**
+ * Implementation of the {@link CassandraCluster} interface.
+ * 
+ * @author Nate McCall (nate@vervewireless.com)
+ */
 /*package*/ class CassandraClusterImpl implements CassandraCluster {
 
   private CassandraClient cassandraClient;

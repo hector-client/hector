@@ -9,6 +9,11 @@ import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
+/**
+ * A class to encapsulate the "meta data" portion of the thrift API
+ * 
+ * @author Nate McCall (nate@vervewireless.com)
+ */
 public interface CassandraCluster {
   
   /**
