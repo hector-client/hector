@@ -67,7 +67,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   }
   
   @Test
-  public void testGetHostNames() throws TTransportException, TException, UnknownHostException {
+  public void testGetHostNames() throws TTransportException, TException, UnknownHostException, NotFoundException {
     CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     Set<String> hosts = cassandraCluster.getHostNames();
     assertEquals(1, hosts.size());

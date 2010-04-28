@@ -44,7 +44,7 @@ public interface CassandraCluster {
   /**
    * Return a Set of hostnames for this cluster
    */
-  Set<String> getHostNames() throws TTransportException, TException;
+  Set<String> getHostNames() throws TTransportException, TException, NotFoundException;
   
   /**
    * Describe the given keyspace. The key for the outer map is the ColumnFamily name.

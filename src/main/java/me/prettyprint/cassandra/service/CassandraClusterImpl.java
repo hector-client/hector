@@ -44,11 +44,11 @@ import org.apache.thrift.transport.TTransportException;
   }
 
   @Override
-  public Set<String> getHostNames() throws TTransportException, TException {
+  public Set<String> getHostNames() throws TTransportException, TException, NotFoundException {
     Set<String> hostnames = new HashSet<String>();
     for (String keyspace : describeKeyspaces()) {
-      if (!keyspace.equals("system")) {        
-        List<TokenRange> tokenRanges = cassandraClient.getCassandra().describe_ring(keyspace);        
+      if (!keyspace.equals("system")) {
+        List<TokenRange> tokenRanges = describeRing(cassandraClient.getKeyspace(keyspace));
         for (TokenRange tokenRange : tokenRanges) {
           for (String host : tokenRange.getEndpoints()){
             hostnames.add(host);
