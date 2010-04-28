@@ -2,8 +2,10 @@ package me.prettyprint.cassandra.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -53,9 +55,12 @@ import org.apache.thrift.transport.TTransportException;
     return hostnames;
   }
 
+  @Override
+  public Map<String, Map<String, String>> describeKeyspace(Keyspace keyspace)
+      throws TTransportException, TException, NotFoundException {
   
-  
-  
-  
+    return cassandraClient.getCassandra().describe_keyspace(keyspace.getName());
+  }
 
+  
 }

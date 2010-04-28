@@ -1,8 +1,10 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -38,5 +40,10 @@ public interface CassandraCluster {
    */
   Set<String> getHostNames() throws TTransportException, TException;
   
+  /**
+   * Describe the given keyspace. The key for the outer map is the ColumnFamily name.
+   * The inner map contains configuration properties mapped to their values. 
+   */
+  Map<String, Map<String, String>> describeKeyspace(Keyspace keyspace) throws TTransportException, TException, NotFoundException;
 
 }
