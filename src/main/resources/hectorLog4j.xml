@@ -28,7 +28,7 @@
           MBean attributes.
         -->
         <param name="TagNamesToExpose"
-          value="READ.success_,WRITE.success_,READ.fail_,WRITE.fail_"/>
+          value="READ.success_,WRITE.success_,READ.fail_,WRITE.fail_,META_READ.success_,META_READ.fail_"/>
         <!--
           You can also specify an optional MBeanName param, which overrides
           the default MBean name of org.perf4j:type=StatisticsExposingMBean,name=Perf4J
