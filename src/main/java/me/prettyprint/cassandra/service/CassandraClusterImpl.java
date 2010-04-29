@@ -2,12 +2,19 @@ package me.prettyprint.cassandra.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
+/**
+ * Implementation of the {@link CassandraCluster} interface.
+ * 
+ * @author Nate McCall (nate@vervewireless.com)
+ */
 /*package*/ class CassandraClusterImpl implements CassandraCluster {
 
   private CassandraClient cassandraClient;
@@ -27,7 +34,7 @@ import org.apache.thrift.transport.TTransportException;
   }
 
   @Override
-  public String describeVersion() throws TTransportException, TException {
+  public String describeThriftVersion() throws TTransportException, TException {
     return cassandraClient.getCassandra().describe_version();
   }
 
@@ -37,11 +44,11 @@ import org.apache.thrift.transport.TTransportException;
   }
 
   @Override
-  public Set<String> getHostNames() throws TTransportException, TException {
+  public Set<String> getHostNames() throws TTransportException, TException, NotFoundException {
     Set<String> hostnames = new HashSet<String>();
     for (String keyspace : describeKeyspaces()) {
-      if (!keyspace.equals("system")) {        
-        List<TokenRange> tokenRanges = cassandraClient.getCassandra().describe_ring(keyspace);        
+      if (!keyspace.equals("system")) {
+        List<TokenRange> tokenRanges = describeRing(cassandraClient.getKeyspace(keyspace));
         for (TokenRange tokenRange : tokenRanges) {
           for (String host : tokenRange.getEndpoints()){
             hostnames.add(host);
@@ -53,9 +60,12 @@ import org.apache.thrift.transport.TTransportException;
     return hostnames;
   }
 
+  @Override
+  public Map<String, Map<String, String>> describeKeyspace(Keyspace keyspace)
+      throws TTransportException, TException, NotFoundException {
   
-  
-  
-  
+    return cassandraClient.getCassandra().describe_keyspace(keyspace.getName());
+  }
 
+  
 }

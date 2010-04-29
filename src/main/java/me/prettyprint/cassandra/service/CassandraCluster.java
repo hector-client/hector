@@ -1,12 +1,20 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
+/**
+ * A class to encapsulate the "Meta-API" portion of the thrift API, the definitions 
+ * historically at bottom of the cassandra.thrift file
+ * 
+ * @author Nate McCall (nate@vervewireless.com)
+ */
 public interface CassandraCluster {
   
   /**
@@ -25,7 +33,7 @@ public interface CassandraCluster {
    * Returns the Thrift API version. Note: this is not the version of Cassandra, but 
    * the underlying Thrift API
    */
-  String describeVersion() throws TTransportException, TException;
+  String describeThriftVersion() throws TTransportException, TException;
   
   /**
    * Describe the structure of the ring for a given Keyspace
@@ -36,7 +44,12 @@ public interface CassandraCluster {
   /**
    * Return a Set of hostnames for this cluster
    */
-  Set<String> getHostNames() throws TTransportException, TException;
+  Set<String> getHostNames() throws TTransportException, TException, NotFoundException;
   
+  /**
+   * Describe the given keyspace. The key for the outer map is the ColumnFamily name.
+   * The inner map contains configuration properties mapped to their values. 
+   */
+  Map<String, Map<String, String>> describeKeyspace(Keyspace keyspace) throws TTransportException, TException, NotFoundException;
 
 }

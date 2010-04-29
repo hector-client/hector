@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 
 import java.net.UnknownHostException;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -53,9 +54,9 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    * 
    */
   @Test
-  public void testDescribeVersion() throws TTransportException, TException, UnknownHostException {
+  public void testDescribeThriftVersion() throws TTransportException, TException, UnknownHostException {
     CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
-    assertEquals("2.1.0",cassandraCluster.describeVersion());
+    assertEquals("2.1.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test
@@ -66,10 +67,19 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   }
   
   @Test
-  public void testGetHostNames() throws TTransportException, TException, UnknownHostException {
+  public void testGetHostNames() throws TTransportException, TException, UnknownHostException, NotFoundException {
     CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     Set<String> hosts = cassandraCluster.getHostNames();
     assertEquals(1, hosts.size());
+  }
+  
+  @Test
+  public void testDescribeKeyspace() throws TTransportException, TException, UnknownHostException, NotFoundException {
+    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
+    Map<String, Map<String, String>> keyspaceDetail = cassandraCluster.describeKeyspace(keyspace);
+    assertNotNull(keyspaceDetail);
+    assertEquals(4,keyspaceDetail.size());
+    
   }
   
 }

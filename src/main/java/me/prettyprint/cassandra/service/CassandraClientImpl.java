@@ -170,7 +170,7 @@ import org.slf4j.LoggerFactory;
           for( String host : tokenRange.getEndpoints() ) {
             log.info("token start: {} end: {} host: {}",
                 new Object[]{tokenRange.getStart_token(), tokenRange.getEnd_token(), host});
-            tokenMap.put(tokenRange.getStart_token()+"-"+tokenRange.getEnd_token(), host);
+            tokenMap.put(tokenRange.getStart_token() + "-" + tokenRange.getEnd_token(), host);
           }
         }
       }
