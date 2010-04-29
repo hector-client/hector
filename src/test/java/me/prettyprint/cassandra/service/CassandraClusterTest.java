@@ -24,6 +24,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   private Keyspace keyspace;
   private CassandraClientPool cassandraClientPool;
   private CassandraClientMonitor cassandraClientMonitor;
+  private CassandraCluster cassandraCluster;
   
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
@@ -35,17 +36,16 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
         new CassandraHost("localhost", 9170), cassandraClientMonitor).create();
     keyspace = cassandraClient.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
+    cassandraCluster = CassandraClusterFactory.getInstance().create(cassandraClient);
   }
   
   @Test
   public void testDescribeKeyspaces() throws TTransportException, TException, UnknownHostException {
-    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     assertEquals(2,cassandraCluster.describeKeyspaces().size());
   }
   
   @Test
   public void testDescribeClusterName() throws TTransportException, TException, UnknownHostException {
-    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     assertEquals("Test Cluster",cassandraCluster.describeClusterName());
   }
   
@@ -55,31 +55,26 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testDescribeThriftVersion() throws TTransportException, TException, UnknownHostException {
-    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     assertEquals("2.1.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test
   public void testDescribeRing() throws TTransportException, TException, UnknownHostException {
-    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     List<TokenRange> ring = cassandraCluster.describeRing(keyspace);
     assertEquals(1, ring.size());
   }
   
   @Test
   public void testGetHostNames() throws TTransportException, TException, UnknownHostException, NotFoundException {
-    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     Set<String> hosts = cassandraCluster.getHostNames();
     assertEquals(1, hosts.size());
   }
   
   @Test
   public void testDescribeKeyspace() throws TTransportException, TException, UnknownHostException, NotFoundException {
-    CassandraCluster cassandraCluster = new CassandraClusterFactory(cassandraClient).create();
     Map<String, Map<String, String>> keyspaceDetail = cassandraCluster.describeKeyspace(keyspace);
     assertNotNull(keyspaceDetail);
-    assertEquals(4,keyspaceDetail.size());
-    
+    assertEquals(4,keyspaceDetail.size());    
   }
   
 }

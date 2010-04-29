@@ -5,15 +5,26 @@ import java.net.UnknownHostException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 
-public class CassandraClusterFactory {
-
-  private final CassandraClient cassandraClient;
+/**
+ * Controls access to CassandraCluster, as we need a live CassandraClient 
+ * in order to do anything useful
+ * 
+ * @author Nate McCall (nate@vervewireless.com)
+ *
+ */
+public enum CassandraClusterFactory {
   
-  public CassandraClusterFactory(CassandraClient cassandraClient) {
-    this.cassandraClient = cassandraClient;
+  INSTANCE;
+  
+  public static CassandraClusterFactory getInstance() {
+    return INSTANCE;
+  }
+    
+  
+  private CassandraClusterFactory() {
   }
   
-  public CassandraCluster create() throws TTransportException, TException, UnknownHostException {
+  public CassandraCluster create(CassandraClient cassandraClient) throws TTransportException, TException, UnknownHostException {
     return new CassandraClusterImpl(cassandraClient);
   }
   
