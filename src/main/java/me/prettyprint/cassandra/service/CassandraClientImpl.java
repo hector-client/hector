@@ -29,11 +29,12 @@ import org.slf4j.LoggerFactory;
 
   private final static String PROP_CLUSTER_NAME = "cluster name";
   private final static String PROP_CONFIG_FILE = "config file";
+  @SuppressWarnings("unused")
   private final static String PROP_TOKEN_MAP = "token map";
+  @SuppressWarnings("unused")
   private final static String PROP_KEYSPACE = "keyspaces";
   private final static String PROP_VERSION = "version";
 
-  @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(CassandraClientImpl.class);
 
   /** Serial number of the client used to track client creation for debug purposes */
@@ -207,19 +208,6 @@ import org.slf4j.LoggerFactory;
   @Override
   public Cassandra.Client getCassandra() {
     return cassandra;
-  }
-
-  /**
-   * Trims the string, one char from each side.
-   * For example, this: asdf becomes this: sd
-   * Useful in those cases:  "asdf" => asdf
-   * @param str
-   * @return
-   */
-  private String trimBothSides(String str) {
-    str = str.substring(1);
-    str = str.substring(0, str.length() - 1);
-    return str;
   }
 
   @Override
