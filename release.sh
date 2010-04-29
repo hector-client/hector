@@ -24,6 +24,9 @@ echo Copying lib jars
 cp lib/* $target
 cp antlib/* $target
 
+echo Copying CHANGELOG
+cp CHANGELOG $target
+
 echo Zipping
 pushd releases
 zip -Tr hector-$version.zip hector-$version/

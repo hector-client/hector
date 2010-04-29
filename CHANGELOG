@@ -1,0 +1,10 @@
+Changes by version:
+===================
+
+0.6.0-12
+========
+Timestampes are currently in milliseconds, should be microseconds http://github.com/rantav/hector/issues/closed#issue/28
+getPackage() MAY return a null at JmxMonitor constructor. http://github.com/rantav/hector/issues/closed#issue/26
+Change default consistency level to QUORUM from DCQUOROM http://github.com/rantav/hector/issues#issue/30
+
+
