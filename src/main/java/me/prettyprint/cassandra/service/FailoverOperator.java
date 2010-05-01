@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
    * {@link TimedOutException}.
    */
   public void operate(Operation<?> op) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+      UnavailableException, TException, TimedOutException {    
     final StopWatch stopWatch = new Slf4JStopWatch();
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
     boolean isFirst = true;
@@ -235,7 +235,9 @@ import org.slf4j.LoggerFactory;
   private void invalidate() {
     try {
       clientPools.invalidateClient(client);
-      client.removeKeyspace(keyspace);
+      if (keyspace != null) {
+        client.removeKeyspace(keyspace);
+      }
     } catch (Exception e) {
       log.error("Unable to invalidate client {}. Will continue anyhow.", client);
     }
@@ -311,7 +313,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException;
 
   public void executeAndSetResult(Cassandra.Client cassandra) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+      UnavailableException, TException, TimedOutException {    
     setResult(execute(cassandra));
   }
 
