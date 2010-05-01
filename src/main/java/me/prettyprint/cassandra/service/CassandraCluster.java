@@ -4,15 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.management.relation.InvalidRelationIdException;
-
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.TokenRange;
-import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 
 /**
  * A class to encapsulate the "Meta-API" portion of the thrift API, the definitions 
