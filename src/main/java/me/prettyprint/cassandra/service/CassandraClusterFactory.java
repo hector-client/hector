@@ -1,9 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.UnknownHostException;
-
-import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 
 /**
  * Controls access to CassandraCluster, as we need a live CassandraClient 
@@ -24,8 +20,8 @@ public enum CassandraClusterFactory {
   private CassandraClusterFactory() {
   }
   
-  public CassandraCluster create(CassandraClient cassandraClient) throws TTransportException, TException, UnknownHostException {
-    return new CassandraClusterImpl(cassandraClient);
+  public CassandraCluster create(CassandraClientPool cassandraClientPool) throws PoolExhaustedException, Exception {
+    return new CassandraClusterImpl(cassandraClientPool);
   }
   
 }
