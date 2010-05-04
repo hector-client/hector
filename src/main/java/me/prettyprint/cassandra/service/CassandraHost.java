@@ -34,7 +34,7 @@ public class CassandraHost {
    * The default max idle number is 5, so if clients keep idle, the total connection
    * number will decrease to 5
    */
-  public static final int DEFAULT_MAX_IDLE = 5 ;
+  public static final int DEFAULT_MAX_IDLE = -1;
 
   public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
       TimestampResolution.MICROSECONDS;
