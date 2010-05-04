@@ -122,7 +122,7 @@ import com.google.common.collect.ImmutableSet;
     p.setTestOnBorrow(true);
     // maxIdle controls the maximum number of objects that can sit idle in the pool at any time.
     // When negative, there is no limit to the number of objects that may be idle at one time.
-    p.setMaxIdle(-1);
+    p.setMaxIdle(maxIdle);
     return p;
   }
 
