@@ -180,7 +180,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ArrayList<Column> list = new ArrayList<Column>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchInsertColumn_" + j),
-            bytes("testBatchInsertColumn_value_" + j), System.currentTimeMillis());
+            bytes("testBatchInsertColumn_value_" + j), createTimestamp(keyspace));
         list.add(col);
       }
       cfmap.put("Standard1", list);
@@ -223,7 +223,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+            bytes("testBatchMutateColumn_value_" + j), createTimestamp(keyspace));
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -261,7 +261,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(System.currentTimeMillis());
+      Deletion deletion = new Deletion(createTimestamp(keyspace));
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -294,7 +294,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+            bytes("testBatchMutateColumn_value_" + j), createTimestamp(keyspace));
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -320,9 +320,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       for (int j = 0; j < 10; j++) {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(System.currentTimeMillis());
+      Deletion deletion = new Deletion(createTimestamp(keyspace));
       deletion.setPredicate(slicePredicate);
-      batchMutation.addDeletion("testBatchMutateColumn_"+i, columnFamilies, deletion);
+      batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
     keyspace.batchMutate(batchMutation);
     // make sure the values are gone
@@ -403,7 +403,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testGetSuperColumn_" + j), bytes("testGetSuperColumn_value_"
-          + j), System.currentTimeMillis());
+          + j), createTimestamp(keyspace));
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -524,7 +524,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperColumn_" + j),
-          bytes("testMultigetSuperColumn_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperColumn_value_" + j), createTimestamp(keyspace));
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -584,7 +584,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperSlice_value_" + j), createTimestamp(keyspace));
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
