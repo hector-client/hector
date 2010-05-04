@@ -180,7 +180,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ArrayList<Column> list = new ArrayList<Column>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchInsertColumn_" + j),
-            bytes("testBatchInsertColumn_value_" + j), createTimestamp(keyspace));
+            bytes("testBatchInsertColumn_value_" + j), keyspace.createTimestamp());
         list.add(col);
       }
       cfmap.put("Standard1", list);
@@ -223,7 +223,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), createTimestamp(keyspace));
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createTimestamp());
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -261,7 +261,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(createTimestamp(keyspace));
+      Deletion deletion = new Deletion(keyspace.createTimestamp());
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -294,7 +294,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), createTimestamp(keyspace));
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createTimestamp());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -320,7 +320,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       for (int j = 0; j < 10; j++) {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(createTimestamp(keyspace));
+      Deletion deletion = new Deletion(keyspace.createTimestamp());
       deletion.setPredicate(slicePredicate);
       batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
@@ -359,14 +359,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), createTimestamp(keyspace));
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createTimestamp());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
 
-    Deletion deletion = new Deletion(createTimestamp(keyspace));
+    Deletion deletion = new Deletion(keyspace.createTimestamp());
     deletion.setPredicate(slicePredicate);
 
     batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);
@@ -403,7 +403,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testGetSuperColumn_" + j), bytes("testGetSuperColumn_value_"
-          + j), createTimestamp(keyspace));
+          + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -524,7 +524,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperColumn_" + j),
-          bytes("testMultigetSuperColumn_value_" + j), createTimestamp(keyspace));
+          bytes("testMultigetSuperColumn_value_" + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -584,7 +584,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), createTimestamp(keyspace));
+          bytes("testMultigetSuperSlice_value_" + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -632,7 +632,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), createTimestamp(keyspace));
+          bytes("testMultigetSuperSlice_value_" + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -672,10 +672,6 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.remove("testMultigetSuperSlice_2", cp);
       keyspace.remove("testMultigetSuperSlice_3", cp);
     }
-  }
-
-  private long createTimestamp(Keyspace k) {
-    return ((KeyspaceImpl) k).createTimeStamp();
   }
 
   @Test

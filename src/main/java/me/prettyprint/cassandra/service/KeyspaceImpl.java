@@ -316,7 +316,7 @@ import org.slf4j.LoggerFactory;
       @Override
       public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistency);
+        cassandra.insert(keyspaceName, key, columnPath, value, createTimestamp(), consistency);
         return null;
       }
     };
@@ -458,7 +458,7 @@ import org.slf4j.LoggerFactory;
       @Override
       public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistency);
+        cassandra.remove(keyspaceName, key, columnPath, createTimestamp(), consistency);
         return null;
       }
     };
@@ -515,7 +515,7 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
-  /*package*/ long createTimeStamp() {
+  public long createTimestamp() {
     long current = System.currentTimeMillis();
     switch(client.getTimestampResolution()) {
     case MICROSECONDS:

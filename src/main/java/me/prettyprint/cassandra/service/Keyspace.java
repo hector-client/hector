@@ -152,19 +152,19 @@ public interface Keyspace {
       UnavailableException, TException, TimedOutException;
 
   /**
-   * Call batch mutate with the assembled mutationMap. This method is a direct pass-through 
-   * to the underlying Thrift API 
+   * Call batch mutate with the assembled mutationMap. This method is a direct pass-through
+   * to the underlying Thrift API
    */
-  void batchMutate(Map<String, Map<String, List<Mutation>>> mutationMap) throws InvalidRequestException, 
+  void batchMutate(Map<String, Map<String, List<Mutation>>> mutationMap) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException;
-  
+
   /**
    * Call batch mutate with the BatchMutation object which encapsulates some of the complexity
    * of the batch_mutate API signature
    */
-  void batchMutate(BatchMutation batchMutation) throws InvalidRequestException, 
-      UnavailableException, TException, TimedOutException; 
-  
+  void batchMutate(BatchMutation batchMutation) throws InvalidRequestException,
+      UnavailableException, TException, TimedOutException;
+
   /**
    * Remove data from the row specified by key at the columnPath.
    *
@@ -196,7 +196,7 @@ public interface Keyspace {
   /**
    * returns a subset of columns for a range of keys.
    */
-  Map<String, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate, 
+  Map<String, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
@@ -218,4 +218,13 @@ public interface Keyspace {
    * @return The failover policy used by this keyspace.
    */
   FailoverPolicy getFailoverPolicy();
+
+  /**
+   * Creates a timestamp.
+   * Timestamps are created according to the system's current time milli and if needed are
+   * multiplied by 1000 (if micro is required).
+   * The timestamp resolution is determined by {@link me.prettyprint.cassandra.service.CassandraClient#getTimestampResolution()}
+   * @return a timestamp!
+   */
+  long createTimestamp();
 }
