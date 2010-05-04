@@ -280,4 +280,11 @@ import java.util.concurrent.atomic.AtomicLong;
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
   }
+
+  private String trimBothSides(String str) {
+    str = str.substring(1);
+    str = str.substring(0, str.length() - 1);
+    return str;
+  }
+
 }
