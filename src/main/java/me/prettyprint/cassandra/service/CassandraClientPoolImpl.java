@@ -40,8 +40,8 @@ import org.slf4j.LoggerFactory;
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, CassandraHost[] cassandraHosts) {
     this(clientMonitor);
     for (CassandraHost cassandraHost : cassandraHosts) {
-      log.debug("Creating pool-by-host instance: {}", cassandraHost);         
-      getPool(cassandraHost);  
+      log.debug("Creating pool-by-host instance: {}", cassandraHost);
+      getPool(cassandraHost);
     }
   }
 
@@ -223,5 +223,10 @@ import org.slf4j.LoggerFactory;
   @Override
   public void invalidateAllConnectionsToHost(CassandraClient client) {
     getPool(client).invalidateAll();
+  }
+
+  @Override
+  public CassandraClientMonitorMBean getMbean() {
+    return clientMonitor;
   }
 }

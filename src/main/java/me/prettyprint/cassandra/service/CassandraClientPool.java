@@ -60,7 +60,7 @@ import org.apache.thrift.TException;
  *   &lt;bean id="cassandraClientPool" factory-bean="cassandraClientPoolFactory" factory-method="createNew"&gt;
  *       &lt;constructor-arg&gt;&lt;ref bean="cassandraHostConfigurator"/&gt;&lt;/constructor-arg&gt;
  *   &lt;/bean&gt;
- *   
+ *
  *   &lt;bean id="cassandraHostConfigurator" class="me.prettyprint.cassandra.service.CassandraHostConfigurator"&gt;
  *       &lt;constructor-arg value="localhost:9170"/&gt;
  *   &lt;/bean&gt;
@@ -156,4 +156,10 @@ public interface CassandraClientPool {
    * Use this method to invalidate all client connections to the same host.
    */
   void invalidateAllConnectionsToHost(CassandraClient client);
+
+  /**
+   * Gets the mbean used to monitor the client, and actually all clients in the same classloader.
+   * @return
+   */
+  CassandraClientMonitorMBean getMbean();
 }
