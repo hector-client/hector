@@ -45,7 +45,7 @@
       that timing statements will only be sent to this logger and NOT to
       upstream loggers.
     -->
-    <logger name="org.perf4j.TimingLogger" additivity="false">
+    <logger name="me.prettyprint.hector.TimingLogger" additivity="false">
         <level value="info"/>
         <appender-ref ref="hector_CoalescingStatistics"/>
     </logger>

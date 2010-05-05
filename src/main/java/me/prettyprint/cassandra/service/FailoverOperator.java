@@ -68,8 +68,8 @@ import org.slf4j.LoggerFactory;
    * {@link TimedOutException}.
    */
   public void operate(Operation<?> op) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {    
-    final StopWatch stopWatch = new Slf4JStopWatch();
+      UnavailableException, TException, TimedOutException {
+    final StopWatch stopWatch = new Slf4JStopWatch("me.prettyprint.hector.TimingLogger");
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
     boolean isFirst = true;
     try {
@@ -313,7 +313,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException;
 
   public void executeAndSetResult(Cassandra.Client cassandra) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {    
+      UnavailableException, TException, TimedOutException {
     setResult(execute(cassandra));
   }
 
