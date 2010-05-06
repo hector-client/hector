@@ -188,6 +188,7 @@ public interface Keyspace {
 
   /**
    * returns a subset of columns for a range of keys.
+   * @deprecated use {@link #getRangeSlices(ColumnParent, SlicePredicate, KeyRange)}
    */
   Map<String, List<Column>> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
@@ -202,6 +203,7 @@ public interface Keyspace {
 
   /**
    * returns a subset of super columns for a range of keys.
+   * @deprecated use {@link #getRangeSlices(ColumnParent, SlicePredicate, KeyRange)}
    */
   Map<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
