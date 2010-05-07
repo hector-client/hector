@@ -454,16 +454,24 @@ import org.slf4j.LoggerFactory;
   @Override
   public void remove(final String key, final ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
+    remove(key, columnPath, createTimestamp());
+  }
+
+  
+  
+  @Override
+  public void remove(final String key, final ColumnPath columnPath, final long timestamp)
+      throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
       public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.remove(keyspaceName, key, columnPath, createTimestamp(), consistency);
+        cassandra.remove(keyspaceName, key, columnPath, timestamp, consistency);
         return null;
       }
     };
-    operateWithFailover(op);
-
+    operateWithFailover(op);    
   }
 
   @Override

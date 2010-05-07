@@ -174,6 +174,12 @@ public interface Keyspace {
    */
   void remove(String key, ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException;
+  
+  /**
+   * Same as two argument version, but the caller must specify their own timestamp
+   */
+  void remove(String key, ColumnPath columnPath, long timestamp) throws InvalidRequestException,
+      UnavailableException, TException, TimedOutException;
 
   /**
    * get a description of the specified keyspace
