@@ -73,7 +73,10 @@ import org.slf4j.LoggerFactory;
     mbs.registerMBean(monitoringInterface, oName);
 
     // Register perf4j monitors
-    registerPerf4J();
+    if ("true".equalsIgnoreCase(
+        System.getProperty("com.prettyprint.cassandra.load_hector_log4j", "true"))) {
+      registerPerf4J();
+    }
   }
 
   private void registerPerf4J() {
