@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
 
   private static final Logger log = LoggerFactory.getLogger(FailoverOperator.class);
 
+  private static final Logger perf4jLogger =
+    LoggerFactory.getLogger("me.prettyprint.hector.TimingLogger");
+
   private final FailoverPolicy failoverPolicy;
 
   /** List of all known remote cassandra nodes */
@@ -69,7 +72,7 @@ import org.slf4j.LoggerFactory;
    */
   public void operate(Operation<?> op) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    final StopWatch stopWatch = new Slf4JStopWatch("me.prettyprint.hector.TimingLogger");
+    final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
     int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
     boolean isFirst = true;
     try {
