@@ -121,12 +121,12 @@ public class CassandraHost {
     if (! (obj instanceof CassandraHost)) {
       return false;
     }
-    return ((CassandraHost) obj).name.equals(name);
+    return ((CassandraHost) obj).ip.equals(ip);
   }
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return ip.hashCode();
   }
 
   public int getMaxActive() {
