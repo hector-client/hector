@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -65,12 +64,9 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
     assertEquals("localhost", client.getUrl());
     assertEquals(9170, client.getPort());
 
-    try {
-      client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
-      fail("Should not have boon able to obtain a client");
-    } catch (Exception e) {
-      // ok
-    }
+    client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
   }
 
   @Test

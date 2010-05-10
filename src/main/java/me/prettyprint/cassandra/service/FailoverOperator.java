@@ -224,7 +224,6 @@ import org.slf4j.LoggerFactory;
     } catch (Exception e) {
       throw new SkipHostException(e);
     }
-//    cassandra = client.getCassandra();
     monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
     log.info("Skipped host. New host is: {}", client.getUrl());
   }
@@ -247,7 +246,7 @@ import org.slf4j.LoggerFactory;
   }
   /**
    * Finds the next host in the knownHosts. Next is the one after the given url
-   * (modulo the number of elemens in the list)
+   * (modulo the number of elements in the list)
    *
    * @return URL of the next presumably available host. null if none can be
    *         found.
@@ -263,10 +262,22 @@ import org.slf4j.LoggerFactory;
         return knownHosts.get((i + 1) % size);
       }
     }
-    log.error("The URL {} wasn't found in the knownHosts", url);
-    return null;
+    log.error("The host {}({}) wasn't found in the knownHosts ({}). Will try to choose a random " +
+        "host from the known host list", new Object[]{url, ip, knownHosts});
+    return chooseRandomHost(knownHosts);
   }
 
+  /**
+   * Chooses a random host from the list.
+   * @param knownHosts
+   * @return
+   */
+  private String chooseRandomHost(List<String> knownHosts) {
+    long rnd = Math.round(Math.random() * knownHosts.size());
+    String host = knownHosts.get((int) rnd);
+    log.info("Choosing random host to skip to: {}", host);
+    return host;
+  }
 
 }
 
