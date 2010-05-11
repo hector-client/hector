@@ -70,8 +70,14 @@ import org.slf4j.LoggerFactory;
 
   private final CassandraClientPool clientPools;
 
+  /** Has the client network connection been closed? */
   private boolean closed = false;
+
+  /** Does this client have errors */
   private boolean hasErrors = false;
+
+  /** Whether the client has been released back to the pool already */
+  private boolean released = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools,
@@ -293,5 +299,15 @@ import org.slf4j.LoggerFactory;
   @Override
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
+  }
+
+  @Override
+  public boolean isReleased() {
+    return released;
+  }
+
+  @Override
+  public void markAsReleased() {
+    released = true;
   }
 }

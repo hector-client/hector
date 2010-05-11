@@ -111,6 +111,11 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void releaseClient(CassandraClient client) throws Exception {
+    if (client.isReleased()) {
+      // The common case with clients that had errors is that they've already been release.
+      // If we release them again the pool's counters will go crazy so we don't want that...
+      return;
+    }
     pool.returnObject(client);
   }
 
@@ -203,6 +208,7 @@ import com.google.common.collect.ImmutableSet;
       liveClientsFromPool.remove(client);
       client.markAsError();
       pool.invalidateObject(client);
+      client.markAsReleased();
     } catch (Exception e) {
       log.error("Unable to invalidate client " + client, e);
     }

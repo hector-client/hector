@@ -158,4 +158,11 @@ public interface CassandraClient {
 
   TimestampResolution getTimestampResolution();
 
+  /**
+   * @return Whether this client has been released (returned) to the pool
+   */
+  boolean isReleased();
+
+  /** Marks this client as already been released back to the pool */
+  void markAsReleased();
 }
