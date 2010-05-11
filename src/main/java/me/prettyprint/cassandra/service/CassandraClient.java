@@ -39,20 +39,19 @@ public interface CassandraClient {
   public enum FailoverPolicy {
 
     /** On communication failure, just return the error to the client and don't retry */
-    FAIL_FAST(0),
+    FAIL_FAST(0, 0),
     /** On communication error try one more server before giving up */
-    ON_FAIL_TRY_ONE_NEXT_AVAILABLE(1),
+    ON_FAIL_TRY_ONE_NEXT_AVAILABLE(1, 0),
     /** On communication error try all known servers before giving up */
-    ON_FAIL_TRY_ALL_AVAILABLE(Integer.MAX_VALUE - 1);
+    ON_FAIL_TRY_ALL_AVAILABLE(Integer.MAX_VALUE - 1, 0);
 
-    private final int numRetries;
+    public final int numRetries;
 
-    FailoverPolicy(int numRetries) {
+    public final int sleepBetweenHostsMilli;
+
+    FailoverPolicy(int numRetries, int sleepBwHostsMilli) {
       this.numRetries = numRetries;
-    }
-
-    public int getNumRetries() {
-      return numRetries;
+      sleepBetweenHostsMilli = sleepBwHostsMilli;
     }
   }
 

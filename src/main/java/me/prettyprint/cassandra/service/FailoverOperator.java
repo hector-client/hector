@@ -73,7 +73,7 @@ import org.slf4j.LoggerFactory;
   public void operate(Operation<?> op) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
     final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
-    int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
+    int retries = Math.min(failoverPolicy.numRetries + 1, knownHosts.size());
     boolean isFirst = true;
     try {
       while (retries > 0) {
@@ -89,6 +89,7 @@ import org.slf4j.LoggerFactory;
           log.warn("Skip-host failed ", e);
           // continue the loop to the next host.
         }
+        sleepBetweenHostSkips();
         isFirst = false;
       }
     } catch (InvalidRequestException e) {
@@ -131,6 +132,22 @@ import org.slf4j.LoggerFactory;
       monitor.incCounter(op.failCounter);
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
+    }
+  }
+
+  /**
+   * Sleeps for the specified time as determined by sleepBetweenHostsMilli.
+   * In many cases failing over to other hosts is done b/c the cluster is too busy, so the sleep b/w
+   * hosts may help reduce load on the cluster.
+   */
+  private void sleepBetweenHostSkips() {
+    if (failoverPolicy.sleepBetweenHostsMilli > 0) {
+      log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
+      try {
+        Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
+      } catch (InterruptedException e) {
+        log.warn("Sleep between hosts interrupted", e);
+      }
     }
   }
 

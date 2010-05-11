@@ -33,12 +33,15 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientMonitor clientMonitor;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
+    log.info("Creating a CassandraClientPool");
     pools = new HashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
   }
 
-  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, CassandraHost[] cassandraHosts) {
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
+      CassandraHost[] cassandraHosts) {
     this(clientMonitor);
+    log.info("Creating a CassandraClientPool with the following configuration: {}", cassandraHosts);
     for (CassandraHost cassandraHost : cassandraHosts) {
       log.debug("Creating pool-by-host instance: {}", cassandraHost);
       getPool(cassandraHost);
