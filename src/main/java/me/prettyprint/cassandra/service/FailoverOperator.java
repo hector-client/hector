@@ -174,7 +174,8 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".success_");
       return true;
     } catch (TimedOutException e) {
-      log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
+      log.warn("Got a TimedOutException from {}. Num of retries: {} (thread={})",
+          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -182,8 +183,8 @@ import org.slf4j.LoggerFactory;
         monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
       }
     } catch (UnavailableException e) {
-      log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
-          retries);
+      log.warn("Got a UnavailableException from {}. Num of retries: {} (thread={})",
+          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -191,8 +192,8 @@ import org.slf4j.LoggerFactory;
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (TTransportException e) {
-      log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
-          retries);
+      log.warn("Got a TTransportException from {}. Num of retries: {} (thread={})",
+          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -215,9 +216,9 @@ import org.slf4j.LoggerFactory;
    * should be invalidated.
    */
   private void skipToNextHost(boolean isRetrySameHostAgain,
-      boolean invalidateAllConnectionsToCurrentHost)
-      throws SkipHostException {
-    log.info("Skipping to next host. Current host is: {}", client.getUrl());
+      boolean invalidateAllConnectionsToCurrentHost) throws SkipHostException {
+    log.info("Skipping to next host (thread={}). Current host is: {}",
+        Thread.currentThread().getName(), client.getUrl());
     invalidate();
     if (invalidateAllConnectionsToCurrentHost) {
       clientPools.invalidateAllConnectionsToHost(client);
@@ -242,7 +243,8 @@ import org.slf4j.LoggerFactory;
       throw new SkipHostException(e);
     }
     monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
-    log.info("Skipped host. New host is: {}", client.getUrl());
+    log.info("Skipped host (thread={}). New host is: {}", Thread.currentThread().getName(),
+        client.getUrl());
   }
 
   /**
@@ -252,13 +254,15 @@ import org.slf4j.LoggerFactory;
    * out of the pool indefinitely) and removed the keyspace from the client.
    */
   private void invalidate() {
+    log.info("Invalidating client {} (thread={})", client, Thread.currentThread().getName());
     try {
       clientPools.invalidateClient(client);
       if (keyspace != null) {
         client.removeKeyspace(keyspace);
       }
     } catch (Exception e) {
-      log.error("Unable to invalidate client {}. Will continue anyhow.", client);
+      log.error("Unable to invalidate client {}. Will continue anyhow. (thread={})", client,
+          Thread.currentThread().getName());
     }
   }
   /**
@@ -280,7 +284,8 @@ import org.slf4j.LoggerFactory;
       }
     }
     log.error("The host {}({}) wasn't found in the knownHosts ({}). Will try to choose a random " +
-        "host from the known host list", new Object[]{url, ip, knownHosts});
+        "host from the known host list. (thread={})",
+        new Object[]{url, ip, knownHosts, Thread.currentThread().getName()});
     return chooseRandomHost(knownHosts);
   }
 

@@ -73,16 +73,39 @@ import com.google.common.collect.ImmutableSet;
   @Override
   public CassandraClient borrowClient() throws Exception, PoolExhaustedException,
       IllegalStateException {
+    log.debug("Borrowing client from {} (thread={})", this, Thread.currentThread().getName());
     try {
       blockedThreadsCount.incrementAndGet();
+      log.debug("Just before borrow: {}", toDebugString());
       CassandraClient client = (CassandraClient) pool.borrowObject();
       liveClientsFromPool.add(client);
+      log.debug("Client {} successfully borrowed from {} (thread={})",
+          new Object[] {client, this, Thread.currentThread().getName()});
       return client;
     } catch (NoSuchElementException e) {
+      log.info("Pool is exhausted {} (thread={})", toDebugString(), Thread.currentThread().getName());
       throw new PoolExhaustedException(e.getMessage());
     } finally {
       blockedThreadsCount.decrementAndGet();
     }
+  }
+
+  private String toDebugString() {
+    StringBuilder s = new StringBuilder();
+    s.append(toString());
+    s.append("&maxActive=");
+    s.append(pool.getMaxActive());
+    s.append("&maxIdle=");
+    s.append(pool.getMaxIdle());
+    s.append("&blockedThreadCount=");
+    s.append(blockedThreadsCount);
+    s.append("&liveClientsFromPool.size=");
+    s.append(liveClientsFromPool.size());
+    s.append("&numActive=");
+    s.append(pool.getNumActive());
+    s.append("&numIdle=");
+    s.append(pool.getNumIdle());
+    return s.toString();
   }
 
   @Override
@@ -111,6 +134,7 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void releaseClient(CassandraClient client) throws Exception {
+    log.debug("Releasing client {} isReleased? {}", client, client.isReleased());
     if (client.isReleased()) {
       // The common case with clients that had errors is that they've already been release.
       // If we release them again the pool's counters will go crazy so we don't want that...
@@ -204,11 +228,14 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void invalidateClient(CassandraClient client) {
+    log.debug("Invalidating client {}", client);
     try {
       liveClientsFromPool.remove(client);
       client.markAsError();
-      pool.invalidateObject(client);
-      client.markAsReleased();
+      if (!client.isReleased()) {
+        client.markAsReleased();
+        pool.invalidateObject(client);
+      }
     } catch (Exception e) {
       log.error("Unable to invalidate client " + client, e);
     }
@@ -220,12 +247,14 @@ import com.google.common.collect.ImmutableSet;
   }
 
   void reportDestroyed(CassandraClient client) {
-    log.debug("Client has been destroyed: {}", client);
+    log.debug("Client has been destroyed: {} (thread={})", client, Thread.currentThread().getName());
     liveClientsFromPool.remove(client);
   }
 
   @Override
   public void invalidateAll() {
+    log.debug("Invalidating all connections at {} (thread={})", this,
+        Thread.currentThread().getName());
     while (!liveClientsFromPool.isEmpty()) {
       invalidateClient(liveClientsFromPool.iterator().next());
     }

@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,7 @@ public class CassandraHost {
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private TimestampResolution timestampResolution = DEFAULT_TIMESTAMP_RESOLUTION;
-
+  //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String urlPort) {
     this(parseHostFromUrl(urlPort), parsePortFromUrl(urlPort));

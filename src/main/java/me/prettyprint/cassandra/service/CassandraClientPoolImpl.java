@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
       CassandraHost[] cassandraHosts) {
     this(clientMonitor);
     log.info("Creating a CassandraClientPool with the following configuration: {}", cassandraHosts);
-    for (CassandraHost cassandraHost : cassandraHosts) {
+    for (CassandraHost cassandraHost: cassandraHosts) {
       log.debug("Creating pool-by-host instance: {}", cassandraHost);
       getPool(cassandraHost);
     }

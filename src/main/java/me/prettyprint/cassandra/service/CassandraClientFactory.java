@@ -68,8 +68,10 @@ import java.net.UnknownHostException;
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
-    return new CassandraClientImpl(createThriftClient(url, port),
+    CassandraClient c = new CassandraClientImpl(createThriftClient(url, port),
         new KeyspaceFactory(clientMonitor), url, port, pool, timestampResolution);
+    log.debug("Creating client {} (thread={})", c, Thread.currentThread().getName());
+    return c;
   }
 
   private Cassandra.Client createThriftClient(String  url, int port)
@@ -129,15 +131,15 @@ import java.net.UnknownHostException;
   @Override
   public void destroyObject(Object obj) throws Exception {
     CassandraClient client = (CassandraClient) obj ;
-    log.debug("Close client {}", client);
+    log.debug("Closing client {} (thread={})", client, Thread.currentThread().getName());
     closeClient(client);
   }
 
   @Override
   public Object makeObject() throws Exception {
-    log.debug("Creating a new client...");
+    log.debug("Creating a new client... (thread={})", Thread.currentThread().getName());
     CassandraClient c = create();
-    log.debug("New client created: {}", c);
+    log.debug("New client created: {} (thread={})", c, Thread.currentThread().getName());
     return c;
   }
 
