@@ -457,8 +457,8 @@ import org.slf4j.LoggerFactory;
     remove(key, columnPath, createTimestamp());
   }
 
-  
-  
+
+
   @Override
   public void remove(final String key, final ColumnPath columnPath, final long timestamp)
       throws InvalidRequestException, UnavailableException, TException,
@@ -471,7 +471,7 @@ import org.slf4j.LoggerFactory;
         return null;
       }
     };
-    operateWithFailover(op);    
+    operateWithFailover(op);
   }
 
   @Override
@@ -651,10 +651,15 @@ import org.slf4j.LoggerFactory;
     // now "known"
     try {
       Map<String, String> map = getClient().getTokenMap(true);
+      Set<String> hosts = new HashSet<String>();
       knownHosts.clear();
       for (Map.Entry<String, String> entry : map.entrySet()) {
-        knownHosts.add(entry.getValue());
+        hosts.add(entry.getValue());
       }
+      if (!hosts.contains(getClient().getUrl()) && !hosts.contains(getClient().getIp())) {
+        hosts.add(getClient().getIp());
+      }
+      knownHosts = new ArrayList<String>(hosts);
     } catch (TException e) {
       knownHosts.clear();
       log.error("Cannot query tokenMap; Keyspace {} is now disconnected", toString());
