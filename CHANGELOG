@@ -1,5 +1,25 @@
 Changes by version:
 ===================
+0.6.0 stands for cassandra's 0.6.0 version.
+-12 stands for hector's version
+
+0.6.0-* work well with cassandra's 0.6.*
+
+
+0.6.0-13
+========
+Fix duplicate host entries and two connection pools to the same host http://github.com/rantav/hector/issues/closed#issue/37
+Make loading hectorLog4j.xml optional, controlled by system property com.prettyprint.cassandra.load_hector_log4j http://github.com/rantav/hector/issues/closed#issue/36
+Fix - JMX counter NumActive isn't reporting a correct num http://github.com/rantav/hector/issues/closed#issue/33
+Chagne the name of the perf4 logger to be me.prettyprint.hector.TimingLogger
+Fix duplicate releases of clients when failing over to next host and connection leaking (no bug, was introduced by recent refactors)
+Improve failover - if the current host isn't in the list of known hosts, just failover to any random known host, don't give up
+Fix perf4j logger name so perf stats will actually work
+added overloaded remove for user specified timestamps
+Add @deprecated to getRangeSlice
+Add CassandraClientPool.getMbean
+Make Keyspace.createTimestamp public
+Change default DEFAULT_MAX_IDLE to -1
 
 0.6.0-12
 ========
