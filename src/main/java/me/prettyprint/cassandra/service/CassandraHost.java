@@ -194,6 +194,4 @@ public class CassandraHost {
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
   }
-
-
 }

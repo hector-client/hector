@@ -310,4 +310,9 @@ import org.slf4j.LoggerFactory;
   public void markAsReleased() {
     released = true;
   }
+
+  @Override
+  public void markAsBorrowed() {
+    released = false;
+  }
 }

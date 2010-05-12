@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
     this(clientMonitor);
     log.info("Creating a CassandraClientPool with the following configuration: {}", cassandraHosts);
     for (CassandraHost cassandraHost: cassandraHosts) {
-      log.debug("Creating pool-by-host instance: {}", cassandraHost);
+      log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
       getPool(cassandraHost);
     }
   }
@@ -129,6 +129,7 @@ import org.slf4j.LoggerFactory;
         if (pool == null) {
           pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
           pools.put(cassandraHost, pool);
+          log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
         }
       }
     }

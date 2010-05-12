@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
    * retries, and there are enough hosts to try and the error was
    * {@link TimedOutException}.
    */
-  public void operate(Operation<?> op) throws InvalidRequestException,
+  public CassandraClient operate(Operation<?> op) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
     final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
     int retries = Math.min(failoverPolicy.numRetries + 1, knownHosts.size());
@@ -83,7 +83,7 @@ import org.slf4j.LoggerFactory;
         try {
           boolean success = operateSingleIteration(op, stopWatch, retries, isFirst);
           if (success) {
-            return;
+            return client;
           }
         } catch (SkipHostException e) {
           log.warn("Skip-host failed ", e);
@@ -133,6 +133,7 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     }
+    return client;
   }
 
   /**
@@ -243,8 +244,8 @@ import org.slf4j.LoggerFactory;
       throw new SkipHostException(e);
     }
     monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
-    log.info("Skipped host (thread={}). New host is: {}", Thread.currentThread().getName(),
-        client.getUrl());
+    log.info("Skipped host (thread={}). New client is {}", Thread.currentThread().getName(),
+        client);
   }
 
   /**

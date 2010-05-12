@@ -162,6 +162,9 @@ public interface CassandraClient {
    */
   boolean isReleased();
 
-  /** Marks this client as already been released back to the pool */
+  /** Marks this client has already been released back to the pool */
   void markAsReleased();
+
+  /** Mark that this client has been borrowed from the pool. Reverts the markAsReleased */
+  void markAsBorrowed();
 }

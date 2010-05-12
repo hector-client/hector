@@ -148,7 +148,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts, monitor, client,
         clientPools, this);
-    operator.operate(op);
+    client = operator.operate(op);
   }
 
   @Override

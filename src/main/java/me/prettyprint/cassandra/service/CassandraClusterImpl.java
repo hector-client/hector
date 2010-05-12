@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
       cassandraClient = cassandraClientPool.borrowClient();
       FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts,
           cassandraClientMonitor, cassandraClient, cassandraClientPool, null);
-      operator.operate(op);
+      cassandraClient = operator.operate(op);
     } catch (InvalidRequestException ire) {
       throw new CassandraClusterException("Invalid request",ire);
     } catch (UnavailableException e) {

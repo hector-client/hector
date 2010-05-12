@@ -78,6 +78,7 @@ import com.google.common.collect.ImmutableSet;
       blockedThreadsCount.incrementAndGet();
       log.debug("Just before borrow: {}", toDebugString());
       CassandraClient client = (CassandraClient) pool.borrowObject();
+      client.markAsBorrowed();
       liveClientsFromPool.add(client);
       log.debug("Client {} successfully borrowed from {} (thread={})",
           new Object[] {client, this, Thread.currentThread().getName()});
@@ -134,12 +135,13 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void releaseClient(CassandraClient client) throws Exception {
-    log.debug("Releasing client {} isReleased? {}", client, client.isReleased());
+    log.debug("Maybe releasing client {}. is aready Released? {}", client, client.isReleased());
     if (client.isReleased()) {
       // The common case with clients that had errors is that they've already been release.
       // If we release them again the pool's counters will go crazy so we don't want that...
       return;
     }
+    client.markAsReleased();
     pool.returnObject(client);
   }
 

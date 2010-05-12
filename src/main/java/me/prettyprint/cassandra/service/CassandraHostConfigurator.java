@@ -31,7 +31,7 @@ public class CassandraHostConfigurator {
       if (maxActive > 0) {
         cassandraHost.setMaxActive(maxActive);
       }
-      if (maxIdle > 0) {
+      if (maxIdle != CassandraHost.DEFAULT_MAX_IDLE) {
         cassandraHost.setMaxIdle(maxIdle);
       }
       if (maxWaitTimeWhenExhausted > 0) {
