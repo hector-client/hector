@@ -524,18 +524,7 @@ import org.slf4j.LoggerFactory;
   }
 
   public long createTimestamp() {
-    long current = System.currentTimeMillis();
-    switch(client.getTimestampResolution()) {
-    case MICROSECONDS:
-      return current * 1000;
-    case MILLISECONDS:
-      return current;
-    case SECONDS:
-      return current / 1000;
-    default:
-      throw new RuntimeException("Unknown TimestampResolution: " +
-          client.getTimestampResolution());
-    }
+    return client.getTimestampResolution().createTimestamp();
   }
 
   /**

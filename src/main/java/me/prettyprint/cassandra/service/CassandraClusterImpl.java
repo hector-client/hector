@@ -31,26 +31,41 @@ import org.slf4j.LoggerFactory;
   private FailoverPolicy failoverPolicy;
   private List<String> knownHosts;
   private CassandraClientMonitor cassandraClientMonitor;
+  private CassandraClient cassandraClient;
 
   public CassandraClusterImpl(CassandraClientPool cassandraClientPool) throws PoolExhaustedException, Exception {
+    this(cassandraClientPool, null);
+  }
+
+  public CassandraClusterImpl(CassandraClientPool cassandraClientPool,
+      CassandraClient cassandraClient) throws PoolExhaustedException, Exception {
+    this.cassandraClient = cassandraClient;
     this.cassandraClientPool = cassandraClientPool;
     this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
-    CassandraClient cassandraClient = cassandraClientPool.borrowClient();
-    try {
+    if (cassandraClient == null ) {
+      cassandraClient = cassandraClientPool.borrowClient();
+      try {
+        knownHosts = new ArrayList<String>(buildHostNames(cassandraClient.getCassandra()));
+      } finally {
+        cassandraClientPool.releaseClient(cassandraClient);
+      }
+    } else {
       knownHosts = new ArrayList<String>(buildHostNames(cassandraClient.getCassandra()));
-    } finally {
-      cassandraClientPool.releaseClient(cassandraClient);
     }
   }
 
   private void operateWithFailover(Operation<?> op) throws CassandraClusterException {
-    CassandraClient cassandraClient = null;
+    CassandraClient localCassandraClient = null;
     try {
-      cassandraClient = cassandraClientPool.borrowClient();
+      if (cassandraClient == null) {
+        localCassandraClient = cassandraClientPool.borrowClient();
+      } else {
+        localCassandraClient = cassandraClient;
+      }
       FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts,
-          cassandraClientMonitor, cassandraClient, cassandraClientPool, null);
-      cassandraClient = operator.operate(op);
+          cassandraClientMonitor, localCassandraClient, cassandraClientPool, null);
+      localCassandraClient = operator.operate(op);
     } catch (InvalidRequestException ire) {
       throw new CassandraClusterException("Invalid request",ire);
     } catch (UnavailableException e) {
@@ -65,7 +80,9 @@ import org.slf4j.LoggerFactory;
       throw new CassandraClusterException("General Exception", e);
     } finally {
       try {
-        cassandraClientPool.releaseClient(cassandraClient);
+        if (cassandraClient == null) {
+          cassandraClientPool.releaseClient(localCassandraClient);
+        }
       } catch (Exception e) {
         log.error("Could not release connection",e);
       }
