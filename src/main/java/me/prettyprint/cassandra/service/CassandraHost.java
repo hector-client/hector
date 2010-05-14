@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +36,7 @@ public class CassandraHost {
    * The default max idle number is 5, so if clients keep idle, the total connection
    * number will decrease to 5
    */
-  public static final int DEFAULT_MAX_IDLE = 5 ;
+  public static final int DEFAULT_MAX_IDLE = -1;
 
   public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
       TimestampResolution.MICROSECONDS;
@@ -50,7 +52,7 @@ public class CassandraHost {
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private TimestampResolution timestampResolution = DEFAULT_TIMESTAMP_RESOLUTION;
-
+  //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String urlPort) {
     this(parseHostFromUrl(urlPort), parsePortFromUrl(urlPort));
@@ -121,12 +123,12 @@ public class CassandraHost {
     if (! (obj instanceof CassandraHost)) {
       return false;
     }
-    return ((CassandraHost) obj).name.equals(name);
+    return ((CassandraHost) obj).ip.equals(ip);
   }
 
   @Override
   public int hashCode() {
-    return name.hashCode();
+    return ip.hashCode();
   }
 
   public int getMaxActive() {
@@ -192,6 +194,4 @@ public class CassandraHost {
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
   }
-
-
 }

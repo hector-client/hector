@@ -1,17 +1,23 @@
 package me.prettyprint.cassandra.service;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Implementation of the client interface.
@@ -64,8 +70,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
   private final CassandraClientPool clientPools;
 
+  /** Has the client network connection been closed? */
   private boolean closed = false;
+
+  /** Does this client have errors */
   private boolean hasErrors = false;
+
+  /** Whether the client has been released back to the pool already */
+  private boolean released = false;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools,
@@ -87,6 +99,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public String getClusterName() throws TException {
+    // TODO replace with meta data API
     if (clusterName == null) {
       clusterName = getStringProperty(PROP_CLUSTER_NAME);
     }
@@ -140,13 +153,14 @@ import java.util.concurrent.atomic.AtomicLong;
   @Override
   public List<String> getKeyspaces() throws TException {
     if (keyspaces == null) {
-      keyspaces = cassandra.get_string_list_property(PROP_KEYSPACE);
+      keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
     }
     return keyspaces;
   }
 
   @Override
   public String getStringProperty(String propertyName) throws TException {
+    // TODO remove
     return cassandra.get_string_property(propertyName);
   }
 
@@ -154,16 +168,20 @@ import java.util.concurrent.atomic.AtomicLong;
   public Map<String, String> getTokenMap(boolean fresh) throws TException {
     if (tokenMap == null || fresh) {
       tokenMap = new HashMap<String, String>();
-      String strTokens = getStringProperty(PROP_TOKEN_MAP);
-      // Parse the result of the form {"token1":"host1","token2":"host2"}
-      strTokens = trimBothSides(strTokens);
-      String[] tokenPairs = strTokens.split(",");
-      for (String tokenPair: tokenPairs) {
-        String[] keyValue = tokenPair.split(":");
-        String token = trimBothSides(keyValue[0]);
-        String host = trimBothSides(keyValue[1]);
-        tokenMap.put(token, host);
+      List<String> keyspaces = getKeyspaces();
+      for (String keyspace : keyspaces) {
+        if ( keyspace.equals("system") )
+          continue;
+        List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
+        for (TokenRange tokenRange : tokenRanges) {
+          for( String host : tokenRange.getEndpoints() ) {
+            log.info("token start: {} end: {} host: {}",
+                new Object[]{tokenRange.getStart_token(), tokenRange.getEnd_token(), host});
+            tokenMap.put(tokenRange.getStart_token() + "-" + tokenRange.getEnd_token(), host);
+          }
+        }
       }
+
     }
     return tokenMap;
   }
@@ -210,6 +228,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public void updateKnownHosts() throws TException {
+    // TODO rebuild to use meta API
     if (closed) {
       return;
     }
@@ -244,6 +263,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
   @Override
   public Set<String> getKnownHosts() {
+    // TODO update to use META API
     Set<String> hosts = new HashSet<String>();
     if (closed) {
       return hosts;
@@ -281,10 +301,18 @@ import java.util.concurrent.atomic.AtomicLong;
     return timestampResolution;
   }
 
-  private String trimBothSides(String str) {
-    str = str.substring(1);
-    str = str.substring(0, str.length() - 1);
-    return str;
+  @Override
+  public boolean isReleased() {
+    return released;
   }
 
+  @Override
+  public void markAsReleased() {
+    released = true;
+  }
+
+  @Override
+  public void markAsBorrowed() {
+    released = false;
+  }
 }

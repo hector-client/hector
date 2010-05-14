@@ -31,7 +31,7 @@ public class CassandraHostConfigurator {
       if (maxActive > 0) {
         cassandraHost.setMaxActive(maxActive);
       }
-      if (maxIdle > 0) {
+      if (maxIdle != CassandraHost.DEFAULT_MAX_IDLE) {
         cassandraHost.setMaxIdle(maxIdle);
       }
       if (maxWaitTimeWhenExhausted > 0) {
@@ -81,5 +81,27 @@ public class CassandraHostConfigurator {
    */
   public void setTimestampResolution(String resolutionString) {
     timestampResolution = TimestampResolution.valueOf(resolutionString);
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder s = new StringBuilder();
+    s.append("CassandraHostConfigurator<");
+    s.append("timestampResolution=");
+    s.append(timestampResolution);
+    s.append("&exhaustedPolicy=");
+    s.append(exhaustedPolicy);
+    s.append("&cassandraThriftSocketTimeout=");
+    s.append(cassandraThriftSocketTimeout);
+    s.append("&maxWaitTimeWhenExhausted=");
+    s.append(maxWaitTimeWhenExhausted);
+    s.append("&maxIdle=");
+    s.append(maxIdle);
+    s.append("&maxActive=");
+    s.append(maxActive);
+    s.append("&hosts=");
+    s.append(hosts);
+    s.append(">");
+    return s.toString();
   }
 }

@@ -1,43 +1,23 @@
 package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
-import org.apache.thrift.transport.TTransportException;
-import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.io.IOException;
-
-import static org.junit.Assert.*;
 
 /**
  *
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class CassandraClientPoolTest {
+public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
 
   private CassandraClientPoolImpl store;
-  private static EmbeddedServerHelper embedded;
-
-  /**
-   * Set embedded cassandra up and spawn it in a new thread.
-   *
-   * @throws TTransportException
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
-    embedded = new EmbeddedServerHelper();
-    embedded.setup();
-  }
-
-  @AfterClass
-  public static void teardown() throws IOException {
-    embedded.teardown();
-  }
 
   @Before
   public void setupTest() {
@@ -84,12 +64,9 @@ public class CassandraClientPoolTest {
     assertEquals("localhost", client.getUrl());
     assertEquals(9170, client.getPort());
 
-    try {
-      client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
-      fail("Should not have boon able to obtain a client");
-    } catch (Exception e) {
-      // ok
-    }
+    client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
+    assertEquals("localhost", client.getUrl());
+    assertEquals(9170, client.getPort());
   }
 
   @Test

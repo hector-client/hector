@@ -9,7 +9,7 @@
   <!-- ====================================================================== -->
   <!-- Build environment properties                                           -->
   <!-- ====================================================================== -->
-  <property name="version" value="0.6.0-12"/>
+  <property name="version" value="0.6.0-13"/>
   <property name="final-name" value="hector-${version}"/>
   <property name="build.dir" value="target"/>
   <property name="project.build.directory" value="${build.outputDir}"/>
@@ -134,6 +134,7 @@
           <include name="**/*Test.java"/>
           <include name="**/*TestCase.java"/>
           <exclude name="**/*Abstract*Test.java"/>
+          <exclude name="**/Base*Test.java"/>        	
         </fileset>
       </batchtest>
       <batchtest todir="${test.reports}" if="test">

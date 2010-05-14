@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /**
  * A factory for getting handles to {@link CassandraClientPool}.
@@ -17,6 +20,8 @@ public enum CassandraClientPoolFactory {
   INSTANCE;
 
   private CassandraClientPool defaultPool;
+
+  private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolFactory.class);
 
   private CassandraClientPoolFactory() {
   }
@@ -45,16 +50,28 @@ public enum CassandraClientPoolFactory {
    * @return
    */
   public CassandraClientPool createDefault() {
+    log.debug("Creating a new CassandraClientPool...");
     CassandraClientPool pool = new CassandraClientPoolImpl(
         JmxMonitor.INSTANCE.getCassandraMonitor());
     JmxMonitor.INSTANCE.addPool(pool);
+    log.debug("CassandraClientPool was created: {}", pool);
     return pool;
   }
 
+  /**
+   * Creates a new {@link CassandraClientPool} instance.
+   * Caller may need to verify that no more than one pool in the application is created, depending
+   * on the caller logic; This method does not perform this kind of check.
+   *
+   * @param cassandraHostConfigurator
+   * @return
+   */
   public CassandraClientPool createNew(CassandraHostConfigurator cassandraHostConfigurator) {
+    log.debug("Creating a new CassandraClientPool...");
     CassandraClientPool pool = new CassandraClientPoolImpl(
         JmxMonitor.INSTANCE.getCassandraMonitor(), cassandraHostConfigurator.buildCassandraHosts());
     JmxMonitor.INSTANCE.addPool(pool);
+    log.debug("CassandraClientPool was created: {}", pool);
     return pool;
   }
 }

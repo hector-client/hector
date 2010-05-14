@@ -33,15 +33,18 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientMonitor clientMonitor;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
+    log.info("Creating a CassandraClientPool");
     pools = new HashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
   }
 
-  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor, CassandraHost[] cassandraHosts) {
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
+      CassandraHost[] cassandraHosts) {
     this(clientMonitor);
-    for (CassandraHost cassandraHost : cassandraHosts) {
-      log.debug("Creating pool-by-host instance: {}", cassandraHost);         
-      getPool(cassandraHost);  
+    log.info("Creating a CassandraClientPool with the following configuration: {}", cassandraHosts);
+    for (CassandraHost cassandraHost: cassandraHosts) {
+      log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
+      getPool(cassandraHost);
     }
   }
 
@@ -126,6 +129,7 @@ import org.slf4j.LoggerFactory;
         if (pool == null) {
           pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
           pools.put(cassandraHost, pool);
+          log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
         }
       }
     }
@@ -223,5 +227,10 @@ import org.slf4j.LoggerFactory;
   @Override
   public void invalidateAllConnectionsToHost(CassandraClient client) {
     getPool(client).invalidateAll();
+  }
+
+  @Override
+  public CassandraClientMonitorMBean getMbean() {
+    return clientMonitor;
   }
 }

@@ -148,7 +148,7 @@ import org.slf4j.LoggerFactory;
       UnavailableException, TException, TimedOutException {
     FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts, monitor, client,
         clientPools, this);
-    operator.operate(op);
+    client = operator.operate(op);
   }
 
   @Override
@@ -316,7 +316,7 @@ import org.slf4j.LoggerFactory;
       @Override
       public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.insert(keyspaceName, key, columnPath, value, createTimeStamp(), consistency);
+        cassandra.insert(keyspaceName, key, columnPath, value, createTimestamp(), consistency);
         return null;
       }
     };
@@ -454,16 +454,24 @@ import org.slf4j.LoggerFactory;
   @Override
   public void remove(final String key, final ColumnPath columnPath) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
+    remove(key, columnPath, createTimestamp());
+  }
+
+
+
+  @Override
+  public void remove(final String key, final ColumnPath columnPath, final long timestamp)
+      throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
       public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
           TException, TimedOutException {
-        cassandra.remove(keyspaceName, key, columnPath, createTimeStamp(), consistency);
+        cassandra.remove(keyspaceName, key, columnPath, timestamp, consistency);
         return null;
       }
     };
     operateWithFailover(op);
-
   }
 
   @Override
@@ -515,19 +523,8 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
-  /*package*/ long createTimeStamp() {
-    long current = System.currentTimeMillis();
-    switch(client.getTimestampResolution()) {
-    case MICROSECONDS:
-      return current * 1000;
-    case MILLISECONDS:
-      return current;
-    case SECONDS:
-      return current / 1000;
-    default:
-      throw new RuntimeException("Unknown TimestampResolution: " +
-          client.getTimestampResolution());
-    }
+  public long createTimestamp() {
+    return client.getTimestampResolution().createTimestamp();
   }
 
   /**
@@ -643,10 +640,15 @@ import org.slf4j.LoggerFactory;
     // now "known"
     try {
       Map<String, String> map = getClient().getTokenMap(true);
+      Set<String> hosts = new HashSet<String>();
       knownHosts.clear();
       for (Map.Entry<String, String> entry : map.entrySet()) {
-        knownHosts.add(entry.getValue());
+        hosts.add(entry.getValue());
       }
+      if (!hosts.contains(getClient().getUrl()) && !hosts.contains(getClient().getIp())) {
+        hosts.add(getClient().getIp());
+      }
+      knownHosts = new ArrayList<String>(hosts);
     } catch (TException e) {
       knownHosts.clear();
       log.error("Cannot query tokenMap; Keyspace {} is now disconnected", toString());

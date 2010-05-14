@@ -16,7 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
@@ -47,9 +45,7 @@ import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Matchers;
 
@@ -66,32 +62,12 @@ import org.mockito.Matchers;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class KeyspaceTest {
-
-  private static EmbeddedServerHelper embedded;
+public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
   private CassandraClientPool pools;
   private CassandraClientMonitor monitor;
-
-  /**
-   * Set embedded cassandra up and spawn it in a new thread.
-   *
-   * @throws TTransportException
-   * @throws IOException
-   * @throws InterruptedException
-   */
-  @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
-    embedded = new EmbeddedServerHelper();
-    embedded.setup();
-  }
-
-  @AfterClass
-  public static void teardown() throws IOException {
-    embedded.teardown();
-  }
 
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
@@ -204,7 +180,7 @@ public class KeyspaceTest {
       ArrayList<Column> list = new ArrayList<Column>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchInsertColumn_" + j),
-            bytes("testBatchInsertColumn_value_" + j), System.currentTimeMillis());
+            bytes("testBatchInsertColumn_value_" + j), keyspace.createTimestamp());
         list.add(col);
       }
       cfmap.put("Standard1", list);
@@ -247,7 +223,7 @@ public class KeyspaceTest {
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createTimestamp());
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -285,7 +261,7 @@ public class KeyspaceTest {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(System.currentTimeMillis());
+      Deletion deletion = new Deletion(keyspace.createTimestamp());
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -318,7 +294,7 @@ public class KeyspaceTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), System.currentTimeMillis());
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createTimestamp());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -344,9 +320,9 @@ public class KeyspaceTest {
       for (int j = 0; j < 10; j++) {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(System.currentTimeMillis());
+      Deletion deletion = new Deletion(keyspace.createTimestamp());
       deletion.setPredicate(slicePredicate);
-      batchMutation.addDeletion("testBatchMutateColumn_"+i, columnFamilies, deletion);
+      batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
     keyspace.batchMutate(batchMutation);
     // make sure the values are gone
@@ -366,6 +342,56 @@ public class KeyspaceTest {
   }
 
   @Test
+  public void testBatchUpdateInsertAndDelOnSame() throws IllegalArgumentException, NoSuchElementException,
+  IllegalStateException, NotFoundException, TException, Exception {
+
+    ColumnPath sta1 = new ColumnPath("Standard1");
+    sta1.setColumn(bytes("deleteThroughInserBatch_col"));
+
+    keyspace.insert("deleteThroughInserBatch_key", sta1, bytes("deleteThroughInserBatch_val"));
+
+    Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
+    assertNotNull(found);
+
+    BatchMutation batchMutation = new BatchMutation();
+    List<String> columnFamilies = Arrays.asList("Standard1");
+    for (int i = 0; i < 10; i++) {
+
+      for (int j = 0; j < 10; j++) {
+        Column col = new Column(bytes("testBatchMutateColumn_" + j),
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createTimestamp());
+        batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
+      }
+    }
+    SlicePredicate slicePredicate = new SlicePredicate();
+    slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
+
+    Deletion deletion = new Deletion(keyspace.createTimestamp());
+    deletion.setPredicate(slicePredicate);
+
+    batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);
+    keyspace.batchMutate(batchMutation);
+    try {
+      keyspace.getColumn("deleteThroughInserBatch_key", sta1);
+      fail("Should not have found a value here");
+    } catch (Exception e) {
+    }
+    // get value
+    for (int i = 0; i < 10; i++) {
+      for (int j = 0; j < 10; j++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testBatchMutateColumn_" + j));
+
+        Column col = keyspace.getColumn("testBatchMutateColumn_" + i, cp);
+        assertNotNull(col);
+        String value = string(col.getValue());
+        assertEquals("testBatchMutateColumn_value_" + j, value);
+
+      }
+    }
+  }
+
+  @Test
   public void testGetClient() {
     assertEquals(client, keyspace.getClient());
   }
@@ -377,7 +403,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testGetSuperColumn_" + j), bytes("testGetSuperColumn_value_"
-          + j), System.currentTimeMillis());
+          + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -498,7 +524,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperColumn_" + j),
-          bytes("testMultigetSuperColumn_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperColumn_value_" + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -558,7 +584,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), System.currentTimeMillis());
+          bytes("testMultigetSuperSlice_value_" + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -606,7 +632,7 @@ public class KeyspaceTest {
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
       Column col = new Column(bytes("testMultigetSuperSlice_" + j),
-          bytes("testMultigetSuperSlice_value_" + j), ((KeyspaceImpl) keyspace).createTimeStamp());
+          bytes("testMultigetSuperSlice_value_" + j), keyspace.createTimestamp());
       list.add(col);
     }
     ArrayList<SuperColumn> superlist = new ArrayList<SuperColumn>(1);
@@ -654,6 +680,7 @@ public class KeyspaceTest {
     assertNotNull(description);
     assertEquals(4, description.size());
   }
+
 
   @Test
   public void testGetCount() throws IllegalArgumentException, NoSuchElementException,

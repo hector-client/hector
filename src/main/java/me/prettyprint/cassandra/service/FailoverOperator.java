@@ -28,6 +28,9 @@ import org.slf4j.LoggerFactory;
 
   private static final Logger log = LoggerFactory.getLogger(FailoverOperator.class);
 
+  private static final Logger perf4jLogger =
+    LoggerFactory.getLogger("me.prettyprint.hector.TimingLogger");
+
   private final FailoverPolicy failoverPolicy;
 
   /** List of all known remote cassandra nodes */
@@ -67,10 +70,10 @@ import org.slf4j.LoggerFactory;
    * retries, and there are enough hosts to try and the error was
    * {@link TimedOutException}.
    */
-  public void operate(Operation<?> op) throws InvalidRequestException,
+  public CassandraClient operate(Operation<?> op) throws InvalidRequestException,
       UnavailableException, TException, TimedOutException {
-    final StopWatch stopWatch = new Slf4JStopWatch();
-    int retries = Math.min(failoverPolicy.getNumRetries() + 1, knownHosts.size());
+    final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
+    int retries = Math.min(failoverPolicy.numRetries + 1, knownHosts.size());
     boolean isFirst = true;
     try {
       while (retries > 0) {
@@ -80,12 +83,13 @@ import org.slf4j.LoggerFactory;
         try {
           boolean success = operateSingleIteration(op, stopWatch, retries, isFirst);
           if (success) {
-            return;
+            return client;
           }
         } catch (SkipHostException e) {
           log.warn("Skip-host failed ", e);
           // continue the loop to the next host.
         }
+        sleepBetweenHostSkips();
         isFirst = false;
       }
     } catch (InvalidRequestException e) {
@@ -129,6 +133,23 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw new UnavailableException();
     }
+    return client;
+  }
+
+  /**
+   * Sleeps for the specified time as determined by sleepBetweenHostsMilli.
+   * In many cases failing over to other hosts is done b/c the cluster is too busy, so the sleep b/w
+   * hosts may help reduce load on the cluster.
+   */
+  private void sleepBetweenHostSkips() {
+    if (failoverPolicy.sleepBetweenHostsMilli > 0) {
+      log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
+      try {
+        Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
+      } catch (InterruptedException e) {
+        log.warn("Sleep between hosts interrupted", e);
+      }
+    }
   }
 
   /**
@@ -154,7 +175,8 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".success_");
       return true;
     } catch (TimedOutException e) {
-      log.warn("Got a TimedOutException from {}. Num of retries: {}", client.getUrl(), retries);
+      log.warn("Got a TimedOutException from {}. Num of retries: {} (thread={})",
+          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -162,8 +184,8 @@ import org.slf4j.LoggerFactory;
         monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
       }
     } catch (UnavailableException e) {
-      log.warn("Got a UnavailableException from {}. Num of retries: {}", client.getUrl(),
-          retries);
+      log.warn("Got a UnavailableException from {}. Num of retries: {} (thread={})",
+          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -171,8 +193,8 @@ import org.slf4j.LoggerFactory;
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (TTransportException e) {
-      log.warn("Got a TTransportException from {}. Num of retries: {}", client.getUrl(),
-          retries);
+      log.warn("Got a TTransportException from {}. Num of retries: {} (thread={})",
+          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -195,9 +217,9 @@ import org.slf4j.LoggerFactory;
    * should be invalidated.
    */
   private void skipToNextHost(boolean isRetrySameHostAgain,
-      boolean invalidateAllConnectionsToCurrentHost)
-      throws SkipHostException {
-    log.info("Skipping to next host. Current host is: {}", client.getUrl());
+      boolean invalidateAllConnectionsToCurrentHost) throws SkipHostException {
+    log.info("Skipping to next host (thread={}). Current host is: {}",
+        Thread.currentThread().getName(), client.getUrl());
     invalidate();
     if (invalidateAllConnectionsToCurrentHost) {
       clientPools.invalidateAllConnectionsToHost(client);
@@ -221,9 +243,9 @@ import org.slf4j.LoggerFactory;
     } catch (Exception e) {
       throw new SkipHostException(e);
     }
-//    cassandra = client.getCassandra();
     monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
-    log.info("Skipped host. New host is: {}", client.getUrl());
+    log.info("Skipped host (thread={}). New client is {}", Thread.currentThread().getName(),
+        client);
   }
 
   /**
@@ -233,16 +255,20 @@ import org.slf4j.LoggerFactory;
    * out of the pool indefinitely) and removed the keyspace from the client.
    */
   private void invalidate() {
+    log.info("Invalidating client {} (thread={})", client, Thread.currentThread().getName());
     try {
       clientPools.invalidateClient(client);
-      client.removeKeyspace(keyspace);
+      if (keyspace != null) {
+        client.removeKeyspace(keyspace);
+      }
     } catch (Exception e) {
-      log.error("Unable to invalidate client {}. Will continue anyhow.", client);
+      log.error("Unable to invalidate client {}. Will continue anyhow. (thread={})", client,
+          Thread.currentThread().getName());
     }
   }
   /**
    * Finds the next host in the knownHosts. Next is the one after the given url
-   * (modulo the number of elemens in the list)
+   * (modulo the number of elements in the list)
    *
    * @return URL of the next presumably available host. null if none can be
    *         found.
@@ -258,10 +284,23 @@ import org.slf4j.LoggerFactory;
         return knownHosts.get((i + 1) % size);
       }
     }
-    log.error("The URL {} wasn't found in the knownHosts", url);
-    return null;
+    log.error("The host {}({}) wasn't found in the knownHosts ({}). Will try to choose a random " +
+        "host from the known host list. (thread={})",
+        new Object[]{url, ip, knownHosts, Thread.currentThread().getName()});
+    return chooseRandomHost(knownHosts);
   }
 
+  /**
+   * Chooses a random host from the list.
+   * @param knownHosts
+   * @return
+   */
+  private String chooseRandomHost(List<String> knownHosts) {
+    long rnd = Math.round(Math.random() * knownHosts.size());
+    String host = knownHosts.get((int) rnd);
+    log.info("Choosing random host to skip to: {}", host);
+    return host;
+  }
 
 }
 

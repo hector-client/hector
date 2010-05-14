@@ -75,6 +75,26 @@ public abstract class Command<OUTPUT> {
     return execute(getPool().borrowClient(hosts), keyspace, consistency);
   }
 
+  public final OUTPUT execute(CassandraClientPool pool, String[] hosts, String keyspace,
+      ConsistencyLevel consistency) throws Exception {
+    CassandraClient c = pool.borrowClient(hosts);
+    Keyspace ks = c.getKeyspace(keyspace, consistency);
+    try {
+      return execute(ks);
+    } finally {
+      pool.releaseClient(ks.getClient());
+    }
+  }
+
+
+  /**
+   * Executes on a client obtained from the default pool
+   * @param c
+   * @param keyspace
+   * @param consistency
+   * @return
+   * @throws Exception
+   */
   protected final OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency)
       throws Exception {
     Keyspace ks = c.getKeyspace(keyspace, consistency);
