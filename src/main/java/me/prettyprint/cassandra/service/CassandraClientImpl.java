@@ -174,8 +174,8 @@ import org.slf4j.LoggerFactory;
           continue;
         List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
         for (TokenRange tokenRange : tokenRanges) {
-          for( String host : tokenRange.getEndpoints() ) {
-            log.info("token start: {} end: {} host: {}",
+          for(String host : tokenRange.getEndpoints()) {
+            log.debug("token start: {} end: {} host: {}",
                 new Object[]{tokenRange.getStart_token(), tokenRange.getEnd_token(), host});
             tokenMap.put(tokenRange.getStart_token() + "-" + tokenRange.getEnd_token(), host);
           }
