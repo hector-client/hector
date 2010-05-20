@@ -228,6 +228,31 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
+  public Map<String, List<SuperColumn>> getSuperRangeSlices(final ColumnParent columnParent,
+      final SlicePredicate predicate, final KeyRange keyRange)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
+        OperationType.READ) {
+      @Override
+      public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
+          UnavailableException, TException, TimedOutException {
+        List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent, predicate,
+            keyRange, consistency);
+        if (keySlices == null || keySlices.isEmpty()) {
+          return Collections.emptyMap();
+        }
+        Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(keySlices.size());
+        for (KeySlice keySlice : keySlices) {
+          ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
+        }
+        return ret;
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+
+  @Override
   public List<Column> getSlice(final String key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
       UnavailableException, TException, TimedOutException {

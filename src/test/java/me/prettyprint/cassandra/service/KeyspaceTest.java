@@ -801,6 +801,43 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
+  public void testGetSuperRangeSlices() throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException, NotFoundException {
+    for (int i = 0; i < 10; i++) {
+      ColumnPath cp = new ColumnPath("Super1");
+      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setColumn(bytes("testGetSuperRangeSlices_" + i));
+      keyspace.insert("testGetSuperRangeSlices0", cp, bytes("testGetSuperRangeSlices_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlices1", cp, bytes("testGetSuperRangeSlices_Value_" + i));
+    }
+
+    // get value
+    ColumnParent clp = new ColumnParent("Super1");
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
+    
+    KeyRange range = new KeyRange();
+    range.setStart_key( "testGetSuperRangeSlices0" );
+    range.setEnd_key( "testGetSuperRangeSlices1" );
+
+    
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlices(clp, sp, range);
+
+    assertNotNull(keySlices);
+    assertEquals(2, keySlices.size());
+    assertNotNull("testGetSuperRangSlices0 is null", keySlices.get("testGetSuperRangeSlices0"));
+    assertEquals("testGetSuperRangeSlices_Value_0",
+        string(keySlices.get("testGetSuperRangeSlices0").get(0).getColumns().get(0).getValue()));
+    assertEquals(1, keySlices.get("testGetSuperRangeSlices1").size());
+    assertEquals(10, keySlices.get("testGetSuperRangeSlices1").get(0).getColumns().size());
+
+    ColumnPath cp = new ColumnPath("Super1");
+    keyspace.remove("testGetSuperRangeSlices0", cp);
+    keyspace.remove("testGetSuperRangeSlices1", cp);
+  }
+
+  @Test
   public void testGetConsistencyLevel() {
     assertEquals(ConsistencyLevel.ONE, keyspace.getConsistencyLevel());
   }

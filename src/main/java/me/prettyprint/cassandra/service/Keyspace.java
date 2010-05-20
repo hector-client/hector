@@ -209,10 +209,17 @@ public interface Keyspace {
 
   /**
    * returns a subset of super columns for a range of keys.
-   * @deprecated use {@link #getRangeSlices(ColumnParent, SlicePredicate, KeyRange)}
+   * @deprecated use {@link #getSuperRangeSlices(ColumnParent, SlicePredicate, KeyRange)}
    */
   Map<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException;
+
+  /**
+   * returns a subset of super columns for a range of keys.
+   */
+  Map<String, List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
+      KeyRange keyRange)
       throws InvalidRequestException, UnavailableException, TException, TimedOutException;
 
   /**
