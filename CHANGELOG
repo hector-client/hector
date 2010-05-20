@@ -9,6 +9,7 @@ Changes by version:
 0.6.0-14
 ========
 Add getRangeSuperSlices http://github.com/rantav/hector/issues/#issue/38
+Add Command.execute that accepts a configurable FailoverPolicy
 
 0.6.0-13
 ========
