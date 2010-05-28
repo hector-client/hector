@@ -43,6 +43,7 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
@@ -159,7 +160,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with CFdoesNotExist");
     } catch (InvalidRequestException e) {
-      // ok
+      assertTrue(StringUtils.contains(e.getWhy(),"column family does not exist"));
     }
 
     cp = new ColumnPath("Standard1");
@@ -168,7 +169,16 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
     } catch (InvalidRequestException e) {
-      // ok
+      assertTrue(StringUtils.contains(e.getWhy(),"column name was null"));
+    }
+    
+    cp = new ColumnPath("Super1");
+    cp.setColumn(bytes("testInsertAndGetAndRemove"));
+    try {
+      keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
+      fail("Should have failed with supercolumn");
+    } catch (InvalidRequestException e) {      
+      assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have"));
     }
   }
 
