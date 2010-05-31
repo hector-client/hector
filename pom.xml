@@ -264,9 +264,8 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-javautils</artifactId>
-      <systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
       <version>1.0.0</version>
-      <scope>system</scope>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
