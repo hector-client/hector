@@ -129,12 +129,16 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     cp.setColumn(bytes("testInsertSuper_column"));
     cp.setSuper_column(bytes("testInsertSuper_super"));
     keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value"));
+    cp.setColumn(bytes("testInsertSuper_column2"));
+    keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value2"));
 
     // get value and assert
-    SuperColumn sc = keyspace.getSuperColumn("testInsertSuper_key", cp);
+    ColumnPath cp2 = new ColumnPath("Super1");
+    cp2.setSuper_column(bytes("testInsertSuper_super"));
+    SuperColumn sc = keyspace.getSuperColumn("testInsertSuper_key", cp2);
     assertNotNull(sc);
     assertEquals("testInsertSuper_super", string(sc.getName()));
-    assertEquals(1, sc.getColumns().size());
+    assertEquals(2, sc.getColumns().size());
     assertEquals("testInsertSuper_value", string(sc.getColumns().get(0).getValue()));
 
     // remove value
@@ -171,13 +175,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     } catch (InvalidRequestException e) {
       assertTrue(StringUtils.contains(e.getWhy(),"column name was null"));
     }
-    
+
     cp = new ColumnPath("Super1");
     cp.setColumn(bytes("testInsertAndGetAndRemove"));
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
-    } catch (InvalidRequestException e) {      
+    } catch (InvalidRequestException e) {
       assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have"));
     }
   }
@@ -826,12 +830,12 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
-    
+
     KeyRange range = new KeyRange();
     range.setStart_key( "testGetSuperRangeSlices0" );
     range.setEnd_key( "testGetSuperRangeSlices1" );
 
-    
+
     Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlices(clp, sp, range);
 
     assertNotNull(keySlices);
