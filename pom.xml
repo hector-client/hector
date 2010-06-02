@@ -265,7 +265,6 @@
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-javautils</artifactId>
       <version>1.0.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

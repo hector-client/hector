@@ -10,6 +10,7 @@ Changes by version:
 ========
 Add getRangeSuperSlices http://github.com/rantav/hector/issues/#issue/38
 Add Command.execute that accepts a configurable FailoverPolicy
+Improve maven build file
 
 0.6.0-13
 ========
