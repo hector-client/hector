@@ -4,6 +4,8 @@ import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+
 import org.apache.cassandra.thrift.ConsistencyLevel;
 
 /**
@@ -86,14 +88,27 @@ public abstract class Command<OUTPUT> {
     }
   }
 
+  /**
+   * Use this execute method if you need a special {@link FailoverPolicy}
+   */
+  public OUTPUT execute(String[] hosts, String keyspace, ConsistencyLevel consistency,
+      FailoverPolicy failoverPolicy) throws Exception {
+    return execute(getPool().borrowClient(hosts), keyspace, consistency, failoverPolicy);
+  }
+
+  protected OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency,
+      FailoverPolicy failoverPolicy) throws Exception {
+    Keyspace ks = c.getKeyspace(keyspace, consistency, failoverPolicy);
+    try {
+      return execute(ks);
+    } finally {
+      getPool().releaseClient(ks.getClient());
+    }
+  }
+
 
   /**
    * Executes on a client obtained from the default pool
-   * @param c
-   * @param keyspace
-   * @param consistency
-   * @return
-   * @throws Exception
    */
   protected final OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency)
       throws Exception {

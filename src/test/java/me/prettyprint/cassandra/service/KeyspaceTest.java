@@ -43,6 +43,7 @@ import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
@@ -128,12 +129,16 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     cp.setColumn(bytes("testInsertSuper_column"));
     cp.setSuper_column(bytes("testInsertSuper_super"));
     keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value"));
+    cp.setColumn(bytes("testInsertSuper_column2"));
+    keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value2"));
 
     // get value and assert
-    SuperColumn sc = keyspace.getSuperColumn("testInsertSuper_key", cp);
+    ColumnPath cp2 = new ColumnPath("Super1");
+    cp2.setSuper_column(bytes("testInsertSuper_super"));
+    SuperColumn sc = keyspace.getSuperColumn("testInsertSuper_key", cp2);
     assertNotNull(sc);
     assertEquals("testInsertSuper_super", string(sc.getName()));
-    assertEquals(1, sc.getColumns().size());
+    assertEquals(2, sc.getColumns().size());
     assertEquals("testInsertSuper_value", string(sc.getColumns().get(0).getValue()));
 
     // remove value
@@ -159,7 +164,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with CFdoesNotExist");
     } catch (InvalidRequestException e) {
-      // ok
+      assertTrue(StringUtils.contains(e.getWhy(),"column family does not exist"));
     }
 
     cp = new ColumnPath("Standard1");
@@ -168,7 +173,16 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
     } catch (InvalidRequestException e) {
-      // ok
+      assertTrue(StringUtils.contains(e.getWhy(),"column name was null"));
+    }
+
+    cp = new ColumnPath("Super1");
+    cp.setColumn(bytes("testInsertAndGetAndRemove"));
+    try {
+      keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
+      fail("Should have failed with supercolumn");
+    } catch (InvalidRequestException e) {
+      assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have"));
     }
   }
 
@@ -798,6 +812,43 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ColumnPath cp = new ColumnPath("Super1");
     keyspace.remove("testGetSuperRangeSlice0", cp);
     keyspace.remove("testGetSuperRangeSlice1", cp);
+  }
+
+  @Test
+  public void testGetSuperRangeSlices() throws InvalidRequestException, UnavailableException, TException,
+      TimedOutException, NotFoundException {
+    for (int i = 0; i < 10; i++) {
+      ColumnPath cp = new ColumnPath("Super1");
+      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setColumn(bytes("testGetSuperRangeSlices_" + i));
+      keyspace.insert("testGetSuperRangeSlices0", cp, bytes("testGetSuperRangeSlices_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlices1", cp, bytes("testGetSuperRangeSlices_Value_" + i));
+    }
+
+    // get value
+    ColumnParent clp = new ColumnParent("Super1");
+    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(sr);
+
+    KeyRange range = new KeyRange();
+    range.setStart_key( "testGetSuperRangeSlices0" );
+    range.setEnd_key( "testGetSuperRangeSlices1" );
+
+
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlices(clp, sp, range);
+
+    assertNotNull(keySlices);
+    assertEquals(2, keySlices.size());
+    assertNotNull("testGetSuperRangSlices0 is null", keySlices.get("testGetSuperRangeSlices0"));
+    assertEquals("testGetSuperRangeSlices_Value_0",
+        string(keySlices.get("testGetSuperRangeSlices0").get(0).getColumns().get(0).getValue()));
+    assertEquals(1, keySlices.get("testGetSuperRangeSlices1").size());
+    assertEquals(10, keySlices.get("testGetSuperRangeSlices1").get(0).getColumns().size());
+
+    ColumnPath cp = new ColumnPath("Super1");
+    keyspace.remove("testGetSuperRangeSlices0", cp);
+    keyspace.remove("testGetSuperRangeSlices1", cp);
   }
 
   @Test

@@ -228,6 +228,31 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
+  public Map<String, List<SuperColumn>> getSuperRangeSlices(final ColumnParent columnParent,
+      final SlicePredicate predicate, final KeyRange keyRange)
+      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+    Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
+        OperationType.READ) {
+      @Override
+      public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
+          UnavailableException, TException, TimedOutException {
+        List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent, predicate,
+            keyRange, consistency);
+        if (keySlices == null || keySlices.isEmpty()) {
+          return Collections.emptyMap();
+        }
+        Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(keySlices.size());
+        for (KeySlice keySlice : keySlices) {
+          ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
+        }
+        return ret;
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+
+  @Override
   public List<Column> getSlice(final String key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
       UnavailableException, TException, TimedOutException {
@@ -539,19 +564,28 @@ import org.slf4j.LoggerFactory;
   private void valideColumnPath(ColumnPath columnPath) throws InvalidRequestException {
     String cf = columnPath.getColumn_family();
     Map<String, String> cfdefine;
+    String errorMsg;
     if ((cfdefine = keyspaceDesc.get(cf)) != null) {
-      if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
+      if (columnPath.getColumn() == null) {
+        // make sure we have a valid name
+        errorMsg = new String("The column name was null for column family " + cf);
+      } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD)) {
         // if the column family is a standard column
         return;
       } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
-          && columnPath.getSuper_column() != null && columnPath.getColumn() != null) {
+          && columnPath.getSuper_column() != null) {
         // if the column family is a super column and also give the super_column
         // name
         return;
+      } else {
+        errorMsg = new String("Invalid Request for column family " + cf + " Make sure you have the right type");
       }
+    } else {
+      errorMsg = new String("The specified column family does not exist: " + cf); 
     }
-    throw new InvalidRequestException("The specified column family does not exist: " + cf);
+    throw new InvalidRequestException(errorMsg);
   }
+  
 
   /**
    * Make sure that the given column path is a SuperColumn in the DB, Throws an
@@ -561,14 +595,15 @@ import org.slf4j.LoggerFactory;
    */
   private void valideSuperColumnPath(ColumnPath columnPath) throws InvalidRequestException {
     String cf = columnPath.getColumn_family();
-    Map<String, String> cfdefine;
+    Map<String, String> cfdefine;  
     if ((cfdefine = keyspaceDesc.get(cf)) != null && cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
         && columnPath.getSuper_column() != null) {
       return;
     }
     throw new InvalidRequestException(
-        "Invalid super column or super column family does not exist: " + cf);
+        "Invalid super column name or super column family does not exist: " + cf);
   }
+  
 
   private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());

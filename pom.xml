@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>jar</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.6.0-13</version>
+  <version>0.6.0-14</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -91,6 +91,74 @@
           </execution>
         </executions>
       </plugin>
+      <!-- install various artifacts -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <version>2.3.1</version>
+        <executions>
+          <execution>
+            <id>install libthrift</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>libthrift</groupId>
+              <artifactId>libthrift</artifactId>
+              <version>917130</version>
+              <file>${basedir}/lib/libthrift-r917130.jar</file>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install cassandra</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>org.apache.cassandra</groupId>
+              <artifactId>cassandra</artifactId>
+              <version>0.6.0</version>
+              <file>${basedir}/lib/apache-cassandra-0.6.0.jar</file>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install high-scale-lib</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>org.cliffc.high_scale_lib</groupId>
+              <artifactId>high-scale-lib</artifactId>
+              <version>1.0.0</version>
+              <file>${basedir}/lib/high-scale-lib.jar</file>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install clhm-production</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>com.reardencommerce</groupId>
+              <artifactId>clhm-production</artifactId>
+              <version>1.0.0</version>
+              <file>${basedir}/lib/clhm-production.jar</file>
+            </configuration>
+          </execution>
+          <execution>
+            <id>install cassandra-javautils</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>org.apache.cassandra</groupId>
+              <artifactId>cassandra-javautils</artifactId>
+              <version>1.0.0</version>
+              <file>${basedir}/lib/cassandra-javautils.jar</file>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
   <dependencies>
@@ -108,29 +176,11 @@
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>917130</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/libthrift-r917130.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra</artifactId>
       <version>0.6.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/apache-cassandra-0.6.0.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>org.cliffc.high_scale_lib</groupId>
-      <artifactId>high-scale-lib</artifactId>
-      <version>1.0.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/high-scale-lib.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>com.reardencommerce</groupId>
-      <artifactId>clhm-production</artifactId>
-      <version>1.0.0</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/clhm-production.jar</systemPath>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -171,6 +221,18 @@
       <scope>test</scope>
     </dependency>
     <dependency>
+      <groupId>org.cliffc.high_scale_lib</groupId>
+      <artifactId>high-scale-lib</artifactId>
+      <version>1.0.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.reardencommerce</groupId>
+      <artifactId>clhm-production</artifactId>
+      <version>1.0.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>2.4</version>
@@ -202,9 +264,7 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-javautils</artifactId>
-      <systemPath>${basedir}/lib/cassandra-javautils.jar</systemPath>
       <version>1.0.0</version>
-      <scope>system</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>

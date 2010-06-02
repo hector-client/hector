@@ -6,6 +6,12 @@ Changes by version:
 0.6.0-* work well with cassandra's 0.6.*
 
 
+0.6.0-14
+========
+Add getRangeSuperSlices http://github.com/rantav/hector/issues/#issue/38
+Add Command.execute that accepts a configurable FailoverPolicy
+Improve maven build file
+
 0.6.0-13
 ========
 Fix duplicate host entries and two connection pools to the same host http://github.com/rantav/hector/issues/closed#issue/37
