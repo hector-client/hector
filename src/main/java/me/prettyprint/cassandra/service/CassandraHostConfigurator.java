@@ -78,6 +78,10 @@ public class CassandraHostConfigurator {
 
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
+  }  
+
+  public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
+    this.useThriftFramedTransport = useThriftFramedTransport;
   }
 
   /**
