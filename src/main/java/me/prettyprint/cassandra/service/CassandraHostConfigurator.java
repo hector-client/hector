@@ -10,6 +10,7 @@ public class CassandraHostConfigurator {
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
   private TimestampResolution timestampResolution;
+  private boolean useThriftFramedTransport;
 
 
   public CassandraHostConfigurator() {
@@ -45,6 +46,9 @@ public class CassandraHostConfigurator {
       }
       if (timestampResolution != null) {
         cassandraHost.setTimestampResolution(timestampResolution);
+      }
+      if (useThriftFramedTransport) {
+        cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
       }
 
       cassandraHosts[x] = cassandraHost;
