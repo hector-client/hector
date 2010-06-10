@@ -5,6 +5,10 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.6.0-15
+========
+Add a few more public settings to pass over to GenericObjectPool: lifo, minEvictableIdleTimeMillis and timeBetweenEvictionRunsMillis (contributed by B. Todd Burruss)
+
 
 0.6.0-14
 ========

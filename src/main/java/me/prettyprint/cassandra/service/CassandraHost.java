@@ -3,8 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,6 @@ import org.slf4j.LoggerFactory;
  */
 public class CassandraHost {
   private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
-
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
 
@@ -38,6 +36,10 @@ public class CassandraHost {
    */
   public static final int DEFAULT_MAX_IDLE = -1;
 
+  public static final boolean DEFAULT_LIFO = GenericObjectPool.DEFAULT_LIFO;
+  public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+  public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+
   public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
       TimestampResolution.MICROSECONDS;
 
@@ -47,6 +49,11 @@ public class CassandraHost {
 
   private int maxActive = DEFAULT_MAX_ACTIVE;
   private int maxIdle = DEFAULT_MAX_IDLE;
+  
+  private boolean lifo = DEFAULT_LIFO;
+  private long minEvictableIdleTimeMillis = DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+  private long timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+  
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
@@ -88,6 +95,7 @@ public class CassandraHost {
 
   /**
    * Checks whether name resolution should occur.
+   * 
    * @return
    */
   public boolean isPerformNameResolution() {
@@ -194,4 +202,29 @@ public class CassandraHost {
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
   }
+
+  public boolean getLifo() {
+    return lifo;
+  }
+
+  public void setLifo(boolean lifo) {
+    this.lifo = lifo;
+  }
+
+  public long getMinEvictableIdleTimeMillis() {
+    return minEvictableIdleTimeMillis;
+  }
+
+  public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+    this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+  }
+
+  public long getTimeBetweenEvictionRunsMillis() {
+    return timeBetweenEvictionRunsMillis;
+  }
+
+  public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
+    this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+  }
+
 }

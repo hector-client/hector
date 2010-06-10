@@ -6,11 +6,14 @@ public class CassandraHostConfigurator {
   private String hosts;
   private int maxActive;
   private int maxIdle;
+  private boolean lifo;
+  private long minEvictableIdleTimeMillis;
+  private long timeBetweenEvictionRunsMillis;
+
   private long maxWaitTimeWhenExhausted;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
   private TimestampResolution timestampResolution;
-  private boolean useThriftFramedTransport;
 
 
   public CassandraHostConfigurator() {
@@ -23,7 +26,7 @@ public class CassandraHostConfigurator {
 
   public CassandraHost[] buildCassandraHosts() {
     if (this.hosts == null) {
-        return null;
+      return null;
     }
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
@@ -34,6 +37,15 @@ public class CassandraHostConfigurator {
       }
       if (maxIdle != CassandraHost.DEFAULT_MAX_IDLE) {
         cassandraHost.setMaxIdle(maxIdle);
+      }
+      if (lifo != CassandraHost.DEFAULT_LIFO) {
+        cassandraHost.setLifo(lifo);
+      }
+      if (minEvictableIdleTimeMillis != CassandraHost.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS) {
+        cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+      }
+      if (timeBetweenEvictionRunsMillis != CassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS) {
+        cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
       }
       if (maxWaitTimeWhenExhausted > 0) {
         cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
@@ -46,9 +58,6 @@ public class CassandraHostConfigurator {
       }
       if (timestampResolution != null) {
         cassandraHost.setTimestampResolution(timestampResolution);
-      }
-      if (useThriftFramedTransport) {
-        cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
       }
 
       cassandraHosts[x] = cassandraHost;
@@ -78,10 +87,6 @@ public class CassandraHostConfigurator {
 
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
-  }  
-
-  public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
-    this.useThriftFramedTransport = useThriftFramedTransport;
   }
 
   /**
@@ -112,4 +117,29 @@ public class CassandraHostConfigurator {
     s.append(">");
     return s.toString();
   }
+
+  public boolean getLifo() {
+    return lifo;
+  }
+
+  public void setLifo(boolean lifo) {
+    this.lifo = lifo;
+  }
+
+  public long getMinEvictableIdleTimeMillis() {
+    return minEvictableIdleTimeMillis;
+  }
+
+  public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+    this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+  }
+
+  public long getTimeBetweenEvictionRunsMillis() {
+    return timeBetweenEvictionRunsMillis;
+  }
+
+  public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
+    this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+  }
+
 }

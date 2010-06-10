@@ -25,6 +25,10 @@ import com.google.common.collect.ImmutableSet;
   private final int port;
   private final int maxActive;
   private final int maxIdle;
+  private final boolean lifo;
+  private final long minEvictableIdleTimeMillis;
+  private final long timeBetweenEvictionRunsMillis;
+
   private final ExhaustedPolicy exhaustedPolicy;
   private final long maxWaitTimeWhenExhausted;
   private final GenericObjectPool pool;
@@ -59,6 +63,9 @@ import com.google.common.collect.ImmutableSet;
     this.name = cassandraHost.getName();
     this.maxActive = cassandraHost.getMaxActive();
     this.maxIdle = cassandraHost.getMaxIdle();
+    this.lifo = cassandraHost.getLifo();
+    this.minEvictableIdleTimeMillis = cassandraHost.getMinEvictableIdleTimeMillis();
+    this.timeBetweenEvictionRunsMillis = cassandraHost.getTimeBetweenEvictionRunsMillis();
     this.maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted();
     this.exhaustedPolicy = cassandraHost.getExhaustedPolicy();
     this.clientFactory = cassandraClientFactory;
@@ -98,6 +105,12 @@ import com.google.common.collect.ImmutableSet;
     s.append(pool.getMaxActive());
     s.append("&maxIdle=");
     s.append(pool.getMaxIdle());
+    s.append("&lifo=");
+    s.append(pool.getLifo());
+    s.append("&minEvictableIdleTimeMillis=");
+    s.append(pool.getMinEvictableIdleTimeMillis());
+    s.append("&timeBetweenEvictionRunsMillis=");
+    s.append(pool.getTimeBetweenEvictionRunsMillis());
     s.append("&blockedThreadCount=");
     s.append(blockedThreadsCount);
     s.append("&liveClientsFromPool.size=");
@@ -154,6 +167,11 @@ import com.google.common.collect.ImmutableSet;
     // maxIdle controls the maximum number of objects that can sit idle in the pool at any time.
     // When negative, there is no limit to the number of objects that may be idle at one time.
     p.setMaxIdle(maxIdle);
+
+    p.setLifo(lifo);
+    p.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+    p.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+
     return p;
   }
 
@@ -260,6 +278,14 @@ import com.google.common.collect.ImmutableSet;
     while (!liveClientsFromPool.isEmpty()) {
       invalidateClient(liveClientsFromPool.iterator().next());
     }
+  }
+
+  public Long getMinEvictableIdleTimeMillis() {
+    return minEvictableIdleTimeMillis;
+  }
+
+  public Long getTimeBetweenEvictionRunsMillis() {
+    return timeBetweenEvictionRunsMillis;
   }
 
 }
