@@ -20,9 +20,9 @@ public enum CassandraClusterFactory {
   private CassandraClusterFactory() {
   }
 
-  public CassandraCluster create(CassandraClientPool cassandraClientPool)
+  public CassandraCluster create(CassandraClientPool cassandraClientPool, String preferredClientUrl)
       throws PoolExhaustedException, Exception {
-    return new CassandraClusterImpl(cassandraClientPool);
+    return new CassandraClusterImpl(cassandraClientPool, preferredClientUrl);
   }
 
 }

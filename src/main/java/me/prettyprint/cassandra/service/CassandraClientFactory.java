@@ -68,9 +68,19 @@ import java.net.UnknownHostException;
   }
 
   public CassandraClient create() throws TTransportException, TException, UnknownHostException {
-    CassandraClient c = new CassandraClientImpl(createThriftClient(url, port),
-        new KeyspaceFactory(clientMonitor), url, port, pool, timestampResolution);
-    log.debug("Creating client {} (thread={})", c, Thread.currentThread().getName());
+    CassandraClient c;
+    try {
+      c = new CassandraClientImpl(createThriftClient(url, port),
+          new KeyspaceFactory(clientMonitor), url, port, pool, 
+          CassandraClusterFactory.INSTANCE.create(pool, url + ":" + port), timestampResolution);
+    } catch (PoolExhaustedException e) {
+      // TODO(ran): replace this runtime exception with HectorException etc.
+      throw new RuntimeException(e);
+    } catch (Exception e) {
+      // TODO(ran): replace this runtime exception with HectorException etc.
+      throw new RuntimeException(e);
+    }
+    log.debug("Creating client {}", c);
     return c;
   }
 

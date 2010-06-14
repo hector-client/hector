@@ -5,10 +5,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
@@ -35,10 +35,11 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
 
   @Before
-  public void setupCase() throws TTransportException, TException, UnknownHostException {
+  public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     pools = mock(CassandraClientPool.class);
     monitor = mock(CassandraClientMonitor.class);
     client = new CassandraClientFactory(pools, new CassandraHost("localhost", 9170), monitor).create();
+    when(pools.borrowClient("localhost:9170")).thenReturn(client);
   }
 
   @Test
@@ -81,12 +82,6 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetStringProperty() throws TException {
-    String prop = client.getStringProperty("cluster name");
-    assertEquals("Test Cluster", prop);
-  }
-
-  @Test
   public void testGetKeyspaces() throws TException {
     List<String> spaces = client.getKeyspaces();
     assertNotNull(spaces);
@@ -102,19 +97,10 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetTokenMap() throws TException {
-    Map<String, String> map = client.getTokenMap(false);
-    assertNotNull(map);
-    for (Map.Entry<String, String> entry : map.entrySet()) {
-      assertEquals("127.0.0.1", entry.getValue());
-    }
-  }
-
-  @Test
-  public void testGetConfigFile() throws TException {
-    String config = client.getConfigFile();
-    assertNotNull(config);
-    assertTrue(config.length() > 0);
+  public void testGetTokenMap() throws IllegalStateException, PoolExhaustedException, Exception {
+    List<String> hosts = client.getKnownHosts(false);
+    assertNotNull(hosts);
+    assertEquals("127.0.0.1", hosts.get(0));
   }
   
   @Test 

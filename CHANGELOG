@@ -8,7 +8,8 @@ Changes by version:
 0.6.0-15
 ========
 Add a few more public settings to pass over to GenericObjectPool: lifo, minEvictableIdleTimeMillis and timeBetweenEvictionRunsMillis (contributed by B. Todd Burruss)
-
+Remove some unused meta calls from CassandraClient, such as getConfigFile and getStringProperty
+Make the calls of other meta API go through CassandraCluster and by that use an improved version of them in thrift and failover (http://github.com/rantav/hector/issues#issue/11 and http://github.com/rantav/hector/issues#issue/7 and http://github.com/rantav/hector/issues#issue/29)
 
 0.6.0-14
 ========

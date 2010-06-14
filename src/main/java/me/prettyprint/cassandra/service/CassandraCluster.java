@@ -39,15 +39,29 @@ public interface CassandraCluster {
   List<TokenRange> describeRing(String keyspace) throws CassandraClusterException; 
   
   /**
-   * Return a Set of hostnames for this cluster
-   */
-  Set<String> getHostNames() throws CassandraClusterException;
-  
-  /**
    * Describe the given keyspace. The key for the outer map is the ColumnFamily name.
    * The inner map contains configuration properties mapped to their values. 
    */
   Map<String, Map<String, String>> describeKeyspace(String keyspace) 
     throws CassandraClusterException;
+
+  /**
+   * Queries the cluster for its name and returns it.
+   * @return
+   */
+  String getClusterName();
+
+  /**
+   * Gets the list of known hosts.
+   * This method is not failover-safe. If will fail fast if the contacted host is down. 
+   * 
+   * @param fresh whether the get  fresh list of hosts or reuse the possibly previous value cached.
+   * @return
+   * @throws IllegalStateException
+   * @throws PoolExhaustedException
+   * @throws Exception
+   */
+  List<String> getKnownHosts(boolean fresh) throws IllegalStateException, PoolExhaustedException,
+      Exception;
 
 }

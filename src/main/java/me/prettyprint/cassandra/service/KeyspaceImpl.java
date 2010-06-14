@@ -674,19 +674,26 @@ import org.slf4j.LoggerFactory;
     // Now query for more hosts. If the query fails, then even this client is
     // now "known"
     try {
-      Map<String, String> map = getClient().getTokenMap(true);
-      Set<String> hosts = new HashSet<String>();
-      knownHosts.clear();
-      for (Map.Entry<String, String> entry : map.entrySet()) {
-        hosts.add(entry.getValue());
+      List<String> hosts;
+      hosts = getClient().getKnownHosts(true);
+      if (hosts != null && hosts.size() > 0) {
+        if (!hosts.contains(getClient().getUrl()) && !hosts.contains(getClient().getIp())) {
+          hosts.add(getClient().getIp());
+        }
+        knownHosts = new ArrayList<String>(hosts);
       }
-      if (!hosts.contains(getClient().getUrl()) && !hosts.contains(getClient().getIp())) {
-        hosts.add(getClient().getIp());
-      }
-      knownHosts = new ArrayList<String>(hosts);
     } catch (TException e) {
       knownHosts.clear();
-      log.error("Cannot query tokenMap; Keyspace {} is now disconnected", toString());
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
+    } catch (IllegalStateException e) {
+      knownHosts.clear();
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
+    } catch (PoolExhaustedException e) {
+      knownHosts.clear();
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
+    } catch (Exception e) {
+      knownHosts.clear();
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
     }
   }
 

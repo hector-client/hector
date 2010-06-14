@@ -27,45 +27,47 @@ import org.slf4j.LoggerFactory;
 
   private static Logger log = LoggerFactory.getLogger(CassandraClusterImpl.class);
 
-  private CassandraClientPool cassandraClientPool;
-  private FailoverPolicy failoverPolicy;
+  private static final String KEYSPACE_SYSTEM = "system";
+
+  private final CassandraClientPool cassandraClientPool;
+  private final FailoverPolicy failoverPolicy;
   private List<String> knownHosts;
-  private CassandraClientMonitor cassandraClientMonitor;
-  private CassandraClient cassandraClient;
+  private final CassandraClientMonitor cassandraClientMonitor;
+  private final String preferredClientUrl;
 
-  public CassandraClusterImpl(CassandraClientPool cassandraClientPool) throws PoolExhaustedException, Exception {
-    this(cassandraClientPool, null);
-  }
-
-  public CassandraClusterImpl(CassandraClientPool cassandraClientPool,
-      CassandraClient cassandraClient) throws PoolExhaustedException, Exception {
-    this.cassandraClient = cassandraClient;
+  /**
+   * @param cassandraClientPool The pool from which to borrow clients for the meta operations.
+   * @param preferredClientUrl a url:port format. If provided, a client by this name will be borrowed
+   *    from the pool. If not, a default client, if exists in the pool, will be borrowed. 
+   */
+  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, String preferredClientUrl) 
+      throws PoolExhaustedException, Exception {
     this.cassandraClientPool = cassandraClientPool;
     this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
-    if (cassandraClient == null ) {
-      cassandraClient = cassandraClientPool.borrowClient();
-      try {
-        knownHosts = new ArrayList<String>(buildHostNames(cassandraClient.getCassandra()));
-      } finally {
-        cassandraClientPool.releaseClient(cassandraClient);
-      }
-    } else {
-      knownHosts = new ArrayList<String>(buildHostNames(cassandraClient.getCassandra()));
-    }
+    this.preferredClientUrl = preferredClientUrl;
   }
 
-  private void operateWithFailover(Operation<?> op) throws CassandraClusterException {
-    CassandraClient localCassandraClient = null;
-    try {
-      if (cassandraClient == null) {
-        localCassandraClient = cassandraClientPool.borrowClient();
-      } else {
-        localCassandraClient = cassandraClient;
+  @Override
+  public List<String> getKnownHosts(boolean fresh) throws IllegalStateException, PoolExhaustedException, Exception {
+    if (fresh || knownHosts == null) {
+      CassandraClient client = borrow();
+      try {
+        knownHosts = new ArrayList<String>(buildHostNames(client.getCassandra()));
+      } finally {
+        cassandraClientPool.releaseClient(client);
       }
-      FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts,
-          cassandraClientMonitor, localCassandraClient, cassandraClientPool, null);
-      localCassandraClient = operator.operate(op);
+    }
+    return knownHosts;
+  }
+  
+  private void operateWithFailover(Operation<?> op) throws CassandraClusterException {
+    CassandraClient client = null;
+    try {
+      client = borrow();
+      FailoverOperator operator = new FailoverOperator(failoverPolicy, getKnownHosts(false),
+          cassandraClientMonitor, client, cassandraClientPool, null);
+      client = operator.operate(op);
     } catch (InvalidRequestException ire) {
       throw new CassandraClusterException("Invalid request",ire);
     } catch (UnavailableException e) {
@@ -80,15 +82,28 @@ import org.slf4j.LoggerFactory;
       throw new CassandraClusterException("General Exception", e);
     } finally {
       try {
-        if (cassandraClient == null) {
-          cassandraClientPool.releaseClient(localCassandraClient);
-        }
+        release(client);
       } catch (Exception e) {
-        log.error("Could not release connection",e);
+        log.error("Unable to release a client", e);
       }
     }
-}
+  }
 
+  private CassandraClient borrow() throws IllegalStateException, PoolExhaustedException, Exception {
+    if (preferredClientUrl == null) {
+      return cassandraClientPool.borrowClient();
+    } else {
+      return cassandraClientPool.borrowClient(preferredClientUrl);
+     
+    }
+  }
+  
+  private void release(CassandraClient c) throws Exception {
+    if (c != null) {
+      cassandraClientPool.releaseClient(c);
+    }
+  }
+  
   @Override
   public Set<String> describeKeyspaces() throws CassandraClusterException {
     Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {
@@ -141,19 +156,6 @@ import org.slf4j.LoggerFactory;
     return op.getResult();
   }
 
-  @Override
-  public Set<String> getHostNames() throws CassandraClusterException {
-    Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {
-      @Override
-      public Set<String> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return buildHostNames(cassandra);
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
-  }
-
   private Set<String> buildHostNames(Cassandra.Client cassandra) throws TException {
     Set<String> hostnames = new HashSet<String>();
     for (String keyspace : cassandra.describe_keyspaces()) {
@@ -188,5 +190,16 @@ import org.slf4j.LoggerFactory;
     return op.getResult();
   }
 
-  private static final String KEYSPACE_SYSTEM = "system";
+  @Override
+  public String getClusterName() {
+    Operation<String> op = new Operation<String>(OperationType.META_READ) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws InvalidRequestException,
+          UnavailableException, TException, TimedOutException {
+        return cassandra.describe_cluster_name();
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
 }

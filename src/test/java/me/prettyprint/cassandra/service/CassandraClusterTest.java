@@ -28,7 +28,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraClientPool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
     
-    cassandraCluster = CassandraClusterFactory.getInstance().create(cassandraClientPool);    
+    cassandraCluster = CassandraClusterFactory.getInstance().create(cassandraClientPool, null);    
   }
   
   @Test
@@ -59,7 +59,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   
   @Test
   public void testGetHostNames() throws Exception {
-    Set<String> hosts = cassandraCluster.getHostNames();
+    List<String> hosts = cassandraCluster.getKnownHosts(false);
     assertEquals(1, hosts.size());
   }
   
