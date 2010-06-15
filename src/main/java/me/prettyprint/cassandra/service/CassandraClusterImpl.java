@@ -6,24 +6,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.TokenRange;
-import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of the {@link CassandraCluster} interface.
- *
+ * 
  * @author Nate McCall (nate@vervewireless.com)
  */
-/*package*/ class CassandraClusterImpl implements CassandraCluster {
+/* package */class CassandraClusterImpl implements CassandraCluster {
 
   private static Logger log = LoggerFactory.getLogger(CassandraClusterImpl.class);
 
@@ -34,22 +30,27 @@ import org.slf4j.LoggerFactory;
   private List<String> knownHosts;
   private final CassandraClientMonitor cassandraClientMonitor;
   private final String preferredClientUrl;
+  private final ExceptionsTranslator xtrans;
 
   /**
-   * @param cassandraClientPool The pool from which to borrow clients for the meta operations.
-   * @param preferredClientUrl a url:port format. If provided, a client by this name will be borrowed
-   *    from the pool. If not, a default client, if exists in the pool, will be borrowed. 
+   * @param cassandraClientPool
+   *          The pool from which to borrow clients for the meta operations.
+   * @param preferredClientUrl
+   *          a url:port format. If provided, a client by this name will be
+   *          borrowed from the pool. If not, a default client, if exists in the
+   *          pool, will be borrowed.
    */
-  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, String preferredClientUrl) 
-      throws PoolExhaustedException, Exception {
+  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, String preferredClientUrl)
+      throws HectorException {
     this.cassandraClientPool = cassandraClientPool;
     this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
     this.preferredClientUrl = preferredClientUrl;
+    xtrans = new ExceptionsTranslatorImpl();
   }
 
   @Override
-  public List<String> getKnownHosts(boolean fresh) throws IllegalStateException, PoolExhaustedException, Exception {
+  public List<String> getKnownHosts(boolean fresh) throws HectorException {
     if (fresh || knownHosts == null) {
       CassandraClient client = borrow();
       try {
@@ -60,26 +61,14 @@ import org.slf4j.LoggerFactory;
     }
     return knownHosts;
   }
-  
-  private void operateWithFailover(Operation<?> op) throws CassandraClusterException {
+
+  private void operateWithFailover(Operation<?> op) throws HectorException {
     CassandraClient client = null;
     try {
       client = borrow();
       FailoverOperator operator = new FailoverOperator(failoverPolicy, getKnownHosts(false),
           cassandraClientMonitor, client, cassandraClientPool, null);
       client = operator.operate(op);
-    } catch (InvalidRequestException ire) {
-      throw new CassandraClusterException("Invalid request",ire);
-    } catch (UnavailableException e) {
-      throw new CassandraClusterException("Endpoint unavailable",e);
-    } catch (TException e) {
-      throw new CassandraClusterException("Thrift Exception",e);
-    } catch (TimedOutException e) {
-      throw new CassandraClusterException("Connection timed out", e);
-    } catch (PoolExhaustedException e) {
-      throw new CassandraClusterException("Pool Was Exhausted", e);
-    } catch (Exception e) {
-      throw new CassandraClusterException("General Exception", e);
     } finally {
       try {
         release(client);
@@ -89,28 +78,31 @@ import org.slf4j.LoggerFactory;
     }
   }
 
-  private CassandraClient borrow() throws IllegalStateException, PoolExhaustedException, Exception {
+  private CassandraClient borrow() throws HectorException {
     if (preferredClientUrl == null) {
       return cassandraClientPool.borrowClient();
     } else {
       return cassandraClientPool.borrowClient(preferredClientUrl);
-     
+
     }
   }
-  
+
   private void release(CassandraClient c) throws Exception {
     if (c != null) {
       cassandraClientPool.releaseClient(c);
     }
   }
-  
+
   @Override
-  public Set<String> describeKeyspaces() throws CassandraClusterException {
+  public Set<String> describeKeyspaces() throws HectorException {
     Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {
       @Override
-      public Set<String> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return cassandra.describe_keyspaces();
+      public Set<String> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.describe_keyspaces();
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
@@ -118,12 +110,15 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public String describeClusterName() throws CassandraClusterException {
+  public String describeClusterName() throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
-      public String execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return cassandra.describe_cluster_name();
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.describe_cluster_name();
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
@@ -131,12 +126,15 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public String describeThriftVersion() throws CassandraClusterException {
+  public String describeThriftVersion() throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
-      public String execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return cassandra.describe_version();
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.describe_version();
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
@@ -144,45 +142,56 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<TokenRange> describeRing(final String keyspace) throws CassandraClusterException {
+  public List<TokenRange> describeRing(final String keyspace) throws HectorException {
     Operation<List<TokenRange>> op = new Operation<List<TokenRange>>(OperationType.META_READ) {
       @Override
-      public List<TokenRange> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return cassandra.describe_ring(keyspace);
+      public List<TokenRange> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.describe_ring(keyspace);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
     return op.getResult();
   }
 
-  private Set<String> buildHostNames(Cassandra.Client cassandra) throws TException {
-    Set<String> hostnames = new HashSet<String>();
-    for (String keyspace : cassandra.describe_keyspaces()) {
-      if (!keyspace.equals(KEYSPACE_SYSTEM)) {
-        List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
-        for (TokenRange tokenRange : tokenRanges) {
-          for (String host : tokenRange.getEndpoints()){
-            hostnames.add(host);
+  private Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
+    try {
+      Set<String> hostnames = new HashSet<String>();
+      for (String keyspace : cassandra.describe_keyspaces()) {
+        if (!keyspace.equals(KEYSPACE_SYSTEM)) {
+          List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
+          for (TokenRange tokenRange : tokenRanges) {
+            for (String host : tokenRange.getEndpoints()) {
+              hostnames.add(host);
+            }
           }
+          break;
         }
-        break;
       }
+      return hostnames;
+    } catch (Exception e) {
+      throw xtrans.translate(e);
     }
-    return hostnames;
   }
 
   @Override
-  public Map<String, Map<String, String>> describeKeyspace(final String keyspace) throws CassandraClusterException {
-    Operation<Map<String, Map<String, String>>> op = new Operation<Map<String, Map<String, String>>>(OperationType.META_READ) {
+  public Map<String, Map<String, String>> describeKeyspace(final String keyspace)
+      throws HectorException {
+    Operation<Map<String, Map<String, String>>> op = new Operation<Map<String, Map<String, String>>>(
+        OperationType.META_READ) {
       @Override
-      public Map<String, Map<String, String>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
+      public Map<String, Map<String, String>> execute(Cassandra.Client cassandra)
+          throws HectorException {
         try {
           return cassandra.describe_keyspace(keyspace);
-        } catch (NotFoundException nfe) {
-          setException(nfe);
+        } catch (org.apache.cassandra.thrift.NotFoundException nfe) {
+          setException(xtrans.translate(nfe));
           return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
       }
     };
@@ -191,12 +200,16 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public String getClusterName() {
+  public String getClusterName() throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
-      public String execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return cassandra.describe_cluster_name();
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.describe_cluster_name();
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+
       }
     };
     operateWithFailover(op);

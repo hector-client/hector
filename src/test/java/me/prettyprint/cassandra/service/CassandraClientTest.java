@@ -7,16 +7,14 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.net.UnknownHostException;
 import java.util.List;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.thrift.TException;
 import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -43,8 +41,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetKeySpaceString() throws IllegalArgumentException, NotFoundException,
-      TException {
+  public void testGetKeySpaceString() throws HectorException {
     Keyspace k = client.getKeyspace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
@@ -59,8 +56,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetKeySpaceConsistencyLevel() throws IllegalArgumentException, NotFoundException,
-      TException {
+  public void testGetKeySpaceConsistencyLevel() throws HectorException {
     Keyspace k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
@@ -73,8 +69,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetKeySpaceFailoverPolicy() throws IllegalArgumentException, NotFoundException,
-      TException {
+  public void testGetKeySpaceFailoverPolicy() throws HectorException {
     Keyspace k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
         FailoverPolicy.FAIL_FAST);
     assertNotNull(k);
@@ -82,7 +77,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetKeyspaces() throws TException {
+  public void testGetKeyspaces() throws HectorException {
     List<String> spaces = client.getKeyspaces();
     assertNotNull(spaces);
     // There should be two spaces: Keyspace1 and system
@@ -91,20 +86,20 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetClusterName() throws TException {
+  public void testGetClusterName() throws HectorException {
     String name = client.getClusterName();
     assertEquals("Test Cluster", name);
   }
 
   @Test
-  public void testGetTokenMap() throws IllegalStateException, PoolExhaustedException, Exception {
+  public void testGetTokenMap() throws HectorException {
     List<String> hosts = client.getKnownHosts(false);
     assertNotNull(hosts);
     assertEquals("127.0.0.1", hosts.get(0));
   }
   
   @Test 
-  public void testFramedTransport() throws TException, TTransportException, UnknownHostException {
+  public void testFramedTransport() throws HectorException {
     CassandraHost cassandraHost = new CassandraHost("localhost", 9170);
     cassandraHost.setUseThriftFramedTransport(true);
     client = new CassandraClientFactory(pools, cassandraHost, monitor).create();

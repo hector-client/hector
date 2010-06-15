@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
+import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
@@ -34,7 +35,7 @@ public class ExampleDaoTest {
   }
 
   @Test
-  public void testInsertGetDelete() throws Exception {
+  public void testInsertGetDelete() throws HectorException {
     ExampleDao dao = new ExampleDao();
     assertNull(dao.get("key"));
     dao.insert("key", "value");

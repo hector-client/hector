@@ -2,8 +2,11 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+
 import org.apache.commons.pool.PoolableObjectFactory;
-import org.apache.thrift.TException;
 
 /**
  * A cassandra client pool per one cassandra host.
@@ -58,24 +61,23 @@ import org.apache.thrift.TException;
    * @return an instance from this pool.
    * @throws IllegalStateException
    *           after {@link #close close} has been called on this pool.
-   * @throws Exception
+   * @throws HectorException
    *           when {@link PoolableObjectFactory#makeObject makeObject} throws
    *           an exception.
    * @throws PoolExhaustedException
    *           when the pool is exhausted and cannot or will not return another
    *           instance.
    */
-  CassandraClient borrowClient() throws Exception, PoolExhaustedException,
-      IllegalStateException;
+  CassandraClient borrowClient() throws HectorException;
 
   /**
    * Returns a client to pool.
    * The client must was an instance previously borrowed from this pool by borrowClient().
    *
    * @param client
-   * @throws Exception if the client was not borrowed from this pool.
+   * @throws HectorException if the client was not borrowed from this pool.
    */
-  void releaseClient(CassandraClient client) throws Exception;
+  void releaseClient(CassandraClient client) throws HectorException;
 
   /**
    * Returns the number of currently available client number.
@@ -119,7 +121,7 @@ import org.apache.thrift.TException;
 
   int getNumBlockedThreads();
 
-  void updateKnownHosts() throws TException;
+  void updateKnownHosts() throws HectorTransportException;
 
   Set<String> getKnownHosts();
 

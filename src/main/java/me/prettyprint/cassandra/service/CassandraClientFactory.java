@@ -1,10 +1,12 @@
 package me.prettyprint.cassandra.service;
 
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.pool.PoolableObjectFactory;
-import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -13,8 +15,6 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.UnknownHostException;
 
 /**
  * Factory for {@link CassandraClient} objects.
@@ -67,25 +67,21 @@ import java.net.UnknownHostException;
     timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   }
 
-  public CassandraClient create() throws TTransportException, TException, UnknownHostException {
+  public CassandraClient create() throws HectorException {
     CassandraClient c;
     try {
       c = new CassandraClientImpl(createThriftClient(url, port),
           new KeyspaceFactory(clientMonitor), url, port, pool, 
           CassandraClusterFactory.INSTANCE.create(pool, url + ":" + port), timestampResolution);
-    } catch (PoolExhaustedException e) {
-      // TODO(ran): replace this runtime exception with HectorException etc.
-      throw new RuntimeException(e);
     } catch (Exception e) {
-      // TODO(ran): replace this runtime exception with HectorException etc.
-      throw new RuntimeException(e);
+      throw new HectorException(e);
     }
     log.debug("Creating client {}", c);
     return c;
   }
 
   private Cassandra.Client createThriftClient(String  url, int port)
-      throws TTransportException , TException {
+      throws HectorTransportException {
     log.debug("Creating a new thrift connection to {}:{}", url, port);
     TTransport tr;
     if (useThriftFramedTransport) {
@@ -102,7 +98,7 @@ import java.net.UnknownHostException;
       // add details to it.
       log.error("Unable to open transport to " + url + ":" + port, e);
       clientMonitor.incCounter(Counter.CONNECT_ERROR);
-      throw new TTransportException("Unable to open transport to " + url + ":" + port + " , " +
+      throw new HectorTransportException("Unable to open transport to " + url + ":" + port + " , " +
           e.getLocalizedMessage(), e);
     }
     return client;

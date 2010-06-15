@@ -2,8 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
-import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
+import me.prettyprint.cassandra.model.HectorTransportException;
 
 /**
  * Defines the various JMX methods the CassandraClientMonitor exposes.
@@ -114,5 +113,5 @@ public interface CassandraClientMonitorMBean {
    * This is useful when an admin adds/removes a host from the ring and wants the application to
    * update asap.
    */
-  public void updateKnownHosts() throws TException;
+  public void updateKnownHosts() throws HectorTransportException;
 }

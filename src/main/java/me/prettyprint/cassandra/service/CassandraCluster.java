@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+
 import org.apache.cassandra.thrift.TokenRange;
 
 /**
@@ -18,38 +22,37 @@ public interface CassandraCluster {
    * Returns a Set of Strings listing the available keyspaces. This includes 
    * the system keyspace. 
    */
-  Set<String> describeKeyspaces() throws CassandraClusterException;
+  Set<String> describeKeyspaces() throws HectorException;
   
   /**
    * Returns the name of the cluster as defined by the ClusterName configuration
    * element in the configuration file   
    */
-  String describeClusterName() throws CassandraClusterException;
+  String describeClusterName() throws HectorException;
   
   /**
    * Returns the Thrift API version. Note: this is not the version of Cassandra, but 
    * the underlying Thrift API
    */
-  String describeThriftVersion() throws CassandraClusterException;
+  String describeThriftVersion() throws HectorException;
   
   /**
    * Describe the structure of the ring for a given Keyspace
    * 
    */
-  List<TokenRange> describeRing(String keyspace) throws CassandraClusterException; 
+  List<TokenRange> describeRing(String keyspace) throws HectorException; 
   
   /**
    * Describe the given keyspace. The key for the outer map is the ColumnFamily name.
    * The inner map contains configuration properties mapped to their values. 
    */
-  Map<String, Map<String, String>> describeKeyspace(String keyspace) 
-    throws CassandraClusterException;
+  Map<String, Map<String, String>> describeKeyspace(String keyspace) throws HectorException;
 
   /**
    * Queries the cluster for its name and returns it.
    * @return
    */
-  String getClusterName();
+  String getClusterName() throws HectorException;
 
   /**
    * Gets the list of known hosts.
@@ -59,9 +62,7 @@ public interface CassandraCluster {
    * @return
    * @throws IllegalStateException
    * @throws PoolExhaustedException
-   * @throws Exception
    */
-  List<String> getKnownHosts(boolean fresh) throws IllegalStateException, PoolExhaustedException,
-      Exception;
+  List<String> getKnownHosts(boolean fresh) throws HectorException;
 
 }

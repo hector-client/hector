@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.dao;
 
+import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
@@ -32,9 +33,8 @@ public abstract class Command<OUTPUT> {
    *
    * @param ks
    * @return
-   * @throws Exception
    */
-  public abstract OUTPUT execute(final Keyspace ks) throws Exception;
+  public abstract OUTPUT execute(final Keyspace ks) throws HectorException;
 
   /**
    * Call this method to run the code within the {@link #execute(Keyspace)} method.
@@ -43,9 +43,8 @@ public abstract class Command<OUTPUT> {
    * @param port
    * @param keyspace
    * @return
-   * @throws Exception
    */
-  public final OUTPUT execute(String host, int port, String keyspace) throws Exception {
+  public final OUTPUT execute(String host, int port, String keyspace) throws HectorException {
     return execute(getPool().borrowClient(host, port), keyspace,
         CassandraClient.DEFAULT_CONSISTENCY_LEVEL);
   }
@@ -54,7 +53,7 @@ public abstract class Command<OUTPUT> {
    * Same as {@link #execute(String, int, String)}
    * @param hostPort host:port
    */
-  public final OUTPUT execute(String hostPort, String keyspace) throws Exception {
+  public final OUTPUT execute(String hostPort, String keyspace) throws HectorException {
     return execute(getPool().borrowClient(hostPort), keyspace,
         CassandraClient.DEFAULT_CONSISTENCY_LEVEL);
   }
@@ -65,7 +64,7 @@ public abstract class Command<OUTPUT> {
    * @param hosts host:port array
    * @param keyspace
    */
-  public final OUTPUT execute(String[] hosts, String keyspace) throws Exception {
+  public final OUTPUT execute(String[] hosts, String keyspace) throws HectorException {
     return execute(getPool().borrowClient(hosts), keyspace,
         CassandraClient.DEFAULT_CONSISTENCY_LEVEL);
   }
@@ -73,12 +72,12 @@ public abstract class Command<OUTPUT> {
   /**
    * Same as {@link #execute(String[], String)} but with the given consistency level
    */
-  public final OUTPUT execute(String[] hosts, String keyspace, ConsistencyLevel consistency) throws Exception {
+  public final OUTPUT execute(String[] hosts, String keyspace, ConsistencyLevel consistency) throws HectorException {
     return execute(getPool().borrowClient(hosts), keyspace, consistency);
   }
 
   public final OUTPUT execute(CassandraClientPool pool, String[] hosts, String keyspace,
-      ConsistencyLevel consistency) throws Exception {
+      ConsistencyLevel consistency) throws HectorException {
     CassandraClient c = pool.borrowClient(hosts);
     Keyspace ks = c.getKeyspace(keyspace, consistency);
     try {
@@ -92,12 +91,12 @@ public abstract class Command<OUTPUT> {
    * Use this execute method if you need a special {@link FailoverPolicy}
    */
   public OUTPUT execute(String[] hosts, String keyspace, ConsistencyLevel consistency,
-      FailoverPolicy failoverPolicy) throws Exception {
+      FailoverPolicy failoverPolicy) throws HectorException {
     return execute(getPool().borrowClient(hosts), keyspace, consistency, failoverPolicy);
   }
 
   protected OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency,
-      FailoverPolicy failoverPolicy) throws Exception {
+      FailoverPolicy failoverPolicy) throws HectorException {
     Keyspace ks = c.getKeyspace(keyspace, consistency, failoverPolicy);
     try {
       return execute(ks);
@@ -111,7 +110,7 @@ public abstract class Command<OUTPUT> {
    * Executes on a client obtained from the default pool
    */
   protected final OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency)
-      throws Exception {
+      throws HectorException {
     Keyspace ks = c.getKeyspace(keyspace, consistency);
     try {
       return execute(ks);

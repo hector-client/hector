@@ -7,6 +7,7 @@ import java.io.IOException;
 
 import javax.annotation.Resource;
 
+import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
@@ -47,7 +48,7 @@ public class ExampleSpringDaoTest {
   }
 
   @Test
-  public void testInsertGetDelete() throws Exception {
+  public void testInsertGetDelete() throws HectorException {
     assertNull(exampleSpringDao.get("key"));
     exampleSpringDao.insert("key", "value");
     assertEquals("value", exampleSpringDao.get("key"));

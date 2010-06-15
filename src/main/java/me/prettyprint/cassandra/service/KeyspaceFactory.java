@@ -1,8 +1,8 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.thrift.TException;
 
 import java.util.Map;
 
@@ -22,7 +22,7 @@ import java.util.Map;
   public Keyspace create(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
-      throws TException {
+      throws HectorTransportException {
     return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, clientMonitor);
   }

@@ -3,10 +3,12 @@ package me.prettyprint.cassandra.service;
 import java.util.List;
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.thrift.TException;
 
 
 /**
@@ -73,48 +75,45 @@ public interface CassandraClient {
    * <p>
    * Uses the default failover policy {@link #DEFAULT_FAILOVER_POLICY}
    */
-  Keyspace getKeyspace(String keyspaceName)
-      throws IllegalArgumentException, NotFoundException, TException;
+  Keyspace getKeyspace(String keyspaceName) throws HectorException;
 
   /**
    * Gets s keyspace with the specified consistency level
    */
-  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel)
-      throws IllegalArgumentException, NotFoundException, TException;
+  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel) throws HectorException;
 
   /**
    * Gets s keyspace with the specified consistency level and failover policy
    */
-  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
-      throws IllegalArgumentException, NotFoundException, TException;
+  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, 
+      FailoverPolicy failoverPolicy)
+      throws HectorException;
 
 
   /**
    * @return all keyspaces name of this client.
    */
-  List<String> getKeyspaces() throws TException;
+  List<String> getKeyspaces() throws HectorTransportException;
 
 
   /**
    * @return target server cluster name
+   * @throws HectorTransportException 
    */
-  String getClusterName() throws TException;
+  String getClusterName() throws HectorException;
 
   /**
    * Gets the list of known hosts.
    *
    * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
    *  a possibly cached value.
-   * @throws Exception 
-   * @throws PoolExhaustedException 
-   * @throws IllegalStateException 
    */
-  List<String> getKnownHosts(boolean fresh) throws TException, IllegalStateException, PoolExhaustedException, Exception;
+  List<String> getKnownHosts(boolean fresh) throws HectorException;
 
   /**
    * @return Server version
    */
-  String getServerVersion() throws TException;
+  String getServerVersion() throws HectorException;
 
   public int getPort();
 
@@ -123,7 +122,7 @@ public interface CassandraClient {
   /**
    * Tells all instanciated keyspaces to update their known hosts
    */
-  void updateKnownHosts() throws TException;
+  void updateKnownHosts() throws HectorTransportException;
 
   void markAsClosed();
 

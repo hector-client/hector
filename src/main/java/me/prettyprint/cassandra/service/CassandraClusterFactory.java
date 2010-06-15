@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+
 
 /**
  * Controls access to CassandraCluster, as we need a live CassandraClient
@@ -21,7 +24,7 @@ public enum CassandraClusterFactory {
   }
 
   public CassandraCluster create(CassandraClientPool cassandraClientPool, String preferredClientUrl)
-      throws PoolExhaustedException, Exception {
+      throws HectorException {
     return new CassandraClusterImpl(cassandraClientPool, preferredClientUrl);
   }
 

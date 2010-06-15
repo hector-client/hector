@@ -7,6 +7,8 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+
 import org.junit.Before;
 import org.junit.Test;
 

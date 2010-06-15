@@ -3,7 +3,7 @@ package me.prettyprint.cassandra.model;
 /**
  * Hector Column definition.
  *
- * TODO(ran): This is still experimental; not production ready.
+ * TODO(ran): This is still experimental; not production ready; work in progress
  * @author Ran Tavory (rantav@gmail.com)
  *
  */

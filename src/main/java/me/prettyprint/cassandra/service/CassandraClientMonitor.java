@@ -8,7 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.apache.thrift.TException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void updateKnownHosts() throws TException {
+  public void updateKnownHosts() throws HectorTransportException {
    log.info("Updating all known cassandra hosts on all clients");
    for (CassandraClientPool pool: pools) {
      pool.updateKnownHosts();

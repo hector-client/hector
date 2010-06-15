@@ -3,16 +3,16 @@ package me.prettyprint.cassandra.service;
 import java.io.IOException;
 import java.util.List;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.cassandra.model.InvalidRequestException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+import me.prettyprint.cassandra.model.TimedOutException;
+import me.prettyprint.cassandra.model.UnavailableException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.InvalidRequestException;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.perf4j.StopWatch;
 import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
@@ -70,8 +70,7 @@ import org.slf4j.LoggerFactory;
    * retries, and there are enough hosts to try and the error was
    * {@link TimedOutException}.
    */
-  public CassandraClient operate(Operation<?> op) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+  public CassandraClient operate(Operation<?> op) throws HectorException {
     final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
     int retries = Math.min(failoverPolicy.numRetries + 1, knownHosts.size());
     boolean isFirst = true;
@@ -101,7 +100,7 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
       throw e;
-    } catch (TException e) {
+    } catch (HectorTransportException e) {
       invalidate();
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
@@ -116,22 +115,22 @@ import org.slf4j.LoggerFactory;
       monitor.incCounter(op.failCounter);
       monitor.incCounter(Counter.POOL_EXHAUSTED);
       stopWatch.stop(op.stopWatchTagName + ".fail_");
-      throw new UnavailableException();
+      throw e;
     } catch (IllegalStateException e) {
       log.error("Client Pool is already closed, cannot obtain new clients.", e);
       monitor.incCounter(op.failCounter);
       stopWatch.stop(op.stopWatchTagName + ".fail_");
-      throw new UnavailableException();
+      throw new HectorException(e);
     } catch (IOException e) {
       invalidate();
       monitor.incCounter(op.failCounter);
       stopWatch.stop(op.stopWatchTagName + ".fail_");
-      throw new UnavailableException();
+      throw new HectorTransportException(e);
     } catch (Exception e) {
       log.error("Cannot retry failover, got an Exception", e);
       monitor.incCounter(op.failCounter);
       stopWatch.stop(op.stopWatchTagName + ".fail_");
-      throw new UnavailableException();
+      throw new HectorException(e);
     }
     return client;
   }
@@ -163,8 +162,8 @@ import org.slf4j.LoggerFactory;
    * @param isFirst is this the first iteraion?
    */
   private boolean operateSingleIteration(Operation<?> op, final StopWatch stopWatch,
-      int retries, boolean isFirst) throws InvalidRequestException, TException, TimedOutException,
-      PoolExhaustedException, Exception, UnavailableException, TTransportException {
+      int retries, boolean isFirst) throws HectorException,
+      PoolExhaustedException, Exception, UnavailableException, HectorTransportException {
     log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
     try {
       // Perform operation and save its result value
@@ -192,8 +191,8 @@ import org.slf4j.LoggerFactory;
         skipToNextHost(isFirst, true);
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
-    } catch (TTransportException e) {
-      log.warn("Got a TTransportException from {}. Num of retries: {} (thread={})",
+    } catch (HectorTransportException e) {
+      log.warn("Got a HectorTException from {}. Num of retries: {} (thread={})",
           new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
@@ -322,7 +321,7 @@ import org.slf4j.LoggerFactory;
   protected final String stopWatchTagName;
 
   protected T result;
-  private NotFoundException exception;
+  private HectorException exception;
 
   public Operation(OperationType operationType) {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
@@ -346,15 +345,13 @@ import org.slf4j.LoggerFactory;
   /**
    * Performs the operation on the given cassandra instance.
    */
-  public abstract T execute(Cassandra.Client cassandra) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException;
+  public abstract T execute(Cassandra.Client cassandra) throws HectorException;
 
-  public void executeAndSetResult(Cassandra.Client cassandra) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+  public void executeAndSetResult(Cassandra.Client cassandra) throws HectorException {
     setResult(execute(cassandra));
   }
 
-  public void setException(NotFoundException e) {
+  public void setException(HectorException e) {
     exception = e;
   }
 
@@ -362,7 +359,7 @@ import org.slf4j.LoggerFactory;
     return exception != null;
   }
 
-  public NotFoundException getException() {
+  public HectorException getException() {
     return exception;
   }
 }
@@ -388,7 +385,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-/*package*/ class SkipHostException extends Exception {
+/*package*/ class SkipHostException extends HectorException {
 
   private static final long serialVersionUID = -6099636388926769255L;
 

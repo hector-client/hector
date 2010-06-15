@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +51,7 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public CassandraClient borrowClient() throws IllegalStateException,
-        PoolExhaustedException, Exception {
+  public CassandraClient borrowClient() throws HectorException {
     String[] clients = new String[pools.size()];
     int x = 0;
     for(CassandraHost cassandraHost : pools.keySet()) {
@@ -62,8 +62,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public CassandraClient borrowClient(String url, int port)
-      throws IllegalStateException, PoolExhaustedException, Exception {
+  public CassandraClient borrowClient(String url, int port) throws HectorException {
     return getPool(new CassandraHost(url, port)).borrowClient();
   }
 
@@ -147,12 +146,12 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void releaseClient(CassandraClient client) throws Exception {
+  public void releaseClient(CassandraClient client) throws HectorException {
     getPool(client).releaseClient(client);
   }
 
   @Override
-  public void updateKnownHosts() throws TException {
+  public void updateKnownHosts() throws HectorTransportException {
     for (CassandraClientPoolByHost pool: pools.values()) {
       pool.updateKnownHosts();
     }
@@ -182,26 +181,25 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void releaseKeyspace(Keyspace k) throws Exception {
+  public void releaseKeyspace(Keyspace k) throws HectorException {
     releaseClient(k.getClient());
   }
 
   @Override
-  public CassandraClient borrowClient(String urlPort) throws IllegalStateException,
-      PoolExhaustedException, Exception {
+  public CassandraClient borrowClient(String urlPort) throws HectorException {
     String url = parseHostFromUrl(urlPort);
     int port = parsePortFromUrl(urlPort);
     return borrowClient(url, port);
   }
 
   @Override
-  public CassandraClient borrowClient(String[] clientUrls) throws Exception {
+  public CassandraClient borrowClient(String[] clientUrls) throws HectorException {
     List<String> clients = new ArrayList<String>(Arrays.asList(clientUrls));
     while(!clients.isEmpty()) {
       int rand = (int) (Math.random() * clients.size());
       try {
         return borrowClient(clients.get(rand));
-      } catch (Exception e) {
+      } catch (HectorException e) {
         if (clients.size() > 1) {
           log.warn("Unable to obtain client " + clients.get(rand) + " will try the next client", e);
           clientMonitor.incCounter(Counter.RECOVERABLE_LB_CONNECT_ERRORS);

@@ -10,9 +10,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.cassandra.model.NotFoundException;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,7 +96,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public String getClusterName() throws TException {
+  public String getClusterName() throws HectorException {
     if (clusterName == null) {
       clusterName = cassandraCluster.getClusterName();
     }
@@ -101,28 +104,33 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Keyspace getKeyspace(String keySpaceName) throws IllegalArgumentException,
-      NotFoundException, TException {
+  public Keyspace getKeyspace(String keySpaceName) throws HectorException {
     return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
   public Keyspace getKeyspace(String keySpaceName, ConsistencyLevel consistency) throws IllegalArgumentException,
-      NotFoundException, TException {
+      NotFoundException, HectorTransportException {
     return getKeyspace(keySpaceName, consistency, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
   public Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy)
-      throws IllegalArgumentException, NotFoundException, TException {
+      throws IllegalArgumentException, NotFoundException, HectorTransportException {
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
     KeyspaceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
       if (getKeyspaces().contains(keyspaceName)) {
-        Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-        keyspace = (KeyspaceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
-            consistencyLevel, failoverPolicy, cassandraClientPool);
+        try {
+          Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
+          keyspace = (KeyspaceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+              consistencyLevel, failoverPolicy, cassandraClientPool);
+        } catch (TException e) {
+          throw new HectorTransportException(e);
+        } catch (org.apache.cassandra.thrift.NotFoundException e) {
+          throw new NotFoundException(e);
+        }
         KeyspaceImpl tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
         if (tmp != null) {
           // There was another put that got here before we did.
@@ -137,22 +145,24 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<String> getKeyspaces() throws TException {
+  public List<String> getKeyspaces() throws HectorTransportException {
     if (keyspaces == null) {
-      keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
+      try {
+        keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
+      } catch (TException e) {
+        throw new HectorTransportException(e);
+      }
     }
     return keyspaces;
   }
 
-
-  // TODO(ran): fix exception types
   @Override
-  public List<String> getKnownHosts(boolean fresh) throws IllegalStateException, PoolExhaustedException, Exception {
+  public List<String> getKnownHosts(boolean fresh) throws HectorException {
     return cassandraCluster.getKnownHosts(fresh);
   }
 
   @Override
-  public String getServerVersion() throws TException {
+  public String getServerVersion() throws HectorException {
     if (serverVersion == null) {
       serverVersion = cassandraCluster.describeThriftVersion();
     }
@@ -192,7 +202,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void updateKnownHosts() throws TException {
+  public void updateKnownHosts() throws HectorTransportException {
     if (closed) {
       return;
     }

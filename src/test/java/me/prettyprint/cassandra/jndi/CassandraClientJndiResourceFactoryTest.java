@@ -28,42 +28,42 @@ public class CassandraClientJndiResourceFactoryTest {
   // canned data
   private final static String cassandraUrl = "localhost";
   private final static int cassandraPort = 9170;
-	
+
   private CassandraClientJndiResourceFactory factory;
   private static EmbeddedServerHelper embeddedServerHelper;
-  
+
   @Before
-  public void setupTest() throws Exception {	   
+  public void setupTest() throws Exception {
     embeddedServerHelper = new EmbeddedServerHelper();
-	embeddedServerHelper.setup();
-	  
-	factory = new CassandraClientJndiResourceFactory();
+    embeddedServerHelper.setup();
+    factory = new CassandraClientJndiResourceFactory();
   }
-	  
+
   @AfterClass
   public static void teardown() throws IOException {
-	  embeddedServerHelper.teardown();
+    embeddedServerHelper.teardown();
   }
-  
+
   @Test
   @SuppressWarnings("unchecked")
   public void getObjectInstance() throws Exception {
     Reference resource = new Reference("CassandraClientFactory");
-		
+
     resource.add(new StringRefAddr("url", cassandraUrl));
     resource.add(new StringRefAddr("port", Integer.toString(cassandraPort)));
-		
-	Name jndiName = mock(Name.class);
-	Context context = new InitialContext();
-	Hashtable environment = new Hashtable();
-		
-	CassandraClientJndiResourcePool cassandraClientJNDIResourcePool =
-	  (CassandraClientJndiResourcePool) factory.getObjectInstance(resource, jndiName, context, environment);
-	
-	CassandraClient cassandraClient = (CassandraClient) cassandraClientJNDIResourcePool.borrowObject();
-		
-	assertNotNull(cassandraClient);
-	assertEquals(cassandraUrl, cassandraClient.getUrl());
-	assertEquals(cassandraPort, cassandraClient.getPort());
+
+    Name jndiName = mock(Name.class);
+    Context context = new InitialContext();
+    Hashtable environment = new Hashtable();
+
+    CassandraClientJndiResourcePool cassandraClientJNDIResourcePool = 
+        (CassandraClientJndiResourcePool) factory.getObjectInstance(resource, jndiName, context,
+                                                                    environment);
+
+    CassandraClient cassandraClient = (CassandraClient) cassandraClientJNDIResourcePool.borrowObject();
+
+    assertNotNull(cassandraClient);
+    assertEquals(cassandraUrl, cassandraClient.getUrl());
+    assertEquals(cassandraPort, cassandraClient.getPort());
   }
 }
