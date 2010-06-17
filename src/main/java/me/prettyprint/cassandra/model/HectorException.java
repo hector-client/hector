@@ -6,7 +6,7 @@ package me.prettyprint.cassandra.model;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class HectorException extends Exception {
+public class HectorException extends RuntimeException {
 
   private static final long serialVersionUID = -8498691501268563571L;
 
