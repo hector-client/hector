@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.service;
 
 import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
 
 
 /**

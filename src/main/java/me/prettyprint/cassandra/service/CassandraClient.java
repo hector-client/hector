@@ -5,7 +5,6 @@ import java.util.Set;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
