@@ -6,7 +6,7 @@ package me.prettyprint.cassandra.model;
     // TODO Auto-generated constructor stub
   }
 
-  public ColumnImpl(org.apache.cassandra.avro.Column thriftColumn) {
+  public ColumnImpl(org.apache.cassandra.avro.Column avroColumn) {
     // TODO Auto-generated constructor stub
   }
 
