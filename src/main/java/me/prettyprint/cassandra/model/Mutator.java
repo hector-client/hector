@@ -4,9 +4,9 @@ public interface Mutator {
 
   // Simple and immediate insertion of a column
   // +1 nate
-  ExecutionResult insert(String row, String cf, Column c);
+  MutationResult insert(String row, String cf, Column c);
 
-  ExecutionResult delete(String row, String cf, Object columnName);
+  MutationResult delete(String row, String cf, Object columnName);
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an 
@@ -19,7 +19,7 @@ public interface Mutator {
 
   Column createColumn(Object name, Object value);
 
-  ExecutionResult execute();
+  MutationResult execute();
 
 
 }
