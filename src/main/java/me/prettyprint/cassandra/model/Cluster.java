@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.List;
 
+import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraHost;
 
 public interface Cluster {
@@ -11,5 +12,9 @@ public interface Cluster {
   void addHost(CassandraHost cassandraHost);
   
   // rest of the methods from the current CassandraCluster
+  
+  CassandraClient borrowClient() throws HectorPoolException;
+  
+  void releaseClient();
   
 }
