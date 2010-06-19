@@ -45,12 +45,6 @@ public class ResultImpl implements Result {
   }
 
   @Override
-  public long getExecTimeMili() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
   public Query getQuery() {
     // TODO Auto-generated method stub
     return null;
@@ -64,6 +58,18 @@ public class ResultImpl implements Result {
 
   @Override
   public byte[] raw() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public long getExecutionTimeMili() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public String getHostUsed() {
     // TODO Auto-generated method stub
     return null;
   }

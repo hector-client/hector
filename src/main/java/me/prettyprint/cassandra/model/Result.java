@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-public interface Result {
+public interface Result extends ExecutionResult {
 
   // get
   Column asColumn();
@@ -31,11 +31,4 @@ public interface Result {
   
   Query getQuery();
   
-  boolean isSuccess();
-  
-  long getExecTimeMili();
-
-  
-  // ... more metadata about the call: was there a retry, which host was used etc
-
 }
