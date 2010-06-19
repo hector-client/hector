@@ -12,6 +12,7 @@ Remove some unused meta calls from CassandraClient, such as getConfigFile and ge
 Make the calls of other meta API go through CassandraCluster and by that use an improved version of them in thrift and failover (http://github.com/rantav/hector/issues#issue/11 and http://github.com/rantav/hector/issues#issue/7 and http://github.com/rantav/hector/issues#issue/29)
 Add an exception hierarchy to wrap transport and general cassandra API exceptions http://github.com/rantav/hector/issues#issue/32
 Make HectorException extend RuntimeException
+Add the port number to be part of the cassandra host identifier so that many cassandra instances can be connected from a single hector client, http://github.com/rantav/hector/issues/issue/37/#comment_278773
 
 0.6.0-14
 ========
