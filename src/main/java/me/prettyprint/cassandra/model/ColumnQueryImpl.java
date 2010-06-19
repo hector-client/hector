@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.Keyspace;
-import me.prettyprint.cassandra.utils.StringUtils;
 
 public class ColumnQueryImpl implements ColumnQuery {
 
@@ -33,13 +32,9 @@ public class ColumnQueryImpl implements ColumnQuery {
 
       @Override
       public Result doInKeyspace(Keyspace ks) throws HectorException {
-        Result result = new ResultImpl();
-        String value = StringUtils.string(ks.getColumn(key, ModelUtils.createColumnPath(columnFamilyName, name)).getValue());
-        // set the value on result. this feels too clunky though
-        // there has to be a smooth, mostly encapsulated way to populate the Result, but still
-        // get to the Keyspace 
-        
-        return result;
+        org.apache.cassandra.thrift.Column thriftColumn = ks.getColumn(key, ModelUtils.createColumnPath(columnFamilyName, name));
+        Column column = new ColumnImpl(thriftColumn);
+        return new ResultImpl(column);
       }
       
     });

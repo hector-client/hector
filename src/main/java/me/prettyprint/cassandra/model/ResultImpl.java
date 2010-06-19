@@ -2,6 +2,10 @@ package me.prettyprint.cassandra.model;
 
 public class ResultImpl implements Result {
 
+  public ResultImpl(Column column) {
+    // TODO Auto-generated constructor stub
+  }
+
   @Override
   public Column asColumn() {
     // TODO Auto-generated method stub
