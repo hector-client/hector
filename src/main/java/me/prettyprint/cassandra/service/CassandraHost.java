@@ -131,7 +131,8 @@ public class CassandraHost {
     if (! (obj instanceof CassandraHost)) {
       return false;
     }
-    return ((CassandraHost) obj).ip.equals(ip);
+    CassandraHost other = (CassandraHost) obj;
+    return other.ip.equals(ip) && other.port == port;
   }
 
   @Override

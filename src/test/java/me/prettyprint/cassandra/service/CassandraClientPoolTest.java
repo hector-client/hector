@@ -61,12 +61,12 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
     assertEquals("localhost", client.getUrl());
     assertEquals(9170, client.getPort());
 
-    client = store.borrowClient(new String[] {"localhost:9170", "localhost:9171", "localhost:9172"});
+    client = store.borrowClient(new String[] {"localhost:9170", "127.0.0.1:9170", "localhost:9170"});
     assertNotNull(client);
     assertEquals("localhost", client.getUrl());
     assertEquals(9170, client.getPort());
 
-    client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
+    client = store.borrowClient(new String[] {"localhost:9170", "127.0.0.1:9170"});
     assertEquals("localhost", client.getUrl());
     assertEquals(9170, client.getPort());
   }
