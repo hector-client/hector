@@ -7,7 +7,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
 public class ClusterFactory {
 
-  private static Map<String, Cluster> clusters = new HashMap<String, Cluster>();
+  private static final Map<String, Cluster> clusters = new HashMap<String, Cluster>();
   
   public static Cluster get(String clusterName) {
     return clusters.get(clusterName);
