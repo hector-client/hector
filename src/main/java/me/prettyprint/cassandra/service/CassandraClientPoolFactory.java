@@ -19,7 +19,7 @@ public enum CassandraClientPoolFactory {
 
   INSTANCE;
 
-  private CassandraClientPool defaultPool;
+  private volatile CassandraClientPool defaultPool;
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolFactory.class);
 
@@ -35,14 +35,16 @@ public enum CassandraClientPoolFactory {
    * @return
    */
   public CassandraClientPool get() {
-    if (defaultPool == null) {
-      synchronized (INSTANCE) {
-        if (defaultPool == null) {
-          defaultPool = createDefault();
+    CassandraClientPool tmp = defaultPool;
+    if (tmp == null) {
+      synchronized(this) {
+        tmp = defaultPool;
+        if (tmp == null) {
+          defaultPool = tmp = createDefault();
         }
       }
     }
-    return defaultPool;
+    return tmp;
   }
 
   /**
