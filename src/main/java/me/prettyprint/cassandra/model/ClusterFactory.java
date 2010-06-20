@@ -5,7 +5,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 public class ClusterFactory {
 
   
-  public static Cluster create(String hostIp) {
+  public static Cluster getOrCreate(String hostIp) {
     /*
      I would like to move off of string literals for hosts, perhaps
      providing them for convinience, and used specific types

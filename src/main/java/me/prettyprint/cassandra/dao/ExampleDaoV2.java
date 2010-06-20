@@ -22,7 +22,7 @@ public class ExampleDaoV2 {
   private final KeyspaceOperator keyspaceOperator;
   
   public static void main(String[] args) throws HectorException {
-    Cluster c = ClusterFactory.create(HOST_PORT);
+    Cluster c = ClusterFactory.getOrCreate(HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(KeyspaceOperatorFactory.create(KEYSPACE, c));
     ed.insert("key1", "value1");
 
