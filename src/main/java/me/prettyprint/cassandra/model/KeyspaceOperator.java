@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.service.Cluster;
+
 public interface KeyspaceOperator {
 
 //  void mutate(Mutator mutation);

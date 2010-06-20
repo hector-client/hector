@@ -1,7 +1,5 @@
 package me.prettyprint.cassandra.dao;
 
-import me.prettyprint.cassandra.model.Cluster;
-import me.prettyprint.cassandra.model.ClusterFactory;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -10,6 +8,8 @@ import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.MutatorFactory;
 import me.prettyprint.cassandra.model.QueryFactory;
 import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.cassandra.service.ClusterFactory;
 
 public class ExampleDaoV2 {
 
@@ -22,7 +22,7 @@ public class ExampleDaoV2 {
   private final KeyspaceOperator keyspaceOperator;
   
   public static void main(String[] args) throws HectorException {
-    Cluster c = ClusterFactory.getOrCreate(HOST_PORT);
+    Cluster c = ClusterFactory.getOrCreate("MyCluster", HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(KeyspaceOperatorFactory.create(KEYSPACE, c));
     ed.insert("key1", "value1");
 

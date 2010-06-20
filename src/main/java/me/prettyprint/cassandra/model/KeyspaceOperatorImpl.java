@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.Keyspace;
 
 
