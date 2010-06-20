@@ -30,7 +30,7 @@ public class KeyspaceOperatorTest {
   }
   
   @Test
-  //@Ignore("Not ready yet")
+  @Ignore("Not ready yet")
   public void testInsertGetRemove() {
     String cf = "Standard1";
     
