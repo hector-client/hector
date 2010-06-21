@@ -6,4 +6,9 @@ public class QueryFactory {
     //TODO
     return null;
   }
+
+  public static SuperColumnQuery createSuperColumnQuery(KeyspaceOperator ko) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

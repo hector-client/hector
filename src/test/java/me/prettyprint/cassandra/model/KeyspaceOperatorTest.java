@@ -1,11 +1,9 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.ClusterFactory;
 
@@ -46,17 +44,15 @@ public class KeyspaceOperatorTest {
     // get value
     ColumnQuery q = QueryFactory.createColumnQuery(ko);
     q.setName("testInsertGetRemove").setColumnFamily(cf);
-    Result r = q.setKey("testInsertGetRemove").execute();
+    Result<Column> r = q.setKey("testInsertGetRemove").execute();
     assertNotNull(r);
     assertTrue(r.isSuccess());
-    Column c = r.asColumn();
+    Column c = r.get();
     assertNotNull(c);
     String value = c.getValue().asString();
     assertEquals("testInsertGetRemove_value_", value);
     String name = c.getName().asString();
     assertEquals("testInsertGetRemove", name);
-    assertEquals("testInsertGetRemove_value_", r.asString());
-    assertEquals(bytes("testInsertGetRemove_value_"), r.raw());
 
     // remove value
     m = MutatorFactory.createMutator(ko);
@@ -65,11 +61,10 @@ public class KeyspaceOperatorTest {
     // get already removed value
     ColumnQuery q2 = QueryFactory.createColumnQuery(ko);
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
-    Result r2 = q2.setKey("testInsertGetRemove").execute();
+    Result<Column> r2 = q2.setKey("testInsertGetRemove").execute();
     assertNotNull(r2);
     assertTrue(r2.isSuccess());
-    assertNull("Value should have been deleted", r2.asColumn());
-    assertNull("Value should have been deleted, yes, even raw", r2.raw());
+    assertNull("Value should have been deleted", r2.get());
   }
 
   @Test
@@ -88,10 +83,10 @@ public class KeyspaceOperatorTest {
     ColumnQuery q = QueryFactory.createColumnQuery(ko);
     q.setName("testInsertGetRemove").setColumnFamily(cf);
     for (int i = 0; i < 5; i++) {
-      Result r = q.setKey("testInsertGetRemove" + i).execute();
+      Result<Column> r = q.setKey("testInsertGetRemove" + i).execute();
       assertNotNull(r);
       assertTrue(r.isSuccess());
-      Column c = r.asColumn();
+      Column c = r.get();
       assertNotNull(c);
       String value = c.getValue().asString();
       assertEquals("testInsertGetRemove_value_" + i, value);
@@ -108,10 +103,10 @@ public class KeyspaceOperatorTest {
     ColumnQuery q2 = QueryFactory.createColumnQuery(ko);
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
     for (int i = 0; i < 5; i++) {
-      Result r = q2.setKey("testInsertGetRemove" + i).execute();
+      Result<Column> r = q2.setKey("testInsertGetRemove" + i).execute();
       assertNotNull(r);
       assertTrue(r.isSuccess());
-      assertNull("Value should have been deleted", r.asColumn());
+      assertNull("Value should have been deleted", r.get());
     }
   }
 
@@ -129,12 +124,12 @@ public class KeyspaceOperatorTest {
     
 
     // get value
-    ColumnQuery q = QueryFactory.createColumnQuery(ko);
+    SuperColumnQuery q = QueryFactory.createSuperColumnQuery(ko);
     q.setName("testSuperInsertGetRemove").setColumnFamily(cf);
-    Result r = q.setKey("testSuperInsertGetRemove").execute();
+    Result<SuperColumn> r = q.setKey("testSuperInsertGetRemove").execute();
     assertNotNull(r);
     assertTrue(r.isSuccess());
-    SuperColumn sc = r.asSuperColumn();
+    SuperColumn sc = r.get();
     assertNotNull(sc);
     assertEquals(2, sc.size());
     Column c = sc.get(0);

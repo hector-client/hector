@@ -1,9 +1,15 @@
 package me.prettyprint.cassandra.model;
 
-public interface Query {
+/**
+ * 
+ * @author Ran Tavory
+ *
+ * @param <T> Result type. For example Column or SuperColumn
+ */
+public interface Query<T> {
 
-  <T extends Query> T setColumnFamily(String cf);
+  <Q extends Query<T>> Q setColumnFamily(String cf);
 
-  Result execute();
+  Result<T> execute();
 
 }

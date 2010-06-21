@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.dao;
 
+import me.prettyprint.cassandra.model.Column;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -50,8 +51,12 @@ public class ExampleDaoV2 {
    */
   public String get(final String key) throws HectorException {
     ColumnQuery q = QueryFactory.createColumnQuery(keyspaceOperator);
-    Result r = q.setKey(key).setName(COLUMN_NAME).setColumnFamily(CF_NAME).execute();
-    return r.asString();
+    Result<Column> r = q.setKey(key).setName(COLUMN_NAME).setColumnFamily(CF_NAME).execute();
+    Column c = r.get();
+    if (c == null || c.getValue() == null) {
+      return null;
+    }
+    return c.getValue().asString();
   }
 
   /**

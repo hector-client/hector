@@ -1,34 +1,17 @@
 package me.prettyprint.cassandra.model;
 
-public interface Result extends ExecutionResult {
+/**
+ * 
+ * @author Ran Tavory
+ *
+ * @param <T> The type of the result. May be for example Column of SuperColumn
+ */
+public interface Result<T> extends ExecutionResult {
 
-  // get
-  Column asColumn();
-  
-  // get of super
-  SuperColumn asSuperColumn();
-  
-  // get_slice
-  ColumnSlice asColumnSlice();
-  
-  // multiget_slice
-  Rows asRows();
-  
-  // get_range_slices
-  OrderedRows asOrderedRows();
-  
-  // get_count
-  int asInt();
-
-  // Short for asColumn().getValue().asString()
-  String asString();
-  
-  // Short for asColumn().getValue().raw(). Returns the bytes of the first column value.
-  byte[] raw();
 
   // maybe: <T> T asType(Class<T> type);
-  // or: <T> T asType();
+  T get();
   
-  Query getQuery();
+  Query<T> getQuery();
   
 }

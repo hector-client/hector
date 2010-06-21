@@ -2,12 +2,11 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.Keyspace;
 
-public class ColumnQueryImpl implements ColumnQuery {
+public class ColumnQueryImpl extends AbstractQuery<Column> implements ColumnQuery {
 
   private final KeyspaceOperator keyspaceOperator;
   private String key;
   private String name;
-  private String columnFamilyName;
   
   ColumnQueryImpl(KeyspaceOperator keyspaceOperator) {
     this.keyspaceOperator = keyspaceOperator; 
@@ -26,25 +25,19 @@ public class ColumnQueryImpl implements ColumnQuery {
   }
 
   @Override
-  public Result execute() {
+  public Result<Column> execute() {
     
-    Result result = keyspaceOperator.doExecute(new KeyspaceOperationCallback<Result>() {
+    Result<Column> result = keyspaceOperator.doExecute(new KeyspaceOperationCallback<Result<Column>>() {
 
       @Override
-      public Result doInKeyspace(Keyspace ks) throws HectorException {
-        org.apache.cassandra.thrift.Column thriftColumn = ks.getColumn(key, ModelUtils.createColumnPath(columnFamilyName, name));
+      public Result<Column> doInKeyspace(Keyspace ks) throws HectorException {
+        org.apache.cassandra.thrift.Column thriftColumn = 
+          ks.getColumn(key, ModelUtils.createColumnPath(columnFamilyName, name));
         Column column = new ColumnImpl(thriftColumn);
-        return new ResultImpl(column);
+        return new ResultImpl<Column>(column);
       }
       
     });
     return result;
   }
-
-  @Override
-  public ColumnQuery setColumnFamily(String cf) {
-    this.columnFamilyName = cf;
-    return this;
-  }
-
 }
