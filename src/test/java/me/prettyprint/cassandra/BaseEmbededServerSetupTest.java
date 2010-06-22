@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.cassandra;
 
 import java.io.IOException;
 
