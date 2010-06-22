@@ -14,6 +14,8 @@ Add an exception hierarchy to wrap transport and general cassandra API exception
 Make HectorException extend RuntimeException
 Add the port number to be part of the cassandra host identifier so that many cassandra instances can be connected from a single hector client, http://github.com/rantav/hector/issues/issue/37/#comment_278773
 Fix bogus doubly locked initialization in CassandraClientPoolFactory
+Fix http://github.com/rantav/hector/issues/issue/48 KeyspaceImpl.getSuperColumn() should use cassandra.get() and not cassandra.get_slice()
+
 
 0.6.0-14
 ========
