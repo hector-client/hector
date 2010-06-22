@@ -174,7 +174,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
     } catch (InvalidRequestException e) {
-      assertTrue(StringUtils.contains(e.getWhy(),"column name was null"));
+      assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have the right type"));
     }
 
     cp = new ColumnPath("Super1");

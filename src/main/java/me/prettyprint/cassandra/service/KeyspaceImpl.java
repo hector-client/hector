@@ -299,10 +299,32 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException {
-    return getSuperColumn(key, columnPath, false, Integer.MAX_VALUE);
-  }
+  public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath) throws HectorException {
+    valideColumnPath(columnPath);
 
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
+      @Override
+      public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
+        ColumnOrSuperColumn cosc;
+        try {
+          cosc = cassandra.get(keyspaceName, key, columnPath, consistency);
+        } catch (NotFoundException e) {
+          setException(xtrans.translate(e));
+          return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+        return cosc == null ? null : cosc.getSuper_column();
+      }
+
+    };
+    operateWithFailover(op);
+    if (op.hasException()) {
+      throw op.getException();
+    }
+    return op.getResult();
+  }
+  
   @Override
   public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath,
       final boolean reversed, final int size) throws HectorException {
@@ -596,10 +618,7 @@ import org.slf4j.LoggerFactory;
     Map<String, String> cfdefine;
     String errorMsg;
     if ((cfdefine = keyspaceDesc.get(cf)) != null) {
-      if (columnPath.getColumn() == null) {
-        // make sure we have a valid name
-        errorMsg = new String("The column name was null for column family " + cf);
-      } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD)) {
+      if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
         // if the column family is a standard column
         return;
       } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
