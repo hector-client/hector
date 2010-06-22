@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.InvalidRequestException;
 import me.prettyprint.cassandra.model.NotFoundException;
