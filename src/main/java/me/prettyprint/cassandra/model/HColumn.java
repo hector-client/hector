@@ -7,38 +7,38 @@ package me.prettyprint.cassandra.model;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class HColumn {
+public class HColumn<K,V> {
 
-  private byte[] name;
-  private byte[] value;
+  private K name;
+  private V value;
   private long timestamp;
 
-  public HColumn(byte[] name, byte[] value, long timestamp) {
+  public HColumn(K name, V value, long timestamp) {
     this.name = name;
     this.value = value;
     this.timestamp = timestamp;
   }
 
-  HColumn setName(byte[] name) {
+  HColumn<K,V> setName(K name) {
     this.name = name;
     return this;
   }
 
-  HColumn setValue(byte[] value) {
+  HColumn<K,V> setValue(V value) {
     this.value = value;
     return this;
   }
 
-  HColumn setTimestamp(long timestamp) {
+  HColumn<K,V> setTimestamp(long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
 
-  byte[] getName() {
+  K getName() {
     return name;
   }
 
-  byte[] getValue() {
+  V getValue() {
     return value;
   }
 
