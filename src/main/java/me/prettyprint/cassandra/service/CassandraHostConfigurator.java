@@ -4,13 +4,12 @@ package me.prettyprint.cassandra.service;
 public class CassandraHostConfigurator {
 
   private String hosts;
-  private int maxActive;
-  private int maxIdle;
-  private boolean lifo;
-  private long minEvictableIdleTimeMillis;
-  private long timeBetweenEvictionRunsMillis;
-
-  private long maxWaitTimeWhenExhausted;
+  private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
+  private int maxIdle = CassandraHost.DEFAULT_MAX_IDLE;
+  private boolean lifo = CassandraHost.DEFAULT_LIFO;
+  private long minEvictableIdleTimeMillis = CassandraHost.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+  private long timeBetweenEvictionRunsMillis = CassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+  private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
   private TimestampResolution timestampResolution;
@@ -32,7 +31,7 @@ public class CassandraHostConfigurator {
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
       CassandraHost cassandraHost = new CassandraHost(hostVals[x]);
-      if (maxActive > 0) {
+      if (maxActive != CassandraHost.DEFAULT_MAX_ACTIVE) {
         cassandraHost.setMaxActive(maxActive);
       }
       if (maxIdle != CassandraHost.DEFAULT_MAX_IDLE) {
@@ -47,9 +46,10 @@ public class CassandraHostConfigurator {
       if (timeBetweenEvictionRunsMillis != CassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS) {
         cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
       }
-      if (maxWaitTimeWhenExhausted > 0) {
+      if (maxWaitTimeWhenExhausted != CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED) {
         cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
       }
+      // this is special as it can be passed in as a system property
       if (cassandraThriftSocketTimeout > 0) {
         cassandraHost.setCassandraThriftSocketTimeout(cassandraThriftSocketTimeout);
       }
