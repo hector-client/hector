@@ -9,9 +9,15 @@ package me.prettyprint.cassandra.model;
 public interface Result<T> extends ExecutionResult {
 
 
-  // maybe: <T> T asType(Class<T> type);
+  /**
+   * @return the actual value returned from the query.
+   */
   T get();
   
+  
+  /**
+   * @return the query used to create this result
+   */
   Query<T> getQuery();
   
 }

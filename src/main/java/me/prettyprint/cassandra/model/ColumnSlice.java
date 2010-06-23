@@ -3,9 +3,13 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 // get_slice
-public interface ColumnSlice {
+/**
+ * @param <K> Column Key type
+ */
+public interface ColumnSlice<K> {
 
   List<Column> asColumns();
   List<SuperColumn> asSuperColumns();
   
+  Column getColumnByName(K columnName);
 }

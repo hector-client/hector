@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.model;
 
 
 // get_slice. returns ColumnSlice
-public interface SliceQuery extends AbstractSliceQuery<ColumnSlice> {
+public interface SliceQuery<K> extends AbstractSliceQuery<ColumnSlice<K>> {
   
-  SliceQuery setKey(String key);
+  SliceQuery<K> setKey(String key);
 }

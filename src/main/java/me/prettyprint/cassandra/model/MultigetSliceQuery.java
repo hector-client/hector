@@ -1,10 +1,10 @@
 package me.prettyprint.cassandra.model;
 
-import java.util.List;
+import java.util.Collection;
 
 // multiget_slice. returns Rows
-public interface MultigetSliceQuery extends AbstractSliceQuery<Rows> {
+public interface MultigetSliceQuery<R, K> extends AbstractSliceQuery<Rows<R, K>> {
 
-  SliceQuery setKeys(List<String> key);
+  SliceQuery<K> setKeys(Collection<String> keys);
 
 }
