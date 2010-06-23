@@ -3,7 +3,7 @@ package me.prettyprint.cassandra.model;
 public class QueryFactory {
 
   public static ColumnQuery createColumnQuery(KeyspaceOperator ko) {
-    return new ColumnQueryImpl(ko);
+    return new ColumnQuery(ko);
   }
 
   public static SuperColumnQuery createSuperColumnQuery(KeyspaceOperator ko) {

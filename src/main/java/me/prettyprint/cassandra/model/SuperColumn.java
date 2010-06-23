@@ -1,10 +1,13 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 // get
-public interface SuperColumn extends List<Column> {
+public class SuperColumn extends ArrayList<Column> implements List<Column> {
 
-  Value getName();
+  Value getName() {
+    return null;
+  }
   
 }

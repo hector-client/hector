@@ -6,10 +6,21 @@ import java.util.List;
 /**
  * @param <K> Column Key type
  */
-public interface ColumnSlice<K> {
+public class ColumnSlice<K> {
 
-  List<Column> asColumns();
-  List<SuperColumn> asSuperColumns();
+  public List<Column> asColumns() {
+    // TODO
+    return null;
+  }
   
-  Column getColumnByName(K columnName);
+  public List<SuperColumn> asSuperColumns() {
+    // TODO
+    return null;
+
+  }
+  
+  public Column getColumnByName(K columnName) {
+    // TODO
+    return null;
+  }
 }
