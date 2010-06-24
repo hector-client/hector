@@ -9,6 +9,7 @@ package me.prettyprint.cassandra.model;
 public class Result<T> implements ExecutionResult {
 
   private T t;
+  
   public Result(T t) {
     // TODO Auto-generated constructor stub
   }
@@ -28,8 +29,6 @@ public class Result<T> implements ExecutionResult {
     // TODO Auto-generated method stub
     return null;
   }
-  
-
 
   @Override
   public boolean isSuccess() {

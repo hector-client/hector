@@ -4,13 +4,15 @@ package me.prettyprint.cassandra.model;
  * 
  * @author Ran Tavory
  *
- * @param <R> Row key type. In 0.7.0 this can be a byte[]. In previous versions this can only be a 
+ * @param <K> Row Key type. In 0.7.0 this can be a byte[]. In previous versions this can only be a 
  * String
+ * @param <N> Column name type
+ * @param <V> Column value type
  */
-public interface Row<R, K> {
+public interface Row<K,N,V> {
 
   // String will become byte[] on 0.7.0
-  R getKey();
+  K getKey();
    
-  ColumnSlice<K> getColumnSlice();
+  ColumnSlice<K,N,V> getColumnSlice();
 }

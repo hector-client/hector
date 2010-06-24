@@ -3,8 +3,8 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 // used by get_range_slices
-public interface OrderedRows<R, K> extends Rows<R, K> {
+public interface OrderedRows<K,N,V> extends Rows<K,N,V> {
 
   // returns the rows as an ordered list.
-  List<Row<R, K>> asList();
+  List<Row<K,N,V>> asList();
 }

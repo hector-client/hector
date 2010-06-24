@@ -4,20 +4,23 @@ import org.apache.cassandra.thrift.Column;
 
 /**
  * Hector Column definition.
+ * 
+ * @param <N> The type of the column name
+ * @param <V> The type of the column value
  *
  * TODO(ran): This is still experimental; not production ready; work in progress
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class HColumn<K,V> {
+public class HColumn<N,V> {
 
-  private K name;
+  private N name;
   private V value;
   private long timestamp;
-  private final Extractor<K> nameExtractor;
+  private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
 
-  public HColumn(K name, V value, long timestamp, Extractor<K> nameExtractor, 
+  public HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor, 
       Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     this.name = name;
@@ -25,7 +28,7 @@ public class HColumn<K,V> {
     this.timestamp = timestamp;
   }
   
-  public HColumn(Column thriftColumn, Extractor<K> nameExtractor, 
+  public HColumn(Column thriftColumn, Extractor<N> nameExtractor, 
       Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     if (thriftColumn == null) {
@@ -35,31 +38,31 @@ public class HColumn<K,V> {
     value = valueExtractor.fromBytes(thriftColumn.getValue());
   }
 
-  public HColumn(Extractor<K> nameExtractor, Extractor<V> valueExtractor) {
+  public HColumn(Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     this.nameExtractor = nameExtractor;
     this.valueExtractor = valueExtractor;
   }
 
-  HColumn<K,V> setName(K name) {
+  public HColumn<N,V> setName(N name) {
     this.name = name;
     return this;
   }
 
-  HColumn<K,V> setValue(V value) {
+  public HColumn<N,V> setValue(V value) {
     this.value = value;
     return this;
   }
 
-  HColumn<K,V> setTimestamp(long timestamp) {
+  HColumn<N,V> setTimestamp(long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
 
-  K getName() {
+  public N getName() {
     return name;
   }
 
-  V getValue() {
+  public V getValue() {
     return value;
   }
 
@@ -71,7 +74,7 @@ public class HColumn<K,V> {
     return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), timestamp);
   }
   
-  public HColumn<K, V> fromThrift(Column c) {
+  public HColumn<N, V> fromThrift(Column c) {
     if (c == null) {
       return this;
     }

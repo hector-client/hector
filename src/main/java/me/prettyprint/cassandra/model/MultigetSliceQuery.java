@@ -3,8 +3,8 @@ package me.prettyprint.cassandra.model;
 import java.util.Collection;
 
 // multiget_slice. returns Rows
-public interface MultigetSliceQuery<R, K> extends AbstractSliceQuery<Rows<R, K>> {
+public interface MultigetSliceQuery<K,N,V> extends AbstractSliceQuery<K,N,Rows<K,N,V>> {
 
-  SliceQuery<K> setKeys(Collection<String> keys);
+  SliceQuery<K,N,V> setKeys(Collection<K> keys);
 
 }

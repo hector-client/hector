@@ -9,6 +9,4 @@ public abstract class AbstractQuery<T> implements Query<T>{
     this.columnFamilyName = cf;
     return this;
   }
-
-
 }

@@ -1,24 +1,25 @@
 package me.prettyprint.cassandra.model;
 
-public interface Mutator {
+import java.util.List;
+
+public interface Mutator<N,V> {
 
   // Simple and immediate insertion of a column
-  // +1 nate
-  MutationResult insert(String row, String cf, Column c);
+  MutationResult insert(String row, String cf, HColumn<N,V> c);
 
   // overloaded insert-super
-  MutationResult insert(String row, String cf, SuperColumn createSuperColumn);
+  <SN> MutationResult insert(String row, String cf, HSuperColumn<SN,N,V> superColumn);
 
-  MutationResult delete(String row, String cf, Object columnName);
+  MutationResult delete(String row, String cf, N columnName);
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an 
   // indeterminant state if we dont validate against LIVE (but cached of course) 
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
-  Mutator addInsertion(String row, String cf, Column c);
+  Mutator<N,V> addInsertion(String row, String cf, HColumn<N,V> c);
   
-  Mutator addDeletion(String row, String cf, Object columnName);
+  Mutator<N,V> addDeletion(String row, String cf, N columnName);
 
 
   /**
@@ -39,9 +40,8 @@ public interface Mutator {
    * @param createColumn a variable number of column arguments
    * @return
    */
-  SuperColumn createSuperColumn(Object name, Column... column);
-  Column createColumn(Object name, Object value);
-
-
+  <SN> HSuperColumn<SN,N,V> createSuperColumn(N name, List<HColumn<N,V>> column);
+  
+  HColumn<N,V> createColumn(N name, V value);
 
 }

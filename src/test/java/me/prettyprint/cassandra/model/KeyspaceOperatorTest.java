@@ -4,6 +4,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.List;
+
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.ClusterFactory;
 
@@ -18,8 +22,11 @@ public class KeyspaceOperatorTest {
   
   private static final Logger log = LoggerFactory.getLogger(KeyspaceOperatorTest.class);
   private final static String KEYSPACE = "Keyspace1";
+  private static final StringExtractor se = new StringExtractor();
   private Cluster cluster;
   private KeyspaceOperator ko;
+  
+
 
   @Before
   public void setup() {
@@ -32,7 +39,7 @@ public class KeyspaceOperatorTest {
   public void testInsertGetRemove() {
     String cf = "Standard1";
     
-    Mutator m = MutatorFactory.createMutator(ko);
+    Mutator<String,String> m = MutatorFactory.createMutator(ko, se, se);
     MutationResult mr = m.insert("testInsertGetRemove", cf, 
         m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_"));
     
@@ -42,26 +49,26 @@ public class KeyspaceOperatorTest {
     log.debug("insert execution time: {}", mr.getExecutionTimeMili());
 
     // get value
-    ColumnQuery q = QueryFactory.createColumnQuery(ko);
+    ColumnQuery<String,String> q = QueryFactory.createColumnQuery(ko, se, se);
     q.setName("testInsertGetRemove").setColumnFamily(cf);
-    Result<Column> r = q.setKey("testInsertGetRemove").execute();
+    Result<HColumn<String,String>> r = q.setKey("testInsertGetRemove").execute();
     assertNotNull(r);
     assertTrue(r.isSuccess());
-    Column c = r.get();
+    HColumn<String,String> c = r.get();
     assertNotNull(c);
-    String value = c.getValue().asString();
+    String value = c.getValue();
     assertEquals("testInsertGetRemove_value_", value);
-    String name = c.getName().asString();
+    String name = c.getName();
     assertEquals("testInsertGetRemove", name);
 
     // remove value
-    m = MutatorFactory.createMutator(ko);
+    m = MutatorFactory.createMutator(ko, se, se);
     m.delete("testInsertGetRemove_", cf, "testInsertGetRemove");
 
     // get already removed value
-    ColumnQuery q2 = QueryFactory.createColumnQuery(ko);
+    ColumnQuery<String,String> q2 = QueryFactory.createColumnQuery(ko, StringExtractor.get(), StringExtractor.get());
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
-    Result<Column> r2 = q2.setKey("testInsertGetRemove").execute();
+    Result<HColumn<String,String>> r2 = q2.setKey("testInsertGetRemove").execute();
     assertNotNull(r2);
     assertTrue(r2.isSuccess());
     assertNull("Value should have been deleted", r2.get());
@@ -72,7 +79,7 @@ public class KeyspaceOperatorTest {
   public void testBatchInsertGetRemove() {
     String cf = "Standard1";
     
-    Mutator m = MutatorFactory.createMutator(ko);
+    Mutator<String,String> m = MutatorFactory.createMutator(ko, se, se);
     for (int i = 0; i < 5; i++) {
       m.addInsertion("testInsertGetRemove" + i, cf, 
           m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_" + i));
@@ -80,30 +87,30 @@ public class KeyspaceOperatorTest {
     m.execute();
 
     // get value
-    ColumnQuery q = QueryFactory.createColumnQuery(ko);
+    ColumnQuery<String,String> q = QueryFactory.createColumnQuery(ko, StringExtractor.get(), StringExtractor.get());
     q.setName("testInsertGetRemove").setColumnFamily(cf);
     for (int i = 0; i < 5; i++) {
-      Result<Column> r = q.setKey("testInsertGetRemove" + i).execute();
+      Result<HColumn<String,String>> r = q.setKey("testInsertGetRemove" + i).execute();
       assertNotNull(r);
       assertTrue(r.isSuccess());
-      Column c = r.get();
+      HColumn<String,String> c = r.get();
       assertNotNull(c);
-      String value = c.getValue().asString();
+      String value = c.getValue();
       assertEquals("testInsertGetRemove_value_" + i, value);
     }
 
     // remove value
-    m = MutatorFactory.createMutator(ko);
+    m = MutatorFactory.createMutator(ko, se, se);
     for (int i = 0; i < 5; i++) {
       m.addDeletion("testInsertGetRemove_" + i, cf, "testInsertGetRemove");
     }
     m.execute();
 
     // get already removed value
-    ColumnQuery q2 = QueryFactory.createColumnQuery(ko);
+    ColumnQuery<String, String> q2 = QueryFactory.createColumnQuery(ko, se, se);
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
     for (int i = 0; i < 5; i++) {
-      Result<Column> r = q2.setKey("testInsertGetRemove" + i).execute();
+      Result<HColumn<String,String>> r = q2.setKey("testInsertGetRemove" + i).execute();
       assertNotNull(r);
       assertTrue(r.isSuccess());
       assertNull("Value should have been deleted", r.get());
@@ -116,36 +123,37 @@ public class KeyspaceOperatorTest {
   public void testSuperInsertGetRemove() {
     String cf = "Super1";
     
-    Mutator m = MutatorFactory.createMutator(ko);
+    Mutator<String,String> m = MutatorFactory.createMutator(ko, se, se);
+    
+    @SuppressWarnings("unchecked") // aye, varargs and generics aren't good friends...
+    List<HColumn<String,String>> columns = Arrays.asList(m.createColumn("name1", "value1"), 
+        m.createColumn("name2", "value2"));
     m.insert("testSuperInsertGetRemove", cf, 
-        m.createSuperColumn("testSuperInsertGetRemove", 
-            m.createColumn("name1", "value1"),
-            m.createColumn("name2", "value2")));
+        m.createSuperColumn("testSuperInsertGetRemove", columns));
     
 
     // get value
-    SuperColumnQuery q = QueryFactory.createSuperColumnQuery(ko);
+    SuperColumnQuery<String,String,String> q = QueryFactory.createSuperColumnQuery(ko);
     q.setName("testSuperInsertGetRemove").setColumnFamily(cf);
-    Result<SuperColumn> r = q.setKey("testSuperInsertGetRemove").execute();
+    Result<HSuperColumn<String,String,String>> r = q.setKey("testSuperInsertGetRemove").execute();
     assertNotNull(r);
     assertTrue(r.isSuccess());
-    SuperColumn sc = r.get();
+    HSuperColumn<String,String,String> sc = r.get();
     assertNotNull(sc);
-    assertEquals(2, sc.size());
-    Column c = sc.get(0);
-    String value = c.getValue().asString();
+    assertEquals(2, sc.getSize());
+    HColumn<String,String> c = sc.get(0);
+    String value = c.getValue();
     assertEquals("value1", value);
-    String name = c.getName().asString();
+    String name = c.getName();
     assertEquals("name1", name);
 
   
-    Column c2 = sc.get(1);
-    assertEquals("name1", c2.getName().asString());
-    assertEquals("value1", c2.getValue().asString());
+    HColumn<String,String> c2 = sc.get(1);
+    assertEquals("name1", c2.getName());
+    assertEquals("value1", c2.getValue());
 
     // remove value
-    m = MutatorFactory.createMutator(ko);
+    m = MutatorFactory.createMutator(ko, se, se);
     m.delete("testSuperInsertGetRemove_", cf, "testSuperInsertGetRemove");
   }
-
 }
