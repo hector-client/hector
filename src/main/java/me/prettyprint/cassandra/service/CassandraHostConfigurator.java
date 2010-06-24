@@ -38,24 +38,14 @@ public class CassandraHostConfigurator {
   }
   
   public void applyConfig(CassandraHost cassandraHost) {
-    if (maxActive != CassandraHost.DEFAULT_MAX_ACTIVE) {
-      cassandraHost.setMaxActive(maxActive);
-    }
-    if (maxIdle != CassandraHost.DEFAULT_MAX_IDLE) {
-      cassandraHost.setMaxIdle(maxIdle);
-    }
-    if (lifo != CassandraHost.DEFAULT_LIFO) {
-      cassandraHost.setLifo(lifo);
-    }
-    if (minEvictableIdleTimeMillis != CassandraHost.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS) {
-      cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
-    }
-    if (timeBetweenEvictionRunsMillis != CassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS) {
-      cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
-    }
-    if (maxWaitTimeWhenExhausted != CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED) {
-      cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
-    }
+    
+    cassandraHost.setMaxActive(maxActive);
+    cassandraHost.setMaxIdle(maxIdle);
+    cassandraHost.setLifo(lifo);
+    cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+    cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);    
+    cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
+
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
       cassandraHost.setCassandraThriftSocketTimeout(cassandraThriftSocketTimeout);
