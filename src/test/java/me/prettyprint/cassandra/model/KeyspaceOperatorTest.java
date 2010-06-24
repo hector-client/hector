@@ -39,9 +39,9 @@ public class KeyspaceOperatorTest {
   public void testInsertGetRemove() {
     String cf = "Standard1";
     
-    Mutator<String,String> m = MutatorFactory.createMutator(ko, se, se);
+    Mutator<String> m = MutatorFactory.createMutator(ko);
     MutationResult mr = m.insert("testInsertGetRemove", cf, 
-        m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_"));
+        m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_", se, se));
     
     // Check the mutation result metadata
     assertTrue(mr.isSuccess());
@@ -62,8 +62,8 @@ public class KeyspaceOperatorTest {
     assertEquals("testInsertGetRemove", name);
 
     // remove value
-    m = MutatorFactory.createMutator(ko, se, se);
-    m.delete("testInsertGetRemove_", cf, "testInsertGetRemove");
+    m = MutatorFactory.createMutator(ko);
+    m.delete("testInsertGetRemove_", cf, "testInsertGetRemove", se);
 
     // get already removed value
     ColumnQuery<String,String> q2 = QueryFactory.createColumnQuery(ko, StringExtractor.get(), StringExtractor.get());
@@ -79,10 +79,10 @@ public class KeyspaceOperatorTest {
   public void testBatchInsertGetRemove() {
     String cf = "Standard1";
     
-    Mutator<String,String> m = MutatorFactory.createMutator(ko, se, se);
+    Mutator<String> m = MutatorFactory.createMutator(ko);
     for (int i = 0; i < 5; i++) {
       m.addInsertion("testInsertGetRemove" + i, cf, 
-          m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_" + i));
+          m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_" + i, se, se));
     }
     m.execute();
 
@@ -100,9 +100,9 @@ public class KeyspaceOperatorTest {
     }
 
     // remove value
-    m = MutatorFactory.createMutator(ko, se, se);
+    m = MutatorFactory.createMutator(ko);
     for (int i = 0; i < 5; i++) {
-      m.addDeletion("testInsertGetRemove_" + i, cf, "testInsertGetRemove");
+      m.addDeletion("testInsertGetRemove_" + i, cf, "testInsertGetRemove", se);
     }
     m.execute();
 
@@ -123,13 +123,13 @@ public class KeyspaceOperatorTest {
   public void testSuperInsertGetRemove() {
     String cf = "Super1";
     
-    Mutator<String,String> m = MutatorFactory.createMutator(ko, se, se);
+    Mutator<String> m = MutatorFactory.createMutator(ko);
     
     @SuppressWarnings("unchecked") // aye, varargs and generics aren't good friends...
-    List<HColumn<String,String>> columns = Arrays.asList(m.createColumn("name1", "value1"), 
-        m.createColumn("name2", "value2"));
+    List<HColumn<String,String>> columns = Arrays.asList(m.createColumn("name1", "value1", se, se), 
+        m.createColumn("name2", "value2", se, se));
     m.insert("testSuperInsertGetRemove", cf, 
-        m.createSuperColumn("testSuperInsertGetRemove", columns));
+        m.createSuperColumn("testSuperInsertGetRemove", columns, se, se, se));
     
 
     // get value
@@ -153,7 +153,7 @@ public class KeyspaceOperatorTest {
     assertEquals("value1", c2.getValue());
 
     // remove value
-    m = MutatorFactory.createMutator(ko, se, se);
-    m.delete("testSuperInsertGetRemove_", cf, "testSuperInsertGetRemove");
+    m = MutatorFactory.createMutator(ko);
+    m.delete("testSuperInsertGetRemove_", cf, "testSuperInsertGetRemove", se);
   }
 }

@@ -2,24 +2,30 @@ package me.prettyprint.cassandra.model;
 
 import java.util.List;
 
-public interface Mutator<N,V> {
+/**
+ * 
+ * @author Ran Tavory 
+ *
+ * @param <K> Key type. In version 0.6.0 only strings are allowed
+ */
+public interface Mutator<K> {
 
   // Simple and immediate insertion of a column
-  MutationResult insert(String row, String cf, HColumn<N,V> c);
+  <N,V> MutationResult insert(K row, String cf, HColumn<N,V> c);
 
   // overloaded insert-super
-  <SN> MutationResult insert(String row, String cf, HSuperColumn<SN,N,V> superColumn);
+  <SN,N,V> MutationResult insert(K row, String cf, HSuperColumn<SN,N,V> superColumn);
 
-  MutationResult delete(String row, String cf, N columnName);
+  <N> MutationResult delete(K row, String cf, N columnName, Extractor<N> nameExtractor);
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an 
   // indeterminant state if we dont validate against LIVE (but cached of course) 
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
-  Mutator<N,V> addInsertion(String row, String cf, HColumn<N,V> c);
+  <N,V> Mutator<K> addInsertion(K row, String cf, HColumn<N,V> c);
   
-  Mutator<N,V> addDeletion(String row, String cf, N columnName);
+  <N> Mutator<K> addDeletion(K row, String cf, N columnName, Extractor<N> nameExtractor);
 
 
   /**
@@ -29,6 +35,9 @@ public interface Mutator<N,V> {
    */
   MutationResult execute();
 
+  K getKeyExtractor();
+  
+  Mutator<K> setKeyExtractor(K extractor);
   
   
   ////////////////////
@@ -40,8 +49,10 @@ public interface Mutator<N,V> {
    * @param createColumn a variable number of column arguments
    * @return
    */
-  <SN> HSuperColumn<SN,N,V> createSuperColumn(N name, List<HColumn<N,V>> column);
+  <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(N name, List<HColumn<N,V>> column, 
+      Extractor<V> superNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor);
   
-  HColumn<N,V> createColumn(N name, V value);
+  <N,V> HColumn<N,V> createColumn(N name, V value, Extractor<N> nameExtractor, 
+      Extractor<V> valueExtractor);
 
 }

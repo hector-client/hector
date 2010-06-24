@@ -49,8 +49,8 @@ public class ExampleDaoV2 {
    * @param value the String value to insert
    */
   public void insert(final String key, final String value) {
-    Mutator<String,String> m = MutatorFactory.createMutator(keyspaceOperator, extractor, extractor);
-    m.insert(key, CF_NAME, m.createColumn(COLUMN_NAME, value));
+    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
+    m.insert(key, CF_NAME, m.createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
   /**
@@ -73,8 +73,8 @@ public class ExampleDaoV2 {
    * Delete a key from cassandra
    */
   public void delete(final String key) throws HectorException {
-    Mutator<String,String> m = MutatorFactory.createMutator(keyspaceOperator, extractor, extractor);
-    m.delete(key, CF_NAME, COLUMN_NAME);
+    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
+    m.delete(key, CF_NAME, COLUMN_NAME, extractor);
   }
   
   /**
@@ -104,9 +104,10 @@ public class ExampleDaoV2 {
    * Insert multiple values
    */
   public void insertMulti(Map<String, String> keyValues) {
-    Mutator<String,String> m = MutatorFactory.createMutator(keyspaceOperator, extractor, extractor);
+    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
-      m.addInsertion(keyValue.getKey(), CF_NAME,  m.createColumn(COLUMN_NAME, keyValue.getValue()));
+      m.addInsertion(keyValue.getKey(), CF_NAME,  
+          m.createColumn(COLUMN_NAME, keyValue.getValue(), extractor, extractor));
     }
     m.execute();
   }
@@ -115,9 +116,9 @@ public class ExampleDaoV2 {
    * Insert multiple values
    */
   public void deleteMulti(Collection<String> keys) {
-    Mutator<String,String> m = MutatorFactory.createMutator(keyspaceOperator, extractor, extractor);
+    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
     for (String key: keys) {
-      m.addDeletion(key, CF_NAME,  COLUMN_NAME);
+      m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
     }
     m.execute();
   }
