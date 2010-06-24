@@ -71,7 +71,7 @@ public enum CassandraClientPoolFactory {
   public CassandraClientPool createNew(CassandraHostConfigurator cassandraHostConfigurator) {
     log.debug("Creating a new CassandraClientPool...");
     CassandraClientPool pool = new CassandraClientPoolImpl(
-        JmxMonitor.INSTANCE.getCassandraMonitor(), cassandraHostConfigurator.buildCassandraHosts());
+        JmxMonitor.INSTANCE.getCassandraMonitor(), cassandraHostConfigurator);
     JmxMonitor.INSTANCE.addPool(pool);
     log.debug("CassandraClientPool was created: {}", pool);
     return pool;

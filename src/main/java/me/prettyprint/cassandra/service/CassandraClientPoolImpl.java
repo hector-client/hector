@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
   private final Map<CassandraHost, CassandraClientPoolByHost> pools;
 
   private final CassandraClientMonitor clientMonitor;
+  
+  private CassandraHostConfigurator cassandraHostConfigurator;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
@@ -47,6 +49,12 @@ import org.slf4j.LoggerFactory;
       log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
       getPool(cassandraHost);
     }
+  }
+  
+  public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
+      CassandraHostConfigurator cassandraHostConfigurator) {
+    this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
+    this.cassandraHostConfigurator = cassandraHostConfigurator;    
   }
 
 
@@ -126,6 +134,9 @@ import org.slf4j.LoggerFactory;
       synchronized (pools) {
         pool = pools.get(cassandraHost);
         if (pool == null) {
+          if (cassandraHostConfigurator != null) {
+            cassandraHostConfigurator.applyConfig(cassandraHost); 
+          }          
           pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
           pools.put(cassandraHost, pool);
           log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());

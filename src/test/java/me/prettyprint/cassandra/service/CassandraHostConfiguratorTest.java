@@ -45,4 +45,14 @@ public class CassandraHostConfiguratorTest {
     assertEquals(3000, cassandraHosts[2].getCassandraThriftSocketTimeout());
     assertEquals(3000, cassandraHosts[0].getCassandraThriftSocketTimeout());
   }
+  
+  @Test
+  public void testApplyConfig() {
+    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+    cassandraHostConfigurator.setMaxActive(15);
+    CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();    
+    CassandraHost extraHost = new CassandraHost("localhost:9171");
+    cassandraHostConfigurator.applyConfig(extraHost);
+    assertEquals(15, extraHost.getMaxActive());
+  }
 }
