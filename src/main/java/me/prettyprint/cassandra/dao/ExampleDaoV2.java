@@ -52,7 +52,8 @@ public class ExampleDaoV2 {
    * @param value the String value to insert
    */
   public void insert(final String key, final String value) {
-    createMutator(keyspaceOperator).insert(key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
+    createMutator(keyspaceOperator).
+        insert(key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
   /**

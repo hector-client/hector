@@ -14,9 +14,10 @@ public class KeyspaceOperatorImpl implements KeyspaceOperator {
   private final Cluster cluster;
   private final String keyspace;
   
-  KeyspaceOperatorImpl(String keyspace, Cluster cluster) {
+  KeyspaceOperatorImpl(String keyspace, Cluster cluster, ConsistencyLevelPolicy consistencyLevelPolicy) {
     this.keyspace = keyspace;
     this.cluster = cluster;
+    this.consistencyLevelPolicy = consistencyLevelPolicy;
   }
   
   @Override

@@ -12,7 +12,7 @@ import me.prettyprint.cassandra.utils.StringUtils;
 import org.apache.cassandra.thrift.ColumnPath;
 
 /**
- * A convenient class with bunch of factory static methods to help create a mutator, 
+ * A convenience class with bunch of factory static methods to help create a mutator, 
  * queries etc.
  *  
  * @author Ran 
@@ -21,6 +21,9 @@ import org.apache.cassandra.thrift.ColumnPath;
 public class HFactory {
 
   private static final Map<String, Cluster> clusters = new HashMap<String, Cluster>();
+  
+  private static final ConsistencyLevelPolicy DEFAULT_CONSISTENCY_LEVEL_POLICY = 
+      new QuorumAllConsistencyLevelPolicy();
   
   public static Cluster getCluster(String clusterName) {
     return clusters.get(clusterName);
@@ -60,8 +63,23 @@ public class HFactory {
     return new ClusterImpl(clusterName, cassandraHostConfigurator);
   }
 
+  /**
+   * Creates a KeyspaceOperator with the default consistency level policy.
+   * @param keyspace
+   * @param cluster
+   * @return
+   */
   public static KeyspaceOperator createKeyspaceOperator(String keyspace, Cluster cluster) {
-    return new KeyspaceOperatorImpl(keyspace, cluster);
+    return createKeyspaceOperator(keyspace, cluster, createDefaultConsistencyLevelPolicy());
+  }
+
+  public static KeyspaceOperator createKeyspaceOperator(String keyspace, Cluster cluster, 
+          ConsistencyLevelPolicy consistencyLevelPolicy) {
+    return new KeyspaceOperatorImpl(keyspace, cluster, consistencyLevelPolicy);
+  }
+
+  public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {
+    return DEFAULT_CONSISTENCY_LEVEL_POLICY;
   }
 
   public static <N,V> Mutator createMutator(KeyspaceOperator ko) {
@@ -85,7 +103,8 @@ public class HFactory {
    * @param keyspaceOperator
    * @return
    */
-  public static <K,N,V> MultigetSliceQuery<K,N,V> createMultigetSliceQuery(KeyspaceOperator keyspaceOperator) {
+  public static <K,N,V> MultigetSliceQuery<K,N,V> 
+      createMultigetSliceQuery(KeyspaceOperator keyspaceOperator) {
     // TODO Auto-generated method stub
     return null;
   }
