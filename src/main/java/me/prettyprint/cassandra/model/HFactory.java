@@ -7,7 +7,6 @@ import java.util.Map;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.ClusterImpl;
-import me.prettyprint.cassandra.utils.StringUtils;
 
 import org.apache.cassandra.thrift.ColumnPath;
 
@@ -130,10 +129,11 @@ public class HFactory {
 
   
   // probably should be typed for thrift vs. avro
-  /*package*/ static ColumnPath createColumnPath(String columnFamilyName, String columnName) {
+  /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, N columnName, 
+      Extractor<N> nameExtractor) {
     ColumnPath columnPath = new ColumnPath(columnFamilyName);
     if ( columnName != null ) {
-      columnPath.setColumn(StringUtils.bytes(columnName));
+      columnPath.setColumn(nameExtractor.toBytes(columnName));
     }
     return columnPath;
   }

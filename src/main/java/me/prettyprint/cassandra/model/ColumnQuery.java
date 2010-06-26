@@ -10,7 +10,7 @@ public class ColumnQuery<N, V> extends AbstractQuery<HColumn<N, V>> implements Q
   private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
   private String key;
-  private String name;
+  private N name;
   
   ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     this.keyspaceOperator = keyspaceOperator; 
@@ -23,7 +23,7 @@ public class ColumnQuery<N, V> extends AbstractQuery<HColumn<N, V>> implements Q
     return this;
   }
 
-  public ColumnQuery<N, V> setName(String name) {
+  public ColumnQuery<N, V> setName(N name) {
     this.name = name;
     return this;
   }
@@ -34,11 +34,10 @@ public class ColumnQuery<N, V> extends AbstractQuery<HColumn<N, V>> implements Q
       @Override
       public Result<HColumn<N, V>> doInKeyspace(Keyspace ks) throws HectorException {
         org.apache.cassandra.thrift.Column thriftColumn = 
-          ks.getColumn(key, createColumnPath(columnFamilyName, name));
+          ks.getColumn(key, createColumnPath(columnFamilyName, name, nameExtractor));
         HColumn<N, V> column = new HColumn<N, V>(thriftColumn, nameExtractor, valueExtractor);
         return new Result<HColumn<N, V>>(column);
       }
-      
     });
     return result;
   }
