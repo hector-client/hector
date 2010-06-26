@@ -39,7 +39,7 @@ public class KeyspaceOperatorTest {
   public void testInsertGetRemove() {
     String cf = "Standard1";
     
-    Mutator<String> m = MutatorFactory.createMutator(ko);
+    Mutator m = MutatorFactory.createMutator(ko);
     MutationResult mr = m.insert("testInsertGetRemove", cf, 
         m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_", se, se));
     
@@ -79,7 +79,7 @@ public class KeyspaceOperatorTest {
   public void testBatchInsertGetRemove() {
     String cf = "Standard1";
     
-    Mutator<String> m = MutatorFactory.createMutator(ko);
+    Mutator m = MutatorFactory.createMutator(ko);
     for (int i = 0; i < 5; i++) {
       m.addInsertion("testInsertGetRemove" + i, cf, 
           m.createColumn("testInsertGetRemove", "testInsertGetRemove_value_" + i, se, se));
@@ -123,7 +123,7 @@ public class KeyspaceOperatorTest {
   public void testSuperInsertGetRemove() {
     String cf = "Super1";
     
-    Mutator<String> m = MutatorFactory.createMutator(ko);
+    Mutator m = MutatorFactory.createMutator(ko);
     
     @SuppressWarnings("unchecked") // aye, varargs and generics aren't good friends...
     List<HColumn<String,String>> columns = Arrays.asList(m.createColumn("name1", "value1", se, se), 

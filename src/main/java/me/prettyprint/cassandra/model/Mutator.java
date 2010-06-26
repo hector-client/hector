@@ -5,27 +5,25 @@ import java.util.List;
 /**
  * 
  * @author Ran Tavory 
- *
- * @param <K> Key type. In version 0.6.0 only strings are allowed
  */
-public interface Mutator<K> {
+public interface Mutator {
 
   // Simple and immediate insertion of a column
-  <N,V> MutationResult insert(K row, String cf, HColumn<N,V> c);
+  <N,V> MutationResult insert(String key, String cf, HColumn<N,V> c);
 
   // overloaded insert-super
-  <SN,N,V> MutationResult insert(K row, String cf, HSuperColumn<SN,N,V> superColumn);
+  <SN,N,V> MutationResult insert(String key, String cf, HSuperColumn<SN,N,V> superColumn);
 
-  <N> MutationResult delete(K row, String cf, N columnName, Extractor<N> nameExtractor);
+  <N> MutationResult delete(String key, String cf, N columnName, Extractor<N> nameExtractor);
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an 
   // indeterminant state if we dont validate against LIVE (but cached of course) 
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
-  <N,V> Mutator<K> addInsertion(K row, String cf, HColumn<N,V> c);
+  <N,V> Mutator addInsertion(String key, String cf, HColumn<N,V> c);
   
-  <N> Mutator<K> addDeletion(K row, String cf, N columnName, Extractor<N> nameExtractor);
+  <N> Mutator addDeletion(String key, String cf, N columnName, Extractor<N> nameExtractor);
 
 
   /**
@@ -35,10 +33,10 @@ public interface Mutator<K> {
    */
   MutationResult execute();
 
-  K getKeyExtractor();
-  
-  Mutator<K> setKeyExtractor(K extractor);
-  
+//  K getKeyExtractor();
+//  
+//  Mutator<K> setKeyExtractor(K extractor);
+//  
   
   ////////////////////
   // Factory methods

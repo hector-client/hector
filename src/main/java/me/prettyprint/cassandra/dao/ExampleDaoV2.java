@@ -49,7 +49,7 @@ public class ExampleDaoV2 {
    * @param value the String value to insert
    */
   public void insert(final String key, final String value) {
-    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
+    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
     m.insert(key, CF_NAME, m.createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
@@ -73,7 +73,7 @@ public class ExampleDaoV2 {
    * Delete a key from cassandra
    */
   public void delete(final String key) throws HectorException {
-    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
+    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
     m.delete(key, CF_NAME, COLUMN_NAME, extractor);
   }
   
@@ -104,7 +104,7 @@ public class ExampleDaoV2 {
    * Insert multiple values
    */
   public void insertMulti(Map<String, String> keyValues) {
-    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
+    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,  
           m.createColumn(COLUMN_NAME, keyValue.getValue(), extractor, extractor));
@@ -116,7 +116,7 @@ public class ExampleDaoV2 {
    * Insert multiple values
    */
   public void deleteMulti(Collection<String> keys) {
-    Mutator<String> m = MutatorFactory.createMutator(keyspaceOperator);
+    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
     for (String key: keys) {
       m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
     }
