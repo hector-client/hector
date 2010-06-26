@@ -1,5 +1,12 @@
 package me.prettyprint.cassandra.dao;
 
+import static me.prettyprint.cassandra.model.HFactory.createColumn;
+import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
+import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
+import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createMutator;
+import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,16 +15,12 @@ import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.KeyspaceOperatorFactory;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
-import me.prettyprint.cassandra.model.MutatorFactory;
-import me.prettyprint.cassandra.model.QueryFactory;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
 import me.prettyprint.cassandra.model.StringExtractor;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.cassandra.service.ClusterFactory;
 
 public class ExampleDaoV2 {
 
@@ -31,8 +34,8 @@ public class ExampleDaoV2 {
   private final KeyspaceOperator keyspaceOperator;
   
   public static void main(String[] args) throws HectorException {
-    Cluster c = ClusterFactory.getOrCreate("MyCluster", HOST_PORT);
-    ExampleDaoV2 ed = new ExampleDaoV2(KeyspaceOperatorFactory.create(KEYSPACE, c));
+    Cluster c = getOrCreateCluster("MyCluster", HOST_PORT);
+    ExampleDaoV2 ed = new ExampleDaoV2(createKeyspaceOperator(KEYSPACE, c));
     ed.insert("key1", "value1");
 
     System.out.println(ed.get("key1"));
@@ -49,8 +52,7 @@ public class ExampleDaoV2 {
    * @param value the String value to insert
    */
   public void insert(final String key, final String value) {
-    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
-    m.insert(key, CF_NAME, m.createColumn(COLUMN_NAME, value, extractor, extractor));
+    createMutator(keyspaceOperator).insert(key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
   /**
@@ -59,8 +61,7 @@ public class ExampleDaoV2 {
    * @return The string value; null if no value exists for the given key.
    */
   public String get(final String key) throws HectorException {
-    ColumnQuery<String, String> q = 
-        QueryFactory.createColumnQuery(keyspaceOperator, extractor, extractor);
+    ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).
@@ -73,8 +74,7 @@ public class ExampleDaoV2 {
    * Delete a key from cassandra
    */
   public void delete(final String key) throws HectorException {
-    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
-    m.delete(key, CF_NAME, COLUMN_NAME, extractor);
+    createMutator(keyspaceOperator).delete(key, CF_NAME, COLUMN_NAME, extractor);
   }
   
   /**
@@ -83,7 +83,7 @@ public class ExampleDaoV2 {
    * @return
    */
   public Map<String, String> getMulti(Collection<String> keys) {
-    MultigetSliceQuery<String,String,String> q = QueryFactory.createMultigetSliceQuery(keyspaceOperator);
+    MultigetSliceQuery<String,String,String> q = createMultigetSliceQuery(keyspaceOperator);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
@@ -104,10 +104,10 @@ public class ExampleDaoV2 {
    * Insert multiple values
    */
   public void insertMulti(Map<String, String> keyValues) {
-    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
+    Mutator m = createMutator(keyspaceOperator);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,  
-          m.createColumn(COLUMN_NAME, keyValue.getValue(), extractor, extractor));
+          createColumn(COLUMN_NAME, keyValue.getValue(), extractor, extractor));
     }
     m.execute();
   }
@@ -116,7 +116,7 @@ public class ExampleDaoV2 {
    * Insert multiple values
    */
   public void deleteMulti(Collection<String> keys) {
-    Mutator m = MutatorFactory.createMutator(keyspaceOperator);
+    Mutator m = createMutator(keyspaceOperator);
     for (String key: keys) {
       m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
     }

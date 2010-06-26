@@ -1,12 +1,12 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
+import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.cassandra.service.ClusterFactory;
 
 import org.junit.Before;
 import org.junit.Test;
-
 public class MutatorTest extends BaseEmbededServerSetupTest {
 
   private Cluster cluster;
@@ -14,8 +14,8 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   
   @Before
   public void doSetup() {
-    cluster = ClusterFactory.getOrCreate("Test Cluster", "127.0.0.1:9170");
-    keyspaceOperator = KeyspaceOperatorFactory.create("Keyspace1", cluster);    
+    cluster = getOrCreateCluster("Test Cluster", "127.0.0.1:9170");
+    keyspaceOperator = createKeyspaceOperator("Keyspace1", cluster);    
   }
   
   @Test

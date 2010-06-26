@@ -1,8 +1,12 @@
 package me.prettyprint.cassandra.model;
 
-import java.util.List;
 
 /**
+ * A Mutator inserts or deltes values from the cluster. 
+ * There are two main ways to use a mutator:
+ * 1. Use the insert/delete methods to immediately insert of delete values. 
+ * or 2. Use the addInsertion/addDeletion methods to schedule batch operations and then execute() 
+ * all of them in batch.
  * 
  * @author Ran Tavory 
  */
@@ -32,25 +36,4 @@ public interface Mutator {
    * @return A MutationResult holds the status.
    */
   MutationResult execute();
-
-//  K getKeyExtractor();
-//  
-//  Mutator<K> setKeyExtractor(K extractor);
-//  
-  
-  ////////////////////
-  // Factory methods
-  ///////////////////
-  /**
-   * createSuperColumn accepts a variable number of column arguments
-   * @param name supercolumn name
-   * @param createColumn a variable number of column arguments
-   * @return
-   */
-  <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(N name, List<HColumn<N,V>> column, 
-      Extractor<V> superNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor);
-  
-  <N,V> HColumn<N,V> createColumn(N name, V value, Extractor<N> nameExtractor, 
-      Extractor<V> valueExtractor);
-
 }

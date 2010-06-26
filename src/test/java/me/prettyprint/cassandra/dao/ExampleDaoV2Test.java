@@ -1,6 +1,10 @@
 package me.prettyprint.cassandra.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import static me.prettyprint.cassandra.model.HFactory.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,9 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.KeyspaceOperatorFactory;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.cassandra.service.ClusterFactory;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
@@ -45,8 +47,8 @@ public class ExampleDaoV2Test {
   @Test
   @Ignore("Not functinal yet")
   public void testInsertGetDelete() throws HectorException {
-    Cluster c = ClusterFactory.getOrCreate("MyCluster", "localhost:9170");
-    ExampleDaoV2 dao = new ExampleDaoV2(KeyspaceOperatorFactory.create("Keyspace1", c));
+    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
+    ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
     assertNull(dao.get("key"));
     dao.insert("key", "value");
     assertEquals("value", dao.get("key"));
@@ -57,8 +59,8 @@ public class ExampleDaoV2Test {
   @Test
   @Ignore("Not functinal yet")
   public void testMultiInsertGetDelete() throws HectorException {
-    Cluster c = ClusterFactory.getOrCreate("MyCluster", "localhost:9170");
-    ExampleDaoV2 dao = new ExampleDaoV2(KeyspaceOperatorFactory.create("Keyspace1", c));
+    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
+    ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
 
     // Get non-existing values
     Map<String, String> ret = dao.getMulti(Arrays.asList("key1", "key2"));

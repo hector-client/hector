@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.Keyspace;
+import static me.prettyprint.cassandra.model.HFactory.*;
 
 // like a simple get operation
 // may return a Column or a SuperColumn
@@ -33,7 +34,7 @@ public class ColumnQuery<N, V> extends AbstractQuery<HColumn<N, V>> implements Q
       @Override
       public Result<HColumn<N, V>> doInKeyspace(Keyspace ks) throws HectorException {
         org.apache.cassandra.thrift.Column thriftColumn = 
-          ks.getColumn(key, ModelUtils.createColumnPath(columnFamilyName, name));
+          ks.getColumn(key, createColumnPath(columnFamilyName, name));
         HColumn<N, V> column = new HColumn<N, V>(thriftColumn, nameExtractor, valueExtractor);
         return new Result<HColumn<N, V>>(column);
       }
