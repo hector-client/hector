@@ -71,7 +71,11 @@ public class HColumn<N,V> {
   }
   
   public byte[] getValueBytes() {
-    return valueExtractor.toBytes(getValue());
+    return this.valueExtractor.toBytes(value);
+  }
+  
+  public Extractor<V> getValueExtractor() {
+    return this.valueExtractor;
   }
   
   public Extractor<N> getNameExtractor() {
