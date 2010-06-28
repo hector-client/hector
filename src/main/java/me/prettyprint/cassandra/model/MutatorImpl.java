@@ -41,8 +41,16 @@ public class MutatorImpl implements Mutator {
   }
 
   @Override
-  public <N, V> MutationResult insert(String key, String cf, HColumn<N, V> c) {
-    return null;
+  public <N, V> MutationResult insert(final String key, final String cf, final HColumn<N, V> c) {
+    MutationResult mutationResult = keyspaceOperator.doExecute(new KeyspaceOperationCallback<MutationResult>() {
+      @Override
+      public MutationResult doInKeyspace(Keyspace ks) throws HectorException {
+        MutationResult mutationResult = new MutationResultImpl();
+        ks.insert(key, createColumnPath(cf, c.getName(), c.getNameExtractor()), c.getValueBytes());
+        return mutationResult;
+      }            
+    });    
+    return mutationResult;
   }
 
   @Override

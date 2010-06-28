@@ -70,6 +70,14 @@ public class HColumn<N,V> {
     return timestamp;
   }
   
+  public byte[] getValueBytes() {
+    return valueExtractor.toBytes(getValue());
+  }
+  
+  public Extractor<N> getNameExtractor() {
+    return this.nameExtractor;
+  }
+  
   public Column toThrift() {
     return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), timestamp);
   }
