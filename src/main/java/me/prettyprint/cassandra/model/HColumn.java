@@ -67,7 +67,7 @@ public class HColumn<N,V> {
   long getTimestamp() {
     return timestamp;
   }
-  
+    
   public Column toThrift() {
     return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), timestamp);
   }
