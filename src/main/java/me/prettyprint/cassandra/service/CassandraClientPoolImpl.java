@@ -158,6 +158,10 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void releaseClient(CassandraClient client) throws HectorException {
+    if (client == null) {
+      log.error("client is null; cannot release, there's a bug dude");
+      return;
+    }
     getPool(client).releaseClient(client);
   }
 
@@ -241,5 +245,10 @@ import org.slf4j.LoggerFactory;
   @Override
   public CassandraClientMonitorMBean getMbean() {
     return clientMonitor;
+  }
+
+  @Override
+  public String toString() {
+    return "CassandraClientPoolImpl(" + pools + ")";
   }
 }

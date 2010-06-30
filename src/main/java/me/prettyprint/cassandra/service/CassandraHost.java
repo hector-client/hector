@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the information required for connecting to a Cassandra host.
  * Also exposes pool configuration parameters for that host.
- *
+ * TODO(ran): Merge CassandraHost, CassandraCluster into Cluster
  * @author Nate McCall (nate@vervewireless.com)
  *
  */

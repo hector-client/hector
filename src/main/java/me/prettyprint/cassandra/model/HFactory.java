@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.cassandra.service.ClusterImpl;
 
 import org.apache.cassandra.thrift.ColumnPath;
 
@@ -59,7 +59,7 @@ public class HFactory {
   }
   
   public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
-    return new ClusterImpl(clusterName, cassandraHostConfigurator);
+    return new Cluster(clusterName, cassandraHostConfigurator);
   }
 
   /**
@@ -74,7 +74,7 @@ public class HFactory {
 
   public static KeyspaceOperator createKeyspaceOperator(String keyspace, Cluster cluster, 
           ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return new KeyspaceOperatorImpl(keyspace, cluster, consistencyLevelPolicy);
+    return new KeyspaceOperator(keyspace, cluster, consistencyLevelPolicy);
   }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {
@@ -82,8 +82,7 @@ public class HFactory {
   }
 
   public static <N,V> Mutator createMutator(KeyspaceOperator ko) {
-    //TODO
-    return null;
+    return new Mutator(ko);
   }
 
   public static <N,V> ColumnQuery<N,V> createColumnQuery(KeyspaceOperator ko, 
@@ -121,19 +120,36 @@ public class HFactory {
     return null;
   }
   
-  public static <N,V> HColumn<N,V> createColumn(N name, V value, Extractor<N> nameExtractor, 
-      Extractor<V> valueExtractor) {
-    //TODO
-    return null;
+  public static <N,V> HColumn<N,V> createColumn(N name, V value, long timestamp, 
+      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new HColumn<N, V>(name, value, timestamp, nameExtractor, valueExtractor);
   }
 
-  
+  /**
+   * Creates a column with the timestamp of now.
+   */
+  public static <N,V> HColumn<N,V> createColumn(N name, V value, 
+      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new HColumn<N, V>(name, value, createTimestamp(), nameExtractor, valueExtractor);
+  }
+
+  /**
+   * Creates a timestamp of now with the default timestamp resolution (micorosec) as defined in 
+   * {@link CassandraHost}
+   */
+  public static long createTimestamp() {
+    return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createTimestamp();
+  }
   // probably should be typed for thrift vs. avro
   /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, N columnName, 
       Extractor<N> nameExtractor) {
+    return createColumnPath(columnFamilyName, nameExtractor.toBytes(columnName));
+  }
+
+  /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
     ColumnPath columnPath = new ColumnPath(columnFamilyName);
     if ( columnName != null ) {
-      columnPath.setColumn(nameExtractor.toBytes(columnName));
+      columnPath.setColumn(columnName);
     }
     return columnPath;
   }

@@ -6,45 +6,25 @@ package me.prettyprint.cassandra.model;
  *
  * @param <T> The type of the result. May be for example Column of SuperColumn
  */
-public class Result<T> implements ExecutionResult {
+public class Result<T> extends ExecutionResult<T> {
 
-  private T t;
+  private final Query<T> query;
   
-  public Result(T t) {
-    // TODO Auto-generated constructor stub
+  /*package*/ Result(ExecutionResult<T> res, Query<T> query) {
+    super(res.get(), res.isSuccess(), res.getExecutionTimeMicro());
+    this.query = query;
   }
 
-  /**
-   * @return the actual value returned from the query.
-   */
-  public T get() {
-    return t;    
-  }
-  
-  
   /**
    * @return the query used to create this result
    */
   public Query<T> getQuery() {
-    // TODO Auto-generated method stub
-    return null;
+    return query;
   }
 
-  @Override
-  public boolean isSuccess() {
-    // TODO Auto-generated method stub
-    return false;
-  }
 
   @Override
-  public long getExecutionTimeMili() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public String getHostUsed() {
-    // TODO Auto-generated method stub
-    return null;
+  public String toString() {
+    return  "Result(" + get() + "," + toStringInternal() + "," + query + ")";
   }
 }

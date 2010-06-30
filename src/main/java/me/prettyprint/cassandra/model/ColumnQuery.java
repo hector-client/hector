@@ -1,7 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
 import me.prettyprint.cassandra.service.Keyspace;
-import static me.prettyprint.cassandra.model.HFactory.*;
 
 // like a simple get operation
 // may return a Column or a SuperColumn
@@ -29,16 +29,23 @@ public class ColumnQuery<N, V> extends AbstractQuery<HColumn<N, V>> implements Q
   }
 
   public Result<HColumn<N, V>> execute() {    
-    Result<HColumn<N, V>> result = keyspaceOperator.doExecute(
-        new KeyspaceOperationCallback<Result<HColumn<N, V>>>() {
+    return new Result<HColumn<N, V>>(keyspaceOperator.doExecute(
+        new KeyspaceOperationCallback<HColumn<N, V>>() {
       @Override
-      public Result<HColumn<N, V>> doInKeyspace(Keyspace ks) throws HectorException {
+      public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
+        try {
         org.apache.cassandra.thrift.Column thriftColumn = 
           ks.getColumn(key, createColumnPath(columnFamilyName, name, nameExtractor));
-        HColumn<N, V> column = new HColumn<N, V>(thriftColumn, nameExtractor, valueExtractor);
-        return new Result<HColumn<N, V>>(column);
+        return new HColumn<N, V>(thriftColumn, nameExtractor, valueExtractor);
+        } catch (NotFoundException e) {
+          return null;
+        }
       }
-    });
-    return result;
+    }), this);
+  }
+
+  @Override
+  public String toString() {
+    return "ColumnQuery(" + key + "," + name + ")";
   }
 }

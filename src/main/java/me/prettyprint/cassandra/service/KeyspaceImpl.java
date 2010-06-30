@@ -381,12 +381,18 @@ import org.slf4j.LoggerFactory;
   @Override
   public void insert(final String key, final ColumnPath columnPath, final byte[] value)
       throws HectorException {
+    insert(key, columnPath, value, createTimestamp());
+  }
+
+  @Override
+  public void insert(final String key, final ColumnPath columnPath, final byte[] value, 
+      final long timestamp) throws HectorException {
     valideColumnPath(columnPath);
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.insert(keyspaceName, key, columnPath, value, createTimestamp(), consistency);
+          cassandra.insert(keyspaceName, key, columnPath, value, timestamp, consistency);
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -395,6 +401,7 @@ import org.slf4j.LoggerFactory;
     };
     operateWithFailover(op);
   }
+
 
   @Override
   public Map<String, Column> multigetColumn(final List<String> keys, final ColumnPath columnPath)

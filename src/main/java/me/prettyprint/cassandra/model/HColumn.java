@@ -8,7 +8,6 @@ import org.apache.cassandra.thrift.Column;
  * @param <N> The type of the column name
  * @param <V> The type of the column value
  *
- * TODO(ran): This is still experimental; not production ready; work in progress
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
@@ -20,8 +19,7 @@ public class HColumn<N,V> {
   private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
 
-  public HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor, 
-      Extractor<V> valueExtractor) {
+  public HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     this.name = name;
     this.value = value;
@@ -81,5 +79,26 @@ public class HColumn<N,V> {
     name = nameExtractor.fromBytes(c.name);
     value = valueExtractor.fromBytes(c.value);
     return this;
+  }
+
+  public Extractor<N> getNameExtractor() {
+    return nameExtractor;
+  }
+
+  public Extractor<V> getValueExtractor() {
+    return valueExtractor;
+  }
+
+  public byte[] getValueBytes() {
+    return valueExtractor.toBytes(getValue());
+  }
+
+  public byte[] getNameBytes() {
+    return nameExtractor.toBytes(getName());
+  }
+
+  @Override
+  public String toString() {
+    return "HColumn(" + name + "=" + value + ")";
   }
 }

@@ -143,6 +143,8 @@ public interface Keyspace {
    */
   void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException;
 
+  void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException;
+
   /**
    * Insert Columns or SuperColumns across different Column Families for the same row key.
    */

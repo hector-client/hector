@@ -53,7 +53,11 @@ public class ExampleDaoV2 {
    */
   public void insert(final String key, final String value) {
     createMutator(keyspaceOperator).
-        insert(key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
+        insert(key, CF_NAME, createColumn(COLUMN_NAME, value, createTimestamp(), extractor, extractor));
+  }
+
+  private long createTimestamp() {
+    return keyspaceOperator.createTimestamp();
   }
 
   /**
@@ -108,7 +112,7 @@ public class ExampleDaoV2 {
     Mutator m = createMutator(keyspaceOperator);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,  
-          createColumn(COLUMN_NAME, keyValue.getValue(), extractor, extractor));
+          createColumn(COLUMN_NAME, keyValue.getValue(), createTimestamp(), extractor, extractor));
     }
     m.execute();
   }

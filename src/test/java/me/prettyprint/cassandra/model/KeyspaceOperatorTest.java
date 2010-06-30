@@ -10,11 +10,12 @@ import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.List;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.Cluster;
 
 import org.junit.Before;
@@ -23,7 +24,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeyspaceOperatorTest {
+public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
   
   private static final Logger log = LoggerFactory.getLogger(KeyspaceOperatorTest.class);
   private final static String KEYSPACE = "Keyspace1";
@@ -34,13 +35,13 @@ public class KeyspaceOperatorTest {
 
 
   @Before
-  public void setup() {
+  public void setupCase() {
     cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
     ko = createKeyspaceOperator(KEYSPACE, cluster);    
   }
   
   @Test
-  @Ignore("Not ready yet")
+  //@Ignore("Not ready yet")
   public void testInsertGetRemove() {
     String cf = "Standard1";
     
@@ -50,8 +51,9 @@ public class KeyspaceOperatorTest {
     
     // Check the mutation result metadata
     assertTrue(mr.isSuccess());
-    assertEquals("127.0.0.1:9170", mr.getHostUsed());
-    log.debug("insert execution time: {}", mr.getExecutionTimeMili());
+    //assertEquals("127.0.0.1:9170", mr.getHostUsed());
+    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
     // get value
     ColumnQuery<String,String> q = createColumnQuery(ko, se, se);
@@ -65,17 +67,22 @@ public class KeyspaceOperatorTest {
     assertEquals("testInsertGetRemove_value_", value);
     String name = c.getName();
     assertEquals("testInsertGetRemove", name);
+    assertEquals(q, r.getQuery());
+    assertTrue("Time should be > 0", r.getExecutionTimeMicro() > 0);
+
 
     // remove value
     m = createMutator(ko);
-    m.delete("testInsertGetRemove_", cf, "testInsertGetRemove", se);
+    MutationResult mr2 = m.delete("testInsertGetRemove", cf, "testInsertGetRemove", se);
+    assertTrue("Delete failed", mr2.isSuccess());
+    assertTrue("Time should be > 0", mr2.getExecutionTimeMicro() > 0);
 
     // get already removed value
     ColumnQuery<String,String> q2 = createColumnQuery(ko, se, se);
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
     Result<HColumn<String,String>> r2 = q2.setKey("testInsertGetRemove").execute();
     assertNotNull(r2);
-    assertTrue(r2.isSuccess());
+    assertTrue("no success..", r2.isSuccess());
     assertNull("Value should have been deleted", r2.get());
   }
 
