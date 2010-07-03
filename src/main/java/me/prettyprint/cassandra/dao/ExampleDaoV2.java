@@ -19,7 +19,7 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
-import me.prettyprint.cassandra.model.StringExtractor;
+import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.service.Cluster;
 
 public class ExampleDaoV2 {

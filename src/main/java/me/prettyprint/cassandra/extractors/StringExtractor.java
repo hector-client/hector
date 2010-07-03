@@ -1,7 +1,13 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.extractors;
 
 import static me.prettyprint.cassandra.utils.StringUtils.*;
+import me.prettyprint.cassandra.model.Extractor;
 
+/**
+ * A StringExtractor translates the byte[] to and from string using utf-8 encoding.
+ * @author Ran Tavory
+ *
+ */
 public class StringExtractor implements Extractor<String> {
 
   private static StringExtractor instance = new StringExtractor();

@@ -12,7 +12,7 @@ public class KeyspaceOperator {
   private final Cluster cluster;
   private final String keyspace;
   
-  KeyspaceOperator(String keyspace, Cluster cluster, ConsistencyLevelPolicy consistencyLevelPolicy) {
+  /*package*/ KeyspaceOperator(String keyspace, Cluster cluster, ConsistencyLevelPolicy consistencyLevelPolicy) {
     this.keyspace = keyspace;
     this.cluster = cluster;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
@@ -26,6 +26,15 @@ public class KeyspaceOperator {
     return cluster;
   }
   
+  @Override
+  public String toString() {
+    return "KeyspaceOperator(" + keyspace +"," + cluster + ")";
+  }
+
+  public long createTimestamp() {
+    return cluster.createTimestamp();
+  }
+
   /*package*/ <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     CassandraClient c = null;
     Keyspace ks = null; 
@@ -36,14 +45,5 @@ public class KeyspaceOperator {
     } finally {
       cluster.releaseClient(ks.getClient());                        
     }
-  }
-
-  @Override
-  public String toString() {
-    return "KeyspaceOperator(" + keyspace +"," + cluster + ")";
-  }
-
-  public long createTimestamp() {
-    return cluster.createTimestamp();
   }
 }

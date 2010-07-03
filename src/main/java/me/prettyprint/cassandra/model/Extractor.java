@@ -1,9 +1,17 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.extractors.StringExtractor;
+
 /**
  * Extracts a type T from the given bytes, or vice a versa.
- * Very useful in conjunction with cassandra column names and values which are encoded in byte[].
- * The extractor extracts real java object from the bytes, one such example is the StringExtractor.
+ * 
+ * In cassandra column names and column values (and starting with 0.7.0 row keys) are all byte[].
+ * To allow type safe conversion in java and keep all conversion code in one place we define the 
+ * Extractor interface.
+ * Implementors of the interface define type conversion according to their domains. A predefined 
+ * set of common extractors can be found in the extractors package, for example 
+ * {@link StringExtractor}.
+ * 
  * @author Ran Tavory 
  *
  * @param <T> The type to which data extraction should work.
