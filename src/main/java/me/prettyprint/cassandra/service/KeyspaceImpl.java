@@ -342,6 +342,9 @@ import org.slf4j.LoggerFactory;
         try {
           List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
               consistency);
+          if (cosc == null || cosc.isEmpty()) {
+            return null;
+          }
           return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
         } catch (Exception e) {
           throw xtrans.translate(e);
