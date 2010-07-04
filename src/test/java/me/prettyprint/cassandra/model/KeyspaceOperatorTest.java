@@ -26,29 +26,29 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
-  
+
   private static final Logger log = LoggerFactory.getLogger(KeyspaceOperatorTest.class);
   private final static String KEYSPACE = "Keyspace1";
   private static final StringExtractor se = new StringExtractor();
   private Cluster cluster;
   private KeyspaceOperator ko;
-  
+
 
 
   @Before
   public void setupCase() {
     cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
-    ko = createKeyspaceOperator(KEYSPACE, cluster);    
+    ko = createKeyspaceOperator(KEYSPACE, cluster);
   }
-  
+
   @Test
   public void testInsertGetRemove() {
     String cf = "Standard1";
-    
+
     Mutator m = createMutator(ko);
-    MutationResult mr = m.insert("testInsertGetRemove", cf, 
+    MutationResult mr = m.insert("testInsertGetRemove", cf,
         createColumn("testInsertGetRemove", "testInsertGetRemove_value_", se, se));
-    
+
     // Check the mutation result metadata
     assertTrue(mr.isSuccess());
     //assertEquals("127.0.0.1:9170", mr.getHostUsed());
@@ -87,13 +87,12 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore("Not ready yet")
   public void testBatchInsertGetRemove() {
     String cf = "Standard1";
-    
+
     Mutator m = createMutator(ko);
     for (int i = 0; i < 5; i++) {
-      m.addInsertion("testInsertGetRemove" + i, cf, 
+      m.addInsertion("testInsertGetRemove" + i, cf,
           createColumn("testInsertGetRemove", "testInsertGetRemove_value_" + i, se, se));
     }
     m.execute();
@@ -114,7 +113,7 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
     // remove value
     m = createMutator(ko);
     for (int i = 0; i < 5; i++) {
-      m.addDeletion("testInsertGetRemove_" + i, cf, "testInsertGetRemove", se);
+      m.addDeletion("testInsertGetRemove" + i, cf, "testInsertGetRemove", se);
     }
     m.execute();
 
@@ -129,20 +128,20 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
     }
   }
 
-  
+
   @Test
   @Ignore("Not ready yet")
   public void testSuperInsertGetRemove() {
     String cf = "Super1";
-    
+
     Mutator m = createMutator(ko);
-    
+
     @SuppressWarnings("unchecked") // aye, varargs and generics aren't good friends...
-    List<HColumn<String,String>> columns = Arrays.asList(createColumn("name1", "value1", se, se), 
+    List<HColumn<String,String>> columns = Arrays.asList(createColumn("name1", "value1", se, se),
         createColumn("name2", "value2", se, se));
-    m.insert("testSuperInsertGetRemove", cf, 
+    m.insert("testSuperInsertGetRemove", cf,
         createSuperColumn("testSuperInsertGetRemove", columns, se, se, se));
-    
+
 
     // get value
     SuperColumnQuery<String,String,String> q = createSuperColumnQuery(ko);
@@ -159,7 +158,7 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
     String name = c.getName();
     assertEquals("name1", name);
 
-  
+
     HColumn<String,String> c2 = sc.get(1);
     assertEquals("name1", c2.getName());
     assertEquals("value1", c2.getValue());

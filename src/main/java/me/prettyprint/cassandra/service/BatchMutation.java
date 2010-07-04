@@ -25,10 +25,14 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public class BatchMutation {
 
-  Map<String, Map<String, List<Mutation>>> mutationMap;
+  private final Map<String, Map<String, List<Mutation>>> mutationMap;
 
   public BatchMutation() {
     mutationMap = new HashMap<String, Map<String,List<Mutation>>>();
+  }
+
+  private BatchMutation(Map<String, Map<String, List<Mutation>>> mutationMap) {
+    this.mutationMap = mutationMap;
   }
 
   /**
@@ -89,4 +93,19 @@ public class BatchMutation {
     return mutationMap;
   }
 
+  /**
+   * Makes a shallow copy of the mutation object.
+   * @return
+   */
+  public BatchMutation makeCopy() {
+    return new BatchMutation(mutationMap);
+  }
+
+  /**
+   * Checks whether the mutation object contains any mutations.
+   * @return
+   */
+  public boolean isEmpty() {
+    return mutationMap.isEmpty();
+  }
 }
