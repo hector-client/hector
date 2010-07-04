@@ -52,8 +52,8 @@ public class ExampleDaoV2 {
    * @param value the String value to insert
    */
   public void insert(final String key, final String value) {
-    createMutator(keyspaceOperator).
-    insert(key, CF_NAME, createColumn(COLUMN_NAME, value, createTimestamp(), extractor, extractor));
+    createMutator(keyspaceOperator).insert(
+        key, CF_NAME, createColumn(COLUMN_NAME, value, createTimestamp(), extractor, extractor));
   }
 
   private long createTimestamp() {
@@ -88,13 +88,13 @@ public class ExampleDaoV2 {
    * @return
    */
   public Map<String, String> getMulti(Collection<String> keys) {
-    MultigetSliceQuery<String,String,String> q = createMultigetSliceQuery(keyspaceOperator);
+    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
 
-    Result<Rows<String,String,String>> r = q.execute();
-    Rows<String,String,String> rows = r.get();
+    Result<Rows<String,String>> r = q.execute();
+    Rows<String,String> rows = r.get();
     Map<String, String> ret = new HashMap<String, String>(keys.size());
     for (String k: keys) {
       HColumn<String,String> c = rows.get(k).getColumnSlice().getColumnByName(COLUMN_NAME);
