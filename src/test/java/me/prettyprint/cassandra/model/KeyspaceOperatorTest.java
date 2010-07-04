@@ -42,7 +42,6 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
   }
   
   @Test
-  //@Ignore("Not ready yet")
   public void testInsertGetRemove() {
     String cf = "Standard1";
     
