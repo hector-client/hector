@@ -1,12 +1,13 @@
-package me.prettyprint.cassandra.dao;
-
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.NotFoundException;
-import me.prettyprint.cassandra.service.Keyspace;
-import org.apache.cassandra.thrift.ColumnPath;
+package me.prettyprint.cassandra.examples;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
+import me.prettyprint.cassandra.dao.Command;
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.NotFoundException;
+import me.prettyprint.cassandra.service.Keyspace;
+
+import org.apache.cassandra.thrift.ColumnPath;
 
 /**
  * An example DAO (data access object) which uses the Command pattern.
@@ -49,6 +50,7 @@ public class ExampleDao {
    */
   public void insert(final String key, final String value) throws HectorException {
     execute(new Command<Void>() {
+      @Override
       public Void execute(final Keyspace ks) throws HectorException {
         ks.insert(key, createColumnPath(COLUMN_NAME), bytes(value));
         return null;
@@ -63,6 +65,7 @@ public class ExampleDao {
    */
   public String get(final String key) throws HectorException {
     return execute(new Command<String>() {
+      @Override
       public String execute(final Keyspace ks) throws HectorException {
         try {
           return string(ks.getColumn(key, createColumnPath(COLUMN_NAME)).getValue());
@@ -78,6 +81,7 @@ public class ExampleDao {
    */
   public void delete(final String key) throws HectorException {
     execute(new Command<Void>() {
+      @Override
       public Void execute(final Keyspace ks) throws HectorException {
         ks.remove(key, createColumnPath(COLUMN_NAME));
         return null;

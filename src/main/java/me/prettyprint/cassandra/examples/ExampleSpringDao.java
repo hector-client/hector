@@ -1,7 +1,8 @@
-package me.prettyprint.cassandra.dao;
+package me.prettyprint.cassandra.examples;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
+import me.prettyprint.cassandra.dao.SpringCommand;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.CassandraClient;
@@ -22,7 +23,7 @@ public class ExampleSpringDao {
   private String columnName = COLUMN_NAME;
   private ConsistencyLevel consistencyLevel = CassandraClient.DEFAULT_CONSISTENCY_LEVEL;
   // collaborator
-  private CassandraClientPool cassandraClientPool;
+  private final CassandraClientPool cassandraClientPool;
 
   /**
    * Must be constructed with a CassandraClientPool
@@ -39,6 +40,7 @@ public class ExampleSpringDao {
    */
   public void insert(final String key, final String value) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
+      @Override
       public Void execute(final Keyspace ks) throws HectorException {
         ks.insert(key, createColumnPath(columnName), bytes(value));
         return null;
@@ -52,6 +54,7 @@ public class ExampleSpringDao {
    */
   public String get(final String key) throws HectorException {
     return execute(new SpringCommand<String>(cassandraClientPool){
+      @Override
       public String execute(final Keyspace ks) throws HectorException {
         try {
           return string(ks.getColumn(key, createColumnPath(columnName)).getValue());
@@ -67,6 +70,7 @@ public class ExampleSpringDao {
    */
   public void delete(final String key) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
+      @Override
       public Void execute(final Keyspace ks) throws HectorException {
         ks.remove(key, createColumnPath(columnName));
         return null;

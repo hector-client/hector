@@ -1,19 +1,13 @@
-package me.prettyprint.cassandra.dao;
+package me.prettyprint.cassandra.examples;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-
-import java.io.IOException;
 
 import javax.annotation.Resource;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
-import org.apache.thrift.transport.TTransportException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.test.context.ContextConfiguration;

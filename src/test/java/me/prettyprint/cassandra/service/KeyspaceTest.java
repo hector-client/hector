@@ -85,7 +85,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsertAndGetAndRemove() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, Exception {
+  IllegalStateException, NotFoundException, Exception {
 
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
@@ -124,7 +124,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testInsertSuper() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, Exception {
+  IllegalStateException, NotFoundException, Exception {
 
     // insert value
     ColumnPath cp = new ColumnPath("Super1");
@@ -720,6 +720,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
+    @SuppressWarnings("deprecation")
     Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0", "testGetRangeSlice3", 5);
 
     assertNotNull(keySlices);
@@ -773,7 +774,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   public void testGetSuperRangeSlice() throws HectorException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Super1");
-      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setSuper_column(bytes("SuperColumn_1"));
       cp.setColumn(bytes("testGetSuperRangeSlice_" + i));
       keyspace.insert("testGetSuperRangeSlice0", cp, bytes("testGetSuperRangeSlice_Value_" + i));
       keyspace.insert("testGetSuperRangeSlice1", cp, bytes("testGetSuperRangeSlice_Value_" + i));
@@ -784,8 +785,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
+    @SuppressWarnings("deprecation")
     Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
-            "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
+        "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());
@@ -804,7 +806,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   public void testGetSuperRangeSlices() throws HectorException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Super1");
-      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setSuper_column(bytes("SuperColumn_1"));
       cp.setColumn(bytes("testGetSuperRangeSlices_" + i));
       keyspace.insert("testGetSuperRangeSlices0", cp, bytes("testGetSuperRangeSlices_Value_" + i));
       keyspace.insert("testGetSuperRangeSlices1", cp, bytes("testGetSuperRangeSlices_Value_" + i));
@@ -848,8 +850,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testFailover() throws HectorException,
-      org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
-      org.apache.cassandra.thrift.TimedOutException, TException {
+  org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
+  org.apache.cassandra.thrift.TimedOutException, TException {
     CassandraClient h1client = mock(CassandraClient.class);
     CassandraClient h2client = mock(CassandraClient.class);
     CassandraClient h3client = mock(CassandraClient.class);

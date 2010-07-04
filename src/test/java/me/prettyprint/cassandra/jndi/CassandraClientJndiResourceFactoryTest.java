@@ -7,18 +7,18 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.Name;
+import javax.naming.Reference;
+import javax.naming.StringRefAddr;
+
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.Name;
-import javax.naming.Reference;
-import javax.naming.StringRefAddr;
 
 /**
  * @author Perry Hoekstra (dutchman_mn@charter.net)
@@ -45,7 +45,6 @@ public class CassandraClientJndiResourceFactoryTest {
   }
 
   @Test
-  @SuppressWarnings("unchecked")
   public void getObjectInstance() throws Exception {
     Reference resource = new Reference("CassandraClientFactory");
 
@@ -54,11 +53,11 @@ public class CassandraClientJndiResourceFactoryTest {
 
     Name jndiName = mock(Name.class);
     Context context = new InitialContext();
-    Hashtable environment = new Hashtable();
+    Hashtable<String, String> environment = new Hashtable<String, String>();
 
-    CassandraClientJndiResourcePool cassandraClientJNDIResourcePool = 
-        (CassandraClientJndiResourcePool) factory.getObjectInstance(resource, jndiName, context,
-                                                                    environment);
+    CassandraClientJndiResourcePool cassandraClientJNDIResourcePool =
+      (CassandraClientJndiResourcePool) factory.getObjectInstance(resource, jndiName, context,
+          environment);
 
     CassandraClient cassandraClient = (CassandraClient) cassandraClientJNDIResourcePool.borrowObject();
 

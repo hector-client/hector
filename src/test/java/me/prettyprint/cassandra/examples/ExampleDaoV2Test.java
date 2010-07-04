@@ -1,10 +1,10 @@
-package me.prettyprint.cassandra.dao;
+package me.prettyprint.cassandra.examples;
 
+import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
+import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-
-import static me.prettyprint.cassandra.model.HFactory.*;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -43,7 +43,7 @@ public class ExampleDaoV2Test {
     embedded.teardown();
   }
 
-  
+
   @Test
   @Ignore("Not functinal yet")
   public void testInsertGetDelete() throws HectorException {
@@ -53,7 +53,7 @@ public class ExampleDaoV2Test {
     dao.insert("key", "value");
     assertEquals("value", dao.get("key"));
     dao.delete("key");
-    assertNull(dao.get("key"));    
+    assertNull(dao.get("key"));
   }
 
   @Test
@@ -72,13 +72,13 @@ public class ExampleDaoV2Test {
     keyValues.put("key1", "value1");
     keyValues.put("key2", "value2");
     dao.insertMulti(keyValues);
-    
+
     // Simple get test
     ret = dao.getMulti(Arrays.asList("key1", "key2"));
     assertNotNull(ret);
     assertEquals("value1", ret.get("key1"));
     assertEquals("value2", ret.get("key2"));
-    
+
     // Get some values that don't exist
     ret = dao.getMulti(Arrays.asList("key2", "key3"));
     assertNotNull(ret);
@@ -88,12 +88,12 @@ public class ExampleDaoV2Test {
 
     // delete
     dao.deleteMulti(Arrays.asList("key1", "key2"));
-    
+
     // validate deletion
     ret = dao.getMulti(Arrays.asList("key1", "key2"));
     assertNotNull(ret);
     assertNull(ret.get("key1"));
     assertNull(ret.get("key2"));
-    
-  }  
+
+  }
 }

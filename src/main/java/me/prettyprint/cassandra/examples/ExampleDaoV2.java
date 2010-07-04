@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.dao;
+package me.prettyprint.cassandra.examples;
 
 import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
@@ -19,7 +20,6 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.service.Cluster;
 
 public class ExampleDaoV2 {
@@ -29,10 +29,10 @@ public class ExampleDaoV2 {
   private final static String CF_NAME = "Standard1";
   /** Column name where values are stored */
   private final static String COLUMN_NAME = "v";
-  private StringExtractor extractor = StringExtractor.get();
+  private final StringExtractor extractor = StringExtractor.get();
 
   private final KeyspaceOperator keyspaceOperator;
-  
+
   public static void main(String[] args) throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(createKeyspaceOperator(KEYSPACE, c));
@@ -44,7 +44,7 @@ public class ExampleDaoV2 {
   public ExampleDaoV2(KeyspaceOperator ko) {
     keyspaceOperator = ko;
   }
-  
+
   /**
    * Insert a new value keyed by key
    *
@@ -53,7 +53,7 @@ public class ExampleDaoV2 {
    */
   public void insert(final String key, final String value) {
     createMutator(keyspaceOperator).
-        insert(key, CF_NAME, createColumn(COLUMN_NAME, value, createTimestamp(), extractor, extractor));
+    insert(key, CF_NAME, createColumn(COLUMN_NAME, value, createTimestamp(), extractor, extractor));
   }
 
   private long createTimestamp() {
@@ -68,9 +68,9 @@ public class ExampleDaoV2 {
   public String get(final String key) throws HectorException {
     ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
     Result<HColumn<String, String>> r = q.setKey(key).
-        setName(COLUMN_NAME).
-        setColumnFamily(CF_NAME).
-        execute();
+    setName(COLUMN_NAME).
+    setColumnFamily(CF_NAME).
+    execute();
     HColumn<String, String> c = r.get();
     return c.getValue();
   }
@@ -81,7 +81,7 @@ public class ExampleDaoV2 {
   public void delete(final String key) throws HectorException {
     createMutator(keyspaceOperator).delete(key, CF_NAME, COLUMN_NAME, extractor);
   }
-  
+
   /**
    * Get multiple values
    * @param keys
@@ -92,7 +92,7 @@ public class ExampleDaoV2 {
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
-    
+
     Result<Rows<String,String,String>> r = q.execute();
     Rows<String,String,String> rows = r.get();
     Map<String, String> ret = new HashMap<String, String>(keys.size());
@@ -111,7 +111,7 @@ public class ExampleDaoV2 {
   public void insertMulti(Map<String, String> keyValues) {
     Mutator m = createMutator(keyspaceOperator);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
-      m.addInsertion(keyValue.getKey(), CF_NAME,  
+      m.addInsertion(keyValue.getKey(), CF_NAME,
           createColumn(COLUMN_NAME, keyValue.getValue(), createTimestamp(), extractor, extractor));
     }
     m.execute();

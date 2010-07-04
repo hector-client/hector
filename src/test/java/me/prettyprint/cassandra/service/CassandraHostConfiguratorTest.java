@@ -1,24 +1,24 @@
 package me.prettyprint.cassandra.service;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class CassandraHostConfiguratorTest {
-  
+
   @Before
   public void setup() {
-    
+
   }
-  
+
   @Test
   public void testSimpleCassandraHostSetup() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
     assertEquals(1,cassandraHosts.length);
   }
-  
+
   @Test
   public void testCassandraHostSetupSplit() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170,localhost:9171,localhost:9172");
@@ -45,12 +45,11 @@ public class CassandraHostConfiguratorTest {
     assertEquals(3000, cassandraHosts[2].getCassandraThriftSocketTimeout());
     assertEquals(3000, cassandraHosts[0].getCassandraThriftSocketTimeout());
   }
-  
+
   @Test
   public void testApplyConfig() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraHostConfigurator.setMaxActive(15);
-    CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();    
     CassandraHost extraHost = new CassandraHost("localhost:9171");
     cassandraHostConfigurator.applyConfig(extraHost);
     assertEquals(15, extraHost.getMaxActive());

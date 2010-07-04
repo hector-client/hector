@@ -1,6 +1,7 @@
-package me.prettyprint.cassandra.dao;
+package me.prettyprint.cassandra.examples;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
@@ -41,7 +42,7 @@ public class ExampleDaoTest {
     dao.insert("key", "value");
     assertEquals("value", dao.get("key"));
     dao.delete("key");
-    assertNull(dao.get("key"));    
+    assertNull(dao.get("key"));
   }
 
 }
