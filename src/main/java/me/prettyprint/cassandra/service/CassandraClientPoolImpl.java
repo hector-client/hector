@@ -131,17 +131,11 @@ import org.slf4j.LoggerFactory;
   public CassandraClientPoolByHost getPool(CassandraHost cassandraHost) {
     CassandraClientPoolByHost pool = pools.get(cassandraHost);
     if (pool == null) {
-      synchronized (pools) {
-        pool = pools.get(cassandraHost);
-        if (pool == null) {
-          if (cassandraHostConfigurator != null) {
-            cassandraHostConfigurator.applyConfig(cassandraHost); 
-          }          
-          pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
-          pools.put(cassandraHost, pool);
-          log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
-        }
-      }
+      if (cassandraHostConfigurator != null) {
+        cassandraHostConfigurator.applyConfig(cassandraHost); 
+      } 
+      addCassandraHost(cassandraHost);
+      pool = pools.get(cassandraHost);
     }
     return pool;
   }
@@ -251,4 +245,18 @@ import org.slf4j.LoggerFactory;
   public String toString() {
     return "CassandraClientPoolImpl(" + pools + ")";
   }
+
+  @Override
+  public void addCassandraHost(CassandraHost cassandraHost) {    
+    synchronized (pools) {
+      CassandraClientPoolByHost pool = pools.get(cassandraHost);
+      if (pool == null) {         
+        pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
+        pools.put(cassandraHost, pool);
+        log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
+      }
+    }    
+  }
+  
+  
 }

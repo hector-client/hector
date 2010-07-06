@@ -144,6 +144,12 @@ public interface CassandraClientPool {
   int getNumActive();
 
   Set<String> getKnownHosts();
+  
+  /**
+   * Adds the (pre-configured) CassandraHost to the pool if not already present
+   * @param cassandraHost
+   */
+  void addCassandraHost(CassandraHost cassandraHost);
 
   /**
    * Use this method to invalidate the client and take it out of the pool.

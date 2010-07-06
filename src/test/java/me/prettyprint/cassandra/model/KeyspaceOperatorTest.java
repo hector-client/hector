@@ -140,7 +140,7 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
     List<HColumn<String,String>> columns = Arrays.asList(createColumn("name1", "value1", se, se),
         createColumn("name2", "value2", se, se));
     m.insert("testSuperInsertGetRemove", cf,
-        createSuperColumn("testSuperInsertGetRemove", columns, se, se, se));
+        createSuperColumn("testSuperInsertGetRemove", columns, se));
 
 
     // get value

@@ -27,11 +27,13 @@ public class Cluster {
 
   private final CassandraClientPool pool;
   private final String name;
+  private final CassandraHostConfigurator configurator;
   private TimestampResolution timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
 
   public Cluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     pool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
     name = clusterName;
+    configurator = cassandraHostConfigurator;
   }
 
   public Set<String> getKnownHosts() {
@@ -39,8 +41,18 @@ public class Cluster {
     return null;
   }
 
-  public void addHost(CassandraHost cassandraHost) {
-    //TODO
+  /**
+   * Adds the host to this Cluster. Unless skipApplyConfig is set to true, the settings in 
+   * the CassandraHostConfigurator will be applied to the provided CassandraHost
+   * @param cassandraHost
+   * @param skipApplyConfig
+   */
+  public void addHost(CassandraHost cassandraHost, boolean skipApplyConfig) {
+    if (!skipApplyConfig) {
+      configurator.applyConfig(cassandraHost);
+    }
+    pool.addCassandraHost(cassandraHost);
+    pool.updateKnownHosts();
   }
 
 
