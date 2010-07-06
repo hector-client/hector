@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
+import static me.prettyprint.cassandra.model.HFactory.*;
 
 import java.util.Arrays;
 
@@ -50,7 +50,7 @@ public class Mutator {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
         HColumn<N, V> hColumn = superColumn.getColumns().get(0);
-        ks.insert(key, HFactory.createSuperColumnPath(cf, superColumn.getNameBytes(), hColumn.getNameBytes()), hColumn.getValueBytes());
+        ks.insert(key, createSuperColumnPath(cf, superColumn.getNameBytes(), hColumn.getNameBytes()), hColumn.getValueBytes());
         return null;
       }
     }));
