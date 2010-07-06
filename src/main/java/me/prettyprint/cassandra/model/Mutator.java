@@ -44,9 +44,15 @@ public class Mutator {
   }
 
   // overloaded insert-super
-  public <SN,N,V> MutationResult insert(String key, String cf, HSuperColumn<SN,N,V> superColumn) {
-    //TODO
-    return null;
+  public <SN,N,V> MutationResult insert(final String key, final String cf, final HSuperColumn<SN,N,V> superColumn) {
+    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
+      @Override
+      public Void doInKeyspace(Keyspace ks) throws HectorException {
+        HColumn<N, V> hColumn = superColumn.getColumns().get(0);
+        ks.insert(key, HFactory.createSuperColumnPath(cf, superColumn.getNameBytes(), hColumn.getNameBytes()), hColumn.getValueBytes());
+        return null;
+      }
+    }));
   }
 
   public <N> MutationResult delete(final String key, final String cf, final N columnName,

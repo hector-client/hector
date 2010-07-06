@@ -15,7 +15,7 @@ public class HSuperColumn<SN,N,V> {
   private long timestamp;
   private final Extractor<SN> nameExtractor;
   
-  public HSuperColumn(SN sName, Extractor<SN> sNameExtractor, List<HColumn<N, V>> columns, long timestamp) {
+  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor, long timestamp) {
     this.name = sName;
     this.nameExtractor = sNameExtractor;
     this.columns = columns;

@@ -7,6 +7,10 @@ import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.service.CassandraClient;
@@ -35,6 +39,16 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     MutationResult mr = m.insert("k", "Standard1", createColumn("name", "value", se, se));
     assertTrue("Execution time on single insert should be > 0",mr.getExecutionTimeMicro() > 0);
     assertColumnExists("Keyspace1", "Standard1", "k", "name");
+  }
+  
+  @Test
+  public void testInsertSuper() {
+    Mutator m = createMutator(keyspaceOperator);
+    List<HColumn<String, String>> columnList = new ArrayList<HColumn<String,String>>();
+    columnList.add(createColumn("name","value",se,se));
+    HSuperColumn<String, String, String> superColumn = HFactory.createSuperColumn("super_name", columnList, se);
+    MutationResult r = m.insert("sk", "Super1", superColumn);
+    assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
   }
 
   @Test
