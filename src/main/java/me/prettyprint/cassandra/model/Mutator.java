@@ -21,6 +21,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * The class is not thread-safe.
  * 
  * @author Ran Tavory
+ * @author zznate
  */
 public class Mutator {
 

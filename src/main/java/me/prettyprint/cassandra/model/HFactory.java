@@ -15,7 +15,7 @@ import org.apache.cassandra.thrift.ColumnPath;
  * queries etc.
  * 
  * @author Ran
- *
+ * @author zznate
  */
 public class HFactory {
 

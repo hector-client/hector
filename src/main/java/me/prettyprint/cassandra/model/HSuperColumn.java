@@ -2,11 +2,10 @@ package me.prettyprint.cassandra.model;
 
 import java.util.List;
 
-// get
 /**
- * @param <SN> SuperColumn name type
- * @param <N> Column name type
- * @param <V> Column value type
+ * Models a SuperColumn in a protocol independant manner
+ * 
+ * @author zznate 
  */
 public class HSuperColumn<SN,N,V> {
   
@@ -14,7 +13,13 @@ public class HSuperColumn<SN,N,V> {
   private List<HColumn<N,V>> columns;
   private long timestamp;
   private final Extractor<SN> nameExtractor;
-  
+
+  /**
+  * @param <SN> SuperColumn name type
+  * @param List<HColumn<N,V>> Column values
+  * @param Extractor<SN> the extractor type
+  * @param timestamp
+  */
   public HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor, long timestamp) {
     this.name = sName;
     this.nameExtractor = sNameExtractor;
@@ -64,5 +69,5 @@ public class HSuperColumn<SN,N,V> {
   public byte[] getNameBytes() {
     return nameExtractor.toBytes(getName());
   }
-  
+  //TODO add thrift convinience methods
 }
