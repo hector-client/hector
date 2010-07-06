@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.cassandra.utils.Assert.notNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +33,11 @@ public class HSuperColumn<SN,N,V> {
    * @param Extractor<SN> the extractor type
    * @param timestamp
    */
-  /* package */HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor,
+  /*package*/HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor,
       long timestamp) {
+    notNull(sName, "Name is null");
+    notNull(columns, "Columns are null");
+    notNull(sNameExtractor, "name extractor is null");
     this.name = sName;
     this.superNameExtractor = sNameExtractor;
     this.columns = columns;
@@ -40,11 +45,13 @@ public class HSuperColumn<SN,N,V> {
   }
 
   public HSuperColumn<SN, N, V> setName(SN name) {
+    notNull(name, "name is null");
     this.name = name;
     return this;
   }
 
   public HSuperColumn<SN, N, V> setSubcolumns(List<HColumn<N, V>> subcolumns) {
+    notNull(subcolumns, "subcolumns are null");
     this.columns = subcolumns;
     return this;
   }

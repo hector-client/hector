@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.cassandra.utils.Assert.notNull;
+
 import org.apache.cassandra.thrift.Column;
 
 /**
@@ -19,34 +21,40 @@ public class HColumn<N,V> {
   private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
 
-  public HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor,
+      Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
+    notNull(name, "name is null");
+    notNull(value, "value is null");
+
     this.name = name;
     this.value = value;
     this.timestamp = timestamp;
   }
-  
-  public HColumn(Column thriftColumn, Extractor<N> nameExtractor, 
+
+  /*package*/HColumn(Column thriftColumn, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
-    if (thriftColumn == null) {
-      return;
-    }
+    notNull(thriftColumn, "thriftColumn is null");
     name = nameExtractor.fromBytes(thriftColumn.getName());
     value = valueExtractor.fromBytes(thriftColumn.getValue());
   }
 
   public HColumn(Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    notNull(nameExtractor, "nameExtractor is null");
+    notNull(valueExtractor, "valueExtractor is null");
     this.nameExtractor = nameExtractor;
     this.valueExtractor = valueExtractor;
   }
 
   public HColumn<N,V> setName(N name) {
+    notNull(name, "name is null");
     this.name = name;
     return this;
   }
 
   public HColumn<N,V> setValue(V value) {
+    notNull(value, "value is null");
     this.value = value;
     return this;
   }
@@ -67,15 +75,13 @@ public class HColumn<N,V> {
   long getTimestamp() {
     return timestamp;
   }
-    
+
   public Column toThrift() {
     return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), timestamp);
   }
-  
+
   public HColumn<N, V> fromThrift(Column c) {
-    if (c == null) {
-      return this;
-    }
+    notNull(c, "column is null");
     name = nameExtractor.fromBytes(c.name);
     value = valueExtractor.fromBytes(c.value);
     return this;
