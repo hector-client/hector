@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
   private static final Logger log = LoggerFactory.getLogger(FailoverOperator.class);
 
   private static final Logger perf4jLogger =
-    LoggerFactory.getLogger("me.prettyprint.hector.TimingLogger");
+ LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
 
   private final FailoverPolicy failoverPolicy;
 
@@ -225,7 +225,7 @@ import org.slf4j.LoggerFactory;
     }
 
     String nextHost = isRetrySameHostAgain ? client.getUrl() :
-        getNextHost(client.getUrl(), client.getIp());
+      getNextHost(client.getUrl(), client.getIp());
     if (nextHost == null) {
       log.error("Unable to find next host to skip to at {}", toString());
       throw new SkipHostException("Unable to failover to next host");
@@ -325,7 +325,7 @@ import org.slf4j.LoggerFactory;
 
   public Operation(OperationType operationType) {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
-        Counter.WRITE_FAIL;
+      Counter.WRITE_FAIL;
     this.stopWatchTagName = operationType.name();
   }
 
