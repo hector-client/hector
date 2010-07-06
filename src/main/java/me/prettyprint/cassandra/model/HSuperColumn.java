@@ -1,73 +1,99 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.SuperColumn;
 
 /**
  * Models a SuperColumn in a protocol independant manner
  * 
- * @author zznate 
+ * @param <SN>
+ *          SuperColumn name type
+ * @param <N>
+ *          Column name type
+ * @param <V>
+ *          Column value type
+ * 
+ * @author zznate
  */
 public class HSuperColumn<SN,N,V> {
-  
+
   private SN name;
   private List<HColumn<N,V>> columns;
   private long timestamp;
-  private final Extractor<SN> nameExtractor;
+  private final Extractor<SN> superNameExtractor;
 
   /**
-  * @param <SN> SuperColumn name type
-  * @param List<HColumn<N,V>> Column values
-  * @param Extractor<SN> the extractor type
-  * @param timestamp
-  */
-  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor, long timestamp) {
+   * @param <SN> SuperColumn name type
+   * @param List<HColumn<N,V>> Column values
+   * @param Extractor<SN> the extractor type
+   * @param timestamp
+   */
+  /* package */HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor,
+      long timestamp) {
     this.name = sName;
-    this.nameExtractor = sNameExtractor;
+    this.superNameExtractor = sNameExtractor;
     this.columns = columns;
     this.timestamp = timestamp;
   }
-  
+
   public HSuperColumn<SN, N, V> setName(SN name) {
     this.name = name;
     return this;
   }
-  
-  public HSuperColumn<SN, N, V> setValues(List<HColumn<N, V>> values) {
-    this.columns = values;
+
+  public HSuperColumn<SN, N, V> setSubcolumns(List<HColumn<N, V>> subcolumns) {
+    this.columns = subcolumns;
     return this;
   }
-  
+
   public HSuperColumn<SN, N, V> setTimestamp(long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
-  
+
   public long getTimestamp() {
     return timestamp;
   }
-  
+
   public int getSize() {
-    return columns.size();
+    return columns == null ? 0 : columns.size();
   }
-  
+
   public SN getName() {
     return name;
   }
-  
+
   public List<HColumn<N,V>> getColumns() {
     return columns;
   }
-  
+
   public HColumn<N,V> get(int i) {
     return columns.get(i);
   }
-  
+
   public Extractor<SN> getNameExtractor() {
-    return nameExtractor;
+    return superNameExtractor;
   }
 
   public byte[] getNameBytes() {
-    return nameExtractor.toBytes(getName());
+    return superNameExtractor.toBytes(getName());
   }
-  //TODO add thrift convinience methods
+
+  public SuperColumn toThrift() {
+    if (name == null || columns == null) {
+      return null;
+    }
+    return new SuperColumn(superNameExtractor.toBytes(name), toThriftColumn());
+  }
+
+  private List<Column> toThriftColumn() {
+    List<Column> ret = new ArrayList<Column>(columns.size());
+    for (HColumn<N, V> c: columns) {
+      ret.add(c.toThrift());
+    }
+    return ret;
+  }
 }
