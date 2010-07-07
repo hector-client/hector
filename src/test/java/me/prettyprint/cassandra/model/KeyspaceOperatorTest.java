@@ -20,7 +20,6 @@ import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.service.Cluster;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,7 +129,6 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
 
 
   @Test
-  @Ignore("Not ready yet")
   public void testSuperInsertGetRemove() {
     String cf = "Super1";
 
@@ -140,12 +138,12 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
     List<HColumn<String,String>> columns = Arrays.asList(createColumn("name1", "value1", se, se),
         createColumn("name2", "value2", se, se));
     m.insert("testSuperInsertGetRemove", cf,
-        createSuperColumn("testSuperInsertGetRemove", columns, se));
+        createSuperColumn("testSuperInsertGetRemove", columns, se, se, se));
 
 
     // get value
-    SuperColumnQuery<String,String,String> q = createSuperColumnQuery(ko);
-    q.setName("testSuperInsertGetRemove").setColumnFamily(cf);
+    SuperColumnQuery<String,String,String> q = createSuperColumnQuery(ko, se, se, se);
+    q.setSuperName("testSuperInsertGetRemove").setColumnFamily(cf);
     Result<HSuperColumn<String,String,String>> r = q.setKey("testSuperInsertGetRemove").execute();
     assertNotNull(r);
     assertTrue(r.isSuccess());
@@ -160,8 +158,8 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
 
 
     HColumn<String,String> c2 = sc.get(1);
-    assertEquals("name1", c2.getName());
-    assertEquals("value1", c2.getValue());
+    assertEquals("name2", c2.getName());
+    assertEquals("value2", c2.getValue());
 
     // remove value
     m = createMutator(ko);

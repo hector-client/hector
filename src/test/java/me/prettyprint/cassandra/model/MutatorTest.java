@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
+import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
 import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,19 +35,20 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testInsert() {    
+  public void testInsert() {
     Mutator m = createMutator(keyspaceOperator);
     MutationResult mr = m.insert("k", "Standard1", createColumn("name", "value", se, se));
     assertTrue("Execution time on single insert should be > 0",mr.getExecutionTimeMicro() > 0);
     assertColumnExists("Keyspace1", "Standard1", "k", "name");
   }
-  
+
   @Test
   public void testInsertSuper() {
     Mutator m = createMutator(keyspaceOperator);
     List<HColumn<String, String>> columnList = new ArrayList<HColumn<String,String>>();
     columnList.add(createColumn("name","value",se,se));
-    HSuperColumn<String, String, String> superColumn = HFactory.createSuperColumn("super_name", columnList, se);
+    HSuperColumn<String, String, String> superColumn =
+        createSuperColumn("super_name", columnList, se, se, se);
     MutationResult r = m.insert("sk", "Super1", superColumn);
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
   }
@@ -83,12 +85,12 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     }
     m.execute();
   }
-  
+
   private void assertColumnExists(String keyspace, String cf, String key, String column) {
     ColumnPath cp = new ColumnPath(cf);
     cp.setColumn(StringUtils.bytes(column));
     CassandraClient client = cluster.borrowClient();
-    assertNotNull(String.format("Should have value for %s.%s[%s][%s]", new String[]{keyspace,cf,key,column}),
+    assertNotNull(String.format("Should have value for %s.%s[%s][%s]", keyspace, cf, key, column),
         client.getKeyspace(keyspace).getColumn(key, cp));
     cluster.releaseClient(client);
   }

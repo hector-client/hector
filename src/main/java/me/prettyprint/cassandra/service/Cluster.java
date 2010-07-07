@@ -6,18 +6,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorPoolException;
+import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.TokenRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorPoolException;
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
 /**
  * A cluster instance the client side representation of a cassandra server cluster.
- * 
+ *
  * The cluster is usually the main entry point for programs using hector. To start operating on
  * cassandra cluster you first get or create a cluster, then a keyspace operator for the keyspace
  * you're interested in and then create mutations of queries
@@ -35,21 +35,21 @@ import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
  * @author zznate
  */
 public class Cluster {
-  
-  private Logger log = LoggerFactory.getLogger(Cluster.class);
-  
+
+  private final Logger log = LoggerFactory.getLogger(Cluster.class);
+
   private static final String KEYSPACE_SYSTEM = "system";
-  
+
   private final CassandraClientPool pool;
   private final String name;
   private final CassandraHostConfigurator configurator;
   private TimestampResolution timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
-  private FailoverPolicy failoverPolicy;
-  private CassandraClientMonitor cassandraClientMonitor;
+  private final FailoverPolicy failoverPolicy;
+  private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
   private Set<String> knownPoolHosts;
   private final ExceptionsTranslator xtrans;
-  
+
   public Cluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     pool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
     name = clusterName;
@@ -85,7 +85,7 @@ public class Cluster {
   }
 
   /**
-   * Adds the host to this Cluster. Unless skipApplyConfig is set to true, the settings in 
+   * Adds the host to this Cluster. Unless skipApplyConfig is set to true, the settings in
    * the CassandraHostConfigurator will be applied to the provided CassandraHost
    * @param cassandraHost
    * @param skipApplyConfig
@@ -120,7 +120,7 @@ public class Cluster {
 
   @Override
   public String toString() {
-    return String.format("Cluster(%s,%s)", new String[]{name, pool.toString()});
+    return String.format("Cluster(%s,%s)", name, pool.toString());
   }
 
   public TimestampResolution getTimestampResolution() {
@@ -135,7 +135,7 @@ public class Cluster {
   public long createTimestamp() {
     return timestampResolution.createTimestamp();
   }
-  
+
 
   public Set<String> describeKeyspaces() throws HectorException {
     Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {
@@ -181,7 +181,7 @@ public class Cluster {
     operateWithFailover(op);
     return op.getResult();
   }
-  
+
   public Map<String, Map<String, String>> describeKeyspace(final String keyspace)
   throws HectorException {
     Operation<Map<String, Map<String, String>>> op = new Operation<Map<String, Map<String, String>>>(
@@ -234,7 +234,7 @@ public class Cluster {
     operateWithFailover(op);
     return op.getResult();
   }
-  
+
   private void operateWithFailover(Operation<?> op) throws HectorException {
     CassandraClient client = null;
     try {
@@ -250,7 +250,7 @@ public class Cluster {
       }
     }
   }
-  
+
   private Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
     try {
       Set<String> hostnames = new HashSet<String>();

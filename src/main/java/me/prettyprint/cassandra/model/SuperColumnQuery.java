@@ -1,8 +1,68 @@
 package me.prettyprint.cassandra.model;
 
-public interface SuperColumnQuery<SN,N,V> extends Query<HSuperColumn<SN,N,V>> {
-  
-  SuperColumnQuery<SN,N,V> setKey(String key);
-  SuperColumnQuery<SN,N,V> setName(String name);
-  
+import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
+import static me.prettyprint.cassandra.utils.Assert.noneNull;
+import static me.prettyprint.cassandra.utils.Assert.notNull;
+import me.prettyprint.cassandra.service.Keyspace;
+
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.SuperColumn;
+
+@SuppressWarnings("unchecked")
+public class SuperColumnQuery<SN,N,V> extends AbstractQuery<HSuperColumn <SN,N,V>>
+    implements Query<HSuperColumn<SN,N,V>> {
+
+  private final Extractor<SN> sNameExtractor;
+  private final Extractor<N> nameExtractor;
+  private final Extractor<V> valueExtractor;
+  private String key;
+  private SN superName;
+
+  /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
+      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    super(keyspaceOperator);
+    noneNull(sNameExtractor, nameExtractor, valueExtractor);
+    this.sNameExtractor = sNameExtractor;
+    this.nameExtractor = nameExtractor;
+    this.valueExtractor = valueExtractor;
+  }
+
+  public SuperColumnQuery<SN,N,V> setKey(String key) {
+    this.key = key;
+    return this;
+  }
+
+  public SuperColumnQuery<SN,N,V> setSuperName(SN superName) {
+    this.superName = superName;
+    return this;
+  }
+
+  @Override
+  public Result<HSuperColumn<SN, N, V>> execute() {
+    notNull(columnFamilyName, "columnFamilyName is null");
+    notNull(superName, "superName is null");
+    return new Result<HSuperColumn<SN, N, V>>(keyspaceOperator.doExecute(
+        new KeyspaceOperationCallback<HSuperColumn<SN, N, V>>() {
+          @Override
+          public HSuperColumn<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
+            try {
+              ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
+                  sNameExtractor, nameExtractor);
+              SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath);
+              if (thriftSuperColumn == null) {
+                return null;
+              }
+              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameExtractor, nameExtractor,
+                  valueExtractor);
+            } catch (NotFoundException e) {
+              return null;
+            }
+          }
+        }), this);
+  }
+
+  @Override
+  public String toString() {
+    return "SuperColumnQuery(" + key + "," + superName + ")";
+  }
 }

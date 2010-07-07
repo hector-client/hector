@@ -6,7 +6,7 @@ import org.apache.cassandra.thrift.Column;
 
 /**
  * Hector Column definition.
- * 
+ *
  * @param <N> The type of the column name
  * @param <V> The type of the column value
  *
@@ -21,7 +21,7 @@ public class HColumn<N,V> {
   private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
 
-  /*package*/HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor,
+  /*package*/ HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     notNull(name, "name is null");
@@ -32,7 +32,7 @@ public class HColumn<N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/HColumn(Column thriftColumn, Extractor<N> nameExtractor,
+  /*package*/ HColumn(Column thriftColumn, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     notNull(thriftColumn, "thriftColumn is null");
@@ -40,7 +40,7 @@ public class HColumn<N,V> {
     value = valueExtractor.fromBytes(thriftColumn.getValue());
   }
 
-  public HColumn(Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ HColumn(Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     notNull(nameExtractor, "nameExtractor is null");
     notNull(valueExtractor, "valueExtractor is null");
     this.nameExtractor = nameExtractor;

@@ -68,9 +68,9 @@ public class ExampleDaoV2 {
   public String get(final String key) throws HectorException {
     ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
     Result<HColumn<String, String>> r = q.setKey(key).
-    setName(COLUMN_NAME).
-    setColumnFamily(CF_NAME).
-    execute();
+        setName(COLUMN_NAME).
+        setColumnFamily(CF_NAME).
+        execute();
     HColumn<String, String> c = r.get();
     return c.getValue();
   }

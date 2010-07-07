@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.cassandra.utils.Assert.noneNull;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,11 +11,10 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 
 import org.apache.cassandra.thrift.ColumnPath;
-
 /**
  * A convenience class with bunch of factory static methods to help create a mutator,
  * queries etc.
- * 
+ *
  * @author Ran
  * @author zznate
  */
@@ -28,7 +29,7 @@ public class HFactory {
     return clusters.get(clusterName);
   }
   /**
-   * 
+   *
    * @param clusterName The cluster name. This is an identifying string for the cluster, e.g.
    * "production" or "test" etc. Clusters will be created on demand per each unique clusterName key.
    * @param hostIp host:ip format string
@@ -90,19 +91,19 @@ public class HFactory {
     return new ColumnQuery<N,V>(ko, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> SuperColumnQuery<SN,N,V> createSuperColumnQuery(KeyspaceOperator ko) {
-    // TODO Auto-generated method stub
-    return null;
+  public static <SN,N,V> SuperColumnQuery<SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
+      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new SuperColumnQuery<SN, N, V>(ko, sNameExtractor, nameExtractor, valueExtractor);
   }
 
   /**
-   * 
+   *
    * @param <K> Row key type
    * @param keyspaceOperator
    * @return
    */
-  public static <N,V> MultigetSliceQuery<N,V>
-  createMultigetSliceQuery(KeyspaceOperator keyspaceOperator) {
+  public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
+      KeyspaceOperator keyspaceOperator) {
     // TODO Auto-generated method stub
     return null;
   }
@@ -114,14 +115,17 @@ public class HFactory {
    * @param createColumn a variable number of column arguments
    * @return
    */
-  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns, 
-      Extractor<SN> superNameExtractor) {
-    return new HSuperColumn<SN, N, V>(name, columns, superNameExtractor, createTimestamp());
+  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
+      Extractor<SN> superNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new HSuperColumn<SN, N, V>(name, columns, createTimestamp(), superNameExtractor,
+        nameExtractor, valueExtractor);
   }
-  
-  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns, 
-      long timestamp, Extractor<SN> superNameExtractor) {
-    return new HSuperColumn<SN, N, V>(name, columns, superNameExtractor, timestamp);
+
+  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
+      long timestamp, Extractor<SN> superNameExtractor, Extractor<N> nameExtractor,
+      Extractor<V> valueExtractor) {
+    return new HSuperColumn<SN, N, V>(name, columns, timestamp, superNameExtractor, nameExtractor,
+        valueExtractor);
   }
 
   public static <N,V> HColumn<N,V> createColumn(N name, V value, long timestamp,
@@ -152,18 +156,32 @@ public class HFactory {
   }
 
   /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
+    noneNull(columnFamilyName);
     ColumnPath columnPath = new ColumnPath(columnFamilyName);
-    if ( columnName != null ) {
+    if (columnName != null) {
       columnPath.setColumn(columnName);
     }
     return columnPath;
   }
-  
-  /*package*/ static <N> ColumnPath createSuperColumnPath(String columnFamilyName, byte[] superColumnName, byte[] columnName) {
-    ColumnPath columnPath = createColumnPath(columnFamilyName, columnName);
-    if ( superColumnName != null ) {
-      columnPath.setSuper_column(superColumnName);
-    } 
+
+  /*package*/ static <SN,N> ColumnPath createSuperColumnPath(String columnFamilyName,
+      SN superColumnName, N columnName, Extractor<SN> superNameExtractor,
+      Extractor<N> nameExtractor) {
+    noneNull(columnFamilyName, superNameExtractor, nameExtractor);
+    ColumnPath columnPath = createColumnPath(columnFamilyName, nameExtractor.toBytes(columnName));
+    if (superColumnName != null) {
+      columnPath.setSuper_column(superNameExtractor.toBytes(superColumnName));
+    }
+    return columnPath;
+  }
+
+  /*package*/ static <SN> ColumnPath createSuperColumnPath(String columnFamilyName,
+      SN superColumnName, Extractor<SN> superNameExtractor) {
+    noneNull(columnFamilyName, superNameExtractor);
+    ColumnPath columnPath = createColumnPath(columnFamilyName, null);
+    if (superColumnName != null) {
+      columnPath.setSuper_column(superNameExtractor.toBytes(superColumnName));
+    }
     return columnPath;
   }
 }

@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import java.util.ArrayList;
@@ -10,22 +11,24 @@ import org.apache.cassandra.thrift.SuperColumn;
 
 /**
  * Models a SuperColumn in a protocol independant manner
- * 
+ *
  * @param <SN>
  *          SuperColumn name type
  * @param <N>
  *          Column name type
  * @param <V>
  *          Column value type
- * 
+ *
  * @author zznate
  */
 public class HSuperColumn<SN,N,V> {
 
-  private SN name;
+  private SN superName;
   private List<HColumn<N,V>> columns;
   private long timestamp;
   private final Extractor<SN> superNameExtractor;
+  private final Extractor<N> nameExtractor;
+  private final Extractor<V> valueExtractor;
 
   /**
    * @param <SN> SuperColumn name type
@@ -33,20 +36,35 @@ public class HSuperColumn<SN,N,V> {
    * @param Extractor<SN> the extractor type
    * @param timestamp
    */
-  /*package*/HSuperColumn(SN sName, List<HColumn<N, V>> columns, Extractor<SN> sNameExtractor,
-      long timestamp) {
+  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
+      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    this(sNameExtractor, nameExtractor, valueExtractor);
     notNull(sName, "Name is null");
     notNull(columns, "Columns are null");
-    notNull(sNameExtractor, "name extractor is null");
-    this.name = sName;
-    this.superNameExtractor = sNameExtractor;
+    this.superName = sName;
     this.columns = columns;
     this.timestamp = timestamp;
   }
 
+  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Extractor<SN> sNameExtractor,
+      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    this(sNameExtractor, nameExtractor, valueExtractor);
+    noneNull(thriftSuperColumn, sNameExtractor, nameExtractor, valueExtractor);
+    superName = sNameExtractor.fromBytes(thriftSuperColumn.getName());
+    columns = fromThriftColumns(thriftSuperColumn.getColumns());
+  }
+
+  /*package*/ HSuperColumn(Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+      Extractor<V> valueExtractor) {
+    noneNull(sNameExtractor, nameExtractor, valueExtractor);
+    this.superNameExtractor = sNameExtractor;
+    this.nameExtractor = nameExtractor;
+    this.valueExtractor = valueExtractor;
+  }
+
   public HSuperColumn<SN, N, V> setName(SN name) {
     notNull(name, "name is null");
-    this.name = name;
+    this.superName = name;
     return this;
   }
 
@@ -70,7 +88,7 @@ public class HSuperColumn<SN,N,V> {
   }
 
   public SN getName() {
-    return name;
+    return superName;
   }
 
   public List<HColumn<N,V>> getColumns() {
@@ -90,10 +108,10 @@ public class HSuperColumn<SN,N,V> {
   }
 
   public SuperColumn toThrift() {
-    if (name == null || columns == null) {
+    if (superName == null || columns == null) {
       return null;
     }
-    return new SuperColumn(superNameExtractor.toBytes(name), toThriftColumn());
+    return new SuperColumn(superNameExtractor.toBytes(superName), toThriftColumn());
   }
 
   private List<Column> toThriftColumn() {
@@ -102,5 +120,26 @@ public class HSuperColumn<SN,N,V> {
       ret.add(c.toThrift());
     }
     return ret;
+  }
+
+  private List<HColumn<N, V>> fromThriftColumns(List<Column> tcolumns) {
+    List<HColumn<N, V>> cs = new ArrayList<HColumn<N,V>>(tcolumns.size());
+    for (Column c: tcolumns) {
+      cs.add(new HColumn<N, V>(c, nameExtractor, valueExtractor));
+    }
+    return cs;
+  }
+
+  public Extractor<SN> getSuperNameExtractor() {
+    return superNameExtractor;
+  }
+
+  public Extractor<V> getValueExtractor() {
+    return valueExtractor;
+  }
+
+  @Override
+  public String toString() {
+    return String.format("HSuperColumn(%s,%s)", superName, columns);
   }
 }

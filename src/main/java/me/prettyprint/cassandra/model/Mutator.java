@@ -1,14 +1,19 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.*;
+import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
+import static me.prettyprint.cassandra.utils.Assert.noneNull;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SuperColumn;
 
 
 /**
@@ -17,9 +22,9 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * 1. Use the insert/delete methods to immediately insert of delete values.
  * or 2. Use the addInsertion/addDeletion methods to schedule batch operations and then execute()
  * all of them in batch.
- * 
+ *
  * The class is not thread-safe.
- * 
+ *
  * @author Ran Tavory
  * @author zznate
  */
@@ -45,12 +50,16 @@ public class Mutator {
   }
 
   // overloaded insert-super
-  public <SN,N,V> MutationResult insert(final String key, final String cf, final HSuperColumn<SN,N,V> superColumn) {
+  public <SN,N,V> MutationResult insert(final String key, final String cf,
+      final HSuperColumn<SN,N,V> superColumn) {
+    noneNull(key, cf, superColumn);
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        HColumn<N, V> hColumn = superColumn.getColumns().get(0);
-        ks.insert(key, createSuperColumnPath(cf, superColumn.getNameBytes(), hColumn.getNameBytes()), hColumn.getValueBytes());
+        Map<String, List<SuperColumn>> superColumnMap =
+            new HashMap<String, List<SuperColumn>>(superColumn.getSize());
+        superColumnMap.put(cf, Arrays.asList(superColumn.toThrift()));
+        ks.batchInsert(key, null, superColumnMap);
         return null;
       }
     }));
