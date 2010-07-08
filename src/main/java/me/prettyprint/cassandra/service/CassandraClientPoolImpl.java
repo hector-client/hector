@@ -162,16 +162,17 @@ import org.slf4j.LoggerFactory;
   @Override
   public void updateKnownHosts() throws HectorTransportException {
     for (CassandraClientPoolByHost pool: pools.values()) {
-      pool.updateKnownHosts();
+      //pool.updateKnownHosts();
     }
   }
 
   @Override
   public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();
+    Set<String> hosts = new HashSet<String>();    
     for (CassandraClientPoolByHost pool: pools.values()) {
-      hosts.addAll(pool.getKnownHosts());
+      hosts.add(pool.getCassandraHost().getIp());
     }
+    log.info("in getKnownHosts for CassandraClientPool w/ hosts:{}",hosts);
     return hosts;
   }
 

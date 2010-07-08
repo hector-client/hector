@@ -20,17 +20,15 @@ import org.junit.Test;
 
 public class CassandraClusterTest extends BaseEmbededServerSetupTest { 
   
-  private CassandraCluster cassandraCluster;
+  private Cluster cassandraCluster;
   private CassandraHostConfigurator cassandraHostConfigurator;
-  private CassandraClientPool cassandraClientPool;
+
   
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
           NotFoundException, UnknownHostException, Exception {
-    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
-    cassandraClientPool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
-    
-    cassandraCluster = CassandraClusterFactory.getInstance().create(cassandraClientPool, null);    
+    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");        
+    cassandraCluster = new Cluster("Test Cluster", cassandraHostConfigurator);
   }
   
   @Test
@@ -59,11 +57,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     assertEquals(1, ring.size());
   }
   
-  @Test
-  public void testGetHostNames() throws Exception {
-    List<String> hosts = cassandraCluster.getKnownHosts(false);
-    assertEquals(1, hosts.size());
-  }
+  
   
   @Test
   public void testDescribeKeyspace() throws Exception {

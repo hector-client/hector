@@ -36,6 +36,7 @@ import com.google.common.collect.ImmutableSet;
   private final GenericObjectPool pool;
   
   private final ExceptionsTranslator xTrans;
+  private final CassandraHost cassandraHost;
 
   /**
    * Number of currently blocked threads.
@@ -62,8 +63,9 @@ import com.google.common.collect.ImmutableSet;
       CassandraClientMonitor cassandraClientMonitor,
       CassandraClientFactory cassandraClientFactory) {
     log.debug("Creating new connection pool for {}", cassandraHost.getUrlPort());
+    this.cassandraHost = cassandraHost;
     url = cassandraHost.getUrl();
-    port = cassandraHost.getPort();
+    port = cassandraHost.getPort();    
     this.name = cassandraHost.getName();
     this.maxActive = cassandraHost.getMaxActive();
     this.maxIdle = cassandraHost.getMaxIdle();
@@ -225,35 +227,11 @@ import com.google.common.collect.ImmutableSet;
   public int getNumBlockedThreads() {
     return blockedThreadsCount.intValue();
   }
+  
 
   @Override
-  public void updateKnownHosts() throws HectorTransportException {
-    Set<CassandraClient> removed = new HashSet<CassandraClient>();
-    for (CassandraClient c: liveClientsFromPool) {
-      if (c.isClosed()) {
-        removed.add(c);
-      } else {
-        try {
-          c.updateKnownHosts();
-        } catch (HectorTransportException e) {
-          log.error("Unable to update hosts list at {}", c, e);
-          throw e;
-        }
-      }
-    }
-    // perform cleanup
-    liveClientsFromPool.removeAll(removed);
-  }
-
-  @Override
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();
-    for (CassandraClient c: liveClientsFromPool) {
-      if (!c.isClosed()) {
-        hosts.addAll(c.getKnownHosts());
-      }
-    }
-    return hosts;
+  public CassandraHost getCassandraHost() {
+    return cassandraHost;
   }
 
   @Override

@@ -121,9 +121,7 @@ import org.apache.commons.pool.PoolableObjectFactory;
 
   int getNumBlockedThreads();
 
-  void updateKnownHosts() throws HectorTransportException;
-
-  Set<String> getKnownHosts();
+  CassandraHost getCassandraHost();
 
   /**
    * Take the client out of the pool.

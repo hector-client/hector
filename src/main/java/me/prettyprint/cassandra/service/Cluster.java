@@ -60,7 +60,7 @@ public class Cluster {
   }
 
   public Set<String> getKnownPoolHosts(boolean refresh) {
-    if (refresh || knownPoolHosts==null) {
+    if (refresh || knownPoolHosts == null) {
       knownPoolHosts = pool.getKnownHosts();
       log.info("found knownPoolHosts: {}", knownPoolHosts);
     }
@@ -205,10 +205,12 @@ public class Cluster {
 
 
   public String getClusterName() throws HectorException {
+    log.info("in execute with client");
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
+          log.info("in execute with client {}", cassandra);
           return cassandra.describe_cluster_name();
         } catch (Exception e) {
           throw xtrans.translate(e);

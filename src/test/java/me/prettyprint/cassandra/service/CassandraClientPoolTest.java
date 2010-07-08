@@ -98,7 +98,8 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
     assertNotNull(client);
     Keyspace ks = client.getKeyspace("Keyspace1");
     assertNotNull(ks);
-    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
+    System.out.print(store.getKnownHosts());
+    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));    
     store.updateKnownHosts();
     assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
   }
