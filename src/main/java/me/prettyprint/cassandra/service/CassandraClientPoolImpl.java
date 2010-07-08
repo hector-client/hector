@@ -176,7 +176,6 @@ import org.slf4j.LoggerFactory;
     for (CassandraClientPoolByHost pool: pools.values()) {
       hosts.add(pool.getCassandraHost().getIp());
     }
-    log.info("in getKnownHosts for CassandraClientPool w/ hosts:{}",hosts);
     return hosts;
   }
 
