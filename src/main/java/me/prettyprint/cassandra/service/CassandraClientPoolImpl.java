@@ -162,7 +162,11 @@ import org.slf4j.LoggerFactory;
   @Override
   public void updateKnownHosts() throws HectorTransportException {
     for (CassandraClientPoolByHost pool: pools.values()) {
-      //pool.updateKnownHosts();
+      if (pool.getLiveClients().isEmpty()) {
+        log.info("Found empty CassandraClientPoolByHost to remove: {}", pool.toString());
+        pools.remove(pool.getCassandraHost());
+        // TODO add the removed host to another map to be retried later
+      }      
     }
   }
 
