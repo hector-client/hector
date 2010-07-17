@@ -103,9 +103,8 @@ public class HFactory {
    * @return
    */
   public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
-      KeyspaceOperator keyspaceOperator) {
-    // TODO Auto-generated method stub
-    return null;
+      KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new MultigetSliceQuery<N,V>(ko, nameExtractor, valueExtractor);
   }
 
 

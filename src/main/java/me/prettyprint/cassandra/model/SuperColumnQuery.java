@@ -9,22 +9,18 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
 @SuppressWarnings("unchecked")
-public class SuperColumnQuery<SN,N,V> extends AbstractQuery<HSuperColumn <SN,N,V>>
+public class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 
   private final Extractor<SN> sNameExtractor;
-  private final Extractor<N> nameExtractor;
-  private final Extractor<V> valueExtractor;
   private String key;
   private SN superName;
 
   /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
       Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(keyspaceOperator);
+    super(keyspaceOperator, nameExtractor, valueExtractor);
     noneNull(sNameExtractor, nameExtractor, valueExtractor);
     this.sNameExtractor = sNameExtractor;
-    this.nameExtractor = nameExtractor;
-    this.valueExtractor = valueExtractor;
   }
 
   public SuperColumnQuery<SN,N,V> setKey(String key) {

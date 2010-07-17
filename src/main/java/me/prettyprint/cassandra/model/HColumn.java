@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 
 /**
  * Hector Column definition.
@@ -106,5 +108,27 @@ public class HColumn<N,V> {
   @Override
   public String toString() {
     return "HColumn(" + name + "=" + value + ")";
+  }
+
+  @Override
+  public int hashCode() {
+    return new HashCodeBuilder().append(name).append(value).append(timestamp).toHashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (obj == null) {
+      return false;
+    }
+    if (obj == this) {
+      return true;
+    }
+    if (obj.getClass() != getClass()) {
+      return false;
+    }
+    @SuppressWarnings("unchecked")
+    HColumn<N,V> other = (HColumn<N,V>) obj;
+    return new EqualsBuilder().appendSuper(super.equals(obj)).append(name, other.name).
+        append(value, other.value).append(timestamp, other.timestamp).isEquals();
   }
 }

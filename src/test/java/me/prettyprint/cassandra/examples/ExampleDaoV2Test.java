@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,7 +62,7 @@ public class ExampleDaoV2Test {
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
 
     // Get non-existing values
-    Map<String, String> ret = dao.getMulti(Arrays.asList("key1", "key2"));
+    Map<String, String> ret = dao.getMulti("key1", "key2");
     assertNotNull(ret);
     assertNull("value1", ret.get("key1"));
 
@@ -74,23 +73,23 @@ public class ExampleDaoV2Test {
     dao.insertMulti(keyValues);
 
     // Simple get test
-    ret = dao.getMulti(Arrays.asList("key1", "key2"));
+    ret = dao.getMulti("key1", "key2");
     assertNotNull(ret);
     assertEquals("value1", ret.get("key1"));
     assertEquals("value2", ret.get("key2"));
 
     // Get some values that don't exist
-    ret = dao.getMulti(Arrays.asList("key2", "key3"));
+    ret = dao.getMulti("key2", "key3");
     assertNotNull(ret);
     assertEquals("value2", ret.get("key2"));
     assertNull(ret.get("key3"));
     assertNull(ret.get("key1"));
 
     // delete
-    dao.deleteMulti(Arrays.asList("key1", "key2"));
+    dao.delete("key1", "key2");
 
     // validate deletion
-    ret = dao.getMulti(Arrays.asList("key1", "key2"));
+    ret = dao.getMulti("key1", "key2");
     assertNotNull(ret);
     assertNull(ret.get("key1"));
     assertNull(ret.get("key2"));

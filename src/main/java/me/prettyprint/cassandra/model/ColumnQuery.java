@@ -6,26 +6,22 @@ import me.prettyprint.cassandra.service.Keyspace;
 // like a simple get operation
 // may return a Column or a SuperColumn
 @SuppressWarnings("unchecked")
-public class ColumnQuery<N, V> extends AbstractQuery<HColumn<N, V>> implements Query<HColumn<N, V>> {
+public class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
-  private final Extractor<N> nameExtractor;
-  private final Extractor<V> valueExtractor;
   private String key;
   private N name;
 
   /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    super(keyspaceOperator);
-    this.nameExtractor = nameExtractor;
-    this.valueExtractor = valueExtractor;
+    super(keyspaceOperator, nameExtractor, valueExtractor);
   }
 
-  public ColumnQuery<N, V> setKey(String key) {
+  public ColumnQuery<N,V> setKey(String key) {
     this.key = key;
     return this;
   }
 
-  public ColumnQuery<N, V> setName(N name) {
+  public ColumnQuery<N,V> setName(N name) {
     this.name = name;
     return this;
   }

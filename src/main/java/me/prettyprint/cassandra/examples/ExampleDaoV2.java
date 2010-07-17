@@ -7,7 +7,6 @@ import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,28 +75,21 @@ public class ExampleDaoV2 {
   }
 
   /**
-   * Delete a key from cassandra
-   */
-  public void delete(final String key) throws HectorException {
-    createMutator(keyspaceOperator).delete(key, CF_NAME, COLUMN_NAME, extractor);
-  }
-
-  /**
    * Get multiple values
    * @param keys
    * @return
    */
-  public Map<String, String> getMulti(Collection<String> keys) {
-    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator);
+  public Map<String, String> getMulti(String... keys) {
+    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
 
     Result<Rows<String,String>> r = q.execute();
     Rows<String,String> rows = r.get();
-    Map<String, String> ret = new HashMap<String, String>(keys.size());
+    Map<String, String> ret = new HashMap<String, String>(keys.length);
     for (String k: keys) {
-      HColumn<String,String> c = rows.get(k).getColumnSlice().getColumnByName(COLUMN_NAME);
+      HColumn<String,String> c = rows.getByKey(k).getColumnSlice().getColumnByName(COLUMN_NAME);
       if (c != null && c.getValue() != null) {
         ret.put(k, c.getValue());
       }
@@ -118,9 +110,9 @@ public class ExampleDaoV2 {
   }
 
   /**
-   * Insert multiple values
+   * Delete multiple values
    */
-  public void deleteMulti(Collection<String> keys) {
+  public void delete(String... keys) {
     Mutator m = createMutator(keyspaceOperator);
     for (String key: keys) {
       m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);

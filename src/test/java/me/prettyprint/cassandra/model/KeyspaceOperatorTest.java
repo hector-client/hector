@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
 import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
+import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumnQuery;
@@ -11,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,7 +21,9 @@ import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.service.Cluster;
 
+import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +42,12 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
   public void setupCase() {
     cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
     ko = createKeyspaceOperator(KEYSPACE, cluster);
+  }
+
+  @After
+  public void teardownCase() {
+    ko = null;
+    cluster = null;
   }
 
   @Test
@@ -164,5 +174,83 @@ public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
     // remove value
     m = createMutator(ko);
     m.delete("testSuperInsertGetRemove_", cf, "testSuperInsertGetRemove", se);
+  }
+
+  @Test
+  @Ignore
+  public void testMultigetSliceQuery() {
+    String cf = "Standard1";
+
+    Mutator m = createMutator(ko);
+    for (int i = 1; i < 4; ++i) {
+      for (int j = 1; j < 3; ++j) {
+        m.addInsertion("testMultigetSliceQuery" + i, cf,
+            createColumn("testMultigetSliceQueryColumn" + j, "testMultigetSliceQueryValue", se, se));
+      }
+    }
+    MutationResult mr = m.execute();
+    assertTrue(mr.isSuccess());
+    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+
+    // get value
+    MultigetSliceQuery<String, String> q = createMultigetSliceQuery(ko, se, se);
+    q.setColumnFamily(cf);
+    q.setKeys("testMultigetSliceQuery1", "testMultigetSliceQuery2");
+    // try with column name first
+    q.setColumnNames("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn2");
+    Result<Rows<String,String>> r = q.execute();
+    assertNotNull(r);
+    assertTrue(r.isSuccess());
+    Rows<String,String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    Row<String,String> row = rows.getByKey("testMultigetSliceQuery1");
+    assertNotNull(row);
+    assertEquals("testMultigetSliceQuery1", row.getKey());
+    ColumnSlice<String,String> slice = row.getColumnSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals("testMultigetSliceQueryValue",
+        slice.getColumnByName("testMultigetSliceQueryColumn1").getValue());
+    assertEquals("testMultigetSliceQueryValue",
+        slice.getColumnByName("testMultigetSliceQueryColumn2").getValue());
+    assertNull(slice.getColumnByName("testMultigetSliceQueryColumn3"));
+    // Test slice.asColumns
+    List<HColumn<String,String>> columns = slice.getColumns();
+    assertNotNull(columns);
+    assertEquals(2, columns.size());
+
+    // now try with start/finish
+    q = createMultigetSliceQuery(ko, se, se);
+    q.setColumnFamily(cf);
+    q.setKeys("testMultigetSliceQuery3");
+    q.setPredicate("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn3", false, 100);
+    r = q.execute();
+    assertNotNull(r);
+    assertTrue(r.isSuccess());
+    rows = r.get();
+    assertEquals(1, rows.getCount());
+    for (Row<String,String> row2: rows) {
+      assertNotNull(row2);
+      slice = row2.getColumnSlice();
+      assertNotNull(slice);
+      for (HColumn<String,String> column: slice.getColumns()) {
+        if (!column.getName().equals("testMultigetSliceQueryColumn1") &&
+            !column.getName().equals("testMultigetSliceQueryColumn2") &&
+            !column.getName().equals("testMultigetSliceQueryColumn3")) {
+          fail("A columns with unexpected column name returned: " + column.getName());
+        }
+      }
+    }
+
+    // Delete values
+    for (int i = 1; i < 4; ++i) {
+      for (int j = 1; j < 3; ++j) {
+        m.addDeletion("testMultigetSliceQuery" + i, cf, "testMultigetSliceQueryColumn" + j, se);
+      }
+    }
+    mr = m.execute();
+    assertTrue(mr.isSuccess());
   }
 }

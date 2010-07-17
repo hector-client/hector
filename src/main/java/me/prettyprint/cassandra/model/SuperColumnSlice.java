@@ -5,11 +5,12 @@ import java.util.List;
 // get_slice
 /**
  */
-public class ColumnSlice<N,V> {
+public class SuperColumnSlice<SN,N,V> {
 
-  public List<HColumn<N,V>> getColumns() {
+  public List<HSuperColumn<SN,N,V>> getSuperColumns() {
     // TODO
     return null;
+
   }
 
   public HColumn<N,V> getColumnByName(N columnName) {
