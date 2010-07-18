@@ -185,7 +185,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     for (int i = 1; i < 4; ++i) {
       for (int j = 1; j < 3; ++j) {
         m.addInsertion("testMultigetSliceQuery" + i, cf,
-            createColumn("testMultigetSliceQueryColumn" + j, "testMultigetSliceQueryValue", se, se));
+            createColumn("testMultigetSliceQueryColumn" + j, "value" + i + j, se, se));
       }
     }
     MutationResult mr = m.execute();
@@ -211,9 +211,9 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     ColumnSlice<String,String> slice = row.getColumnSlice();
     assertNotNull(slice);
     // Test slice.getColumnByName
-    assertEquals("testMultigetSliceQueryValue",
+    assertEquals("value11",
         slice.getColumnByName("testMultigetSliceQueryColumn1").getValue());
-    assertEquals("testMultigetSliceQueryValue",
+    assertEquals("value12",
         slice.getColumnByName("testMultigetSliceQueryColumn2").getValue());
     assertNull(slice.getColumnByName("testMultigetSliceQueryColumn3"));
     // Test slice.asColumns
@@ -283,5 +283,4 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   public void testSuperSlicesQuery() {
     //TODO
   }
-
 }
