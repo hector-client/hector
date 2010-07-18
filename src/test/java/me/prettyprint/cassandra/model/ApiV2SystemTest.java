@@ -177,7 +177,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore
+  @Ignore("Not ready yet")
   public void testMultigetSliceQuery() {
     String cf = "Standard1";
 
@@ -253,4 +253,35 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     mr = m.execute();
     assertTrue(mr.isSuccess());
   }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testSuperMultigetSliceQuery() {
+    //TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testRangeSlicesQuery() {
+    //TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testSuperRangeSlicesQuery() {
+    //TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testSlicesQuery() {
+    //TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testSuperSlicesQuery() {
+    //TODO
+  }
+
 }
