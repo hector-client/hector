@@ -28,9 +28,9 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class KeyspaceOperatorTest extends BaseEmbededServerSetupTest {
+public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
-  private static final Logger log = LoggerFactory.getLogger(KeyspaceOperatorTest.class);
+  private static final Logger log = LoggerFactory.getLogger(ApiV2SystemTest.class);
   private final static String KEYSPACE = "Keyspace1";
   private static final StringExtractor se = new StringExtractor();
   private Cluster cluster;
