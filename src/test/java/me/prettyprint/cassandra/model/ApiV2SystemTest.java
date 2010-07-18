@@ -177,7 +177,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore("Not ready yet")
   public void testMultigetSliceQuery() {
     String cf = "Standard1";
 
@@ -216,7 +215,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("value12",
         slice.getColumnByName("testMultigetSliceQueryColumn2").getValue());
     assertNull(slice.getColumnByName("testMultigetSliceQueryColumn3"));
-    // Test slice.asColumns
+    // Test slice.getColumns
     List<HColumn<String,String>> columns = slice.getColumns();
     assertNotNull(columns);
     assertEquals(2, columns.size());
@@ -225,7 +224,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q = createMultigetSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
     q.setKeys("testMultigetSliceQuery3");
-    q.setPredicate("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn3", false, 100);
+    q.setRange("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn3", false, 100);
     r = q.execute();
     assertNotNull(r);
     assertTrue(r.isSuccess());

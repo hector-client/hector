@@ -19,6 +19,7 @@ import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.utils.StringUtils;
 
 import org.apache.cassandra.thrift.ColumnPath;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 public class MutatorTest extends BaseEmbededServerSetupTest {
@@ -29,9 +30,15 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   private KeyspaceOperator keyspaceOperator;
 
   @Before
-  public void doSetup() {
+  public void setupCase() {
     cluster = getOrCreateCluster("Test Cluster", "127.0.0.1:9170");
     keyspaceOperator = createKeyspaceOperator("Keyspace1", cluster);
+  }
+
+  @After
+  public void teardownCase() {
+    keyspaceOperator = null;
+    cluster = null;
   }
 
   @Test

@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
+import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -155,12 +156,16 @@ public class HFactory {
   }
 
   /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
-    noneNull(columnFamilyName);
+    notNull(columnFamilyName, "columnFamilyName cannot be null");
     ColumnPath columnPath = new ColumnPath(columnFamilyName);
     if (columnName != null) {
       columnPath.setColumn(columnName);
     }
     return columnPath;
+  }
+
+  /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName) {
+    return createColumnPath(columnFamilyName, null);
   }
 
   /*package*/ static <SN,N> ColumnPath createSuperColumnPath(String columnFamilyName,

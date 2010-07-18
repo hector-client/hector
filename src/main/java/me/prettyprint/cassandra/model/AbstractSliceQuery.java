@@ -1,9 +1,14 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 
 
 /**
@@ -48,7 +53,7 @@ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements
    * @param count
    * @return
    */
-  public AbstractSliceQuery<N,V,T> setPredicate(N start, N finish, boolean reversed, int count) {
+  public AbstractSliceQuery<N,V,T> setRange(N start, N finish, boolean reversed, int count) {
     Assert.noneNull(start, finish);
     this.start = start;
     this.finish = finish;
@@ -56,5 +61,39 @@ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements
     this.count = count;
     useColumnNames = false;
     return this;
+  }
+
+  /**
+   *
+   * @return the thrift representation of the predicate
+   */
+  public SlicePredicate getPredicate() {
+    SlicePredicate pred = new SlicePredicate();
+    if (useColumnNames) {
+      if (columnNames == null || columnNames.isEmpty()) {
+        return null;
+      }
+      pred.setColumn_names(toThriftColumnNames(columnNames));
+    } else {
+      if (start == null || finish == null) {
+        return null;
+      }
+      SliceRange range = new SliceRange(nameExtractor.toBytes(start), nameExtractor.toBytes(finish),
+          reversed, count);
+      pred.setSlice_range(range);
+    }
+    return pred;
+  }
+
+  private List<byte[]> toThriftColumnNames(Collection<N> clms) {
+    List<byte[]> ret = new ArrayList<byte[]>(clms.size());
+    for (N name: clms) {
+      ret.add(nameExtractor.toBytes(name));
+    }
+    return ret;
+  }
+
+  protected String toStringInternal() {
+    return "" + (useColumnNames ? columnNames : "start:" + start + ",finish:" + finish);
   }
 }
