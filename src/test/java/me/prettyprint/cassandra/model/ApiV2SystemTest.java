@@ -58,7 +58,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
         createColumn("testInsertGetRemove", "testInsertGetRemove_value_", se, se));
 
     // Check the mutation result metadata
-    assertTrue(mr.isSuccess());
     // assertEquals("127.0.0.1:9170", mr.getHostUsed());
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
@@ -68,7 +67,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setName("testInsertGetRemove").setColumnFamily(cf);
     Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove").execute();
     assertNotNull(r);
-    assertTrue(r.isSuccess());
     HColumn<String, String> c = r.get();
     assertNotNull(c);
     String value = c.getValue();
@@ -81,7 +79,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // remove value
     m = createMutator(ko);
     MutationResult mr2 = m.delete("testInsertGetRemove", cf, "testInsertGetRemove", se);
-    assertTrue("Delete failed", mr2.isSuccess());
     assertTrue("Time should be > 0", mr2.getExecutionTimeMicro() > 0);
 
     // get already removed value
@@ -89,7 +86,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
     Result<HColumn<String, String>> r2 = q2.setKey("testInsertGetRemove").execute();
     assertNotNull(r2);
-    assertTrue("no success..", r2.isSuccess());
     assertNull("Value should have been deleted", r2.get());
   }
 
@@ -110,7 +106,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 5; i++) {
       Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove" + i).execute();
       assertNotNull(r);
-      assertTrue(r.isSuccess());
       HColumn<String, String> c = r.get();
       assertNotNull(c);
       String value = c.getValue();
@@ -130,7 +125,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 5; i++) {
       Result<HColumn<String, String>> r = q2.setKey("testInsertGetRemove" + i).execute();
       assertNotNull(r);
-      assertTrue(r.isSuccess());
       assertNull("Value should have been deleted", r.get());
     }
   }
@@ -153,7 +147,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setSuperName("testSuperInsertGetRemove").setColumnFamily(cf);
     Result<HSuperColumn<String, String, String>> r = q.setKey("testSuperInsertGetRemove").execute();
     assertNotNull(r);
-    assertTrue(r.isSuccess());
     HSuperColumn<String, String, String> sc = r.get();
     assertNotNull(sc);
     assertEquals(2, sc.getSize());
@@ -189,7 +182,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       }
     }
     MutationResult mr = m.execute();
-    assertTrue(mr.isSuccess());
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
@@ -201,7 +193,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setColumnNames("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn2");
     Result<Rows<String, String>> r = q.execute();
     assertNotNull(r);
-    assertTrue(r.isSuccess());
     Rows<String, String> rows = r.get();
     assertNotNull(rows);
     assertEquals(2, rows.getCount());
@@ -226,7 +217,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setRange("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn3", false, 100);
     r = q.execute();
     assertNotNull(r);
-    assertTrue(r.isSuccess());
     rows = r.get();
     assertEquals(1, rows.getCount());
     for (Row<String, String> row2 : rows) {
@@ -249,7 +239,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       }
     }
     mr = m.execute();
-    assertTrue(mr.isSuccess());
   }
 
   @Test
@@ -262,7 +251,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
           createColumn("testSlicesQuery" + j, "value" + j, se, se));
     }
     MutationResult mr = m.execute();
-    assertTrue(mr.isSuccess());
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
@@ -274,7 +262,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setColumnNames("testSlicesQuery1", "testSlicesQuery2", "testSlicesQuery3");
     Result<ColumnSlice<String, String>> r = q.execute();
     assertNotNull(r);
-    assertTrue(r.isSuccess());
     ColumnSlice<String, String> slice = r.get();
     assertNotNull(slice);
     assertEquals(3, slice.getColumns().size());
@@ -295,7 +282,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setRange("testSlicesQuery2", "testSlicesQuery1", true, 100);
     r = q.execute();
     assertNotNull(r);
-    assertTrue(r.isSuccess());
     slice = r.get();
     assertNotNull(slice);
     for (HColumn<String, String> column : slice.getColumns()) {
@@ -310,7 +296,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       m.addDeletion("testSlicesQuery", cf, "testSlicesQuery1" + j, se);
     }
     mr = m.execute();
-    assertTrue(mr.isSuccess());
   }
 
   @Test

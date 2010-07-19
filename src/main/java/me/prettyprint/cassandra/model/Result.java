@@ -1,7 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 /**
- * 
+ *
  * @author Ran Tavory
  *
  * @param <T> The type of the result. May be for example Column of SuperColumn
@@ -9,9 +9,9 @@ package me.prettyprint.cassandra.model;
 public class Result<T> extends ExecutionResult<T> {
 
   private final Query<T> query;
-  
+
   /*package*/ Result(ExecutionResult<T> res, Query<T> query) {
-    super(res.get(), res.isSuccess(), res.getExecutionTimeMicro());
+    super(res.get(), res.getExecutionTimeMicro());
     this.query = query;
   }
 
