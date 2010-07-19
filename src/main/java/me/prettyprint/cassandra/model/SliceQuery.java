@@ -1,5 +1,12 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.List;
+
+import me.prettyprint.cassandra.service.Keyspace;
+
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnParent;
+
 
 /**
  * A query for the thrift call get_slice
@@ -11,18 +18,32 @@ package me.prettyprint.cassandra.model;
 @SuppressWarnings("unchecked")
 public class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
 
-  SliceQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  private String key;
+
+  /*package*/ SliceQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
   }
 
-  SliceQuery<N,V> setKey(String key) {
-    // TODO
-    return null;
+  public SliceQuery<N,V> setKey(String key) {
+    this.key = key;
+    return this;
   }
 
   @Override
   public Result<ColumnSlice<N, V>> execute() {
-    // TODO Auto-generated method stub
-    return null;
+    return new Result<ColumnSlice<N, V>>(keyspaceOperator.doExecute(
+        new KeyspaceOperationCallback<ColumnSlice<N, V>>() {
+          @Override
+          public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
+            ColumnParent columnParent = new ColumnParent(columnFamilyName);
+            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate());
+            return new ColumnSlice<N, V>(thriftRet, nameExtractor, valueExtractor);
+          }
+        }), this);
+  }
+
+  @Override
+  public String toString() {
+    return "SliceQuery(" + key + "," + toStringInternal() + ")";
   }
 }

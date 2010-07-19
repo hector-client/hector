@@ -16,9 +16,6 @@ import org.apache.cassandra.thrift.Column;
  * @param <N> Column name type
  * @param <V> Column value type
  *
- * Not implemented yet:
- * @param <K> Row Key type. In 0.7.0 this can be a byte[]. In previous versions this can only be a
- * String
  */
 public class Row<N,V> {
 
