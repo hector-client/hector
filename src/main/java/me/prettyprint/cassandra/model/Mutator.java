@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
+import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
 
 import java.util.Arrays;
@@ -43,7 +44,7 @@ public class Mutator {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.insert(key, createColumnPath(cf, c.getNameBytes()), c.getValueBytes());
+        ks.insert(key, createColumnPath(cf, c.getName(), c.getNameExtractor()), c.getValueBytes());
         return null;
       }
     }));
@@ -70,11 +71,23 @@ public class Mutator {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createColumnPath(cf, nameExtractor.toBytes(columnName)));
+        ks.remove(key, createColumnPath(cf, columnName, nameExtractor));
         return null;
       }
     }));
   }
+
+  public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
+      final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor) {
+    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
+      @Override
+      public Void doInKeyspace(Keyspace ks) throws HectorException {
+        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor));
+        return null;
+      }
+    }));
+  }
+
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an

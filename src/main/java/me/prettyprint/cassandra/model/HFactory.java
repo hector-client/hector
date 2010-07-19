@@ -159,7 +159,7 @@ public class HFactory {
     return createColumnPath(columnFamilyName, nameExtractor.toBytes(columnName));
   }
 
-  /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
+  private static <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
     notNull(columnFamilyName, "columnFamilyName cannot be null");
     ColumnPath columnPath = new ColumnPath(columnFamilyName);
     if (columnName != null) {
@@ -175,11 +175,9 @@ public class HFactory {
   /*package*/ static <SN,N> ColumnPath createSuperColumnPath(String columnFamilyName,
       SN superColumnName, N columnName, Extractor<SN> superNameExtractor,
       Extractor<N> nameExtractor) {
-    noneNull(columnFamilyName, superNameExtractor, nameExtractor);
+    noneNull(columnFamilyName, superColumnName, superNameExtractor, nameExtractor);
     ColumnPath columnPath = createColumnPath(columnFamilyName, nameExtractor.toBytes(columnName));
-    if (superColumnName != null) {
-      columnPath.setSuper_column(superNameExtractor.toBytes(superColumnName));
-    }
+    columnPath.setSuper_column(superNameExtractor.toBytes(superColumnName));
     return columnPath;
   }
 
