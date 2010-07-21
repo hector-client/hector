@@ -69,16 +69,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
-  private CassandraClientPool pools;
-  private CassandraClientMonitor monitor;
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
-    pools = mock(CassandraClientPool.class);
-    monitor = mock(CassandraClientMonitor.class);
+    super.setupClient();
     client = new CassandraClientFactory(pools,
-        new CassandraHost("localhost", 9170), monitor).create();
-    when(pools.borrowClient("localhost:9170")).thenReturn(client);
+        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
+
     keyspace = client.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
   }

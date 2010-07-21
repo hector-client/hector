@@ -34,16 +34,14 @@ import org.slf4j.LoggerFactory;
    * The pool associated with this client factory.
    */
   private final CassandraClientPool pool;
-  private final String url;
-  private final int port;
   private final boolean useThriftFramedTransport;
   private final TimestampResolution timestampResolution;
+  private final CassandraHost cassandraHost;
 
   public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
       CassandraClientMonitor clientMonitor) {
     this.pool = pools;
-    this.url = cassandraHost.getUrl();
-    this.port = cassandraHost.getPort();
+    this.cassandraHost = cassandraHost;
     timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
     this.useThriftFramedTransport = cassandraHost.getUseThriftFramedTransport();
@@ -60,8 +58,7 @@ import org.slf4j.LoggerFactory;
   public CassandraClientFactory(String url, int port) {
     this.clientMonitor = new CassandraClientMonitor();
     this.pool = new CassandraClientPoolImpl(this.clientMonitor);
-    this.url = url;
-    this.port = port;
+    this.cassandraHost = new CassandraHost(url,port);
     timeout = getTimeout(null);
     this.useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
     timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
@@ -70,9 +67,9 @@ import org.slf4j.LoggerFactory;
   public CassandraClient create() throws HectorException {
     CassandraClient c;
     try {
-      c = new CassandraClientImpl(createThriftClient(url, port),
-          new KeyspaceFactory(clientMonitor), url, port, pool, 
-          CassandraClusterFactory.INSTANCE.create(pool, url + ":" + port), timestampResolution);
+      c = new CassandraClientImpl(createThriftClient(cassandraHost),
+          new KeyspaceFactory(clientMonitor), cassandraHost.getUrl(), cassandraHost.getPort(), pool, 
+          CassandraClusterFactory.INSTANCE.create(pool, cassandraHost), timestampResolution);
     } catch (Exception e) {
       throw new HectorException(e);
     }
@@ -80,14 +77,14 @@ import org.slf4j.LoggerFactory;
     return c;
   }
 
-  private Cassandra.Client createThriftClient(String  url, int port)
+  private Cassandra.Client createThriftClient(CassandraHost cassandraHost)
       throws HectorTransportException {
-    log.debug("Creating a new thrift connection to {}:{}", url, port);
+    log.debug("Creating a new thrift connection to {}", cassandraHost);
     TTransport tr;
     if (useThriftFramedTransport) {
-      tr = new TFramedTransport(new TSocket(url, port, timeout));
+      tr = new TFramedTransport(new TSocket(cassandraHost.getUrl(), cassandraHost.getPort(), timeout));
     } else {
-      tr = new TSocket(url, port, timeout);
+      tr = new TSocket(cassandraHost.getUrl(), cassandraHost.getPort(), timeout);
     }
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
@@ -96,9 +93,9 @@ import org.slf4j.LoggerFactory;
     } catch (TTransportException e) {
       // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
       // add details to it.
-      log.error("Unable to open transport to " + url + ":" + port, e);
+      log.error("Unable to open transport to " + cassandraHost.getName(), e);
       clientMonitor.incCounter(Counter.CONNECT_ERROR);
-      throw new HectorTransportException("Unable to open transport to " + url + ":" + port + " , " +
+      throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
           e.getLocalizedMessage(), e);
     }
     return client;

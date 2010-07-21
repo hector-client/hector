@@ -90,6 +90,13 @@ public interface CassandraClientPool {
    * @return
    */
   CassandraClient borrowClient(String url, int port) throws HectorException;
+  
+  /**
+   * Borrows a client from the pool defined by {@link CassandraHost}
+   * @param cassandraHost defines the connection attributes
+   * @return
+   */
+  CassandraClient borrowClient(CassandraHost cassandraHost) throws HectorException;
 
   /**
    * Borrows a client, similar to {@link #borrowClient(String, int)}, but expects the url:port

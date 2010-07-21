@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
   private final FailoverPolicy failoverPolicy;
   private List<String> knownHosts;
   private final CassandraClientMonitor cassandraClientMonitor;
-  private final String preferredClientUrl;
+  private final CassandraHost preferredCassandraHost;
   private final ExceptionsTranslator xtrans;
 
   /**
@@ -40,12 +40,12 @@ import org.slf4j.LoggerFactory;
    *          borrowed from the pool. If not, a default client, if exists in the
    *          pool, will be borrowed.
    */
-  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, String preferredClientUrl)
+  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, CassandraHost prefferedHost)
       throws HectorException {
     this.cassandraClientPool = cassandraClientPool;
     this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
-    this.preferredClientUrl = preferredClientUrl;
+    this.preferredCassandraHost = prefferedHost;
     xtrans = new ExceptionsTranslatorImpl();
   }
 
@@ -79,10 +79,10 @@ import org.slf4j.LoggerFactory;
   }
 
   private CassandraClient borrow() throws HectorException {
-    if (preferredClientUrl == null) {
+    if (preferredCassandraHost == null) {
       return cassandraClientPool.borrowClient();
     } else {
-      return cassandraClientPool.borrowClient(preferredClientUrl);
+      return cassandraClientPool.borrowClient(preferredCassandraHost);
 
     }
   }

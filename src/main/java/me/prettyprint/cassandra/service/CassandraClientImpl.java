@@ -53,10 +53,10 @@ import org.slf4j.LoggerFactory;
 
   private final KeyspaceFactory keyspaceFactory;
 
-  private final int port;
-
-  private final String url;
-  private final String ip;
+//  private final int port;
+//
+//  private final String url;
+//  private final String ip;
 
   private final CassandraClientPool cassandraClientPool;
   
@@ -71,6 +71,8 @@ import org.slf4j.LoggerFactory;
 
   /** Whether the client has been released back to the pool already */
   private boolean released = false;
+  
+  private final CassandraHost cassandraHost;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, 
@@ -83,9 +85,10 @@ import org.slf4j.LoggerFactory;
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
-    this.port = port;
-    this.url = url;
-    ip = getIpString(url);
+    this.cassandraHost = new CassandraHost(url, port);
+    //this.port = port;
+    //this.url = url;
+    //ip = getIpString(url);
     this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
     this.cassandraCluster = cassandraCluster;
@@ -193,12 +196,12 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public int getPort() {
-    return port;
+    return cassandraHost.getPort();
   }
 
   @Override
   public String getUrl() {
-    return url;
+    return cassandraHost.getUrl();
   }
 
   @Override
@@ -250,7 +253,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public String getIp() {
-    return ip;
+    return cassandraHost.getIp();
   }
 
   @Override

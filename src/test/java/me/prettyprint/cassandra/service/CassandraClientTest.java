@@ -28,17 +28,12 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
 
-  private CassandraClientPool pools;
-
-  private CassandraClientMonitor monitor;
-
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
-    pools = mock(CassandraClientPool.class);
-    monitor = mock(CassandraClientMonitor.class);
-    client = new CassandraClientFactory(pools, new CassandraHost("localhost", 9170), monitor).create();
-    when(pools.borrowClient("localhost:9170")).thenReturn(client);
+    super.setupClient();
+    client = new CassandraClientFactory(pools,
+        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();    
   }
 
   @Test
@@ -103,7 +98,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   public void testFramedTransport() throws HectorException {
     CassandraHost cassandraHost = new CassandraHost("localhost", 9170);
     cassandraHost.setUseThriftFramedTransport(true);
-    client = new CassandraClientFactory(pools, cassandraHost, monitor).create();
+    client = new CassandraClientFactory(pools, cassandraHost, JmxMonitor.getInstance().getCassandraMonitor()).create();
     assertTrue(client.getCassandra().getInputProtocol().getTransport() instanceof TFramedTransport);
   }
 }

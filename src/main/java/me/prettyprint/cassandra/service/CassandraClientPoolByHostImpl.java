@@ -22,9 +22,7 @@ import com.google.common.collect.ImmutableSet;
   private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolByHostImpl.class);
 
   private final CassandraClientFactory clientFactory;
-  private final String url;
   private final String name;
-  private final int port;
   private final int maxActive;
   private final int maxIdle;
   private final boolean lifo;
@@ -64,8 +62,6 @@ import com.google.common.collect.ImmutableSet;
       CassandraClientFactory cassandraClientFactory) {
     log.debug("Creating new connection pool for {}", cassandraHost.getUrlPort());
     this.cassandraHost = cassandraHost;
-    url = cassandraHost.getUrl();
-    port = cassandraHost.getPort();    
     this.name = cassandraHost.getName();
     this.maxActive = cassandraHost.getMaxActive();
     this.maxIdle = cassandraHost.getMaxIdle();
@@ -202,13 +198,7 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder();
-    b.append("CassandraClientPoolImpl<");
-    b.append(url);
-    b.append(":");
-    b.append(port);
-    b.append(">");
-    return b.toString();
+    return String.format("CassandraClientPoolImpl<%s>", name);
   }
 
   @Override

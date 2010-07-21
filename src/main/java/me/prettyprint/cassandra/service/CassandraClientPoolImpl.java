@@ -73,6 +73,10 @@ import org.slf4j.LoggerFactory;
   public CassandraClient borrowClient(String url, int port) throws HectorException {
     return getPool(new CassandraHost(url, port)).borrowClient();
   }
+  
+  public CassandraClient borrowClient(CassandraHost cassandraHost) throws HectorException {
+    return getPool(cassandraHost).borrowClient();
+  }
 
   @Override
   public Set<String> getExhaustedPoolNames() {
