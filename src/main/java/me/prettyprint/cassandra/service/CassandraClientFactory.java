@@ -82,9 +82,9 @@ import org.slf4j.LoggerFactory;
     log.debug("Creating a new thrift connection to {}", cassandraHost);
     TTransport tr;
     if (useThriftFramedTransport) {
-      tr = new TFramedTransport(new TSocket(cassandraHost.getUrl(), cassandraHost.getPort(), timeout));
+      tr = new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout));
     } else {
-      tr = new TSocket(cassandraHost.getUrl(), cassandraHost.getPort(), timeout);
+      tr = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
     }
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);

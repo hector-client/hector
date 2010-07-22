@@ -60,7 +60,7 @@ import com.google.common.collect.ImmutableSet;
       CassandraClientPool pools,
       CassandraClientMonitor cassandraClientMonitor,
       CassandraClientFactory cassandraClientFactory) {
-    log.debug("Creating new connection pool for {}", cassandraHost.getUrlPort());
+    log.debug("Creating new connection pool for {}", cassandraHost.getUrl());
     this.cassandraHost = cassandraHost;
     this.name = cassandraHost.getName();
     this.maxActive = cassandraHost.getMaxActive();

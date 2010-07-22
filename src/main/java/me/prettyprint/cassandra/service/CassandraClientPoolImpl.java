@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
     String[] clients = new String[pools.size()];
     int x = 0;
     for(CassandraHost cassandraHost : pools.keySet()) {
-      clients[x] = cassandraHost.getUrlPort();
+      clients[x] = cassandraHost.getUrl();
       x++;
     }
     return borrowClient(clients);

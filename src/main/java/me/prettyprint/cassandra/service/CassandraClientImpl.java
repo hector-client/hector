@@ -187,7 +187,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public String getUrl() {
-    return cassandraHost.getUrl();
+    return cassandraHost.getHost();
   }
 
   @Override
