@@ -53,11 +53,6 @@ import org.slf4j.LoggerFactory;
 
   private final KeyspaceFactory keyspaceFactory;
 
-//  private final int port;
-//
-//  private final String url;
-//  private final String ip;
-
   private final CassandraClientPool cassandraClientPool;
   
   /** An instance of the cluster object used to manage meta-operations */
@@ -86,9 +81,6 @@ import org.slf4j.LoggerFactory;
     cassandra = cassandraThriftClient;
     this.keyspaceFactory = keyspaceFactory;
     this.cassandraHost = new CassandraHost(url, port);
-    //this.port = port;
-    //this.url = url;
-    //ip = getIpString(url);
     this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
     this.cassandraCluster = cassandraCluster;
