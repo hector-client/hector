@@ -150,7 +150,7 @@ public interface CassandraClientPool {
 
   int getNumActive();
 
-  Set<String> getKnownHosts();
+  Set<CassandraHost> getKnownHosts();
   
   /**
    * Adds the (pre-configured) CassandraHost to the pool if not already present

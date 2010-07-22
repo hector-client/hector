@@ -47,7 +47,7 @@ public class Cluster {
   private final FailoverPolicy failoverPolicy;
   private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
-  private Set<String> knownPoolHosts;
+  private Set<CassandraHost> knownPoolHosts;
   private final ExceptionsTranslator xtrans;
 
   public Cluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
@@ -59,7 +59,7 @@ public class Cluster {
     xtrans = new ExceptionsTranslatorImpl();
   }
 
-  public Set<String> getKnownPoolHosts(boolean refresh) {
+  public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
       knownPoolHosts = pool.getKnownHosts();
       log.info("found knownPoolHosts: {}", knownPoolHosts);
@@ -241,7 +241,7 @@ public class Cluster {
     CassandraClient client = null;
     try {
       client = borrowClient();
-      FailoverOperator operator = new FailoverOperator(failoverPolicy, new ArrayList<String>(getKnownPoolHosts(false)),
+      FailoverOperator operator = new FailoverOperator(failoverPolicy, new ArrayList<CassandraHost>(getKnownPoolHosts(false)),
           cassandraClientMonitor, client, pool, null);
       client = operator.operate(op);
     } finally {

@@ -162,8 +162,8 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Set<String> getKnownHosts() {
-    Set<String> ret = new HashSet<String>();
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> ret = new HashSet<CassandraHost>();
     for (CassandraClientPool pool: pools) {
       ret.addAll(pool.getKnownHosts());
     }

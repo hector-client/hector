@@ -89,9 +89,10 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetTokenMap() throws HectorException {
-    List<String> hosts = client.getKnownHosts(false);
+    CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+    List<CassandraHost> hosts = client.getKnownHosts(false);
     assertNotNull(hosts);
-    assertEquals("127.0.0.1", hosts.get(0));
+    assertEquals(cassandraHost, hosts.get(0));
   }
   
   @Test 

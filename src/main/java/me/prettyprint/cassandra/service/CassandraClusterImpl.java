@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 
   private final CassandraClientPool cassandraClientPool;
   private final FailoverPolicy failoverPolicy;
-  private List<String> knownHosts;
+  private List<CassandraHost> knownHosts;
   private final CassandraClientMonitor cassandraClientMonitor;
   private final CassandraHost preferredCassandraHost;
   private final ExceptionsTranslator xtrans;
@@ -50,17 +50,19 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<String> getKnownHosts(boolean fresh) throws HectorException {
+  public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
     if (fresh || knownHosts == null) {
       CassandraClient client = borrow();
       try {
-        knownHosts = new ArrayList<String>(buildHostNames(client.getCassandra()));
+        knownHosts = new ArrayList<CassandraHost>(buildHostNames(client.getCassandra()));
       } finally {
         cassandraClientPool.releaseClient(client);
       }
     }
     return knownHosts;
   }
+  
+  
 
   private void operateWithFailover(Operation<?> op) throws HectorException {
     CassandraClient client = null;
@@ -157,15 +159,15 @@ import org.slf4j.LoggerFactory;
     return op.getResult();
   }
 
-  private Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
+  private Set<CassandraHost> buildHostNames(Cassandra.Client cassandra) throws HectorException {
     try {
-      Set<String> hostnames = new HashSet<String>();
+      Set<CassandraHost> hostnames = new HashSet<CassandraHost>();
       for (String keyspace : cassandra.describe_keyspaces()) {
         if (!keyspace.equals(KEYSPACE_SYSTEM)) {
           List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
           for (TokenRange tokenRange : tokenRanges) {
             for (String host : tokenRange.getEndpoints()) {
-              hostnames.add(host);
+              hostnames.add(new CassandraHost(host + ":" + preferredCassandraHost.getPort()));
             }
           }
           break;

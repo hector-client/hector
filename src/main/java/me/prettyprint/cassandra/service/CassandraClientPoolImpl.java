@@ -175,10 +175,10 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();    
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> hosts = new HashSet<CassandraHost>();    
     for (CassandraClientPoolByHost pool: pools.values()) {
-      hosts.add(pool.getCassandraHost().getIp());
+      hosts.add(pool.getCassandraHost());
     }
     return hosts;
   }
@@ -194,7 +194,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private CassandraClientPoolByHost getPool(CassandraClient c) {
-    return getPool(new CassandraHost(c.getUrl(), c.getPort()));
+    return getPool(c.getCassandraHost());
   }
 
   @Override

@@ -106,7 +106,7 @@ public interface CassandraClientMonitorMBean {
    */
   long getNumConnectionErrors();
 
-  public Set<String> getKnownHosts();
+  public Set<CassandraHost> getKnownHosts();
 
   /**
    * Tells all pulls to update their list of known hosts.

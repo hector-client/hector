@@ -52,7 +52,7 @@ import org.slf4j.LoggerFactory;
   private final FailoverPolicy failoverPolicy;
 
   /** List of all known remote cassandra nodes */
-  private List<String> knownHosts = new ArrayList<String>();
+  private List<CassandraHost> knownHosts = new ArrayList<CassandraHost>();
 
   private final CassandraClientPool clientPools;
 
@@ -712,7 +712,7 @@ import org.slf4j.LoggerFactory;
   private void initFailover() throws HectorTransportException {
     if (failoverPolicy == FailoverPolicy.FAIL_FAST) {
       knownHosts.clear();
-      knownHosts.add(client.getUrl());
+      knownHosts.add(client.getCassandraHost());
       return;
     }
     // learn about other cassandra hosts in the ring
@@ -727,18 +727,18 @@ import org.slf4j.LoggerFactory;
   public void updateKnownHosts() throws HectorTransportException {
     // When update starts we only know of this client, nothing else
     knownHosts.clear();
-    knownHosts.add(getClient().getUrl());
+    knownHosts.add(getClient().getCassandraHost());
 
     // Now query for more hosts. If the query fails, then even this client is
     // now "known"
     try {
-      List<String> hosts;
+      List<CassandraHost> hosts;
       hosts = getClient().getKnownHosts(true);
       if (hosts != null && hosts.size() > 0) {
-        if (!hosts.contains(getClient().getUrl()) && !hosts.contains(getClient().getIp())) {
-          hosts.add(getClient().getIp());
+        if (!hosts.contains(getClient().getCassandraHost())) {
+          hosts.add(getClient().getCassandraHost());
         }
-        knownHosts = new ArrayList<String>(hosts);
+        knownHosts = new ArrayList<CassandraHost>(hosts);
       }
     } catch (HectorTransportException e) {
       knownHosts.clear();
@@ -755,8 +755,8 @@ import org.slf4j.LoggerFactory;
     }
   }
 
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
     hosts.addAll(knownHosts);
     return hosts;
   }
