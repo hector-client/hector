@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -83,10 +82,6 @@ import org.slf4j.LoggerFactory;
     this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
     this.cassandraCluster = cassandraCluster;
-  }
-
-  private static String getIpString(String url) throws UnknownHostException {
-    return InetAddress.getByName(url).getHostAddress();
   }
 
   @Override
