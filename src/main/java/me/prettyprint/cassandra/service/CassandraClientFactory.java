@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
     CassandraClient c;
     try {
       c = new CassandraClientImpl(createThriftClient(cassandraHost),
-          new KeyspaceFactory(clientMonitor), cassandraHost.getUrl(), cassandraHost.getPort(), pool, 
+          new KeyspaceFactory(clientMonitor), cassandraHost, pool, 
           CassandraClusterFactory.INSTANCE.create(pool, cassandraHost), timestampResolution);
     } catch (Exception e) {
       throw new HectorException(e);

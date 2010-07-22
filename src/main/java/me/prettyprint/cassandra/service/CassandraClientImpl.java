@@ -71,16 +71,15 @@ import org.slf4j.LoggerFactory;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, 
-      String url, 
-      int port, 
+      CassandraHost cassandraHost, 
       CassandraClientPool clientPools,
-      CassandraCluster cassandraCluster,
+      CassandraCluster cassandraCluster,      
       TimestampResolution timestampResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
+    this.cassandraHost = cassandraHost;
     this.keyspaceFactory = keyspaceFactory;
-    this.cassandraHost = new CassandraHost(url, port);
     this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
     this.cassandraCluster = cassandraCluster;
