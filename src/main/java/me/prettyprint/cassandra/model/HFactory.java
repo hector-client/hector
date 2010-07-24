@@ -113,6 +113,12 @@ public class HFactory {
     return new SliceQuery<N,V>(ko, nameExtractor, valueExtractor);
   }
 
+  public static <SN,N,V> SuperSliceQuery<SN,N,V> createSuperSliceQuery(
+      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+      Extractor<V> valueExtractor) {
+    return new SuperSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+  }
+
   /**
    * createSuperColumn accepts a variable number of column arguments
    * @param name supercolumn name

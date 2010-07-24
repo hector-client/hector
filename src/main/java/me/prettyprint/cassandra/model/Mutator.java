@@ -99,6 +99,14 @@ public class Mutator {
     return this;
   }
 
+  /**
+   * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
+   */
+  public <SN,N,V> Mutator addInsertion(String key, String cf, HSuperColumn<SN,N,V> sc) {
+    getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
+    return this;
+  }
+
   public <N> Mutator addDeletion(String key, String cf, N columnName, Extractor<N> nameExtractor) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameExtractor.toBytes(columnName));
@@ -147,4 +155,5 @@ public class Mutator {
     }
     return pendingMutations;
   }
+
 }

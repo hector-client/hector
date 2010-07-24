@@ -8,6 +8,7 @@ import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumnQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -293,15 +294,70 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // Delete values
     for (int j = 1; j <= 3; ++j) {
-      m.addDeletion("testSlicesQuery", cf, "testSlicesQuery1" + j, se);
+      m.addDeletion("testSlicesQuery", cf, "testSlicesQuery" + j, se);
     }
     mr = m.execute();
   }
 
   @Test
-  @Ignore("Not ready yet")
-  public void testSuperSlicesQuery() {
-    // TODO
+  public void testSuperSliceQuery() {
+    String cf = "Super1";
+
+    Mutator m = createMutator(ko);
+    for (int j = 1; j <= 3; ++j) {
+      @SuppressWarnings("unchecked")
+      HSuperColumn<String, String, String> sc = createSuperColumn("testSuperSliceQuery" + j,
+          Arrays.asList(createColumn("name", "value", se, se)), se, se, se);
+      m.addInsertion("testSuperSliceQuery", cf, sc);
+    }
+
+    MutationResult mr = m.execute();
+    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+
+    // get value
+    SuperSliceQuery<String,String, String> q = createSuperSliceQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKey("testSuperSliceQuery");
+    // try with column name first
+    q.setColumnNames("testSuperSliceQuery1", "testSuperSliceQuery2", "testSuperSliceQuery3");
+    Result<SuperSlice<String,String,String>> r = q.execute();
+    assertNotNull(r);
+    SuperSlice<String,String,String> slice = r.get();
+    assertNotNull(slice);
+    assertEquals(3, slice.getSuperColumns().size());
+    // Test slice.getColumnByName
+    assertEquals("value", slice.getColumnByName("testSuperSliceQuery1").getColumns().get(0).getValue());
+
+    // now try with start/finish
+    q = createSuperSliceQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKey("testSuperSliceQuery");
+    // try reversed this time
+    q.setRange("testSuperSliceQuery1", "testSuperSliceQuery2", false, 2);
+    r = q.execute();
+    assertNotNull(r);
+    slice = r.get();
+    assertNotNull(slice);
+    for (HSuperColumn<String,String,String> scolumn : slice.getSuperColumns()) {
+      if (!scolumn.getName().equals("testSuperSliceQuery1")
+          && !scolumn.getName().equals("testSuperSliceQuery2")) {
+        fail("A columns with unexpected column name returned: " + scolumn.getName());
+      }
+    }
+
+    // Delete values
+    for (int j = 1; j <= 3; ++j) {
+      m.addDeletion("testSuperSliceQuery", cf, "testSuperSliceQuery" + j, se);
+    }
+    mr = m.execute();
+
+    // Test after deletion
+    r = q.execute();
+    assertNotNull(r);
+    slice = r.get();
+    assertNotNull(slice);
+    assertTrue(slice.getSuperColumns().isEmpty());
   }
 
   @Test
