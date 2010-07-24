@@ -4,6 +4,7 @@ import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.cassandra.thrift.Column;
@@ -91,8 +92,12 @@ public class HSuperColumn<SN,N,V> {
     return superName;
   }
 
+  /**
+   *
+   * @return an unmodifiable list of columns
+   */
   public List<HColumn<N,V>> getColumns() {
-    return columns;
+    return Collections.unmodifiableList(columns);
   }
 
   public HColumn<N,V> get(int i) {

@@ -14,6 +14,9 @@ public class OrderedRows<N,V> extends Rows<N,V> {
   }
 
   // returns the rows as an ordered list.
+  /**
+   * @return an unmodifiable list of Rows
+   */
   List<Row<N,V>> getList() {
     //TODO
     return null;

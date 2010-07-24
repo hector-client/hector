@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,8 +30,12 @@ public class ColumnSlice<N,V> {
     }
   }
 
+  /**
+   *
+   * @return an unmodifiable list of the columns
+   */
   public List<HColumn<N,V>> getColumns() {
-    return columnsList;
+    return Collections.unmodifiableList(columnsList);
   }
 
   public HColumn<N,V> getColumnByName(N columnName) {

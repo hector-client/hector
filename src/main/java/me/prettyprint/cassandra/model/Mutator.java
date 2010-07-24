@@ -115,7 +115,6 @@ public class Mutator {
     return this;
   }
 
-
   /**
    * Batch executes all mutations scheduled to this Mutator instance by addInsertion, addDeletion etc.
    * May throw a HectorException which is a RuntimeException.

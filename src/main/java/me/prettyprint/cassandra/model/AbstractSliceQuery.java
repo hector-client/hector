@@ -67,7 +67,7 @@ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements
    *
    * @return the thrift representation of the predicate
    */
-  public SlicePredicate getPredicate() {
+  /*package*/ SlicePredicate getPredicate() {
     SlicePredicate pred = new SlicePredicate();
     if (useColumnNames) {
       if (columnNames == null || columnNames.isEmpty()) {
