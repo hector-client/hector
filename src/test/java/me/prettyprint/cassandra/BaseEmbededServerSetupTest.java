@@ -34,6 +34,6 @@ public abstract class BaseEmbededServerSetupTest {
   @AfterClass
   public static void teardown() throws IOException {
     embedded.teardown();
+    embedded = null;
   }
-
 }
