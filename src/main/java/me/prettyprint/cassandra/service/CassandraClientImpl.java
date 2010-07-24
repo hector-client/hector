@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -53,11 +52,6 @@ import org.slf4j.LoggerFactory;
 
   private final KeyspaceFactory keyspaceFactory;
 
-  private final int port;
-
-  private final String url;
-  private final String ip;
-
   private final CassandraClientPool cassandraClientPool;
   
   /** An instance of the cluster object used to manage meta-operations */
@@ -71,28 +65,23 @@ import org.slf4j.LoggerFactory;
 
   /** Whether the client has been released back to the pool already */
   private boolean released = false;
+  
+  private final CassandraHost cassandraHost;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
       KeyspaceFactory keyspaceFactory, 
-      String url, 
-      int port, 
+      CassandraHost cassandraHost, 
       CassandraClientPool clientPools,
-      CassandraCluster cassandraCluster,
+      CassandraCluster cassandraCluster,      
       TimestampResolution timestampResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
+    this.cassandraHost = cassandraHost;
     this.keyspaceFactory = keyspaceFactory;
-    this.port = port;
-    this.url = url;
-    ip = getIpString(url);
     this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
     this.cassandraCluster = cassandraCluster;
-  }
-
-  private static String getIpString(String url) throws UnknownHostException {
-    return InetAddress.getByName(url).getHostAddress();
   }
 
   @Override
@@ -157,7 +146,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<String> getKnownHosts(boolean fresh) throws HectorException {
+  public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
     return cassandraCluster.getKnownHosts(fresh);
   }
 
@@ -192,13 +181,8 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public int getPort() {
-    return port;
-  }
-
-  @Override
-  public String getUrl() {
-    return url;
+  public CassandraHost getCassandraHost() {
+    return this.cassandraHost;
   }
 
   @Override
@@ -216,9 +200,7 @@ import org.slf4j.LoggerFactory;
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("CassandraClient<");
-    b.append(getUrl());
-    b.append(":");
-    b.append(getPort());
+    b.append(cassandraHost.getUrl());
     b.append("-");
     b.append(mySerial);
     b.append(">");
@@ -236,8 +218,8 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
     if (closed) {
       return hosts;
     }
@@ -248,10 +230,6 @@ import org.slf4j.LoggerFactory;
     return hosts;
   }
 
-  @Override
-  public String getIp() {
-    return ip;
-  }
 
   @Override
   public boolean hasErrors() {

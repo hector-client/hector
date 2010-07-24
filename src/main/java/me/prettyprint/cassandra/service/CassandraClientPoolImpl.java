@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
     String[] clients = new String[pools.size()];
     int x = 0;
     for(CassandraHost cassandraHost : pools.keySet()) {
-      clients[x] = cassandraHost.getUrlPort();
+      clients[x] = cassandraHost.getUrl();
       x++;
     }
     return borrowClient(clients);
@@ -72,6 +72,10 @@ import org.slf4j.LoggerFactory;
   @Override
   public CassandraClient borrowClient(String url, int port) throws HectorException {
     return getPool(new CassandraHost(url, port)).borrowClient();
+  }
+  
+  public CassandraClient borrowClient(CassandraHost cassandraHost) throws HectorException {
+    return getPool(cassandraHost).borrowClient();
   }
 
   @Override
@@ -171,10 +175,10 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();    
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> hosts = new HashSet<CassandraHost>();    
     for (CassandraClientPoolByHost pool: pools.values()) {
-      hosts.add(pool.getCassandraHost().getIp());
+      hosts.add(pool.getCassandraHost());
     }
     return hosts;
   }
@@ -190,7 +194,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private CassandraClientPoolByHost getPool(CassandraClient c) {
-    return getPool(new CassandraHost(c.getUrl(), c.getPort()));
+    return getPool(c.getCassandraHost());
   }
 
   @Override

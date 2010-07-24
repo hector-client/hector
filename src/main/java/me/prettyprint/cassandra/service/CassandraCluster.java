@@ -63,6 +63,6 @@ public interface CassandraCluster {
    * @throws IllegalStateException
    * @throws PoolExhaustedException
    */
-  List<String> getKnownHosts(boolean fresh) throws HectorException;
+  List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException;
 
 }

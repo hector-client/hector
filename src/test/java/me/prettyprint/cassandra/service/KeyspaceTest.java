@@ -69,16 +69,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
-  private CassandraClientPool pools;
-  private CassandraClientMonitor monitor;
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
-    pools = mock(CassandraClientPool.class);
-    monitor = mock(CassandraClientMonitor.class);
+    super.setupClient();
     client = new CassandraClientFactory(pools,
-        new CassandraHost("localhost", 9170), monitor).create();
-    when(pools.borrowClient("localhost:9170")).thenReturn(client);
+        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
+
     keyspace = client.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
@@ -870,29 +867,27 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
     // The token map represents the list of available servers.
-    List<String> hosts = Arrays.asList(new String[]{"h1", "h2", "h3"});
+    List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+        new CassandraHost("h1:111"), 
+        new CassandraHost("h2:111"),
+        new CassandraHost("h3:111")});
 
     when(h1client.getCassandra()).thenReturn(h1cassandra);
+    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
     when(h2client.getCassandra()).thenReturn(h2cassandra);
+    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
     when(h3client.getCassandra()).thenReturn(h3cassandra);
+    when(h3client.getCassandraHost()).thenReturn(hosts.get(2));
     when(h1client.getKnownHosts(anyBoolean())).thenReturn(hosts);
     when(h2client.getKnownHosts(anyBoolean())).thenReturn(hosts);
     when(h3client.getKnownHosts(anyBoolean())).thenReturn(hosts);
-    when(h1client.getPort()).thenReturn(111);
-    when(h2client.getPort()).thenReturn(111);
-    when(h3client.getPort()).thenReturn(111);
-    when(h1client.getUrl()).thenReturn("h1");
-    when(h1client.getIp()).thenReturn("ip1");
-    when(h2client.getUrl()).thenReturn("h2");
-    when(h2client.getIp()).thenReturn("ip2");
-    when(h3client.getUrl()).thenReturn("h3");
-    when(h3client.getIp()).thenReturn("ip3");
+
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h3client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
-    when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
-    when(clientPools.borrowClient("h3", 111)).thenReturn(h3client);
+    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
+    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
+    when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
 
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
@@ -921,7 +916,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ks.insert("key", cp, bytes("value"));
     verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
         (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
-    verify(clientPools).borrowClient("h2", 111);
+    verify(clientPools).borrowClient(hosts.get(1));
 
     // make both h1 and h2 fail
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
@@ -986,22 +981,21 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
     // The token map represents the list of available servers.
-    List<String> hosts = Arrays.asList(new String[]{"h1", "h2"});
+    List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+        new CassandraHost("h1:111"), 
+        new CassandraHost("h2:111")});
 
     when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h2client.getCassandra()).thenReturn(h2cassandra);
+    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
+    when(h2client.getCassandra()).thenReturn(h2cassandra);    
+    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
     when(h1client.getKnownHosts(anyBoolean())).thenReturn(hosts);
     when(h2client.getKnownHosts(anyBoolean())).thenReturn(hosts);
-    when(h1client.getPort()).thenReturn(111);
-    when(h2client.getPort()).thenReturn(111);
-    when(h1client.getUrl()).thenReturn("h1");
-    when(h1client.getIp()).thenReturn("ip1");
-    when(h2client.getUrl()).thenReturn("h2");
-    when(h2client.getIp()).thenReturn("ip2");
+     
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
-    when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
+    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
+    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
 
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
@@ -1048,22 +1042,20 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
-    List<String> hosts = Arrays.asList(new String[]{"h1", "h2"});
+    List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+        new CassandraHost("h1:111"), 
+        new CassandraHost("h2:111")});
 
     when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h2client.getCassandra()).thenReturn(h2cassandra);
+    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
+    when(h2client.getCassandra()).thenReturn(h2cassandra);    
+    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
     when(h1client.getKnownHosts(anyBoolean())).thenReturn(hosts);
     when(h2client.getKnownHosts(anyBoolean())).thenReturn(hosts);
-    when(h1client.getPort()).thenReturn(2);
-    when(h2client.getPort()).thenReturn(2);
-    when(h1client.getUrl()).thenReturn("h1");
-    when(h1client.getIp()).thenReturn("ip1");
-    when(h2client.getUrl()).thenReturn("h2");
-    when(h2client.getIp()).thenReturn("ip2");
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient("h1", 2)).thenReturn(h1client);
-    when(clientPools.borrowClient("h2", 2)).thenReturn(h2client);
+    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
+    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
 
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,

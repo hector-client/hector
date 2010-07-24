@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 
   private final CassandraClientPool cassandraClientPool;
   private final FailoverPolicy failoverPolicy;
-  private List<String> knownHosts;
+  private List<CassandraHost> knownHosts;
   private final CassandraClientMonitor cassandraClientMonitor;
-  private final String preferredClientUrl;
+  private final CassandraHost preferredCassandraHost;
   private final ExceptionsTranslator xtrans;
 
   /**
@@ -40,27 +40,29 @@ import org.slf4j.LoggerFactory;
    *          borrowed from the pool. If not, a default client, if exists in the
    *          pool, will be borrowed.
    */
-  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, String preferredClientUrl)
+  public CassandraClusterImpl(CassandraClientPool cassandraClientPool, CassandraHost prefferedHost)
       throws HectorException {
     this.cassandraClientPool = cassandraClientPool;
     this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
-    this.preferredClientUrl = preferredClientUrl;
+    this.preferredCassandraHost = prefferedHost;
     xtrans = new ExceptionsTranslatorImpl();
   }
 
   @Override
-  public List<String> getKnownHosts(boolean fresh) throws HectorException {
+  public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
     if (fresh || knownHosts == null) {
       CassandraClient client = borrow();
       try {
-        knownHosts = new ArrayList<String>(buildHostNames(client.getCassandra()));
+        knownHosts = new ArrayList<CassandraHost>(buildHostNames(client.getCassandra()));
       } finally {
         cassandraClientPool.releaseClient(client);
       }
     }
     return knownHosts;
   }
+  
+  
 
   private void operateWithFailover(Operation<?> op) throws HectorException {
     CassandraClient client = null;
@@ -79,10 +81,10 @@ import org.slf4j.LoggerFactory;
   }
 
   private CassandraClient borrow() throws HectorException {
-    if (preferredClientUrl == null) {
+    if (preferredCassandraHost == null) {
       return cassandraClientPool.borrowClient();
     } else {
-      return cassandraClientPool.borrowClient(preferredClientUrl);
+      return cassandraClientPool.borrowClient(preferredCassandraHost);
 
     }
   }
@@ -157,15 +159,15 @@ import org.slf4j.LoggerFactory;
     return op.getResult();
   }
 
-  private Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
+  private Set<CassandraHost> buildHostNames(Cassandra.Client cassandra) throws HectorException {
     try {
-      Set<String> hostnames = new HashSet<String>();
+      Set<CassandraHost> hostnames = new HashSet<CassandraHost>();
       for (String keyspace : cassandra.describe_keyspaces()) {
         if (!keyspace.equals(KEYSPACE_SYSTEM)) {
           List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
           for (TokenRange tokenRange : tokenRanges) {
             for (String host : tokenRange.getEndpoints()) {
-              hostnames.add(host);
+              hostnames.add(new CassandraHost(host + ":" + preferredCassandraHost.getPort()));
             }
           }
           break;

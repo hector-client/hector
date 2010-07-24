@@ -22,9 +22,9 @@ public enum CassandraClusterFactory {
   private CassandraClusterFactory() {
   }
 
-  public CassandraCluster create(CassandraClientPool cassandraClientPool, String preferredClientUrl)
+  public CassandraCluster create(CassandraClientPool cassandraClientPool, CassandraHost cassandraHost)
       throws HectorException {
-    return new CassandraClusterImpl(cassandraClientPool, preferredClientUrl);
+    return new CassandraClusterImpl(cassandraClientPool, cassandraHost);
   }
 
 }

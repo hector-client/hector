@@ -43,7 +43,7 @@ public class CassandraHost {
   public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
       TimestampResolution.MICROSECONDS;
 
-  private final String url, ip;
+  private final String host, ip, url;
   private final int port;
   private final String name;
 
@@ -61,8 +61,8 @@ public class CassandraHost {
   private TimestampResolution timestampResolution = DEFAULT_TIMESTAMP_RESOLUTION;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
-  public CassandraHost(String urlPort) {
-    this(parseHostFromUrl(urlPort), parsePortFromUrl(urlPort));
+  public CassandraHost(String url) {
+    this(parseHostFromUrl(url), parsePortFromUrl(url));
   }
 
   public CassandraHost(String url2, int port) {
@@ -79,7 +79,7 @@ public class CassandraHost {
       turl = url2;
       tip = url2;
     }
-    this.url = turl;
+    this.host = turl;
     ip = tip;
     b.append(url2);
     b.append("(");
@@ -87,10 +87,11 @@ public class CassandraHost {
     b.append("):");
     b.append(port);
     name = b.toString();
+    url = String.format("%s:%d",host,port);
   }
 
-  public String getUrlPort() {
-    return new StringBuilder(32).append(url).append(':').append(port).toString();
+  public String getUrl() {
+    return url;
   }
 
   /**
@@ -109,8 +110,8 @@ public class CassandraHost {
     return name;
   }
 
-  public String getUrl() {
-    return url;
+  public String getHost() {
+    return host;
   }
 
   public String getIp() {

@@ -62,7 +62,7 @@ public class CassandraClientJndiResourceFactoryTest {
     CassandraClient cassandraClient = (CassandraClient) cassandraClientJNDIResourcePool.borrowObject();
 
     assertNotNull(cassandraClient);
-    assertEquals(cassandraUrl, cassandraClient.getUrl());
-    assertEquals(cassandraPort, cassandraClient.getPort());
+    assertEquals(cassandraUrl, cassandraClient.getCassandraHost().getHost());
+    assertEquals(cassandraPort, cassandraClient.getCassandraHost().getPort());
   }
 }

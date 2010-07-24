@@ -17,7 +17,7 @@ import org.junit.Test;
  *
  */
 public class CassandraClientPoolByHostTest {
-
+  
   private CassandraClientPoolByHost pool;
   private CassandraClientFactory factory;
   private CassandraClientPool poolStore;

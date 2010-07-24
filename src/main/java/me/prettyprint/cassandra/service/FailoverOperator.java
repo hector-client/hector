@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
   private final FailoverPolicy failoverPolicy;
 
   /** List of all known remote cassandra nodes */
-  private final List<String> knownHosts;
+  private final List<CassandraHost> knownHosts;
 
   private final CassandraClientMonitor monitor;
 
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
    * @param keyspace The keyspace performing this operation (if it's a keyspace performing it). May
    * be null
    */
-  public FailoverOperator(FailoverPolicy policy, List<String> hosts, CassandraClientMonitor monitor,
+  public FailoverOperator(FailoverPolicy policy, List<CassandraHost> hosts, CassandraClientMonitor monitor,
       CassandraClient client, CassandraClientPool clientPools, Keyspace keyspace) {
     this.failoverPolicy = policy;
     this.knownHosts = hosts;
@@ -164,18 +164,18 @@ import org.slf4j.LoggerFactory;
   private boolean operateSingleIteration(Operation<?> op, final StopWatch stopWatch,
       int retries, boolean isFirst) throws HectorException,
       PoolExhaustedException, Exception, UnavailableException, HectorTransportException {
-    log.debug("Performing operation on {}; retries: {}", client.getUrl(), retries);
+    log.debug("Performing operation on {}; retries: {}", client.getCassandraHost().getUrl(), retries);
     try {
       // Perform operation and save its result value
       op.executeAndSetResult(client.getCassandra());
       // hmmm don't count success, there are too many...
       // monitor.incCounter(op.successCounter);
-      log.debug("Operation succeeded on {}", client.getUrl());
+      log.debug("Operation succeeded on {}", client.getCassandraHost().getUrl());
       stopWatch.stop(op.stopWatchTagName + ".success_");
       return true;
     } catch (TimedOutException e) {
       log.warn("Got a TimedOutException from {}. Num of retries: {} (thread={})",
-          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
+          new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -184,7 +184,7 @@ import org.slf4j.LoggerFactory;
       }
     } catch (UnavailableException e) {
       log.warn("Got a UnavailableException from {}. Num of retries: {} (thread={})",
-          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
+          new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -193,7 +193,7 @@ import org.slf4j.LoggerFactory;
       }
     } catch (HectorTransportException e) {
       log.warn("Got a HectorTException from {}. Num of retries: {} (thread={})",
-          new Object[]{client.getUrl(), retries, Thread.currentThread().getName()});
+          new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -218,14 +218,14 @@ import org.slf4j.LoggerFactory;
   private void skipToNextHost(boolean isRetrySameHostAgain,
       boolean invalidateAllConnectionsToCurrentHost) throws SkipHostException {
     log.info("Skipping to next host (thread={}). Current host is: {}",
-        Thread.currentThread().getName(), client.getUrl());
+        Thread.currentThread().getName(), client.getCassandraHost().getUrl());
     invalidate();
     if (invalidateAllConnectionsToCurrentHost) {
       clientPools.invalidateAllConnectionsToHost(client);
     }
 
-    String nextHost = isRetrySameHostAgain ? client.getUrl() :
-      getNextHost(client.getUrl(), client.getIp());
+    CassandraHost nextHost = isRetrySameHostAgain ? client.getCassandraHost() :
+      getNextHost(client.getCassandraHost());
     if (nextHost == null) {
       log.error("Unable to find next host to skip to at {}", toString());
       throw new SkipHostException("Unable to failover to next host");
@@ -234,7 +234,7 @@ import org.slf4j.LoggerFactory;
 
     // assume all hosts in the ring use the same port (cassandra's API only provides IPs, not ports)
     try {
-      client = clientPools.borrowClient(nextHost, client.getPort());
+      client = clientPools.borrowClient(nextHost);
     } catch (IllegalStateException e) {
       throw new SkipHostException(e);
     } catch (PoolExhaustedException e) {
@@ -272,20 +272,20 @@ import org.slf4j.LoggerFactory;
    * @return URL of the next presumably available host. null if none can be
    *         found.
    */
-  private String getNextHost(String url, String ip) {
+  private CassandraHost getNextHost(CassandraHost cassandraHost) {
     int size = knownHosts.size();
     if (size < 1) {
       return null;
     }
     for (int i = 0; i < knownHosts.size(); ++i) {
-      if (url.equals(knownHosts.get(i)) || ip.equals(knownHosts.get(i))) {
+      if (cassandraHost.equals(knownHosts.get(i))) {
         // found this host. Return the next one in the array
         return knownHosts.get((i + 1) % size);
       }
     }
-    log.error("The host {}({}) wasn't found in the knownHosts ({}). Will try to choose a random " +
+    log.error("The host {} wasn't found in the knownHosts ({}). Will try to choose a random " +
         "host from the known host list. (thread={})",
-        new Object[]{url, ip, knownHosts, Thread.currentThread().getName()});
+        new Object[]{cassandraHost, knownHosts, Thread.currentThread().getName()});
     return chooseRandomHost(knownHosts);
   }
 
@@ -294,9 +294,9 @@ import org.slf4j.LoggerFactory;
    * @param knownHosts
    * @return
    */
-  private String chooseRandomHost(List<String> knownHosts) {
+  private CassandraHost chooseRandomHost(List<CassandraHost> knownHosts) {
     long rnd = Math.round(Math.random() * knownHosts.size());
-    String host = knownHosts.get((int) rnd);
+    CassandraHost host = knownHosts.get((int) rnd);
     log.info("Choosing random host to skip to: {}", host);
     return host;
   }

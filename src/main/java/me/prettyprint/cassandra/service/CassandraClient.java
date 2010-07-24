@@ -107,17 +107,15 @@ public interface CassandraClient {
    * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
    *  a possibly cached value.
    */
-  List<String> getKnownHosts(boolean fresh) throws HectorException;
+  List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException;
 
   /**
    * @return Server version
    */
   String getServerVersion() throws HectorException;
 
-  public int getPort();
-
-  public String getUrl();
-
+  CassandraHost getCassandraHost();
+  
   /**
    * Tells all instanciated keyspaces to update their known hosts
    */
@@ -127,9 +125,7 @@ public interface CassandraClient {
 
   boolean isClosed();
 
-  Set<String> getKnownHosts();
-
-  String getIp();
+  Set<CassandraHost> getKnownHosts();
 
   void markAsError();
 
