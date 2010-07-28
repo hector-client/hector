@@ -34,11 +34,13 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientMonitor clientMonitor;
   
   private CassandraHostConfigurator cassandraHostConfigurator;
+  private Cluster cluster;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
     pools = new HashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
+    this.cluster = new Cluster("Default Cluster", this);
   }
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
@@ -49,12 +51,14 @@ import org.slf4j.LoggerFactory;
       log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
       getPool(cassandraHost);
     }
+    this.cluster = new Cluster("Default Cluster", this);
   }
   
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
-    this.cassandraHostConfigurator = cassandraHostConfigurator;    
+    this.cassandraHostConfigurator = cassandraHostConfigurator;
+    this.cluster = new Cluster("Default Cluster", this);
   }
 
 
@@ -265,6 +269,14 @@ import org.slf4j.LoggerFactory;
       }
     }    
   }
+
+  @Override
+  public Cluster getCluster() {
+
+    return cluster;
+  }
+  
+  
   
   
 }

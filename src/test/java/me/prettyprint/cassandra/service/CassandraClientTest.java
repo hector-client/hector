@@ -84,7 +84,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   @Test
   public void testGetClusterName() throws HectorException {
     String name = client.getClusterName();
-    assertEquals("Test Cluster", name);
+    assertEquals("Default Cluster", name);
   }
 
   @Test

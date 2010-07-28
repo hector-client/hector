@@ -174,4 +174,10 @@ public interface CassandraClientPool {
    * @return
    */
   CassandraClientMonitorMBean getMbean();
+  
+  /**
+   * Short-term work around until constructor complexity can be refactored
+   * @return
+   */
+  Cluster getCluster();
 }

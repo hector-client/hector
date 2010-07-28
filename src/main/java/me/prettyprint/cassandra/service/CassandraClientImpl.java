@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientPool cassandraClientPool;
   
   /** An instance of the cluster object used to manage meta-operations */
-  private final CassandraCluster cassandraCluster;
+  private final Cluster cluster;
 
   /** Has the client network connection been closed? */
   private boolean closed = false;
@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
       KeyspaceFactory keyspaceFactory, 
       CassandraHost cassandraHost, 
       CassandraClientPool clientPools,
-      CassandraCluster cassandraCluster,      
+      Cluster cassandraCluster,      
       TimestampResolution timestampResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
@@ -81,13 +81,13 @@ import org.slf4j.LoggerFactory;
     this.keyspaceFactory = keyspaceFactory;
     this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
-    this.cassandraCluster = cassandraCluster;
+    this.cluster = cassandraCluster;
   }
 
   @Override
   public String getClusterName() throws HectorException {
     if (clusterName == null) {
-      clusterName = cassandraCluster.getClusterName();
+      clusterName = cluster.getName();
     }
     return clusterName;
   }
@@ -147,13 +147,13 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
-    return cassandraCluster.getKnownHosts(fresh);
+    return new ArrayList<CassandraHost>(cluster.getKnownPoolHosts(fresh));
   }
 
   @Override
   public String getServerVersion() throws HectorException {
     if (serverVersion == null) {
-      serverVersion = cassandraCluster.describeThriftVersion();
+      serverVersion = cluster.describeThriftVersion();
     }
     return serverVersion;
    }
