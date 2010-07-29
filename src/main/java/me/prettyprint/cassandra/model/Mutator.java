@@ -1,20 +1,14 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
-import static me.prettyprint.cassandra.utils.Assert.noneNull;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SuperColumn;
 
 
 /**
@@ -41,40 +35,21 @@ public class Mutator {
 
   // Simple and immediate insertion of a column
   public <N,V> MutationResult insert(final String key, final String cf, final HColumn<N,V> c) {
-    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
-      @Override
-      public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.insert(key, createColumnPath(cf, c.getName(), c.getNameExtractor()), c.getValueBytes());
-        return null;
-      }
-    }));
+    addInsertion(key, cf, c);
+    return execute();
   }
 
   // overloaded insert-super
   public <SN,N,V> MutationResult insert(final String key, final String cf,
       final HSuperColumn<SN,N,V> superColumn) {
-    noneNull(key, cf, superColumn);
-    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
-      @Override
-      public Void doInKeyspace(Keyspace ks) throws HectorException {
-        Map<String, List<SuperColumn>> superColumnMap =
-            new HashMap<String, List<SuperColumn>>(superColumn.getSize());
-        superColumnMap.put(cf, Arrays.asList(superColumn.toThrift()));
-        ks.batchInsert(key, null, superColumnMap);
-        return null;
-      }
-    }));
+    addInsertion(key, cf, superColumn);
+    return execute();
   }
 
   public <N> MutationResult delete(final String key, final String cf, final N columnName,
       final Extractor<N> nameExtractor) {
-    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
-      @Override
-      public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createColumnPath(cf, columnName, nameExtractor));
-        return null;
-      }
-    }));
+    addDeletion(key, cf, columnName, nameExtractor);
+    return execute();
   }
 
   public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
@@ -87,7 +62,6 @@ public class Mutator {
       }
     }));
   }
-
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an
