@@ -59,6 +59,15 @@ public class Cluster {
     xtrans = new ExceptionsTranslatorImpl();
   }
 
+  public Cluster(String clusterName, CassandraClientPool pool) {
+    this.pool = pool;
+    name = clusterName;
+    configurator = null;
+    failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+    cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
+    xtrans = new ExceptionsTranslatorImpl();
+  }
+  
   public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
       knownPoolHosts = pool.getKnownHosts();
@@ -91,7 +100,7 @@ public class Cluster {
    * @param skipApplyConfig
    */
   public void addHost(CassandraHost cassandraHost, boolean skipApplyConfig) {
-    if (!skipApplyConfig) {
+    if (!skipApplyConfig && configurator != null) {
       configurator.applyConfig(cassandraHost);
     }
     pool.addCassandraHost(cassandraHost);
