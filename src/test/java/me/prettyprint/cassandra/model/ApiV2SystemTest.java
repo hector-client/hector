@@ -6,6 +6,7 @@ import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumnQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperSliceQuery;
@@ -358,6 +359,67 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     slice = r.get();
     assertNotNull(slice);
     assertTrue(slice.getSuperColumns().isEmpty());
+  }
+
+  /**
+   * Tests the SubSliceQuery, a query on columns within a supercolumn
+   */
+  @Test
+  public void testSliceQueryOnSubcolumns() {
+    String cf = "Super1";
+
+    // insert
+    Mutator m = createMutator(ko);
+    @SuppressWarnings("unchecked")
+    HSuperColumn<String, String, String> sc = createSuperColumn("testSliceQueryOnSubcolumns_column",
+        Arrays.asList(createColumn("c1", "v1", se, se),
+                      createColumn("c2", "v2", se, se),
+                      createColumn("c3", "v3", se, se)), se, se, se);
+    m.addInsertion("testSliceQueryOnSubcolumns", cf, sc);
+    m.execute();
+
+    // get value
+    SubSliceQuery<String,String,String> q = createSubSliceQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setSuperColumn("testSliceQueryOnSubcolumns_column");
+    q.setKey("testSliceQueryOnSubcolumns");
+    // try with column name first
+    q.setColumnNames("c1", "c2", "c3");
+    Result<ColumnSlice<String,String>> r = q.execute();
+    assertNotNull(r);
+    ColumnSlice<String,String> slice = r.get();
+    assertNotNull(slice);
+    assertEquals(3, slice.getColumns().size());
+    // Test slice.getColumnByName
+    assertEquals("v1", slice.getColumnByName("c1").getValue());
+
+    // now try with start/finish
+    q = createSubSliceQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKey("testSliceQueryOnSubcolumns");
+    q.setSuperColumn("testSliceQueryOnSubcolumns_column");
+    // try reversed this time
+    q.setRange("c1", "c2", false, 2);
+    r = q.execute();
+    assertNotNull(r);
+    slice = r.get();
+    assertNotNull(slice);
+    for (HColumn<String,String> column : slice.getColumns()) {
+      if (!column.getName().equals("c1")
+          && !column.getName().equals("c2")) {
+        fail("A columns with unexpected column name returned: " + column.getName());
+      }
+    }
+
+    // Delete values
+    m.delete("testSliceQueryOnSubcolumns", cf, "testSliceQueryOnSubcolumns_column", se);
+
+    // Test after deletion
+    r = q.execute();
+    assertNotNull(r);
+    slice = r.get();
+    assertNotNull(slice);
+    assertTrue(slice.getColumns().isEmpty());
   }
 
   @Test
