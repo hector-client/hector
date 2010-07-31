@@ -371,48 +371,43 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String cf = "Super1";
 
     // insert
-    Mutator m = createMutator(ko);
-    @SuppressWarnings("unchecked")
-    HSuperColumn<String, String, String> sc = createSuperColumn(
-        "testSliceQueryOnSubcolumns_column", Arrays.asList(createColumn("c1", "v1", se, se),
-            createColumn("c2", "v2", se, se), createColumn("c3", "v3", se, se)), se, se, se);
-    m.addInsertion("testSliceQueryOnSubcolumns", cf, sc);
-    m.execute();
+    TestCleanupDescriptor cleanup =
+      createSuperColumns(cf, 1, "testSliceQueryOnSubcolumns", 1, "testSliceQueryOnSubcolumns_column");
 
     // get value
     SubSliceQuery<String, String, String> q = createSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setSuperColumn("testSliceQueryOnSubcolumns_column");
-    q.setKey("testSliceQueryOnSubcolumns");
+    q.setSuperColumn("testSliceQueryOnSubcolumns_column0");
+    q.setKey("testSliceQueryOnSubcolumns0");
     // try with column name first
-    q.setColumnNames("c1", "c2", "c3");
+    q.setColumnNames("c000", "c110", "c_doesn't_exist");
     Result<ColumnSlice<String, String>> r = q.execute();
     assertNotNull(r);
     ColumnSlice<String, String> slice = r.get();
     assertNotNull(slice);
-    assertEquals(3, slice.getColumns().size());
+    assertEquals(2, slice.getColumns().size());
     // Test slice.getColumnByName
-    assertEquals("v1", slice.getColumnByName("c1").getValue());
+    assertEquals("v000", slice.getColumnByName("c000").getValue());
 
     // now try with start/finish
     q = createSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSliceQueryOnSubcolumns");
-    q.setSuperColumn("testSliceQueryOnSubcolumns_column");
+    q.setKey("testSliceQueryOnSubcolumns0");
+    q.setSuperColumn("testSliceQueryOnSubcolumns_column0");
     // try reversed this time
-    q.setRange("c1", "c2", false, 2);
+    q.setRange("c000", "c110", false, 2);
     r = q.execute();
     assertNotNull(r);
     slice = r.get();
     assertNotNull(slice);
     for (HColumn<String, String> column : slice.getColumns()) {
-      if (!column.getName().equals("c1") && !column.getName().equals("c2")) {
+      if (!column.getName().equals("c000") && !column.getName().equals("c110")) {
         fail("A columns with unexpected column name returned: " + column.getName());
       }
     }
 
     // Delete values
-    m.delete("testSliceQueryOnSubcolumns", cf, "testSliceQueryOnSubcolumns_column", se);
+    deleteColumns(cleanup);
 
     // Test after deletion
     r = q.execute();
@@ -426,18 +421,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   public void testSuperMultigetSliceQuery() {
     String cf = "Super1";
 
-    Mutator m = createMutator(ko);
-    for (int i = 0; i < 4; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        @SuppressWarnings("unchecked")
-        HSuperColumn<String, String, String> sc = createSuperColumn(
-            "testSuperMultigetSliceQuery" + j,
-            Arrays.asList(createColumn("c0" + i + j, "v0" + i + j, se, se),
-                createColumn("c1" + 1 + j, "v1" + i + j, se, se)), se, se, se);
-        m.addInsertion("testSuperMultigetSliceQueryKey" + i, cf, sc);
-      }
-    }
-    m.execute();
+    TestCleanupDescriptor cleanup =
+      createSuperColumns(cf, 4, "testSuperMultigetSliceQueryKey", 3, "testSuperMultigetSliceQuery");
 
     // get value
     MultigetSuperSliceQuery<String, String, String> q = createMultigetSuperSliceQuery(ko, se, se,
@@ -461,14 +446,34 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
                               .getValue());
     assertNull(slice.getColumnByName("testSuperMultigetSliceQuery3"));
 
-    // Delete values
-    for (int i = 0; i < 4; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        m.addDeletion("testSuperMultigetSliceQueryKey" + i, cf, "testSuperMultigetSliceQuery" + j,
-            se);
+    deleteColumns(cleanup);
+  }
+
+  private void deleteColumns(TestCleanupDescriptor cleanup) {
+    Mutator m = createMutator(ko);
+    for (int i = 0; i < cleanup.rowCount; ++i) {
+      for (int j = 0; j < cleanup.columnCount; ++j) {
+        m.addDeletion(cleanup.rowPrefix + i, cleanup.cf, cleanup.columnsPrefix + j, se);
       }
     }
     m.execute();
+  }
+
+  private TestCleanupDescriptor createSuperColumns(String cf, int rowCount, String rowPrefix,
+      int scCount, String scPrefix) {
+    Mutator m = createMutator(ko);
+    for (int i = 0; i < rowCount; ++i) {
+      for (int j = 0; j < scCount; ++j) {
+        @SuppressWarnings("unchecked")
+        HSuperColumn<String, String, String> sc = createSuperColumn(
+            scPrefix + j,
+            Arrays.asList(createColumn("c0" + i + j, "v0" + i + j, se, se),
+                createColumn("c1" + 1 + j, "v1" + i + j, se, se)), se, se, se);
+        m.addInsertion(rowPrefix + i, cf, sc);
+      }
+    }
+    m.execute();
+    return new TestCleanupDescriptor(cf, rowCount, rowPrefix, scCount, scPrefix);
   }
 
   @Test
@@ -484,7 +489,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
   @Test
   @Ignore("Not ready yet")
-  public void testSuperRangeSlicesQuery() {
+  public void testRangeSuperSlicesQuery() {
     // TODO
   }
 
@@ -494,4 +499,26 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // TODO
   }
 
+  /**
+   * A class describing what kind of cleanup is required at the end of the test.
+   * Just some bookeeping, that's all.
+   * @author Ran Tavory
+   *
+   */
+  private static class TestCleanupDescriptor {
+    public final String cf;
+    public final int rowCount;
+    public final String rowPrefix;
+    public final int columnCount;
+    public final String columnsPrefix;
+
+    public TestCleanupDescriptor(String cf, int rowCount, String rowPrefix,
+      int scCount, String scPrefix) {
+      this.cf = cf;
+      this.rowCount = rowCount;
+      this.rowPrefix = rowPrefix;
+      this.columnCount = scCount;
+      this.columnsPrefix = scPrefix;
+    }
+  }
 }
