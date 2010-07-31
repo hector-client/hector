@@ -22,11 +22,11 @@ public class Row<N,V> {
   private final String rowKey;
   private final ColumnSlice<N,V> columnSlice;
 
-  /*package*/ Row(String rowKey, List<Column> list, Extractor<N> nameExtractor,
+  /*package*/ Row(String rowKey, List<Column> columns, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    Assert.noneNull(rowKey, list, nameExtractor, valueExtractor);
+    Assert.noneNull(rowKey, columns, nameExtractor, valueExtractor);
     this.rowKey = rowKey;
-    columnSlice = new ColumnSlice<N,V>(list, nameExtractor, valueExtractor);
+    columnSlice = new ColumnSlice<N,V>(columns, nameExtractor, valueExtractor);
   }
 
   public String getKey() {

@@ -42,7 +42,7 @@ public class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperSlice<S
           public SuperSlice<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate());
-            return new SuperSlice<SN,N,V>(thriftRet, sNameExtractor, nameExtractor, valueExtractor);
+            return new SuperSlice<SN,N,V>(thriftRet, sNameExtractor, columnNameExtractor, valueExtractor);
           }
         }), this);
   }

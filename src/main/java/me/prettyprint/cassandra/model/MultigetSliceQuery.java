@@ -40,7 +40,7 @@ public class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N,V>> {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<String, List<Column>> thriftRet =
               ks.multigetSlice(keysList, columnParent, getPredicate());
-            return new Rows<N,V>(thriftRet, nameExtractor, valueExtractor);
+            return new Rows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);
   }

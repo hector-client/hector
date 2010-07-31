@@ -43,12 +43,12 @@ public class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN
           public HSuperColumn<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
-                  sNameExtractor, nameExtractor);
+                  sNameExtractor, columnNameExtractor);
               SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath);
               if (thriftSuperColumn == null) {
                 return null;
               }
-              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameExtractor, nameExtractor,
+              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameExtractor, columnNameExtractor,
                   valueExtractor);
             } catch (NotFoundException e) {
               return null;

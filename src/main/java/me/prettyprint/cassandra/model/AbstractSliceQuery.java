@@ -78,7 +78,7 @@ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements
       if (start == null || finish == null) {
         return null;
       }
-      SliceRange range = new SliceRange(nameExtractor.toBytes(start), nameExtractor.toBytes(finish),
+      SliceRange range = new SliceRange(columnNameExtractor.toBytes(start), columnNameExtractor.toBytes(finish),
           reversed, count);
       pred.setSlice_range(range);
     }
@@ -88,7 +88,7 @@ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements
   private List<byte[]> toThriftColumnNames(Collection<N> clms) {
     List<byte[]> ret = new ArrayList<byte[]>(clms.size());
     for (N name: clms) {
-      ret.add(nameExtractor.toBytes(name));
+      ret.add(columnNameExtractor.toBytes(name));
     }
     return ret;
   }

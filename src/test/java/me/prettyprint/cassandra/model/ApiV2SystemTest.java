@@ -4,6 +4,7 @@ import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
 import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createMultigetSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
@@ -317,18 +318,19 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
     // get value
-    SuperSliceQuery<String,String, String> q = createSuperSliceQuery(ko, se, se, se);
+    SuperSliceQuery<String, String, String> q = createSuperSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
     q.setKey("testSuperSliceQuery");
     // try with column name first
     q.setColumnNames("testSuperSliceQuery1", "testSuperSliceQuery2", "testSuperSliceQuery3");
-    Result<SuperSlice<String,String,String>> r = q.execute();
+    Result<SuperSlice<String, String, String>> r = q.execute();
     assertNotNull(r);
-    SuperSlice<String,String,String> slice = r.get();
+    SuperSlice<String, String, String> slice = r.get();
     assertNotNull(slice);
     assertEquals(3, slice.getSuperColumns().size());
     // Test slice.getColumnByName
-    assertEquals("value", slice.getColumnByName("testSuperSliceQuery1").getColumns().get(0).getValue());
+    assertEquals("value", slice.getColumnByName("testSuperSliceQuery1").getColumns().get(0)
+                               .getValue());
 
     // now try with start/finish
     q = createSuperSliceQuery(ko, se, se, se);
@@ -340,7 +342,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertNotNull(r);
     slice = r.get();
     assertNotNull(slice);
-    for (HSuperColumn<String,String,String> scolumn : slice.getSuperColumns()) {
+    for (HSuperColumn<String, String, String> scolumn : slice.getSuperColumns()) {
       if (!scolumn.getName().equals("testSuperSliceQuery1")
           && !scolumn.getName().equals("testSuperSliceQuery2")) {
         fail("A columns with unexpected column name returned: " + scolumn.getName());
@@ -371,23 +373,22 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // insert
     Mutator m = createMutator(ko);
     @SuppressWarnings("unchecked")
-    HSuperColumn<String, String, String> sc = createSuperColumn("testSliceQueryOnSubcolumns_column",
-        Arrays.asList(createColumn("c1", "v1", se, se),
-                      createColumn("c2", "v2", se, se),
-                      createColumn("c3", "v3", se, se)), se, se, se);
+    HSuperColumn<String, String, String> sc = createSuperColumn(
+        "testSliceQueryOnSubcolumns_column", Arrays.asList(createColumn("c1", "v1", se, se),
+            createColumn("c2", "v2", se, se), createColumn("c3", "v3", se, se)), se, se, se);
     m.addInsertion("testSliceQueryOnSubcolumns", cf, sc);
     m.execute();
 
     // get value
-    SubSliceQuery<String,String,String> q = createSubSliceQuery(ko, se, se, se);
+    SubSliceQuery<String, String, String> q = createSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
     q.setSuperColumn("testSliceQueryOnSubcolumns_column");
     q.setKey("testSliceQueryOnSubcolumns");
     // try with column name first
     q.setColumnNames("c1", "c2", "c3");
-    Result<ColumnSlice<String,String>> r = q.execute();
+    Result<ColumnSlice<String, String>> r = q.execute();
     assertNotNull(r);
-    ColumnSlice<String,String> slice = r.get();
+    ColumnSlice<String, String> slice = r.get();
     assertNotNull(slice);
     assertEquals(3, slice.getColumns().size());
     // Test slice.getColumnByName
@@ -404,9 +405,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertNotNull(r);
     slice = r.get();
     assertNotNull(slice);
-    for (HColumn<String,String> column : slice.getColumns()) {
-      if (!column.getName().equals("c1")
-          && !column.getName().equals("c2")) {
+    for (HColumn<String, String> column : slice.getColumns()) {
+      if (!column.getName().equals("c1") && !column.getName().equals("c2")) {
         fail("A columns with unexpected column name returned: " + column.getName());
       }
     }
@@ -423,9 +423,57 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore("Not ready yet")
   public void testSuperMultigetSliceQuery() {
-    // TODO
+    String cf = "Super1";
+
+    Mutator m = createMutator(ko);
+    for (int i = 0; i < 4; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        @SuppressWarnings("unchecked")
+        HSuperColumn<String, String, String> sc = createSuperColumn(
+            "testSuperMultigetSliceQuery" + j,
+            Arrays.asList(createColumn("c0" + i + j, "v0" + i + j, se, se),
+                createColumn("c1" + 1 + j, "v1" + i + j, se, se)), se, se, se);
+        m.addInsertion("testSuperMultigetSliceQueryKey" + i, cf, sc);
+      }
+    }
+    m.execute();
+
+    // get value
+    MultigetSuperSliceQuery<String, String, String> q = createMultigetSuperSliceQuery(ko, se, se,
+        se);
+    q.setColumnFamily(cf);
+    q.setKeys("testSuperMultigetSliceQueryKey0", "testSuperMultigetSliceQueryKey3");
+    // try with column name first
+    q.setColumnNames("testSuperMultigetSliceQuery1", "testSuperMultigetSliceQuery2");
+    Result<SuperRows<String, String, String>> r = q.execute();
+    assertNotNull(r);
+    SuperRows<String, String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    SuperRow<String, String, String> row = rows.getByKey("testSuperMultigetSliceQueryKey0");
+    assertNotNull(row);
+    assertEquals("testSuperMultigetSliceQueryKey0", row.getKey());
+    SuperSlice<String, String, String> slice = row.getSuperSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals("v001", slice.getColumnByName("testSuperMultigetSliceQuery1").getColumns().get(0)
+                              .getValue());
+    assertNull(slice.getColumnByName("testSuperMultigetSliceQuery3"));
+
+    // Delete values
+    for (int i = 0; i < 4; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        m.addDeletion("testSuperMultigetSliceQueryKey" + i, cf, "testSuperMultigetSliceQuery" + j,
+            se);
+      }
+    }
+    m.execute();
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testMultigetSubSliceQuery() {
   }
 
   @Test
@@ -437,6 +485,12 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   @Test
   @Ignore("Not ready yet")
   public void testSuperRangeSlicesQuery() {
+    // TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testRangeSubSlicesQuery() {
     // TODO
   }
 

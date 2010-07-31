@@ -97,15 +97,14 @@ public class HFactory {
     return new SuperColumnQuery<SN, N, V>(ko, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  /**
-   *
-   * @param <K> Row key type
-   * @param keyspaceOperator
-   * @return
-   */
   public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
       KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     return new MultigetSliceQuery<N,V>(ko, nameExtractor, valueExtractor);
+  }
+
+  public static <SN,N,V> MultigetSuperSliceQuery<SN,N,V> createMultigetSuperSliceQuery(
+      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new MultigetSuperSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
   }
 
   public static <N,V> SliceQuery<N,V> createSliceQuery(

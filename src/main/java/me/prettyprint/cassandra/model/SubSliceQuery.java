@@ -55,7 +55,7 @@ public class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
             List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate());
-            return new ColumnSlice<N, V>(thriftRet, nameExtractor, valueExtractor);
+            return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);
   }
