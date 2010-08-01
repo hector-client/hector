@@ -112,6 +112,10 @@ public class HFactory {
     return new MultigetSubSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
   }
 
+  public static <N,V> RangeSlicesQuery<N,V> createRangeSlicesQuery(
+      KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new RangeSlicesQuery<N,V>(ko, nameExtractor, valueExtractor);
+  }
 
   public static <N,V> SliceQuery<N,V> createSliceQuery(
       KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.utils.Assert;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -31,6 +32,9 @@ public class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N,V>> {
 
   @Override
   public Result<Rows<N,V>> execute() {
+    Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
+    Assert.notNull(keys, "keys can't be null");
+
     return new Result<Rows<N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<Rows<N,V>>() {
           @Override

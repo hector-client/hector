@@ -7,6 +7,7 @@ import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
+import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
@@ -233,33 +234,26 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testSlicesQuery() {
+  public void testSliceQuery() {
     String cf = "Standard1";
 
-    Mutator m = createMutator(ko);
-    for (int j = 1; j <= 3; ++j) {
-      m.addInsertion("testSlicesQuery", cf,
-          createColumn("testSlicesQuery" + j, "value" + j, se, se));
-    }
-    MutationResult mr = m.execute();
-    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
-    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+    TestCleanupDescriptor cleanup = insertColumns(cf, 1, "testSliceQuery", 4, "testSliceQuery");
 
     // get value
     SliceQuery<String, String> q = createSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSlicesQuery");
+    q.setKey("testSliceQuery0");
     // try with column name first
-    q.setColumnNames("testSlicesQuery1", "testSlicesQuery2", "testSlicesQuery3");
+    q.setColumnNames("testSliceQuery1", "testSliceQuery2", "testSliceQuery3");
     Result<ColumnSlice<String, String>> r = q.execute();
     assertNotNull(r);
     ColumnSlice<String, String> slice = r.get();
     assertNotNull(slice);
     assertEquals(3, slice.getColumns().size());
     // Test slice.getColumnByName
-    assertEquals("value1", slice.getColumnByName("testSlicesQuery1").getValue());
-    assertEquals("value2", slice.getColumnByName("testSlicesQuery2").getValue());
-    assertEquals("value3", slice.getColumnByName("testSlicesQuery3").getValue());
+    assertEquals("value01", slice.getColumnByName("testSliceQuery1").getValue());
+    assertEquals("value02", slice.getColumnByName("testSliceQuery2").getValue());
+    assertEquals("value03", slice.getColumnByName("testSliceQuery3").getValue());
     // Test slice.getColumns
     List<HColumn<String, String>> columns = slice.getColumns();
     assertNotNull(columns);
@@ -268,25 +262,22 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // now try with start/finish
     q = createSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSlicesQuery");
+    q.setKey("testSliceQuery0");
     // try reversed this time
-    q.setRange("testSlicesQuery2", "testSlicesQuery1", true, 100);
+    q.setRange("testSliceQuery2", "testSliceQuery1", true, 100);
     r = q.execute();
     assertNotNull(r);
     slice = r.get();
     assertNotNull(slice);
+    assertEquals(2, slice.getColumns().size());
     for (HColumn<String, String> column : slice.getColumns()) {
-      if (!column.getName().equals("testSlicesQuery1")
-          && !column.getName().equals("testSlicesQuery2")) {
+      if (!column.getName().equals("testSliceQuery1")
+          && !column.getName().equals("testSliceQuery2")) {
         fail("A columns with unexpected column name returned: " + column.getName());
       }
     }
 
-    // Delete values
-    for (int j = 1; j <= 3; ++j) {
-      m.addDeletion("testSlicesQuery", cf, "testSlicesQuery" + j, se);
-    }
-    mr = m.execute();
+    deleteColumns(cleanup);
   }
 
   @Test
@@ -498,9 +489,59 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore("Not ready yet")
   public void testRangeSlicesQuery() {
-    // TODO
+    String cf = "Standard1";
+
+    TestCleanupDescriptor cleanup = insertColumns(cf, 4, "testRangeSlicesQuery", 3,
+        "testRangeSlicesQueryColumn");
+
+    // get value
+    RangeSlicesQuery<String, String> q = createRangeSlicesQuery(ko, se, se);
+    q.setColumnFamily(cf);
+    q.setTokens("testRangeSlicesQuery1", "testRangeSlicesQuery3");
+    // try with column name first
+    q.setColumnNames("testRangeSlicesQueryColumn1", "testRangeSlicesQueryColumn2");
+    Result<OrderedRows<String, String>> r = q.execute();
+    assertNotNull(r);
+    OrderedRows<String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    Row<String, String> row = rows.getList().get(0);
+    assertNotNull(row);
+    assertEquals("testRangeSlicesQuery2", row.getKey());
+    ColumnSlice<String, String> slice = row.getColumnSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals("value21", slice.getColumnByName("testRangeSlicesQueryColumn1").getValue());
+    assertEquals("value22", slice.getColumnByName("testRangeSlicesQueryColumn2").getValue());
+    assertNull(slice.getColumnByName("testRangeSlicesQueryColumn3"));
+    // Test slice.getColumns
+    List<HColumn<String, String>> columns = slice.getColumns();
+    assertNotNull(columns);
+    assertEquals(2, columns.size());
+
+    // now try with setKeys in combination with setRange
+    q.setKeys("testRangeSlicesQuery0", "testRangeSlicesQuery5");
+    q.setRange("testRangeSlicesQueryColumn1", "testRangeSlicesQueryColumn3", false, 100);
+    r = q.execute();
+    assertNotNull(r);
+    rows = r.get();
+    assertEquals(4, rows.getCount());
+    for (Row<String, String> row2 : rows) {
+      assertNotNull(row2);
+      slice = row2.getColumnSlice();
+      assertNotNull(slice);
+      assertEquals(2, slice.getColumns().size());
+      for (HColumn<String, String> column : slice.getColumns()) {
+        if (!column.getName().equals("testRangeSlicesQueryColumn1")
+            && !column.getName().equals("testRangeSlicesQueryColumn2")) {
+          fail("A columns with unexpected column name returned: " + column.getName());
+        }
+      }
+    }
+
+    // Delete values
+    deleteColumns(cleanup);
   }
 
   @Test

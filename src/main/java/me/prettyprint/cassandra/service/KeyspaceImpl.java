@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Implementation of a Keyspace
- * 
+ *
  * @author Ran Tavory (rantav@gmail.com)
- * 
+ *
  */
 /* package */class KeyspaceImpl implements Keyspace {
 
@@ -186,19 +186,21 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, List<Column>> getRangeSlices(final ColumnParent columnParent,
+  public LinkedHashMap<String, List<Column>> getRangeSlices(final ColumnParent columnParent,
       final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
-    Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
+    Operation<LinkedHashMap<String, List<Column>>> op = new Operation<LinkedHashMap<String, List<Column>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
+      public LinkedHashMap<String, List<Column>> execute(Cassandra.Client cassandra)
+          throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent,
               predicate, keyRange, consistency);
           if (keySlices == null || keySlices.isEmpty()) {
-            return Collections.emptyMap();
+            return new LinkedHashMap<String, List<Column>>(0);
           }
-          Map<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(keySlices.size());
+          LinkedHashMap<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(
+              keySlices.size());
           for (KeySlice keySlice : keySlices) {
             ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
           }
@@ -324,7 +326,7 @@ import org.slf4j.LoggerFactory;
     }
     return op.getResult();
   }
-  
+
   @Override
   public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath,
       final boolean reversed, final int size) throws HectorException {
@@ -388,7 +390,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void insert(final String key, final ColumnPath columnPath, final byte[] value, 
+  public void insert(final String key, final ColumnPath columnPath, final byte[] value,
       final long timestamp) throws HectorException {
     valideColumnPath(columnPath);
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
@@ -610,6 +612,7 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
+  @Override
   public long createTimestamp() {
     return client.getTimestampResolution().createTimestamp();
   }
@@ -617,7 +620,7 @@ import org.slf4j.LoggerFactory;
   /**
    * Make sure that if the given column path was a Column. Throws an
    * InvalidRequestException if not.
-   * 
+   *
    * @param columnPath
    * @throws InvalidRequestException
    *           if either the column family does not exist or that it's type does
@@ -649,7 +652,7 @@ import org.slf4j.LoggerFactory;
   /**
    * Make sure that the given column path is a SuperColumn in the DB, Throws an
    * exception if it's not.
-   * 
+   *
    * @throws InvalidRequestException
    */
   private void valideSuperColumnPath(ColumnPath columnPath) throws InvalidRequestException {
@@ -706,7 +709,7 @@ import org.slf4j.LoggerFactory;
 
   /**
    * Initializes the ring info so we can handle failover if this happens later.
-   * 
+   *
    * @throws HectorTransportException
    */
   private void initFailover() throws HectorTransportException {
@@ -721,7 +724,7 @@ import org.slf4j.LoggerFactory;
 
   /**
    * Uses the current known host to query about all other hosts in the ring.
-   * 
+   *
    * @throws HectorTransportException
    */
   public void updateKnownHosts() throws HectorTransportException {

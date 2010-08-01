@@ -94,6 +94,6 @@ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements
   }
 
   protected String toStringInternal() {
-    return "" + (useColumnNames ? columnNames : "start:" + start + ",finish:" + finish);
+    return "" + (useColumnNames ? columnNames : "cStart:" + start + ",cFinish:" + finish);
   }
 }

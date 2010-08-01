@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -171,7 +172,7 @@ public interface Keyspace {
    * a SuperColumn or a single Column by specifying those levels too.
    */
   void remove(String key, ColumnPath columnPath) throws HectorException;
-  
+
   /**
    * Same as two argument version, but the caller must specify their own timestamp
    */
@@ -191,6 +192,7 @@ public interface Keyspace {
    * returns a subset of columns for a range of keys.
    * @deprecated use {@link #getRangeSlices(ColumnParent, SlicePredicate, KeyRange)}
    */
+  @Deprecated
   Map<String, List<Column>> getRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count)
       throws HectorException;
@@ -198,13 +200,14 @@ public interface Keyspace {
   /**
    * returns a subset of columns for a range of keys.
    */
-  Map<String, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
+  LinkedHashMap<String, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
 
   /**
    * returns a subset of super columns for a range of keys.
    * @deprecated use {@link #getSuperRangeSlices(ColumnParent, SlicePredicate, KeyRange)}
    */
+  @Deprecated
   Map<String, List<SuperColumn>> getSuperRangeSlice(ColumnParent columnParent, SlicePredicate predicate,
       String start, String finish, int count) throws HectorException;
 
