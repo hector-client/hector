@@ -178,16 +178,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   public void testMultigetSliceQuery() {
     String cf = "Standard1";
 
-    Mutator m = createMutator(ko);
-    for (int i = 1; i < 4; ++i) {
-      for (int j = 1; j < 3; ++j) {
-        m.addInsertion("testMultigetSliceQuery" + i, cf,
-            createColumn("testMultigetSliceQueryColumn" + j, "value" + i + j, se, se));
-      }
-    }
-    MutationResult mr = m.execute();
-    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
-    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+    TestCleanupDescriptor cleanup = insertColumns(cf, 4, "testMultigetSliceQuery", 3,
+        "testMultigetSliceQueryColumn");
 
     // get value
     MultigetSliceQuery<String, String> q = createMultigetSliceQuery(ko, se, se);
@@ -237,12 +229,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     }
 
     // Delete values
-    for (int i = 1; i < 4; ++i) {
-      for (int j = 1; j < 3; ++j) {
-        m.addDeletion("testMultigetSliceQuery" + i, cf, "testMultigetSliceQueryColumn" + j, se);
-      }
-    }
-    mr = m.execute();
+    deleteColumns(cleanup);
   }
 
   @Test
@@ -553,6 +540,21 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     }
     m.execute();
     return new TestCleanupDescriptor(cf, rowCount, rowPrefix, scCount, scPrefix);
+  }
+
+  private TestCleanupDescriptor insertColumns(String cf, int rowCount, String rowPrefix,
+      int columnCount, String columnPrefix) {
+    Mutator m = createMutator(ko);
+    for (int i = 0; i < rowCount; ++i) {
+      for (int j = 0; j < columnCount; ++j) {
+        m.addInsertion(rowPrefix + i, cf,
+            createColumn(columnPrefix + j, "value" + i + j, se, se));
+      }
+    }
+    MutationResult mr = m.execute();
+    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+    return new TestCleanupDescriptor(cf, rowCount, rowPrefix, columnCount, columnPrefix);
   }
 
   /**
