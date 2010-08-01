@@ -4,6 +4,7 @@ import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
 import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
@@ -367,12 +368,12 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
    * Tests the SubSliceQuery, a query on columns within a supercolumn
    */
   @Test
-  public void testSliceQueryOnSubcolumns() {
+  public void testSubSliceQuery() {
     String cf = "Super1";
 
     // insert
-    TestCleanupDescriptor cleanup =
-      createSuperColumns(cf, 1, "testSliceQueryOnSubcolumns", 1, "testSliceQueryOnSubcolumns_column");
+    TestCleanupDescriptor cleanup = createSuperColumns(cf, 1, "testSliceQueryOnSubcolumns", 1,
+        "testSliceQueryOnSubcolumns_column");
 
     // get value
     SubSliceQuery<String, String, String> q = createSubSliceQuery(ko, se, se, se);
@@ -418,11 +419,11 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testSuperMultigetSliceQuery() {
+  public void testMultigetSuperSliceQuery() {
     String cf = "Super1";
 
-    TestCleanupDescriptor cleanup =
-      createSuperColumns(cf, 4, "testSuperMultigetSliceQueryKey", 3, "testSuperMultigetSliceQuery");
+    TestCleanupDescriptor cleanup = createSuperColumns(cf, 4, "testSuperMultigetSliceQueryKey", 3,
+        "testSuperMultigetSliceQuery");
 
     // get value
     MultigetSuperSliceQuery<String, String, String> q = createMultigetSuperSliceQuery(ko, se, se,
@@ -447,6 +448,84 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertNull(slice.getColumnByName("testSuperMultigetSliceQuery3"));
 
     deleteColumns(cleanup);
+  }
+
+  @Test
+  public void testMultigetSubSliceQuery() {
+    String cf = "Super1";
+
+    // insert
+    TestCleanupDescriptor cleanup = createSuperColumns(cf, 3, "testMultigetSubSliceQuery", 1,
+        "testMultigetSubSliceQuery");
+
+    // get value
+    MultigetSubSliceQuery<String, String, String> q = createMultigetSubSliceQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setSuperColumn("testMultigetSubSliceQuery0");
+    q.setKeys("testMultigetSubSliceQuery0", "testMultigetSubSliceQuery2");
+    // try with column name first
+    q.setColumnNames("c000", "c110");
+    Result<Rows<String, String>> r = q.execute();
+    assertNotNull(r);
+    Rows<String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    Row<String, String> row = rows.getByKey("testMultigetSubSliceQuery0");
+    assertNotNull(row);
+    assertEquals("testMultigetSubSliceQuery0", row.getKey());
+    ColumnSlice<String, String> slice = row.getColumnSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals("v000", slice.getColumnByName("c000").getValue());
+    assertEquals("v100", slice.getColumnByName("c110").getValue());
+    // Test slice.getColumns
+    List<HColumn<String, String>> columns = slice.getColumns();
+    assertNotNull(columns);
+    assertEquals(2, columns.size());
+
+    // now try with start/finish
+    q = createMultigetSubSliceQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKeys("testMultigetSubSliceQuery0");
+    q.setSuperColumn("testMultigetSubSliceQuery0");
+    // try reversed this time
+    q.setRange("c000", "c110", false, 2);
+    r = q.execute();
+    assertNotNull(r);
+    rows = r.get();
+    assertEquals(1, rows.getCount());
+    for (Row<String, String> row2 : rows) {
+      assertNotNull(row2);
+      slice = row2.getColumnSlice();
+      assertNotNull(slice);
+      assertEquals(2, slice.getColumns().size());
+      for (HColumn<String, String> column : slice.getColumns()) {
+        if (!column.getName().equals("c000") && !column.getName().equals("c110")) {
+          fail("A columns with unexpected column name returned: " + column.getName());
+        }
+      }
+    }
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testRangeSlicesQuery() {
+    // TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testRangeSuperSlicesQuery() {
+    // TODO
+  }
+
+  @Test
+  @Ignore("Not ready yet")
+  public void testRangeSubSlicesQuery() {
+    // TODO
   }
 
   private void deleteColumns(TestCleanupDescriptor cleanup) {
@@ -476,32 +555,10 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     return new TestCleanupDescriptor(cf, rowCount, rowPrefix, scCount, scPrefix);
   }
 
-  @Test
-  @Ignore("Not ready yet")
-  public void testMultigetSubSliceQuery() {
-  }
-
-  @Test
-  @Ignore("Not ready yet")
-  public void testRangeSlicesQuery() {
-    // TODO
-  }
-
-  @Test
-  @Ignore("Not ready yet")
-  public void testRangeSuperSlicesQuery() {
-    // TODO
-  }
-
-  @Test
-  @Ignore("Not ready yet")
-  public void testRangeSubSlicesQuery() {
-    // TODO
-  }
-
   /**
-   * A class describing what kind of cleanup is required at the end of the test.
-   * Just some bookeeping, that's all.
+   * A class describing what kind of cleanup is required at the end of the test. Just some
+   * bookeeping, that's all.
+   *
    * @author Ran Tavory
    *
    */
@@ -512,8 +569,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     public final int columnCount;
     public final String columnsPrefix;
 
-    public TestCleanupDescriptor(String cf, int rowCount, String rowPrefix,
-      int scCount, String scPrefix) {
+    public TestCleanupDescriptor(String cf, int rowCount, String rowPrefix, int scCount,
+        String scPrefix) {
       this.cf = cf;
       this.rowCount = rowCount;
       this.rowPrefix = rowPrefix;
