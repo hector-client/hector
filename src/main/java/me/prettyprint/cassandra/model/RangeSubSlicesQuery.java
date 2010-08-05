@@ -10,47 +10,59 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 
 /**
- * A query for the thrift call get_range_slices.
+ * A query for the thrift call get_range_slices for subcolumns of supercolumns
  *
  * @author Ran Tavory
  *
- * @param <N>
- * @param <V>
  */
 @SuppressWarnings("unchecked")
-public class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
 
+  private final Extractor<SN> sNameExtractor;
   private final HKeyRange keyRange;
+  private SN superColumn;
 
-  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+
+  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
+      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
+    Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
+    this.sNameExtractor = sNameExtractor;
     keyRange = new HKeyRange();
   }
 
-  public RangeSlicesQuery<N,V> setTokens(String start, String end) {
+  public RangeSubSlicesQuery<SN,N,V> setTokens(String start, String end) {
     keyRange.setTokens(start, end);
     return this;
   }
 
-  public RangeSlicesQuery<N,V> setKeys(String start, String end) {
+  public RangeSubSlicesQuery<SN,N,V> setKeys(String start, String end) {
     keyRange.setKeys(start, end);
     return this;
   }
 
-  public RangeSlicesQuery<N,V> setRowCount(int rowCount) {
+  public RangeSubSlicesQuery<SN,N,V> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
+    return this;
+  }
+
+  public  RangeSubSlicesQuery<SN,N,V> setSuperColumn(SN sc) {
+    Assert.notNull(sc, "sc can't be null");
+    superColumn = sc;
     return this;
   }
 
   @Override
   public Result<OrderedRows<N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
+    Assert.notNull(superColumn, "superColumn cannot be null");
 
     return new Result<OrderedRows<N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<OrderedRows<N,V>>() {
           @Override
           public OrderedRows<N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
+            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
             LinkedHashMap<String, List<Column>> thriftRet =
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
             return new OrderedRows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
@@ -60,6 +72,7 @@ public class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,
 
   @Override
   public String toString() {
-    return "RangeSlicesQuery(" + keyRange + super.toStringInternal() + ")";
+    return "RangeSuperSlicesQuery(" + keyRange + super.toStringInternal() + ")";
   }
+
 }

@@ -8,6 +8,7 @@ import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuer
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
+import static me.prettyprint.cassandra.model.HFactory.createRangeSubSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
@@ -30,7 +31,6 @@ import me.prettyprint.cassandra.service.Cluster;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -598,9 +598,36 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore("Not ready yet")
   public void testRangeSubSlicesQuery() {
-    // TODO
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 4, "testRangeSubSlicesQuery", 3,
+        "testRangeSubSlicesQuery");
+
+    // get value
+    RangeSubSlicesQuery<String,String, String> q = createRangeSubSlicesQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setTokens("testRangeSubSlicesQuery1", "testRangeSubSlicesQuery3");
+    // try with column name first
+    q.setSuperColumn("testRangeSubSlicesQuery1");
+    q.setColumnNames("c021", "c111");
+    Result<OrderedRows<String, String>> r = q.execute();
+    assertNotNull(r);
+    OrderedRows<String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    Row<String, String> row = rows.getList().get(0);
+    assertNotNull(row);
+    assertEquals("testRangeSubSlicesQuery2", row.getKey());
+    ColumnSlice<String, String> slice = row.getColumnSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals("v021", slice.getColumnByName("c021").getValue());
+    assertEquals("v121", slice.getColumnByName("c111").getValue());
+    assertNull(slice.getColumnByName("c033"));
+
+    // Delete values
+    deleteColumns(cleanup);
   }
 
   private void deleteColumns(TestCleanupDescriptor cleanup) {

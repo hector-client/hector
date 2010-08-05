@@ -124,6 +124,12 @@ public class HFactory {
     return new RangeSuperSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
   }
 
+  public static <SN,N,V> RangeSubSlicesQuery<SN,N,V> createRangeSubSlicesQuery(
+      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+      Extractor<V> valueExtractor) {
+    return new RangeSubSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+  }
+
   public static <N,V> SliceQuery<N,V> createSliceQuery(
       KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     return new SliceQuery<N,V>(ko, nameExtractor, valueExtractor);
@@ -179,7 +185,7 @@ public class HFactory {
     StringExtractor se = StringExtractor.get();
     return new HColumn<String, String>(name, value, createTimestamp(), se, se);
   }
-  
+
   /**
    * Creates a timestamp of now with the default timestamp resolution (micorosec) as defined in
    * {@link CassandraHost}
