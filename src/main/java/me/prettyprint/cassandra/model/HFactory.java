@@ -117,6 +117,12 @@ public class HFactory {
     return new RangeSlicesQuery<N,V>(ko, nameExtractor, valueExtractor);
   }
 
+  public static <SN,N,V> RangeSuperSlicesQuery<SN,N,V> createRangeSuperSlicesQuery(
+      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+      Extractor<V> valueExtractor) {
+    return new RangeSuperSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+  }
+
   public static <N,V> SliceQuery<N,V> createSliceQuery(
       KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     return new SliceQuery<N,V>(ko, nameExtractor, valueExtractor);

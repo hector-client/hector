@@ -8,6 +8,7 @@ import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuer
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
+import static me.prettyprint.cassandra.model.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
@@ -350,7 +351,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String cf = "Super1";
 
     // insert
-    TestCleanupDescriptor cleanup = createSuperColumns(cf, 1, "testSliceQueryOnSubcolumns", 1,
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSliceQueryOnSubcolumns", 1,
         "testSliceQueryOnSubcolumns_column");
 
     // get value
@@ -400,7 +401,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   public void testMultigetSuperSliceQuery() {
     String cf = "Super1";
 
-    TestCleanupDescriptor cleanup = createSuperColumns(cf, 4, "testSuperMultigetSliceQueryKey", 3,
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 4, "testSuperMultigetSliceQueryKey", 3,
         "testSuperMultigetSliceQuery");
 
     // get value
@@ -433,7 +434,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String cf = "Super1";
 
     // insert
-    TestCleanupDescriptor cleanup = createSuperColumns(cf, 3, "testMultigetSubSliceQuery", 1,
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 3, "testMultigetSubSliceQuery", 1,
         "testMultigetSubSliceQuery");
 
     // get value
@@ -545,9 +546,55 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  @Ignore("Not ready yet")
   public void testRangeSuperSlicesQuery() {
-    // TODO
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 4, "testRangeSuperSlicesQuery", 3,
+        "testRangeSuperSlicesQuery");
+
+    // get value
+    RangeSuperSlicesQuery<String,String, String> q = createRangeSuperSlicesQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setTokens("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery3");
+    // try with column name first
+    q.setColumnNames("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery2");
+    Result<OrderedSuperRows<String, String, String>> r = q.execute();
+    assertNotNull(r);
+    OrderedSuperRows<String, String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    SuperRow<String, String, String> row = rows.getList().get(0);
+    assertNotNull(row);
+    assertEquals("testRangeSuperSlicesQuery2", row.getKey());
+    SuperSlice<String, String, String> slice = row.getSuperSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals("v021", slice.getColumnByName("testRangeSuperSlicesQuery1").get(0).getValue());
+    assertEquals("v022", slice.getColumnByName("testRangeSuperSlicesQuery2").get(0).getValue());
+    assertNull(slice.getColumnByName("testRangeSuperSlicesQuery3"));
+
+    // now try with setKeys in combination with setRange
+    q.setKeys("testRangeSuperSlicesQuery0", "testRangeSuperSlicesQuery5");
+    q.setRange("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery3", false, 100);
+    r = q.execute();
+    assertNotNull(r);
+    rows = r.get();
+    assertEquals(4, rows.getCount());
+    for (SuperRow<String, String, String> row2 : rows) {
+      assertNotNull(row2);
+      slice = row2.getSuperSlice();
+      assertNotNull(slice);
+      assertEquals(2, slice.getSuperColumns().size());
+      for (HSuperColumn<String, String, String> column : slice.getSuperColumns()) {
+        if (!column.getName().equals("testRangeSuperSlicesQuery1")
+            && !column.getName().equals("testRangeSuperSlicesQuery2")) {
+          fail("A columns with unexpected column name returned: " + column.getName());
+        }
+      }
+    }
+
+    // Delete values
+    deleteColumns(cleanup);
   }
 
   @Test
@@ -566,7 +613,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     m.execute();
   }
 
-  private TestCleanupDescriptor createSuperColumns(String cf, int rowCount, String rowPrefix,
+  private TestCleanupDescriptor insertSuperColumns(String cf, int rowCount, String rowPrefix,
       int scCount, String scPrefix) {
     Mutator m = createMutator(ko);
     for (int i = 0; i < rowCount; ++i) {
@@ -588,8 +635,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     Mutator m = createMutator(ko);
     for (int i = 0; i < rowCount; ++i) {
       for (int j = 0; j < columnCount; ++j) {
-        m.addInsertion(rowPrefix + i, cf,
-            createColumn(columnPrefix + j, "value" + i + j, se, se));
+        m.addInsertion(rowPrefix + i, cf, createColumn(columnPrefix + j, "value" + i + j, se, se));
       }
     }
     MutationResult mr = m.execute();

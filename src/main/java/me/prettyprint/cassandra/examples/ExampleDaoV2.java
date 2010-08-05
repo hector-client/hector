@@ -52,7 +52,7 @@ public class ExampleDaoV2 {
    */
   public void insert(final String key, final String value) {
     createMutator(keyspaceOperator).insert(
-        key, CF_NAME, createColumn(COLUMN_NAME, value, createTimestamp(), extractor, extractor));
+        key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
   private long createTimestamp() {

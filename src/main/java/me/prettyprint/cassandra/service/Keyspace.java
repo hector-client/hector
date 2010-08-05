@@ -214,7 +214,7 @@ public interface Keyspace {
   /**
    * returns a subset of super columns for a range of keys.
    */
-  Map<String, List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
+  LinkedHashMap<String, List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
 
   /**

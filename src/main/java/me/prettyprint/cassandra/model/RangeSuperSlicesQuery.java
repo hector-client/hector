@@ -6,12 +6,12 @@ import java.util.List;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 
-import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.SuperColumn;
 
 /**
- * A query for the thrift call get_range_slices.
+ * A query for the thrift call get_range_slices of supercolumns
  *
  * @author Ran Tavory
  *
@@ -19,46 +19,50 @@ import org.apache.cassandra.thrift.KeyRange;
  * @param <V>
  */
 @SuppressWarnings("unchecked")
-public class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V,OrderedSuperRows<SN,N,V>> {
 
   /** Whether to use start/end as tokens or as keys */
   private boolean useTokens = true;
   private String start, end;
   private int rowCount = 100;
+  private final Extractor<N> nameExtractor;
 
-  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
+  /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
+      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    super(ko, sNameExtractor, valueExtractor);
+    Assert.notNull(nameExtractor, "nameExtractor cannot be null");
+    this.nameExtractor = nameExtractor;
   }
 
-  public RangeSlicesQuery<N,V> setTokens(String start, String end) {
+  public RangeSuperSlicesQuery<SN,N,V> setTokens(String start, String end) {
     useTokens = true;
     this.start = start;
     this.end = end;
     return this;
   }
 
-  public RangeSlicesQuery<N,V> setKeys(String start, String end) {
+  public RangeSuperSlicesQuery<SN,N,V> setKeys(String start, String end) {
     useTokens = false;
     this.start = start;
     this.end = end;
     return this;
   }
 
-  public RangeSlicesQuery<N,V> setRowCount(int rowCount) {
+  public RangeSuperSlicesQuery<SN,N,V> setRowCount(int rowCount) {
     this.rowCount = rowCount;
     return this;
   }
 
   @Override
-  public Result<OrderedRows<N, V>> execute() {
+  public Result<OrderedSuperRows<SN,N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
     Assert.notNull(start, "start can't be null");
     Assert.notNull(end, "end can't be null");
 
-    return new Result<OrderedRows<N,V>>(keyspaceOperator.doExecute(
-        new KeyspaceOperationCallback<OrderedRows<N,V>>() {
+    return new Result<OrderedSuperRows<SN,N,V>>(keyspaceOperator.doExecute(
+        new KeyspaceOperationCallback<OrderedSuperRows<SN,N,V>>() {
           @Override
-          public OrderedRows<N,V> doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedSuperRows<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             KeyRange keyRange = new KeyRange(rowCount);
             if (useTokens) {
               keyRange.setStart_token(start);
@@ -68,9 +72,10 @@ public class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,
               keyRange.setEnd_key(end);
             }
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            LinkedHashMap<String, List<Column>> thriftRet =
-                ks.getRangeSlices(columnParent, getPredicate(), keyRange);
-            return new OrderedRows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
+            LinkedHashMap<String, List<SuperColumn>> thriftRet =
+                ks.getSuperRangeSlices(columnParent, getPredicate(), keyRange);
+            return new OrderedSuperRows<SN,N,V>(thriftRet, columnNameExtractor, nameExtractor,
+                valueExtractor);
           }
         }), this);
   }
@@ -78,7 +83,7 @@ public class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,
   @Override
   public String toString() {
     String tk = useTokens ? "t" : "k";
-    return "RangeSlicesQuery(" + tk + "Start:" + start + "," + tk + "End:" + end + ","
+    return "RangeSuperSlicesQuery(" + tk + "Start:" + start + "," + tk + "End:" + end + ","
         + super.toStringInternal() + ")";
   }
 

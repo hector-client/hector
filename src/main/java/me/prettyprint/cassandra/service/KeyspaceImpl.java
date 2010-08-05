@@ -245,20 +245,21 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, List<SuperColumn>> getSuperRangeSlices(final ColumnParent columnParent,
-      final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
-    Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
+  public LinkedHashMap<String, List<SuperColumn>> getSuperRangeSlices(
+      final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange)
+      throws HectorException {
+    Operation<LinkedHashMap<String, List<SuperColumn>>> op = new Operation<LinkedHashMap<String, List<SuperColumn>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
+      public LinkedHashMap<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent,
               predicate, keyRange, consistency);
           if (keySlices == null || keySlices.isEmpty()) {
-            return Collections.emptyMap();
+            return new LinkedHashMap<String, List<SuperColumn>>();
           }
-          Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(
+          LinkedHashMap<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(
               keySlices.size());
           for (KeySlice keySlice : keySlices) {
             ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
