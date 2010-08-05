@@ -17,6 +17,7 @@ Fix bogus doubly locked initialization in CassandraClientPoolFactory
 Fix http://github.com/rantav/hector/issues/issue/48 KeyspaceImpl.getSuperColumn() should use cassandra.get() and not cassandra.get_slice()
 Allow CassandraClientPool to provide settings from CassandraHostConfigurator to new hosts if it was configured from such. http://github.com/rantav/hector/issues/issue/47
 Fix http://github.com/rantav/hector/issues#issue/50 getSuperColumn() does not return null
+New and fancy API. We call this API v2 beta to be able to collect feedback from the commumnity before finalizing it
 
 
 0.6.0-14
