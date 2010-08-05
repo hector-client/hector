@@ -93,6 +93,11 @@ public class HFactory {
     return new ColumnQuery<N,V>(ko, nameExtractor, valueExtractor);
   }
 
+  public static ColumnQuery<String, String> createStringColumnQuery(KeyspaceOperator ko) {
+    StringExtractor se = StringExtractor.get();
+    return createColumnQuery(ko, se, se);
+  }
+
   public static <SN,N,V> SuperColumnQuery<SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
       Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     return new SuperColumnQuery<SN, N, V>(ko, sNameExtractor, nameExtractor, valueExtractor);
@@ -183,7 +188,7 @@ public class HFactory {
    */
   public static HColumn<String,String> createStringColumn(String name, String value) {
     StringExtractor se = StringExtractor.get();
-    return new HColumn<String, String>(name, value, createTimestamp(), se, se);
+    return createColumn(name, value, se, se);
   }
 
   /**
