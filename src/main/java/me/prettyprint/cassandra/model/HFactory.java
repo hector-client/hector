@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
@@ -165,6 +166,14 @@ public class HFactory {
     return new HColumn<N, V>(name, value, createTimestamp(), nameExtractor, valueExtractor);
   }
 
+  /**
+   * Convienience method for creating a column with a String name and String value
+   */
+  public static HColumn<String,String> createStringColumn(String name, String value) {
+    StringExtractor se = StringExtractor.get();
+    return new HColumn<String, String>(name, value, createTimestamp(), se, se);
+  }
+  
   /**
    * Creates a timestamp of now with the default timestamp resolution (micorosec) as defined in
    * {@link CassandraHost}
