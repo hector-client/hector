@@ -208,20 +208,6 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Set<CassandraHost> getKnownHosts() {
-    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
-    if (closed) {
-      return hosts;
-    }
-    // Iterate over all keyspaces and ask them to update known hosts
-    for (KeyspaceImpl k: keyspaceMap.values()) {
-      hosts.addAll(k.getKnownHosts());
-    }
-    return hosts;
-  }
-
-
-  @Override
   public boolean hasErrors() {
     return hasErrors ;
   }

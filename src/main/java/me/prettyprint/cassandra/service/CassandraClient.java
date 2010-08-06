@@ -120,8 +120,6 @@ public interface CassandraClient {
 
   boolean isClosed();
 
-  Set<CassandraHost> getKnownHosts();
-
   void markAsError();
 
   boolean hasErrors();
