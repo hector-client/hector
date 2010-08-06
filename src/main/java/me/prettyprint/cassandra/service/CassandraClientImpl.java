@@ -185,16 +185,6 @@ import org.slf4j.LoggerFactory;
     return this.cassandraHost;
   }
 
-  @Override
-  public void updateKnownHosts() throws HectorTransportException {
-    if (closed) {
-      return;
-    }
-    // Iterate over all keyspaces and ask them to update known hosts
-    for (KeyspaceImpl k: keyspaceMap.values()) {
-      k.updateKnownHosts();
-    }
-  }
 
   @Override
   public String toString() {

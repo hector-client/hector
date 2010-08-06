@@ -114,12 +114,7 @@ public interface CassandraClient {
    */
   String getServerVersion() throws HectorException;
 
-  CassandraHost getCassandraHost();
-  
-  /**
-   * Tells all instanciated keyspaces to update their known hosts
-   */
-  void updateKnownHosts() throws HectorTransportException;
+  CassandraHost getCassandraHost();  
 
   void markAsClosed();
 
