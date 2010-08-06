@@ -1,9 +1,7 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -11,10 +9,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.cassandra.model.NotFoundException;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,14 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 /*package*/ class CassandraClientImpl implements CassandraClient {
 
-  private final static String PROP_CLUSTER_NAME = "cluster name";
-  private final static String PROP_CONFIG_FILE = "config file";
   @SuppressWarnings("unused")
-  private final static String PROP_TOKEN_MAP = "token map";
-  @SuppressWarnings("unused")
-  private final static String PROP_KEYSPACE = "keyspaces";
-  private final static String PROP_VERSION = "version";
-
   private static final Logger log = LoggerFactory.getLogger(CassandraClientImpl.class);
 
   /** Serial number of the client used to track client creation for debug purposes */
@@ -55,20 +48,14 @@ import org.slf4j.LoggerFactory;
 
   private String clusterName;
 
-  private Map<String, String> tokenMap;
-
-  private String configFile;
-
   private String serverVersion;
 
   private final KeyspaceFactory keyspaceFactory;
 
-  private final int port;
-
-  private final String url;
-  private final String ip;
-
-  private final CassandraClientPool clientPools;
+  private final CassandraClientPool cassandraClientPool;
+  
+  /** An instance of the cluster object used to manage meta-operations */
+  private final Cluster cluster;
 
   /** Has the client network connection been closed? */
   private boolean closed = false;
@@ -78,65 +65,61 @@ import org.slf4j.LoggerFactory;
 
   /** Whether the client has been released back to the pool already */
   private boolean released = false;
+  
+  private final CassandraHost cassandraHost;
 
   public CassandraClientImpl(Cassandra.Client cassandraThriftClient,
-      KeyspaceFactory keyspaceFactory, String url, int port, CassandraClientPool clientPools,
+      KeyspaceFactory keyspaceFactory, 
+      CassandraHost cassandraHost, 
+      CassandraClientPool clientPools,
+      Cluster cassandraCluster,      
       TimestampResolution timestampResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
+    this.cassandraHost = cassandraHost;
     this.keyspaceFactory = keyspaceFactory;
-    this.port = port;
-    this.url = url;
-    ip = getIpString(url);
-    this.clientPools = clientPools;
+    this.cassandraClientPool = clientPools;
     this.timestampResolution = timestampResolution;
-  }
-
-  private static String getIpString(String url) throws UnknownHostException {
-    return InetAddress.getByName(url).getHostAddress();
+    this.cluster = cassandraCluster;
   }
 
   @Override
-  public String getClusterName() throws TException {
-    // TODO replace with meta data API
+  public String getClusterName() throws HectorException {
     if (clusterName == null) {
-      clusterName = getStringProperty(PROP_CLUSTER_NAME);
+      clusterName = cluster.getName();
     }
     return clusterName;
   }
 
   @Override
-  public String getConfigFile() throws TException {
-    if (configFile == null) {
-      configFile = getStringProperty(PROP_CONFIG_FILE);
-    }
-    return configFile;
-  }
-
-  @Override
-  public Keyspace getKeyspace(String keySpaceName) throws IllegalArgumentException,
-      NotFoundException, TException {
+  public Keyspace getKeyspace(String keySpaceName) throws HectorException {
     return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
   public Keyspace getKeyspace(String keySpaceName, ConsistencyLevel consistency) throws IllegalArgumentException,
-      NotFoundException, TException {
+      NotFoundException, HectorTransportException {
     return getKeyspace(keySpaceName, consistency, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
   public Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy)
-      throws IllegalArgumentException, NotFoundException, TException {
+      throws IllegalArgumentException, NotFoundException, HectorTransportException {
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
     KeyspaceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
       if (getKeyspaces().contains(keyspaceName)) {
-        Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-        keyspace = (KeyspaceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
-            consistencyLevel, failoverPolicy, clientPools);
+        try {
+          Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
+          keyspace = (KeyspaceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+              consistencyLevel, failoverPolicy, cassandraClientPool);
+        } catch (TException e) {
+          throw new HectorTransportException(e);
+        } catch (org.apache.cassandra.thrift.NotFoundException e) {
+          throw new NotFoundException(e);
+        }
         KeyspaceImpl tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
         if (tmp != null) {
           // There was another put that got here before we did.
@@ -151,45 +134,26 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public List<String> getKeyspaces() throws TException {
+  public List<String> getKeyspaces() throws HectorTransportException {
     if (keyspaces == null) {
-      keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
+      try {
+        keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
+      } catch (TException e) {
+        throw new HectorTransportException(e);
+      }
     }
     return keyspaces;
   }
 
   @Override
-  public String getStringProperty(String propertyName) throws TException {
-    // TODO remove
-    return cassandra.get_string_property(propertyName);
+  public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
+    return new ArrayList<CassandraHost>(cluster.getKnownPoolHosts(fresh));
   }
 
   @Override
-  public Map<String, String> getTokenMap(boolean fresh) throws TException {
-    if (tokenMap == null || fresh) {
-      tokenMap = new HashMap<String, String>();
-      List<String> keyspaces = getKeyspaces();
-      for (String keyspace : keyspaces) {
-        if ( keyspace.equals("system") )
-          continue;
-        List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
-        for (TokenRange tokenRange : tokenRanges) {
-          for(String host : tokenRange.getEndpoints()) {
-            log.debug("token start: {} end: {} host: {}",
-                new Object[]{tokenRange.getStart_token(), tokenRange.getEnd_token(), host});
-            tokenMap.put(tokenRange.getStart_token() + "-" + tokenRange.getEnd_token(), host);
-          }
-        }
-      }
-
-    }
-    return tokenMap;
-  }
-
-  @Override
-  public String getServerVersion() throws TException {
+  public String getServerVersion() throws HectorException {
     if (serverVersion == null) {
-      serverVersion = getStringProperty(PROP_VERSION);
+      serverVersion = cluster.describeThriftVersion();
     }
     return serverVersion;
    }
@@ -217,18 +181,12 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public int getPort() {
-    return port;
+  public CassandraHost getCassandraHost() {
+    return this.cassandraHost;
   }
 
   @Override
-  public String getUrl() {
-    return url;
-  }
-
-  @Override
-  public void updateKnownHosts() throws TException {
-    // TODO rebuild to use meta API
+  public void updateKnownHosts() throws HectorTransportException {
     if (closed) {
       return;
     }
@@ -242,9 +200,7 @@ import org.slf4j.LoggerFactory;
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("CassandraClient<");
-    b.append(getUrl());
-    b.append(":");
-    b.append(getPort());
+    b.append(cassandraHost.getUrl());
     b.append("-");
     b.append(mySerial);
     b.append(">");
@@ -262,9 +218,8 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Set<String> getKnownHosts() {
-    // TODO update to use META API
-    Set<String> hosts = new HashSet<String>();
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
     if (closed) {
       return hosts;
     }
@@ -275,10 +230,6 @@ import org.slf4j.LoggerFactory;
     return hosts;
   }
 
-  @Override
-  public String getIp() {
-    return ip;
-  }
 
   @Override
   public boolean hasErrors() {

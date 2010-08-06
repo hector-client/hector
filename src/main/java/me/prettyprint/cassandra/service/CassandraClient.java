@@ -1,13 +1,13 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.List;
+import java.util.Set;
+
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.thrift.TException;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 /**
@@ -74,80 +74,58 @@ public interface CassandraClient {
    * <p>
    * Uses the default failover policy {@link #DEFAULT_FAILOVER_POLICY}
    */
-  Keyspace getKeyspace(String keyspaceName)
-      throws IllegalArgumentException, NotFoundException, TException;
+  Keyspace getKeyspace(String keyspaceName) throws HectorException;
 
   /**
    * Gets s keyspace with the specified consistency level
    */
-  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel)
-      throws IllegalArgumentException, NotFoundException, TException;
+  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel) throws HectorException;
 
   /**
    * Gets s keyspace with the specified consistency level and failover policy
    */
-  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, FailoverPolicy failoverPolicy)
-      throws IllegalArgumentException, NotFoundException, TException;
-
-
-
-  /**
-   * Gets a string property from the server, such as:
-   * "cluster name": cluster name;
-   * "config file" : all config file content, if need you can try to explain it.
-   * "token map" :  get the token map from local gossip protocal.
-   */
-  String getStringProperty(String propertyName) throws TException;
+  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, 
+      FailoverPolicy failoverPolicy)
+      throws HectorException;
 
 
   /**
    * @return all keyspaces name of this client.
    */
-  List<String> getKeyspaces() throws TException;
+  List<String> getKeyspaces() throws HectorTransportException;
 
 
   /**
    * @return target server cluster name
+   * @throws HectorTransportException 
    */
-  String getClusterName() throws TException;
+  String getClusterName() throws HectorException;
 
   /**
-   * Gets the token map with an option to refresh the value from cassandra.
-   * If fresh is false, a local cached value may be returned.
+   * Gets the list of known hosts.
    *
    * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
    *  a possibly cached value.
-   * @return  a map from tokens to hosts.
    */
-  Map<String, String> getTokenMap(boolean fresh) throws TException;
-
-
-  /**
-   * @return config file content.
-   */
-  String getConfigFile() throws TException;
+  List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException;
 
   /**
    * @return Server version
    */
-  String getServerVersion() throws TException;
+  String getServerVersion() throws HectorException;
 
-  public int getPort();
-
-  public String getUrl();
-
+  CassandraHost getCassandraHost();
+  
   /**
    * Tells all instanciated keyspaces to update their known hosts
    */
-  void updateKnownHosts() throws TException;
+  void updateKnownHosts() throws HectorTransportException;
 
   void markAsClosed();
 
   boolean isClosed();
 
-  Set<String> getKnownHosts();
-
-  String getIp();
+  Set<CassandraHost> getKnownHosts();
 
   void markAsError();
 

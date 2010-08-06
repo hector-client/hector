@@ -17,7 +17,7 @@
         <constructor-arg><ref bean="cassandraHostConfigurator"/></constructor-arg>
     </bean>
 
-    <bean id="exampleSpringDao" class="me.prettyprint.cassandra.dao.ExampleSpringDao">
+    <bean id="exampleSpringDao" class="me.prettyprint.cassandra.examples.ExampleSpringDao">
         <constructor-arg><ref bean="cassandraClientPool"/></constructor-arg>
     </bean>
 

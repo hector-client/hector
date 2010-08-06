@@ -3,21 +3,19 @@ package me.prettyprint.cassandra.service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-
+import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates the information required for connecting to a Cassandra host.
  * Also exposes pool configuration parameters for that host.
- *
+ * TODO(ran): Merge CassandraHost, CassandraCluster into Cluster
  * @author Nate McCall (nate@vervewireless.com)
  *
  */
 public class CassandraHost {
   private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
-
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
 
@@ -38,15 +36,24 @@ public class CassandraHost {
    */
   public static final int DEFAULT_MAX_IDLE = -1;
 
+  public static final boolean DEFAULT_LIFO = GenericObjectPool.DEFAULT_LIFO;
+  public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+  public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+
   public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
       TimestampResolution.MICROSECONDS;
 
-  private final String url, ip;
+  private final String host, ip, url;
   private final int port;
   private final String name;
 
   private int maxActive = DEFAULT_MAX_ACTIVE;
   private int maxIdle = DEFAULT_MAX_IDLE;
+  
+  private boolean lifo = DEFAULT_LIFO;
+  private long minEvictableIdleTimeMillis = DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+  private long timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+  
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
@@ -54,8 +61,8 @@ public class CassandraHost {
   private TimestampResolution timestampResolution = DEFAULT_TIMESTAMP_RESOLUTION;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
-  public CassandraHost(String urlPort) {
-    this(parseHostFromUrl(urlPort), parsePortFromUrl(urlPort));
+  public CassandraHost(String url) {
+    this(parseHostFromUrl(url), parsePortFromUrl(url));
   }
 
   public CassandraHost(String url2, int port) {
@@ -72,7 +79,7 @@ public class CassandraHost {
       turl = url2;
       tip = url2;
     }
-    this.url = turl;
+    this.host = turl;
     ip = tip;
     b.append(url2);
     b.append("(");
@@ -80,14 +87,16 @@ public class CassandraHost {
     b.append("):");
     b.append(port);
     name = b.toString();
+    url = String.format("%s:%d",host,port);
   }
 
-  public String getUrlPort() {
-    return new StringBuilder(32).append(url).append(':').append(port).toString();
+  public String getUrl() {
+    return url;
   }
 
   /**
    * Checks whether name resolution should occur.
+   * 
    * @return
    */
   public boolean isPerformNameResolution() {
@@ -101,8 +110,8 @@ public class CassandraHost {
     return name;
   }
 
-  public String getUrl() {
-    return url;
+  public String getHost() {
+    return host;
   }
 
   public String getIp() {
@@ -123,7 +132,8 @@ public class CassandraHost {
     if (! (obj instanceof CassandraHost)) {
       return false;
     }
-    return ((CassandraHost) obj).ip.equals(ip);
+    CassandraHost other = (CassandraHost) obj;
+    return other.ip.equals(ip) && other.port == port;
   }
 
   @Override
@@ -194,4 +204,29 @@ public class CassandraHost {
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
   }
+
+  public boolean getLifo() {
+    return lifo;
+  }
+
+  public void setLifo(boolean lifo) {
+    this.lifo = lifo;
+  }
+
+  public long getMinEvictableIdleTimeMillis() {
+    return minEvictableIdleTimeMillis;
+  }
+
+  public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+    this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+  }
+
+  public long getTimeBetweenEvictionRunsMillis() {
+    return timeBetweenEvictionRunsMillis;
+  }
+
+  public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
+    this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
+  }
+
 }

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
@@ -18,17 +20,15 @@ import org.junit.Test;
 
 public class CassandraClusterTest extends BaseEmbededServerSetupTest { 
   
-  private CassandraCluster cassandraCluster;
+  private Cluster cassandraCluster;
   private CassandraHostConfigurator cassandraHostConfigurator;
-  private CassandraClientPool cassandraClientPool;
+
   
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
           NotFoundException, UnknownHostException, Exception {
-    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
-    cassandraClientPool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
-    
-    cassandraCluster = CassandraClusterFactory.getInstance().create(cassandraClientPool);    
+    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");        
+    cassandraCluster = new Cluster("Test Cluster", cassandraHostConfigurator);
   }
   
   @Test
@@ -57,11 +57,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     assertEquals(1, ring.size());
   }
   
-  @Test
-  public void testGetHostNames() throws Exception {
-    Set<String> hosts = cassandraCluster.getHostNames();
-    assertEquals(1, hosts.size());
-  }
+  
   
   @Test
   public void testDescribeKeyspace() throws Exception {

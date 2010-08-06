@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.6.0-14</version>
+  <version>0.6.0-15</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -13,6 +13,10 @@
   <properties>
     <!-- Set default encoding to UTF-8 -->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- OSGi bundle properties -->
+    <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
+    <bundle.namespace>me.prettyprint</bundle.namespace>
   </properties>
 
   <issueManagement>
@@ -30,6 +34,60 @@
 
   <build>
     <plugins>
+
+      <plugin>
+        <groupId>org.ops4j</groupId>
+	<artifactId>maven-pax-plugin</artifactId>
+	<version>1.4</version>
+	<extensions>true</extensions>
+	<configuration>
+	  <provision>
+            <param>--platform=equinox</param>
+	  </provision>
+	</configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.4.3</version>
+	<configuration>
+          <instructions>
+            <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+            <Bundle-Version>${pom.version}</Bundle-Version>
+
+	    <Embed-Dependency>
+	      libthrift;scope=compile|runtime;type=!pom;inline=false,
+	      cassandra;scope=compile|runtime;type=!pom;inline=false,
+	      <!-- *;scope=compile|runtime;type=!pom;inline=false -->
+            </Embed-Dependency> 
+
+	    <Export-Package>
+	      <!-- !${bundle.namespace}.internal.*, -->
+	      ${bundle.namespace}.*;version="${pom.version}"
+	    </Export-Package>
+
+            <Import-Package>
+	      !org.apache.avro.*,
+	      !javax.jms.*,
+	      !javax.mail.*,
+	      !javax.servlet.*,
+	      !com.sun.*,
+	      !org.antlr.*,
+	      !jline.*,
+	      !sun.misc.*,
+              *;resolution:=optional
+            </Import-Package>
+	    
+	    <Private-Package>
+	      <!-- ${bundle.namespace}.internal.* -->
+	    </Private-Package>
+
+            <_include>-osgi.bnd</_include>
+          </instructions>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
@@ -43,6 +101,8 @@
           </additionalClasspathElements>
         </configuration>
       </plugin>
+
+
       <!-- Setup the build for JAVA 1.6  -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -212,18 +272,45 @@
       <artifactId>google-collections</artifactId>
       <version>1.0</version>
     </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>2.4</version>
+    </dependency>
 
+    <!-- OSGi deps -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.6</version>
+      <version>4.8.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.cliffc.high_scale_lib</groupId>
-      <artifactId>high-scale-lib</artifactId>
-      <version>1.0.0</version>
+      <groupId>com.googlecode.json-simple</groupId>
+      <artifactId>json-simple</artifactId>
+      <version>1.1</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -233,9 +320,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
+      <groupId>org.cliffc.high_scale_lib</groupId>
+      <artifactId>high-scale-lib</artifactId>
+      <version>1.0.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -248,18 +335,6 @@
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>properties-maven-plugin</artifactId>
       <version>1.0-alpha-2</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.json-simple</groupId>
-      <artifactId>json-simple</artifactId>
-      <version>1.1</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>

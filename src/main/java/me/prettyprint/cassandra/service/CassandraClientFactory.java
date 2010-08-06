@@ -1,10 +1,12 @@
 package me.prettyprint.cassandra.service;
 
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.pool.PoolableObjectFactory;
-import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -13,8 +15,6 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.UnknownHostException;
 
 /**
  * Factory for {@link CassandraClient} objects.
@@ -34,16 +34,14 @@ import java.net.UnknownHostException;
    * The pool associated with this client factory.
    */
   private final CassandraClientPool pool;
-  private final String url;
-  private final int port;
   private final boolean useThriftFramedTransport;
   private final TimestampResolution timestampResolution;
+  private final CassandraHost cassandraHost;
 
   public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
       CassandraClientMonitor clientMonitor) {
     this.pool = pools;
-    this.url = cassandraHost.getUrl();
-    this.port = cassandraHost.getPort();
+    this.cassandraHost = cassandraHost;
     timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
     this.useThriftFramedTransport = cassandraHost.getUseThriftFramedTransport();
@@ -60,28 +58,33 @@ import java.net.UnknownHostException;
   public CassandraClientFactory(String url, int port) {
     this.clientMonitor = new CassandraClientMonitor();
     this.pool = new CassandraClientPoolImpl(this.clientMonitor);
-    this.url = url;
-    this.port = port;
+    this.cassandraHost = new CassandraHost(url,port);
     timeout = getTimeout(null);
     this.useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
     timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   }
 
-  public CassandraClient create() throws TTransportException, TException, UnknownHostException {
-    CassandraClient c = new CassandraClientImpl(createThriftClient(url, port),
-        new KeyspaceFactory(clientMonitor), url, port, pool, timestampResolution);
-    log.debug("Creating client {} (thread={})", c, Thread.currentThread().getName());
+  public CassandraClient create() throws HectorException {
+    CassandraClient c;
+    try {
+      c = new CassandraClientImpl(createThriftClient(cassandraHost),
+          new KeyspaceFactory(clientMonitor), cassandraHost, pool, 
+          pool.getCluster(), timestampResolution);
+    } catch (Exception e) {
+      throw new HectorException(e);
+    }
+    log.debug("Creating client {}", c);
     return c;
   }
 
-  private Cassandra.Client createThriftClient(String  url, int port)
-      throws TTransportException , TException {
-    log.debug("Creating a new thrift connection to {}:{}", url, port);
+  private Cassandra.Client createThriftClient(CassandraHost cassandraHost)
+      throws HectorTransportException {
+    log.debug("Creating a new thrift connection to {}", cassandraHost);
     TTransport tr;
     if (useThriftFramedTransport) {
-      tr = new TFramedTransport(new TSocket(url, port, timeout));
+      tr = new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout));
     } else {
-      tr = new TSocket(url, port, timeout);
+      tr = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
     }
     TProtocol proto = new TBinaryProtocol(tr);
     Cassandra.Client client = new Cassandra.Client(proto);
@@ -90,9 +93,9 @@ import java.net.UnknownHostException;
     } catch (TTransportException e) {
       // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
       // add details to it.
-      log.error("Unable to open transport to " + url + ":" + port, e);
+      log.error("Unable to open transport to " + cassandraHost.getName(), e);
       clientMonitor.incCounter(Counter.CONNECT_ERROR);
-      throw new TTransportException("Unable to open transport to " + url + ":" + port + " , " +
+      throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
           e.getLocalizedMessage(), e);
     }
     return client;

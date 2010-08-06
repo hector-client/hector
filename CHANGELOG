@@ -5,6 +5,20 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.6.0-15
+========
+Add a few more public settings to pass over to GenericObjectPool: lifo, minEvictableIdleTimeMillis and timeBetweenEvictionRunsMillis (contributed by B. Todd Burruss)
+Remove some unused meta calls from CassandraClient, such as getConfigFile and getStringProperty
+Make the calls of other meta API go through CassandraCluster and by that use an improved version of them in thrift and failover (http://github.com/rantav/hector/issues#issue/11 and http://github.com/rantav/hector/issues#issue/7 and http://github.com/rantav/hector/issues#issue/29)
+Add an exception hierarchy to wrap transport and general cassandra API exceptions http://github.com/rantav/hector/issues#issue/32
+Make HectorException extend RuntimeException
+Add the port number to be part of the cassandra host identifier so that many cassandra instances can be connected from a single hector client, http://github.com/rantav/hector/issues/issue/37/#comment_278773
+Fix bogus doubly locked initialization in CassandraClientPoolFactory
+Fix http://github.com/rantav/hector/issues/issue/48 KeyspaceImpl.getSuperColumn() should use cassandra.get() and not cassandra.get_slice()
+Allow CassandraClientPool to provide settings from CassandraHostConfigurator to new hosts if it was configured from such. http://github.com/rantav/hector/issues/issue/47
+Fix http://github.com/rantav/hector/issues#issue/50 getSuperColumn() does not return null
+New and fancy API. We call this API v2 beta b/c we want to collect feedback from the commumnity before finalizing it
+
 
 0.6.0-14
 ========

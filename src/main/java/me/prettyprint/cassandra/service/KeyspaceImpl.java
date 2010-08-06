@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.cassandra.model.InvalidRequestException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -17,7 +21,6 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
@@ -25,9 +28,6 @@ import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.thrift.TimedOutException;
-import org.apache.cassandra.thrift.UnavailableException;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +52,18 @@ import org.slf4j.LoggerFactory;
   private final FailoverPolicy failoverPolicy;
 
   /** List of all known remote cassandra nodes */
-  private List<String> knownHosts = new ArrayList<String>();
+  private List<CassandraHost> knownHosts = new ArrayList<CassandraHost>();
 
   private final CassandraClientPool clientPools;
 
   private final CassandraClientMonitor monitor;
 
+  private final ExceptionsTranslator xtrans;
+
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
-      throws TException {
+      throws HectorTransportException {
     this.client = client;
     this.consistency = consistencyLevel;
     this.keyspaceDesc = keyspaceDesc;
@@ -69,13 +71,13 @@ import org.slf4j.LoggerFactory;
     this.failoverPolicy = failoverPolicy;
     this.clientPools = clientPools;
     this.monitor = monitor;
+    xtrans = new ExceptionsTranslatorImpl();
     initFailover();
   }
 
   @Override
   public void batchInsert(final String key, Map<String, List<Column>> columnMap,
-      Map<String, List<SuperColumn>> superColumnMap) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+      Map<String, List<SuperColumn>> superColumnMap) throws HectorException {
     if (columnMap == null && superColumnMap == null) {
       throw new InvalidRequestException("columnMap and SuperColumnMap can not be null at same time");
     }
@@ -99,10 +101,13 @@ import org.slf4j.LoggerFactory;
 
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
-          TException, TimedOutException {
-        cassandra.batch_insert(keyspaceName, key, cfmap, consistency);
-        return null;
+      public Void execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          cassandra.batch_insert(keyspaceName, key, cfmap, consistency);
+          return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
@@ -110,42 +115,43 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void batchMutate(final Map<String, Map<String, List<Mutation>>> mutationMap)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
-      TException, TimedOutException {
-        cassandra.batch_mutate(keyspaceName, mutationMap, consistency);
+      public Void execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          cassandra.batch_mutate(keyspaceName, mutationMap, consistency);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
         return null;
       }
     };
     operateWithFailover(op);
   }
 
-
-
   @Override
-  public void batchMutate(BatchMutation batchMutate)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+  public void batchMutate(BatchMutation batchMutate) throws HectorException {
     batchMutate(batchMutate.getMutationMap());
   }
 
   @Override
-  public int getCount(final String key, final ColumnParent columnParent)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+  public int getCount(final String key, final ColumnParent columnParent) throws HectorException {
     Operation<Integer> op = new Operation<Integer>(OperationType.READ) {
       @Override
-      public Integer execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        return cassandra.get_count(keyspaceName, key, columnParent, consistency);
+      public Integer execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.get_count(keyspaceName, key, columnParent, consistency);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
     return op.getResult();
   }
 
-  private void operateWithFailover(Operation<?> op) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+  private void operateWithFailover(Operation<?> op) throws HectorException {
     FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts, monitor, client,
         clientPools, this);
     client = operator.operate(op);
@@ -154,22 +160,25 @@ import org.slf4j.LoggerFactory;
   @Override
   public Map<String, List<Column>> getRangeSlice(final ColumnParent columnParent,
       final SlicePredicate predicate, final String start, final String finish, final int count)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      throws HectorException {
     Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
-            start, finish, count, consistency);
-        if (keySlices == null || keySlices.isEmpty()) {
-          return Collections.emptyMap();
+      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent,
+              predicate, start, finish, count, consistency);
+          if (keySlices == null || keySlices.isEmpty()) {
+            return Collections.emptyMap();
+          }
+          Map<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        Map<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(keySlices.size());
-        for (KeySlice keySlice : keySlices) {
-          ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
-        }
-        return ret;
       }
     };
     operateWithFailover(op);
@@ -177,25 +186,29 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, List<Column>> getRangeSlices(final ColumnParent columnParent,
-      final SlicePredicate predicate, final KeyRange keyRange)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<Column>>> op = new Operation<Map<String, List<Column>>>(
+  public LinkedHashMap<String, List<Column>> getRangeSlices(final ColumnParent columnParent,
+      final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
+    Operation<LinkedHashMap<String, List<Column>>> op = new Operation<LinkedHashMap<String, List<Column>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent, predicate,
-            keyRange, consistency);
-        if (keySlices == null || keySlices.isEmpty()) {
-          return Collections.emptyMap();
+      public LinkedHashMap<String, List<Column>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent,
+              predicate, keyRange, consistency);
+          if (keySlices == null || keySlices.isEmpty()) {
+            return new LinkedHashMap<String, List<Column>>(0);
+          }
+          LinkedHashMap<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(
+              keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        Map<String, List<Column>> ret = new LinkedHashMap<String, List<Column>>(keySlices.size());
-        for (KeySlice keySlice : keySlices) {
-          ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
-        }
-        return ret;
-      }
+      };
     };
     operateWithFailover(op);
     return op.getResult();
@@ -204,23 +217,27 @@ import org.slf4j.LoggerFactory;
   @Override
   public Map<String, List<SuperColumn>> getSuperRangeSlice(final ColumnParent columnParent,
       final SlicePredicate predicate, final String start, final String finish, final int count)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      throws HectorException {
     Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
         OperationType.READ) {
       @Override
       public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
-          throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent, predicate,
-            start, finish, count, consistency);
-        if (keySlices == null || keySlices.isEmpty()) {
-          return Collections.emptyMap();
+          throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_range_slice(keyspaceName, columnParent,
+              predicate, start, finish, count, consistency);
+          if (keySlices == null || keySlices.isEmpty()) {
+            return Collections.emptyMap();
+          }
+          Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(
+              keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(
-            keySlices.size());
-        for (KeySlice keySlice : keySlices) {
-          ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
-        }
-        return ret;
       }
     };
     operateWithFailover(op);
@@ -228,24 +245,29 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, List<SuperColumn>> getSuperRangeSlices(final ColumnParent columnParent,
-      final SlicePredicate predicate, final KeyRange keyRange)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-    Operation<Map<String, List<SuperColumn>>> op = new Operation<Map<String, List<SuperColumn>>>(
+  public LinkedHashMap<String, List<SuperColumn>> getSuperRangeSlices(
+      final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange)
+      throws HectorException {
+    Operation<LinkedHashMap<String, List<SuperColumn>>> op = new Operation<LinkedHashMap<String, List<SuperColumn>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent, predicate,
-            keyRange, consistency);
-        if (keySlices == null || keySlices.isEmpty()) {
-          return Collections.emptyMap();
+      public LinkedHashMap<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_range_slices(keyspaceName, columnParent,
+              predicate, keyRange, consistency);
+          if (keySlices == null || keySlices.isEmpty()) {
+            return new LinkedHashMap<String, List<SuperColumn>>();
+          }
+          LinkedHashMap<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(
+              keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        Map<String, List<SuperColumn>> ret = new LinkedHashMap<String, List<SuperColumn>>(keySlices.size());
-        for (KeySlice keySlice : keySlices) {
-          ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
-        }
-        return ret;
       }
     };
     operateWithFailover(op);
@@ -254,23 +276,25 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public List<Column> getSlice(final String key, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
-      UnavailableException, TException, TimedOutException {
+      final SlicePredicate predicate) throws HectorException {
     Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ) {
       @Override
-      public List<Column> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
-            predicate, consistency);
+      public List<Column> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
+              predicate, consistency);
 
-        if (cosclist == null) {
-          return null;
+          if (cosclist == null) {
+            return null;
+          }
+          ArrayList<Column> result = new ArrayList<Column>(cosclist.size());
+          for (ColumnOrSuperColumn cosc : cosclist) {
+            result.add(cosc.getColumn());
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        ArrayList<Column> result = new ArrayList<Column>(cosclist.size());
-        for (ColumnOrSuperColumn cosc : cosclist) {
-          result.add(cosc.getColumn());
-        }
-        return result;
       }
     };
     operateWithFailover(op);
@@ -278,31 +302,56 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public SuperColumn getSuperColumn(String key, ColumnPath columnPath)
-      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
-      TimedOutException {
-    return getSuperColumn(key, columnPath, false, Integer.MAX_VALUE);
+  public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath) throws HectorException {
+    valideColumnPath(columnPath);
+
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
+      @Override
+      public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
+        ColumnOrSuperColumn cosc;
+        try {
+          cosc = cassandra.get(keyspaceName, key, columnPath, consistency);
+        } catch (NotFoundException e) {
+          setException(xtrans.translate(e));
+          return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+        return cosc == null ? null : cosc.getSuper_column();
+      }
+
+    };
+    operateWithFailover(op);
+    if (op.hasException()) {
+      throw op.getException();
+    }
+    return op.getResult();
   }
 
   @Override
   public SuperColumn getSuperColumn(final String key, final ColumnPath columnPath,
-      final boolean reversed, final int size) throws InvalidRequestException, NotFoundException,
-      UnavailableException, TException, TimedOutException {
+      final boolean reversed, final int size) throws HectorException {
     valideSuperColumnPath(columnPath);
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
     Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
       @Override
-      public SuperColumn execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
+      public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
         ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
         clp.setSuper_column(columnPath.getSuper_column());
 
         SlicePredicate sp = new SlicePredicate();
         sp.setSlice_range(sliceRange);
 
-        List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
-            consistency);
-        return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
+        try {
+          List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyspaceName, key, clp, sp,
+              consistency);
+          if (cosc == null || cosc.isEmpty()) {
+            return null;
+          }
+          return new SuperColumn(columnPath.getSuper_column(), getColumnList(cosc));
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
@@ -311,22 +360,24 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public List<SuperColumn> getSuperSlice(final String key, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws InvalidRequestException, NotFoundException,
-      UnavailableException, TException, TimedOutException {
+      final SlicePredicate predicate) throws HectorException {
     Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ) {
       @Override
-      public List<SuperColumn> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
-            predicate, consistency);
-        if (cosclist == null) {
-          return null;
+      public List<SuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyspaceName, key, columnParent,
+              predicate, consistency);
+          if (cosclist == null) {
+            return null;
+          }
+          ArrayList<SuperColumn> result = new ArrayList<SuperColumn>(cosclist.size());
+          for (ColumnOrSuperColumn cosc : cosclist) {
+            result.add(cosc.getSuper_column());
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        ArrayList<SuperColumn> result = new ArrayList<SuperColumn>(cosclist.size());
-        for (ColumnOrSuperColumn cosc : cosclist) {
-          result.add(cosc.getSuper_column());
-        }
-        return result;
       }
     };
     operateWithFailover(op);
@@ -335,38 +386,51 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void insert(final String key, final ColumnPath columnPath, final byte[] value)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      throws HectorException {
+    insert(key, columnPath, value, createTimestamp());
+  }
+
+  @Override
+  public void insert(final String key, final ColumnPath columnPath, final byte[] value,
+      final long timestamp) throws HectorException {
     valideColumnPath(columnPath);
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
-          TException, TimedOutException {
-        cassandra.insert(keyspaceName, key, columnPath, value, createTimestamp(), consistency);
-        return null;
+      public Void execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          cassandra.insert(keyspaceName, key, columnPath, value, timestamp, consistency);
+          return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
   }
 
+
   @Override
   public Map<String, Column> multigetColumn(final List<String> keys, final ColumnPath columnPath)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      throws HectorException {
     valideColumnPath(columnPath);
 
     Operation<Map<String, Column>> op = new Operation<Map<String, Column>>(OperationType.READ) {
       @Override
-      public Map<String, Column> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspaceName, keys, columnPath,
-            consistency);
-        if (cfmap == null || cfmap.isEmpty()) {
-          return Collections.emptyMap();
+      public Map<String, Column> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          Map<String, ColumnOrSuperColumn> cfmap = cassandra.multiget(keyspaceName, keys,
+              columnPath, consistency);
+          if (cfmap == null || cfmap.isEmpty()) {
+            return Collections.emptyMap();
+          }
+          Map<String, Column> result = new HashMap<String, Column>();
+          for (Map.Entry<String, ColumnOrSuperColumn> entry : cfmap.entrySet()) {
+            result.put(entry.getKey(), entry.getValue().getColumn());
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        Map<String, Column> result = new HashMap<String, Column>();
-        for (Map.Entry<String, ColumnOrSuperColumn> entry : cfmap.entrySet()) {
-          result.put(entry.getKey(), entry.getValue().getColumn());
-        }
-        return result;
       }
     };
     operateWithFailover(op);
@@ -375,21 +439,23 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Map<String, List<Column>> multigetSlice(final List<String> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<String, List<Column>>> getCount = new Operation<Map<String, List<Column>>>(
         OperationType.READ) {
       @Override
-      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws InvalidRequestException,
-          UnavailableException, TException, TimedOutException {
-        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
-            columnParent, predicate, consistency);
+      public Map<String, List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName,
+              keys, columnParent, predicate, consistency);
 
-        Map<String, List<Column>> result = new HashMap<String, List<Column>>();
-        for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-          result.put(entry.getKey(), getColumnList(entry.getValue()));
+          Map<String, List<Column>> result = new HashMap<String, List<Column>>();
+          for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+            result.put(entry.getKey(), getColumnList(entry.getValue()));
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
-        return result;
       }
     };
     operateWithFailover(getCount);
@@ -399,14 +465,13 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      throws HectorException {
     return multigetSuperColumn(keys, columnPath, false, Integer.MAX_VALUE);
   }
 
   @Override
   public Map<String, SuperColumn> multigetSuperColumn(List<String> keys, ColumnPath columnPath,
-      boolean reversed, int size) throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException {
+      boolean reversed, int size) throws HectorException {
     valideSuperColumnPath(columnPath);
 
     // only can get supercolumn by multigetSuperSlice
@@ -435,39 +500,41 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Map<String, List<SuperColumn>> multigetSuperSlice(final List<String> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate)
-      throws InvalidRequestException, UnavailableException, TException, TimedOutException {
+      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<String, List<SuperColumn>>> getCount = new Operation<Map<String, List<SuperColumn>>>(
         OperationType.READ) {
       @Override
       public Map<String, List<SuperColumn>> execute(Cassandra.Client cassandra)
-          throws InvalidRequestException, UnavailableException, TException, TimedOutException {
-        Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName, keys,
-            columnParent, predicate, consistency);
-
-        // if user not given super column name, the multiget_slice will return
-        // List
-        // filled with
-        // super column, if user given a column name, the return List will
-        // filled
-        // with column,
-        // this is a bad interface design.
-        if (columnParent.getSuper_column() == null) {
-          Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
-          for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-            result.put(entry.getKey(), getSuperColumnList(entry.getValue()));
+          throws HectorException {
+        try {
+          Map<String, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(keyspaceName,
+              keys, columnParent, predicate, consistency);
+          // if user not given super column name, the multiget_slice will return
+          // List
+          // filled with
+          // super column, if user given a column name, the return List will
+          // filled
+          // with column,
+          // this is a bad interface design.
+          if (columnParent.getSuper_column() == null) {
+            Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
+            for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+              result.put(entry.getKey(), getSuperColumnList(entry.getValue()));
+            }
+            return result;
+          } else {
+            Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
+            for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+              SuperColumn spc = new SuperColumn(columnParent.getSuper_column(),
+                  getColumnList(entry.getValue()));
+              ArrayList<SuperColumn> spclist = new ArrayList<SuperColumn>(1);
+              spclist.add(spc);
+              result.put(entry.getKey(), spclist);
+            }
+            return result;
           }
-          return result;
-        } else {
-          Map<String, List<SuperColumn>> result = new HashMap<String, List<SuperColumn>>();
-          for (Map.Entry<String, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-            SuperColumn spc = new SuperColumn(columnParent.getSuper_column(),
-                getColumnList(entry.getValue()));
-            ArrayList<SuperColumn> spclist = new ArrayList<SuperColumn>(1);
-            spclist.add(spc);
-            result.put(entry.getKey(), spclist);
-          }
-          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
       }
     };
@@ -477,23 +544,22 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void remove(final String key, final ColumnPath columnPath) throws InvalidRequestException,
-      UnavailableException, TException, TimedOutException {
+  public void remove(final String key, final ColumnPath columnPath) throws HectorException {
     remove(key, columnPath, createTimestamp());
   }
 
-
-
   @Override
   public void remove(final String key, final ColumnPath columnPath, final long timestamp)
-      throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException {
+      throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
-          TException, TimedOutException {
-        cassandra.remove(keyspaceName, key, columnPath, timestamp, consistency);
-        return null;
+      public Void execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          cassandra.remove(keyspaceName, key, columnPath, timestamp, consistency);
+          return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
       }
     };
     operateWithFailover(op);
@@ -505,7 +571,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<String, Map<String, String>> describeKeyspace() throws NotFoundException, TException {
+  public Map<String, Map<String, String>> describeKeyspace() throws HectorException {
     return keyspaceDesc;
   }
 
@@ -515,21 +581,20 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Column getColumn(final String key, final ColumnPath columnPath)
-      throws InvalidRequestException, NotFoundException, UnavailableException, TException,
-      TimedOutException {
+  public Column getColumn(final String key, final ColumnPath columnPath) throws HectorException {
     valideColumnPath(columnPath);
 
     Operation<Column> op = new Operation<Column>(OperationType.READ) {
       @Override
-      public Column execute(Cassandra.Client cassandra) throws InvalidRequestException, UnavailableException,
-          TException, TimedOutException {
+      public Column execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
           cosc = cassandra.get(keyspaceName, key, columnPath, consistency);
         } catch (NotFoundException e) {
-          setException(e);
+          setException(xtrans.translate(e));
           return null;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
         }
         return cosc == null ? null : cosc.getColumn();
       }
@@ -548,6 +613,7 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
+  @Override
   public long createTimestamp() {
     return client.getTimestampResolution().createTimestamp();
   }
@@ -566,10 +632,7 @@ import org.slf4j.LoggerFactory;
     Map<String, String> cfdefine;
     String errorMsg;
     if ((cfdefine = keyspaceDesc.get(cf)) != null) {
-      if (columnPath.getColumn() == null) {
-        // make sure we have a valid name
-        errorMsg = new String("The column name was null for column family " + cf);
-      } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD)) {
+      if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
         // if the column family is a standard column
         return;
       } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
@@ -578,14 +641,14 @@ import org.slf4j.LoggerFactory;
         // name
         return;
       } else {
-        errorMsg = new String("Invalid Request for column family " + cf + " Make sure you have the right type");
+        errorMsg = new String("Invalid Request for column family " + cf
+            + " Make sure you have the right type");
       }
     } else {
-      errorMsg = new String("The specified column family does not exist: " + cf); 
+      errorMsg = new String("The specified column family does not exist: " + cf);
     }
     throw new InvalidRequestException(errorMsg);
   }
-  
 
   /**
    * Make sure that the given column path is a SuperColumn in the DB, Throws an
@@ -595,7 +658,7 @@ import org.slf4j.LoggerFactory;
    */
   private void valideSuperColumnPath(ColumnPath columnPath) throws InvalidRequestException {
     String cf = columnPath.getColumn_family();
-    Map<String, String> cfdefine;  
+    Map<String, String> cfdefine;
     if ((cfdefine = keyspaceDesc.get(cf)) != null && cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
         && columnPath.getSuper_column() != null) {
       return;
@@ -603,14 +666,13 @@ import org.slf4j.LoggerFactory;
     throw new InvalidRequestException(
         "Invalid super column name or super column family does not exist: " + cf);
   }
-  
 
   private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
     for (Column col : columns) {
-        ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
-        columnOrSuperColumn.setColumn(col);
-        list.add(columnOrSuperColumn);
+      ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
+      columnOrSuperColumn.setColumn(col);
+      list.add(columnOrSuperColumn);
     }
     return list;
   }
@@ -649,12 +711,12 @@ import org.slf4j.LoggerFactory;
   /**
    * Initializes the ring info so we can handle failover if this happens later.
    *
-   * @throws TException
+   * @throws HectorTransportException
    */
-  private void initFailover() throws TException {
+  private void initFailover() throws HectorTransportException {
     if (failoverPolicy == FailoverPolicy.FAIL_FAST) {
       knownHosts.clear();
-      knownHosts.add(client.getUrl());
+      knownHosts.add(client.getCassandraHost());
       return;
     }
     // learn about other cassandra hosts in the ring
@@ -664,34 +726,41 @@ import org.slf4j.LoggerFactory;
   /**
    * Uses the current known host to query about all other hosts in the ring.
    *
-   * @throws TException
+   * @throws HectorTransportException
    */
-  public void updateKnownHosts() throws TException {
+  public void updateKnownHosts() throws HectorTransportException {
     // When update starts we only know of this client, nothing else
     knownHosts.clear();
-    knownHosts.add(getClient().getUrl());
+    knownHosts.add(getClient().getCassandraHost());
 
     // Now query for more hosts. If the query fails, then even this client is
     // now "known"
     try {
-      Map<String, String> map = getClient().getTokenMap(true);
-      Set<String> hosts = new HashSet<String>();
-      knownHosts.clear();
-      for (Map.Entry<String, String> entry : map.entrySet()) {
-        hosts.add(entry.getValue());
+      List<CassandraHost> hosts;
+      hosts = getClient().getKnownHosts(true);
+      if (hosts != null && hosts.size() > 0) {
+        if (!hosts.contains(getClient().getCassandraHost())) {
+          hosts.add(getClient().getCassandraHost());
+        }
+        knownHosts = new ArrayList<CassandraHost>(hosts);
       }
-      if (!hosts.contains(getClient().getUrl()) && !hosts.contains(getClient().getIp())) {
-        hosts.add(getClient().getIp());
-      }
-      knownHosts = new ArrayList<String>(hosts);
-    } catch (TException e) {
+    } catch (HectorTransportException e) {
       knownHosts.clear();
-      log.error("Cannot query tokenMap; Keyspace {} is now disconnected", toString());
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
+    } catch (IllegalStateException e) {
+      knownHosts.clear();
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
+    } catch (PoolExhaustedException e) {
+      knownHosts.clear();
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
+    } catch (Exception e) {
+      knownHosts.clear();
+      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
     }
   }
 
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();
+  public Set<CassandraHost> getKnownHosts() {
+    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
     hosts.addAll(knownHosts);
     return hosts;
   }

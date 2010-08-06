@@ -4,6 +4,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+import me.prettyprint.cassandra.model.PoolIllegalStateException;
 import me.prettyprint.cassandra.service.ExhaustedPolicy;
 
 import org.junit.Before;
@@ -15,7 +17,7 @@ import org.junit.Test;
  *
  */
 public class CassandraClientPoolByHostTest {
-
+  
   private CassandraClientPoolByHost pool;
   private CassandraClientFactory factory;
   private CassandraClientPool poolStore;
@@ -118,7 +120,7 @@ public class CassandraClientPoolByHostTest {
     try {
       pool.borrowClient();
       fail("The borrowClient should have failed with IllegalStateException");
-    } catch (IllegalStateException e) {
+    } catch (PoolIllegalStateException e) {
       // OK
     }
   }

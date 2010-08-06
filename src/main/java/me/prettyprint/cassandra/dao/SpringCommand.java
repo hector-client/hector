@@ -1,13 +1,14 @@
 package me.prettyprint.cassandra.dao;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
-
+import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.Keyspace;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
+
 public abstract class SpringCommand<OUTPUT> {
-  private CassandraClientPool cassandraClientPool;
+  private final CassandraClientPool cassandraClientPool;
 
   public SpringCommand(CassandraClientPool cassandraClientPool) {
     this.cassandraClientPool = cassandraClientPool;
@@ -22,13 +23,10 @@ public abstract class SpringCommand<OUTPUT> {
    *
    * @param ks
    * @return
-   * @throws Exception
    */
-  public abstract OUTPUT execute(final Keyspace ks) throws Exception;
+  public abstract OUTPUT execute(final Keyspace ks) throws HectorException;
 
-
-  protected final OUTPUT execute(String keyspace, ConsistencyLevel consistency)
-      throws Exception {
+  public final OUTPUT execute(String keyspace, ConsistencyLevel consistency) throws HectorException {
     CassandraClient c = cassandraClientPool.borrowClient();
     Keyspace ks = c.getKeyspace(keyspace, consistency);
     try {

@@ -7,6 +7,9 @@ import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,8 +37,7 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
   public void testBorrowClient() throws IllegalStateException, PoolExhaustedException, Exception {
     CassandraClient client = store.borrowClient("localhost", 9170);
     assertNotNull(client);
-    assertEquals("localhost", client.getUrl());
-    assertEquals(9170, client.getPort());
+    assertEquals("localhost:9170", client.getCassandraHost().getUrl());
   }
 
   /**
@@ -45,8 +47,7 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
   public void testBorrowClient1() throws IllegalStateException, PoolExhaustedException, Exception {
     CassandraClient client = store.borrowClient("localhost:9170");
     assertNotNull(client);
-    assertEquals("localhost", client.getUrl());
-    assertEquals(9170, client.getPort());
+    assertEquals("localhost:9170", client.getCassandraHost().getUrl());
   }
 
   /**
@@ -56,17 +57,15 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
   public void testBorrowLbClient() throws IllegalStateException, PoolExhaustedException, Exception {
     CassandraClient client = store.borrowClient(new String[] {"localhost:9170"});
     assertNotNull(client);
-    assertEquals("localhost", client.getUrl());
-    assertEquals(9170, client.getPort());
+    assertEquals("localhost:9170", client.getCassandraHost().getUrl()); 
 
-    client = store.borrowClient(new String[] {"localhost:9170", "localhost:9171", "localhost:9172"});
+
+    client = store.borrowClient(new String[] {"localhost:9170", "127.0.0.1:9170", "localhost:9170"});
     assertNotNull(client);
-    assertEquals("localhost", client.getUrl());
-    assertEquals(9170, client.getPort());
-
-    client = store.borrowClient(new String[] {"localhost:9171", "localhost:9172"});
-    assertEquals("localhost", client.getUrl());
-    assertEquals(9170, client.getPort());
+    assertEquals("localhost:9170", client.getCassandraHost().getUrl()); 
+    
+    client = store.borrowClient(new String[] {"localhost:9170", "127.0.0.1:9170"});
+    assertEquals("localhost:9170", client.getCassandraHost().getUrl());
   }
 
   @Test
@@ -76,8 +75,7 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
     store.releaseClient(client);
     client = store.borrowClient();
     assertNotNull(client);
-    assertEquals("localhost", client.getUrl());
-    assertEquals(9170, client.getPort());
+    assertEquals("localhost:9170", client.getCassandraHost().getUrl());
 
   }
 
@@ -92,12 +90,14 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
   public void testUpdateKnownHostsList()
       throws IllegalStateException, PoolExhaustedException, Exception {
     CassandraClient client = store.borrowClient("localhost", 9170);
+    CassandraHost cassandraHost = client.getCassandraHost();
     assertNotNull(client);
     Keyspace ks = client.getKeyspace("Keyspace1");
     assertNotNull(ks);
-    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
+    System.out.print(store.getKnownHosts());
+    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains(cassandraHost));    
     store.updateKnownHosts();
-    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains("127.0.0.1"));
+    assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains(cassandraHost));
   }
 
   @Test

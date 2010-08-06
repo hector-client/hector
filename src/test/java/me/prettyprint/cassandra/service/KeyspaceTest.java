@@ -16,7 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.InvalidRequestException;
+import me.prettyprint.cassandra.model.NotFoundException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
+import me.prettyprint.cassandra.model.TimedOutException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -34,14 +39,11 @@ import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.Deletion;
-import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
@@ -67,23 +69,20 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
-  private CassandraClientPool pools;
-  private CassandraClientMonitor monitor;
 
   @Before
-  public void setupCase() throws TTransportException, TException, IllegalArgumentException,
-          NotFoundException, UnknownHostException {
-    pools = mock(CassandraClientPool.class);
-    monitor = mock(CassandraClientMonitor.class);
+  public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
+    super.setupClient();
     client = new CassandraClientFactory(pools,
-        new CassandraHost("localhost", 9170), monitor).create();
+        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
+
     keyspace = client.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
   }
 
   @Test
   public void testInsertAndGetAndRemove() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, Exception {
+  IllegalStateException, NotFoundException, Exception {
 
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
@@ -122,7 +121,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testInsertSuper() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, Exception {
+  IllegalStateException, NotFoundException, Exception {
 
     // insert value
     ColumnPath cp = new ColumnPath("Super1");
@@ -146,7 +145,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testValideColumnPath() throws UnavailableException, TException, TimedOutException {
+  public void testValideColumnPath() throws HectorException {
     // Try to insert invalid columns
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
@@ -173,7 +172,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
     } catch (InvalidRequestException e) {
-      assertTrue(StringUtils.contains(e.getWhy(),"column name was null"));
+      assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have the right type"));
     }
 
     cp = new ColumnPath("Super1");
@@ -187,8 +186,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testBatchInsertColumn() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testBatchInsertColumn() throws HectorException {
     for (int i = 0; i < 10; i++) {
       HashMap<String, List<Column>> cfmap = new HashMap<String, List<Column>>(10);
       ArrayList<Column> list = new ArrayList<Column>(10);
@@ -227,8 +225,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testBatchMutate() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testBatchMutate() throws HectorException {
     Map<String, Map<String, List<Mutation>>> outerMutationMap = new HashMap<String, Map<String,List<Mutation>>>();
     for (int i = 0; i < 10; i++) {
 
@@ -300,8 +297,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testBatchMutateBatchMutation() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testBatchMutateBatchMutation() throws HectorException {
     BatchMutation batchMutation = new BatchMutation();
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
@@ -356,8 +352,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testBatchUpdateInsertAndDelOnSame() throws IllegalArgumentException, NoSuchElementException,
-  IllegalStateException, NotFoundException, TException, Exception {
+  public void testBatchUpdateInsertAndDelOnSame() throws HectorException {
 
     ColumnPath sta1 = new ColumnPath("Standard1");
     sta1.setColumn(bytes("deleteThroughInserBatch_col"));
@@ -411,8 +406,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetSuperColumn() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testGetSuperColumn() throws HectorException {
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -439,8 +433,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetSlice() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testGetSlice() throws HectorException {
     // insert value
     ArrayList<String> columnnames = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
@@ -473,8 +466,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetSuperSlice() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testGetSuperSlice() throws HectorException {
     // insert value
     for (int i = 0; i < 100; i++) {
       ColumnPath cp = new ColumnPath("Super1");
@@ -506,8 +498,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testMultigetColumn() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testMultigetColumn() throws HectorException {
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
     cp.setColumn(bytes("testMultigetColumn"));
@@ -532,8 +523,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testMultigetSuperColumn() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testMultigetSuperColumn() throws HectorException {
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -562,8 +552,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testMultigetSlice() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testMultigetSlice() throws HectorException {
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
     cp.setColumn(bytes("testMultigetSlice"));
@@ -592,8 +581,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testMultigetSlice_1() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testMultigetSlice_1() throws HectorException {
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -640,8 +628,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testMultigetSuperSlice() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testMultigetSuperSlice() throws HectorException {
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -689,7 +676,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testDescribeKeyspace() throws NotFoundException, TException {
+  public void testDescribeKeyspace() throws HectorException {
     Map<String, Map<String, String>> description = keyspace.describeKeyspace();
     assertNotNull(description);
     assertEquals(4, description.size());
@@ -697,8 +684,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
 
   @Test
-  public void testGetCount() throws IllegalArgumentException, NoSuchElementException,
-      IllegalStateException, NotFoundException, TException, Exception {
+  public void testGetCount() throws HectorException {
     // insert values
     for (int i = 0; i < 100; i++) {
       ColumnPath cp = new ColumnPath("Standard1");
@@ -716,8 +702,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetRangeSlice() throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException, NotFoundException {
+  public void testGetRangeSlice() throws HectorException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlice_" + i));
@@ -732,6 +717,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
+    @SuppressWarnings("deprecation")
     Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0", "testGetRangeSlice3", 5);
 
     assertNotNull(keySlices);
@@ -747,8 +733,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetRangeSlices() throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException, NotFoundException {
+  public void testGetRangeSlices() throws HectorException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlices_" + i));
@@ -783,11 +768,10 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetSuperRangeSlice() throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException, NotFoundException {
+  public void testGetSuperRangeSlice() throws HectorException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Super1");
-      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setSuper_column(bytes("SuperColumn_1"));
       cp.setColumn(bytes("testGetSuperRangeSlice_" + i));
       keyspace.insert("testGetSuperRangeSlice0", cp, bytes("testGetSuperRangeSlice_Value_" + i));
       keyspace.insert("testGetSuperRangeSlice1", cp, bytes("testGetSuperRangeSlice_Value_" + i));
@@ -798,8 +782,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
+    @SuppressWarnings("deprecation")
     Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
-            "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
+        "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());
@@ -815,11 +800,10 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetSuperRangeSlices() throws InvalidRequestException, UnavailableException, TException,
-      TimedOutException, NotFoundException {
+  public void testGetSuperRangeSlices() throws HectorException {
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Super1");
-      cp.setSuper_column((bytes("SuperColumn_1")));
+      cp.setSuper_column(bytes("SuperColumn_1"));
       cp.setColumn(bytes("testGetSuperRangeSlices_" + i));
       keyspace.insert("testGetSuperRangeSlices0", cp, bytes("testGetSuperRangeSlices_Value_" + i));
       keyspace.insert("testGetSuperRangeSlices1", cp, bytes("testGetSuperRangeSlices_Value_" + i));
@@ -862,7 +846,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testFailover() throws IllegalStateException, PoolExhaustedException, Exception {
+  public void testFailover() throws HectorException,
+  org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
+  org.apache.cassandra.thrift.TimedOutException, TException {
     CassandraClient h1client = mock(CassandraClient.class);
     CassandraClient h2client = mock(CassandraClient.class);
     CassandraClient h3client = mock(CassandraClient.class);
@@ -881,32 +867,27 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
     // The token map represents the list of available servers.
-    Map<String, String> tokenMap = new HashMap<String, String>();
-    tokenMap.put("t1", "h1");
-    tokenMap.put("t2", "h2");
-    tokenMap.put("t3", "h3");
+    List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+        new CassandraHost("h1:111"), 
+        new CassandraHost("h2:111"),
+        new CassandraHost("h3:111")});
 
     when(h1client.getCassandra()).thenReturn(h1cassandra);
+    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
     when(h2client.getCassandra()).thenReturn(h2cassandra);
+    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
     when(h3client.getCassandra()).thenReturn(h3cassandra);
-    when(h1client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h2client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h3client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h1client.getPort()).thenReturn(111);
-    when(h2client.getPort()).thenReturn(111);
-    when(h3client.getPort()).thenReturn(111);
-    when(h1client.getUrl()).thenReturn("h1");
-    when(h1client.getIp()).thenReturn("ip1");
-    when(h2client.getUrl()).thenReturn("h2");
-    when(h2client.getIp()).thenReturn("ip2");
-    when(h3client.getUrl()).thenReturn("h3");
-    when(h3client.getIp()).thenReturn("ip3");
+    when(h3client.getCassandraHost()).thenReturn(hosts.get(2));
+    when(h1client.getKnownHosts(anyBoolean())).thenReturn(hosts);
+    when(h2client.getKnownHosts(anyBoolean())).thenReturn(hosts);
+    when(h3client.getKnownHosts(anyBoolean())).thenReturn(hosts);
+
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h3client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
-    when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
-    when(clientPools.borrowClient("h3", 111)).thenReturn(h3client);
+    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
+    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
+    when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
 
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
@@ -916,7 +897,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ks.insert("key", cp, bytes("value"));
 
     // now fail the call and make sure it fails fast
-    doThrow(new TimedOutException()).when(h1cassandra).insert(anyString(), anyString(),
+    doThrow(new org.apache.cassandra.thrift.TimedOutException()).when(h1cassandra).insert(anyString(), anyString(),
         (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
@@ -933,14 +914,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
-    verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
+    verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
         (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
-    verify(clientPools).borrowClient("h3", 111);
+    verify(clientPools).borrowClient(hosts.get(1));
 
-    // make both h1 and h3 fail
+    // make both h1 and h2 fail
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
-    doThrow(new TimedOutException()).when(h3cassandra).insert(anyString(), anyString(),
+    doThrow(new org.apache.cassandra.thrift.TimedOutException()).when(h2cassandra).insert(anyString(), anyString(),
         (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
@@ -951,19 +932,21 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     }
 
     // Now try the full cycle
-    // h1 fails, h3 fails, h2 succeeds
+    // h1 fails, h2 fails, h3 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
-    verify(h2cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
+    verify(h3cassandra).insert(anyString(), anyString(), (ColumnPath) anyObject(),
         (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
 
     // now fail them all. h1 fails, h2 fails, h3 fails
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
-    doThrow(new TimedOutException()).when(h2cassandra).insert(anyString(), anyString(),
+    doThrow(new org.apache.cassandra.thrift.TimedOutException()).when(h2cassandra).insert(anyString(), anyString(),
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
+    doThrow(new org.apache.cassandra.thrift.TimedOutException()).when(h3cassandra).insert(anyString(), anyString(),
         (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
     try {
       ks.insert("key", cp, bytes("value"));
@@ -998,24 +981,21 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
     // The token map represents the list of available servers.
-    Map<String, String> tokenMap = new HashMap<String, String>();
-    tokenMap.put("t1", "h1");
-    tokenMap.put("t2", "h2");
+    List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+        new CassandraHost("h1:111"), 
+        new CassandraHost("h2:111")});
 
     when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h2client.getCassandra()).thenReturn(h2cassandra);
-    when(h1client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h2client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h1client.getPort()).thenReturn(111);
-    when(h2client.getPort()).thenReturn(111);
-    when(h1client.getUrl()).thenReturn("h1");
-    when(h1client.getIp()).thenReturn("ip1");
-    when(h2client.getUrl()).thenReturn("h2");
-    when(h2client.getIp()).thenReturn("ip2");
+    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
+    when(h2client.getCassandra()).thenReturn(h2cassandra);    
+    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
+    when(h1client.getKnownHosts(anyBoolean())).thenReturn(hosts);
+    when(h2client.getKnownHosts(anyBoolean())).thenReturn(hosts);
+     
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient("h1", 111)).thenReturn(h1client);
-    when(clientPools.borrowClient("h2", 111)).thenReturn(h2client);
+    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
+    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
 
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
@@ -1062,25 +1042,20 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CassandraClientPool clientPools = mock(CassandraClientPool.class);
     CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
 
-    // The token map represents the list of available servers.
-    Map<String, String> tokenMap = new HashMap<String, String>();
-    tokenMap.put("t1", "h1");
-    tokenMap.put("t2", "h2");
+    List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+        new CassandraHost("h1:111"), 
+        new CassandraHost("h2:111")});
 
     when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h2client.getCassandra()).thenReturn(h2cassandra);
-    when(h1client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h2client.getTokenMap(anyBoolean())).thenReturn(tokenMap);
-    when(h1client.getPort()).thenReturn(2);
-    when(h2client.getPort()).thenReturn(2);
-    when(h1client.getUrl()).thenReturn("h1");
-    when(h1client.getIp()).thenReturn("ip1");
-    when(h2client.getUrl()).thenReturn("h2");
-    when(h2client.getIp()).thenReturn("ip2");
+    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
+    when(h2client.getCassandra()).thenReturn(h2cassandra);    
+    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
+    when(h1client.getKnownHosts(anyBoolean())).thenReturn(hosts);
+    when(h2client.getKnownHosts(anyBoolean())).thenReturn(hosts);
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient("h1", 2)).thenReturn(h1client);
-    when(clientPools.borrowClient("h2", 2)).thenReturn(h2client);
+    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
+    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
 
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
@@ -1092,11 +1067,11 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
     // And also fail the call to borrowClient when trying to borrow from this host again.
     // This is actually simulation the host down permanently (well, until the test ends at least...)
-    doThrow(new TException()).when(clientPools).borrowClient("h1", 2);
+    doThrow(new HectorException("test")).when(clientPools).borrowClient("h1", 2);
 
     // And also fail the call to borrowClient when trying to borrow from this host again.
     // This is actually simulation the host down permanently (well, until the test ends at least...)
-    doThrow(new TException()).when(clientPools).borrowClient("h1", 2);
+    doThrow(new HectorException("test")).when(clientPools).borrowClient("h1", 2);
 
     ks.insert("key", cp, bytes("value"));
 

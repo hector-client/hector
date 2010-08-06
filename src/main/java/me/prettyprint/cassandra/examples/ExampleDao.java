@@ -1,11 +1,13 @@
-package me.prettyprint.cassandra.dao;
-
-import me.prettyprint.cassandra.service.Keyspace;
-import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.NotFoundException;
+package me.prettyprint.cassandra.examples;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
+import me.prettyprint.cassandra.dao.Command;
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.NotFoundException;
+import me.prettyprint.cassandra.service.Keyspace;
+
+import org.apache.cassandra.thrift.ColumnPath;
 
 /**
  * An example DAO (data access object) which uses the Command pattern.
@@ -33,7 +35,7 @@ public class ExampleDao {
   /** Column name where values are stored */
   private final String COLUMN_NAME = "v";
 
-  public static void main(String[] args) throws Exception {
+  public static void main(String[] args) throws HectorException {
     ExampleDao ed = new ExampleDao();
     ed.insert("key1", "value1");
 
@@ -46,9 +48,10 @@ public class ExampleDao {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String value) throws Exception {
+  public void insert(final String key, final String value) throws HectorException {
     execute(new Command<Void>() {
-      public Void execute(final Keyspace ks) throws Exception {
+      @Override
+      public Void execute(final Keyspace ks) throws HectorException {
         ks.insert(key, createColumnPath(COLUMN_NAME), bytes(value));
         return null;
       }
@@ -60,9 +63,10 @@ public class ExampleDao {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key) throws Exception {
+  public String get(final String key) throws HectorException {
     return execute(new Command<String>() {
-      public String execute(final Keyspace ks) throws Exception {
+      @Override
+      public String execute(final Keyspace ks) throws HectorException {
         try {
           return string(ks.getColumn(key, createColumnPath(COLUMN_NAME)).getValue());
         } catch (NotFoundException e) {
@@ -75,16 +79,17 @@ public class ExampleDao {
   /**
    * Delete a key from cassandra
    */
-  public void delete(final String key) throws Exception {
+  public void delete(final String key) throws HectorException {
     execute(new Command<Void>() {
-      public Void execute(final Keyspace ks) throws Exception {
+      @Override
+      public Void execute(final Keyspace ks) throws HectorException {
         ks.remove(key, createColumnPath(COLUMN_NAME));
         return null;
       }
     });
   }
 
-  protected static <T> T execute(Command<T> command) throws Exception {
+  protected static <T> T execute(Command<T> command) throws HectorException {
     return command.execute(CASSANDRA_HOST, CASSANDRA_PORT, CASSANDRA_KEYSPACE);
   }
 

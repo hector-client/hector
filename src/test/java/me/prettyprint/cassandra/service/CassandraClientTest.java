@@ -5,18 +5,17 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.net.UnknownHostException;
 import java.util.List;
-import java.util.Map;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.thrift.TException;
 import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,21 +28,16 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
 
-  private CassandraClientPool pools;
-
-  private CassandraClientMonitor monitor;
-
 
   @Before
-  public void setupCase() throws TTransportException, TException, UnknownHostException {
-    pools = mock(CassandraClientPool.class);
-    monitor = mock(CassandraClientMonitor.class);
-    client = new CassandraClientFactory(pools, new CassandraHost("localhost", 9170), monitor).create();
+  public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
+    super.setupClient();
+    client = new CassandraClientFactory(pools,
+        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();    
   }
 
   @Test
-  public void testGetKeySpaceString() throws IllegalArgumentException, NotFoundException,
-      TException {
+  public void testGetKeySpaceString() throws HectorException {
     Keyspace k = client.getKeyspace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
@@ -58,8 +52,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetKeySpaceConsistencyLevel() throws IllegalArgumentException, NotFoundException,
-      TException {
+  public void testGetKeySpaceConsistencyLevel() throws HectorException {
     Keyspace k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
@@ -72,8 +65,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetKeySpaceFailoverPolicy() throws IllegalArgumentException, NotFoundException,
-      TException {
+  public void testGetKeySpaceFailoverPolicy() throws HectorException {
     Keyspace k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
         FailoverPolicy.FAIL_FAST);
     assertNotNull(k);
@@ -81,13 +73,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetStringProperty() throws TException {
-    String prop = client.getStringProperty("cluster name");
-    assertEquals("Test Cluster", prop);
-  }
-
-  @Test
-  public void testGetKeyspaces() throws TException {
+  public void testGetKeyspaces() throws HectorException {
     List<String> spaces = client.getKeyspaces();
     assertNotNull(spaces);
     // There should be two spaces: Keyspace1 and system
@@ -96,32 +82,24 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testGetClusterName() throws TException {
+  public void testGetClusterName() throws HectorException {
     String name = client.getClusterName();
-    assertEquals("Test Cluster", name);
+    assertEquals("Default Cluster", name);
   }
 
   @Test
-  public void testGetTokenMap() throws TException {
-    Map<String, String> map = client.getTokenMap(false);
-    assertNotNull(map);
-    for (Map.Entry<String, String> entry : map.entrySet()) {
-      assertEquals("127.0.0.1", entry.getValue());
-    }
-  }
-
-  @Test
-  public void testGetConfigFile() throws TException {
-    String config = client.getConfigFile();
-    assertNotNull(config);
-    assertTrue(config.length() > 0);
+  public void testGetTokenMap() throws HectorException {
+    CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+    List<CassandraHost> hosts = client.getKnownHosts(false);
+    assertNotNull(hosts);
+    assertEquals(cassandraHost, hosts.get(0));
   }
   
   @Test 
-  public void testFramedTransport() throws TException, TTransportException, UnknownHostException {
+  public void testFramedTransport() throws HectorException {
     CassandraHost cassandraHost = new CassandraHost("localhost", 9170);
     cassandraHost.setUseThriftFramedTransport(true);
-    client = new CassandraClientFactory(pools, cassandraHost, monitor).create();
+    client = new CassandraClientFactory(pools, cassandraHost, JmxMonitor.getInstance().getCassandraMonitor()).create();
     assertTrue(client.getCassandra().getInputProtocol().getTransport() instanceof TFramedTransport);
   }
 }

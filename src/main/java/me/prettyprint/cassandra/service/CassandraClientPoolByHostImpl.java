@@ -7,9 +7,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPoolFactory;
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,14 +22,19 @@ import com.google.common.collect.ImmutableSet;
   private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolByHostImpl.class);
 
   private final CassandraClientFactory clientFactory;
-  private final String url;
   private final String name;
-  private final int port;
   private final int maxActive;
   private final int maxIdle;
+  private final boolean lifo;
+  private final long minEvictableIdleTimeMillis;
+  private final long timeBetweenEvictionRunsMillis;
+
   private final ExhaustedPolicy exhaustedPolicy;
   private final long maxWaitTimeWhenExhausted;
   private final GenericObjectPool pool;
+  
+  private final ExceptionsTranslator xTrans;
+  private final CassandraHost cassandraHost;
 
   /**
    * Number of currently blocked threads.
@@ -53,15 +60,18 @@ import com.google.common.collect.ImmutableSet;
       CassandraClientPool pools,
       CassandraClientMonitor cassandraClientMonitor,
       CassandraClientFactory cassandraClientFactory) {
-    log.debug("Creating new connection pool for {}", cassandraHost.getUrlPort());
-    url = cassandraHost.getUrl();
-    port = cassandraHost.getPort();
+    log.debug("Creating new connection pool for {}", cassandraHost.getUrl());
+    this.cassandraHost = cassandraHost;
     this.name = cassandraHost.getName();
     this.maxActive = cassandraHost.getMaxActive();
     this.maxIdle = cassandraHost.getMaxIdle();
+    this.lifo = cassandraHost.getLifo();
+    this.minEvictableIdleTimeMillis = cassandraHost.getMinEvictableIdleTimeMillis();
+    this.timeBetweenEvictionRunsMillis = cassandraHost.getTimeBetweenEvictionRunsMillis();
     this.maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted();
     this.exhaustedPolicy = cassandraHost.getExhaustedPolicy();
     this.clientFactory = cassandraClientFactory;
+    xTrans = new ExceptionsTranslatorImpl();
 
     blockedThreadsCount = new AtomicInteger(0);
     // Create a set implemented as a ConcurrentHashMap for performance and concurrency.
@@ -71,9 +81,8 @@ import com.google.common.collect.ImmutableSet;
   }
 
   @Override
-  public CassandraClient borrowClient() throws Exception, PoolExhaustedException,
-      IllegalStateException {
-    log.debug("Borrowing client from {} (thread={})", this, Thread.currentThread().getName());
+  public CassandraClient borrowClient() throws HectorException {
+    log.debug("Borrowing client from {}", this);
     try {
       blockedThreadsCount.incrementAndGet();
       log.debug("Just before borrow: {}", toDebugString());
@@ -85,7 +94,9 @@ import com.google.common.collect.ImmutableSet;
       return client;
     } catch (NoSuchElementException e) {
       log.info("Pool is exhausted {} (thread={})", toDebugString(), Thread.currentThread().getName());
-      throw new PoolExhaustedException(e.getMessage());
+      throw xTrans.translate(e);
+    } catch (Exception e) {
+      throw xTrans.translate(e);
     } finally {
       blockedThreadsCount.decrementAndGet();
     }
@@ -98,6 +109,12 @@ import com.google.common.collect.ImmutableSet;
     s.append(pool.getMaxActive());
     s.append("&maxIdle=");
     s.append(pool.getMaxIdle());
+    s.append("&lifo=");
+    s.append(pool.getLifo());
+    s.append("&minEvictableIdleTimeMillis=");
+    s.append(pool.getMinEvictableIdleTimeMillis());
+    s.append("&timeBetweenEvictionRunsMillis=");
+    s.append(pool.getTimeBetweenEvictionRunsMillis());
     s.append("&blockedThreadCount=");
     s.append(blockedThreadsCount);
     s.append("&liveClientsFromPool.size=");
@@ -134,7 +151,7 @@ import com.google.common.collect.ImmutableSet;
   }
 
   @Override
-  public void releaseClient(CassandraClient client) throws Exception {
+  public void releaseClient(CassandraClient client) throws HectorException {
     log.debug("Maybe releasing client {}. is aready Released? {}", client, client.isReleased());
     if (client.isReleased()) {
       // The common case with clients that had errors is that they've already been release.
@@ -142,7 +159,11 @@ import com.google.common.collect.ImmutableSet;
       return;
     }
     client.markAsReleased();
-    pool.returnObject(client);
+    try {
+      pool.returnObject(client);
+    } catch (Exception e) {
+      throw xTrans.translate(e);
+    }
   }
 
   private GenericObjectPool createPool() {
@@ -154,6 +175,11 @@ import com.google.common.collect.ImmutableSet;
     // maxIdle controls the maximum number of objects that can sit idle in the pool at any time.
     // When negative, there is no limit to the number of objects that may be idle at one time.
     p.setMaxIdle(maxIdle);
+
+    p.setLifo(lifo);
+    p.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
+    p.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
+
     return p;
   }
 
@@ -172,13 +198,7 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public String toString() {
-    StringBuilder b = new StringBuilder();
-    b.append("CassandraClientPoolImpl<");
-    b.append(url);
-    b.append(":");
-    b.append(port);
-    b.append(">");
-    return b.toString();
+    return String.format("CassandraClientPoolImpl<%s>", name);
   }
 
   @Override
@@ -197,35 +217,11 @@ import com.google.common.collect.ImmutableSet;
   public int getNumBlockedThreads() {
     return blockedThreadsCount.intValue();
   }
+  
 
   @Override
-  public void updateKnownHosts() throws TException {
-    Set<CassandraClient> removed = new HashSet<CassandraClient>();
-    for (CassandraClient c: liveClientsFromPool) {
-      if (c.isClosed()) {
-        removed.add(c);
-      } else {
-        try {
-          c.updateKnownHosts();
-        } catch (TException e) {
-          log.error("Unable to update hosts list at {}", c, e);
-          throw e;
-        }
-      }
-    }
-    // perform cleanup
-    liveClientsFromPool.removeAll(removed);
-  }
-
-  @Override
-  public Set<String> getKnownHosts() {
-    Set<String> hosts = new HashSet<String>();
-    for (CassandraClient c: liveClientsFromPool) {
-      if (!c.isClosed()) {
-        hosts.addAll(c.getKnownHosts());
-      }
-    }
-    return hosts;
+  public CassandraHost getCassandraHost() {
+    return cassandraHost;
   }
 
   @Override
@@ -260,6 +256,14 @@ import com.google.common.collect.ImmutableSet;
     while (!liveClientsFromPool.isEmpty()) {
       invalidateClient(liveClientsFromPool.iterator().next());
     }
+  }
+
+  public Long getMinEvictableIdleTimeMillis() {
+    return minEvictableIdleTimeMillis;
+  }
+
+  public Long getTimeBetweenEvictionRunsMillis() {
+    return timeBetweenEvictionRunsMillis;
   }
 
 }

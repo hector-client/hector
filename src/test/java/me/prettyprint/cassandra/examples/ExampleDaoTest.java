@@ -1,30 +1,19 @@
-package me.prettyprint.cassandra.dao;
+package me.prettyprint.cassandra.examples;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
-import javax.annotation.Resource;
-
+import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/cassandra-context-test.xml")
-public class ExampleSpringDaoTest {
-
-  @Resource
-  private ExampleSpringDao exampleSpringDao;
-
-
+public class ExampleDaoTest {
 
   private static EmbeddedServerHelper embedded;
 
@@ -47,12 +36,13 @@ public class ExampleSpringDaoTest {
   }
 
   @Test
-  public void testInsertGetDelete() throws Exception {
-    assertNull(exampleSpringDao.get("key"));
-    exampleSpringDao.insert("key", "value");
-    assertEquals("value", exampleSpringDao.get("key"));
-    exampleSpringDao.delete("key");
-    assertNull(exampleSpringDao.get("key"));
+  public void testInsertGetDelete() throws HectorException {
+    ExampleDao dao = new ExampleDao();
+    assertNull(dao.get("key"));
+    dao.insert("key", "value");
+    assertEquals("value", dao.get("key"));
+    dao.delete("key");
+    assertNull(dao.get("key"));
   }
 
 }

@@ -2,6 +2,9 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.HectorTransportException;
+
 import org.apache.thrift.TException;
 
 /**
@@ -78,8 +81,7 @@ public interface CassandraClientPool {
    * hosts before hand or you dont care about which host services the request
    * @return
    */
-  CassandraClient borrowClient()
-      throws IllegalStateException, PoolExhaustedException, Exception;
+  CassandraClient borrowClient() throws HectorException;
 
   /**
    * Borrows a client from the pool defined by url:port
@@ -87,16 +89,21 @@ public interface CassandraClientPool {
    * @param port
    * @return
    */
-  CassandraClient borrowClient(String url, int port)
-      throws IllegalStateException, PoolExhaustedException, Exception;
+  CassandraClient borrowClient(String url, int port) throws HectorException;
+  
+  /**
+   * Borrows a client from the pool defined by {@link CassandraHost}
+   * @param cassandraHost defines the connection attributes
+   * @return
+   */
+  CassandraClient borrowClient(CassandraHost cassandraHost) throws HectorException;
 
   /**
    * Borrows a client, similar to {@link #borrowClient(String, int)}, but expects the url:port
    * string format
    * @param urlPort a string of the format url:port
    */
-  CassandraClient borrowClient(String urlPort)
-      throws IllegalStateException, PoolExhaustedException, Exception;
+  CassandraClient borrowClient(String urlPort) throws HectorException;
 
   /**
    * Borrows a load-balanced client, a random client from the array of given client addresses.
@@ -109,26 +116,25 @@ public interface CassandraClientPool {
    * @param clientUrls An array of "url:port" cassandra client addresses.
    *
    * @return A randomly chosen client from the array of clientUrls.
-   * @throws Exception
    */
-  CassandraClient borrowClient(String[] clientUrls) throws Exception;
+  CassandraClient borrowClient(String[] clientUrls) throws HectorException;
 
   /**
    * Releases a client from the pool it belongs to.
    */
-  void releaseClient(CassandraClient client) throws Exception;
+  void releaseClient(CassandraClient client) throws HectorException;
 
   /**
    * Returns the client associated with this keyspace to the connection pool.
    * This is just short for releaseClient(k.getClient());
    */
-  void releaseKeyspace(Keyspace k) throws Exception;
+  void releaseKeyspace(Keyspace k) throws HectorException;
 
   /**
    * Tells all the clients in the pool to update their list of known hosts.
    * @throws TException
    */
-  void updateKnownHosts() throws TException;
+  void updateKnownHosts() throws HectorTransportException;
 
   Set<String> getExhaustedPoolNames();
 
@@ -144,7 +150,13 @@ public interface CassandraClientPool {
 
   int getNumActive();
 
-  Set<String> getKnownHosts();
+  Set<CassandraHost> getKnownHosts();
+  
+  /**
+   * Adds the (pre-configured) CassandraHost to the pool if not already present
+   * @param cassandraHost
+   */
+  void addCassandraHost(CassandraHost cassandraHost);
 
   /**
    * Use this method to invalidate the client and take it out of the pool.
@@ -162,4 +174,10 @@ public interface CassandraClientPool {
    * @return
    */
   CassandraClientMonitorMBean getMbean();
+  
+  /**
+   * Short-term work around until constructor complexity can be refactored
+   * @return
+   */
+  Cluster getCluster();
 }
