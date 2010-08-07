@@ -15,7 +15,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class HColumn<N,V> {
+public final class HColumn<N,V> {
 
   private N name;
   private V value;

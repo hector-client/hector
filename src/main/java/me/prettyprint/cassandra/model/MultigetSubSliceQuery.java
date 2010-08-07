@@ -16,7 +16,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  * A query wrapper for the thrift call multiget_slice for subcolumns  of supercolumns
  */
 @SuppressWarnings("unchecked")
-public class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N, V, Rows<N, V>> {
+public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N, V, Rows<N, V>> {
 
   private Collection<String> keys;
   private final Extractor<SN> sNameExtractor;

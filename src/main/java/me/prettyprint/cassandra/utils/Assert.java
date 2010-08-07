@@ -11,7 +11,7 @@ package me.prettyprint.cassandra.utils;
  * @author Ran Tavory
  *
  */
-public class Assert {
+public final class Assert {
 
   public static void notNull(Object object, String message) {
     if (object == null) {

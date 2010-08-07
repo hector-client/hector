@@ -13,7 +13,7 @@ import org.apache.cassandra.thrift.Column;
 /**
  * A ColumnSlice represents a set of columns as returned by calls such as get_slice
  */
-public class ColumnSlice<N,V> {
+public final class ColumnSlice<N,V> {
 
   private final Map<N,HColumn<N,V>> columnsMap;
   private final List<HColumn<N,V>> columnsList;

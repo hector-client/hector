@@ -4,11 +4,11 @@ import me.prettyprint.cassandra.model.Extractor;
 
 /**
  * Converts bytes to Long and vise a versa
- * 
+ *
  * @author Ran Tavory
  *
  */
-public class LongExtractor implements Extractor<Long> {
+public final class LongExtractor implements Extractor<Long> {
 
   @Override
   public byte[] toBytes(Long obj) {

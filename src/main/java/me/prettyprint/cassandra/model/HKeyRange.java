@@ -10,7 +10,7 @@ import org.apache.cassandra.thrift.KeyRange;
  * @author Ran Tavory
  *
  */
-/*package*/ class HKeyRange {
+/*package*/ final class HKeyRange {
 
   /** Whether to use start/end as tokens or as keys */
   private boolean useTokens = true;

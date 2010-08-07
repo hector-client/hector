@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory
  * @author zznate
  */
-public class Cluster {
+public final class Cluster {
 
   private final Logger log = LoggerFactory.getLogger(Cluster.class);
 
@@ -67,7 +67,7 @@ public class Cluster {
     cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
     xtrans = new ExceptionsTranslatorImpl();
   }
-  
+
   public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
       knownPoolHosts = pool.getKnownHosts();

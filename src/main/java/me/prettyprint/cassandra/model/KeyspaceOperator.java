@@ -6,7 +6,7 @@ import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 
-public class KeyspaceOperator {
+public /*final*/ class KeyspaceOperator {
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
 

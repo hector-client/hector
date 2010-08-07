@@ -13,7 +13,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @author Ran Tavory
  *
  */
-public class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
+public final class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
 
   private final List<SuperRow<SN,N,V>> rowsList;
 

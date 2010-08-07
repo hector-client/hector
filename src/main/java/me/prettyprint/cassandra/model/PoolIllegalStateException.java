@@ -5,7 +5,7 @@ package me.prettyprint.cassandra.model;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class PoolIllegalStateException extends HectorException {
+public final class PoolIllegalStateException extends HectorException {
 
   private static final long serialVersionUID = -144302975594095361L;
 

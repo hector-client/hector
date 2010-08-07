@@ -1,7 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 
-public class CassandraHostConfigurator {
+public final class CassandraHostConfigurator {
 
   private String hosts;
   private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
@@ -31,19 +31,19 @@ public class CassandraHostConfigurator {
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
       CassandraHost cassandraHost = new CassandraHost(hostVals[x]);
-      applyConfig(cassandraHost);      
+      applyConfig(cassandraHost);
       cassandraHosts[x] = cassandraHost;
     }
     return cassandraHosts;
   }
-  
+
   public void applyConfig(CassandraHost cassandraHost) {
-    
+
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setMaxIdle(maxIdle);
     cassandraHost.setLifo(lifo);
     cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
-    cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);    
+    cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
 
     // this is special as it can be passed in as a system property
@@ -55,7 +55,7 @@ public class CassandraHostConfigurator {
     }
     if (timestampResolution != null) {
       cassandraHost.setTimestampResolution(timestampResolution);
-    }    
+    }
   }
 
   public void setHosts(String hosts) {

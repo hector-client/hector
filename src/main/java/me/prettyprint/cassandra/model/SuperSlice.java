@@ -17,7 +17,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N> Column name type
  * @param <V> Column value type
  */
-public class SuperSlice<SN,N,V> {
+public final class SuperSlice<SN,N,V> {
 
   private final Map<SN,HSuperColumn<SN,N,V>> columnsMap;
 
