@@ -145,10 +145,7 @@ import org.slf4j.LoggerFactory;
     return keyspaces;
   }
 
-  @Override
-  public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
-    return new ArrayList<CassandraHost>(cluster.getKnownPoolHosts(fresh));
-  }
+
 
   @Override
   public String getServerVersion() throws HectorException {

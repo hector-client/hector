@@ -250,7 +250,7 @@ public class Cluster {
     CassandraClient client = null;
     try {
       client = borrowClient();
-      FailoverOperator operator = new FailoverOperator(failoverPolicy, new ArrayList<CassandraHost>(getKnownPoolHosts(false)),
+      FailoverOperator operator = new FailoverOperator(failoverPolicy,
           cassandraClientMonitor, client, pool, null);
       client = operator.operate(op);
     } finally {

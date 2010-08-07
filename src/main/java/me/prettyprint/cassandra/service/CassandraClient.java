@@ -102,14 +102,6 @@ public interface CassandraClient {
   String getClusterName() throws HectorException;
 
   /**
-   * Gets the list of known hosts.
-   *
-   * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
-   *  a possibly cached value.
-   */
-  List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException;
-
-  /**
    * @return Server version
    */
   String getServerVersion() throws HectorException;

@@ -51,9 +51,6 @@ import org.slf4j.LoggerFactory;
 
   private final FailoverPolicy failoverPolicy;
 
-  /** List of all known remote cassandra nodes */
-  private List<CassandraHost> knownHosts = new ArrayList<CassandraHost>();
-
   private final CassandraClientPool clientPools;
 
   private final CassandraClientMonitor monitor;
@@ -72,7 +69,6 @@ import org.slf4j.LoggerFactory;
     this.clientPools = clientPools;
     this.monitor = monitor;
     xtrans = new ExceptionsTranslatorImpl();
-    initFailover();
   }
 
   @Override
@@ -152,7 +148,7 @@ import org.slf4j.LoggerFactory;
   }
 
   private void operateWithFailover(Operation<?> op) throws HectorException {
-    FailoverOperator operator = new FailoverOperator(failoverPolicy, knownHosts, monitor, client,
+    FailoverOperator operator = new FailoverOperator(failoverPolicy, monitor, client,
         clientPools, this);
     client = operator.operate(op);
   }
@@ -708,62 +704,6 @@ import org.slf4j.LoggerFactory;
     return failoverPolicy;
   }
 
-  /**
-   * Initializes the ring info so we can handle failover if this happens later.
-   *
-   * @throws HectorTransportException
-   */
-  private void initFailover() throws HectorTransportException {
-    if (failoverPolicy == FailoverPolicy.FAIL_FAST) {
-      knownHosts.clear();
-      knownHosts.add(client.getCassandraHost());
-      return;
-    }
-    // learn about other cassandra hosts in the ring
-    updateKnownHosts();
-  }
-
-  /**
-   * Uses the current known host to query about all other hosts in the ring.
-   *
-   * @throws HectorTransportException
-   */
-  public void updateKnownHosts() throws HectorTransportException {
-    // When update starts we only know of this client, nothing else
-    knownHosts.clear();
-    knownHosts.add(getClient().getCassandraHost());
-
-    // Now query for more hosts. If the query fails, then even this client is
-    // now "known"
-    try {
-      List<CassandraHost> hosts;
-      hosts = getClient().getKnownHosts(true);
-      if (hosts != null && hosts.size() > 0) {
-        if (!hosts.contains(getClient().getCassandraHost())) {
-          hosts.add(getClient().getCassandraHost());
-        }
-        knownHosts = new ArrayList<CassandraHost>(hosts);
-      }
-    } catch (HectorTransportException e) {
-      knownHosts.clear();
-      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
-    } catch (IllegalStateException e) {
-      knownHosts.clear();
-      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
-    } catch (PoolExhaustedException e) {
-      knownHosts.clear();
-      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
-    } catch (Exception e) {
-      knownHosts.clear();
-      log.error("Cannot query host names; Keyspace {} is now disconnected", toString());
-    }
-  }
-
-  public Set<CassandraHost> getKnownHosts() {
-    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
-    hosts.addAll(knownHosts);
-    return hosts;
-  }
 
   @Override
   public String toString() {

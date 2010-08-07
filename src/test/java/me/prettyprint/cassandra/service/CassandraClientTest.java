@@ -87,14 +87,6 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
     assertEquals("Default Cluster", name);
   }
 
-  @Test
-  public void testGetTokenMap() throws HectorException {
-    CassandraHost cassandraHost = new CassandraHost("localhost:9170");
-    List<CassandraHost> hosts = client.getKnownHosts(false);
-    assertNotNull(hosts);
-    assertEquals(cassandraHost, hosts.get(0));
-  }
-  
   @Test 
   public void testFramedTransport() throws HectorException {
     CassandraHost cassandraHost = new CassandraHost("localhost", 9170);
