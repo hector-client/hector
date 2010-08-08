@@ -15,7 +15,6 @@ import org.apache.cassandra.thrift.ColumnParent;
 /**
  * A query wrapper for the thrift call multiget_slice
  */
-@SuppressWarnings("unchecked")
 public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N,V>> {
 
   private Collection<String> keys;

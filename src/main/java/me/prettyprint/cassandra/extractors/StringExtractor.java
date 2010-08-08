@@ -11,7 +11,7 @@ import me.prettyprint.cassandra.model.Extractor;
  */
 public final class StringExtractor implements Extractor<String> {
 
-  private static StringExtractor instance = new StringExtractor();
+  private static final StringExtractor instance = new StringExtractor();
 
   public static StringExtractor get() {
     return instance;

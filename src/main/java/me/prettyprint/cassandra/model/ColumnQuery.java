@@ -5,7 +5,6 @@ import me.prettyprint.cassandra.service.Keyspace;
 
 // like a simple get operation
 // may return a Column or a SuperColumn
-@SuppressWarnings("unchecked")
 public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
   private String key;

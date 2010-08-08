@@ -15,7 +15,6 @@ import org.apache.cassandra.thrift.SuperColumn;
 /**
  * A query wrapper for the thrift call multiget_slice for a slice of supercolumns
  */
-@SuppressWarnings("unchecked")
 public final class MultigetSuperSliceQuery<SN, N, V> extends
     AbstractSliceQuery<SN, V, SuperRows<SN, N, V>> {
 

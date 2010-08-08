@@ -22,12 +22,13 @@ public final class ColumnSlice<N,V> {
       Extractor<V> valueExtractor) {
     Assert.noneNull(tColumns, nameExtractor, valueExtractor);
     columnsMap = new HashMap<N,HColumn<N,V>>(tColumns.size());
-    columnsList = new ArrayList<HColumn<N,V>>(tColumns.size());
+    List<HColumn<N,V>> list = new ArrayList<HColumn<N,V>>(tColumns.size());
     for (Column c: tColumns) {
       HColumn<N, V> column = new HColumn<N,V>(c, nameExtractor, valueExtractor);
       columnsMap.put(column.getName(), column);
-      columnsList.add(column);
+      list.add(column);
     }
+    columnsList = Collections.unmodifiableList(list);
   }
 
   /**
@@ -35,7 +36,7 @@ public final class ColumnSlice<N,V> {
    * @return an unmodifiable list of the columns
    */
   public List<HColumn<N,V>> getColumns() {
-    return Collections.unmodifiableList(columnsList);
+    return columnsList;
   }
 
   public HColumn<N,V> getColumnByName(N columnName) {

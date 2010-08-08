@@ -10,6 +10,12 @@ import me.prettyprint.cassandra.model.Extractor;
  */
 public final class LongExtractor implements Extractor<Long> {
 
+  private static final LongExtractor instance = new LongExtractor();
+
+  public static LongExtractor get() {
+    return instance;
+  }
+
   @Override
   public byte[] toBytes(Long obj) {
     if (obj == null) {

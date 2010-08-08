@@ -8,7 +8,6 @@ import me.prettyprint.cassandra.service.Keyspace;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
-@SuppressWarnings("unchecked")
 public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 

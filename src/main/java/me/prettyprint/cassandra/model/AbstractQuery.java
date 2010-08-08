@@ -18,8 +18,6 @@ public abstract class AbstractQuery<N,V,T> implements Query<T>{
     this.valueExtractor = valueExtractor;
   }
 
-  @SuppressWarnings("unchecked")
-  @Override
   public AbstractQuery<N,V,T> setColumnFamily(String cf) {
     this.columnFamilyName = cf;
     return this;

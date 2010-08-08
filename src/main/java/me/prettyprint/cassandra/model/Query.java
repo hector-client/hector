@@ -25,8 +25,6 @@ package me.prettyprint.cassandra.model;
  */
 public interface Query<T> {
 
-  <Q extends Query<T>> Q setColumnFamily(String cf);
-
   Result<T> execute();
 
 }

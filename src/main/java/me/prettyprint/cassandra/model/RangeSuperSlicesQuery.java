@@ -17,7 +17,6 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N>
  * @param <V>
  */
-@SuppressWarnings("unchecked")
 public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V,OrderedSuperRows<SN,N,V>> {
 
   private final Extractor<N> nameExtractor;
