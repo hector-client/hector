@@ -102,30 +102,15 @@ public interface CassandraClient {
   String getClusterName() throws HectorException;
 
   /**
-   * Gets the list of known hosts.
-   *
-   * @param fresh Whether to query cassandra remote host for an up to date value, or to serve
-   *  a possibly cached value.
-   */
-  List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException;
-
-  /**
    * @return Server version
    */
   String getServerVersion() throws HectorException;
 
-  CassandraHost getCassandraHost();
-  
-  /**
-   * Tells all instanciated keyspaces to update their known hosts
-   */
-  void updateKnownHosts() throws HectorTransportException;
+  CassandraHost getCassandraHost();  
 
   void markAsClosed();
 
   boolean isClosed();
-
-  Set<CassandraHost> getKnownHosts();
 
   void markAsError();
 

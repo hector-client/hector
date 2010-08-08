@@ -145,10 +145,7 @@ import org.slf4j.LoggerFactory;
     return keyspaces;
   }
 
-  @Override
-  public List<CassandraHost> getKnownHosts(boolean fresh) throws HectorException {
-    return new ArrayList<CassandraHost>(cluster.getKnownPoolHosts(fresh));
-  }
+
 
   @Override
   public String getServerVersion() throws HectorException {
@@ -185,16 +182,6 @@ import org.slf4j.LoggerFactory;
     return this.cassandraHost;
   }
 
-  @Override
-  public void updateKnownHosts() throws HectorTransportException {
-    if (closed) {
-      return;
-    }
-    // Iterate over all keyspaces and ask them to update known hosts
-    for (KeyspaceImpl k: keyspaceMap.values()) {
-      k.updateKnownHosts();
-    }
-  }
 
   @Override
   public String toString() {
@@ -216,20 +203,6 @@ import org.slf4j.LoggerFactory;
   public boolean isClosed() {
     return closed;
   }
-
-  @Override
-  public Set<CassandraHost> getKnownHosts() {
-    Set<CassandraHost> hosts = new HashSet<CassandraHost>();
-    if (closed) {
-      return hosts;
-    }
-    // Iterate over all keyspaces and ask them to update known hosts
-    for (KeyspaceImpl k: keyspaceMap.values()) {
-      hosts.addAll(k.getKnownHosts());
-    }
-    return hosts;
-  }
-
 
   @Override
   public boolean hasErrors() {

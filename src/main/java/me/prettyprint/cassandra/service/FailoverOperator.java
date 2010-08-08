@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.HectorException;
@@ -55,10 +56,10 @@ import org.slf4j.LoggerFactory;
    * @param keyspace The keyspace performing this operation (if it's a keyspace performing it). May
    * be null
    */
-  public FailoverOperator(FailoverPolicy policy, List<CassandraHost> hosts, CassandraClientMonitor monitor,
+  public FailoverOperator(FailoverPolicy policy, CassandraClientMonitor monitor,
       CassandraClient client, CassandraClientPool clientPools, Keyspace keyspace) {
     this.failoverPolicy = policy;
-    this.knownHosts = hosts;
+    this.knownHosts = new ArrayList<CassandraHost>(clientPools.getKnownHosts());
     this.monitor = monitor;
     this.client = client;
     this.clientPools = clientPools;
