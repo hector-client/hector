@@ -11,6 +11,11 @@ import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.thrift.transport.TTransportException;
 
+import org.apache.cassandra.config.KSMetaData;
+import org.apache.cassandra.config.DatabaseDescriptor;
+import org.apache.cassandra.config.CFMetaData;
+import org.apache.cassandra.config.ConfigurationException;
+
 /**
 *
 * @author Ran Tavory (rantav@gmail.com)
@@ -29,16 +34,26 @@ public class EmbeddedServerHelper {
    * @throws IOException
    * @throws InterruptedException
    */
-  public void setup() throws TTransportException, IOException, InterruptedException {
+  public void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
     // delete tmp dir first
     rmdir(TMP);
     // make a tmp dir and copy storag-conf.xml and log4j.properties to it
     copy("/storage-conf.xml", TMP);
     copy("/log4j.properties", TMP);
+    copy("/cassandra.yaml", TMP);
     System.setProperty("storage-config", TMP);
 
     CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
     cleaner.prepare();
+
+    // Manually load tables from the test configuration file.
+    for (KSMetaData table : DatabaseDescriptor.readTablesFromYaml())
+    {
+        for (CFMetaData cfm : table.cfMetaData().values())
+            CFMetaData.map(cfm);
+        DatabaseDescriptor.setTableDefinition(table, DatabaseDescriptor.getDefsVersion());
+    }
+
     cassandra = new EmbeddedCassandraService();
     cassandra.init();
     Thread t = new Thread(cassandra);

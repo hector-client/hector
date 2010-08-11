@@ -168,7 +168,9 @@ import org.slf4j.LoggerFactory;
     log.debug("Performing operation on {}; retries: {}", client.getCassandraHost().getUrl(), retries);
     try {
       // Perform operation and save its result value
-      op.executeAndSetResult(client.getCassandra());
+    	Cassandra.Client c = client.getCassandra();
+    	if (keyspace != null) c.set_keyspace(keyspace.getName());
+      op.executeAndSetResult(c);
       // hmmm don't count success, there are too many...
       // monitor.incCounter(op.successCounter);
       log.debug("Operation succeeded on {}", client.getCassandraHost().getUrl());
