@@ -178,7 +178,7 @@
               <groupId>org.apache.cassandra</groupId>
               <artifactId>cassandra</artifactId>
               <version>0.7.0</version>
-              <file>${basedir}/lib/apache-cassandra-2010-08-10_13-08-19.jar</file>
+              <file>${basedir}/lib/apache-cassandra-0.7.0-beta1-SNAPSHOT.jar</file>
             </configuration>
           </execution>
           <execution>
