@@ -76,11 +76,11 @@ listen_address: localhost
 # The address to bind the Thrift RPC service to
 rpc_address: localhost
 # port for Thrift to listen on
-rpc_port: 9160
+rpc_port: 9170
 
 # Frame size for thrift (maximum field length).
 # 0 disables TFramedTransport in favor of TSocket. 
-thrift_framed_transport_size_in_mb: 15
+thrift_framed_transport_size_in_mb: 0
 
 # The max length of a thrift message, including all fields and
 # internal thrift overhead.
