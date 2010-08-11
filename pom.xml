@@ -17,6 +17,8 @@
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
+
+	<org.springframework.version>3.0.0.RELEASE</org.springframework.version>
   </properties>
 
   <issueManagement>
@@ -361,7 +363,7 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>3.0.0.RELEASE</version>
+      <version>${org.springframework.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -373,7 +375,7 @@
      <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>3.0.0.RELEASE</version>   
+      <version>${org.springframework.version}</version>   
       <scope>test</scope>               
     </dependency>
 	<dependency>
