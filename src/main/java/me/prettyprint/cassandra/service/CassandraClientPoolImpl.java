@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,14 +21,14 @@ import org.slf4j.LoggerFactory;
  * efficiently be reused.
  *
  * @author Ran Tavory (ran@outbain.com)
- * @author Nate McCall (nate@vervewireless.com)
+ * @author zznate
  *
  */
 /*package*/ class CassandraClientPoolImpl implements CassandraClientPool {
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientPoolImpl.class);
   /**
-   * Mapping b/w the host identifier (url:port) and the pool used to store connections to it.
+   * Mapping b/w the CassandraHost and the pool used to store connections to it.
    */
   private final Map<CassandraHost, CassandraClientPoolByHost> pools;
 
@@ -180,11 +181,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Set<CassandraHost> getKnownHosts() {
-    Set<CassandraHost> hosts = new HashSet<CassandraHost>();    
-    for (CassandraClientPoolByHost pool: pools.values()) {
-      hosts.add(pool.getCassandraHost());
-    }
-    return hosts;
+    return Collections.unmodifiableSet(pools.keySet());
   }
 
 

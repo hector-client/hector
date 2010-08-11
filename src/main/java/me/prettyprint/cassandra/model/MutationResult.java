@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-public class MutationResult extends ExecutionResult<Void> {
+public final class MutationResult extends ExecutionResult<Void> {
 
   /*package*/ MutationResult(boolean success, long execTime) {
     super(null, execTime);

@@ -20,7 +20,7 @@ import org.apache.cassandra.thrift.ColumnPath;
  * @author Ran
  * @author zznate
  */
-public class HFactory {
+public final class HFactory {
 
   private static final Map<String, Cluster> clusters = new HashMap<String, Cluster>();
 

@@ -15,8 +15,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @author Ran Tavory
  *
  */
-@SuppressWarnings("unchecked")
-public class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
 
   private final Extractor<SN> sNameExtractor;
   private final HKeyRange keyRange;

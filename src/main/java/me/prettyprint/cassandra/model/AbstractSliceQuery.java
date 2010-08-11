@@ -18,8 +18,7 @@ import org.apache.cassandra.thrift.SliceRange;
  * @param <N>
  * @param <T>
  */
-/*package*/ @SuppressWarnings("unchecked")
-abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements Query<T> {
+/*package*/ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements Query<T> {
 
   protected Collection<N> columnNames;
   protected N start;

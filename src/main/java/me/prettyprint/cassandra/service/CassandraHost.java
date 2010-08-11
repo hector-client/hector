@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
  * @author Nate McCall (nate@vervewireless.com)
  *
  */
-public class CassandraHost {
+public final class CassandraHost {
   private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
@@ -49,11 +49,11 @@ public class CassandraHost {
 
   private int maxActive = DEFAULT_MAX_ACTIVE;
   private int maxIdle = DEFAULT_MAX_IDLE;
-  
+
   private boolean lifo = DEFAULT_LIFO;
   private long minEvictableIdleTimeMillis = DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
   private long timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
-  
+
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
@@ -96,7 +96,7 @@ public class CassandraHost {
 
   /**
    * Checks whether name resolution should occur.
-   * 
+   *
    * @return
    */
   public boolean isPerformNameResolution() {

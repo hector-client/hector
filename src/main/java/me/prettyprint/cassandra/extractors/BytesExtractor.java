@@ -3,13 +3,13 @@ package me.prettyprint.cassandra.extractors;
 import me.prettyprint.cassandra.model.Extractor;
 
 /**
- * The BytesExtractor is a simple identity function. It supports the Extractor interface and 
+ * The BytesExtractor is a simple identity function. It supports the Extractor interface and
  * implements the fromBytes and toBytes as simple identity functions.
- * 
- * @author Ran Tavory 
+ *
+ * @author Ran Tavory
  *
  */
-public class BytesExtractor implements Extractor<byte[]> {
+public final class BytesExtractor implements Extractor<byte[]> {
 
   private static BytesExtractor instance = new BytesExtractor();
 

@@ -8,7 +8,7 @@ package me.prettyprint.cassandra.model;
  * @author Ran
  *
  */
-public class ExecutionResult<T> {
+/*package*/ class ExecutionResult<T> {
 
   private final T value;
   private final long execTime;

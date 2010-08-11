@@ -17,8 +17,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-@SuppressWarnings("unchecked")
-public class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
 
   private final HKeyRange keyRange;
 

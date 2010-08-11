@@ -19,7 +19,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  *          Column value type
  *
  */
-public class SuperRow<SN, N, V> {
+public final class SuperRow<SN, N, V> {
 
   private final String rowKey;
   private final SuperSlice<SN, N, V> slice;

@@ -3,7 +3,7 @@ package me.prettyprint.cassandra.model;
 /**
  * @author Ran Tavory (rantav@gmail.com)
  */
-public class UnavailableException extends HectorException {
+public final class UnavailableException extends HectorException {
 
   private static final long serialVersionUID = 1971498442136497970L;
 

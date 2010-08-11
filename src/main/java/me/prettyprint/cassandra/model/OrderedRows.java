@@ -15,7 +15,7 @@ import org.apache.cassandra.thrift.Column;
  * @param <N>
  * @param <V>
  */
-public class OrderedRows<N,V> extends Rows<N,V> {
+public final class OrderedRows<N,V> extends Rows<N,V> {
 
   private final List<Row<N,V>> rowsList;
 

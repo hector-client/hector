@@ -22,7 +22,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  *
  * @author zznate
  */
-public class HSuperColumn<SN,N,V> {
+public final class HSuperColumn<SN,N,V> {
 
   private SN superName;
   private List<HColumn<N,V>> columns;

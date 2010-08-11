@@ -3,11 +3,11 @@ package me.prettyprint.cassandra.model;
 
 /**
  * Hector transport exception (thrift or avro).
- * 
+ *
  * @author Ran Tavory (ran@outbrain.com)
  *
  */
-public class HectorTransportException extends HectorException {
+public final class HectorTransportException extends HectorException {
 
   private static final long serialVersionUID = -8687856384223311785L;
 
@@ -22,5 +22,5 @@ public class HectorTransportException extends HectorException {
   public HectorTransportException(Throwable t) {
     super(t);
   }
-  
+
 }

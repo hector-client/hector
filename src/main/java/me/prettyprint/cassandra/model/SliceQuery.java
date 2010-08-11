@@ -15,8 +15,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-@SuppressWarnings("unchecked")
-public class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
+public final class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
 
   private String key;
 

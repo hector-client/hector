@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.extractors;
 
-import static me.prettyprint.cassandra.utils.StringUtils.*;
+import static me.prettyprint.cassandra.utils.StringUtils.bytes;
+import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.model.Extractor;
 
 /**
@@ -8,9 +9,9 @@ import me.prettyprint.cassandra.model.Extractor;
  * @author Ran Tavory
  *
  */
-public class StringExtractor implements Extractor<String> {
+public final class StringExtractor implements Extractor<String> {
 
-  private static StringExtractor instance = new StringExtractor();
+  private static final StringExtractor instance = new StringExtractor();
 
   public static StringExtractor get() {
     return instance;

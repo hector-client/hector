@@ -23,7 +23,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * @author Ran Tavory
  * @author zznate
  */
-public class Mutator {
+public final class Mutator {
 
   private final KeyspaceOperator ko;
 

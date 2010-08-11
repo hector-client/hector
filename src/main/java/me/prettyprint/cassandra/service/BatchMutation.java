@@ -23,7 +23,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @author Nathan McCall (nate@vervewireless.com)
  *
  */
-public class BatchMutation {
+public final class BatchMutation {
 
   private final Map<String, Map<String, List<Mutation>>> mutationMap;
 

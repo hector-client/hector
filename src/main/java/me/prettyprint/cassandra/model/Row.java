@@ -17,7 +17,7 @@ import org.apache.cassandra.thrift.Column;
  * @param <V> Column value type
  *
  */
-public class Row<N,V> {
+public final class Row<N,V> {
 
   private final String rowKey;
   private final ColumnSlice<N,V> columnSlice;

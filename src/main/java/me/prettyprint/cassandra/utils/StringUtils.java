@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public class StringUtils {
+public final class StringUtils {
 
   private static final Logger log = LoggerFactory.getLogger(StringUtils.class);
 

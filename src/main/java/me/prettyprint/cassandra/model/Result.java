@@ -6,7 +6,7 @@ package me.prettyprint.cassandra.model;
  *
  * @param <T> The type of the result. May be for example Column of SuperColumn
  */
-public class Result<T> extends ExecutionResult<T> {
+public final class Result<T> extends ExecutionResult<T> {
 
   private final Query<T> query;
 
