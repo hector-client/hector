@@ -2,3 +2,6 @@
 .DS_Store
 hector.iml
 releases
+target
+tmp
+
