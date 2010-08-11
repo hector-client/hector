@@ -16,6 +16,11 @@ import org.slf4j.LoggerFactory;
  */
 public final class CassandraHost {
   private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
+  
+  /**
+   * The default port number to which we will connect
+   */
+  public static final int DEFAULT_PORT = 9160;
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
 
@@ -190,11 +195,11 @@ public final class CassandraHost {
   }
 
   public static String parseHostFromUrl(String urlPort) {
-    return urlPort.substring(0, urlPort.lastIndexOf(':'));
+    return urlPort.lastIndexOf(':') > 0 ? urlPort.substring(0, urlPort.lastIndexOf(':')) : urlPort;
   }
 
   public static int parsePortFromUrl(String urlPort) {
-    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
+    return urlPort.lastIndexOf(':') > 0 ? Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length())) : DEFAULT_PORT;
   }
 
   public void setTimestampResolution(TimestampResolution timestampResolution) {
