@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +30,9 @@ import org.slf4j.LoggerFactory;
  * // Make a mutation:
  * MutationResult mr = m.insert("key", cf, createColumn("name", "value", extractor, extractor));
  * </code>
+ *
+ * THREAD SAFETY: This class is thread safe.
+ *
  * @author Ran Tavory
  * @author zznate
  */
