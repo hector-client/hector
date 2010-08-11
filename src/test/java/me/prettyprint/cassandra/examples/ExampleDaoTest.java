@@ -38,11 +38,11 @@ public class ExampleDaoTest {
   @Test
   public void testInsertGetDelete() throws HectorException {
     ExampleDao dao = new ExampleDao();
-    assertNull(dao.get("key"));
-    dao.insert("key", "value");
-    assertEquals("value", dao.get("key"));
-    dao.delete("key");
-    assertNull(dao.get("key"));
+    assertNull(dao.get("key".getBytes()));
+    dao.insert("key".getBytes(), "value");
+    assertEquals("value", dao.get("key".getBytes()));
+    dao.delete("key".getBytes());
+    assertNull(dao.get("key".getBytes()));
   }
 
 }

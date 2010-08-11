@@ -16,7 +16,6 @@ public final class LongExtractor implements Extractor<Long> {
     return instance;
   }
 
-  @Override
   public byte[] toBytes(Long obj) {
     if (obj == null) {
       return null;
@@ -30,7 +29,6 @@ public final class LongExtractor implements Extractor<Long> {
     return b;
   }
 
-  @Override
   public Long fromBytes(byte[] bytes) {
     if (bytes == null) {
       return null;

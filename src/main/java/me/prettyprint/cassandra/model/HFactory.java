@@ -12,6 +12,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.ColumnPath;
 /**
  * A convenience class with bunch of factory static methods to help create a mutator,
@@ -159,28 +160,28 @@ public final class HFactory {
    */
   public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
       Extractor<SN> superNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new HSuperColumn<SN, N, V>(name, columns, createTimestamp(), superNameExtractor,
+    return new HSuperColumn<SN, N, V>(name, columns, createClock(), superNameExtractor,
         nameExtractor, valueExtractor);
   }
 
   public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
-      long timestamp, Extractor<SN> superNameExtractor, Extractor<N> nameExtractor,
+      Clock clock, Extractor<SN> superNameExtractor, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    return new HSuperColumn<SN, N, V>(name, columns, timestamp, superNameExtractor, nameExtractor,
+    return new HSuperColumn<SN, N, V>(name, columns, clock, superNameExtractor, nameExtractor,
         valueExtractor);
   }
 
-  public static <N,V> HColumn<N,V> createColumn(N name, V value, long timestamp,
+  public static <N,V> HColumn<N,V> createColumn(N name, V value, Clock clock,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new HColumn<N, V>(name, value, timestamp, nameExtractor, valueExtractor);
+    return new HColumn<N, V>(name, value, clock, nameExtractor, valueExtractor);
   }
 
   /**
-   * Creates a column with the timestamp of now.
+   * Creates a column with the clock of now.
    */
   public static <N,V> HColumn<N,V> createColumn(N name, V value,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new HColumn<N, V>(name, value, createTimestamp(), nameExtractor, valueExtractor);
+    return new HColumn<N, V>(name, value, createClock(), nameExtractor, valueExtractor);
   }
 
   /**
@@ -192,11 +193,11 @@ public final class HFactory {
   }
 
   /**
-   * Creates a timestamp of now with the default timestamp resolution (micorosec) as defined in
+   * Creates a clock of now with the default clock resolution (micorosec) as defined in
    * {@link CassandraHost}
    */
-  public static long createTimestamp() {
-    return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createTimestamp();
+  public static Clock createClock() {
+    return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();
   }
 
   // probably should be typed for thrift vs. avro

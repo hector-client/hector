@@ -34,25 +34,25 @@ public final class Mutator {
   }
 
   // Simple and immediate insertion of a column
-  public <N,V> MutationResult insert(final String key, final String cf, final HColumn<N,V> c) {
+  public <N,V> MutationResult insert(final byte[] key, final String cf, final HColumn<N,V> c) {
     addInsertion(key, cf, c);
     return execute();
   }
 
   // overloaded insert-super
-  public <SN,N,V> MutationResult insert(final String key, final String cf,
+  public <SN,N,V> MutationResult insert(final byte[] key, final String cf,
       final HSuperColumn<SN,N,V> superColumn) {
     addInsertion(key, cf, superColumn);
     return execute();
   }
 
-  public <N> MutationResult delete(final String key, final String cf, final N columnName,
+  public <N> MutationResult delete(final byte[] key, final String cf, final N columnName,
       final Extractor<N> nameExtractor) {
     addDeletion(key, cf, columnName, nameExtractor);
     return execute();
   }
 
-  public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
+  public <SN,N> MutationResult superDelete(final byte[] key, final String cf, final SN supercolumnName,
       final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
@@ -68,7 +68,7 @@ public final class Mutator {
   // indeterminant state if we dont validate against LIVE (but cached of course)
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
-  public <N,V> Mutator addInsertion(String key, String cf, HColumn<N,V> c) {
+  public <N,V> Mutator addInsertion(byte[] key, String cf, HColumn<N,V> c) {
     getPendingMutations().addInsertion(key, Arrays.asList(cf), c.toThrift());
     return this;
   }
@@ -76,15 +76,15 @@ public final class Mutator {
   /**
    * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
    */
-  public <SN,N,V> Mutator addInsertion(String key, String cf, HSuperColumn<SN,N,V> sc) {
+  public <SN,N,V> Mutator addInsertion(byte[] key, String cf, HSuperColumn<SN,N,V> sc) {
     getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
     return this;
   }
 
-  public <N> Mutator addDeletion(String key, String cf, N columnName, Extractor<N> nameExtractor) {
+  public <N> Mutator addDeletion(byte[] key, String cf, N columnName, Extractor<N> nameExtractor) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameExtractor.toBytes(columnName));
-    Deletion d = new Deletion(ko.createTimestamp()).setPredicate(sp);
+    Deletion d = new Deletion(ko.createClock()).setPredicate(sp);
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

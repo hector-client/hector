@@ -60,7 +60,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String cf = "Standard1";
 
     Mutator m = createMutator(ko);
-    MutationResult mr = m.insert("testInsertGetRemove", cf,
+    MutationResult mr = m.insert("testInsertGetRemove".getBytes(), cf,
         createColumn("testInsertGetRemove", "testInsertGetRemove_value_", se, se));
 
     // Check the mutation result metadata
@@ -71,7 +71,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     ColumnQuery<String, String> q = createColumnQuery(ko, se, se);
     q.setName("testInsertGetRemove").setColumnFamily(cf);
-    Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove").execute();
+    Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove".getBytes()).execute();
     assertNotNull(r);
     HColumn<String, String> c = r.get();
     assertNotNull(c);
@@ -84,13 +84,13 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // remove value
     m = createMutator(ko);
-    MutationResult mr2 = m.delete("testInsertGetRemove", cf, "testInsertGetRemove", se);
+    MutationResult mr2 = m.delete("testInsertGetRemove".getBytes(), cf, "testInsertGetRemove", se);
     assertTrue("Time should be > 0", mr2.getExecutionTimeMicro() > 0);
 
     // get already removed value
     ColumnQuery<String, String> q2 = createColumnQuery(ko, se, se);
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
-    Result<HColumn<String, String>> r2 = q2.setKey("testInsertGetRemove").execute();
+    Result<HColumn<String, String>> r2 = q2.setKey("testInsertGetRemove".getBytes()).execute();
     assertNotNull(r2);
     assertNull("Value should have been deleted", r2.get());
   }
@@ -101,7 +101,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     Mutator m = createMutator(ko);
     for (int i = 0; i < 5; i++) {
-      m.addInsertion("testInsertGetRemove" + i, cf,
+      m.addInsertion(("testInsertGetRemove" + i).getBytes(), cf,
           createColumn("testInsertGetRemove", "testInsertGetRemove_value_" + i, se, se));
     }
     m.execute();
@@ -110,7 +110,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     ColumnQuery<String, String> q = createColumnQuery(ko, se, se);
     q.setName("testInsertGetRemove").setColumnFamily(cf);
     for (int i = 0; i < 5; i++) {
-      Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove" + i).execute();
+      Result<HColumn<String, String>> r = q.setKey(("testInsertGetRemove" + i).getBytes()).execute();
       assertNotNull(r);
       HColumn<String, String> c = r.get();
       assertNotNull(c);
@@ -121,7 +121,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // remove value
     m = createMutator(ko);
     for (int i = 0; i < 5; i++) {
-      m.addDeletion("testInsertGetRemove" + i, cf, "testInsertGetRemove", se);
+      m.addDeletion(("testInsertGetRemove" + i).getBytes(), cf, "testInsertGetRemove", se);
     }
     m.execute();
 
@@ -129,7 +129,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     ColumnQuery<String, String> q2 = createColumnQuery(ko, se, se);
     q2.setName("testInsertGetRemove").setColumnFamily(cf);
     for (int i = 0; i < 5; i++) {
-      Result<HColumn<String, String>> r = q2.setKey("testInsertGetRemove" + i).execute();
+      Result<HColumn<String, String>> r = q2.setKey(("testInsertGetRemove" + i).getBytes()).execute();
       assertNotNull(r);
       assertNull("Value should have been deleted", r.get());
     }
@@ -145,13 +145,13 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // aye, varargs and generics aren't good friends...
     List<HColumn<String, String>> columns = Arrays.asList(createColumn("name1", "value1", se, se),
         createColumn("name2", "value2", se, se));
-    m.insert("testSuperInsertGetRemove", cf,
+    m.insert("testSuperInsertGetRemove".getBytes(), cf,
         createSuperColumn("testSuperInsertGetRemove", columns, se, se, se));
 
     // get value
     SuperColumnQuery<String, String, String> q = createSuperColumnQuery(ko, se, se, se);
     q.setSuperName("testSuperInsertGetRemove").setColumnFamily(cf);
-    Result<HSuperColumn<String, String, String>> r = q.setKey("testSuperInsertGetRemove").execute();
+    Result<HSuperColumn<String, String, String>> r = q.setKey("testSuperInsertGetRemove".getBytes()).execute();
     assertNotNull(r);
     HSuperColumn<String, String, String> sc = r.get();
     assertNotNull(sc);
@@ -168,7 +168,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // remove value
     m = createMutator(ko);
-    m.superDelete("testSuperInsertGetRemove", cf, "testSuperInsertGetRemove", null, se, se);
+    m.superDelete("testSuperInsertGetRemove".getBytes(), cf, "testSuperInsertGetRemove", null, se, se);
 
     // test after removal
     r = q.execute();
@@ -186,7 +186,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     MultigetSliceQuery<String, String> q = createMultigetSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setKeys("testMultigetSliceQuery1", "testMultigetSliceQuery2");
+    q.setKeys("testMultigetSliceQuery1".getBytes(), "testMultigetSliceQuery2".getBytes());
     // try with column name first
     q.setColumnNames("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn2");
     Result<Rows<String, String>> r = q.execute();
@@ -194,7 +194,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     Rows<String, String> rows = r.get();
     assertNotNull(rows);
     assertEquals(2, rows.getCount());
-    Row<String, String> row = rows.getByKey("testMultigetSliceQuery1");
+    Row<String, String> row = rows.getByKey("testMultigetSliceQuery1".getBytes());
     assertNotNull(row);
     assertEquals("testMultigetSliceQuery1", row.getKey());
     ColumnSlice<String, String> slice = row.getColumnSlice();
@@ -211,7 +211,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // now try with start/finish
     q = createMultigetSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setKeys("testMultigetSliceQuery3");
+    q.setKeys("testMultigetSliceQuery3".getBytes());
     q.setRange("testMultigetSliceQueryColumn1", "testMultigetSliceQueryColumn3", false, 100);
     r = q.execute();
     assertNotNull(r);
@@ -243,7 +243,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     SliceQuery<String, String> q = createSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSliceQuery0");
+    q.setKey("testSliceQuery0".getBytes());
     // try with column name first
     q.setColumnNames("testSliceQuery1", "testSliceQuery2", "testSliceQuery3");
     Result<ColumnSlice<String, String>> r = q.execute();
@@ -263,7 +263,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // now try with start/finish
     q = createSliceQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSliceQuery0");
+    q.setKey("testSliceQuery0".getBytes());
     // try reversed this time
     q.setRange("testSliceQuery2", "testSliceQuery1", true, 100);
     r = q.execute();
@@ -290,7 +290,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       @SuppressWarnings("unchecked")
       HSuperColumn<String, String, String> sc = createSuperColumn("testSuperSliceQuery" + j,
           Arrays.asList(createColumn("name", "value", se, se)), se, se, se);
-      m.addInsertion("testSuperSliceQuery", cf, sc);
+      m.addInsertion("testSuperSliceQuery".getBytes(), cf, sc);
     }
 
     MutationResult mr = m.execute();
@@ -300,7 +300,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     SuperSliceQuery<String, String, String> q = createSuperSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSuperSliceQuery");
+    q.setKey("testSuperSliceQuery".getBytes());
     // try with column name first
     q.setColumnNames("testSuperSliceQuery1", "testSuperSliceQuery2", "testSuperSliceQuery3");
     Result<SuperSlice<String, String, String>> r = q.execute();
@@ -315,7 +315,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // now try with start/finish
     q = createSuperSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSuperSliceQuery");
+    q.setKey("testSuperSliceQuery".getBytes());
     // try reversed this time
     q.setRange("testSuperSliceQuery1", "testSuperSliceQuery2", false, 2);
     r = q.execute();
@@ -331,7 +331,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // Delete values
     for (int j = 1; j <= 3; ++j) {
-      m.addDeletion("testSuperSliceQuery", cf, "testSuperSliceQuery" + j, se);
+      m.addDeletion("testSuperSliceQuery".getBytes(), cf, "testSuperSliceQuery" + j, se);
     }
     mr = m.execute();
 
@@ -358,7 +358,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     SubSliceQuery<String, String, String> q = createSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
     q.setSuperColumn("testSliceQueryOnSubcolumns_column0");
-    q.setKey("testSliceQueryOnSubcolumns0");
+    q.setKey("testSliceQueryOnSubcolumns0".getBytes());
     // try with column name first
     q.setColumnNames("c000", "c110", "c_doesn't_exist");
     Result<ColumnSlice<String, String>> r = q.execute();
@@ -372,7 +372,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // now try with start/finish
     q = createSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setKey("testSliceQueryOnSubcolumns0");
+    q.setKey("testSliceQueryOnSubcolumns0".getBytes());
     q.setSuperColumn("testSliceQueryOnSubcolumns_column0");
     // try reversed this time
     q.setRange("c000", "c110", false, 2);
@@ -408,7 +408,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     MultigetSuperSliceQuery<String, String, String> q = createMultigetSuperSliceQuery(ko, se, se,
         se);
     q.setColumnFamily(cf);
-    q.setKeys("testSuperMultigetSliceQueryKey0", "testSuperMultigetSliceQueryKey3");
+    q.setKeys("testSuperMultigetSliceQueryKey0".getBytes(), "testSuperMultigetSliceQueryKey3".getBytes());
     // try with column name first
     q.setColumnNames("testSuperMultigetSliceQuery1", "testSuperMultigetSliceQuery2");
     Result<SuperRows<String, String, String>> r = q.execute();
@@ -441,7 +441,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     MultigetSubSliceQuery<String, String, String> q = createMultigetSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
     q.setSuperColumn("testMultigetSubSliceQuery0");
-    q.setKeys("testMultigetSubSliceQuery0", "testMultigetSubSliceQuery2");
+    q.setKeys("testMultigetSubSliceQuery0".getBytes(), "testMultigetSubSliceQuery2".getBytes());
     // try with column name first
     q.setColumnNames("c000", "c110");
     Result<Rows<String, String>> r = q.execute();
@@ -449,7 +449,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     Rows<String, String> rows = r.get();
     assertNotNull(rows);
     assertEquals(2, rows.getCount());
-    Row<String, String> row = rows.getByKey("testMultigetSubSliceQuery0");
+    Row<String, String> row = rows.getByKey("testMultigetSubSliceQuery0".getBytes());
     assertNotNull(row);
     assertEquals("testMultigetSubSliceQuery0", row.getKey());
     ColumnSlice<String, String> slice = row.getColumnSlice();
@@ -465,7 +465,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // now try with start/finish
     q = createMultigetSubSliceQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setKeys("testMultigetSubSliceQuery0");
+    q.setKeys("testMultigetSubSliceQuery0".getBytes());
     q.setSuperColumn("testMultigetSubSliceQuery0");
     // try reversed this time
     q.setRange("c000", "c110", false, 2);
@@ -522,7 +522,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals(2, columns.size());
 
     // now try with setKeys in combination with setRange
-    q.setKeys("testRangeSlicesQuery0", "testRangeSlicesQuery5");
+    q.setKeys("testRangeSlicesQuery0".getBytes(), "testRangeSlicesQuery5".getBytes());
     q.setRange("testRangeSlicesQueryColumn1", "testRangeSlicesQueryColumn3", false, 100);
     r = q.execute();
     assertNotNull(r);
@@ -574,7 +574,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertNull(slice.getColumnByName("testRangeSuperSlicesQuery3"));
 
     // now try with setKeys in combination with setRange
-    q.setKeys("testRangeSuperSlicesQuery0", "testRangeSuperSlicesQuery5");
+    q.setKeys("testRangeSuperSlicesQuery0".getBytes(), "testRangeSuperSlicesQuery5".getBytes());
     q.setRange("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery3", false, 100);
     r = q.execute();
     assertNotNull(r);
@@ -634,7 +634,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     Mutator m = createMutator(ko);
     for (int i = 0; i < cleanup.rowCount; ++i) {
       for (int j = 0; j < cleanup.columnCount; ++j) {
-        m.addDeletion(cleanup.rowPrefix + i, cleanup.cf, cleanup.columnsPrefix + j, se);
+        m.addDeletion((cleanup.rowPrefix + i).getBytes(), cleanup.cf, cleanup.columnsPrefix + j, se);
       }
     }
     m.execute();
@@ -650,7 +650,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
             scPrefix + j,
             Arrays.asList(createColumn("c0" + i + j, "v0" + i + j, se, se),
                 createColumn("c1" + 1 + j, "v1" + i + j, se, se)), se, se, se);
-        m.addInsertion(rowPrefix + i, cf, sc);
+        m.addInsertion((rowPrefix + i).getBytes(), cf, sc);
       }
     }
     m.execute();
@@ -662,7 +662,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     Mutator m = createMutator(ko);
     for (int i = 0; i < rowCount; ++i) {
       for (int j = 0; j < columnCount; ++j) {
-        m.addInsertion(rowPrefix + i, cf, createColumn(columnPrefix + j, "value" + i + j, se, se));
+        m.addInsertion((rowPrefix + i).getBytes(), cf, createColumn(columnPrefix + j, "value" + i + j, se, se));
       }
     }
     MutationResult mr = m.execute();

@@ -14,17 +14,21 @@ import org.apache.cassandra.thrift.KeyRange;
 
   /** Whether to use start/end as tokens or as keys */
   private boolean useTokens = true;
-  private String start, end;
+  byte[] start;
+private byte[] end;
+
+String start_token;
+String end_token;
   private int rowCount = 100;
 
   public HKeyRange setTokens(String start, String end) {
     useTokens = true;
-    this.start = start;
-    this.end = end;
+    this.start_token = start;
+    this.end_token = end;
     return this;
   }
 
-  public HKeyRange setKeys(String start, String end) {
+  public HKeyRange setKeys(byte[] start, byte[] end) {
     useTokens = false;
     this.start = start;
     this.end = end;
@@ -46,8 +50,8 @@ import org.apache.cassandra.thrift.KeyRange;
 
     KeyRange keyRange = new KeyRange(rowCount);
     if (useTokens) {
-      keyRange.setStart_token(start);
-      keyRange.setEnd_token(end);
+      keyRange.setStart_token(start_token);
+      keyRange.setEnd_token(end_token);
     } else {
       keyRange.setStart_key(start);
       keyRange.setEnd_key(end);

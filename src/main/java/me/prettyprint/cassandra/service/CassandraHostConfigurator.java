@@ -12,7 +12,7 @@ public final class CassandraHostConfigurator {
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
-  private TimestampResolution timestampResolution;
+  private ClockResolution clockResolution;
 
 
   public CassandraHostConfigurator() {
@@ -53,8 +53,8 @@ public final class CassandraHostConfigurator {
     if (exhaustedPolicy != null) {
       cassandraHost.setExhaustedPolicy(exhaustedPolicy);
     }
-    if (timestampResolution != null) {
-      cassandraHost.setTimestampResolution(timestampResolution);
+    if (clockResolution != null) {
+      cassandraHost.setClockResolution(clockResolution);
     }
   }
 
@@ -85,16 +85,16 @@ public final class CassandraHostConfigurator {
   /**
    * @param resolutionString one of "SECONDS", "MILLISECONDS" or "MICROSECONDS"
    */
-  public void setTimestampResolution(String resolutionString) {
-    timestampResolution = TimestampResolution.valueOf(resolutionString);
+  public void setClockResolution(String resolutionString) {
+    clockResolution = ClockResolution.valueOf(resolutionString);
   }
 
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder();
     s.append("CassandraHostConfigurator<");
-    s.append("timestampResolution=");
-    s.append(timestampResolution);
+    s.append("clockResolution=");
+    s.append(clockResolution);
     s.append("&exhaustedPolicy=");
     s.append(exhaustedPolicy);
     s.append("&cassandraThriftSocketTimeout=");

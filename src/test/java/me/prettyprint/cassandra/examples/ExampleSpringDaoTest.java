@@ -22,11 +22,11 @@ public class ExampleSpringDaoTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsertGetDelete() throws HectorException {
-    assertNull(exampleSpringDao.get("key"));
-    exampleSpringDao.insert("key", "value");
-    assertEquals("value", exampleSpringDao.get("key"));
-    exampleSpringDao.delete("key");
-    assertNull(exampleSpringDao.get("key"));
+    assertNull(exampleSpringDao.get("key".getBytes()));
+    exampleSpringDao.insert("key".getBytes(), "value");
+    assertEquals("value", exampleSpringDao.get("key".getBytes()));
+    exampleSpringDao.delete("key".getBytes());
+    assertNull(exampleSpringDao.get("key".getBytes()));
   }
 
 }

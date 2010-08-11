@@ -47,7 +47,6 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory
    * @exception Exception - if this object factory encountered an exception while attempting 
    *                        to create an object, and no other object factories are to be tried.
 	 */
-	@Override
 	public Object getObjectInstance(Object object, Name jndiName, Context context,
 			Hashtable<?, ?> environment) throws Exception {	
 		Reference resourceRef = null;

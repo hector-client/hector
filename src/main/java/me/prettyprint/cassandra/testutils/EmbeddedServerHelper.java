@@ -60,7 +60,7 @@ public class EmbeddedServerHelper {
   private static void rmdir(String dir) throws IOException {
     File dirFile = new File(dir);
     if (dirFile.exists()) {
-      FileUtils.deleteDir(new File(dir));
+      FileUtils.deleteRecursive(new File(dir));
     }
   }
   /**

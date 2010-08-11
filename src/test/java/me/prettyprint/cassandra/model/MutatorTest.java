@@ -44,7 +44,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   @Test
   public void testInsert() {
     Mutator m = createMutator(keyspaceOperator);
-    MutationResult mr = m.insert("k", "Standard1", createColumn("name", "value", se, se));
+    MutationResult mr = m.insert("k".getBytes(), "Standard1", createColumn("name", "value", se, se));
     assertTrue("Execution time on single insert should be > 0",mr.getExecutionTimeMicro() > 0);
     assertColumnExists("Keyspace1", "Standard1", "k", "name");
   }
@@ -56,7 +56,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     columnList.add(createColumn("name","value",se,se));
     HSuperColumn<String, String, String> superColumn =
         createSuperColumn("super_name", columnList, se, se, se);
-    MutationResult r = m.insert("sk", "Super1", superColumn);
+    MutationResult r = m.insert("sk".getBytes(), "Super1", superColumn);
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
   }
 
@@ -66,7 +66,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
     Mutator m = createMutator(keyspaceOperator);
     for (int i = 0; i < 5; i++) {
-      m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
+      m.addInsertion(("k" + i).getBytes(), cf, createColumn("name", "value" + i, se, se));
     }
     MutationResult r = m.execute();
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
@@ -80,7 +80,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
     // Test discard and then exec an empty mutation
     for (int i = 0; i < 5; i++) {
-      m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
+      m.addInsertion(("k" + i).getBytes(), cf, createColumn("name", "value" + i, se, se));
     }
     m.discardPendingMutations();
     r = m.execute();
@@ -88,7 +88,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
     // cleanup
     for (int i = 0; i < 5; i++) {
-      m.addDeletion("k" + i, cf, "name", se);
+      m.addDeletion(("k" + i).getBytes(), cf, "name", se);
     }
     m.execute();
   }
@@ -98,7 +98,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     cp.setColumn(StringUtils.bytes(column));
     CassandraClient client = cluster.borrowClient();
     assertNotNull(String.format("Should have value for %s.%s[%s][%s]", keyspace, cf, key, column),
-        client.getKeyspace(keyspace).getColumn(key, cp));
+        client.getKeyspace(keyspace).getColumn(key.getBytes(), cp));
     cluster.releaseClient(client);
   }
 

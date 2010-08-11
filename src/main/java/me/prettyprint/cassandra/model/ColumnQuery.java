@@ -7,7 +7,7 @@ import me.prettyprint.cassandra.service.Keyspace;
 // may return a Column or a SuperColumn
 public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
-  private String key;
+  private byte[] key;
   private N name;
 
   /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<N> nameExtractor,
@@ -15,7 +15,7 @@ public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> impl
     super(keyspaceOperator, nameExtractor, valueExtractor);
   }
 
-  public ColumnQuery<N,V> setKey(String key) {
+  public ColumnQuery<N,V> setKey(byte[] key) {
     this.key = key;
     return this;
   }
@@ -25,11 +25,11 @@ public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> impl
     return this;
   }
 
-  @Override
+
   public Result<HColumn<N, V>> execute() {
     return new Result<HColumn<N, V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<HColumn<N, V>>() {
-          @Override
+        
           public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               org.apache.cassandra.thrift.Column thriftColumn =
@@ -42,7 +42,7 @@ public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> impl
         }), this);
   }
 
-  @Override
+
   public String toString() {
     return "ColumnQuery(" + key + "," + name + ")";
   }

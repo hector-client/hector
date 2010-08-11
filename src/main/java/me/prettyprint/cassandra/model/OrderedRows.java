@@ -19,11 +19,11 @@ public final class OrderedRows<N,V> extends Rows<N,V> {
 
   private final List<Row<N,V>> rowsList;
 
-  public OrderedRows(LinkedHashMap<String, List<Column>> thriftRet, Extractor<N> nameExtractor,
+  public OrderedRows(LinkedHashMap<byte[], List<Column>> thriftRet, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
     super(thriftRet, nameExtractor, valueExtractor);
     rowsList = new ArrayList<Row<N,V>>(thriftRet.size());
-    for (Map.Entry<String, List<Column>> entry: thriftRet.entrySet()) {
+    for (Map.Entry<byte[], List<Column>> entry: thriftRet.entrySet()) {
       rowsList.add(new Row<N,V>(entry.getKey(), entry.getValue(), nameExtractor, valueExtractor));
     }
   }

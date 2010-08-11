@@ -19,7 +19,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
 
-  private String key;
+  private byte[] key;
   private SN superColumn;
   private final Extractor<SN> sNameExtractor;
 
@@ -30,7 +30,7 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
     this.sNameExtractor = sNameExtractor;
   }
 
-  public SubSliceQuery<SN,N,V> setKey(String key) {
+  public SubSliceQuery<SN,N,V> setKey(byte[] key) {
     this.key = key;
     return this;
   }
@@ -43,7 +43,6 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
     return this;
   }
 
-  @Override
   public Result<ColumnSlice<N, V>> execute() {
     Assert.notNull(key, "Key cannot be null");
     Assert.notNull(superColumn, "Supercolumn cannot be null");

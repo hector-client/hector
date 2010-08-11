@@ -12,7 +12,7 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
     implements Query<HSuperColumn<SN,N,V>> {
 
   private final Extractor<SN> sNameExtractor;
-  private String key;
+  private byte[] key;
   private SN superName;
 
   /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
@@ -22,7 +22,7 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
     this.sNameExtractor = sNameExtractor;
   }
 
-  public SuperColumnQuery<SN,N,V> setKey(String key) {
+  public SuperColumnQuery<SN,N,V> setKey(byte[] key) {
     this.key = key;
     return this;
   }
@@ -32,7 +32,6 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
     return this;
   }
 
-  @Override
   public Result<HSuperColumn<SN, N, V>> execute() {
     notNull(columnFamilyName, "columnFamilyName is null");
     notNull(superName, "superName is null");

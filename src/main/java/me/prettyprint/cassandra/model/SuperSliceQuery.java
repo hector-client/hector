@@ -18,7 +18,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperSlice<SN,N,V>> {
 
-  private String key;
+  private byte[] key;
   private final Extractor<SN> sNameExtractor;
 
   /*package*/ SuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
@@ -28,12 +28,11 @@ public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperS
     this.sNameExtractor = sNameExtractor;
   }
 
-  public SuperSliceQuery<SN,N,V> setKey(String key) {
+  public SuperSliceQuery<SN,N,V> setKey(byte[] key) {
     this.key = key;
     return this;
   }
 
-  @Override
   public Result<SuperSlice<SN,N,V>> execute() {
     return new Result<SuperSlice<SN,N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<SuperSlice<SN,N,V>>() {

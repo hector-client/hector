@@ -16,7 +16,7 @@ import org.apache.thrift.transport.TTransportException;
 
 public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
 
-  @Override
+
   public HectorException translate(Throwable original) {
     if (original instanceof HectorException) {
       return (HectorException) original;

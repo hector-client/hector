@@ -17,12 +17,10 @@ public final class BytesExtractor implements Extractor<byte[]> {
     return instance;
   }
 
-  @Override
   public byte[] fromBytes(byte[] bytes) {
     return bytes;
   }
 
-  @Override
   public byte[] toBytes(byte[] obj) {
     return obj;
   }

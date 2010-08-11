@@ -40,8 +40,8 @@ public final class CassandraHost {
   public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS = GenericObjectPool.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
   public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
-  public static final TimestampResolution DEFAULT_TIMESTAMP_RESOLUTION =
-      TimestampResolution.MICROSECONDS;
+  public static final ClockResolution DEFAULT_TIMESTAMP_RESOLUTION =
+      ClockResolution.MICROSECONDS;
 
   private final String host, ip, url;
   private final int port;
@@ -58,7 +58,7 @@ public final class CassandraHost {
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
-  private TimestampResolution timestampResolution = DEFAULT_TIMESTAMP_RESOLUTION;
+  private ClockResolution clockResolution = DEFAULT_TIMESTAMP_RESOLUTION;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String url) {
@@ -197,12 +197,12 @@ public final class CassandraHost {
     return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
   }
 
-  public void setTimestampResolution(TimestampResolution timestampResolution) {
-    this.timestampResolution = timestampResolution;
+  public void setClockResolution(ClockResolution clockResolution) {
+    this.clockResolution = clockResolution;
   }
 
-  public TimestampResolution getTimestampResolution() {
-    return timestampResolution;
+  public ClockResolution getClockResolution() {
+    return clockResolution;
   }
 
   public boolean getLifo() {

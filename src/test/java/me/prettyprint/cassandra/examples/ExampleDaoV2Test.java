@@ -48,11 +48,11 @@ public class ExampleDaoV2Test {
   public void testInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
-    assertNull(dao.get("key"));
-    dao.insert("key", "value");
-    assertEquals("value", dao.get("key"));
-    dao.delete("key");
-    assertNull(dao.get("key"));
+    assertNull(dao.get("key".getBytes()));
+    dao.insert("key".getBytes(), "value");
+    assertEquals("value", dao.get("key".getBytes()));
+    dao.delete("key".getBytes());
+    assertNull(dao.get("key".getBytes()));
   }
 
   @Test
@@ -62,37 +62,37 @@ public class ExampleDaoV2Test {
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
 
     // Get non-existing values
-    Map<String, String> ret = dao.getMulti("key1", "key2");
+    Map<byte[], String> ret = dao.getMulti("key1".getBytes(), "key2".getBytes());
     assertNotNull(ret);
     assertNull("value1", ret.get("key1"));
 
     // Insert values
-    Map<String, String> keyValues = new HashMap<String, String>();
-    keyValues.put("key1", "value1");
-    keyValues.put("key2", "value2");
+    Map<byte[], String> keyValues = new HashMap<byte[], String>();
+    keyValues.put("key1".getBytes(), "value1");
+    keyValues.put("key2".getBytes(), "value2");
     dao.insertMulti(keyValues);
 
     // Simple get test
-    ret = dao.getMulti("key1", "key2");
+    ret = dao.getMulti("key1".getBytes(), "key2".getBytes());
     assertNotNull(ret);
-    assertEquals("value1", ret.get("key1"));
-    assertEquals("value2", ret.get("key2"));
+    assertEquals("value1", ret.get("key1".getBytes()));
+    assertEquals("value2", ret.get("key2".getBytes()));
 
     // Get some values that don't exist
-    ret = dao.getMulti("key2", "key3");
+    ret = dao.getMulti("key2".getBytes(), "key3".getBytes());
     assertNotNull(ret);
-    assertEquals("value2", ret.get("key2"));
-    assertNull(ret.get("key3"));
-    assertNull(ret.get("key1"));
+    assertEquals("value2", ret.get("key2".getBytes()));
+    assertNull(ret.get("key3".getBytes()));
+    assertNull(ret.get("key1".getBytes()));
 
     // delete
-    dao.delete("key1", "key2");
+    dao.delete("key1".getBytes(), "key2".getBytes());
 
     // validate deletion
-    ret = dao.getMulti("key1", "key2");
+    ret = dao.getMulti("key1".getBytes(), "key2".getBytes());
     assertNotNull(ret);
-    assertNull(ret.get("key1"));
-    assertNull(ret.get("key2"));
+    assertNull(ret.get("key1".getBytes()));
+    assertNull(ret.get("key2".getBytes()));
 
   }
 }

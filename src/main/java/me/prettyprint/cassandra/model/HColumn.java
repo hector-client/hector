@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -19,11 +20,11 @@ public final class HColumn<N,V> {
 
   private N name;
   private V value;
-  private long timestamp;
+  private Clock clock;
   private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
 
-  /*package*/ HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor,
+  /*package*/ HColumn(N name, V value, Clock clock, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     notNull(name, "name is null");
@@ -31,7 +32,7 @@ public final class HColumn<N,V> {
 
     this.name = name;
     this.value = value;
-    this.timestamp = timestamp;
+    this.clock = clock;
   }
 
   /*package*/ HColumn(Column thriftColumn, Extractor<N> nameExtractor,
@@ -61,8 +62,8 @@ public final class HColumn<N,V> {
     return this;
   }
 
-  HColumn<N,V> setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
+  HColumn<N,V> setClock(Clock clock) {
+    this.clock = clock;
     return this;
   }
 
@@ -74,12 +75,12 @@ public final class HColumn<N,V> {
     return value;
   }
 
-  long getTimestamp() {
-    return timestamp;
+  Clock getClock() {
+    return clock;
   }
 
   public Column toThrift() {
-    return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), timestamp);
+    return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), clock);
   }
 
   public HColumn<N, V> fromThrift(Column c) {
@@ -112,7 +113,7 @@ public final class HColumn<N,V> {
 
   @Override
   public int hashCode() {
-    return new HashCodeBuilder().append(name).append(value).append(timestamp).toHashCode();
+    return new HashCodeBuilder().append(name).append(value).append(clock).toHashCode();
   }
 
   @Override
@@ -129,6 +130,6 @@ public final class HColumn<N,V> {
     @SuppressWarnings("unchecked")
     HColumn<N,V> other = (HColumn<N,V>) obj;
     return new EqualsBuilder().appendSuper(super.equals(obj)).append(name, other.name).
-        append(value, other.value).append(timestamp, other.timestamp).isEquals();
+        append(value, other.value).append(clock, other.clock).isEquals();
   }
 }

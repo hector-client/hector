@@ -9,6 +9,7 @@ import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.Keyspace;
 
 import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 
 /**
@@ -28,13 +29,14 @@ public class ExampleClient {
     try {
       Keyspace keyspace = client.getKeyspace("Keyspace1");
       ColumnPath columnPath = new ColumnPath("Standard1");
+      ColumnParent columnParent = new ColumnParent("Standard1");
       columnPath.setColumn(bytes("column-name"));
 
       // insert
-      keyspace.insert("key", columnPath, bytes("value"));
+      keyspace.insert("key".getBytes(), columnParent, new Column(bytes("column-name"), bytes("value"), keyspace.createClock()));
 
       // read
-      Column col = keyspace.getColumn("key", columnPath);
+      Column col = keyspace.getColumn("key".getBytes(), columnPath);
 
       System.out.println("Read from cassandra: " + string(col.getValue()));
 

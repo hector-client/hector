@@ -35,7 +35,7 @@ public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V
     return this;
   }
 
-  public RangeSuperSlicesQuery<SN,N,V> setKeys(String start, String end) {
+  public RangeSuperSlicesQuery<SN,N,V> setKeys(byte[] start, byte[] end) {
     keyRange.setKeys(start, end);
     return this;
   }
@@ -45,7 +45,6 @@ public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V
     return this;
   }
 
-  @Override
   public Result<OrderedSuperRows<SN,N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 
@@ -54,7 +53,7 @@ public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V
           @Override
           public OrderedSuperRows<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            LinkedHashMap<String, List<SuperColumn>> thriftRet =
+            LinkedHashMap<byte[], List<SuperColumn>> thriftRet =
                 ks.getSuperRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
             return new OrderedSuperRows<SN,N,V>(thriftRet, columnNameExtractor, nameExtractor,
                 valueExtractor);

@@ -9,6 +9,8 @@ import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.Keyspace;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 
@@ -38,11 +40,11 @@ public class ExampleSpringDao {
    * @param key Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String value) throws HectorException {
+  public void insert(final byte[] key, final String value) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.insert(key, createColumnPath(columnName), bytes(value));
+        ks.insert(key, new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), ks.createClock()));
         return null;
       }
     });
@@ -52,7 +54,7 @@ public class ExampleSpringDao {
    * Get a string value.
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key) throws HectorException {
+  public String get(final byte[] key) throws HectorException {
     return execute(new SpringCommand<String>(cassandraClientPool){
       @Override
       public String execute(final Keyspace ks) throws HectorException {
@@ -68,7 +70,7 @@ public class ExampleSpringDao {
   /**
    * Delete a key from cassandra
    */
-  public void delete(final String key) throws HectorException {
+  public void delete(final byte[] key) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {

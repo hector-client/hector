@@ -11,14 +11,12 @@ import java.util.Map;
 import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
-import me.prettyprint.cassandra.model.HFactory;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
-import me.prettyprint.cassandra.service.Cluster;
 
 public class SimpleCassandraDao {
 
@@ -33,7 +31,7 @@ public class SimpleCassandraDao {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String columnName, final String value) {
+  public void insert(final byte[] key, final String columnName, final String value) {
     createMutator(keyspaceOperator).insert(
         key, columnFamilyName, createColumn(columnName, value, extractor, extractor));
   }
@@ -43,7 +41,7 @@ public class SimpleCassandraDao {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key, final String columnName) throws HectorException {
+  public String get(final byte[] key, final String columnName) throws HectorException {
     ColumnQuery<String, String> q = createStringColumnQuery(keyspaceOperator);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(columnName).
@@ -58,7 +56,7 @@ public class SimpleCassandraDao {
    * @param keys
    * @return
    */
-  public Map<String, String> getMulti(String columnName, String... keys) {
+  public Map<byte[], String> getMulti(String columnName, byte[]... keys) {
     MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor);
     q.setColumnFamily(columnFamilyName);
     q.setKeys(keys);
@@ -66,8 +64,8 @@ public class SimpleCassandraDao {
 
     Result<Rows<String,String>> r = q.execute();
     Rows<String,String> rows = r.get();
-    Map<String, String> ret = new HashMap<String, String>(keys.length);
-    for (String k: keys) {
+    Map<byte[], String> ret = new HashMap<byte[], String>(keys.length);
+    for (byte[] k: keys) {
       HColumn<String,String> c = rows.getByKey(k).getColumnSlice().getColumnByName(columnName);
       if (c != null && c.getValue() != null) {
         ret.put(k, c.getValue());
@@ -79,11 +77,11 @@ public class SimpleCassandraDao {
   /**
    * Insert multiple values for a given columnName
    */
-  public void insertMulti(String columnName, Map<String, String> keyValues) {
+  public void insertMulti(String columnName, Map<byte[], String> keyValues) {
     Mutator m = createMutator(keyspaceOperator);
-    for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
+    for (Map.Entry<byte[], String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), columnFamilyName,
-          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createTimestamp(), extractor, extractor));
+          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createClock(), extractor, extractor));
     }
     m.execute();
   }
@@ -92,9 +90,9 @@ public class SimpleCassandraDao {
   /**
    * Delete multiple values
    */
-  public void delete(String columnName, String... keys) {
+  public void delete(String columnName, byte[]... keys) {
     Mutator m = createMutator(keyspaceOperator);
-    for (String key: keys) {
+    for (byte[] key: keys) {
       m.addDeletion(key, columnFamilyName,  columnName, extractor);
     }
     m.execute();

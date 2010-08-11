@@ -19,13 +19,13 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
 
-  private final Map<String, SuperRow<SN, N, V>> rows;
+  private final Map<byte[], SuperRow<SN, N, V>> rows;
 
-  public SuperRows(Map<String, List<SuperColumn>> thriftSuperColumns, Extractor<SN> sNameExtractor,
+  public SuperRows(Map<byte[], List<SuperColumn>> thriftRet, Extractor<SN> sNameExtractor,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(thriftSuperColumns, sNameExtractor, nameExtractor, valueExtractor);
-    rows = new HashMap<String, SuperRow<SN, N, V>>(thriftSuperColumns.size());
-    for (Map.Entry<String, List<SuperColumn>> entry : thriftSuperColumns.entrySet()) {
+    Assert.noneNull(thriftRet, sNameExtractor, nameExtractor, valueExtractor);
+    rows = new HashMap<byte[], SuperRow<SN, N, V>>(thriftRet.size());
+    for (Map.Entry<byte[], List<SuperColumn>> entry : thriftRet.entrySet()) {
       rows.put(entry.getKey(), new SuperRow<SN, N, V>(entry.getKey(), entry.getValue(),
           sNameExtractor, nameExtractor, valueExtractor));
     }
@@ -39,7 +39,6 @@ public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
     return rows.size();
   }
 
-  @Override
   public Iterator<SuperRow<SN, N, V>> iterator() {
     return rows.values().iterator();
   }

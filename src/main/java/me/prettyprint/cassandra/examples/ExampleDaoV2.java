@@ -10,6 +10,8 @@ import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.cassandra.thrift.Clock;
+
 import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
@@ -35,9 +37,9 @@ public class ExampleDaoV2 {
   public static void main(String[] args) throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(createKeyspaceOperator(KEYSPACE, c));
-    ed.insert("key1", "value1");
+    ed.insert("key1".getBytes(), "value1");
 
-    System.out.println(ed.get("key1"));
+    System.out.println(ed.get("key1".getBytes()));
   }
 
   public ExampleDaoV2(KeyspaceOperator ko) {
@@ -50,13 +52,13 @@ public class ExampleDaoV2 {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String value) {
+  public void insert(final byte[] key, final String value) {
     createMutator(keyspaceOperator).insert(
         key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
-  private long createTimestamp() {
-    return keyspaceOperator.createTimestamp();
+  private Clock createClock() {
+    return keyspaceOperator.createClock();
   }
 
   /**
@@ -64,7 +66,7 @@ public class ExampleDaoV2 {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key) throws HectorException {
+  public String get(final byte[] key) throws HectorException {
     ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
@@ -79,7 +81,7 @@ public class ExampleDaoV2 {
    * @param keys
    * @return
    */
-  public Map<String, String> getMulti(String... keys) {
+  public Map<byte[], String> getMulti(byte[]... keys) {
     MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
@@ -87,8 +89,8 @@ public class ExampleDaoV2 {
 
     Result<Rows<String,String>> r = q.execute();
     Rows<String,String> rows = r.get();
-    Map<String, String> ret = new HashMap<String, String>(keys.length);
-    for (String k: keys) {
+    Map<byte[], String> ret = new HashMap<byte[], String>(keys.length);
+    for (byte[] k: keys) {
       HColumn<String,String> c = rows.getByKey(k).getColumnSlice().getColumnByName(COLUMN_NAME);
       if (c != null && c.getValue() != null) {
         ret.put(k, c.getValue());
@@ -100,11 +102,11 @@ public class ExampleDaoV2 {
   /**
    * Insert multiple values
    */
-  public void insertMulti(Map<String, String> keyValues) {
+  public void insertMulti(Map<byte[], String> keyValues) {
     Mutator m = createMutator(keyspaceOperator);
-    for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
+    for (Map.Entry<byte[], String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,
-          createColumn(COLUMN_NAME, keyValue.getValue(), createTimestamp(), extractor, extractor));
+          createColumn(COLUMN_NAME, keyValue.getValue(), createClock(), extractor, extractor));
     }
     m.execute();
   }
@@ -112,9 +114,9 @@ public class ExampleDaoV2 {
   /**
    * Delete multiple values
    */
-  public void delete(String... keys) {
+  public void delete(byte[]... keys) {
     Mutator m = createMutator(keyspaceOperator);
-    for (String key: keys) {
+    for (byte[] key: keys) {
       m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
     }
     m.execute();

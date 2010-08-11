@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -26,7 +27,7 @@ public final class HSuperColumn<SN,N,V> {
 
   private SN superName;
   private List<HColumn<N,V>> columns;
-  private long timestamp;
+  private Clock clock;
   private final Extractor<SN> superNameExtractor;
   private final Extractor<N> nameExtractor;
   private final Extractor<V> valueExtractor;
@@ -35,16 +36,16 @@ public final class HSuperColumn<SN,N,V> {
    * @param <SN> SuperColumn name type
    * @param List<HColumn<N,V>> Column values
    * @param Extractor<SN> the extractor type
-   * @param timestamp
+   * @param clock
    */
-  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
+  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, Clock clock,
       Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     this(sNameExtractor, nameExtractor, valueExtractor);
     notNull(sName, "Name is null");
     notNull(columns, "Columns are null");
     this.superName = sName;
     this.columns = columns;
-    this.timestamp = timestamp;
+    this.clock = clock;
   }
 
   /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Extractor<SN> sNameExtractor,
@@ -75,13 +76,13 @@ public final class HSuperColumn<SN,N,V> {
     return this;
   }
 
-  public HSuperColumn<SN, N, V> setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
+  public HSuperColumn<SN, N, V> setClock(Clock clock) {
+    this.clock = clock;
     return this;
   }
 
-  public long getTimestamp() {
-    return timestamp;
+  public Clock getClock() {
+    return clock;
   }
 
   public int getSize() {

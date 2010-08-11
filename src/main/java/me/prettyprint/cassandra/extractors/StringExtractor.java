@@ -17,7 +17,6 @@ public final class StringExtractor implements Extractor<String> {
     return instance;
   }
 
-  @Override
   public String fromBytes(byte[] bytes) {
     if (bytes == null) {
       return null;
@@ -25,7 +24,6 @@ public final class StringExtractor implements Extractor<String> {
     return string(bytes);
   }
 
-  @Override
   public byte[] toBytes(String obj) {
     if (obj == null) {
       return null;

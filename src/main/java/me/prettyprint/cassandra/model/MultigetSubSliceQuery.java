@@ -17,7 +17,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N, V, Rows<N, V>> {
 
-  private Collection<String> keys;
+  private Collection<byte[]> keys;
   private final Extractor<SN> sNameExtractor;
   private SN superColumn;
 
@@ -28,7 +28,7 @@ public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N,
     this.sNameExtractor = sNameExtractor;
   }
 
-  public MultigetSubSliceQuery<SN, N, V> setKeys(String... keys) {
+  public MultigetSubSliceQuery<SN, N, V> setKeys(byte[]... keys) {
     this.keys = Arrays.asList(keys);
     return this;
   }
@@ -43,7 +43,6 @@ public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N,
   }
 
 
-  @Override
   public Result<Rows<N, V>> execute() {
     Assert.noneNull(keys, "Keys cannot be null");
     Assert.noneNull(columnFamilyName, "columnFamilyName cannot be null");
@@ -53,11 +52,11 @@ public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N,
         keyspaceOperator.doExecute(new KeyspaceOperationCallback<Rows<N, V>>() {
           @Override
           public Rows<N, V> doInKeyspace(Keyspace ks) throws HectorException {
-            List<String> keysList = new ArrayList<String>();
+            List<byte[]> keysList = new ArrayList<byte[]>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            Map<String, List<Column>> thriftRet = ks.multigetSlice(keysList,
+            Map<byte[], List<Column>> thriftRet = ks.multigetSlice(keysList,
                 columnParent, getPredicate());
             return new Rows<N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }

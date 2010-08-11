@@ -17,18 +17,17 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
 
-  private String key;
+  private byte[] key;
 
   /*package*/ SliceQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
   }
 
-  public SliceQuery<N,V> setKey(String key) {
+  public SliceQuery<N,V> setKey(byte[] key) {
     this.key = key;
     return this;
   }
 
-  @Override
   public Result<ColumnSlice<N, V>> execute() {
     return new Result<ColumnSlice<N, V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<ColumnSlice<N, V>>() {

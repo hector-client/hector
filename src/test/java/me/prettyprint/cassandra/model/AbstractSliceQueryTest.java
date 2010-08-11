@@ -51,7 +51,6 @@ public class AbstractSliceQueryTest {
       super(ko, nameExtractor, valueExtractor);
     }
 
-    @Override
     public Result<T> execute() {
       return null;
     }

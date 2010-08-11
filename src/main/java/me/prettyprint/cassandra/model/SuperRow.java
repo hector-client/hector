@@ -21,18 +21,18 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public final class SuperRow<SN, N, V> {
 
-  private final String rowKey;
+  private final byte[] rowKey;
   private final SuperSlice<SN, N, V> slice;
 
-  /*package*/SuperRow(String rowKey, List<SuperColumn> thriftSuperColumns,
+  /*package*/SuperRow(byte[] bs, List<SuperColumn> thriftSuperColumns,
       Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(rowKey, thriftSuperColumns, nameExtractor, valueExtractor);
-    this.rowKey = rowKey;
+    Assert.noneNull(bs, thriftSuperColumns, nameExtractor, valueExtractor);
+    this.rowKey = bs;
     slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameExtractor, nameExtractor,
         valueExtractor);
   }
 
-  public String getKey() {
+  public byte[] getKey() {
     return rowKey;
   }
 

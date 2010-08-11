@@ -7,6 +7,8 @@ import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.Keyspace;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 
 /**
@@ -37,9 +39,9 @@ public class ExampleDao {
 
   public static void main(String[] args) throws HectorException {
     ExampleDao ed = new ExampleDao();
-    ed.insert("key1", "value1");
+    ed.insert("key1".getBytes(), "value1");
 
-    System.out.println(ed.get("key1"));
+    System.out.println(ed.get("key1".getBytes()));
   }
 
   /**
@@ -48,11 +50,11 @@ public class ExampleDao {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String value) throws HectorException {
+  public void insert(final byte[] key, final String value) throws HectorException {
     execute(new Command<Void>() {
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.insert(key, createColumnPath(COLUMN_NAME), bytes(value));
+        ks.insert(key, new ColumnParent(CF_NAME), new Column(bytes(COLUMN_NAME), bytes(value), ks.createClock()));
         return null;
       }
     });
@@ -63,7 +65,7 @@ public class ExampleDao {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key) throws HectorException {
+  public String get(final byte[] key) throws HectorException {
     return execute(new Command<String>() {
       @Override
       public String execute(final Keyspace ks) throws HectorException {
@@ -79,7 +81,7 @@ public class ExampleDao {
   /**
    * Delete a key from cassandra
    */
-  public void delete(final String key) throws HectorException {
+  public void delete(final byte[] key) throws HectorException {
     execute(new Command<Void>() {
       @Override
       public Void execute(final Keyspace ks) throws HectorException {

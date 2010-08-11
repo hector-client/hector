@@ -165,8 +165,8 @@
               <packaging>jar</packaging>
               <groupId>libthrift</groupId>
               <artifactId>libthrift</artifactId>
-              <version>917130</version>
-              <file>${basedir}/lib/libthrift-r917130.jar</file>
+              <version>959516</version>
+              <file>${basedir}/lib/libthrift-r959516.jar</file>
             </configuration>
           </execution>
           <execution>
@@ -177,8 +177,8 @@
               <packaging>jar</packaging>
               <groupId>org.apache.cassandra</groupId>
               <artifactId>cassandra</artifactId>
-              <version>0.6.0</version>
-              <file>${basedir}/lib/apache-cassandra-0.6.0.jar</file>
+              <version>0.7.0</version>
+              <file>${basedir}/lib/apache-cassandra-2010-08-10_13-08-19.jar</file>
             </configuration>
           </execution>
           <execution>
@@ -235,12 +235,12 @@
     <dependency>
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>917130</version>
+      <version>959516</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra</artifactId>
-      <version>0.6.0</version>
+      <version>0.7.0</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>

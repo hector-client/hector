@@ -118,7 +118,7 @@ public interface CassandraClient {
 
   void removeKeyspace(Keyspace k);
 
-  TimestampResolution getTimestampResolution();
+  ClockResolution getClockResolution();
 
   /**
    * @return Whether this client has been released (returned) to the pool

@@ -18,7 +18,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class MultigetSuperSliceQuery<SN, N, V> extends
     AbstractSliceQuery<SN, V, SuperRows<SN, N, V>> {
 
-  private Collection<String> keys;
+  private Collection<byte[]> keys;
   private final Extractor<N> nameExtractor;
 
   /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
@@ -28,21 +28,20 @@ public final class MultigetSuperSliceQuery<SN, N, V> extends
     this.nameExtractor = nameExtractor;
   }
 
-  public MultigetSuperSliceQuery<SN, N, V> setKeys(String... keys) {
+  public MultigetSuperSliceQuery<SN, N, V> setKeys(byte[]... keys) {
     this.keys = Arrays.asList(keys);
     return this;
   }
 
-  @Override
   public Result<SuperRows<SN, N, V>> execute() {
     return new Result<SuperRows<SN, N, V>>(
         keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<SN, N, V>>() {
           @Override
           public SuperRows<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
-            List<String> keysList = new ArrayList<String>();
+            List<byte[]> keysList = new ArrayList<byte[]>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            Map<String, List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
+            Map<byte[], List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
                 columnParent, getPredicate());
             return new SuperRows<SN, N, V>(thriftRet, columnNameExtractor, nameExtractor,
                 valueExtractor);
