@@ -217,6 +217,18 @@
               <file>${basedir}/lib/cassandra-javautils.jar</file>
             </configuration>
           </execution>
+          <execution>
+            <id>install snakeyaml</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>snakeyaml</groupId>
+              <artifactId>snakeyaml</artifactId>
+              <version>1.6</version>
+              <file>${basedir}/lib/snakeyaml-1.6.jar</file>
+            </configuration>
+          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -276,6 +288,11 @@
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>2.4</version>
+    </dependency>
+    <dependency>
+      <groupId>snakeyaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.6</version>
     </dependency>
 
     <!-- OSGi deps -->
