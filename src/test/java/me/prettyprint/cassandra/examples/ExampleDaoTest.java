@@ -12,6 +12,7 @@ import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.apache.cassandra.config.ConfigurationException;
 
 public class ExampleDaoTest {
 
@@ -25,7 +26,7 @@ public class ExampleDaoTest {
    * @throws InterruptedException
    */
   @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
+  public static void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
     embedded = new EmbeddedServerHelper();
     embedded.setup();
   }

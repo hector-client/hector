@@ -19,6 +19,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.apache.cassandra.config.ConfigurationException;
 
 public class ExampleDaoV2Test {
 
@@ -32,7 +33,7 @@ public class ExampleDaoV2Test {
    * @throws InterruptedException
    */
   @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
+  public static void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
     embedded = new EmbeddedServerHelper();
     embedded.setup();
   }

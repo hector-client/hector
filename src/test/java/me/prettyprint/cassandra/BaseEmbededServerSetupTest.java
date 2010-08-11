@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.apache.cassandra.config.ConfigurationException;
 
 /**
  * Base class for test cases that need access to EmbeddedServerHelper
@@ -32,7 +33,7 @@ public abstract class BaseEmbededServerSetupTest {
    * @throws InterruptedException
    */
   @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
+  public static void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
     embedded = new EmbeddedServerHelper();
     embedded.setup();
   }
