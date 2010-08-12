@@ -67,10 +67,11 @@ public final class CassandraHost {
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String url) {
-    this(parseHostFromUrl(url), parsePortFromUrl(url));
+    this(url, parsePortFromUrl(url));
   }
 
   public CassandraHost(String url2, int port) {
+    url2 = parseHostFromUrl(url2);
     this.port = port;
     StringBuilder b = new StringBuilder();
     InetAddress address;
