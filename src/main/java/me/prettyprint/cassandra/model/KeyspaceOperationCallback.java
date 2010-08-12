@@ -10,7 +10,8 @@ import me.prettyprint.cassandra.service.Keyspace;
     long start = System.nanoTime();
     T value = null;
     value = doInKeyspace(ks);
-    return new ExecutionResult<T>(value, System.nanoTime() - start);
+    
+    return new ExecutionResult<T>(value, System.nanoTime() - start, ks.getClient().getCassandraHost());
   }
 
 }
