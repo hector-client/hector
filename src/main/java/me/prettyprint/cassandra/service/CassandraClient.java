@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.List;
-import java.util.Set;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
@@ -118,7 +117,7 @@ public interface CassandraClient {
 
   void removeKeyspace(Keyspace k);
 
-  TimestampResolution getTimestampResolution();
+  ClockResolution getClockResolution();
 
   /**
    * @return Whether this client has been released (returned) to the pool

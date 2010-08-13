@@ -3,7 +3,6 @@ package me.prettyprint.cassandra.service;
 import java.util.Set;
 
 import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.model.PoolExhaustedException;
 
 import org.apache.commons.pool.PoolableObjectFactory;

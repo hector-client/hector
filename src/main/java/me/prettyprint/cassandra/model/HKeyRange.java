@@ -14,20 +14,24 @@ import org.apache.cassandra.thrift.KeyRange;
 
   /** Whether to use start/end as tokens or as keys */
   private boolean useTokens = true;
-  private String start, end;
+  byte[] startKey;
+private byte[] endKey;
+
+String startToken;
+String endToken;
   private int rowCount = 100;
 
   public HKeyRange setTokens(String start, String end) {
     useTokens = true;
-    this.start = start;
-    this.end = end;
+    this.startToken = start;
+    this.endToken = end;
     return this;
   }
 
-  public HKeyRange setKeys(String start, String end) {
+  public <K> HKeyRange setKeys(K start, K end, Serializer<K> keySerializer) {
     useTokens = false;
-    this.start = start;
-    this.end = end;
+    this.startKey = keySerializer.toBytes(start);
+    this.endKey = keySerializer.toBytes(end);
     return this;
   }
 
@@ -41,16 +45,18 @@ import org.apache.cassandra.thrift.KeyRange;
    * @return The thrift representation of this object
    */
   public KeyRange toThrift() {
-    Assert.notNull(start, "start can't be null");
-    Assert.notNull(end, "end can't be null");
 
     KeyRange keyRange = new KeyRange(rowCount);
     if (useTokens) {
-      keyRange.setStart_token(start);
-      keyRange.setEnd_token(end);
+      Assert.notNull(startToken, "start_token can't be null");
+      Assert.notNull(endToken, "end_token can't be null");
+      keyRange.setStart_token(startToken);
+      keyRange.setEnd_token(endToken);
     } else {
-      keyRange.setStart_key(start);
-      keyRange.setEnd_key(end);
+      Assert.notNull(startKey, "start can't be null");
+      Assert.notNull(endKey, "end can't be null");
+      keyRange.setStart_key(startKey);
+      keyRange.setEnd_key(endKey);
     }
     return keyRange;
   }
@@ -58,7 +64,7 @@ import org.apache.cassandra.thrift.KeyRange;
   @Override
   public String toString() {
     String tk = useTokens ? "t" : "k";
-    return "HKeyRange(" + tk + "Start:" + start + "," + tk + "End:" + end + "," + ")";
+    return "HKeyRange(" + tk + "Start:" + startKey + "," + tk + "End:" + endKey + "," + ")";
   }
 
 }

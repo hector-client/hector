@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import org.apache.cassandra.thrift.Clock;
+
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
@@ -34,8 +36,8 @@ public /*final*/ class KeyspaceOperator {
     return "KeyspaceOperator(" + keyspace +"," + cluster + ")";
   }
 
-  public long createTimestamp() {
-    return cluster.createTimestamp();
+  public Clock createClock() {
+    return cluster.createClock();
   }
 
   /*package*/ <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {

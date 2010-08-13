@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -26,41 +27,41 @@ public final class HSuperColumn<SN,N,V> {
 
   private SN superName;
   private List<HColumn<N,V>> columns;
-  private long timestamp;
-  private final Extractor<SN> superNameExtractor;
-  private final Extractor<N> nameExtractor;
-  private final Extractor<V> valueExtractor;
+  private Clock clock;
+  private final Serializer<SN> superNameSerializer;
+  private final Serializer<N> nameSerializer;
+  private final Serializer<V> valueSerializer;
 
   /**
    * @param <SN> SuperColumn name type
    * @param List<HColumn<N,V>> Column values
-   * @param Extractor<SN> the extractor type
-   * @param timestamp
+   * @param Serializer<SN> the serializer type
+   * @param clock
    */
-  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    this(sNameExtractor, nameExtractor, valueExtractor);
+  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, Clock clock,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    this(sNameSerializer, nameSerializer, valueSerializer);
     notNull(sName, "Name is null");
     notNull(columns, "Columns are null");
     this.superName = sName;
     this.columns = columns;
-    this.timestamp = timestamp;
+    this.clock = clock;
   }
 
-  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    this(sNameExtractor, nameExtractor, valueExtractor);
-    noneNull(thriftSuperColumn, sNameExtractor, nameExtractor, valueExtractor);
-    superName = sNameExtractor.fromBytes(thriftSuperColumn.getName());
+  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    this(sNameSerializer, nameSerializer, valueSerializer);
+    noneNull(thriftSuperColumn, sNameSerializer, nameSerializer, valueSerializer);
+    superName = sNameSerializer.fromBytes(thriftSuperColumn.getName());
     columns = fromThriftColumns(thriftSuperColumn.getColumns());
   }
 
-  /*package*/ HSuperColumn(Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    noneNull(sNameExtractor, nameExtractor, valueExtractor);
-    this.superNameExtractor = sNameExtractor;
-    this.nameExtractor = nameExtractor;
-    this.valueExtractor = valueExtractor;
+  /*package*/ HSuperColumn(Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    noneNull(sNameSerializer, nameSerializer, valueSerializer);
+    this.superNameSerializer = sNameSerializer;
+    this.nameSerializer = nameSerializer;
+    this.valueSerializer = valueSerializer;
   }
 
   public HSuperColumn<SN, N, V> setName(SN name) {
@@ -75,13 +76,13 @@ public final class HSuperColumn<SN,N,V> {
     return this;
   }
 
-  public HSuperColumn<SN, N, V> setTimestamp(long timestamp) {
-    this.timestamp = timestamp;
+  public HSuperColumn<SN, N, V> setClock(Clock clock) {
+    this.clock = clock;
     return this;
   }
 
-  public long getTimestamp() {
-    return timestamp;
+  public Clock getClock() {
+    return clock;
   }
 
   public int getSize() {
@@ -104,19 +105,19 @@ public final class HSuperColumn<SN,N,V> {
     return columns.get(i);
   }
 
-  public Extractor<SN> getNameExtractor() {
-    return superNameExtractor;
+  public Serializer<SN> getNameSerializer() {
+    return superNameSerializer;
   }
 
   public byte[] getNameBytes() {
-    return superNameExtractor.toBytes(getName());
+    return superNameSerializer.toBytes(getName());
   }
 
   public SuperColumn toThrift() {
     if (superName == null || columns == null) {
       return null;
     }
-    return new SuperColumn(superNameExtractor.toBytes(superName), toThriftColumn());
+    return new SuperColumn(superNameSerializer.toBytes(superName), toThriftColumn());
   }
 
   private List<Column> toThriftColumn() {
@@ -130,17 +131,17 @@ public final class HSuperColumn<SN,N,V> {
   private List<HColumn<N, V>> fromThriftColumns(List<Column> tcolumns) {
     List<HColumn<N, V>> cs = new ArrayList<HColumn<N,V>>(tcolumns.size());
     for (Column c: tcolumns) {
-      cs.add(new HColumn<N, V>(c, nameExtractor, valueExtractor));
+      cs.add(new HColumn<N, V>(c, nameSerializer, valueSerializer));
     }
     return cs;
   }
 
-  public Extractor<SN> getSuperNameExtractor() {
-    return superNameExtractor;
+  public Serializer<SN> getSuperNameSerializer() {
+    return superNameSerializer;
   }
 
-  public Extractor<V> getValueExtractor() {
-    return valueExtractor;
+  public Serializer<V> getValueSerializer() {
+    return valueSerializer;
   }
 
   @Override

@@ -1,22 +1,25 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import java.util.List;
+import java.util.Map;
+
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 /**
  * Extracts a type T from the given bytes, or vice a versa.
  * 
  * In cassandra column names and column values (and starting with 0.7.0 row keys) are all byte[].
  * To allow type safe conversion in java and keep all conversion code in one place we define the 
- * Extractor interface.
+ * Serializer interface.
  * Implementors of the interface define type conversion according to their domains. A predefined 
- * set of common extractors can be found in the extractors package, for example 
- * {@link StringExtractor}.
+ * set of common serializers can be found in the serializers package, for example 
+ * {@link StringSerializer}.
  * 
  * @author Ran Tavory 
  *
  * @param <T> The type to which data extraction should work.
  */
-public interface Extractor<T> {
+public interface Serializer<T> {
 
   /**
    * Extract bytes from the obj of type T
@@ -31,4 +34,13 @@ public interface Extractor<T> {
    * @return
    */
   public T fromBytes(byte[] bytes);
+  
+  public List<byte[]> toBytesList(List<T> list);
+
+  public List<T> fromBytesList(List<byte[]> list);
+
+  public <V> Map<byte[], V> toBytesMap(Map<T, V> map);
+
+  public <V> Map<T, V> fromBytesMap(Map<byte[], V> map);
+
 }

@@ -23,14 +23,14 @@ public final class SuperSlice<SN,N,V> {
 
   private final List<HSuperColumn<SN,N,V>> columnsList;
 
-  /*package*/ SuperSlice(List<SuperColumn> tSuperColumns, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(tSuperColumns, sNameExtractor, nameExtractor, valueExtractor);
+  /*package*/ SuperSlice(List<SuperColumn> tSuperColumns, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    Assert.noneNull(tSuperColumns, sNameSerializer, nameSerializer, valueSerializer);
     columnsMap = new HashMap<SN,HSuperColumn<SN,N,V>>(tSuperColumns.size());
     columnsList = new ArrayList<HSuperColumn<SN,N,V>>(tSuperColumns.size());
     for (SuperColumn sc: tSuperColumns) {
-      HSuperColumn<SN,N,V> column = new HSuperColumn<SN,N,V>(sc, sNameExtractor, nameExtractor,
-          valueExtractor);
+      HSuperColumn<SN,N,V> column = new HSuperColumn<SN,N,V>(sc, sNameSerializer, nameSerializer,
+          valueSerializer);
       columnsMap.put(column.getName(), column);
       columnsList.add(column);
     }

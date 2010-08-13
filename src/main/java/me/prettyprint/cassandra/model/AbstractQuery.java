@@ -2,23 +2,25 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
 
-public abstract class AbstractQuery<N,V,T> implements Query<T>{
+public abstract class AbstractQuery<K,N,V,T> implements Query<T>{
 
   protected final KeyspaceOperator keyspaceOperator;
   protected String columnFamilyName;
-  protected final Extractor<N> columnNameExtractor;
-  protected final Extractor<V> valueExtractor;
+  protected final Serializer<K> keySerializer;
+  protected final Serializer<N> columnNameSerializer;
+  protected final Serializer<V> valueSerializer;
 
 
-  /*package*/ AbstractQuery(KeyspaceOperator ko, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    Assert.noneNull(ko, nameExtractor, valueExtractor);
+  /*package*/ AbstractQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    Assert.noneNull(ko, keySerializer, nameSerializer, valueSerializer);
     keyspaceOperator = ko;
-    this.columnNameExtractor = nameExtractor;
-    this.valueExtractor = valueExtractor;
+    this.keySerializer = keySerializer;
+    this.columnNameSerializer = nameSerializer;
+    this.valueSerializer = valueSerializer;
   }
 
-  public AbstractQuery<N,V,T> setColumnFamily(String cf) {
+  public AbstractQuery<K,N,V,T> setColumnFamily(String cf) {
     this.columnFamilyName = cf;
     return this;
   }

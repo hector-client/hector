@@ -6,7 +6,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -16,13 +16,13 @@ import org.mockito.Mockito;
 public class AbstractSliceQueryTest {
 
 
-  private static final StringExtractor se = StringExtractor.get();
+  private static final StringSerializer se = StringSerializer.get();
   private static final KeyspaceOperator ko = Mockito.mock(KeyspaceOperator.class);
 
   @Test
   public void testGetSetPredicate_columnNames() {
-    ConcreteSliceQueury<String, String, Rows<String, String>> q =
-      new ConcreteSliceQueury<String, String, Rows<String,String>>(ko, se, se);
+    ConcreteSliceQueury<String, String, String, Rows<String, String, String>> q =
+      new ConcreteSliceQueury<String, String, String, Rows<String, String,String>>(ko, se, se, se);
     assertNull(q.getPredicate());
     q.setColumnNames("1", "2", "3");
     SlicePredicate p = q.getPredicate();
@@ -32,8 +32,8 @@ public class AbstractSliceQueryTest {
 
   @Test
   public void testGetSetPredicate_range() {
-    ConcreteSliceQueury<String, String, Rows<String, String>> q =
-      new ConcreteSliceQueury<String, String, Rows<String,String>>(ko, se, se);
+    ConcreteSliceQueury<String, String, String, Rows<String, String, String>> q =
+      new ConcreteSliceQueury<String, String, String, Rows<String, String,String>>(ko, se, se, se);
     assertNull(q.getPredicate());
     q.setRange("1", "100", false, 10);
     SlicePredicate p = q.getPredicate();
@@ -45,13 +45,12 @@ public class AbstractSliceQueryTest {
     assertEquals(10, range.getCount());
   }
 
-  private class ConcreteSliceQueury<N, V, T> extends AbstractSliceQuery<N, V, T> {
+  private class ConcreteSliceQueury<K, N, V, T> extends AbstractSliceQuery<K, N, V, T> {
 
-    ConcreteSliceQueury(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-      super(ko, nameExtractor, valueExtractor);
+    ConcreteSliceQueury(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+      super(ko, keySerializer, nameSerializer, valueSerializer);
     }
 
-    @Override
     public Result<T> execute() {
       return null;
     }

@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
    */
   private final CassandraClientPool pool;
   private final boolean useThriftFramedTransport;
-  private final TimestampResolution timestampResolution;
+  private final ClockResolution clockResolution;
   private final CassandraHost cassandraHost;
 
   public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
     timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
     this.useThriftFramedTransport = cassandraHost.getUseThriftFramedTransport();
-    timestampResolution = cassandraHost.getTimestampResolution();
+    clockResolution = cassandraHost.getClockResolution();
   }
 
   /**
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
     this.cassandraHost = new CassandraHost(url,port);
     timeout = getTimeout(null);
     this.useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
-    timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
+    clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   }
 
   public CassandraClient create() throws HectorException {
@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
     try {
       c = new CassandraClientImpl(createThriftClient(cassandraHost),
           new KeyspaceFactory(clientMonitor), cassandraHost, pool, 
-          pool.getCluster(), timestampResolution);
+          pool.getCluster(), clockResolution);
     } catch (Exception e) {
       throw new HectorException(e);
     }
@@ -126,19 +126,16 @@ import org.slf4j.LoggerFactory;
     return timeoutVar;
   }
 
-  @Override
   public void activateObject(Object obj) throws Exception {
     // nada
   }
 
-  @Override
   public void destroyObject(Object obj) throws Exception {
     CassandraClient client = (CassandraClient) obj ;
     log.debug("Closing client {} (thread={})", client, Thread.currentThread().getName());
     closeClient(client);
   }
 
-  @Override
   public Object makeObject() throws Exception {
     log.debug("Creating a new client... (thread={})", Thread.currentThread().getName());
     CassandraClient c = create();
@@ -146,7 +143,6 @@ import org.slf4j.LoggerFactory;
     return c;
   }
 
-  @Override
   public boolean validateObject(Object obj) {
     return validateClient((CassandraClient) obj);
   }
@@ -164,7 +160,6 @@ import org.slf4j.LoggerFactory;
     cclient.markAsClosed();
   }
 
-  @Override
   public void passivateObject(Object obj) throws Exception {
     // none
   }

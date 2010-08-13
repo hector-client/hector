@@ -15,37 +15,36 @@ import org.apache.cassandra.thrift.SuperColumn;
 /**
  * A query wrapper for the thrift call multiget_slice for a slice of supercolumns
  */
-public final class MultigetSuperSliceQuery<SN, N, V> extends
-    AbstractSliceQuery<SN, V, SuperRows<SN, N, V>> {
+public final class MultigetSuperSliceQuery<K, SN, N, V> extends
+    AbstractSliceQuery<K, SN, V, SuperRows<K, SN, N, V>> {
 
-  private Collection<String> keys;
-  private final Extractor<N> nameExtractor;
+  private Collection<K> keys;
+  private final Serializer<N> nameSerializer;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, sNameExtractor, valueExtractor);
-    Assert.notNull(nameExtractor, "nameExtractor can't be null");
-    this.nameExtractor = nameExtractor;
+  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, sNameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "nameSerializer can't be null");
+    this.nameSerializer = nameSerializer;
   }
 
-  public MultigetSuperSliceQuery<SN, N, V> setKeys(String... keys) {
+  public MultigetSuperSliceQuery<K, SN, N, V> setKeys(K... keys) {
     this.keys = Arrays.asList(keys);
     return this;
   }
 
-  @Override
-  public Result<SuperRows<SN, N, V>> execute() {
-    return new Result<SuperRows<SN, N, V>>(
-        keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<SN, N, V>>() {
+  public Result<SuperRows<K, SN, N, V>> execute() {
+    return new Result<SuperRows<K, SN, N, V>>(
+        keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<K, SN, N, V>>() {
           @Override
-          public SuperRows<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
-            List<String> keysList = new ArrayList<String>();
+          public SuperRows<K, SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
+            List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            Map<String, List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
-                columnParent, getPredicate());
-            return new SuperRows<SN, N, V>(thriftRet, columnNameExtractor, nameExtractor,
-                valueExtractor);
+            Map<K, List<SuperColumn>> thriftRet = keySerializer.fromBytesMap(ks.multigetSuperSlice(keySerializer.toBytesList(keysList),
+                columnParent, getPredicate()));
+            return new SuperRows<K, SN, N, V>(thriftRet, keySerializer, columnNameSerializer, nameSerializer,
+                valueSerializer);
           }
         }), this);
   }

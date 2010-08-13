@@ -1,6 +1,5 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
-import me.prettyprint.cassandra.model.Extractor;
 
 /**
  * Converts bytes to Long and vise a versa
@@ -8,15 +7,14 @@ import me.prettyprint.cassandra.model.Extractor;
  * @author Ran Tavory
  *
  */
-public final class LongExtractor implements Extractor<Long> {
+public final class LongSerializer extends AbstractSerializer<Long> {
 
-  private static final LongExtractor instance = new LongExtractor();
+  private static final LongSerializer instance = new LongSerializer();
 
-  public static LongExtractor get() {
+  public static LongSerializer get() {
     return instance;
   }
 
-  @Override
   public byte[] toBytes(Long obj) {
     if (obj == null) {
       return null;
@@ -30,7 +28,6 @@ public final class LongExtractor implements Extractor<Long> {
     return b;
   }
 
-  @Override
   public Long fromBytes(byte[] bytes) {
     if (bytes == null) {
       return null;
@@ -42,4 +39,5 @@ public final class LongExtractor implements Extractor<Long> {
     }
     return l;
   }
+
 }

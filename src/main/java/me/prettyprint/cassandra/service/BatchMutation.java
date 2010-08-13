@@ -25,20 +25,20 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public final class BatchMutation {
 
-  private final Map<String, Map<String, List<Mutation>>> mutationMap;
+  private final Map<byte[],Map<String,List<Mutation>>> mutationMap;
 
   public BatchMutation() {
-    mutationMap = new HashMap<String, Map<String,List<Mutation>>>();
+    mutationMap = new HashMap<byte[],Map<String,List<Mutation>>>();
   }
 
-  private BatchMutation(Map<String, Map<String, List<Mutation>>> mutationMap) {
+  private BatchMutation(Map<byte[],Map<String,List<Mutation>>> mutationMap) {
     this.mutationMap = mutationMap;
   }
 
   /**
    * Add an Column insertion (or update) to the batch mutation request.
    */
-  public BatchMutation addInsertion(String key, List<String> columnFamilies,
+  public BatchMutation addInsertion(byte[] key, List<String> columnFamilies,
       Column column) {
     Mutation mutation = new Mutation();
     mutation.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
@@ -46,10 +46,15 @@ public final class BatchMutation {
     return this;
   }
 
+  public BatchMutation addInsertion(String key, List<String> columnFamilies,
+	      Column column) {
+	    return addInsertion(key.getBytes(), columnFamilies, column);
+	  }
+
   /**
    * Add an SuperColumn insertion (or update) to the batch mutation request.
    */
-  public BatchMutation addSuperInsertion(String key, List<String> columnFamilies,
+  public BatchMutation addSuperInsertion(byte[] key, List<String> columnFamilies,
       SuperColumn superColumn) {
     Mutation mutation = new Mutation();
     mutation.setColumn_or_supercolumn(new ColumnOrSuperColumn().setSuper_column(superColumn));
@@ -57,17 +62,26 @@ public final class BatchMutation {
     return this;
   }
 
+  public BatchMutation addSuperInsertion(String key, List<String> columnFamilies,
+	      SuperColumn superColumn) {
+	    return addSuperInsertion(key.getBytes(), columnFamilies, superColumn);
+  }
+
   /**
    * Add a deletion request to the batch mutation.
    */
-  public BatchMutation addDeletion(String key, List<String> columnFamilies, Deletion deletion) {
+  public BatchMutation addDeletion(byte[] key, List<String> columnFamilies, Deletion deletion) {
     Mutation mutation = new Mutation();
     mutation.setDeletion(deletion);
     addMutation(key, columnFamilies, mutation);
     return this;
   }
 
-  private void addMutation(String key, List<String> columnFamilies, Mutation mutation) {
+  public BatchMutation addDeletion(String key, List<String> columnFamilies, Deletion deletion) {
+	  return addDeletion(key.getBytes(), columnFamilies, deletion);
+  }
+  
+  private void addMutation(byte[] key, List<String> columnFamilies, Mutation mutation) {
     Map<String, List<Mutation>> innerMutationMap = getInnerMutationMap(key);
     for (String columnFamily : columnFamilies) {
       if (innerMutationMap.get(columnFamily) == null) {
@@ -81,7 +95,7 @@ public final class BatchMutation {
     mutationMap.put(key, innerMutationMap);
   }
 
-  private Map<String, List<Mutation>> getInnerMutationMap(String key) {
+  private Map<String, List<Mutation>> getInnerMutationMap(byte[] key) {
     Map<String, List<Mutation>> innerMutationMap = mutationMap.get(key);
     if (innerMutationMap == null) {
       innerMutationMap = new HashMap<String, List<Mutation>>();
@@ -89,7 +103,7 @@ public final class BatchMutation {
     return innerMutationMap;
   }
 
-  Map<String, Map<String, List<Mutation>>> getMutationMap() {
+  Map<byte[],Map<String,List<Mutation>>> getMutationMap() {
     return mutationMap;
   }
 
