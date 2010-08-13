@@ -15,35 +15,35 @@ import org.apache.cassandra.thrift.SuperColumn;
 /**
  * A query wrapper for the thrift call multiget_slice for a slice of supercolumns
  */
-public final class MultigetSuperSliceQuery<SN, N, V> extends
-    AbstractSliceQuery<SN, V, SuperRows<SN, N, V>> {
+public final class MultigetSuperSliceQuery<K, SN, N, V> extends
+    AbstractSliceQuery<K, SN, V, SuperRows<K, SN, N, V>> {
 
-  private Collection<byte[]> keys;
+  private Collection<K> keys;
   private final Extractor<N> nameExtractor;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
+  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, sNameExtractor, valueExtractor);
+    super(ko, keyExtractor, sNameExtractor, valueExtractor);
     Assert.notNull(nameExtractor, "nameExtractor can't be null");
     this.nameExtractor = nameExtractor;
   }
 
-  public MultigetSuperSliceQuery<SN, N, V> setKeys(byte[]... keys) {
+  public MultigetSuperSliceQuery<K, SN, N, V> setKeys(K... keys) {
     this.keys = Arrays.asList(keys);
     return this;
   }
 
-  public Result<SuperRows<SN, N, V>> execute() {
-    return new Result<SuperRows<SN, N, V>>(
-        keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<SN, N, V>>() {
+  public Result<SuperRows<K, SN, N, V>> execute() {
+    return new Result<SuperRows<K, SN, N, V>>(
+        keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<K, SN, N, V>>() {
           @Override
-          public SuperRows<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
-            List<byte[]> keysList = new ArrayList<byte[]>();
+          public SuperRows<K, SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
+            List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            Map<byte[], List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
-                columnParent, getPredicate());
-            return new SuperRows<SN, N, V>(thriftRet, columnNameExtractor, nameExtractor,
+            Map<K, List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
+                columnParent, getPredicate(), keyExtractor);
+            return new SuperRows<K, SN, N, V>(thriftRet, keyExtractor, columnNameExtractor, nameExtractor,
                 valueExtractor);
           }
         }), this);

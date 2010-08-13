@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.examples;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.dao.SpringCommand;
+import me.prettyprint.cassandra.model.Extractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.CassandraClient;
@@ -40,11 +41,11 @@ public class ExampleSpringDao {
    * @param key Key for the value
    * @param value the String value to insert
    */
-  public void insert(final byte[] key, final String value) throws HectorException {
+  public <K> void insert(final K key, final String value, final Extractor<K> keyExtractor) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.insert(key, new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), ks.createClock()));
+        ks.insert(key, new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), ks.createClock()), keyExtractor);
         return null;
       }
     });
@@ -54,12 +55,12 @@ public class ExampleSpringDao {
    * Get a string value.
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final byte[] key) throws HectorException {
+  public <K> String get(final K key, final Extractor<K> keyExtractor) throws HectorException {
     return execute(new SpringCommand<String>(cassandraClientPool){
       @Override
       public String execute(final Keyspace ks) throws HectorException {
         try {
-          return string(ks.getColumn(key, createColumnPath(columnName)).getValue());
+          return string(ks.getColumn(key, createColumnPath(columnName), keyExtractor).getValue());
         } catch (NotFoundException e) {
           return null;
         }
@@ -70,11 +71,11 @@ public class ExampleSpringDao {
   /**
    * Delete a key from cassandra
    */
-  public void delete(final byte[] key) throws HectorException {
+  public <K> void delete(final K key, final Extractor<K> keyExtractor) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.remove(key, createColumnPath(columnName));
+        ks.remove(key, createColumnPath(columnName), keyExtractor);
         return null;
       }
     });

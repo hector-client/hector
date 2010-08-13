@@ -15,16 +15,16 @@ import org.apache.cassandra.thrift.Column;
  * @param <N>
  * @param <V>
  */
-public final class OrderedRows<N,V> extends Rows<N,V> {
+public final class OrderedRows<K,N,V> extends Rows<K,N,V> {
 
-  private final List<Row<N,V>> rowsList;
+  private final List<Row<K,N,V>> rowsList;
 
-  public OrderedRows(LinkedHashMap<byte[], List<Column>> thriftRet, Extractor<N> nameExtractor,
+  public OrderedRows(LinkedHashMap<K, List<Column>> thriftRet, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
     super(thriftRet, nameExtractor, valueExtractor);
-    rowsList = new ArrayList<Row<N,V>>(thriftRet.size());
-    for (Map.Entry<byte[], List<Column>> entry: thriftRet.entrySet()) {
-      rowsList.add(new Row<N,V>(entry.getKey(), entry.getValue(), nameExtractor, valueExtractor));
+    rowsList = new ArrayList<Row<K,N,V>>(thriftRet.size());
+    for (Map.Entry<K, List<Column>> entry: thriftRet.entrySet()) {
+      rowsList.add(new Row<K,N,V>(entry.getKey(), entry.getValue(), nameExtractor, valueExtractor));
     }
   }
 
@@ -32,7 +32,7 @@ public final class OrderedRows<N,V> extends Rows<N,V> {
    * Preserves rows order
    * @return an unmodifiable list of Rows
    */
-  public List<Row<N,V>> getList() {
+  public List<Row<K,N,V>> getList() {
     return Collections.unmodifiableList(rowsList);
   }
 }

@@ -14,6 +14,7 @@ import org.apache.cassandra.thrift.Clock;
 
 import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
+import me.prettyprint.cassandra.model.Extractor;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -37,9 +38,9 @@ public class ExampleDaoV2 {
   public static void main(String[] args) throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(createKeyspaceOperator(KEYSPACE, c));
-    ed.insert("key1".getBytes(), "value1");
+    ed.insert("key1", "value1", StringExtractor.get());
 
-    System.out.println(ed.get("key1".getBytes()));
+    System.out.println(ed.get("key1", StringExtractor.get()));
   }
 
   public ExampleDaoV2(KeyspaceOperator ko) {
@@ -52,8 +53,8 @@ public class ExampleDaoV2 {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final byte[] key, final String value) {
-    createMutator(keyspaceOperator).insert(
+  public <K> void insert(final K key, final String value, Extractor<K> keyExtractor) {
+    createMutator(keyspaceOperator, keyExtractor).insert(
         key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
   }
 
@@ -66,8 +67,8 @@ public class ExampleDaoV2 {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final byte[] key) throws HectorException {
-    ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
+  public <K> String get(final K key, Extractor<K> keyExtractor) throws HectorException {
+    ColumnQuery<K, String, String> q = createColumnQuery(keyspaceOperator, keyExtractor, extractor, extractor);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).
@@ -81,16 +82,16 @@ public class ExampleDaoV2 {
    * @param keys
    * @return
    */
-  public Map<byte[], String> getMulti(byte[]... keys) {
-    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor);
+  public <K> Map<K, String> getMulti(Extractor<K> keyExtractor, K... keys) {
+    MultigetSliceQuery<K, String,String> q = createMultigetSliceQuery(keyspaceOperator, keyExtractor, extractor, extractor);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
 
-    Result<Rows<String,String>> r = q.execute();
-    Rows<String,String> rows = r.get();
-    Map<byte[], String> ret = new HashMap<byte[], String>(keys.length);
-    for (byte[] k: keys) {
+    Result<Rows<K, String,String>> r = q.execute();
+    Rows<K, String,String> rows = r.get();
+    Map<K, String> ret = new HashMap<K, String>(keys.length);
+    for (K k: keys) {
       HColumn<String,String> c = rows.getByKey(k).getColumnSlice().getColumnByName(COLUMN_NAME);
       if (c != null && c.getValue() != null) {
         ret.put(k, c.getValue());
@@ -102,9 +103,9 @@ public class ExampleDaoV2 {
   /**
    * Insert multiple values
    */
-  public void insertMulti(Map<byte[], String> keyValues) {
-    Mutator m = createMutator(keyspaceOperator);
-    for (Map.Entry<byte[], String> keyValue: keyValues.entrySet()) {
+  public <K> void insertMulti(Map<K, String> keyValues, Extractor<K> keyExtractor) {
+    Mutator<K> m = createMutator(keyspaceOperator, keyExtractor);
+    for (Map.Entry<K, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,
           createColumn(COLUMN_NAME, keyValue.getValue(), createClock(), extractor, extractor));
     }
@@ -114,9 +115,9 @@ public class ExampleDaoV2 {
   /**
    * Delete multiple values
    */
-  public void delete(byte[]... keys) {
-    Mutator m = createMutator(keyspaceOperator);
-    for (byte[] key: keys) {
+  public <K> void delete(Extractor<K> keyExtractor, K... keys) {
+    Mutator<K> m = createMutator(keyspaceOperator, keyExtractor);
+    for (K key: keys) {
       m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
     }
     m.execute();

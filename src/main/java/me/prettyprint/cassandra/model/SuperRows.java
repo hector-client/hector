@@ -17,21 +17,24 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N>
  * @param <V>
  */
-public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
+public class SuperRows<K, SN, N, V> implements Iterable<SuperRow<K, SN, N, V>> {
 
-  private final Map<byte[], SuperRow<SN, N, V>> rows;
+  private final Map<K, SuperRow<K, SN, N, V>> rows;
+  
+  Extractor<K> keyExtractor;
 
-  public SuperRows(Map<byte[], List<SuperColumn>> thriftRet, Extractor<SN> sNameExtractor,
+  public SuperRows(Map<K, List<SuperColumn>> thriftRet, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(thriftRet, sNameExtractor, nameExtractor, valueExtractor);
-    rows = new HashMap<byte[], SuperRow<SN, N, V>>(thriftRet.size());
-    for (Map.Entry<byte[], List<SuperColumn>> entry : thriftRet.entrySet()) {
-      rows.put(entry.getKey(), new SuperRow<SN, N, V>(entry.getKey(), entry.getValue(),
+    Assert.noneNull(thriftRet, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
+    this.keyExtractor = keyExtractor;
+    rows = new HashMap<K, SuperRow<K, SN, N, V>>(thriftRet.size());
+    for (Map.Entry<K, List<SuperColumn>> entry : thriftRet.entrySet()) {
+      rows.put(entry.getKey(), new SuperRow<K, SN, N, V>(entry.getKey(), entry.getValue(),
           sNameExtractor, nameExtractor, valueExtractor));
     }
   }
 
-  public SuperRow<SN, N, V> getByKey(String key) {
+  public SuperRow<K, SN, N, V> getByKey(K key) {
     return rows.get(key);
   }
 
@@ -39,7 +42,7 @@ public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
     return rows.size();
   }
 
-  public Iterator<SuperRow<SN, N, V>> iterator() {
+  public Iterator<SuperRow<K, SN, N, V>> iterator() {
     return rows.values().iterator();
   }
 

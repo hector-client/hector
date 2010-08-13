@@ -13,17 +13,17 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @author Ran Tavory
  *
  */
-public final class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
+public final class OrderedSuperRows<K,SN,N,V> extends SuperRows<K,SN,N,V> {
 
-  private final List<SuperRow<SN,N,V>> rowsList;
+  private final List<SuperRow<K,SN,N,V>> rowsList;
 
-  public OrderedSuperRows(LinkedHashMap<byte[], List<SuperColumn>> thriftRet,
+  public OrderedSuperRows(LinkedHashMap<K, List<SuperColumn>> thriftRet, Extractor<K> keyExtractor,
       Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    super(thriftRet, sNameExtractor, nameExtractor, valueExtractor);
-    rowsList = new ArrayList<SuperRow<SN,N,V>>(thriftRet.size());
-    for (Map.Entry<byte[], List<SuperColumn>> entry: thriftRet.entrySet()) {
-      rowsList.add(new SuperRow<SN,N,V>(entry.getKey(), entry.getValue(), sNameExtractor,
+    super(thriftRet, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
+    rowsList = new ArrayList<SuperRow<K,SN,N,V>>(thriftRet.size());
+    for (Map.Entry<K, List<SuperColumn>> entry: thriftRet.entrySet()) {
+      rowsList.add(new SuperRow<K,SN,N,V>(entry.getKey(), entry.getValue(), sNameExtractor,
           nameExtractor, valueExtractor));
     }
   }
@@ -32,7 +32,7 @@ public final class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
    * Preserves rows order
    * @return an unmodifiable list of Rows
    */
-  public List<SuperRow<SN,N,V>> getList() {
+  public List<SuperRow<K,SN,N,V>> getList() {
     return Collections.unmodifiableList(rowsList);
   }
 }

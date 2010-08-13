@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.List;
+import java.util.Map;
+
 import me.prettyprint.cassandra.extractors.StringExtractor;
 
 /**
@@ -31,4 +34,13 @@ public interface Extractor<T> {
    * @return
    */
   public T fromBytes(byte[] bytes);
+  
+  public List<byte[]> toBytesList(List<T> list);
+
+  public List<T> fromBytesList(List<byte[]> list);
+
+  public <V> Map<byte[], V> toBytesMap(Map<T, V> map);
+
+  public <V> Map<T, V> fromBytesMap(Map<byte[], V> map);
+
 }

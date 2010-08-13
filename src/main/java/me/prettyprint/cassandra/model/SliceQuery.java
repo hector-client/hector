@@ -15,15 +15,15 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-public final class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
+public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlice<N,V>> {
 
-  private byte[] key;
+  private K key;
 
-  /*package*/ SliceQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
+  /*package*/ SliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    super(ko, keyExtractor, nameExtractor, valueExtractor);
   }
 
-  public SliceQuery<N,V> setKey(byte[] key) {
+  public SliceQuery<K,N,V> setKey(K key) {
     this.key = key;
     return this;
   }
@@ -34,7 +34,7 @@ public final class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,
           @Override
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate());
+            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate(), keyExtractor);
             return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);

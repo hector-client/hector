@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.InvalidRequestException;
 import me.prettyprint.cassandra.model.NotFoundException;
@@ -69,6 +70,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
+  private static final StringExtractor se = new StringExtractor();
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
@@ -187,7 +189,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testBatchInsertColumn() throws HectorException {
-	/*
+    // FIXME replace batchInserts
+    /*
     for (int i = 0; i < 10; i++) {
       HashMap<String, List<Column>> cfmap = new HashMap<String, List<Column>>(10);
       ArrayList<Column> list = new ArrayList<Column>(10);
@@ -228,7 +231,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testBatchMutate() throws HectorException {
-    Map<byte[], Map<String, List<Mutation>>> outerMutationMap = new HashMap<byte[], Map<String,List<Mutation>>>();
+    Map<String, Map<String, List<Mutation>>> outerMutationMap = new HashMap<String, Map<String,List<Mutation>>>();
     for (int i = 0; i < 10; i++) {
 
       Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
@@ -245,9 +248,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         mutations.add(mutation);
       }
       mutationMap.put("Standard1", mutations);
-      outerMutationMap.put(("testBatchMutateColumn_" + i).getBytes(), mutationMap);
+      outerMutationMap.put("testBatchMutateColumn_" + i, mutationMap);
     }
-    keyspace.batchMutate(outerMutationMap);
+    keyspace.batchMutate(outerMutationMap, se);
     // re-use later
     outerMutationMap.clear();
 
@@ -280,9 +283,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       mutations.add(mutation);
 
       mutationMap.put("Standard1", mutations);
-      outerMutationMap.put(("testBatchMutateColumn_"+i).getBytes(), mutationMap);
+      outerMutationMap.put("testBatchMutateColumn_"+i, mutationMap);
     }
-    keyspace.batchMutate(outerMutationMap);
+    keyspace.batchMutate(outerMutationMap, se);
     // make sure the values are gone
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
@@ -300,7 +303,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testBatchMutateBatchMutation() throws HectorException {
-    BatchMutation batchMutation = new BatchMutation();
+    BatchMutation<String> batchMutation = new BatchMutation<String>(se);
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 
@@ -325,7 +328,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       }
     }
-    batchMutation = new BatchMutation();
+    batchMutation = new BatchMutation<String>(se);
     // batch_mutate delete by key
     for (int i = 0; i < 10; i++) {
       SlicePredicate slicePredicate = new SlicePredicate();
@@ -364,7 +367,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
     assertNotNull(found);
 
-    BatchMutation batchMutation = new BatchMutation();
+    BatchMutation<String> batchMutation = new BatchMutation<String>(se);
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 
@@ -409,7 +412,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetSuperColumn() throws HectorException {
-	/*
+    // FIXME replace batchInserts
+    /*
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -503,34 +507,35 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testMultigetColumn() throws HectorException {
-	  /*
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
     cp.setColumn(bytes("testMultigetColumn"));
-    ArrayList<byte[]> keys = new ArrayList<byte[]>(100);
+    ArrayList<String> keys = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
       keyspace.insert("testMultigetColumn_" + i, cp, bytes("testMultigetColumn_value_" + i));
       keys.add("testMultigetColumn_" + i);
     }
 
     // get value
-    Map<byte[], Column> ms = keyspace.multigetColumn(keys, cp);
+    /*
+    Map<String, Column> ms = keyspace.multigetColumn(keys, cp);
     for (int i = 0; i < 100; i++) {
       Column cl = ms.get(keys.get(i));
       assertNotNull(cl);
       assertEquals("testMultigetColumn_value_" + i, string(cl.getValue()));
     }
+    */
 
     // remove value
     for (int i = 0; i < 100; i++) {
       keyspace.remove("testMultigetColumn_" + i, cp);
     }
-    */
   }
 
   @Test
   public void testMultigetSuperColumn() throws HectorException {
-	  /*
+    // FIXME replace batchInserts
+    /*
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -549,13 +554,12 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       List<String> keys = new ArrayList<String>();
       keys.add("testMultigetSuperColumn_1");
-      Map<String, SuperColumn> superc = keyspace.multigetSuperColumn(keys, cp);
+      Map<String, SuperColumn> superc = keyspace.multigetSuperColumn(keys, cp, se);
       assertNotNull(superc);
       assertEquals(1, superc.size());
       assertEquals(10, superc.get("testMultigetSuperColumn_1").columns.size());
     } finally {
       keyspace.remove("testMultigetSuperColumn_1", cp);
-    }
     */
   }
 
@@ -564,17 +568,17 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
     cp.setColumn(bytes("testMultigetSlice"));
-    ArrayList<byte[]> keys = new ArrayList<byte[]>(100);
+    ArrayList<String> keys = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
       keyspace.insert("testMultigetSlice_" + i, cp, bytes("testMultigetSlice_value_" + i));
-      keys.add(("testMultigetSlice_" + i).getBytes());
+      keys.add("testMultigetSlice_" + i);
     }
     // get value
     ColumnParent clp = new ColumnParent("Standard1");
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
-    Map<byte[], List<Column>> ms = keyspace.multigetSlice(keys, clp, sp);
+    Map<String, List<Column>> ms = keyspace.multigetSlice(keys, clp, sp, se);
     for (int i = 0; i < 100; i++) {
       List<Column> cl = ms.get(keys.get(i));
       assertNotNull(cl);
@@ -590,7 +594,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testMultigetSlice_1() throws HectorException {
-	  /*
+    // FIXME replace batchInserts
+    /*
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -619,7 +624,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
       SlicePredicate sp = new SlicePredicate();
       sp.setSlice_range(sr);
-      Map<String, List<Column>> superc = keyspace.multigetSlice(keys, clp, sp);
+      Map<String, List<Column>> superc = keyspace.multigetSlice(keys, clp, sp, se);
 
       assertNotNull(superc);
       assertEquals(3, superc.size());
@@ -639,7 +644,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testMultigetSuperSlice() throws HectorException {
-	  /*
+    // FIXME replace batchInserts
+    /*
     HashMap<String, List<SuperColumn>> cfmap = new HashMap<String, List<SuperColumn>>(10);
     ArrayList<Column> list = new ArrayList<Column>(100);
     for (int j = 0; j < 10; j++) {
@@ -667,7 +673,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
       SlicePredicate sp = new SlicePredicate();
       sp.setSlice_range(sr);
-      Map<String, List<SuperColumn>> superc = keyspace.multigetSuperSlice(keys, clp, sp); // throw
+      Map<String, List<SuperColumn>> superc = keyspace.multigetSuperSlice(keys, clp, sp, se); // throw
 
       assertNotNull(superc);
       assertEquals(3, superc.size());
@@ -697,7 +703,6 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetCount() throws HectorException {
-	  /*
     // insert values
     for (int i = 0; i < 100; i++) {
       ColumnPath cp = new ColumnPath("Standard1");
@@ -707,17 +712,15 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
     // get value
     ColumnParent clp = new ColumnParent("Standard1");
-    int count = keyspace.getCount("testGetCount", clp);
-    assertEquals(100, count);
+    //int count = keyspace.getCount("testGetCount", clp, se);
+    //assertEquals(100, count);
 
     ColumnPath cp = new ColumnPath("Standard1");
     keyspace.remove("testGetCount", cp);
-    */
   }
 
   @Test
   public void testGetRangeSlice() throws HectorException {
-	  /*
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlice_" + i));
@@ -732,6 +735,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
+    /*
     @SuppressWarnings("deprecation")
     Map<String, List<Column>> keySlices = keyspace.getRangeSlice(clp, sp, "testGetRangeSlice0", "testGetRangeSlice3", 5);
 
@@ -740,12 +744,12 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     assertNotNull("testGetRangeSlice1 is null", keySlices.get("testGetRangeSlice1"));
     assertEquals("testGetRangeSlice_Value_0", string(keySlices.get("testGetRangeSlice1").get(0).getValue()));
     assertEquals(10, keySlices.get("testGetRangeSlice1").size());
+    */
 
     ColumnPath cp = new ColumnPath("Standard2");
     keyspace.remove("testGetRanageSlice0", cp);
     keyspace.remove("testGetRanageSlice1", cp);
     keyspace.remove("testGetRanageSlice2", cp);
-    */
   }
 
   @Test
@@ -766,10 +770,10 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     sp.setSlice_range(sr);
 
     KeyRange range = new KeyRange();
-    range.setStart_key( "testGetRangeSlices0".getBytes() );
-    range.setEnd_key( "testGetRangeSlices2".getBytes() );
+    range.setStart_key( "testGetRangeSlices0".getBytes());
+    range.setEnd_key( "testGetRangeSlices2".getBytes());
 
-    Map<byte[], List<Column>> keySlices = keyspace.getRangeSlices(clp, sp, range);
+    Map<String, List<Column>> keySlices = keyspace.getRangeSlices(clp, sp, range, se);
 
     assertNotNull(keySlices);
     assertEquals(3, keySlices.size());
@@ -785,7 +789,6 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetSuperRangeSlice() throws HectorException {
-	  /*
     for (int i = 0; i < 10; i++) {
       ColumnPath cp = new ColumnPath("Super1");
       cp.setSuper_column(bytes("SuperColumn_1"));
@@ -799,8 +802,10 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
+    
+    /*
     @SuppressWarnings("deprecation")
-    Map<byte[], List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
         "testGetSuperRangeSlice0", "testGetSuperRangeSlice3", 5);
 
     assertNotNull(keySlices);
@@ -810,11 +815,11 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         string(keySlices.get("testGetSuperRangeSlice0").get(0).getColumns().get(0).getValue()));
     assertEquals(1, keySlices.get("testGetSuperRangeSlice1").size());
     assertEquals(10, keySlices.get("testGetSuperRangeSlice1").get(0).getColumns().size());
-
+    */
+    
     ColumnPath cp = new ColumnPath("Super1");
     keyspace.remove("testGetSuperRangeSlice0", cp);
     keyspace.remove("testGetSuperRangeSlice1", cp);
-    */
   }
 
   @Test
@@ -834,11 +839,11 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     sp.setSlice_range(sr);
 
     KeyRange range = new KeyRange();
-    range.setStart_key( "testGetSuperRangeSlices0".getBytes() );
-    range.setEnd_key( "testGetSuperRangeSlices1".getBytes() );
+    range.setStart_key( "testGetSuperRangeSlices0".getBytes());
+    range.setEnd_key( "testGetSuperRangeSlices1".getBytes());
 
 
-    Map<byte[], List<SuperColumn>> keySlices = keyspace.getSuperRangeSlices(clp, sp, range);
+    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlices(clp, sp, range, se);
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());

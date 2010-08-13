@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.examples;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
+import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
@@ -33,10 +34,10 @@ public class ExampleClient {
       columnPath.setColumn(bytes("column-name"));
 
       // insert
-      keyspace.insert("key".getBytes(), columnParent, new Column(bytes("column-name"), bytes("value"), keyspace.createClock()));
+      keyspace.insert("key", columnParent, new Column(bytes("column-name"), bytes("value"), keyspace.createClock()), StringExtractor.get());
 
       // read
-      Column col = keyspace.getColumn("key".getBytes(), columnPath);
+      Column col = keyspace.getColumn("key", columnPath, StringExtractor.get());
 
       System.out.println("Read from cassandra: " + string(col.getValue()));
 

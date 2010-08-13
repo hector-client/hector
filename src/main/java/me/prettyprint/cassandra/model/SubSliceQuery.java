@@ -17,20 +17,20 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
+public final class SubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlice<N,V>> {
 
-  private byte[] key;
+  private K key;
   private SN superColumn;
   private final Extractor<SN> sNameExtractor;
 
-  /*package*/ SubSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
+  /*package*/ SubSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
+    super(ko, keyExtractor, nameExtractor, valueExtractor);
     Assert.notNull(sNameExtractor, "Supername extractor cannot be null");
     this.sNameExtractor = sNameExtractor;
   }
 
-  public SubSliceQuery<SN,N,V> setKey(byte[] key) {
+  public SubSliceQuery<K,SN,N,V> setKey(K key) {
     this.key = key;
     return this;
   }
@@ -38,7 +38,7 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
   /**
    * Set the supercolumn to run the slice query on
    */
-  public SubSliceQuery<SN,N,V> setSuperColumn(SN superColumn) {
+  public SubSliceQuery<K,SN,N,V> setSuperColumn(SN superColumn) {
     this.superColumn = superColumn;
     return this;
   }
@@ -52,7 +52,7 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate());
+            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate(), keyExtractor);
             return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);

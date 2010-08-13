@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
@@ -49,11 +50,11 @@ public class ExampleDaoV2Test {
   public void testInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
-    assertNull(dao.get("key".getBytes()));
-    dao.insert("key".getBytes(), "value");
-    assertEquals("value", dao.get("key".getBytes()));
-    dao.delete("key".getBytes());
-    assertNull(dao.get("key".getBytes()));
+    assertNull(dao.get("key", StringExtractor.get()));
+    dao.insert("key", "value", StringExtractor.get());
+    assertEquals("value", dao.get("key", StringExtractor.get()));
+    dao.delete(StringExtractor.get(), "key");
+    assertNull(dao.get("key", StringExtractor.get()));
   }
 
   @Test
@@ -63,37 +64,37 @@ public class ExampleDaoV2Test {
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
 
     // Get non-existing values
-    Map<byte[], String> ret = dao.getMulti("key1".getBytes(), "key2".getBytes());
+    Map<String, String> ret = dao.getMulti(StringExtractor.get(), "key1", "key2");
     assertNotNull(ret);
     assertNull("value1", ret.get("key1"));
 
     // Insert values
-    Map<byte[], String> keyValues = new HashMap<byte[], String>();
-    keyValues.put("key1".getBytes(), "value1");
-    keyValues.put("key2".getBytes(), "value2");
-    dao.insertMulti(keyValues);
+    Map<String, String> keyValues = new HashMap<String, String>();
+    keyValues.put("key1", "value1");
+    keyValues.put("key2", "value2");
+    dao.insertMulti(keyValues, StringExtractor.get());
 
     // Simple get test
-    ret = dao.getMulti("key1".getBytes(), "key2".getBytes());
+    ret = dao.getMulti(StringExtractor.get(), "key1", "key2");
     assertNotNull(ret);
-    assertEquals("value1", ret.get("key1".getBytes()));
-    assertEquals("value2", ret.get("key2".getBytes()));
+    assertEquals("value1", ret.get("key1"));
+    assertEquals("value2", ret.get("key2"));
 
     // Get some values that don't exist
-    ret = dao.getMulti("key2".getBytes(), "key3".getBytes());
+    ret = dao.getMulti(StringExtractor.get(), "key2", "key3");
     assertNotNull(ret);
-    assertEquals("value2", ret.get("key2".getBytes()));
-    assertNull(ret.get("key3".getBytes()));
-    assertNull(ret.get("key1".getBytes()));
+    assertEquals("value2", ret.get("key2"));
+    assertNull(ret.get("key3"));
+    assertNull(ret.get("key1"));
 
     // delete
-    dao.delete("key1".getBytes(), "key2".getBytes());
+    dao.delete(StringExtractor.get(), "key1", "key2");
 
     // validate deletion
-    ret = dao.getMulti("key1".getBytes(), "key2".getBytes());
+    ret = dao.getMulti(StringExtractor.get(), "key1", "key2");
     assertNotNull(ret);
-    assertNull(ret.get("key1".getBytes()));
-    assertNull(ret.get("key2".getBytes()));
+    assertNull(ret.get("key1"));
+    assertNull(ret.get("key2"));
 
   }
 }

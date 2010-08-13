@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.extractors;
 
+import java.util.List;
+import java.util.Map;
+
 import me.prettyprint.cassandra.model.Extractor;
 
 /**
@@ -24,4 +27,21 @@ public final class BytesExtractor implements Extractor<byte[]> {
   public byte[] toBytes(byte[] obj) {
     return obj;
   }
+  
+  public List<byte[]> toBytesList(List<byte[]> list) {
+    return list;
+  }
+
+  public List<byte[]> fromBytesList(List<byte[]> list) {
+    return list;
+  }
+
+  public <V> Map<byte[], V> toBytesMap(Map<byte[], V> map) {
+    return map;
+  }
+
+  public <V> Map<byte[], V> fromBytesMap(Map<byte[], V> map) {
+    return map;
+  }
+
 }

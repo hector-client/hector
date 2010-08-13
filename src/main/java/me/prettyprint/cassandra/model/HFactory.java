@@ -85,72 +85,72 @@ public final class HFactory {
     return DEFAULT_CONSISTENCY_LEVEL_POLICY;
   }
 
-  public static <N,V> Mutator createMutator(KeyspaceOperator ko) {
-    return new Mutator(ko);
+  public static <K,N,V> Mutator<K> createMutator(KeyspaceOperator ko, Extractor<K> keyExtractor) {
+    return new Mutator<K>(ko, keyExtractor);
   }
 
-  public static <N,V> ColumnQuery<N,V> createColumnQuery(KeyspaceOperator ko,
+  public static <K,N,V> ColumnQuery<K,N,V> createColumnQuery(KeyspaceOperator ko, Extractor<K> keyExtractor,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new ColumnQuery<N,V>(ko, nameExtractor, valueExtractor);
+    return new ColumnQuery<K,N,V>(ko, keyExtractor, nameExtractor, valueExtractor);
   }
 
-  public static ColumnQuery<String, String> createStringColumnQuery(KeyspaceOperator ko) {
+  public static ColumnQuery<String, String, String> createStringColumnQuery(KeyspaceOperator ko) {
     StringExtractor se = StringExtractor.get();
-    return createColumnQuery(ko, se, se);
+    return createColumnQuery(ko, se, se, se);
   }
 
-  public static <SN,N,V> SuperColumnQuery<SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new SuperColumnQuery<SN, N, V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+  public static <K,SN,N,V> SuperColumnQuery<K,SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
+      Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new SuperColumnQuery<K,SN, N, V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
-      KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new MultigetSliceQuery<N,V>(ko, nameExtractor, valueExtractor);
+  public static <K,N,V> MultigetSliceQuery<K,N,V> createMultigetSliceQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new MultigetSliceQuery<K,N,V>(ko, keyExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> MultigetSuperSliceQuery<SN,N,V> createMultigetSuperSliceQuery(
-      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new MultigetSuperSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+  public static <K,SN,N,V> MultigetSuperSliceQuery<K,SN,N,V> createMultigetSuperSliceQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new MultigetSuperSliceQuery<K,SN,N,V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> MultigetSubSliceQuery<SN,N,V> createMultigetSubSliceQuery(
-      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new MultigetSubSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+  public static <K,SN,N,V> MultigetSubSliceQuery<K,SN,N,V> createMultigetSubSliceQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new MultigetSubSliceQuery<K,SN,N,V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <N,V> RangeSlicesQuery<N,V> createRangeSlicesQuery(
-      KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new RangeSlicesQuery<N,V>(ko, nameExtractor, valueExtractor);
+  public static <K,N,V> RangeSlicesQuery<K,N,V> createRangeSlicesQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new RangeSlicesQuery<K,N,V>(ko, keyExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> RangeSuperSlicesQuery<SN,N,V> createRangeSuperSlicesQuery(
-      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+  public static <K,SN,N,V> RangeSuperSlicesQuery<K,SN,N,V> createRangeSuperSlicesQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    return new RangeSuperSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+    return new RangeSuperSlicesQuery<K,SN,N,V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> RangeSubSlicesQuery<SN,N,V> createRangeSubSlicesQuery(
-      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+  public static <K,SN,N,V> RangeSubSlicesQuery<K,SN,N,V> createRangeSubSlicesQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    return new RangeSubSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+    return new RangeSubSlicesQuery<K,SN,N,V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <N,V> SliceQuery<N,V> createSliceQuery(
-      KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    return new SliceQuery<N,V>(ko, nameExtractor, valueExtractor);
+  public static <K,N,V> SliceQuery<K,N,V> createSliceQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    return new SliceQuery<K,N,V>(ko, keyExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> SubSliceQuery<SN,N,V> createSubSliceQuery(
-      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+  public static <K,SN,N,V> SubSliceQuery<K,SN,N,V> createSubSliceQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    return new SubSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+    return new SubSliceQuery<K,SN,N,V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
-  public static <SN,N,V> SuperSliceQuery<SN,N,V> createSuperSliceQuery(
-      KeyspaceOperator ko, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
+  public static <K,SN,N,V> SuperSliceQuery<K,SN,N,V> createSuperSliceQuery(
+      KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
       Extractor<V> valueExtractor) {
-    return new SuperSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+    return new SuperSliceQuery<K,SN,N,V>(ko, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
   }
 
   /**

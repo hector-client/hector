@@ -7,6 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.model.Extractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.model.InvalidRequestException;
@@ -70,14 +72,14 @@ import org.slf4j.LoggerFactory;
   }
 
 
-
-  public void batchMutate(final Map<byte[],Map<String,List<Mutation>>> mutationMap)
+  public <K> void batchMutate(final Map<K,Map<String,List<Mutation>>> mutationMap, final Extractor<K> keyExtractor) 
       throws HectorException {
+
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
     
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.batch_mutate(mutationMap, consistency);
+          cassandra.batch_mutate(keyExtractor.toBytesMap(mutationMap), consistency);
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -88,17 +90,17 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  public void batchMutate(BatchMutation batchMutate) throws HectorException {
-    batchMutate(batchMutate.getMutationMap());
+  public <K> void batchMutate(BatchMutation<K> batchMutation) throws HectorException {
+    batchMutate(batchMutation.getMutationMap(), batchMutation.getKeyExtractor());
   }
 
 
-  public int getCount(final byte[] key, final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
+  public <K> int getCount(final K key, final ColumnParent columnParent, final SlicePredicate predicate, final Extractor<K> keyExtractor) throws HectorException {
     Operation<Integer> op = new Operation<Integer>(OperationType.READ) {
     
       public Integer execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.get_count(key, columnParent, predicate, consistency);
+          return cassandra.get_count(keyExtractor.toBytes(key), columnParent, predicate, consistency);
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -116,23 +118,23 @@ import org.slf4j.LoggerFactory;
 
 
 
-  public LinkedHashMap<byte[], List<Column>> getRangeSlices(final ColumnParent columnParent,
-      final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
-    Operation<LinkedHashMap<byte[], List<Column>>> op = new Operation<LinkedHashMap<byte[], List<Column>>>(
+  public <K> LinkedHashMap<K, List<Column>> getRangeSlices(final ColumnParent columnParent,
+      final SlicePredicate predicate, final KeyRange keyRange, final Extractor<K> keyExtractor) throws HectorException {
+    Operation<LinkedHashMap<K, List<Column>>> op = new Operation<LinkedHashMap<K, List<Column>>>(
         OperationType.READ) {
     
-      public LinkedHashMap<byte[], List<Column>> execute(Cassandra.Client cassandra)
+      public LinkedHashMap<K, List<Column>> execute(Cassandra.Client cassandra)
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
               predicate, keyRange, consistency);
           if (keySlices == null || keySlices.isEmpty()) {
-            return new LinkedHashMap<byte[], List<Column>>(0);
+            return new LinkedHashMap<K, List<Column>>(0);
           }
-          LinkedHashMap<byte[], List<Column>> ret = new LinkedHashMap<byte[], List<Column>>(
+          LinkedHashMap<K, List<Column>> ret = new LinkedHashMap<K, List<Column>>(
               keySlices.size());
           for (KeySlice keySlice : keySlices) {
-            ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
+            ret.put(keyExtractor.fromBytes(keySlice.getKey()), getColumnList(keySlice.getColumns()));
           }
           return ret;
         } catch (Exception e) {
@@ -146,24 +148,24 @@ import org.slf4j.LoggerFactory;
 
 
 
-  public LinkedHashMap<byte[], List<SuperColumn>> getSuperRangeSlices(
-      final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange)
+  public <K> LinkedHashMap<K, List<SuperColumn>> getSuperRangeSlices(
+      final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange, final Extractor<K> keyExtractor)
       throws HectorException {
-    Operation<LinkedHashMap<byte[], List<SuperColumn>>> op = new Operation<LinkedHashMap<byte[], List<SuperColumn>>>(
+    Operation<LinkedHashMap<K, List<SuperColumn>>> op = new Operation<LinkedHashMap<K, List<SuperColumn>>>(
         OperationType.READ) {
     
-      public LinkedHashMap<byte[], List<SuperColumn>> execute(Cassandra.Client cassandra)
+      public LinkedHashMap<K, List<SuperColumn>> execute(Cassandra.Client cassandra)
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
               predicate, keyRange, consistency);
           if (keySlices == null || keySlices.isEmpty()) {
-            return new LinkedHashMap<byte[], List<SuperColumn>>();
+            return new LinkedHashMap<K, List<SuperColumn>>();
           }
-          LinkedHashMap<byte[], List<SuperColumn>> ret = new LinkedHashMap<byte[], List<SuperColumn>>(
+          LinkedHashMap<K, List<SuperColumn>> ret = new LinkedHashMap<K, List<SuperColumn>>(
               keySlices.size());
           for (KeySlice keySlice : keySlices) {
-            ret.put(keySlice.getKey(), getSuperColumnList(keySlice.getColumns()));
+            ret.put(keyExtractor.fromBytes(keySlice.getKey()), getSuperColumnList(keySlice.getColumns()));
           }
           return ret;
         } catch (Exception e) {
@@ -176,13 +178,13 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  public List<Column> getSlice(final byte[] key, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws HectorException {
+  public <K> List<Column> getSlice(final K key, final ColumnParent columnParent,
+      final SlicePredicate predicate, final Extractor<K> keyExtractor) throws HectorException {
     Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ) {
     
       public List<Column> execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyExtractor.toBytes(key), columnParent,
               predicate, consistency);
 
           if (cosclist == null) {
@@ -204,10 +206,10 @@ import org.slf4j.LoggerFactory;
 
   public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
   throws HectorException {
-	  return getSlice(key.getBytes(), columnParent, predicate);
+	  return getSlice(key, columnParent, predicate, StringExtractor.get());
   }
 
-  public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
+  public <K> SuperColumn getSuperColumn(final K key, final ColumnPath columnPath, final Extractor<K> keyExtractor) throws HectorException {
     valideColumnPath(columnPath);
 
     Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
@@ -215,7 +217,7 @@ import org.slf4j.LoggerFactory;
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(key, columnPath, consistency);
+          cosc = cassandra.get(keyExtractor.toBytes(key), columnPath, consistency);
         } catch (NotFoundException e) {
           setException(xtrans.translate(e));
           return null;
@@ -235,12 +237,12 @@ import org.slf4j.LoggerFactory;
   
   public List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
 	      SlicePredicate predicate) throws HectorException {
-	  return getSuperSlice(key.getBytes(), columnParent, predicate);
+	  return getSuperSlice(key, columnParent, predicate, StringExtractor.get());
   }
 
 
-  public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath,
-      final boolean reversed, final int size) throws HectorException {
+  public <K> SuperColumn getSuperColumn(final K key, final ColumnPath columnPath,
+      final boolean reversed, final int size, final Extractor<K> keyExtractor) throws HectorException {
     valideSuperColumnPath(columnPath);
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
     Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
@@ -253,7 +255,7 @@ import org.slf4j.LoggerFactory;
         sp.setSlice_range(sliceRange);
 
         try {
-          List<ColumnOrSuperColumn> cosc = cassandra.get_slice(key, clp, sp,
+          List<ColumnOrSuperColumn> cosc = cassandra.get_slice(keyExtractor.toBytes(key), clp, sp,
               consistency);
           if (cosc == null || cosc.isEmpty()) {
             return null;
@@ -269,17 +271,17 @@ import org.slf4j.LoggerFactory;
   }
   
   public SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException {
-	  return getSuperColumn(key.getBytes(), columnPath);
+	  return getSuperColumn(key, columnPath, StringExtractor.get());
   }
 
 
-  public List<SuperColumn> getSuperSlice(final byte[] key, final ColumnParent columnParent,
-      final SlicePredicate predicate) throws HectorException {
+  public <K> List<SuperColumn> getSuperSlice(final K key, final ColumnParent columnParent,
+      final SlicePredicate predicate, final Extractor<K> keyExtractor) throws HectorException {
     Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ) {
     
       public List<SuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keyExtractor.toBytes(key), columnParent,
               predicate, consistency);
           if (cosclist == null) {
             return null;
@@ -300,12 +302,12 @@ import org.slf4j.LoggerFactory;
 
 
 
-  public void insert(final byte[] key, final ColumnParent columnParent, final Column column) throws HectorException {
+  public <K> void insert(final K key, final ColumnParent columnParent, final Column column, final Extractor<K> keyExtractor) throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
     
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.insert(key, columnParent, column, consistency);
+          cassandra.insert(keyExtractor.toBytes(key), columnParent, column, consistency);
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -318,29 +320,32 @@ import org.slf4j.LoggerFactory;
   public void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException {
 	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
 	  Column column = new Column(columnPath.getColumn(), value, createClock());
-	  insert(key.getBytes(), columnParent, column);
+	  insert(key, columnParent, column, StringExtractor.get());
   }
 
   public void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException {
 	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
 	  Column column = new Column(columnPath.getColumn(), value, new Clock(timestamp));
-	  insert(key.getBytes(), columnParent, column);
+	  insert(key, columnParent, column, StringExtractor.get());
   }
 
 
-  public Map<byte[], List<Column>> multigetSlice(final List<byte[]> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
-    Operation<Map<byte[], List<Column>>> getCount = new Operation<Map<byte[], List<Column>>>(
+  public <K> Map<K, List<Column>> multigetSlice(final List<K> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate, final Extractor<K> keyExtractor) throws HectorException {
+    Operation<Map<K, List<Column>>> getCount = new Operation<Map<K, List<Column>>>(
         OperationType.READ) {
     
-      public Map<byte[], List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
+      public Map<K, List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
         try {
+          
+          List<byte[]> byte_keys = keyExtractor.toBytesList(keys);
+                    
           Map<byte[], List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
-              keys, columnParent, predicate, consistency);
+              byte_keys, columnParent, predicate, consistency);
 
-          Map<byte[], List<Column>> result = new HashMap<byte[], List<Column>>();
+          Map<K, List<Column>> result = new HashMap<K, List<Column>>();
           for (Map.Entry<byte[], List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-            result.put(entry.getKey(), getColumnList(entry.getValue()));
+            result.put(keyExtractor.fromBytes(entry.getKey()), getColumnList(entry.getValue()));
           }
           return result;
         } catch (Exception e) {
@@ -354,14 +359,14 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath)
+  public <K> Map<K, SuperColumn> multigetSuperColumn(List<K> keys, ColumnPath columnPath, Extractor<K> keyExtractor)
       throws HectorException {
-    return multigetSuperColumn(keys, columnPath, false, Integer.MAX_VALUE);
+    return multigetSuperColumn(keys, columnPath, false, Integer.MAX_VALUE, keyExtractor);
   }
 
 
-  public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
-      boolean reversed, int size) throws HectorException {
+  public <K> Map<K, SuperColumn> multigetSuperColumn(List<K> keys, ColumnPath columnPath,
+      boolean reversed, int size, Extractor<K> keyExtractor) throws HectorException {
     valideSuperColumnPath(columnPath);
 
     // only can get supercolumn by multigetSuperSlice
@@ -372,14 +377,14 @@ import org.slf4j.LoggerFactory;
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
 
-    Map<byte[], List<SuperColumn>> sclist = multigetSuperSlice(keys, clp, sp);
+    Map<K, List<SuperColumn>> sclist = multigetSuperSlice(keys, clp, sp, keyExtractor);
 
     if (sclist == null || sclist.isEmpty()) {
       return Collections.emptyMap();
     }
 
-    Map<byte[], SuperColumn> result = new HashMap<byte[], SuperColumn>(keys.size() * 2);
-    for (Map.Entry<byte[], List<SuperColumn>> entry : sclist.entrySet()) {
+    Map<K, SuperColumn> result = new HashMap<K, SuperColumn>(keys.size() * 2);
+    for (Map.Entry<K, List<SuperColumn>> entry : sclist.entrySet()) {
       List<SuperColumn> sclistByKey = entry.getValue();
       if (sclistByKey.size() > 0) {
         result.put(entry.getKey(), sclistByKey.get(0));
@@ -389,16 +394,16 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  public Map<byte[], List<SuperColumn>> multigetSuperSlice(final List<byte[]> keys,
-      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
-    Operation<Map<byte[], List<SuperColumn>>> getCount = new Operation<Map<byte[], List<SuperColumn>>>(
+  public <K> Map<K, List<SuperColumn>> multigetSuperSlice(final List<K> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate, final Extractor<K> keyExtractor) throws HectorException {
+    Operation<Map<K, List<SuperColumn>>> getCount = new Operation<Map<K, List<SuperColumn>>>(
         OperationType.READ) {
     
-      public Map<byte[], List<SuperColumn>> execute(Cassandra.Client cassandra)
+      public Map<K, List<SuperColumn>> execute(Cassandra.Client cassandra)
           throws HectorException {
         try {
           Map<byte[], List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
-              keys, columnParent, predicate, consistency);
+              keyExtractor.toBytesList(keys), columnParent, predicate, consistency);
           // if user not given super column name, the multiget_slice will return
           // List
           // filled with
@@ -407,19 +412,19 @@ import org.slf4j.LoggerFactory;
           // with column,
           // this is a bad interface design.
           if (columnParent.getSuper_column() == null) {
-            Map<byte[], List<SuperColumn>> result = new HashMap<byte[], List<SuperColumn>>();
+            Map<K, List<SuperColumn>> result = new HashMap<K, List<SuperColumn>>();
             for (Map.Entry<byte[], List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
-              result.put(entry.getKey(), getSuperColumnList(entry.getValue()));
+              result.put(keyExtractor.fromBytes(entry.getKey()), getSuperColumnList(entry.getValue()));
             }
             return result;
           } else {
-            Map<byte[], List<SuperColumn>> result = new HashMap<byte[], List<SuperColumn>>();
+            Map<K, List<SuperColumn>> result = new HashMap<K, List<SuperColumn>>();
             for (Map.Entry<byte[], List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
               SuperColumn spc = new SuperColumn(columnParent.getSuper_column(),
                   getColumnList(entry.getValue()));
               ArrayList<SuperColumn> spclist = new ArrayList<SuperColumn>(1);
               spclist.add(spc);
-              result.put(entry.getKey(), spclist);
+              result.put(keyExtractor.fromBytes(entry.getKey()), spclist);
             }
             return result;
           }
@@ -434,19 +439,19 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  public void remove(byte[] key, ColumnPath columnPath) {
-	this.remove(key, columnPath, createClock());
+  public <K> void remove(K key, ColumnPath columnPath, Extractor<K> keyExtractor) {
+	this.remove(key, columnPath, createClock(), keyExtractor);
 }
 
 
 
-public void remove(final byte[] key, final ColumnPath columnPath, final Clock clock)
+public <K> void remove(final K key, final ColumnPath columnPath, final Clock clock, final Extractor<K> keyExtractor)
       throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
     
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.remove(key, columnPath, clock, consistency);
+          cassandra.remove(keyExtractor.toBytes(key), columnPath, clock, consistency);
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -457,14 +462,14 @@ public void remove(final byte[] key, final ColumnPath columnPath, final Clock cl
   }
 
 public void remove(String key, ColumnPath columnPath) throws HectorException {
-	remove(key.getBytes(), columnPath);
+	remove(key, columnPath, StringExtractor.get());
 }
 
 /**
 * Same as two argument version, but the caller must specify their own timestamp
 */
 public void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException {
-	remove(key.getBytes(), columnPath, new Clock(timestamp));
+	remove(key, columnPath, new Clock(timestamp), StringExtractor.get());
 }
 
 
@@ -483,7 +488,7 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
   }
 
 
-  public Column getColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
+  public <K> Column getColumn(final K key, final ColumnPath columnPath, final Extractor<K> keyExtractor) throws HectorException {
     valideColumnPath(columnPath);
 
     Operation<Column> op = new Operation<Column>(OperationType.READ) {
@@ -491,7 +496,7 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
       public Column execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(key, columnPath, consistency);
+          cosc = cassandra.get(keyExtractor.toBytes(key), columnPath, consistency);
         } catch (NotFoundException e) {
           setException(xtrans.translate(e));
           return null;
@@ -511,7 +516,7 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
   }
 
   public Column getColumn(String key, ColumnPath columnPath) throws HectorException {
-	  return getColumn(key.getBytes(), columnPath);
+	  return getColumn(key, columnPath, StringExtractor.get());
   }
 
   public ConsistencyLevel getConsistencyLevel() {

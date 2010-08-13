@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import me.prettyprint.cassandra.extractors.StringExtractor;
+
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.Deletion;
@@ -18,13 +20,13 @@ import org.junit.Test;
 public class BatchMutationTest {
 
   private List<String> columnFamilies;
-  private BatchMutation batchMutate;
+  private BatchMutation<String> batchMutate;
 
   @Before
   public void setup() {
     columnFamilies = new ArrayList<String>();
     columnFamilies.add("Standard1");
-    batchMutate = new BatchMutation();
+    batchMutate = new BatchMutation<String>(StringExtractor.get());
   }
 
   @Test

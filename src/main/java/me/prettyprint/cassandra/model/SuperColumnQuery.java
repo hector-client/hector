@@ -8,26 +8,26 @@ import me.prettyprint.cassandra.service.Keyspace;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
-public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
+public final class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 
   private final Extractor<SN> sNameExtractor;
-  private byte[] key;
+  private K key;
   private SN superName;
 
   /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(keyspaceOperator, nameExtractor, valueExtractor);
+      Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+    super(keyspaceOperator, keyExtractor, nameExtractor, valueExtractor);
     noneNull(sNameExtractor, nameExtractor, valueExtractor);
     this.sNameExtractor = sNameExtractor;
   }
 
-  public SuperColumnQuery<SN,N,V> setKey(byte[] key) {
+  public SuperColumnQuery<K,SN,N,V> setKey(K key, Extractor<K> keyExtractor) {
     this.key = key;
     return this;
   }
 
-  public SuperColumnQuery<SN,N,V> setSuperName(SN superName) {
+  public SuperColumnQuery<K,SN,N,V> setSuperName(SN superName) {
     this.superName = superName;
     return this;
   }
@@ -42,7 +42,7 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
             try {
               ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
                   sNameExtractor, columnNameExtractor);
-              SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath);
+              SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath, keyExtractor);
               if (thriftSuperColumn == null) {
                 return null;
               }

@@ -16,19 +16,19 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N>
  * @param <V>
  */
-public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperSlice<SN,N,V>> {
+public final class SuperSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,SuperSlice<SN,N,V>> {
 
-  private byte[] key;
+  private K key;
   private final Extractor<SN> sNameExtractor;
 
-  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
+  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
+    super(ko, keyExtractor, nameExtractor, valueExtractor);
     Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
     this.sNameExtractor = sNameExtractor;
   }
 
-  public SuperSliceQuery<SN,N,V> setKey(byte[] key) {
+  public SuperSliceQuery<K,SN,N,V> setKey(K key) {
     this.key = key;
     return this;
   }
@@ -39,7 +39,7 @@ public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperS
           @Override
           public SuperSlice<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate());
+            List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate(), keyExtractor);
             return new SuperSlice<SN,N,V>(thriftRet, sNameExtractor, columnNameExtractor, valueExtractor);
           }
         }), this);

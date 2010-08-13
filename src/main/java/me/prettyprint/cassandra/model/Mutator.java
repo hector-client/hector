@@ -23,41 +23,44 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * @author Ran Tavory
  * @author zznate
  */
-public final class Mutator {
+public final class Mutator<K> {
 
   private final KeyspaceOperator ko;
+  
+  final Extractor<K> keyExtractor;
 
-  private BatchMutation pendingMutations;
+  private BatchMutation<K> pendingMutations;
 
-  /*package*/ Mutator(KeyspaceOperator ko) {
+  /*package*/ Mutator(KeyspaceOperator ko, Extractor<K> keyExtractor) {
     this.ko = ko;
+    this.keyExtractor = keyExtractor;
   }
 
   // Simple and immediate insertion of a column
-  public <N,V> MutationResult insert(final byte[] key, final String cf, final HColumn<N,V> c) {
+  public <N,V> MutationResult insert(final K key, final String cf, final HColumn<N,V> c) {
     addInsertion(key, cf, c);
     return execute();
   }
 
   // overloaded insert-super
-  public <SN,N,V> MutationResult insert(final byte[] key, final String cf,
+  public <SN,N,V> MutationResult insert(final K key, final String cf,
       final HSuperColumn<SN,N,V> superColumn) {
     addInsertion(key, cf, superColumn);
     return execute();
   }
 
-  public <N> MutationResult delete(final byte[] key, final String cf, final N columnName,
+  public <N> MutationResult delete(final K key, final String cf, final N columnName,
       final Extractor<N> nameExtractor) {
     addDeletion(key, cf, columnName, nameExtractor);
     return execute();
   }
 
-  public <SN,N> MutationResult superDelete(final byte[] key, final String cf, final SN supercolumnName,
-      final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor) {
+  public <SN,N> MutationResult superDelete(final K key, final String cf, final SN supercolumnName,
+      final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor, final Extractor<K> keyExtractor) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor));
+        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor), keyExtractor);
         return null;
       }
     }));
@@ -68,7 +71,7 @@ public final class Mutator {
   // indeterminant state if we dont validate against LIVE (but cached of course)
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
-  public <N,V> Mutator addInsertion(byte[] key, String cf, HColumn<N,V> c) {
+  public <N,V> Mutator<K> addInsertion(K key, String cf, HColumn<N,V> c) {
     getPendingMutations().addInsertion(key, Arrays.asList(cf), c.toThrift());
     return this;
   }
@@ -76,12 +79,12 @@ public final class Mutator {
   /**
    * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
    */
-  public <SN,N,V> Mutator addInsertion(byte[] key, String cf, HSuperColumn<SN,N,V> sc) {
+  public <SN,N,V> Mutator<K> addInsertion(K key, String cf, HSuperColumn<SN,N,V> sc) {
     getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
     return this;
   }
 
-  public <N> Mutator addDeletion(byte[] key, String cf, N columnName, Extractor<N> nameExtractor) {
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Extractor<N> nameExtractor) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameExtractor.toBytes(columnName));
     Deletion d = new Deletion(ko.createClock()).setPredicate(sp);
@@ -98,7 +101,7 @@ public final class Mutator {
     if (pendingMutations == null || pendingMutations.isEmpty()) {
       return new MutationResult(true, 0);
     }
-    final BatchMutation mutations = pendingMutations.makeCopy();
+    final BatchMutation<K> mutations = pendingMutations.makeCopy();
     pendingMutations = null;
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
@@ -112,7 +115,7 @@ public final class Mutator {
   /**
    * Discards all pending mutations.
    */
-  public Mutator discardPendingMutations() {
+  public Mutator<K> discardPendingMutations() {
     pendingMutations = null;
     return this;
   }
@@ -122,9 +125,9 @@ public final class Mutator {
     return "Mutator(" + ko.toString() + ")";
   }
 
-  private BatchMutation getPendingMutations() {
+  private BatchMutation<K> getPendingMutations() {
     if (pendingMutations == null) {
-      pendingMutations = new BatchMutation();
+      pendingMutations = new BatchMutation<K>(keyExtractor);
     }
     return pendingMutations;
   }

@@ -14,8 +14,8 @@ import org.apache.cassandra.thrift.KeyRange;
 
   /** Whether to use start/end as tokens or as keys */
   private boolean useTokens = true;
-  byte[] start;
-private byte[] end;
+  byte[] start_key;
+private byte[] end_key;
 
 String start_token;
 String end_token;
@@ -28,10 +28,10 @@ String end_token;
     return this;
   }
 
-  public HKeyRange setKeys(byte[] start, byte[] end) {
+  public <K> HKeyRange setKeys(K start, K end, Extractor<K> keyExtractor) {
     useTokens = false;
-    this.start = start;
-    this.end = end;
+    this.start_key = keyExtractor.toBytes(start);
+    this.end_key = keyExtractor.toBytes(end);
     return this;
   }
 
@@ -45,16 +45,18 @@ String end_token;
    * @return The thrift representation of this object
    */
   public KeyRange toThrift() {
-    Assert.notNull(start, "start can't be null");
-    Assert.notNull(end, "end can't be null");
 
     KeyRange keyRange = new KeyRange(rowCount);
     if (useTokens) {
+      Assert.notNull(start_token, "start_token can't be null");
+      Assert.notNull(end_token, "end_token can't be null");
       keyRange.setStart_token(start_token);
       keyRange.setEnd_token(end_token);
     } else {
-      keyRange.setStart_key(start);
-      keyRange.setEnd_key(end);
+      Assert.notNull(start_key, "start can't be null");
+      Assert.notNull(end_key, "end can't be null");
+      keyRange.setStart_key(start_key);
+      keyRange.setEnd_key(end_key);
     }
     return keyRange;
   }
@@ -62,7 +64,7 @@ String end_token;
   @Override
   public String toString() {
     String tk = useTokens ? "t" : "k";
-    return "HKeyRange(" + tk + "Start:" + start + "," + tk + "End:" + end + "," + ")";
+    return "HKeyRange(" + tk + "Start:" + start_key + "," + tk + "End:" + end_key + "," + ")";
   }
 
 }
