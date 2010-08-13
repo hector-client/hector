@@ -37,8 +37,7 @@ public class EmbeddedServerHelper {
   public void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
     // delete tmp dir first
     rmdir(TMP);
-    // make a tmp dir and copy storag-conf.xml and log4j.properties to it
-    copy("/storage-conf.xml", TMP);
+    // make a tmp dir and copy cassandra.yaml and log4j.properties to it
     copy("/log4j.properties", TMP);
     copy("/cassandra.yaml", TMP);
     System.setProperty("storage-config", TMP);
@@ -46,19 +45,24 @@ public class EmbeddedServerHelper {
     CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
     cleaner.prepare();
 
-    // Manually load tables from the test configuration file.
-    for (KSMetaData table : DatabaseDescriptor.readTablesFromYaml())
-    {
-        for (CFMetaData cfm : table.cfMetaData().values())
-            CFMetaData.map(cfm);
-        DatabaseDescriptor.setTableDefinition(table, DatabaseDescriptor.getDefsVersion());
-    }
+    loadYamlTables();
 
     cassandra = new EmbeddedCassandraService();
     cassandra.init();
     Thread t = new Thread(cassandra);
     t.setDaemon(true);
     t.start();
+  }
+
+  /** Manually load tables from the test configuration file.
+   * @throws ConfigurationException */
+  private void loadYamlTables() throws ConfigurationException {
+    for (KSMetaData table : DatabaseDescriptor.readTablesFromYaml()) {
+      for (CFMetaData cfm : table.cfMetaData().values()) {
+        CFMetaData.map(cfm);
+      }
+      DatabaseDescriptor.setTableDefinition(table, DatabaseDescriptor.getDefsVersion());
+    }
   }
 
   public void teardown() {
