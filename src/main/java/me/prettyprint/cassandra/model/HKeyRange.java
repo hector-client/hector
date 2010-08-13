@@ -14,24 +14,24 @@ import org.apache.cassandra.thrift.KeyRange;
 
   /** Whether to use start/end as tokens or as keys */
   private boolean useTokens = true;
-  byte[] start_key;
-private byte[] end_key;
+  byte[] startKey;
+private byte[] endKey;
 
-String start_token;
-String end_token;
+String startToken;
+String endToken;
   private int rowCount = 100;
 
   public HKeyRange setTokens(String start, String end) {
     useTokens = true;
-    this.start_token = start;
-    this.end_token = end;
+    this.startToken = start;
+    this.endToken = end;
     return this;
   }
 
   public <K> HKeyRange setKeys(K start, K end, Extractor<K> keyExtractor) {
     useTokens = false;
-    this.start_key = keyExtractor.toBytes(start);
-    this.end_key = keyExtractor.toBytes(end);
+    this.startKey = keyExtractor.toBytes(start);
+    this.endKey = keyExtractor.toBytes(end);
     return this;
   }
 
@@ -48,15 +48,15 @@ String end_token;
 
     KeyRange keyRange = new KeyRange(rowCount);
     if (useTokens) {
-      Assert.notNull(start_token, "start_token can't be null");
-      Assert.notNull(end_token, "end_token can't be null");
-      keyRange.setStart_token(start_token);
-      keyRange.setEnd_token(end_token);
+      Assert.notNull(startToken, "start_token can't be null");
+      Assert.notNull(endToken, "end_token can't be null");
+      keyRange.setStart_token(startToken);
+      keyRange.setEnd_token(endToken);
     } else {
-      Assert.notNull(start_key, "start can't be null");
-      Assert.notNull(end_key, "end can't be null");
-      keyRange.setStart_key(start_key);
-      keyRange.setEnd_key(end_key);
+      Assert.notNull(startKey, "start can't be null");
+      Assert.notNull(endKey, "end can't be null");
+      keyRange.setStart_key(startKey);
+      keyRange.setEnd_key(endKey);
     }
     return keyRange;
   }
@@ -64,7 +64,7 @@ String end_token;
   @Override
   public String toString() {
     String tk = useTokens ? "t" : "k";
-    return "HKeyRange(" + tk + "Start:" + start_key + "," + tk + "End:" + end_key + "," + ")";
+    return "HKeyRange(" + tk + "Start:" + startKey + "," + tk + "End:" + endKey + "," + ")";
   }
 
 }
