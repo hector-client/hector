@@ -18,7 +18,7 @@ public final class JndiCassandraClientFactory extends CassandraClientFactory {
    * @param port  port number that Cassandra is listening on
    */
 
-	public JndiCassandraClientFactory(String url, int port) {
-	  super(url, port);
+  public JndiCassandraClientFactory(String url, int port) {
+    super(url, port);
   }
 }

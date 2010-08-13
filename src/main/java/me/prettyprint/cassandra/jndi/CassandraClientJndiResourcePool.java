@@ -23,7 +23,7 @@ public class CassandraClientJndiResourcePool extends GenericObjectPool {
    * @param port  port number that Cassandra is listening on.
    */
   
-	public CassandraClientJndiResourcePool(String url, int port) {
+  public CassandraClientJndiResourcePool(String url, int port) {
     super(new JndiCassandraClientFactory(url, port)); 
   }
 }

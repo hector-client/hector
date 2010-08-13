@@ -206,7 +206,7 @@ import org.slf4j.LoggerFactory;
 
   public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
   throws HectorException {
-	  return getSlice(key, columnParent, predicate, StringExtractor.get());
+    return getSlice(key, columnParent, predicate, StringExtractor.get());
   }
 
   public <K> SuperColumn getSuperColumn(final K key, final ColumnPath columnPath, final Extractor<K> keyExtractor) throws HectorException {
@@ -236,8 +236,8 @@ import org.slf4j.LoggerFactory;
   }
   
   public List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
-	      SlicePredicate predicate) throws HectorException {
-	  return getSuperSlice(key, columnParent, predicate, StringExtractor.get());
+        SlicePredicate predicate) throws HectorException {
+    return getSuperSlice(key, columnParent, predicate, StringExtractor.get());
   }
 
 
@@ -271,7 +271,7 @@ import org.slf4j.LoggerFactory;
   }
   
   public SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException {
-	  return getSuperColumn(key, columnPath, StringExtractor.get());
+    return getSuperColumn(key, columnPath, StringExtractor.get());
   }
 
 
@@ -318,15 +318,15 @@ import org.slf4j.LoggerFactory;
   }
 
   public void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException {
-	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
-	  Column column = new Column(columnPath.getColumn(), value, createClock());
-	  insert(key, columnParent, column, StringExtractor.get());
+    ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
+    Column column = new Column(columnPath.getColumn(), value, createClock());
+    insert(key, columnParent, column, StringExtractor.get());
   }
 
   public void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException {
-	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
-	  Column column = new Column(columnPath.getColumn(), value, new Clock(timestamp));
-	  insert(key, columnParent, column, StringExtractor.get());
+    ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
+    Column column = new Column(columnPath.getColumn(), value, new Clock(timestamp));
+    insert(key, columnParent, column, StringExtractor.get());
   }
 
 
@@ -440,7 +440,7 @@ import org.slf4j.LoggerFactory;
 
 
   public <K> void remove(K key, ColumnPath columnPath, Extractor<K> keyExtractor) {
-	this.remove(key, columnPath, createClock(), keyExtractor);
+  this.remove(key, columnPath, createClock(), keyExtractor);
 }
 
 
@@ -462,14 +462,14 @@ public <K> void remove(final K key, final ColumnPath columnPath, final Clock clo
   }
 
 public void remove(String key, ColumnPath columnPath) throws HectorException {
-	remove(key, columnPath, StringExtractor.get());
+  remove(key, columnPath, StringExtractor.get());
 }
 
 /**
 * Same as two argument version, but the caller must specify their own timestamp
 */
 public void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException {
-	remove(key, columnPath, new Clock(timestamp), StringExtractor.get());
+  remove(key, columnPath, new Clock(timestamp), StringExtractor.get());
 }
 
 
@@ -516,7 +516,7 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
   }
 
   public Column getColumn(String key, ColumnPath columnPath) throws HectorException {
-	  return getColumn(key, columnPath, StringExtractor.get());
+    return getColumn(key, columnPath, StringExtractor.get());
   }
 
   public ConsistencyLevel getConsistencyLevel() {

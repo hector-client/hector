@@ -102,7 +102,7 @@ public interface Keyspace {
       SlicePredicate predicate,  Extractor<K> keyExtractor) throws HectorException;
 
   List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
-	      SlicePredicate predicate) throws HectorException;
+      SlicePredicate predicate) throws HectorException;
   
   /**
    * Performs a get for columnPath in parallel on the given list of keys.
