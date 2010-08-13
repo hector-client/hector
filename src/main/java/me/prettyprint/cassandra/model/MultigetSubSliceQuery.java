@@ -56,8 +56,8 @@ public final class MultigetSubSliceQuery<K, SN, N, V> extends AbstractSliceQuery
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            Map<K, List<Column>> thriftRet = ks.multigetSlice(keysList,
-                columnParent, getPredicate(), keyExtractor);
+            Map<K, List<Column>> thriftRet = keyExtractor.fromBytesMap(ks.multigetSlice(keyExtractor.toBytesList(keysList),
+                columnParent, getPredicate()));
             return new Rows<K, N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);

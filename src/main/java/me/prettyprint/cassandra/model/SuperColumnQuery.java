@@ -42,7 +42,7 @@ public final class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuper
             try {
               ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
                   sNameExtractor, columnNameExtractor);
-              SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath, keyExtractor);
+              SuperColumn thriftSuperColumn = ks.getSuperColumn(keyExtractor.toBytes(key), cpath);
               if (thriftSuperColumn == null) {
                 return null;
               }

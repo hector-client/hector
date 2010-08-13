@@ -41,8 +41,8 @@ public final class MultigetSuperSliceQuery<K, SN, N, V> extends
             List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            Map<K, List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
-                columnParent, getPredicate(), keyExtractor);
+            Map<K, List<SuperColumn>> thriftRet = keyExtractor.fromBytesMap(ks.multigetSuperSlice(keyExtractor.toBytesList(keysList),
+                columnParent, getPredicate()));
             return new SuperRows<K, SN, N, V>(thriftRet, keyExtractor, columnNameExtractor, nameExtractor,
                 valueExtractor);
           }

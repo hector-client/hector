@@ -39,7 +39,7 @@ public final class SuperSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Su
           @Override
           public SuperSlice<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate(), keyExtractor);
+            List<SuperColumn> thriftRet = ks.getSuperSlice(keyExtractor.toBytes(key), columnParent, getPredicate());
             return new SuperSlice<SN,N,V>(thriftRet, sNameExtractor, columnNameExtractor, valueExtractor);
           }
         }), this);

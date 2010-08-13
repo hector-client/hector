@@ -45,7 +45,7 @@ public class ExampleSpringDao {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.insert(key, new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), ks.createClock()), keyExtractor);
+        ks.insert(keyExtractor.toBytes(key), new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), ks.createClock()));
         return null;
       }
     });
@@ -60,7 +60,7 @@ public class ExampleSpringDao {
       @Override
       public String execute(final Keyspace ks) throws HectorException {
         try {
-          return string(ks.getColumn(key, createColumnPath(columnName), keyExtractor).getValue());
+          return string(ks.getColumn(keyExtractor.toBytes(key), createColumnPath(columnName)).getValue());
         } catch (NotFoundException e) {
           return null;
         }
@@ -75,7 +75,7 @@ public class ExampleSpringDao {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.remove(key, createColumnPath(columnName), keyExtractor);
+        ks.remove(keyExtractor.toBytes(key), createColumnPath(columnName));
         return null;
       }
     });

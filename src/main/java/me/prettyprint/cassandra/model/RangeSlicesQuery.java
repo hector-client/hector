@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
@@ -49,9 +50,9 @@ public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Orde
           @Override
           public OrderedRows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            LinkedHashMap<K, List<Column>> thriftRet =
-                ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift(), keyExtractor);
-            return new OrderedRows<K,N,V>(thriftRet, columnNameExtractor, valueExtractor);
+            Map<K, List<Column>> thriftRet = keyExtractor.fromBytesMap(
+                ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
+            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);
   }

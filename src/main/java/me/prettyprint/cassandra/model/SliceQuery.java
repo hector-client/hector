@@ -34,7 +34,7 @@ public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlic
           @Override
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate(), keyExtractor);
+            List<Column> thriftRet = ks.getSlice(keyExtractor.toBytes(key), columnParent, getPredicate());
             return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);

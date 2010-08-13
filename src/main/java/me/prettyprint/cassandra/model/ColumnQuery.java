@@ -33,7 +33,7 @@ public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> 
           public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               org.apache.cassandra.thrift.Column thriftColumn =
-                ks.getColumn(key, createColumnPath(columnFamilyName, name, columnNameExtractor), keyExtractor);
+                ks.getColumn(keyExtractor.toBytes(key), createColumnPath(columnFamilyName, name, columnNameExtractor));
               return new HColumn<N, V>(thriftColumn, columnNameExtractor, valueExtractor);
             } catch (NotFoundException e) {
               return null;

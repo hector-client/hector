@@ -250,7 +250,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       mutationMap.put("Standard1", mutations);
       outerMutationMap.put("testBatchMutateColumn_" + i, mutationMap);
     }
-    keyspace.batchMutate(outerMutationMap, se);
+    keyspace.batchMutate(se.toBytesMap(outerMutationMap));
     // re-use later
     outerMutationMap.clear();
 
@@ -285,7 +285,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       mutationMap.put("Standard1", mutations);
       outerMutationMap.put("testBatchMutateColumn_"+i, mutationMap);
     }
-    keyspace.batchMutate(outerMutationMap, se);
+    keyspace.batchMutate(se.toBytesMap(outerMutationMap));
     // make sure the values are gone
     for (int i = 0; i < 10; i++) {
       for (int j = 0; j < 10; j++) {
@@ -578,7 +578,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
-    Map<String, List<Column>> ms = keyspace.multigetSlice(keys, clp, sp, se);
+    Map<String, List<Column>> ms = se.fromBytesMap(keyspace.multigetSlice(se.toBytesList(keys), clp, sp));
     for (int i = 0; i < 100; i++) {
       List<Column> cl = ms.get(keys.get(i));
       assertNotNull(cl);
@@ -773,7 +773,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     range.setStart_key( "testGetRangeSlices0".getBytes());
     range.setEnd_key( "testGetRangeSlices2".getBytes());
 
-    Map<String, List<Column>> keySlices = keyspace.getRangeSlices(clp, sp, range, se);
+    Map<String, List<Column>> keySlices = se.fromBytesMap(keyspace.getRangeSlices(clp, sp, range));
 
     assertNotNull(keySlices);
     assertEquals(3, keySlices.size());
@@ -843,7 +843,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     range.setEnd_key( "testGetSuperRangeSlices1".getBytes());
 
 
-    Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlices(clp, sp, range, se);
+    Map<String, List<SuperColumn>> keySlices = se.fromBytesMap(keyspace.getSuperRangeSlices(clp, sp, range));
 
     assertNotNull(keySlices);
     assertEquals(2, keySlices.size());

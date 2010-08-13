@@ -34,10 +34,10 @@ public class ExampleClient {
       columnPath.setColumn(bytes("column-name"));
 
       // insert
-      keyspace.insert("key", columnParent, new Column(bytes("column-name"), bytes("value"), keyspace.createClock()), StringExtractor.get());
+      keyspace.insert(bytes("key"), columnParent, new Column(bytes("column-name"), bytes("value"), keyspace.createClock()));
 
       // read
-      Column col = keyspace.getColumn("key", columnPath, StringExtractor.get());
+      Column col = keyspace.getColumn(bytes("key"), columnPath);
 
       System.out.println("Read from cassandra: " + string(col.getValue()));
 

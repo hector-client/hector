@@ -52,7 +52,7 @@ public final class SubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Colu
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate(), keyExtractor);
+            List<Column> thriftRet = ks.getSlice(keyExtractor.toBytes(key), columnParent, getPredicate());
             return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
           }
         }), this);

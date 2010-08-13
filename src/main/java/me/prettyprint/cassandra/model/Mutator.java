@@ -60,7 +60,7 @@ public final class Mutator<K> {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor), keyExtractor);
+        ks.remove(keyExtractor.toBytes(key), createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor));
         return null;
       }
     }));

@@ -56,7 +56,7 @@ public class ExampleDao {
     execute(new Command<Void>() {
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.insert(key, new ColumnParent(CF_NAME), new Column(bytes(COLUMN_NAME), bytes(value), ks.createClock()), keyExtractor);
+        ks.insert(keyExtractor.toBytes(key), new ColumnParent(CF_NAME), new Column(bytes(COLUMN_NAME), bytes(value), ks.createClock()));
         return null;
       }
     });
@@ -72,7 +72,7 @@ public class ExampleDao {
       @Override
       public String execute(final Keyspace ks) throws HectorException {
         try {
-          return string(ks.getColumn(key, createColumnPath(COLUMN_NAME), keyExtractor).getValue());
+          return string(ks.getColumn(keyExtractor.toBytes(key), createColumnPath(COLUMN_NAME)).getValue());
         } catch (NotFoundException e) {
           return null;
         }
@@ -87,7 +87,7 @@ public class ExampleDao {
     execute(new Command<Void>() {
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.remove(key, createColumnPath(COLUMN_NAME), keyExtractor);
+        ks.remove(keyExtractor.toBytes(key), createColumnPath(COLUMN_NAME));
         return null;
       }
     });
