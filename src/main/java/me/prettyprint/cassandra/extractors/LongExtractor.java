@@ -1,12 +1,5 @@
 package me.prettyprint.cassandra.extractors;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import me.prettyprint.cassandra.model.Extractor;
 
 /**
  * Converts bytes to Long and vise a versa
@@ -14,7 +7,7 @@ import me.prettyprint.cassandra.model.Extractor;
  * @author Ran Tavory
  *
  */
-public final class LongExtractor implements Extractor<Long> {
+public final class LongExtractor extends AbstractExtractor<Long> {
 
   private static final LongExtractor instance = new LongExtractor();
 
@@ -46,39 +39,5 @@ public final class LongExtractor implements Extractor<Long> {
     }
     return l;
   }
-
-  public List<byte[]> toBytesList(List<Long> list) {
-    List<byte[]> bytesList = new ArrayList<byte[]>();
-    for (Long s : list) {
-      bytesList.add(toBytes(s));
-    }
-    return bytesList;
-  }
-
-  public List<Long> fromBytesList(List<byte[]> list) {
-    List<Long> longList = new ArrayList<Long>();
-    for (byte[] b : list) {
-      longList.add(fromBytes(b));
-    }
-    return longList;
-  }
-
-  public <V> Map<byte[], V> toBytesMap(Map<Long, V> map) {
-    Map<byte[], V> bytesMap = new LinkedHashMap<byte[], V>();
-    for (Entry<Long, V> entry : map.entrySet()) {
-      bytesMap.put(toBytes(entry.getKey()), entry.getValue());
-    }
-    return bytesMap;
-  }
-
-  public <V> Map<Long, V> fromBytesMap(Map<byte[], V> map) {
-    Map<Long, V> longMap = new LinkedHashMap<Long, V>();
-    for (Entry<byte[], V> entry : map.entrySet()) {
-      longMap.put(fromBytes(entry.getKey()), entry.getValue());
-    }
-    return longMap;
-  }
-
-
 
 }

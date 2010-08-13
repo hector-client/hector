@@ -20,14 +20,14 @@ public final class BytesExtractor implements Extractor<byte[]> {
     return instance;
   }
 
+  public byte[] toBytes(byte[] obj) {
+    return obj;
+  }
+
   public byte[] fromBytes(byte[] bytes) {
     return bytes;
   }
 
-  public byte[] toBytes(byte[] obj) {
-    return obj;
-  }
-  
   public List<byte[]> toBytesList(List<byte[]> list) {
     return list;
   }
