@@ -21,13 +21,13 @@ public class Rows<K, N, V> implements Iterable<Row<K, N, V>> {
 
   protected final Map<K, Row<K, N, V>> rows;
 
-  public Rows(Map<K, List<Column>> thriftRet, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    Assert.noneNull(thriftRet, nameExtractor, valueExtractor);
+  public Rows(Map<K, List<Column>> thriftRet, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    Assert.noneNull(thriftRet, nameSerializer, valueSerializer);
     rows = new HashMap<K, Row<K, N, V>>(thriftRet.size());
     for (Map.Entry<K, List<Column>> entry : thriftRet.entrySet()) {
-      rows.put(entry.getKey(), new Row<K, N, V>(entry.getKey(), entry.getValue(), nameExtractor,
-          valueExtractor));
+      rows.put(entry.getKey(), new Row<K, N, V>(entry.getKey(), entry.getValue(), nameSerializer,
+          valueSerializer));
     }
   }
 

@@ -28,10 +28,10 @@ String endToken;
     return this;
   }
 
-  public <K> HKeyRange setKeys(K start, K end, Extractor<K> keyExtractor) {
+  public <K> HKeyRange setKeys(K start, K end, Serializer<K> keySerializer) {
     useTokens = false;
-    this.startKey = keyExtractor.toBytes(start);
-    this.endKey = keyExtractor.toBytes(end);
+    this.startKey = keySerializer.toBytes(start);
+    this.endKey = keySerializer.toBytes(end);
     return this;
   }
 

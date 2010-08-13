@@ -12,7 +12,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 
 
 /**
- * A Mutator inserts or deltes values from the cluster.
+ * A Mutator inserts or deletes values from the cluster.
  * There are two main ways to use a mutator:
  * 1. Use the insert/delete methods to immediately insert of delete values.
  * or 2. Use the addInsertion/addDeletion methods to schedule batch operations and then execute()
@@ -27,13 +27,13 @@ public final class Mutator<K> {
 
   private final KeyspaceOperator ko;
   
-  final Extractor<K> keyExtractor;
+  final Serializer<K> keySerializer;
 
-  private BatchMutation<K> pendingMutations;
+  private BatchMutation pendingMutations;
 
-  /*package*/ Mutator(KeyspaceOperator ko, Extractor<K> keyExtractor) {
+  /*package*/ Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
     this.ko = ko;
-    this.keyExtractor = keyExtractor;
+    this.keySerializer = keySerializer;
   }
 
   // Simple and immediate insertion of a column
@@ -50,17 +50,17 @@ public final class Mutator<K> {
   }
 
   public <N> MutationResult delete(final K key, final String cf, final N columnName,
-      final Extractor<N> nameExtractor) {
-    addDeletion(key, cf, columnName, nameExtractor);
+      final Serializer<N> nameSerializer) {
+    addDeletion(key, cf, columnName, nameSerializer);
     return execute();
   }
 
   public <SN,N> MutationResult superDelete(final K key, final String cf, final SN supercolumnName,
-      final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor, final Extractor<K> keyExtractor) {
+      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer, final Serializer<K> keySerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(keyExtractor.toBytes(key), createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor));
+        ks.remove(keySerializer.toBytes(key), createSuperColumnPath(cf, supercolumnName, columnName, sNameSerializer, nameSerializer));
         return null;
       }
     }));
@@ -72,7 +72,7 @@ public final class Mutator<K> {
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
   public <N,V> Mutator<K> addInsertion(K key, String cf, HColumn<N,V> c) {
-    getPendingMutations().addInsertion(key, Arrays.asList(cf), c.toThrift());
+    getPendingMutations().addInsertion(keySerializer.toBytes(key), Arrays.asList(cf), c.toThrift());
     return this;
   }
 
@@ -80,15 +80,15 @@ public final class Mutator<K> {
    * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
    */
   public <SN,N,V> Mutator<K> addInsertion(K key, String cf, HSuperColumn<SN,N,V> sc) {
-    getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
+    getPendingMutations().addSuperInsertion(keySerializer.toBytes(key), Arrays.asList(cf), sc.toThrift());
     return this;
   }
 
-  public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Extractor<N> nameExtractor) {
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
-    sp.addToColumn_names(nameExtractor.toBytes(columnName));
+    sp.addToColumn_names(nameSerializer.toBytes(columnName));
     Deletion d = new Deletion(ko.createClock()).setPredicate(sp);
-    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    getPendingMutations().addDeletion(keySerializer.toBytes(key), Arrays.asList(cf), d);
     return this;
   }
 
@@ -101,7 +101,7 @@ public final class Mutator<K> {
     if (pendingMutations == null || pendingMutations.isEmpty()) {
       return new MutationResult(true, 0);
     }
-    final BatchMutation<K> mutations = pendingMutations.makeCopy();
+    final BatchMutation mutations = pendingMutations.makeCopy();
     pendingMutations = null;
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
@@ -125,9 +125,9 @@ public final class Mutator<K> {
     return "Mutator(" + ko.toString() + ")";
   }
 
-  private BatchMutation<K> getPendingMutations() {
+  private BatchMutation getPendingMutations() {
     if (pendingMutations == null) {
-      pendingMutations = new BatchMutation<K>(keyExtractor);
+      pendingMutations = new BatchMutation();
     }
     return pendingMutations;
   }

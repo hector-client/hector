@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import me.prettyprint.cassandra.model.Extractor;
+import me.prettyprint.cassandra.model.Serializer;
 
-public abstract class AbstractExtractor<T> implements Extractor<T> {
+public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   public abstract byte[] toBytes(T obj);
 

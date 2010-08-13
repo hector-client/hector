@@ -22,8 +22,8 @@ public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Orde
 
   private final HKeyRange keyRange;
 
-  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
+  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
     keyRange = new HKeyRange();
   }
 
@@ -33,7 +33,7 @@ public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Orde
   }
 
   public RangeSlicesQuery<K,N,V> setKeys(K start, K end) {
-    keyRange.setKeys(start, end, keyExtractor);
+    keyRange.setKeys(start, end, keySerializer);
     return this;
   }
 
@@ -50,9 +50,9 @@ public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Orde
           @Override
           public OrderedRows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            Map<K, List<Column>> thriftRet = keyExtractor.fromBytesMap(
+            Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
-            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameExtractor, valueExtractor);
+            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

@@ -29,8 +29,8 @@ import org.apache.cassandra.thrift.SliceRange;
   /** Use column names or start/finish? */
   protected boolean useColumnNames;
 
-  /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
+  /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
   }
 
   /**
@@ -77,7 +77,7 @@ import org.apache.cassandra.thrift.SliceRange;
       if (start == null || finish == null) {
         return null;
       }
-      SliceRange range = new SliceRange(columnNameExtractor.toBytes(start), columnNameExtractor.toBytes(finish),
+      SliceRange range = new SliceRange(columnNameSerializer.toBytes(start), columnNameSerializer.toBytes(finish),
           reversed, count);
       pred.setSlice_range(range);
     }
@@ -87,7 +87,7 @@ import org.apache.cassandra.thrift.SliceRange;
   private List<byte[]> toThriftColumnNames(Collection<N> clms) {
     List<byte[]> ret = new ArrayList<byte[]>(clms.size());
     for (N name: clms) {
-      ret.add(columnNameExtractor.toBytes(name));
+      ret.add(columnNameSerializer.toBytes(name));
     }
     return ret;
   }

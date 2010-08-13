@@ -2,7 +2,6 @@ package me.prettyprint.cassandra.examples;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;

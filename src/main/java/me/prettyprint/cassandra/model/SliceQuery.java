@@ -19,8 +19,8 @@ public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlic
 
   private K key;
 
-  /*package*/ SliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
+  /*package*/ SliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
   }
 
   public SliceQuery<K,N,V> setKey(K key) {
@@ -34,8 +34,8 @@ public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlic
           @Override
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<Column> thriftRet = ks.getSlice(keyExtractor.toBytes(key), columnParent, getPredicate());
-            return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
+            List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());
+            return new ColumnSlice<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

@@ -21,16 +21,16 @@ public class SuperRows<K, SN, N, V> implements Iterable<SuperRow<K, SN, N, V>> {
 
   private final Map<K, SuperRow<K, SN, N, V>> rows;
   
-  Extractor<K> keyExtractor;
+  Serializer<K> keySerializer;
 
-  public SuperRows(Map<K, List<SuperColumn>> thriftRet, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(thriftRet, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
-    this.keyExtractor = keyExtractor;
+  public SuperRows(Map<K, List<SuperColumn>> thriftRet, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    Assert.noneNull(thriftRet, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    this.keySerializer = keySerializer;
     rows = new HashMap<K, SuperRow<K, SN, N, V>>(thriftRet.size());
     for (Map.Entry<K, List<SuperColumn>> entry : thriftRet.entrySet()) {
       rows.put(entry.getKey(), new SuperRow<K, SN, N, V>(entry.getKey(), entry.getValue(),
-          sNameExtractor, nameExtractor, valueExtractor));
+          sNameSerializer, nameSerializer, valueSerializer));
     }
   }
 

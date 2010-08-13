@@ -10,9 +10,9 @@ public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> 
   private K key;
   private N name;
 
-  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<K> keyExtractor, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    super(keyspaceOperator, keyExtractor, nameExtractor, valueExtractor);
+  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<K> keySerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    super(keyspaceOperator, keySerializer, nameSerializer, valueSerializer);
   }
 
   public ColumnQuery<K,N,V> setKey(K key) {
@@ -33,8 +33,8 @@ public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> 
           public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               org.apache.cassandra.thrift.Column thriftColumn =
-                ks.getColumn(keyExtractor.toBytes(key), createColumnPath(columnFamilyName, name, columnNameExtractor));
-              return new HColumn<N, V>(thriftColumn, columnNameExtractor, valueExtractor);
+                ks.getColumn(keySerializer.toBytes(key), createColumnPath(columnFamilyName, name, columnNameSerializer));
+              return new HColumn<N, V>(thriftColumn, columnNameSerializer, valueSerializer);
             } catch (NotFoundException e) {
               return null;
             }

@@ -18,16 +18,16 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class RangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,OrderedRows<K,N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private final HKeyRange keyRange;
   private SN superColumn;
 
 
-  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
     keyRange = new HKeyRange();
   }
 
@@ -37,7 +37,7 @@ public final class RangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,
   }
 
   public RangeSubSlicesQuery<K,SN,N,V> setKeys(K start, K end) {
-    keyRange.setKeys(start, end, keyExtractor);
+    keyRange.setKeys(start, end, keySerializer);
     return this;
   }
 
@@ -61,10 +61,10 @@ public final class RangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,
           @Override
           public OrderedRows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            Map<K, List<Column>> thriftRet = keyExtractor.fromBytesMap(
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
+            Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
-            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameExtractor, valueExtractor);
+            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

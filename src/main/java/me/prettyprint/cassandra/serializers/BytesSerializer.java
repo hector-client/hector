@@ -1,22 +1,22 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.Extractor;
+import me.prettyprint.cassandra.model.Serializer;
 
 /**
- * The BytesExtractor is a simple identity function. It supports the Extractor interface and
+ * The BytesSerializer is a simple identity function. It supports the Serializer interface and
  * implements the fromBytes and toBytes as simple identity functions.
  *
  * @author Ran Tavory
  *
  */
-public final class BytesExtractor implements Extractor<byte[]> {
+public final class BytesSerializer implements Serializer<byte[]> {
 
-  private static BytesExtractor instance = new BytesExtractor();
+  private static BytesSerializer instance = new BytesSerializer();
 
-  public static BytesExtractor get() {
+  public static BytesSerializer get() {
     return instance;
   }
 

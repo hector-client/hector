@@ -19,13 +19,13 @@ public final class MultigetSuperSliceQuery<K, SN, N, V> extends
     AbstractSliceQuery<K, SN, V, SuperRows<K, SN, N, V>> {
 
   private Collection<K> keys;
-  private final Extractor<N> nameExtractor;
+  private final Serializer<N> nameSerializer;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, sNameExtractor, valueExtractor);
-    Assert.notNull(nameExtractor, "nameExtractor can't be null");
-    this.nameExtractor = nameExtractor;
+  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, sNameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "nameSerializer can't be null");
+    this.nameSerializer = nameSerializer;
   }
 
   public MultigetSuperSliceQuery<K, SN, N, V> setKeys(K... keys) {
@@ -41,10 +41,10 @@ public final class MultigetSuperSliceQuery<K, SN, N, V> extends
             List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            Map<K, List<SuperColumn>> thriftRet = keyExtractor.fromBytesMap(ks.multigetSuperSlice(keyExtractor.toBytesList(keysList),
+            Map<K, List<SuperColumn>> thriftRet = keySerializer.fromBytesMap(ks.multigetSuperSlice(keySerializer.toBytesList(keysList),
                 columnParent, getPredicate()));
-            return new SuperRows<K, SN, N, V>(thriftRet, keyExtractor, columnNameExtractor, nameExtractor,
-                valueExtractor);
+            return new SuperRows<K, SN, N, V>(thriftRet, keySerializer, columnNameSerializer, nameSerializer,
+                valueSerializer);
           }
         }), this);
   }

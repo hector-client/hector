@@ -6,15 +6,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,15 +16,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.InvalidRequestException;
 import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.model.PoolExhaustedException;
-import me.prettyprint.cassandra.model.TimedOutException;
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
-import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -45,13 +33,9 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
 
 /**
  * For the tests we assume the following structure:
@@ -70,7 +54,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
   private Keyspace keyspace;
-  private static final StringExtractor se = new StringExtractor();
+  private static final StringSerializer se = new StringSerializer();
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
@@ -303,7 +287,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testBatchMutateBatchMutation() throws HectorException {
-    BatchMutation<String> batchMutation = new BatchMutation<String>(se);
+    BatchMutation batchMutation = new BatchMutation();
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 
@@ -328,7 +312,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       }
     }
-    batchMutation = new BatchMutation<String>(se);
+    batchMutation = new BatchMutation();
     // batch_mutate delete by key
     for (int i = 0; i < 10; i++) {
       SlicePredicate slicePredicate = new SlicePredicate();
@@ -367,7 +351,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
     assertNotNull(found);
 
-    BatchMutation<String> batchMutation = new BatchMutation<String>(se);
+    BatchMutation batchMutation = new BatchMutation();
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 

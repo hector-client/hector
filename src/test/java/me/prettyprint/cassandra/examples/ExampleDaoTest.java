@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
@@ -40,11 +40,11 @@ public class ExampleDaoTest {
   @Test
   public void testInsertGetDelete() throws HectorException {
     ExampleDao dao = new ExampleDao();
-    assertNull(dao.get("key", StringExtractor.get()));
-    dao.insert("key", "value", StringExtractor.get());
-    assertEquals("value", dao.get("key", StringExtractor.get()));
-    dao.delete("key", StringExtractor.get());
-    assertNull(dao.get("key", StringExtractor.get()));
+    assertNull(dao.get("key", StringSerializer.get()));
+    dao.insert("key", "value", StringSerializer.get());
+    assertEquals("value", dao.get("key", StringSerializer.get()));
+    dao.delete("key", StringSerializer.get());
+    assertNull(dao.get("key", StringSerializer.get()));
   }
 
 }

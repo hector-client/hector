@@ -1,11 +1,13 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
 
 import static org.junit.Assert.assertEquals;
 
+import me.prettyprint.cassandra.serializers.StringSerializer;
+
 import org.junit.Test;
 
-public class StringExtractorTest {
+public class StringSerializerTest {
 
   @Test
   public void testConversions() {
@@ -19,7 +21,7 @@ public class StringExtractorTest {
   }
 
   private void test(String str) {
-    StringExtractor e = new StringExtractor();
+    StringSerializer e = new StringSerializer();
     assertEquals(str, e.fromBytes(e.toBytes(str))) ;
   }
 }

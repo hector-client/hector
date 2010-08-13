@@ -19,13 +19,13 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class SuperSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,SuperSlice<SN,N,V>> {
 
   private K key;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
   }
 
   public SuperSliceQuery<K,SN,N,V> setKey(K key) {
@@ -39,8 +39,8 @@ public final class SuperSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Su
           @Override
           public SuperSlice<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<SuperColumn> thriftRet = ks.getSuperSlice(keyExtractor.toBytes(key), columnParent, getPredicate());
-            return new SuperSlice<SN,N,V>(thriftRet, sNameExtractor, columnNameExtractor, valueExtractor);
+            List<SuperColumn> thriftRet = ks.getSuperSlice(keySerializer.toBytes(key), columnParent, getPredicate());
+            return new SuperSlice<SN,N,V>(thriftRet, sNameSerializer, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

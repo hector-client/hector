@@ -8,7 +8,6 @@ import static me.prettyprint.cassandra.model.HFactory.createMutator;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
@@ -17,13 +16,14 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 public class SimpleCassandraDao {
 
   private String columnFamilyName;
   private String keyspaceName;
   private KeyspaceOperator keyspaceOperator;
-  private StringExtractor extractor = StringExtractor.get();
+  private StringSerializer serializer = StringSerializer.get();
     
   /**
    * Insert a new value keyed by key
@@ -32,8 +32,8 @@ public class SimpleCassandraDao {
    * @param value the String value to insert
    */
   public void insert(final String key, final String columnName, final String value) {
-    createMutator(keyspaceOperator, extractor).insert(
-        key, columnFamilyName, createColumn(columnName, value, extractor, extractor));
+    createMutator(keyspaceOperator, serializer).insert(
+        key, columnFamilyName, createColumn(columnName, value, serializer, serializer));
   }
 
   /**
@@ -42,7 +42,7 @@ public class SimpleCassandraDao {
    * @return The string value; null if no value exists for the given key.
    */
   public String get(final String key, final String columnName) throws HectorException {
-    ColumnQuery<String, String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor, extractor);
+    ColumnQuery<String, String, String> q = createColumnQuery(keyspaceOperator, serializer, serializer, serializer);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(columnName).
         setColumnFamily(columnFamilyName).
@@ -57,7 +57,7 @@ public class SimpleCassandraDao {
    * @return
    */
   public Map<String, String> getMulti(String columnName, String... keys) {
-    MultigetSliceQuery<String, String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor, extractor);
+    MultigetSliceQuery<String, String,String> q = createMultigetSliceQuery(keyspaceOperator, serializer, serializer, serializer);
     q.setColumnFamily(columnFamilyName);
     q.setKeys(keys);
     q.setColumnNames(columnName);
@@ -78,10 +78,10 @@ public class SimpleCassandraDao {
    * Insert multiple values for a given columnName
    */
   public void insertMulti(String columnName, Map<String, String> keyValues) {
-    Mutator<String> m = createMutator(keyspaceOperator, extractor);
+    Mutator<String> m = createMutator(keyspaceOperator, serializer);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), columnFamilyName,
-          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createClock(), extractor, extractor));
+          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createClock(), serializer, serializer));
     }
     m.execute();
   }
@@ -91,9 +91,9 @@ public class SimpleCassandraDao {
    * Delete multiple values
    */
   public void delete(String columnName, String... keys) {
-    Mutator<String> m = createMutator(keyspaceOperator, extractor);
+    Mutator<String> m = createMutator(keyspaceOperator, serializer);
     for (String key: keys) {
-      m.addDeletion(key, columnFamilyName,  columnName, extractor);
+      m.addDeletion(key, columnFamilyName,  columnName, serializer);
     }
     m.execute();
   }

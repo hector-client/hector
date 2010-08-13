@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
-import me.prettyprint.cassandra.extractors.LongExtractor;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
@@ -22,8 +22,8 @@ public class ColumnSliceTest {
 
   @Test
   public void testConstruction() {
-    StringExtractor se = StringExtractor.get();
-    LongExtractor le = LongExtractor.get();
+    StringSerializer se = StringSerializer.get();
+    LongSerializer le = LongSerializer.get();
     List<Column> tColumns = new ArrayList<Column>();
     ColumnSlice<String, Long> slice = new ColumnSlice<String, Long>(tColumns, se, le);
     Assert.assertTrue(slice.getColumns().isEmpty());

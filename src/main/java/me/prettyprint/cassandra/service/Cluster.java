@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * //Create a mutator:
  * Mutator m = createMutator(ko);
  * // Make a mutation:
- * MutationResult mr = m.insert("key", cf, createColumn("name", "value", extractor, extractor));
+ * MutationResult mr = m.insert("key", cf, createColumn("name", "value", serializer, serializer));
  * </code>
  * @author Ran Tavory
  * @author zznate

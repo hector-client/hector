@@ -11,18 +11,18 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private K key;
   private SN superName;
 
   /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
-      Extractor<K> keyExtractor, Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(keyspaceOperator, keyExtractor, nameExtractor, valueExtractor);
-    noneNull(sNameExtractor, nameExtractor, valueExtractor);
-    this.sNameExtractor = sNameExtractor;
+      Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(keyspaceOperator, keySerializer, nameSerializer, valueSerializer);
+    noneNull(sNameSerializer, nameSerializer, valueSerializer);
+    this.sNameSerializer = sNameSerializer;
   }
 
-  public SuperColumnQuery<K,SN,N,V> setKey(K key, Extractor<K> keyExtractor) {
+  public SuperColumnQuery<K,SN,N,V> setKey(K key, Serializer<K> keySerializer) {
     this.key = key;
     return this;
   }
@@ -41,13 +41,13 @@ public final class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuper
           public HSuperColumn<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
-                  sNameExtractor, columnNameExtractor);
-              SuperColumn thriftSuperColumn = ks.getSuperColumn(keyExtractor.toBytes(key), cpath);
+                  sNameSerializer, columnNameSerializer);
+              SuperColumn thriftSuperColumn = ks.getSuperColumn(keySerializer.toBytes(key), cpath);
               if (thriftSuperColumn == null) {
                 return null;
               }
-              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameExtractor, columnNameExtractor,
-                  valueExtractor);
+              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameSerializer, columnNameSerializer,
+                  valueSerializer);
             } catch (NotFoundException e) {
               return null;
             }

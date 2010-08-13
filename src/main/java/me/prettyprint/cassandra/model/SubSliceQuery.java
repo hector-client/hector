@@ -21,13 +21,13 @@ public final class SubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Colu
 
   private K key;
   private SN superColumn;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SubSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "Supername extractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ SubSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "Supername serializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
   }
 
   public SubSliceQuery<K,SN,N,V> setKey(K key) {
@@ -51,9 +51,9 @@ public final class SubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Colu
           @Override
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            List<Column> thriftRet = ks.getSlice(keyExtractor.toBytes(key), columnParent, getPredicate());
-            return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
+            List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());
+            return new ColumnSlice<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

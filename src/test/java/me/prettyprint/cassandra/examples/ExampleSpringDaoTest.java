@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNull;
 import javax.annotation.Resource;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,11 +23,11 @@ public class ExampleSpringDaoTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsertGetDelete() throws HectorException {
-    assertNull(exampleSpringDao.get("key", StringExtractor.get()));
-    exampleSpringDao.insert("key", "value", StringExtractor.get());
-    assertEquals("value", exampleSpringDao.get("key", StringExtractor.get()));
-    exampleSpringDao.delete("key", StringExtractor.get());
-    assertNull(exampleSpringDao.get("key", StringExtractor.get()));
+    assertNull(exampleSpringDao.get("key", StringSerializer.get()));
+    exampleSpringDao.insert("key", "value", StringSerializer.get());
+    assertEquals("value", exampleSpringDao.get("key", StringSerializer.get()));
+    exampleSpringDao.delete("key", StringSerializer.get());
+    assertNull(exampleSpringDao.get("key", StringSerializer.get()));
   }
 
 }

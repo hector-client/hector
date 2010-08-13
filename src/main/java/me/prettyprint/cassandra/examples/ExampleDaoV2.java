@@ -12,9 +12,8 @@ import java.util.Map;
 
 import org.apache.cassandra.thrift.Clock;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
-import me.prettyprint.cassandra.model.Extractor;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -22,6 +21,7 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 
 public class ExampleDaoV2 {
@@ -31,16 +31,16 @@ public class ExampleDaoV2 {
   private final static String CF_NAME = "Standard1";
   /** Column name where values are stored */
   private final static String COLUMN_NAME = "v";
-  private final StringExtractor extractor = StringExtractor.get();
+  private final StringSerializer serializer = StringSerializer.get();
 
   private final KeyspaceOperator keyspaceOperator;
 
   public static void main(String[] args) throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(createKeyspaceOperator(KEYSPACE, c));
-    ed.insert("key1", "value1", StringExtractor.get());
+    ed.insert("key1", "value1", StringSerializer.get());
 
-    System.out.println(ed.get("key1", StringExtractor.get()));
+    System.out.println(ed.get("key1", StringSerializer.get()));
   }
 
   public ExampleDaoV2(KeyspaceOperator ko) {
@@ -53,9 +53,9 @@ public class ExampleDaoV2 {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public <K> void insert(final K key, final String value, Extractor<K> keyExtractor) {
-    createMutator(keyspaceOperator, keyExtractor).insert(
-        key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
+  public <K> void insert(final K key, final String value, Serializer<K> keySerializer) {
+    createMutator(keyspaceOperator, keySerializer).insert(
+        key, CF_NAME, createColumn(COLUMN_NAME, value, serializer, serializer));
   }
 
   private Clock createClock() {
@@ -67,8 +67,8 @@ public class ExampleDaoV2 {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public <K> String get(final K key, Extractor<K> keyExtractor) throws HectorException {
-    ColumnQuery<K, String, String> q = createColumnQuery(keyspaceOperator, keyExtractor, extractor, extractor);
+  public <K> String get(final K key, Serializer<K> keySerializer) throws HectorException {
+    ColumnQuery<K, String, String> q = createColumnQuery(keyspaceOperator, keySerializer, serializer, serializer);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).
@@ -82,8 +82,8 @@ public class ExampleDaoV2 {
    * @param keys
    * @return
    */
-  public <K> Map<K, String> getMulti(Extractor<K> keyExtractor, K... keys) {
-    MultigetSliceQuery<K, String,String> q = createMultigetSliceQuery(keyspaceOperator, keyExtractor, extractor, extractor);
+  public <K> Map<K, String> getMulti(Serializer<K> keySerializer, K... keys) {
+    MultigetSliceQuery<K, String,String> q = createMultigetSliceQuery(keyspaceOperator, keySerializer, serializer, serializer);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
@@ -103,11 +103,11 @@ public class ExampleDaoV2 {
   /**
    * Insert multiple values
    */
-  public <K> void insertMulti(Map<K, String> keyValues, Extractor<K> keyExtractor) {
-    Mutator<K> m = createMutator(keyspaceOperator, keyExtractor);
+  public <K> void insertMulti(Map<K, String> keyValues, Serializer<K> keySerializer) {
+    Mutator<K> m = createMutator(keyspaceOperator, keySerializer);
     for (Map.Entry<K, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,
-          createColumn(COLUMN_NAME, keyValue.getValue(), createClock(), extractor, extractor));
+          createColumn(COLUMN_NAME, keyValue.getValue(), createClock(), serializer, serializer));
     }
     m.execute();
   }
@@ -115,10 +115,10 @@ public class ExampleDaoV2 {
   /**
    * Delete multiple values
    */
-  public <K> void delete(Extractor<K> keyExtractor, K... keys) {
-    Mutator<K> m = createMutator(keyspaceOperator, keyExtractor);
+  public <K> void delete(Serializer<K> keySerializer, K... keys) {
+    Mutator<K> m = createMutator(keyspaceOperator, keySerializer);
     for (K key: keys) {
-      m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
+      m.addDeletion(key, CF_NAME,  COLUMN_NAME, serializer);
     }
     m.execute();
   }

@@ -17,14 +17,14 @@ public final class OrderedSuperRows<K,SN,N,V> extends SuperRows<K,SN,N,V> {
 
   private final List<SuperRow<K,SN,N,V>> rowsList;
 
-  public OrderedSuperRows(LinkedHashMap<K, List<SuperColumn>> thriftRet, Extractor<K> keyExtractor,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    super(thriftRet, keyExtractor, sNameExtractor, nameExtractor, valueExtractor);
+  public OrderedSuperRows(LinkedHashMap<K, List<SuperColumn>> thriftRet, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    super(thriftRet, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
     rowsList = new ArrayList<SuperRow<K,SN,N,V>>(thriftRet.size());
     for (Map.Entry<K, List<SuperColumn>> entry: thriftRet.entrySet()) {
-      rowsList.add(new SuperRow<K,SN,N,V>(entry.getKey(), entry.getValue(), sNameExtractor,
-          nameExtractor, valueExtractor));
+      rowsList.add(new SuperRow<K,SN,N,V>(entry.getKey(), entry.getValue(), sNameSerializer,
+          nameSerializer, valueSerializer));
     }
   }
 

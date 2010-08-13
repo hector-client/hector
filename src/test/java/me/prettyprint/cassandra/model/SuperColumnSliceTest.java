@@ -5,9 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Assert;
-import me.prettyprint.cassandra.extractors.BytesExtractor;
-import me.prettyprint.cassandra.extractors.LongExtractor;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.BytesSerializer;
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
@@ -23,9 +23,9 @@ public class SuperColumnSliceTest {
 
   @Test
   public void testConstruction() {
-    LongExtractor le = LongExtractor.get();
-    StringExtractor se = StringExtractor.get();
-    BytesExtractor be = BytesExtractor.get();
+    LongSerializer le = LongSerializer.get();
+    StringSerializer se = StringSerializer.get();
+    BytesSerializer be = BytesSerializer.get();
     // empty one
     List<SuperColumn> tColumns = new ArrayList<SuperColumn>();
     SuperSlice<String, Long, byte[]> slice = new SuperSlice<String, Long, byte[]>(tColumns, se, le,

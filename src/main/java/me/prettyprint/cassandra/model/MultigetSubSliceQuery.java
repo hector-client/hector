@@ -18,14 +18,14 @@ import org.apache.cassandra.thrift.ColumnParent;
 public final class MultigetSubSliceQuery<K, SN, N, V> extends AbstractSliceQuery<K, N, V, Rows<K, N, V>> {
 
   private Collection<K> keys;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private SN superColumn;
 
-  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Extractor<K> keyExtractor, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, keyExtractor, nameExtractor, valueExtractor);
-    Assert.notNull(nameExtractor, "sNameExtractor can't be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "sNameSerializer can't be null");
+    this.sNameSerializer = sNameSerializer;
   }
 
   public MultigetSubSliceQuery<K, SN, N, V> setKeys(K... keys) {
@@ -55,10 +55,10 @@ public final class MultigetSubSliceQuery<K, SN, N, V> extends AbstractSliceQuery
             List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            Map<K, List<Column>> thriftRet = keyExtractor.fromBytesMap(ks.multigetSlice(keyExtractor.toBytesList(keysList),
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
+            Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ks.multigetSlice(keySerializer.toBytesList(keysList),
                 columnParent, getPredicate()));
-            return new Rows<K, N, V>(thriftRet, columnNameExtractor, valueExtractor);
+            return new Rows<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

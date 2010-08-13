@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
 
 /**
@@ -7,11 +7,11 @@ package me.prettyprint.cassandra.extractors;
  * @author Ran Tavory
  *
  */
-public final class LongExtractor extends AbstractExtractor<Long> {
+public final class LongSerializer extends AbstractSerializer<Long> {
 
-  private static final LongExtractor instance = new LongExtractor();
+  private static final LongSerializer instance = new LongSerializer();
 
-  public static LongExtractor get() {
+  public static LongSerializer get() {
     return instance;
   }
 
