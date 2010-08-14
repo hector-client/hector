@@ -10,12 +10,17 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the information required for connecting to a Cassandra host.
  * Also exposes pool configuration parameters for that host.
- * TODO(ran): Merge CassandraHost, CassandraCluster into Cluster
- * @author Nate McCall (nate@vervewireless.com)
+ * 
+ * @author zznate(nate@riptano.com)
  *
  */
 public final class CassandraHost {
   private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
+  
+  /**
+   * The default port number to which we will connect
+   */
+  public static final int DEFAULT_PORT = 9160;
 
   public static final int DEFAULT_MAX_ACTIVE = 50;
 
@@ -62,10 +67,11 @@ public final class CassandraHost {
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String url) {
-    this(parseHostFromUrl(url), parsePortFromUrl(url));
+    this(url, parsePortFromUrl(url));
   }
 
   public CassandraHost(String url2, int port) {
+    url2 = parseHostFromUrl(url2);
     this.port = port;
     StringBuilder b = new StringBuilder();
     InetAddress address;
@@ -190,11 +196,11 @@ public final class CassandraHost {
   }
 
   public static String parseHostFromUrl(String urlPort) {
-    return urlPort.substring(0, urlPort.lastIndexOf(':'));
+    return urlPort.lastIndexOf(':') > 0 ? urlPort.substring(0, urlPort.lastIndexOf(':')) : urlPort;
   }
 
   public static int parsePortFromUrl(String urlPort) {
-    return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
+    return urlPort.lastIndexOf(':') > 0 ? Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length())) : DEFAULT_PORT;
   }
 
   public void setTimestampResolution(TimestampResolution timestampResolution) {

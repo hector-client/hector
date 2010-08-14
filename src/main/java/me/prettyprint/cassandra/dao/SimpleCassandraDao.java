@@ -23,7 +23,6 @@ import me.prettyprint.cassandra.service.Cluster;
 public class SimpleCassandraDao {
 
   private String columnFamilyName;
-  private String keyspaceName;
   private KeyspaceOperator keyspaceOperator;
   private StringExtractor extractor = StringExtractor.get();
     
@@ -33,7 +32,7 @@ public class SimpleCassandraDao {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String columnName, final String value) {
+  public void insert(String key, String columnName, String value) {
     createMutator(keyspaceOperator).insert(
         key, columnFamilyName, createColumn(columnName, value, extractor, extractor));
   }
@@ -43,7 +42,7 @@ public class SimpleCassandraDao {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key, final String columnName) throws HectorException {
+  public String get(String key, String columnName) throws HectorException {
     ColumnQuery<String, String> q = createStringColumnQuery(keyspaceOperator);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(columnName).
@@ -104,9 +103,6 @@ public class SimpleCassandraDao {
     this.columnFamilyName = columnFamilyName;
   }
 
-  public void setKeyspaceName(String keyspaceName) {
-    this.keyspaceName = keyspaceName;
-  }
 
   public void setKeyspaceOperator(KeyspaceOperator keyspaceOperator) {
     this.keyspaceOperator = keyspaceOperator;

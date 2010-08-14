@@ -66,6 +66,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // Check the mutation result metadata
     // assertEquals("127.0.0.1:9170", mr.getHostUsed());
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
     // get value
@@ -73,6 +74,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setName("testInsertGetRemove").setColumnFamily(cf);
     Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove").execute();
     assertNotNull(r);
+    assertTrue("Should have operated on a host", r.getHostUsed() != null);
     HColumn<String, String> c = r.get();
     assertNotNull(c);
     String value = c.getValue();
@@ -81,7 +83,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("testInsertGetRemove", name);
     assertEquals(q, r.getQuery());
     assertTrue("Time should be > 0", r.getExecutionTimeMicro() > 0);
-
+    assertTrue("Should have operated on a host", r.getHostUsed() != null);
     // remove value
     m = createMutator(ko);
     MutationResult mr2 = m.delete("testInsertGetRemove", cf, "testInsertGetRemove", se);
@@ -295,6 +297,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     MutationResult mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
     // get value
