@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import me.prettyprint.cassandra.utils.Assert;
 
 import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.utils.FBUtilities;
 
 /**
  * A helper class for range queries
@@ -12,23 +13,27 @@ import org.apache.cassandra.thrift.KeyRange;
  */
 /*package*/ final class HKeyRange {
 
-  /** Whether to use start/end as tokens or as keys */
-  private boolean useTokens = true;
+  /** Whether to use start/end as tokens */
+  private boolean useTokens = false;
+  /** Whether to use start/end Key */
+  private boolean useKeys = false;
   byte[] startKey;
-private byte[] endKey;
+  private byte[] endKey;
 
-String startToken;
-String endToken;
+  String startToken;
+  String endToken;
   private int rowCount = 100;
 
   public HKeyRange setTokens(String start, String end) {
     useTokens = true;
+    useKeys = false;
     this.startToken = start;
     this.endToken = end;
     return this;
   }
 
   public <K> HKeyRange setKeys(K start, K end, Serializer<K> keySerializer) {
+    useKeys = true;
     useTokens = false;
     this.startKey = keySerializer.toBytes(start);
     this.endKey = keySerializer.toBytes(end);
@@ -50,9 +55,10 @@ String endToken;
     if (useTokens) {
       Assert.notNull(startToken, "start_token can't be null");
       Assert.notNull(endToken, "end_token can't be null");
-      keyRange.setStart_token(startToken);
-      keyRange.setEnd_token(endToken);
-    } else {
+      keyRange.setStart_token(FBUtilities.md5hash(startToken.getBytes()).toString());
+      keyRange.setEnd_token(FBUtilities.md5hash(endToken.getBytes()).toString());
+    } 
+    if (useKeys) {
       Assert.notNull(startKey, "start can't be null");
       Assert.notNull(endKey, "end can't be null");
       keyRange.setStart_key(startKey);
