@@ -96,7 +96,7 @@ public final class Mutator {
    */
   public MutationResult execute() {
     if (pendingMutations == null || pendingMutations.isEmpty()) {
-      return new MutationResult(true, 0);
+      return new MutationResult(true, 0, null);
     }
     final BatchMutation mutations = pendingMutations.makeCopy();
     pendingMutations = null;

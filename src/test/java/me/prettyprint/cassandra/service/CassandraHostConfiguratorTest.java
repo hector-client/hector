@@ -54,4 +54,19 @@ public class CassandraHostConfiguratorTest {
     cassandraHostConfigurator.applyConfig(extraHost);
     assertEquals(15, extraHost.getMaxActive());
   }
+  
+  @Test
+  public void testHostnameOnlyDefaultPort() {
+    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost");
+    CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
+    assertEquals(CassandraHost.DEFAULT_PORT,cassandraHosts[0].getPort());
+  }
+  
+  @Test
+  public void testConfiguratorPort() {
+    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost");
+    cassandraHostConfigurator.setPort(9177);
+    CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
+    assertEquals(9177,cassandraHosts[0].getPort());
+  } 
 }
