@@ -10,8 +10,10 @@ import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import org.apache.cassandra.thrift.Clock;
+
 import me.prettyprint.cassandra.model.ColumnQuery;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -19,6 +21,7 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 
 public class ExampleDaoV2 {
@@ -28,16 +31,16 @@ public class ExampleDaoV2 {
   private final static String CF_NAME = "Standard1";
   /** Column name where values are stored */
   private final static String COLUMN_NAME = "v";
-  private final StringExtractor extractor = StringExtractor.get();
+  private final StringSerializer serializer = StringSerializer.get();
 
   private final KeyspaceOperator keyspaceOperator;
 
   public static void main(String[] args) throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", HOST_PORT);
     ExampleDaoV2 ed = new ExampleDaoV2(createKeyspaceOperator(KEYSPACE, c));
-    ed.insert("key1", "value1");
+    ed.insert("key1", "value1", StringSerializer.get());
 
-    System.out.println(ed.get("key1"));
+    System.out.println(ed.get("key1", StringSerializer.get()));
   }
 
   public ExampleDaoV2(KeyspaceOperator ko) {
@@ -50,13 +53,13 @@ public class ExampleDaoV2 {
    * @param key   Key for the value
    * @param value the String value to insert
    */
-  public void insert(final String key, final String value) {
-    createMutator(keyspaceOperator).insert(
-        key, CF_NAME, createColumn(COLUMN_NAME, value, extractor, extractor));
+  public <K> void insert(final K key, final String value, Serializer<K> keySerializer) {
+    createMutator(keyspaceOperator, keySerializer).insert(
+        key, CF_NAME, createColumn(COLUMN_NAME, value, serializer, serializer));
   }
 
-  private long createTimestamp() {
-    return keyspaceOperator.createTimestamp();
+  private Clock createClock() {
+    return keyspaceOperator.createClock();
   }
 
   /**
@@ -64,8 +67,8 @@ public class ExampleDaoV2 {
    *
    * @return The string value; null if no value exists for the given key.
    */
-  public String get(final String key) throws HectorException {
-    ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
+  public <K> String get(final K key, Serializer<K> keySerializer) throws HectorException {
+    ColumnQuery<K, String, String> q = createColumnQuery(keyspaceOperator, keySerializer, serializer, serializer);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).
@@ -79,16 +82,16 @@ public class ExampleDaoV2 {
    * @param keys
    * @return
    */
-  public Map<String, String> getMulti(String... keys) {
-    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor);
+  public <K> Map<K, String> getMulti(Serializer<K> keySerializer, K... keys) {
+    MultigetSliceQuery<K, String,String> q = createMultigetSliceQuery(keyspaceOperator, keySerializer, serializer, serializer);
     q.setColumnFamily(CF_NAME);
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
 
-    Result<Rows<String,String>> r = q.execute();
-    Rows<String,String> rows = r.get();
-    Map<String, String> ret = new HashMap<String, String>(keys.length);
-    for (String k: keys) {
+    Result<Rows<K, String,String>> r = q.execute();
+    Rows<K, String,String> rows = r.get();
+    Map<K, String> ret = new HashMap<K, String>(keys.length);
+    for (K k: keys) {
       HColumn<String,String> c = rows.getByKey(k).getColumnSlice().getColumnByName(COLUMN_NAME);
       if (c != null && c.getValue() != null) {
         ret.put(k, c.getValue());
@@ -100,11 +103,11 @@ public class ExampleDaoV2 {
   /**
    * Insert multiple values
    */
-  public void insertMulti(Map<String, String> keyValues) {
-    Mutator m = createMutator(keyspaceOperator);
-    for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
+  public <K> void insertMulti(Map<K, String> keyValues, Serializer<K> keySerializer) {
+    Mutator<K> m = createMutator(keyspaceOperator, keySerializer);
+    for (Map.Entry<K, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,
-          createColumn(COLUMN_NAME, keyValue.getValue(), createTimestamp(), extractor, extractor));
+          createColumn(COLUMN_NAME, keyValue.getValue(), createClock(), serializer, serializer));
     }
     m.execute();
   }
@@ -112,10 +115,10 @@ public class ExampleDaoV2 {
   /**
    * Delete multiple values
    */
-  public void delete(String... keys) {
-    Mutator m = createMutator(keyspaceOperator);
-    for (String key: keys) {
-      m.addDeletion(key, CF_NAME,  COLUMN_NAME, extractor);
+  public <K> void delete(Serializer<K> keySerializer, K... keys) {
+    Mutator<K> m = createMutator(keyspaceOperator, keySerializer);
+    for (K key: keys) {
+      m.addDeletion(key, CF_NAME,  COLUMN_NAME, serializer);
     }
     m.execute();
   }

@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
@@ -15,56 +16,55 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @author Ran Tavory
  *
  */
-public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public final class RangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,OrderedRows<K,N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private final HKeyRange keyRange;
   private SN superColumn;
 
 
-  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
     keyRange = new HKeyRange();
   }
 
-  public RangeSubSlicesQuery<SN,N,V> setTokens(String start, String end) {
+  public RangeSubSlicesQuery<K,SN,N,V> setTokens(String start, String end) {
     keyRange.setTokens(start, end);
     return this;
   }
 
-  public RangeSubSlicesQuery<SN,N,V> setKeys(String start, String end) {
-    keyRange.setKeys(start, end);
+  public RangeSubSlicesQuery<K,SN,N,V> setKeys(K start, K end) {
+    keyRange.setKeys(start, end, keySerializer);
     return this;
   }
 
-  public RangeSubSlicesQuery<SN,N,V> setRowCount(int rowCount) {
+  public RangeSubSlicesQuery<K,SN,N,V> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
     return this;
   }
 
-  public  RangeSubSlicesQuery<SN,N,V> setSuperColumn(SN sc) {
+  public  RangeSubSlicesQuery<K,SN,N,V> setSuperColumn(SN sc) {
     Assert.notNull(sc, "sc can't be null");
     superColumn = sc;
     return this;
   }
 
-  @Override
-  public Result<OrderedRows<N, V>> execute() {
+  public Result<OrderedRows<K,N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
     Assert.notNull(superColumn, "superColumn cannot be null");
 
-    return new Result<OrderedRows<N,V>>(keyspaceOperator.doExecute(
-        new KeyspaceOperationCallback<OrderedRows<N,V>>() {
+    return new Result<OrderedRows<K,N,V>>(keyspaceOperator.doExecute(
+        new KeyspaceOperationCallback<OrderedRows<K,N,V>>() {
           @Override
-          public OrderedRows<N,V> doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedRows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            LinkedHashMap<String, List<Column>> thriftRet =
-                ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
-            return new OrderedRows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
+            Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
+                ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
+            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

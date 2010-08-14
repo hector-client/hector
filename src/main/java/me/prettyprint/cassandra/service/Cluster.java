@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.model.HectorPoolException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.TokenRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * //Create a mutator:
  * Mutator m = createMutator(ko);
  * // Make a mutation:
- * MutationResult mr = m.insert("key", cf, createColumn("name", "value", extractor, extractor));
+ * MutationResult mr = m.insert("key", cf, createColumn("name", "value", serializer, serializer));
  * </code>
  *
  * THREAD SAFETY: This class is thread safe.
@@ -45,7 +46,7 @@ public final class Cluster {
   private final CassandraClientPool pool;
   private final String name;
   private final CassandraHostConfigurator configurator;
-  private TimestampResolution timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
+  private ClockResolution clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   private final FailoverPolicy failoverPolicy;
   private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
@@ -134,17 +135,17 @@ public final class Cluster {
     return String.format("Cluster(%s,%s)", name, pool.toString());
   }
 
-  public TimestampResolution getTimestampResolution() {
-    return timestampResolution;
+  public ClockResolution getClockResolution() {
+    return clockResolution;
   }
 
-  public Cluster setTimestampResolution(TimestampResolution timestampResolution) {
-    this.timestampResolution = timestampResolution;
+  public Cluster setClockResolution(ClockResolution clockResolution) {
+    this.clockResolution = clockResolution;
     return this;
   }
 
-  public long createTimestamp() {
-    return timestampResolution.createTimestamp();
+  public Clock createClock() {
+    return clockResolution.createClock();
   }
 
 

@@ -2,10 +2,8 @@ package me.prettyprint.cassandra.service;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -38,7 +36,7 @@ import org.slf4j.LoggerFactory;
   /** The thrift object */
   private final Cassandra.Client cassandra;
 
-  private final TimestampResolution timestampResolution;
+  private final ClockResolution clockResolution;
 
   /** List of known keyspaces */
   private List<String> keyspaces;
@@ -73,18 +71,18 @@ import org.slf4j.LoggerFactory;
       CassandraHost cassandraHost, 
       CassandraClientPool clientPools,
       Cluster cassandraCluster,      
-      TimestampResolution timestampResolution)
+      ClockResolution clockResolution)
       throws UnknownHostException {
     this.mySerial = serial.incrementAndGet();
     cassandra = cassandraThriftClient;
     this.cassandraHost = cassandraHost;
     this.keyspaceFactory = keyspaceFactory;
     this.cassandraClientPool = clientPools;
-    this.timestampResolution = timestampResolution;
+    this.clockResolution = clockResolution;
     this.cluster = cassandraCluster;
   }
 
-  @Override
+
   public String getClusterName() throws HectorException {
     if (clusterName == null) {
       clusterName = cluster.getName();
@@ -92,18 +90,18 @@ import org.slf4j.LoggerFactory;
     return clusterName;
   }
 
-  @Override
+
   public Keyspace getKeyspace(String keySpaceName) throws HectorException {
     return getKeyspace(keySpaceName, DEFAULT_CONSISTENCY_LEVEL, DEFAULT_FAILOVER_POLICY);
   }
 
-  @Override
+
   public Keyspace getKeyspace(String keySpaceName, ConsistencyLevel consistency) throws IllegalArgumentException,
       NotFoundException, HectorTransportException {
     return getKeyspace(keySpaceName, consistency, DEFAULT_FAILOVER_POLICY);
   }
 
-  @Override
+
   public Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy)
       throws IllegalArgumentException, NotFoundException, HectorTransportException {
@@ -133,7 +131,7 @@ import org.slf4j.LoggerFactory;
     return keyspace;
   }
 
-  @Override
+
   public List<String> getKeyspaces() throws HectorTransportException {
     if (keyspaces == null) {
       try {
@@ -147,7 +145,7 @@ import org.slf4j.LoggerFactory;
 
 
 
-  @Override
+
   public String getServerVersion() throws HectorException {
     if (serverVersion == null) {
       serverVersion = cluster.describeThriftVersion();
@@ -172,18 +170,18 @@ import org.slf4j.LoggerFactory;
     return b.toString();
   }
 
-  @Override
+
   public Cassandra.Client getCassandra() {
     return cassandra;
   }
 
-  @Override
+
   public CassandraHost getCassandraHost() {
     return this.cassandraHost;
   }
 
 
-  @Override
+
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("CassandraClient<");
@@ -194,48 +192,48 @@ import org.slf4j.LoggerFactory;
     return b.toString();
   }
 
-  @Override
+
   public void markAsClosed() {
     closed = true;
   }
 
-  @Override
+
   public boolean isClosed() {
     return closed;
   }
 
-  @Override
+
   public boolean hasErrors() {
     return hasErrors ;
   }
 
-  @Override
+
   public void markAsError() {
     hasErrors = true;
   }
 
-  @Override
+
   public void removeKeyspace(Keyspace k) {
     String key = buildKeyspaceMapName(k.getName(), k.getConsistencyLevel(), k.getFailoverPolicy());
     keyspaceMap.remove(key);
   }
 
-  @Override
-  public TimestampResolution getTimestampResolution() {
-    return timestampResolution;
+
+  public ClockResolution getClockResolution() {
+    return clockResolution;
   }
 
-  @Override
+
   public boolean isReleased() {
     return released;
   }
 
-  @Override
+
   public void markAsReleased() {
     released = true;
   }
 
-  @Override
+
   public void markAsBorrowed() {
     released = false;
   }

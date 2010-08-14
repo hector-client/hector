@@ -1,6 +1,10 @@
+This is a fork of the latest release of Hector (as of 8/10/2010) to work with Cassandra 0.7.  This should be considered an experimental version.
+
+----------------------------------------------------------------------------------------------------
+
 A high level cassandra java client.
 Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
-Hector is the greatest warrior in the greek mithology, Troy's builder and brother of Cassandra
+Hector is the greatest warrior in the greek mythology, Troy's builder and brother of Cassandra
 http://en.wikipedia.org/wiki/Hector
 http://en.wikipedia.org/wiki/Cassandra
 

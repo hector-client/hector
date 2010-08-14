@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.utils.StringUtils;
@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 public class MutatorTest extends BaseEmbededServerSetupTest {
 
-  private static final StringExtractor se = new StringExtractor();
+  private static final StringSerializer se = new StringSerializer();
 
   private Cluster cluster;
   private KeyspaceOperator keyspaceOperator;
@@ -43,7 +43,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsert() {
-    Mutator m = createMutator(keyspaceOperator);
+    Mutator<String> m = createMutator(keyspaceOperator, se);
     MutationResult mr = m.insert("k", "Standard1", createColumn("name", "value", se, se));
     assertTrue("Execution time on single insert should be > 0",mr.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", mr.getHostUsed() != null);
@@ -52,7 +52,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsertSuper() {
-    Mutator m = createMutator(keyspaceOperator);
+    Mutator<String> m = createMutator(keyspaceOperator, se);
     List<HColumn<String, String>> columnList = new ArrayList<HColumn<String,String>>();
     columnList.add(createColumn("name","value",se,se));
     HSuperColumn<String, String, String> superColumn =
@@ -66,7 +66,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   public void testBatchMutationManagement() {
     String cf = "Standard1";
 
-    Mutator m = createMutator(keyspaceOperator);
+    Mutator<String> m = createMutator(keyspaceOperator, se);
     for (int i = 0; i < 5; i++) {
       m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
     }

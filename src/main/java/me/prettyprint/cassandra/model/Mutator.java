@@ -12,7 +12,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 
 
 /**
- * A Mutator inserts or deltes values from the cluster.
+ * A Mutator inserts or deletes values from the cluster.
  * There are two main ways to use a mutator:
  * 1. Use the insert/delete methods to immediately insert of delete values.
  * or 2. Use the addInsertion/addDeletion methods to schedule batch operations and then execute()
@@ -23,41 +23,44 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * @author Ran Tavory
  * @author zznate
  */
-public final class Mutator {
+public final class Mutator<K> {
 
   private final KeyspaceOperator ko;
+  
+  final Serializer<K> keySerializer;
 
   private BatchMutation pendingMutations;
 
-  /*package*/ Mutator(KeyspaceOperator ko) {
+  /*package*/ Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
     this.ko = ko;
+    this.keySerializer = keySerializer;
   }
 
   // Simple and immediate insertion of a column
-  public <N,V> MutationResult insert(final String key, final String cf, final HColumn<N,V> c) {
+  public <N,V> MutationResult insert(final K key, final String cf, final HColumn<N,V> c) {
     addInsertion(key, cf, c);
     return execute();
   }
 
   // overloaded insert-super
-  public <SN,N,V> MutationResult insert(final String key, final String cf,
+  public <SN,N,V> MutationResult insert(final K key, final String cf,
       final HSuperColumn<SN,N,V> superColumn) {
     addInsertion(key, cf, superColumn);
     return execute();
   }
 
-  public <N> MutationResult delete(final String key, final String cf, final N columnName,
-      final Extractor<N> nameExtractor) {
-    addDeletion(key, cf, columnName, nameExtractor);
+  public <N> MutationResult delete(final K key, final String cf, final N columnName,
+      final Serializer<N> nameSerializer) {
+    addDeletion(key, cf, columnName, nameSerializer);
     return execute();
   }
 
-  public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
-      final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor) {
+  public <SN,N> MutationResult superDelete(final K key, final String cf, final SN supercolumnName,
+      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer, final Serializer<K> keySerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor));
+        ks.remove(keySerializer.toBytes(key), createSuperColumnPath(cf, supercolumnName, columnName, sNameSerializer, nameSerializer));
         return null;
       }
     }));
@@ -68,24 +71,24 @@ public final class Mutator {
   // indeterminant state if we dont validate against LIVE (but cached of course)
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
-  public <N,V> Mutator addInsertion(String key, String cf, HColumn<N,V> c) {
-    getPendingMutations().addInsertion(key, Arrays.asList(cf), c.toThrift());
+  public <N,V> Mutator<K> addInsertion(K key, String cf, HColumn<N,V> c) {
+    getPendingMutations().addInsertion(keySerializer.toBytes(key), Arrays.asList(cf), c.toThrift());
     return this;
   }
 
   /**
    * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
    */
-  public <SN,N,V> Mutator addInsertion(String key, String cf, HSuperColumn<SN,N,V> sc) {
-    getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
+  public <SN,N,V> Mutator<K> addInsertion(K key, String cf, HSuperColumn<SN,N,V> sc) {
+    getPendingMutations().addSuperInsertion(keySerializer.toBytes(key), Arrays.asList(cf), sc.toThrift());
     return this;
   }
 
-  public <N> Mutator addDeletion(String key, String cf, N columnName, Extractor<N> nameExtractor) {
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
-    sp.addToColumn_names(nameExtractor.toBytes(columnName));
-    Deletion d = new Deletion(ko.createTimestamp()).setPredicate(sp);
-    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    sp.addToColumn_names(nameSerializer.toBytes(columnName));
+    Deletion d = new Deletion(ko.createClock()).setPredicate(sp);
+    getPendingMutations().addDeletion(keySerializer.toBytes(key), Arrays.asList(cf), d);
     return this;
   }
 
@@ -112,7 +115,7 @@ public final class Mutator {
   /**
    * Discards all pending mutations.
    */
-  public Mutator discardPendingMutations() {
+  public Mutator<K> discardPendingMutations() {
     pendingMutations = null;
     return this;
   }

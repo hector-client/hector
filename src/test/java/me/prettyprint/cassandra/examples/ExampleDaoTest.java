@@ -6,12 +6,14 @@ import static org.junit.Assert.assertNull;
 import java.io.IOException;
 
 import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.apache.cassandra.config.ConfigurationException;
 
 public class ExampleDaoTest {
 
@@ -25,7 +27,7 @@ public class ExampleDaoTest {
    * @throws InterruptedException
    */
   @BeforeClass
-  public static void setup() throws TTransportException, IOException, InterruptedException {
+  public static void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
     embedded = new EmbeddedServerHelper();
     embedded.setup();
   }
@@ -38,11 +40,11 @@ public class ExampleDaoTest {
   @Test
   public void testInsertGetDelete() throws HectorException {
     ExampleDao dao = new ExampleDao();
-    assertNull(dao.get("key"));
-    dao.insert("key", "value");
-    assertEquals("value", dao.get("key"));
-    dao.delete("key");
-    assertNull(dao.get("key"));
+    assertNull(dao.get("key", StringSerializer.get()));
+    dao.insert("key", "value", StringSerializer.get());
+    assertEquals("value", dao.get("key", StringSerializer.get()));
+    dao.delete("key", StringSerializer.get());
+    assertNull(dao.get("key", StringSerializer.get()));
   }
 
 }

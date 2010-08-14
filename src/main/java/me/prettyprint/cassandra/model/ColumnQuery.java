@@ -5,36 +5,36 @@ import me.prettyprint.cassandra.service.Keyspace;
 
 // like a simple get operation
 // may return a Column or a SuperColumn
-public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
+public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
-  private String key;
+  private K key;
   private N name;
 
-  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    super(keyspaceOperator, nameExtractor, valueExtractor);
+  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<K> keySerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    super(keyspaceOperator, keySerializer, nameSerializer, valueSerializer);
   }
 
-  public ColumnQuery<N,V> setKey(String key) {
+  public ColumnQuery<K,N,V> setKey(K key) {
     this.key = key;
     return this;
   }
 
-  public ColumnQuery<N,V> setName(N name) {
+  public ColumnQuery<K,N,V> setName(N name) {
     this.name = name;
     return this;
   }
 
-  @Override
+
   public Result<HColumn<N, V>> execute() {
     return new Result<HColumn<N, V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<HColumn<N, V>>() {
-          @Override
+        
           public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               org.apache.cassandra.thrift.Column thriftColumn =
-                ks.getColumn(key, createColumnPath(columnFamilyName, name, columnNameExtractor));
-              return new HColumn<N, V>(thriftColumn, columnNameExtractor, valueExtractor);
+                ks.getColumn(keySerializer.toBytes(key), createColumnPath(columnFamilyName, name, columnNameSerializer));
+              return new HColumn<N, V>(thriftColumn, columnNameSerializer, valueSerializer);
             } catch (NotFoundException e) {
               return null;
             }
@@ -42,7 +42,7 @@ public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> impl
         }), this);
   }
 
-  @Override
+
   public String toString() {
     return "ColumnQuery(" + key + "," + name + ")";
   }

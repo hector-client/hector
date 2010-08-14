@@ -78,7 +78,7 @@ import com.google.common.collect.ImmutableSet;
     pool = createPool();
   }
 
-  @Override
+
   public CassandraClient borrowClient() throws HectorException {
     log.debug("Borrowing client from {}", this);
     try {
@@ -124,7 +124,7 @@ import com.google.common.collect.ImmutableSet;
     return s.toString();
   }
 
-  @Override
+
   public void close() {
     try {
       pool.close();
@@ -133,22 +133,22 @@ import com.google.common.collect.ImmutableSet;
     }
   }
 
-  @Override
+
   public int getNumIdle() {
     return pool.getNumIdle();
   }
 
-  @Override
+
   public int getNumActive() {
     return pool.getNumActive();
   }
 
-  @Override
+
   public int getNumBeforeExhausted() {
     return maxActive - pool.getNumActive();
   }
 
-  @Override
+
   public void releaseClient(CassandraClient client) throws HectorException {
     log.debug("Maybe releasing client {}. is aready Released? {}", client, client.isReleased());
     if (client.isReleased()) {
@@ -194,35 +194,35 @@ import com.google.common.collect.ImmutableSet;
     }
   }
 
-  @Override
+
   public String toString() {
     return String.format("CassandraClientPoolImpl<%s>", name);
   }
 
-  @Override
+
   public String getName() {
     return name;
   }
 
-  @Override
+
   public boolean isExhausted() {
     return getNumBeforeExhausted() <= 0 &&
         (exhaustedPolicy.equals(ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK) ||
          exhaustedPolicy.equals(ExhaustedPolicy.WHEN_EXHAUSTED_FAIL));
   }
 
-  @Override
+
   public int getNumBlockedThreads() {
     return blockedThreadsCount.intValue();
   }
 
 
-  @Override
+
   public CassandraHost getCassandraHost() {
     return cassandraHost;
   }
 
-  @Override
+
   public void invalidateClient(CassandraClient client) {
     log.debug("Invalidating client {}", client);
     try {
@@ -237,7 +237,7 @@ import com.google.common.collect.ImmutableSet;
     }
   }
 
-  @Override
+
   public Set<CassandraClient> getLiveClients() {
     return ImmutableSet.copyOf(liveClientsFromPool);
   }
@@ -247,7 +247,7 @@ import com.google.common.collect.ImmutableSet;
     liveClientsFromPool.remove(client);
   }
 
-  @Override
+
   public void invalidateAll() {
     log.debug("Invalidating all connections at {} (thread={})", this,
         Thread.currentThread().getName());

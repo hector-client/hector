@@ -19,20 +19,20 @@ import org.apache.cassandra.thrift.SuperColumn;
  *          Column value type
  *
  */
-public final class SuperRow<SN, N, V> {
+public final class SuperRow<K, SN, N, V> {
 
-  private final String rowKey;
+  private final K rowKey;
   private final SuperSlice<SN, N, V> slice;
 
-  /*package*/SuperRow(String rowKey, List<SuperColumn> thriftSuperColumns,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(rowKey, thriftSuperColumns, nameExtractor, valueExtractor);
-    this.rowKey = rowKey;
-    slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameExtractor, nameExtractor,
-        valueExtractor);
+  /*package*/SuperRow(K bs, List<SuperColumn> thriftSuperColumns,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    Assert.noneNull(bs, thriftSuperColumns, nameSerializer, valueSerializer);
+    this.rowKey = bs;
+    slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameSerializer, nameSerializer,
+        valueSerializer);
   }
 
-  public String getKey() {
+  public K getKey() {
     return rowKey;
   }
 

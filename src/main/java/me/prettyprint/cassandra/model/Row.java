@@ -17,19 +17,19 @@ import org.apache.cassandra.thrift.Column;
  * @param <V> Column value type
  *
  */
-public final class Row<N,V> {
+public final class Row<K,N,V> {
 
-  private final String rowKey;
+  private final K rowKey;
   private final ColumnSlice<N,V> columnSlice;
 
-  /*package*/ Row(String rowKey, List<Column> columns, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    Assert.noneNull(rowKey, columns, nameExtractor, valueExtractor);
-    this.rowKey = rowKey;
-    columnSlice = new ColumnSlice<N,V>(columns, nameExtractor, valueExtractor);
+  /*package*/ Row(K k, List<Column> columns, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    Assert.noneNull(k, columns, nameSerializer, valueSerializer);
+    this.rowKey = k;
+    columnSlice = new ColumnSlice<N,V>(columns, nameSerializer, valueSerializer);
   }
 
-  public String getKey() {
+  public K getKey() {
     return rowKey;
   }
 

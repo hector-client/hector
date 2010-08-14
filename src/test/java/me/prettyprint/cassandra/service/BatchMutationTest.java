@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -28,14 +29,14 @@ public class BatchMutationTest {
 
   @Test
   public void testAddInsertion() {
-    Column column = new Column(bytes("c_name"), bytes("c_val"), System.currentTimeMillis());
+    Column column = new Column(bytes("c_name"), bytes("c_val"), new Clock(System.currentTimeMillis()));
     batchMutate.addInsertion("key1", columnFamilies, column);
     // assert there is one outter map row with 'key' as the key
     assertEquals(1, batchMutate.getMutationMap().get("key1").size());
 
     // add again with a different column and verify there is one key and two mutations underneath
     // for "standard1"
-    Column column2 = new Column(bytes("c_name2"), bytes("c_val2"), System.currentTimeMillis());
+    Column column2 = new Column(bytes("c_name2"), bytes("c_val2"), new Clock(System.currentTimeMillis()));
     batchMutate.addInsertion("key1",columnFamilies, column2);
     assertEquals(2, batchMutate.getMutationMap().get("key1").get("Standard1").size());
   }
@@ -43,7 +44,7 @@ public class BatchMutationTest {
   @Test
   public void testAddSuperInsertion() {
     SuperColumn sc = new SuperColumn(bytes("c_name"),
-        Arrays.asList(new Column(bytes("c_name"), bytes("c_val"), System.currentTimeMillis())));
+        Arrays.asList(new Column(bytes("c_name"), bytes("c_val"), new Clock(System.currentTimeMillis()))));
     batchMutate.addSuperInsertion("key1", columnFamilies, sc);
     // assert there is one outter map row with 'key' as the key
     assertEquals(1, batchMutate.getMutationMap().get("key1").size());
@@ -51,7 +52,7 @@ public class BatchMutationTest {
     // add again with a different column and verify there is one key and two mutations underneath
     // for "standard1"
     SuperColumn sc2 = new SuperColumn(bytes("c_name2"),
-        Arrays.asList(new Column(bytes("c_name"), bytes("c_val"), System.currentTimeMillis())));
+        Arrays.asList(new Column(bytes("c_name"), bytes("c_val"), new Clock(System.currentTimeMillis()))));
     batchMutate.addSuperInsertion("key1", columnFamilies, sc2);
     assertEquals(2, batchMutate.getMutationMap().get("key1").get("Standard1").size());
   }
@@ -59,7 +60,7 @@ public class BatchMutationTest {
 
   @Test
   public void testAddDeletion() {
-    Deletion deletion = new Deletion(System.currentTimeMillis());
+    Deletion deletion = new Deletion(new Clock(System.currentTimeMillis()));
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(bytes("c_name"));
     deletion.setPredicate(slicePredicate);
@@ -67,7 +68,7 @@ public class BatchMutationTest {
 
     assertEquals(1,batchMutate.getMutationMap().get("key1").size());
 
-    deletion = new Deletion(System.currentTimeMillis());
+    deletion = new Deletion(new Clock(System.currentTimeMillis()));
     slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(bytes("c_name2"));
     deletion.setPredicate(slicePredicate);

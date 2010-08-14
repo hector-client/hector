@@ -17,20 +17,20 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,V>> {
+public final class SubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlice<N,V>> {
 
-  private String key;
+  private K key;
   private SN superColumn;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SubSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "Supername extractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ SubSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, keySerializer, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "Supername serializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
   }
 
-  public SubSliceQuery<SN,N,V> setKey(String key) {
+  public SubSliceQuery<K,SN,N,V> setKey(K key) {
     this.key = key;
     return this;
   }
@@ -38,12 +38,11 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
   /**
    * Set the supercolumn to run the slice query on
    */
-  public SubSliceQuery<SN,N,V> setSuperColumn(SN superColumn) {
+  public SubSliceQuery<K,SN,N,V> setSuperColumn(SN superColumn) {
     this.superColumn = superColumn;
     return this;
   }
 
-  @Override
   public Result<ColumnSlice<N, V>> execute() {
     Assert.notNull(key, "Key cannot be null");
     Assert.notNull(superColumn, "Supercolumn cannot be null");
@@ -52,9 +51,9 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
           @Override
           public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
-            List<Column> thriftRet = ks.getSlice(key, columnParent, getPredicate());
-            return new ColumnSlice<N, V>(thriftRet, columnNameExtractor, valueExtractor);
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
+            List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());
+            return new ColumnSlice<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }
