@@ -27,7 +27,7 @@ public final class CassandraHost {
   /**
    * By default, we will use TSocket transport on thrift (matches default Cassandra configs)
    */
-  public static final boolean DEFAULT_USE_FRAMED_THRIFT_TRANSPORT = false;
+  public static final boolean DEFAULT_USE_FRAMED_THRIFT_TRANSPORT = true;
 
   /**
    * The default max wait time when exhausted happens, default value is negative, which means

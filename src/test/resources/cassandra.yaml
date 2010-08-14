@@ -80,7 +80,7 @@ rpc_port: 9170
 
 # Frame size for thrift (maximum field length).
 # 0 disables TFramedTransport in favor of TSocket. 
-thrift_framed_transport_size_in_mb: 0
+thrift_framed_transport_size_in_mb: 15
 
 # The max length of a thrift message, including all fields and
 # internal thrift overhead.
