@@ -19,6 +19,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.Mutation;
@@ -441,6 +442,34 @@ import org.slf4j.LoggerFactory;
 
   }
 
+  public Map<byte[], List<Column>> getIndexedSlices(final ColumnParent columnParent,
+      final IndexClause indexClause,
+      final SlicePredicate predicate) throws HectorException {
+    Operation<Map<byte[], List<Column>>> op = new Operation<Map<byte[], List<Column>>>(
+        OperationType.READ) {
+    
+      public Map<byte[], List<Column>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_indexed_slices(columnParent, indexClause,
+              predicate, consistency);
+          if (keySlices == null || keySlices.isEmpty()) {
+            return new LinkedHashMap<byte[], List<Column>>(0);
+          }
+          LinkedHashMap<byte[], List<Column>> ret = new LinkedHashMap<byte[], List<Column>>(
+              keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(keySlice.getKey(), getColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      };
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
 
   public void remove(byte[] key, ColumnPath columnPath) {
 	this.remove(key, columnPath, createClock());

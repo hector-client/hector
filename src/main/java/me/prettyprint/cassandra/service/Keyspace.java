@@ -12,6 +12,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -191,6 +192,12 @@ public interface Keyspace {
    */
   Map<byte[], List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
+  
+  /**
+   * returns a subset of columns for a range of keys.
+   */
+  Map<byte[], List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause, 
+      SlicePredicate predicate) throws HectorException;  
 
   /**
    * @return The consistency level held by this keyspace instance.
