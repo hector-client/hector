@@ -29,7 +29,7 @@ public final class Mutator<K> {
   
   final Serializer<K> keySerializer;
 
-  private BatchMutation pendingMutations;
+  private BatchMutation<K> pendingMutations;
 
   /*package*/ Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
     this.ko = ko;
@@ -72,7 +72,7 @@ public final class Mutator<K> {
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
   public <N,V> Mutator<K> addInsertion(K key, String cf, HColumn<N,V> c) {
-    getPendingMutations().addInsertion(keySerializer.toBytes(key), Arrays.asList(cf), c.toThrift());
+    getPendingMutations().addInsertion(key, Arrays.asList(cf), c.toThrift());
     return this;
   }
 
@@ -80,7 +80,7 @@ public final class Mutator<K> {
    * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
    */
   public <SN,N,V> Mutator<K> addInsertion(K key, String cf, HSuperColumn<SN,N,V> sc) {
-    getPendingMutations().addSuperInsertion(keySerializer.toBytes(key), Arrays.asList(cf), sc.toThrift());
+    getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
     return this;
   }
 
@@ -88,7 +88,7 @@ public final class Mutator<K> {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
     Deletion d = new Deletion(ko.createClock()).setPredicate(sp);
-    getPendingMutations().addDeletion(keySerializer.toBytes(key), Arrays.asList(cf), d);
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
 
@@ -101,7 +101,7 @@ public final class Mutator<K> {
     if (pendingMutations == null || pendingMutations.isEmpty()) {
       return new MutationResult(true, 0, null);
     }
-    final BatchMutation mutations = pendingMutations.makeCopy();
+    final BatchMutation<K> mutations = pendingMutations.makeCopy();
     pendingMutations = null;
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
@@ -125,9 +125,9 @@ public final class Mutator<K> {
     return "Mutator(" + ko.toString() + ")";
   }
 
-  private BatchMutation getPendingMutations() {
+  private BatchMutation<K> getPendingMutations() {
     if (pendingMutations == null) {
-      pendingMutations = new BatchMutation();
+      pendingMutations = new BatchMutation<K>(keySerializer);
     }
     return pendingMutations;
   }

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.cassandra.serializers.BytesSerializer;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.Deletion;
@@ -26,19 +29,22 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class BatchMutation<K> {
 
   private final Map<K,Map<String,List<Mutation>>> mutationMap;
+  private final Serializer<K> keySerializer;
 
-  public BatchMutation() {
-    mutationMap = new HashMap<K,Map<String,List<Mutation>>>();
+  public BatchMutation(Serializer<K> serializer) {
+    this.keySerializer = serializer;    
+    mutationMap = new HashMap<K,Map<String,List<Mutation>>>();            
   }
 
-  private BatchMutation(Map<K,Map<String,List<Mutation>>> mutationMap) {
+  private BatchMutation(Serializer<K> serializer, Map<K,Map<String,List<Mutation>>> mutationMap) {
+    this.keySerializer = serializer;
     this.mutationMap = mutationMap;
   }
 
   /**
    * Add an Column insertion (or update) to the batch mutation request.
    */
-  public BatchMutation addInsertion(K key, List<String> columnFamilies,
+  public BatchMutation<K> addInsertion(K key, List<String> columnFamilies,
       Column column) {
     Mutation mutation = new Mutation();
     mutation.setColumn_or_supercolumn(new ColumnOrSuperColumn().setColumn(column));
@@ -50,7 +56,7 @@ public final class BatchMutation<K> {
   /**
    * Add an SuperColumn insertion (or update) to the batch mutation request.
    */
-  public BatchMutation addSuperInsertion(K key, List<String> columnFamilies,
+  public BatchMutation<K> addSuperInsertion(K key, List<String> columnFamilies,
       SuperColumn superColumn) {
     Mutation mutation = new Mutation();
     mutation.setColumn_or_supercolumn(new ColumnOrSuperColumn().setSuper_column(superColumn));
@@ -61,7 +67,7 @@ public final class BatchMutation<K> {
   /**
    * Add a deletion request to the batch mutation.
    */
-  public BatchMutation addDeletion(K key, List<String> columnFamilies, Deletion deletion) {
+  public BatchMutation<K> addDeletion(K key, List<String> columnFamilies, Deletion deletion) {
     Mutation mutation = new Mutation();
     mutation.setDeletion(deletion);
     addMutation(key, columnFamilies, mutation);
@@ -90,16 +96,22 @@ public final class BatchMutation<K> {
     return innerMutationMap;
   }
 
-  Map<K,Map<String,List<Mutation>>> getMutationMap() {
+  Map<byte[],Map<String,List<Mutation>>> getMutationMap() {
+    return keySerializer.toBytesMap(mutationMap);
+  }
+  
+  Map<K,Map<String,List<Mutation>>> getRawMutationMap() {
     return mutationMap;
   }
+  
+  
 
   /**
    * Makes a shallow copy of the mutation object.
    * @return
    */
-  public BatchMutation makeCopy() {
-    return new BatchMutation(mutationMap);
+  public BatchMutation<K> makeCopy() {
+    return new BatchMutation<K>(keySerializer, mutationMap);
   }
 
   /**

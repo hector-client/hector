@@ -151,7 +151,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with CFdoesNotExist");
-    } catch (InvalidRequestException e) {
+    } catch (InvalidRequestException e) {    
       assertTrue(StringUtils.contains(e.getWhy(),"column family does not exist"));
     }
 
@@ -290,7 +290,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testBatchMutateBatchMutation() throws HectorException {
-    BatchMutation batchMutation = new BatchMutation();
+    BatchMutation<String> batchMutation = new BatchMutation<String>(StringSerializer.get());
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 
@@ -315,7 +315,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       }
     }
-    batchMutation = new BatchMutation();
+    batchMutation = new BatchMutation<String>(StringSerializer.get());
     // batch_mutate delete by key
     for (int i = 0; i < 10; i++) {
       SlicePredicate slicePredicate = new SlicePredicate();
@@ -354,7 +354,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
     assertNotNull(found);
 
-    BatchMutation batchMutation = new BatchMutation();
+    BatchMutation<String> batchMutation = new BatchMutation<String>(StringSerializer.get());
     List<String> columnFamilies = Arrays.asList("Standard1");
     for (int i = 0; i < 10; i++) {
 
@@ -680,12 +680,6 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     */
   }
 
-  @Test
-  public void testDescribeKeyspace() throws HectorException {
-    Map<String, Map<String, String>> description = keyspace.describeKeyspace();
-    assertNotNull(description);
-    assertEquals(4, description.size());
-  }
 
 
   @Test
@@ -757,13 +751,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     sp.setSlice_range(sr);
 
     KeyRange range = new KeyRange();
-    range.setStart_key( "testGetRangeSlices0".getBytes());
-    range.setEnd_key( "testGetRangeSlices2".getBytes());
+    range.setStart_key( "".getBytes());
+    range.setEnd_key( "".getBytes());
 
     Map<String, List<Column>> keySlices = se.fromBytesMap(keyspace.getRangeSlices(clp, sp, range));
 
     assertNotNull(keySlices);
-    assertEquals(3, keySlices.size());
+
     assertNotNull("testGetRangeSlices1 is null", keySlices.get("testGetRangeSlices1"));
     assertEquals("testGetRangeSlices_Value_0", string(keySlices.get("testGetRangeSlices1").get(0).getValue()));
     assertEquals(10, keySlices.get("testGetRangeSlices1").size());
@@ -826,14 +820,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     sp.setSlice_range(sr);
 
     KeyRange range = new KeyRange();
-    range.setStart_key( "testGetSuperRangeSlices0".getBytes());
-    range.setEnd_key( "testGetSuperRangeSlices1".getBytes());
+    range.setStart_key( "".getBytes());
+    range.setEnd_key( "".getBytes());
 
 
     Map<String, List<SuperColumn>> keySlices = se.fromBytesMap(keyspace.getSuperRangeSlices(clp, sp, range));
 
     assertNotNull(keySlices);
-    assertEquals(2, keySlices.size());
+
     assertNotNull("testGetSuperRangSlices0 is null", keySlices.get("testGetSuperRangeSlices0"));
     assertEquals("testGetSuperRangeSlices_Value_0",
         string(keySlices.get("testGetSuperRangeSlices0").get(0).getColumns().get(0).getValue()));

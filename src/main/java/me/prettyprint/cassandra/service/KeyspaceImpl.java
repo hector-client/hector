@@ -316,6 +316,7 @@ import org.slf4j.LoggerFactory;
   }
 
   public void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException {
+    valideColumnPath(columnPath);
 	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
 	  if (columnPath.isSetSuper_column()) {
 	    columnParent.setSuper_column(columnPath.getSuper_column());
@@ -325,6 +326,7 @@ import org.slf4j.LoggerFactory;
   }
 
   public void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException {
+    valideColumnPath(columnPath);
 	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
 	  if (columnPath.isSetSuper_column()) {
       columnParent.setSuper_column(columnPath.getSuper_column());
