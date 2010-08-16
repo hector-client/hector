@@ -3,16 +3,13 @@ package me.prettyprint.cassandra.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.model.InvalidRequestException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -637,11 +634,11 @@ import org.slf4j.LoggerFactory;
         // name
         return;
       } else {
-        errorMsg = new String("Invalid Request for column family " + cf
-            + " Make sure you have the right type");
+        errorMsg = "Invalid Request for column family " + cf
+            + " Make sure you have the right type";
       }
     } else {
-      errorMsg = new String("The specified column family does not exist: " + cf);
+      errorMsg = "The specified column family does not exist: " + cf;
     }
     throw new InvalidRequestException(errorMsg);
   }
