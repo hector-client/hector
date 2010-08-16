@@ -48,7 +48,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testDescribeThriftVersion() throws Exception {
-    assertEquals("2.1.0",cassandraCluster.describeThriftVersion());
+    assertEquals("10.0.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test
@@ -63,7 +63,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   public void testDescribeKeyspace() throws Exception {
     Map<String, Map<String, String>> keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
     assertNotNull(keyspaceDetail);
-    assertEquals(4,keyspaceDetail.size());    
+    assertEquals(6,keyspaceDetail.size());    
   }
   
 }
