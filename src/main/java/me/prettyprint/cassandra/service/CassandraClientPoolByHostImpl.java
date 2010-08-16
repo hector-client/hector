@@ -1,14 +1,12 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPoolFactory;
@@ -32,7 +30,7 @@ import com.google.common.collect.ImmutableSet;
   private final ExhaustedPolicy exhaustedPolicy;
   private final long maxWaitTimeWhenExhausted;
   private final GenericObjectPool pool;
-  
+
   private final ExceptionsTranslator xTrans;
   private final CassandraHost cassandraHost;
 
@@ -217,7 +215,7 @@ import com.google.common.collect.ImmutableSet;
   public int getNumBlockedThreads() {
     return blockedThreadsCount.intValue();
   }
-  
+
 
   @Override
   public CassandraHost getCassandraHost() {
@@ -254,6 +252,7 @@ import com.google.common.collect.ImmutableSet;
     log.debug("Invalidating all connections at {} (thread={})", this,
         Thread.currentThread().getName());
     while (!liveClientsFromPool.isEmpty()) {
+      //TODO(ran): There's a multithreading sync issue here.
       invalidateClient(liveClientsFromPool.iterator().next());
     }
   }

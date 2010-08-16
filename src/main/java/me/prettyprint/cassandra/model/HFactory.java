@@ -88,6 +88,19 @@ public final class HFactory {
     return new Mutator(ko);
   }
 
+  public static CountQuery createCountQuery(KeyspaceOperator ko) {
+    return new CountQuery(ko);
+  }
+
+  public static SuperCountQuery createSuperCountQuery(KeyspaceOperator ko) {
+    return new SuperCountQuery(ko);
+  }
+
+  public static <SN> SubCountQuery<SN> createSubCountQuery(KeyspaceOperator ko,
+      Extractor<SN> superNameExtractor) {
+    return new SubCountQuery<SN>(ko, superNameExtractor);
+  }
+
   public static <N,V> ColumnQuery<N,V> createColumnQuery(KeyspaceOperator ko,
       Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
     return new ColumnQuery<N,V>(ko, nameExtractor, valueExtractor);

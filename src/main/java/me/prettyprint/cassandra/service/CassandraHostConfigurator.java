@@ -4,6 +4,7 @@ package me.prettyprint.cassandra.service;
 public final class CassandraHostConfigurator {
 
   private String hosts;
+  private int port = CassandraHost.DEFAULT_PORT;
   private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
   private int maxIdle = CassandraHost.DEFAULT_MAX_IDLE;
   private boolean lifo = CassandraHost.DEFAULT_LIFO;
@@ -30,7 +31,7 @@ public final class CassandraHostConfigurator {
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
-      CassandraHost cassandraHost = new CassandraHost(hostVals[x]);
+      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port); 
       applyConfig(cassandraHost);
       cassandraHosts[x] = cassandraHost;
     }
@@ -38,7 +39,7 @@ public final class CassandraHostConfigurator {
   }
 
   public void applyConfig(CassandraHost cassandraHost) {
-
+    
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setMaxIdle(maxIdle);
     cassandraHost.setLifo(lifo);
@@ -135,4 +136,13 @@ public final class CassandraHostConfigurator {
     this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
   }
 
+  public int getPort() {
+    return port;
+  }
+
+  public void setPort(int port) {
+    this.port = port;
+  }
+
+  
 }

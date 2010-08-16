@@ -46,6 +46,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     Mutator m = createMutator(keyspaceOperator);
     MutationResult mr = m.insert("k", "Standard1", createColumn("name", "value", se, se));
     assertTrue("Execution time on single insert should be > 0",mr.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     assertColumnExists("Keyspace1", "Standard1", "k", "name");
   }
 
@@ -58,6 +59,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
         createSuperColumn("super_name", columnList, se, se, se);
     MutationResult r = m.insert("sk", "Super1", superColumn);
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", r.getHostUsed() != null);
   }
 
   @Test
@@ -70,6 +72,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     }
     MutationResult r = m.execute();
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", r.getHostUsed() != null);
 
     for (int i = 0; i < 5; i++) {
       assertColumnExists("Keyspace1", "Standard1", "k"+i, "name");
@@ -85,6 +88,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     m.discardPendingMutations();
     r = m.execute();
     assertEquals("Execute time should be 0", 0, r.getExecutionTimeMicro());
+    assertTrue("Should have operated with a null host", r.getHostUsed() == null);
 
     // cleanup
     for (int i = 0; i < 5; i++) {

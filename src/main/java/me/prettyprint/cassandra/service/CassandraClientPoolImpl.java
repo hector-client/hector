@@ -5,9 +5,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
@@ -170,12 +172,14 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void updateKnownHosts() throws HectorTransportException {
-    for (CassandraClientPoolByHost pool: pools.values()) {
-      if (pool.getLiveClients().isEmpty()) {
-        log.info("Found empty CassandraClientPoolByHost to remove: {}", pool.toString());
-        pools.remove(pool.getCassandraHost());
-        // TODO add the removed host to another map to be retried later
-      }      
+    synchronized(pools) {
+      for (Iterator<Entry<CassandraHost, CassandraClientPoolByHost>> iterator = pools.entrySet().iterator(); iterator.hasNext();) {
+        Entry<CassandraHost, CassandraClientPoolByHost> pool = iterator.next();
+        if (pool.getValue().getLiveClients().isEmpty()) {
+          log.info("Found empty CassandraClientPoolByHost to remove: {}", pool.toString());
+          iterator.remove();
+        }
+      }
     }
   }
 
