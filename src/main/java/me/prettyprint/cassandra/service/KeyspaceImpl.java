@@ -317,12 +317,18 @@ import org.slf4j.LoggerFactory;
 
   public void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException {
 	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
+	  if (columnPath.isSetSuper_column()) {
+	    columnParent.setSuper_column(columnPath.getSuper_column());
+	  }
 	  Column column = new Column(columnPath.getColumn(), value, createClock());
 	  insert(key.getBytes(), columnParent, column);
   }
 
   public void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException {
 	  ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
+	  if (columnPath.isSetSuper_column()) {
+      columnParent.setSuper_column(columnPath.getSuper_column());
+    }    
 	  Column column = new Column(columnPath.getColumn(), value, new Clock(timestamp));
 	  insert(key.getBytes(), columnParent, column);
   }

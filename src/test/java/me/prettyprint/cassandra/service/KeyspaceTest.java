@@ -110,12 +110,15 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   IllegalStateException, NotFoundException, Exception {
 
     // insert value
-    ColumnPath cp = new ColumnPath("Super1");
-    cp.setColumn(bytes("testInsertSuper_column"));
-    cp.setSuper_column(bytes("testInsertSuper_super"));
-    keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value"));
-    cp.setColumn(bytes("testInsertSuper_column2"));
-    keyspace.insert("testInsertSuper_key", cp, bytes("testInsertSuper_value2"));
+    ColumnParent columnParent = new ColumnParent("Super1");
+    columnParent.setSuper_column(bytes("testInsertSuper_super"));
+    Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), keyspace.createClock());
+    
+  
+  
+    keyspace.insert(bytes("testInsertSuper_key"), columnParent, column);
+    column.setName(bytes("testInsertSuper_column2"));
+    keyspace.insert(bytes("testInsertSuper_key"), columnParent, column);
 
     // get value and assert
     ColumnPath cp2 = new ColumnPath("Super1");
@@ -127,7 +130,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     assertEquals("testInsertSuper_value", string(sc.getColumns().get(0).getValue()));
 
     // remove value
-    keyspace.remove("testInsertSuper_super", cp);
+    keyspace.remove("testInsertSuper_super", cp2);
   }
 
   @Test
