@@ -10,7 +10,10 @@ import org.apache.cassandra.thrift.SuperColumn;
 
 
 /**
- * A query for the thrift call get_slice
+ * A query for the thrift call get_slice.
+ * <p>
+ * Get a slice of super columns from a super column family.
+ *
  * @author Ran Tavory
  *
  * @param <N>
