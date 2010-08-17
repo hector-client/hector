@@ -3,7 +3,6 @@ package me.prettyprint.cassandra.model;
 import me.prettyprint.cassandra.utils.Assert;
 
 import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.utils.FBUtilities;
 
 /**
  * A helper class for range queries
@@ -55,9 +54,12 @@ import org.apache.cassandra.utils.FBUtilities;
     if (useTokens) {
       Assert.notNull(startToken, "start_token can't be null");
       Assert.notNull(endToken, "end_token can't be null");
-      keyRange.setStart_token(FBUtilities.md5hash(startToken.getBytes()).toString());
-      keyRange.setEnd_token(FBUtilities.md5hash(endToken.getBytes()).toString());
-    } 
+      keyRange.setStart_token(startToken);
+      keyRange.setEnd_token(endToken);
+      // TODO(ran): Should this be used for RP and the above for OPP?
+      //keyRange.setStart_token(FBUtilities.md5hash(startToken.getBytes()).toString());
+      //keyRange.setEnd_token(FBUtilities.md5hash(endToken.getBytes()).toString());
+    }
     if (useKeys) {
       Assert.notNull(startKey, "start can't be null");
       Assert.notNull(endKey, "end can't be null");

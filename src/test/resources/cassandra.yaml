@@ -24,7 +24,7 @@ authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
 # org.apache.cassandra.dht.RandomPartitioner
 # org.apache.cassandra.dht.OrderPreservingPartitioner, and
 # org.apache.cassandra.dht.CollatingOrderPreservingPartitioner.
-partitioner: org.apache.cassandra.dht.RandomPartitioner
+partitioner: org.apache.cassandra.dht.OrderPreservingPartitioner
 
 # directories where Cassandra should store data on disk.
 data_file_directories:
