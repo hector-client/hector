@@ -32,7 +32,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
     client = new CassandraClientFactory(pools,
-        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();    
+        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
   }
 
   @Test
@@ -43,7 +43,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
     // negative path
     try {
-      k = client.getKeyspace("KeyspaceDoesntExist");
+      client.getKeyspace("KeyspaceDoesntExist");
       fail("Should have thrown an exception IllegalArgumentException");
     } catch (IllegalArgumentException e) {
       // good
@@ -86,7 +86,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
     assertEquals("Default Cluster", name);
   }
 
-  @Test 
+  @Test
   public void testFramedTransport() throws HectorException {
     CassandraHost cassandraHost = new CassandraHost("localhost", 9170);
     cassandraHost.setUseThriftFramedTransport(true);

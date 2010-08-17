@@ -3,8 +3,13 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
 import me.prettyprint.cassandra.service.Keyspace;
 
-// like a simple get operation
-// may return a Column or a SuperColumn
+/**
+ * like a simple get operation for a standard column
+ * @author Ran Tavory
+ *
+ * @param <N> column name type
+ * @param <V> value type
+ */
 public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
   private K key;
@@ -25,11 +30,12 @@ public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> 
     return this;
   }
 
-
+  @Override
   public Result<HColumn<N, V>> execute() {
     return new Result<HColumn<N, V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<HColumn<N, V>>() {
-        
+
+          @Override
           public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               org.apache.cassandra.thrift.Column thriftColumn =
@@ -43,6 +49,7 @@ public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> 
   }
 
 
+  @Override
   public String toString() {
     return "ColumnQuery(" + key + "," + name + ")";
   }

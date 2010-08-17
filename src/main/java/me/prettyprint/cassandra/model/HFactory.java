@@ -94,6 +94,22 @@ public final class HFactory {
     return new ColumnQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
   }
 
+  public static <K, N> CountQuery<K, N> createCountQuery(KeyspaceOperator ko,
+      Serializer<K> keySerializer, Serializer<N> nameSerializer) {
+    return new CountQuery<K, N>(ko, keySerializer, nameSerializer);
+  }
+
+  public static <K,SN> SuperCountQuery<K,SN> createSuperCountQuery(KeyspaceOperator ko,
+      Serializer<K> keySerializer, Serializer<SN> superNameSerializer) {
+    return new SuperCountQuery<K,SN>(ko, keySerializer, superNameSerializer);
+  }
+
+  public static <K,SN,N> SubCountQuery<K,SN,N> createSubCountQuery(KeyspaceOperator ko,
+      Serializer<K> keySerializer, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
+    return new SubCountQuery<K,SN,N>(ko, keySerializer, superNameSerializer, nameSerializer);
+  }
+
+
   public static ColumnQuery<String, String, String> createStringColumnQuery(KeyspaceOperator ko) {
     StringSerializer se = StringSerializer.get();
     return createColumnQuery(ko, se, se, se);

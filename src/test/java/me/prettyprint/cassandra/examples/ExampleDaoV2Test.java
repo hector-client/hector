@@ -43,7 +43,6 @@ public class ExampleDaoV2Test {
     embedded.teardown();
   }
 
-
   @Test
   public void testInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");

@@ -35,9 +35,9 @@ public class ExampleDao {
   private final static String CASSANDRA_KEYSPACE = "Keyspace1";
   private final static int CASSANDRA_PORT = 9170;
   private final static String CASSANDRA_HOST = "localhost";
-  private final String CF_NAME = "Standard1";
+  private final static String CF_NAME = "Standard1";
   /** Column name where values are stored */
-  private final String COLUMN_NAME = "v";
+  private final static String COLUMN_NAME = "v";
 
   public static void main(String[] args) throws HectorException {
     ExampleDao ed = new ExampleDao();

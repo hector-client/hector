@@ -1,14 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import me.prettyprint.cassandra.utils.Assert;
-
 import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SliceRange;
 
 
 /**
@@ -20,17 +12,11 @@ import org.apache.cassandra.thrift.SliceRange;
  */
 /*package*/ abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T> implements Query<T> {
 
-  protected Collection<N> columnNames;
-  protected N start;
-  protected N finish;
-  protected boolean reversed;
-  protected int count;
-
-  /** Use column names or start/finish? */
-  protected boolean useColumnNames;
+  protected final HSlicePredicate<N> slicePredicate;
 
   /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
+    slicePredicate = new HSlicePredicate<N>(nameSerializer);
   }
 
   /**
@@ -38,8 +24,7 @@ import org.apache.cassandra.thrift.SliceRange;
    * @param columns a list of column names
    */
   public AbstractSliceQuery<K,N,V,T> setColumnNames(N... columnNames) {
-    this.columnNames = Arrays.asList(columnNames);
-    useColumnNames = true;
+    slicePredicate.setColumnNames(columnNames);
     return this;
   }
 
@@ -53,12 +38,7 @@ import org.apache.cassandra.thrift.SliceRange;
    * @return
    */
   public AbstractSliceQuery<K,N,V,T> setRange(N start, N finish, boolean reversed, int count) {
-    Assert.noneNull(start, finish);
-    this.start = start;
-    this.finish = finish;
-    this.reversed = reversed;
-    this.count = count;
-    useColumnNames = false;
+    slicePredicate.setRange(start, finish, reversed, count);
     return this;
   }
 
@@ -67,32 +47,10 @@ import org.apache.cassandra.thrift.SliceRange;
    * @return the thrift representation of the predicate
    */
   /*package*/ SlicePredicate getPredicate() {
-    SlicePredicate pred = new SlicePredicate();
-    if (useColumnNames) {
-      if (columnNames == null || columnNames.isEmpty()) {
-        return null;
-      }
-      pred.setColumn_names(toThriftColumnNames(columnNames));
-    } else {
-      if (start == null || finish == null) {
-        return null;
-      }
-      SliceRange range = new SliceRange(columnNameSerializer.toBytes(start), columnNameSerializer.toBytes(finish),
-          reversed, count);
-      pred.setSlice_range(range);
-    }
-    return pred;
-  }
-
-  private List<byte[]> toThriftColumnNames(Collection<N> clms) {
-    List<byte[]> ret = new ArrayList<byte[]>(clms.size());
-    for (N name: clms) {
-      ret.add(columnNameSerializer.toBytes(name));
-    }
-    return ret;
+    return slicePredicate.toThrift();
   }
 
   protected String toStringInternal() {
-    return "" + (useColumnNames ? columnNames : "cStart:" + start + ",cFinish:" + finish);
+    return slicePredicate.toString();
   }
 }

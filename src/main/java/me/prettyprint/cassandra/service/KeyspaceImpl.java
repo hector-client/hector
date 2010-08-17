@@ -597,11 +597,11 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
         // name
         return;
       } else {
-        errorMsg = new String("Invalid Request for column family " + cf
-            + " Make sure you have the right type");
+        errorMsg = "Invalid Request for column family " + cf
+            + " Make sure you have the right type";
       }
     } else {
-      errorMsg = new String("The specified column family does not exist: " + cf);
+      errorMsg = "The specified column family does not exist: " + cf;
     }
     throw new InvalidRequestException(errorMsg);
   }

@@ -45,12 +45,12 @@ public class AbstractSliceQueryTest {
     assertEquals(10, range.getCount());
   }
 
-  private class ConcreteSliceQueury<K, N, V, T> extends AbstractSliceQuery<K, N, V, T> {
-
+  private static class ConcreteSliceQueury<K, N, V, T> extends AbstractSliceQuery<K, N, V, T> {
     ConcreteSliceQueury(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
       super(ko, keySerializer, nameSerializer, valueSerializer);
     }
 
+    @Override
     public Result<T> execute() {
       return null;
     }

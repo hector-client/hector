@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
+import static me.prettyprint.cassandra.model.HFactory.createCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuery;
@@ -11,9 +12,11 @@ import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSubSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSubCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumnQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSuperCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
@@ -629,6 +632,66 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("v021", slice.getColumnByName("c021").getValue());
     assertEquals("v121", slice.getColumnByName("c111").getValue());
     assertNull(slice.getColumnByName("c033"));
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
+  public void testCountQuery() {
+    String cf = "Standard1";
+
+    TestCleanupDescriptor cleanup = insertColumns(cf, 1, "testCountQuery", 10,
+        "testCountQueryColumn");
+    CountQuery<String, String> cq = createCountQuery(ko, se, se);
+    cq.setColumnFamily(cf).setKey("testCountQuery0");
+    cq.setRange("testCountQueryColumn", "testCountQueryColumn999", 100);
+    Result<Integer> r = cq.execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(10), r.get());
+
+    // Delete values
+    deleteColumns(cleanup);
+
+    // Try a non existing row, make sure it gets 0 (not exceptions)
+    cq = createCountQuery(ko, se, se);
+    cq.setColumnFamily(cf).setKey("testCountQuery_nonexisting");
+    cq.setRange("testCountQueryColumn", "testCountQueryColumn999", 100);
+    r = cq.execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(0), r.get());
+}
+
+
+  @Test
+  public void testSuperCountQuery() {
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSuperCountQuery", 11,
+        "testSuperCountQueryColumn");
+    SuperCountQuery<String, String> cq = createSuperCountQuery(ko, se, se);
+    cq.setColumnFamily(cf).setKey("testSuperCountQuery0");
+    cq.setRange("testSuperCountQueryColumn", "testSuperCountQueryColumn999", 100);
+    Result<Integer> r = cq.execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(11), r.get());
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
+  public void testSubCountQuery() {
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSubCountQuery", 1,
+        "testSubCountQueryColumn");
+    SubCountQuery<String, String, String> cq = createSubCountQuery(ko, se, se, se);
+    cq.setRange("c0", "c3", 100);
+    Result<Integer> r = cq.setColumnFamily(cf).setKey("testSubCountQuery0").
+        setSuperColumn("testSubCountQueryColumn0").execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(2), r.get());
 
     // Delete values
     deleteColumns(cleanup);
