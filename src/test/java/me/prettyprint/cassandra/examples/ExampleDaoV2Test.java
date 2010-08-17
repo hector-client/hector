@@ -15,12 +15,11 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
+import org.apache.cassandra.config.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.apache.cassandra.config.ConfigurationException;
 
 public class ExampleDaoV2Test {
 
@@ -46,7 +45,6 @@ public class ExampleDaoV2Test {
 
 
   @Test
-  @Ignore("Not functinal yet")
   public void testInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
@@ -58,7 +56,6 @@ public class ExampleDaoV2Test {
   }
 
   @Test
-  @Ignore("Not functinal yet")
   public void testMultiInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
     ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
