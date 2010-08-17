@@ -7,6 +7,7 @@ import me.prettyprint.cassandra.model.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KsDef;
 
 
 /**
@@ -91,7 +92,7 @@ public interface CassandraClient {
   /**
    * @return all keyspaces name of this client.
    */
-  List<String> getKeyspaces() throws HectorTransportException;
+  List<KsDef> getKeyspaces() throws HectorTransportException;
 
 
   /**

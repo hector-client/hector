@@ -13,6 +13,7 @@ import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.thrift.transport.TFramedTransport;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,11 +73,11 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeyspaces() throws HectorException {
-    List<String> spaces = client.getKeyspaces();
+    List<KsDef> spaces = client.getKeyspaces();
     assertNotNull(spaces);
     // There should be two spaces: Keyspace1 and system
     assertEquals(2, spaces.size());
-    assertTrue("Keyspace1".equals(spaces.get(0)) || "Keyspace1".equals(spaces.get(1)));
+    assertTrue("Keyspace1".equals(spaces.get(0).getName()) || "Keyspace1".equals(spaces.get(1).getName()));
   }
 
   @Test

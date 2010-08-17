@@ -13,6 +13,7 @@ import me.prettyprint.cassandra.model.InvalidRequestException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -22,6 +23,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -44,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
   private final String keyspaceName;
 
-  private final Map<String, Map<String, String>> keyspaceDesc;
+  private final KsDef keyspaceDesc;
 
   private final ConsistencyLevel consistency;
 
@@ -57,7 +59,7 @@ import org.slf4j.LoggerFactory;
   private final ExceptionsTranslator xtrans;
 
   public KeyspaceImpl(CassandraClient client, String keyspaceName,
-      Map<String, Map<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
+      KsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws HectorTransportException {
     this.client = client;
@@ -510,7 +512,7 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
   }
 
 
-  public Map<String, Map<String, String>> describeKeyspace() throws HectorException {
+  public KsDef describeKeyspace() throws HectorException {
     return keyspaceDesc;
   }
 
@@ -559,6 +561,18 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
   public Clock createClock() {
     return client.getClockResolution().createClock();
   }
+  
+  private CfDef getCfDef(String cf) {
+	  List<CfDef> cfDefs = keyspaceDesc.getCf_defs();
+	  if (cfDefs != null) {
+		  for (CfDef cfDef: cfDefs) {
+			  if (cf.equals(cfDef.getName())) {
+				  return cfDef;
+			  }
+		  }
+	  }
+	  return null;
+  }
 
   /**
    * Make sure that if the given column path was a Column. Throws an
@@ -571,13 +585,13 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
    */
   private void valideColumnPath(ColumnPath columnPath) throws InvalidRequestException {
     String cf = columnPath.getColumn_family();
-    Map<String, String> cfdefine;
+    CfDef cfdefine;
     String errorMsg;
-    if ((cfdefine = keyspaceDesc.get(cf)) != null) {
-      if (cfdefine.get(CF_TYPE).equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
+    if ((cfdefine = getCfDef(cf)) != null) {
+      if (cfdefine.getColumn_type().equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
         // if the column family is a standard column
         return;
-      } else if (cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
+      } else if (cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
           && columnPath.getSuper_column() != null) {
         // if the column family is a super column and also give the super_column
         // name
@@ -600,8 +614,8 @@ public void remove(String key, ColumnPath columnPath, long timestamp) throws Hec
    */
   private void valideSuperColumnPath(ColumnPath columnPath) throws InvalidRequestException {
     String cf = columnPath.getColumn_family();
-    Map<String, String> cfdefine;
-    if ((cfdefine = keyspaceDesc.get(cf)) != null && cfdefine.get(CF_TYPE).equals(CF_TYPE_SUPER)
+    CfDef cfdefine;
+    if ((cfdefine = getCfDef(cf)) != null && cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
         && columnPath.getSuper_column() != null) {
       return;
     }

@@ -21,10 +21,12 @@ import me.prettyprint.cassandra.model.TimedOutException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -46,8 +48,8 @@ public class FailoverOperatorTest {
       new CassandraHost("h2:111"),
       new CassandraHost("h3:111")});
   private Map<Cassandra.Client,CassandraHost> clientHosts = new HashMap<Cassandra.Client,CassandraHost>();
-  private Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String, String>>();
-  private Map<String, String> keyspace1Desc = new HashMap<String, String>();
+  private KsDef keyspaceDesc = new KsDef();
+  private CfDef keyspace1Desc = new CfDef();
   
   
   private String keyspaceName = "Keyspace1";
@@ -64,8 +66,10 @@ public class FailoverOperatorTest {
     clientHosts.put(h3cassandra, hosts.get(2));
 
     
-    keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
-    keyspaceDesc.put("Standard1", keyspace1Desc);
+    keyspace1Desc.setKeyspace(keyspaceName);
+    keyspace1Desc.setName("Standard1");
+    keyspace1Desc.setColumn_type(Keyspace.CF_TYPE_STANDARD);
+    keyspaceDesc.addToCf_defs(keyspace1Desc);
     
     
     cp.setColumn(bytes("testFailover"));

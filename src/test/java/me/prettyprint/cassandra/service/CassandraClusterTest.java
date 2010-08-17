@@ -10,6 +10,7 @@ import java.util.Set;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
@@ -33,7 +34,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   
   @Test
   public void testDescribeKeyspaces() throws Exception {
-    Set<String> keyspaces = cassandraCluster.describeKeyspaces();
+    List<KsDef> keyspaces = cassandraCluster.describeKeyspaces();
     assertEquals(2,keyspaces.size());
   }
   
@@ -61,9 +62,9 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   
   @Test
   public void testDescribeKeyspace() throws Exception {
-    Map<String, Map<String, String>> keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
+    KsDef keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
     assertNotNull(keyspaceDetail);
-    assertEquals(6,keyspaceDetail.size());    
+    assertEquals(6,keyspaceDetail.cf_defs.size());    
   }
   
 }

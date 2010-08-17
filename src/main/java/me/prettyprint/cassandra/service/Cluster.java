@@ -11,6 +11,7 @@ import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Clock;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -149,10 +150,10 @@ public final class Cluster {
   }
 
 
-  public Set<String> describeKeyspaces() throws HectorException {
-    Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {
+  public List<KsDef> describeKeyspaces() throws HectorException {
+    Operation<List<KsDef>> op = new Operation<List<KsDef>>(OperationType.META_READ) {
       @Override
-      public Set<String> execute(Cassandra.Client cassandra) throws HectorException {
+      public List<KsDef> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           return cassandra.describe_keyspaces();
         } catch (Exception e) {
@@ -194,12 +195,12 @@ public final class Cluster {
     return op.getResult();
   }
 
-  public Map<String, Map<String, String>> describeKeyspace(final String keyspace)
+  public KsDef describeKeyspace(final String keyspace)
   throws HectorException {
-    Operation<Map<String, Map<String, String>>> op = new Operation<Map<String, Map<String, String>>>(
+    Operation<KsDef> op = new Operation<KsDef>(
         OperationType.META_READ) {
       @Override
-      public Map<String, Map<String, String>> execute(Cassandra.Client cassandra)
+      public KsDef execute(Cassandra.Client cassandra)
       throws HectorException {
         try {
           return cassandra.describe_keyspace(keyspace);
@@ -268,9 +269,9 @@ public final class Cluster {
   private Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
     try {
       Set<String> hostnames = new HashSet<String>();
-      for (String keyspace : cassandra.describe_keyspaces()) {
-        if (!keyspace.equals(KEYSPACE_SYSTEM)) {
-          List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
+      for (KsDef keyspace : cassandra.describe_keyspaces()) {
+        if (!keyspace.getName().equals(KEYSPACE_SYSTEM)) {
+          List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace.getName());
           for (TokenRange tokenRange : tokenRanges) {
             for (String host : tokenRange.getEndpoints()) {
               hostnames.add(host);

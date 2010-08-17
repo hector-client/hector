@@ -14,6 +14,7 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -174,7 +175,7 @@ public interface Keyspace {
   /**
    * get a description of the specified keyspace
    */
-  Map<String, Map<String, String>> describeKeyspace() throws HectorException;
+  KsDef describeKeyspace() throws HectorException;
 
   /**
    * Counts the columns present in columnParent.

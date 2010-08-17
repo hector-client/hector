@@ -13,6 +13,7 @@ import me.prettyprint.cassandra.model.NotFoundException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
   private final ClockResolution clockResolution;
 
   /** List of known keyspaces */
-  private List<String> keyspaces;
+  private ArrayList<KsDef> keyspaces;
 
   private final ConcurrentHashMap<String, KeyspaceImpl> keyspaceMap =
       new ConcurrentHashMap<String, KeyspaceImpl>();
@@ -108,9 +109,9 @@ import org.slf4j.LoggerFactory;
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
     KeyspaceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
-      if (getKeyspaces().contains(keyspaceName)) {
+      if (keyspaceExists(keyspaceName)) {
         try {
-          Map<String, Map<String, String>> keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
+          KsDef keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
           keyspace = (KeyspaceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
               consistencyLevel, failoverPolicy, cassandraClientPool);
         } catch (TException e) {
@@ -132,10 +133,10 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  public List<String> getKeyspaces() throws HectorTransportException {
+  public List<KsDef> getKeyspaces() throws HectorTransportException {
     if (keyspaces == null) {
       try {
-        keyspaces = new ArrayList<String>(cassandra.describe_keyspaces());
+        keyspaces = new ArrayList<KsDef>(cassandra.describe_keyspaces());
       } catch (TException e) {
         throw new HectorTransportException(e);
       }
@@ -143,7 +144,13 @@ import org.slf4j.LoggerFactory;
     return keyspaces;
   }
 
-
+  public boolean keyspaceExists(String keyspace) {
+    List<KsDef> ksDefs = getKeyspaces();
+    for (KsDef ksDef : ksDefs) {
+      if (ksDef.getName().equals(keyspace)) return true;
+    }
+    return false;
+  }
 
 
   public String getServerVersion() throws HectorException {
