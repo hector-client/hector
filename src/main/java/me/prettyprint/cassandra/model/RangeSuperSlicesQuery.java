@@ -30,11 +30,6 @@ public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V
     keyRange = new HKeyRange();
   }
 
-  public RangeSuperSlicesQuery<SN,N,V> setTokens(String start, String end) {
-    keyRange.setTokens(start, end);
-    return this;
-  }
-
   public RangeSuperSlicesQuery<SN,N,V> setKeys(String start, String end) {
     keyRange.setKeys(start, end);
     return this;

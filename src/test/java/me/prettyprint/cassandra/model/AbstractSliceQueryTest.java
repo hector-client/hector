@@ -45,7 +45,7 @@ public class AbstractSliceQueryTest {
     assertEquals(10, range.getCount());
   }
 
-  private class ConcreteSliceQueury<N, V, T> extends AbstractSliceQuery<N, V, T> {
+  private static class ConcreteSliceQueury<N, V, T> extends AbstractSliceQuery<N, V, T> {
 
     ConcreteSliceQueury(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
       super(ko, nameExtractor, valueExtractor);

@@ -26,11 +26,6 @@ public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedR
     keyRange = new HKeyRange();
   }
 
-  public RangeSlicesQuery<N,V> setTokens(String start, String end) {
-    keyRange.setTokens(start, end);
-    return this;
-  }
-
   public RangeSlicesQuery<N,V> setKeys(String start, String end) {
     keyRange.setKeys(start, end);
     return this;

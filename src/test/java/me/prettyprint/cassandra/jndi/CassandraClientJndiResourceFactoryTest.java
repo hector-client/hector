@@ -13,10 +13,10 @@ import javax.naming.Name;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,24 +24,21 @@ import org.junit.Test;
  * @author Perry Hoekstra (dutchman_mn@charter.net)
  */
 
-public class CassandraClientJndiResourceFactoryTest {
+public class CassandraClientJndiResourceFactoryTest extends BaseEmbededServerSetupTest {
   // canned data
   private final static String cassandraUrl = "localhost";
   private final static int cassandraPort = 9170;
 
   private CassandraClientJndiResourceFactory factory;
-  private static EmbeddedServerHelper embeddedServerHelper;
 
   @Before
-  public void setupTest() throws Exception {
-    embeddedServerHelper = new EmbeddedServerHelper();
-    embeddedServerHelper.setup();
+  public void setupCase() throws Exception {
     factory = new CassandraClientJndiResourceFactory();
   }
 
-  @AfterClass
-  public static void teardown() throws IOException {
-    embeddedServerHelper.teardown();
+  @After
+  public void teardownCase() throws IOException {
+    factory = null;
   }
 
   @Test
