@@ -5,41 +5,34 @@ import me.prettyprint.cassandra.utils.Assert;
 import org.apache.cassandra.thrift.KeyRange;
 
 /**
- * A helper class for range queries
+ * A helper class for range queries.
+ * <p>
+ * We allow only keys range, no tokens range since if you want to use tokens and you're not hadoop
+ * then you're (probably) doing something wrong (JE)
  *
  * @author Ran Tavory
  *
  */
-/*package*/ final class HKeyRange {
+/*package*/ final class HKeyRange<K> {
 
-  /** Whether to use start/end as tokens */
-  private boolean useTokens = false;
-  /** Whether to use start/end Key */
-  private boolean useKeys = false;
-  byte[] startKey;
-  private byte[] endKey;
+  private K startKey;
+  private K endKey;
 
-  String startToken;
-  String endToken;
   private int rowCount = 100;
 
-  public HKeyRange setTokens(String start, String end) {
-    useTokens = true;
-    useKeys = false;
-    this.startToken = start;
-    this.endToken = end;
-    return this;
+  private final Serializer<K> keySerializer;
+
+  public HKeyRange(Serializer<K> keySerializer) {
+    Assert.notNull(keySerializer, "keySerializer is null");
+    this.keySerializer = keySerializer;
   }
 
-  public <K> HKeyRange setKeys(K start, K end, Serializer<K> keySerializer) {
-    useKeys = true;
-    useTokens = false;
-    this.startKey = keySerializer.toBytes(start);
-    this.endKey = keySerializer.toBytes(end);
+  public HKeyRange<K> setKeys(K start, K end) {
+    this.startKey = start;
+    this.endKey = end;
     return this;
   }
-
-  public HKeyRange setRowCount(int rowCount) {
+  public HKeyRange<K> setRowCount(int rowCount) {
     this.rowCount = rowCount;
     return this;
   }
@@ -49,30 +42,17 @@ import org.apache.cassandra.thrift.KeyRange;
    * @return The thrift representation of this object
    */
   public KeyRange toThrift() {
+    Assert.notNull(startKey, "start can't be null");
+    Assert.notNull(endKey, "end can't be null");
 
     KeyRange keyRange = new KeyRange(rowCount);
-    if (useTokens) {
-      Assert.notNull(startToken, "start_token can't be null");
-      Assert.notNull(endToken, "end_token can't be null");
-      keyRange.setStart_token(startToken);
-      keyRange.setEnd_token(endToken);
-      // TODO(ran): Should this be used for RP and the above for OPP?
-      //keyRange.setStart_token(FBUtilities.md5hash(startToken.getBytes()).toString());
-      //keyRange.setEnd_token(FBUtilities.md5hash(endToken.getBytes()).toString());
-    }
-    if (useKeys) {
-      Assert.notNull(startKey, "start can't be null");
-      Assert.notNull(endKey, "end can't be null");
-      keyRange.setStart_key(startKey);
-      keyRange.setEnd_key(endKey);
-    }
+    keyRange.setStart_key(keySerializer.toBytes(startKey));
+    keyRange.setEnd_key(keySerializer.toBytes(endKey));
     return keyRange;
   }
 
   @Override
   public String toString() {
-    String tk = useTokens ? "t" : "k";
-    return "HKeyRange(" + tk + "Start:" + startKey + "," + tk + "End:" + endKey + "," + ")";
+    return "HKeyRange(start:" + startKey + ",end:" + endKey + "," + ")";
   }
-
 }

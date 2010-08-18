@@ -20,20 +20,16 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedRows<K,N,V>> {
 
-  private final HKeyRange keyRange;
+  private final HKeyRange<K> keyRange;
 
   /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
-    keyRange = new HKeyRange();
+    keyRange = new HKeyRange<K>(keySerializer);
   }
 
-  public RangeSlicesQuery<K,N,V> setTokens(String start, String end) {
-    keyRange.setTokens(start, end);
-    return this;
-  }
 
   public RangeSlicesQuery<K,N,V> setKeys(K start, K end) {
-    keyRange.setKeys(start, end, keySerializer);
+    keyRange.setKeys(start, end);
     return this;
   }
 
@@ -42,6 +38,7 @@ public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Orde
     return this;
   }
 
+  @Override
   public Result<OrderedRows<K,N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 

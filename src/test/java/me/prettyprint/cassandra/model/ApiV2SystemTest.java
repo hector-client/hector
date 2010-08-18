@@ -562,7 +562,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     RangeSuperSlicesQuery<String, String,String, String> q = createRangeSuperSlicesQuery(ko, se, se, se, se);
     q.setColumnFamily(cf);
-    q.setTokens("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery3");
+    q.setKeys("testRangeSuperSlicesQuery2", "testRangeSuperSlicesQuery3");
     // try with column name first
     q.setColumnNames("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery2");
     Result<OrderedSuperRows<String, String, String, String>> r = q.execute();
@@ -614,7 +614,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     RangeSubSlicesQuery<String, String,String, String> q = createRangeSubSlicesQuery(ko, se, se, se, se);
     q.setColumnFamily(cf);
-    q.setTokens("testRangeSubSlicesQuery1", "testRangeSubSlicesQuery3");
+    q.setKeys("testRangeSubSlicesQuery2", "testRangeSubSlicesQuery3");
     // try with column name first
     q.setSuperColumn("testRangeSubSlicesQuery1");
     q.setColumnNames("c021", "c111");

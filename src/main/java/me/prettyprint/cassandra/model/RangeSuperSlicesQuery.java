@@ -21,23 +21,19 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class RangeSuperSlicesQuery<K,SN,N,V> extends AbstractSliceQuery<K,SN,V,OrderedSuperRows<K,SN,N,V>> {
 
   private final Serializer<N> nameSerializer;
-  private final HKeyRange keyRange;
+  private final HKeyRange<K> keyRange;
 
   /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, sNameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "nameSerializer cannot be null");
     this.nameSerializer = nameSerializer;
-    keyRange = new HKeyRange();
+    keyRange = new HKeyRange<K>(keySerializer);
   }
 
-  public RangeSuperSlicesQuery<K,SN,N,V> setTokens(String start, String end) {
-    keyRange.setTokens(start, end);
-    return this;
-  }
 
   public RangeSuperSlicesQuery<K,SN,N,V> setKeys(K start, K end) {
-    keyRange.setKeys(start, end, keySerializer);
+    keyRange.setKeys(start, end);
     return this;
   }
 
@@ -46,6 +42,7 @@ public final class RangeSuperSlicesQuery<K,SN,N,V> extends AbstractSliceQuery<K,
     return this;
   }
 
+  @Override
   public Result<OrderedSuperRows<K,SN,N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 
