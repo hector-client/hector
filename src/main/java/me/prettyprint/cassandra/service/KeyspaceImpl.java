@@ -474,15 +474,15 @@ import org.slf4j.LoggerFactory;
   }
 
   public void remove(byte[] key, ColumnPath columnPath) {
-	this.remove(key, columnPath, createClock());
-}
+    this.remove(key, columnPath, createClock());
+  }
 
 
 
-public void remove(final byte[] key, final ColumnPath columnPath, final Clock clock)
-      throws HectorException {
+  public void remove(final byte[] key, final ColumnPath columnPath, final Clock clock)
+  throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
-    
+
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
           cassandra.remove(key, columnPath, clock, consistency);
@@ -495,16 +495,16 @@ public void remove(final byte[] key, final ColumnPath columnPath, final Clock cl
     operateWithFailover(op);
   }
 
-public void remove(String key, ColumnPath columnPath) throws HectorException {
-	remove(key.getBytes(), columnPath);
-}
+  public void remove(String key, ColumnPath columnPath) throws HectorException {
+    remove(key.getBytes(), columnPath);
+  }
 
-/**
-* Same as two argument version, but the caller must specify their own timestamp
-*/
-public void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException {
-	remove(key.getBytes(), columnPath, new Clock(timestamp));
-}
+  /**
+   * Same as two argument version, but the caller must specify their own timestamp
+   */
+  public void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException {
+    remove(key.getBytes(), columnPath, new Clock(timestamp));
+  }
 
 
   public String getName() {
