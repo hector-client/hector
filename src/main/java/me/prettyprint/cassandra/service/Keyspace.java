@@ -201,6 +201,12 @@ public interface Keyspace {
       SlicePredicate predicate) throws HectorException;  
 
   /**
+   * Returns a map of key to column count
+   */
+  Map<byte[], Integer> multigetCount(List<byte[]> keys, ColumnParent columnParent, 
+      SlicePredicate slicePredicate) throws HectorException;
+  
+  /**
    * @return The consistency level held by this keyspace instance.
    */
   ConsistencyLevel getConsistencyLevel();

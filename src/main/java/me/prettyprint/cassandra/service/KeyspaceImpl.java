@@ -477,7 +477,21 @@ import org.slf4j.LoggerFactory;
     this.remove(key, columnPath, createClock());
   }
 
-
+  public Map<byte[], Integer> multigetCount(final List<byte[]> keys, final ColumnParent columnParent, 
+      final SlicePredicate slicePredicate) throws HectorException {
+    Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ) {
+      
+      public Map<byte[], Integer> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.multiget_count(keyspaceName, keys, columnParent, slicePredicate, consistency);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
 
   public void remove(final byte[] key, final ColumnPath columnPath, final Clock clock)
   throws HectorException {

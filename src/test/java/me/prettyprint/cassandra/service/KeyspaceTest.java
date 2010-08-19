@@ -838,6 +838,36 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     keyspace.remove("testGetSuperRangeSlices0", cp);
     keyspace.remove("testGetSuperRangeSlices1", cp);
   }
+  
+  @Test
+  public void testMultigetCount() {
+    // insert 25 columns into 10 rows
+    List<byte[]> keys = new ArrayList<byte[]>();
+    for ( int j=0; j < 10; j++ ) {
+      for (int i = 0; i < 25; i++) {
+        ColumnPath cp = new ColumnPath("Standard1");
+        cp.setColumn(bytes("testMultigetCount_column_" + i));
+        keyspace.insert("testMultigetCount_key_"+j, cp, bytes("testMultigetCount_value_" + i));  
+      }
+      if (j % 2 == 0)
+        keys.add(("testMultigetCount_key_"+j).getBytes());
+    }
+
+    // get value
+    ColumnParent clp = new ColumnParent("Standard1");
+    SlicePredicate slicePredicate = new SlicePredicate();
+    slicePredicate.setSlice_range(new SliceRange("".getBytes(), "".getBytes(), false, 100));
+    Map<byte[],Integer> counts = keyspace.multigetCount(keys, clp, slicePredicate);
+    assertEquals(5,counts.size());
+    assertEquals(new Integer(25),counts.entrySet().iterator().next().getValue());
+    
+    slicePredicate.setSlice_range(new SliceRange("".getBytes(), "".getBytes(), false, 5));
+    counts = keyspace.multigetCount(keys, clp, slicePredicate);
+    
+    assertEquals(5,counts.size());
+    assertEquals(new Integer(5),counts.entrySet().iterator().next().getValue());
+    
+  }
 
   @Test
   public void testGetConsistencyLevel() {
