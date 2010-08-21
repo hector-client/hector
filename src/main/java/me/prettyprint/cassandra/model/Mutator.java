@@ -47,13 +47,13 @@ public final class Mutator {
   }
 
   public <N> MutationResult delete(final String key, final String cf, final N columnName,
-      final Extractor<N> nameExtractor) {
+      final Serializer<N> nameExtractor) {
     addDeletion(key, cf, columnName, nameExtractor);
     return execute();
   }
 
   public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
-      final N columnName, final Extractor<SN> sNameExtractor, final Extractor<N> nameExtractor) {
+      final N columnName, final Serializer<SN> sNameExtractor, final Serializer<N> nameExtractor) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
@@ -81,7 +81,7 @@ public final class Mutator {
     return this;
   }
 
-  public <N> Mutator addDeletion(String key, String cf, N columnName, Extractor<N> nameExtractor) {
+  public <N> Mutator addDeletion(String key, String cf, N columnName, Serializer<N> nameExtractor) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameExtractor.toBytes(columnName));
     Deletion d = new Deletion(ko.createTimestamp()).setPredicate(sp);

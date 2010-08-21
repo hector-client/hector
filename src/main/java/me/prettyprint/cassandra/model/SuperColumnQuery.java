@@ -11,12 +11,12 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameExtractor;
   private String key;
   private SN superName;
 
   /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+      Serializer<SN> sNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(keyspaceOperator, nameExtractor, valueExtractor);
     noneNull(sNameExtractor, nameExtractor, valueExtractor);
     this.sNameExtractor = sNameExtractor;

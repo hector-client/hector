@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 
 import org.junit.After;
@@ -42,7 +42,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
   private static final Logger log = LoggerFactory.getLogger(ApiV2SystemTest.class);
   private final static String KEYSPACE = "Keyspace1";
-  private static final StringExtractor se = new StringExtractor();
+  private static final StringSerializer se = new StringSerializer();
   private Cluster cluster;
   private KeyspaceOperator ko;
 

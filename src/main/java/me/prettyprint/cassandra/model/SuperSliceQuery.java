@@ -22,10 +22,10 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperSlice<SN,N,V>> {
 
   private String key;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameExtractor;
 
-  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
     Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
     this.sNameExtractor = sNameExtractor;

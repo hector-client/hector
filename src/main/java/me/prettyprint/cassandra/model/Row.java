@@ -22,8 +22,8 @@ public final class Row<N,V> {
   private final String rowKey;
   private final ColumnSlice<N,V> columnSlice;
 
-  /*package*/ Row(String rowKey, List<Column> columns, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ Row(String rowKey, List<Column> columns, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     Assert.noneNull(rowKey, columns, nameExtractor, valueExtractor);
     this.rowKey = rowKey;
     columnSlice = new ColumnSlice<N,V>(columns, nameExtractor, valueExtractor);

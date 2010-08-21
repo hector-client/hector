@@ -27,9 +27,9 @@ public final class HSuperColumn<SN,N,V> {
   private SN superName;
   private List<HColumn<N,V>> columns;
   private long timestamp;
-  private final Extractor<SN> superNameExtractor;
-  private final Extractor<N> nameExtractor;
-  private final Extractor<V> valueExtractor;
+  private final Serializer<SN> superNameExtractor;
+  private final Serializer<N> nameExtractor;
+  private final Serializer<V> valueExtractor;
 
   /**
    * @param <SN> SuperColumn name type
@@ -38,7 +38,7 @@ public final class HSuperColumn<SN,N,V> {
    * @param timestamp
    */
   /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+      Serializer<SN> sNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     this(sNameExtractor, nameExtractor, valueExtractor);
     notNull(sName, "Name is null");
     notNull(columns, "Columns are null");
@@ -47,16 +47,16 @@ public final class HSuperColumn<SN,N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     this(sNameExtractor, nameExtractor, valueExtractor);
     noneNull(thriftSuperColumn, sNameExtractor, nameExtractor, valueExtractor);
     superName = sNameExtractor.fromBytes(thriftSuperColumn.getName());
     columns = fromThriftColumns(thriftSuperColumn.getColumns());
   }
 
-  /*package*/ HSuperColumn(Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ HSuperColumn(Serializer<SN> sNameExtractor, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     noneNull(sNameExtractor, nameExtractor, valueExtractor);
     this.superNameExtractor = sNameExtractor;
     this.nameExtractor = nameExtractor;
@@ -104,7 +104,7 @@ public final class HSuperColumn<SN,N,V> {
     return columns.get(i);
   }
 
-  public Extractor<SN> getNameExtractor() {
+  public Serializer<SN> getNameExtractor() {
     return superNameExtractor;
   }
 
@@ -135,11 +135,11 @@ public final class HSuperColumn<SN,N,V> {
     return cs;
   }
 
-  public Extractor<SN> getSuperNameExtractor() {
+  public Serializer<SN> getSuperNameExtractor() {
     return superNameExtractor;
   }
 
-  public Extractor<V> getValueExtractor() {
+  public Serializer<V> getValueExtractor() {
     return valueExtractor;
   }
 

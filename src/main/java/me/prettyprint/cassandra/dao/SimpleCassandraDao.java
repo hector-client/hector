@@ -8,7 +8,6 @@ import static me.prettyprint.cassandra.model.HFactory.createStringColumnQuery;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HFactory;
@@ -18,13 +17,14 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 
 public class SimpleCassandraDao {
 
   private String columnFamilyName;
   private KeyspaceOperator keyspaceOperator;
-  private StringExtractor extractor = StringExtractor.get();
+  private StringSerializer extractor = StringSerializer.get();
     
   /**
    * Insert a new value keyed by key

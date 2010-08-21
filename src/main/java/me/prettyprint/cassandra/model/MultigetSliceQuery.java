@@ -19,8 +19,8 @@ public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N
 
   private Collection<String> keys;
 
-  /*package*/ MultigetSliceQuery(KeyspaceOperator ko, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ MultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
   }
 

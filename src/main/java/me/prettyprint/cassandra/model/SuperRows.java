@@ -21,8 +21,8 @@ public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
 
   private final Map<String, SuperRow<SN, N, V>> rows;
 
-  public SuperRows(Map<String, List<SuperColumn>> thriftSuperColumns, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  public SuperRows(Map<String, List<SuperColumn>> thriftSuperColumns, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     Assert.noneNull(thriftSuperColumns, sNameExtractor, nameExtractor, valueExtractor);
     rows = new HashMap<String, SuperRow<SN, N, V>>(thriftSuperColumns.size());
     for (Map.Entry<String, List<SuperColumn>> entry : thriftSuperColumns.entrySet()) {

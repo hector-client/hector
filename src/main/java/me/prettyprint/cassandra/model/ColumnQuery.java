@@ -15,8 +15,8 @@ public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> impl
   private String key;
   private N name;
 
-  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     super(keyspaceOperator, nameExtractor, valueExtractor);
   }
 

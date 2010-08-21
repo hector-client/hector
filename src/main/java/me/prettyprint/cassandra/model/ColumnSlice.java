@@ -18,8 +18,8 @@ public final class ColumnSlice<N,V> {
   private final Map<N,HColumn<N,V>> columnsMap;
   private final List<HColumn<N,V>> columnsList;
 
-  /*package*/ ColumnSlice(List<Column> tColumns, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ ColumnSlice(List<Column> tColumns, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     Assert.noneNull(tColumns, nameExtractor, valueExtractor);
     columnsMap = new HashMap<N,HColumn<N,V>>(tColumns.size());
     List<HColumn<N,V>> list = new ArrayList<HColumn<N,V>>(tColumns.size());

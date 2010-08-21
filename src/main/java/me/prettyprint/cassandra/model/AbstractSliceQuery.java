@@ -29,7 +29,7 @@ import org.apache.cassandra.thrift.SliceRange;
   /** Use column names or start/finish? */
   protected boolean useColumnNames;
 
-  /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
   }
 
