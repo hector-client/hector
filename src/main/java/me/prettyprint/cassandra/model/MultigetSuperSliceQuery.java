@@ -33,6 +33,7 @@ public final class MultigetSuperSliceQuery<K, SN, N, V> extends
     return this;
   }
 
+  @Override
   public Result<SuperRows<K, SN, N, V>> execute() {
     return new Result<SuperRows<K, SN, N, V>>(
         keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<K, SN, N, V>>() {

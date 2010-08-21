@@ -30,13 +30,15 @@ public final class MultigetSliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Ro
   }
 
 
+  @Override
   public Result<Rows<K,N,V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
     Assert.notNull(keys, "keys can't be null");
 
     return new Result<Rows<K,N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<Rows<K,N,V>>() {
-        
+
+          @Override
           public Rows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
@@ -49,6 +51,7 @@ public final class MultigetSliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Ro
   }
 
 
+  @Override
   public String toString() {
     return "MultigetSliceQuery(" + keys + "," + super.toStringInternal() + ")";
   }

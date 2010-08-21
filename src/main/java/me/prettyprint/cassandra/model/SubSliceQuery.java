@@ -43,6 +43,7 @@ public final class SubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Colu
     return this;
   }
 
+  @Override
   public Result<ColumnSlice<N, V>> execute() {
     Assert.notNull(key, "Key cannot be null");
     Assert.notNull(superColumn, "Supercolumn cannot be null");

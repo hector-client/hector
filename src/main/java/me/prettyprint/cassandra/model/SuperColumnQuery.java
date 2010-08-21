@@ -32,6 +32,7 @@ public final class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuper
     return this;
   }
 
+  @Override
   public Result<HSuperColumn<SN, N, V>> execute() {
     notNull(columnFamilyName, "columnFamilyName is null");
     notNull(superName, "superName is null");

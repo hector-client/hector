@@ -26,7 +26,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 public final class Mutator<K> {
 
   private final KeyspaceOperator ko;
-  
+
   final Serializer<K> keySerializer;
 
   private BatchMutation<K> pendingMutations;
