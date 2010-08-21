@@ -2,14 +2,13 @@ package me.prettyprint.cassandra.serializers;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
-import me.prettyprint.cassandra.model.Serializer;
 
 /**
  * A StringSerializer translates the byte[] to and from string using utf-8 encoding.
  * @author Ran Tavory
  *
  */
-public final class StringSerializer implements Serializer<String> {
+public final class StringSerializer extends AbstractSerializer<String> {
 
   private static final StringSerializer instance = new StringSerializer();
 

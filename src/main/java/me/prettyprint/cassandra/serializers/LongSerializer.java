@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.serializers;
 
-import me.prettyprint.cassandra.model.Serializer;
 
 /**
  * Converts bytes to Long and vise a versa
@@ -8,7 +7,7 @@ import me.prettyprint.cassandra.model.Serializer;
  * @author Ran Tavory
  *
  */
-public final class LongSerializer implements Serializer<Long> {
+public final class LongSerializer extends AbstractSerializer<Long> {
 
   private static final LongSerializer instance = new LongSerializer();
 

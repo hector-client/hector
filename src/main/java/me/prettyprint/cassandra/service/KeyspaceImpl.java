@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  */
 /* package */class KeyspaceImpl implements Keyspace {
 
+  @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
 
   private CassandraClient client;

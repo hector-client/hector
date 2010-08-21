@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,7 +6,7 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 
 import org.junit.Test;
 
-public class LongExtractorTest {
+public class LongSerializerTest {
 
   @Test
   public void testConversions() {

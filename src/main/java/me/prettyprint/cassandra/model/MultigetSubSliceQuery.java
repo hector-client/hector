@@ -18,14 +18,14 @@ import org.apache.cassandra.thrift.ColumnParent;
 public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N, V, Rows<N, V>> {
 
   private Collection<String> keys;
-  private final Serializer<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private SN superColumn;
 
-  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
-      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
-    Assert.notNull(nameExtractor, "sNameExtractor can't be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, nameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "sNameSerializer can't be null");
+    this.sNameSerializer = sNameSerializer;
   }
 
   public MultigetSubSliceQuery<SN, N, V> setKeys(String... keys) {
@@ -56,10 +56,10 @@ public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N,
             List<String> keysList = new ArrayList<String>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             Map<String, List<Column>> thriftRet = ks.multigetSlice(keysList,
                 columnParent, getPredicate());
-            return new Rows<N, V>(thriftRet, columnNameExtractor, valueExtractor);
+            return new Rows<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

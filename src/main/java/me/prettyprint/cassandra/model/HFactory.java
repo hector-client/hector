@@ -97,13 +97,13 @@ public final class HFactory {
   }
 
   public static <SN> SubCountQuery<SN> createSubCountQuery(KeyspaceOperator ko,
-      Serializer<SN> superNameExtractor) {
-    return new SubCountQuery<SN>(ko, superNameExtractor);
+      Serializer<SN> superNameSerializer) {
+    return new SubCountQuery<SN>(ko, superNameSerializer);
   }
 
   public static <N,V> ColumnQuery<N,V> createColumnQuery(KeyspaceOperator ko,
-      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new ColumnQuery<N,V>(ko, nameExtractor, valueExtractor);
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new ColumnQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static ColumnQuery<String, String> createStringColumnQuery(KeyspaceOperator ko) {
@@ -112,57 +112,57 @@ public final class HFactory {
   }
 
   public static <SN,N,V> SuperColumnQuery<SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
-      Serializer<SN> sNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new SuperColumnQuery<SN, N, V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new SuperColumnQuery<SN, N, V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
-      KeyspaceOperator ko, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new MultigetSliceQuery<N,V>(ko, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new MultigetSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> MultigetSuperSliceQuery<SN,N,V> createMultigetSuperSliceQuery(
-      KeyspaceOperator ko, Serializer<SN> sNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new MultigetSuperSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new MultigetSuperSliceQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> MultigetSubSliceQuery<SN,N,V> createMultigetSubSliceQuery(
-      KeyspaceOperator ko, Serializer<SN> sNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new MultigetSubSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new MultigetSubSliceQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <N,V> RangeSlicesQuery<N,V> createRangeSlicesQuery(
-      KeyspaceOperator ko, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new RangeSlicesQuery<N,V>(ko, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new RangeSlicesQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> RangeSuperSlicesQuery<SN,N,V> createRangeSuperSlicesQuery(
-      KeyspaceOperator ko, Serializer<SN> sNameExtractor, Serializer<N> nameExtractor,
-      Serializer<V> valueExtractor) {
-    return new RangeSuperSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    return new RangeSuperSlicesQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> RangeSubSlicesQuery<SN,N,V> createRangeSubSlicesQuery(
-      KeyspaceOperator ko, Serializer<SN> sNameExtractor, Serializer<N> nameExtractor,
-      Serializer<V> valueExtractor) {
-    return new RangeSubSlicesQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    return new RangeSubSlicesQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <N,V> SliceQuery<N,V> createSliceQuery(
-      KeyspaceOperator ko, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new SliceQuery<N,V>(ko, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new SliceQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> SubSliceQuery<SN,N,V> createSubSliceQuery(
-      KeyspaceOperator ko, Serializer<SN> sNameExtractor, Serializer<N> nameExtractor,
-      Serializer<V> valueExtractor) {
-    return new SubSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    return new SubSliceQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> SuperSliceQuery<SN,N,V> createSuperSliceQuery(
-      KeyspaceOperator ko, Serializer<SN> sNameExtractor, Serializer<N> nameExtractor,
-      Serializer<V> valueExtractor) {
-    return new SuperSliceQuery<SN,N,V>(ko, sNameExtractor, nameExtractor, valueExtractor);
+      KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    return new SuperSliceQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   /**
@@ -171,29 +171,29 @@ public final class HFactory {
    * @param createColumn a variable number of column arguments
    */
   public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
-      Serializer<SN> superNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new HSuperColumn<SN, N, V>(name, columns, createTimestamp(), superNameExtractor,
-        nameExtractor, valueExtractor);
+      Serializer<SN> superNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new HSuperColumn<SN, N, V>(name, columns, createTimestamp(), superNameSerializer,
+        nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
-      long timestamp, Serializer<SN> superNameExtractor, Serializer<N> nameExtractor,
-      Serializer<V> valueExtractor) {
-    return new HSuperColumn<SN, N, V>(name, columns, timestamp, superNameExtractor, nameExtractor,
-        valueExtractor);
+      long timestamp, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    return new HSuperColumn<SN, N, V>(name, columns, timestamp, superNameSerializer, nameSerializer,
+        valueSerializer);
   }
 
   public static <N,V> HColumn<N,V> createColumn(N name, V value, long timestamp,
-      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new HColumn<N, V>(name, value, timestamp, nameExtractor, valueExtractor);
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new HColumn<N, V>(name, value, timestamp, nameSerializer, valueSerializer);
   }
 
   /**
    * Creates a column with the timestamp of now.
    */
   public static <N,V> HColumn<N,V> createColumn(N name, V value,
-      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    return new HColumn<N, V>(name, value, createTimestamp(), nameExtractor, valueExtractor);
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new HColumn<N, V>(name, value, createTimestamp(), nameSerializer, valueSerializer);
   }
 
   /**
@@ -214,8 +214,8 @@ public final class HFactory {
 
   // probably should be typed for thrift vs. avro
   /*package*/ static <N> ColumnPath createColumnPath(String columnFamilyName, N columnName,
-      Serializer<N> nameExtractor) {
-    return createColumnPath(columnFamilyName, nameExtractor.toBytes(columnName));
+      Serializer<N> nameSerializer) {
+    return createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
   }
 
   private static <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
@@ -232,20 +232,20 @@ public final class HFactory {
   }
 
   /*package*/ static <SN,N> ColumnPath createSuperColumnPath(String columnFamilyName,
-      SN superColumnName, N columnName, Serializer<SN> superNameExtractor,
-      Serializer<N> nameExtractor) {
-    noneNull(columnFamilyName, superColumnName, superNameExtractor, nameExtractor);
-    ColumnPath columnPath = createColumnPath(columnFamilyName, nameExtractor.toBytes(columnName));
-    columnPath.setSuper_column(superNameExtractor.toBytes(superColumnName));
+      SN superColumnName, N columnName, Serializer<SN> superNameSerializer,
+      Serializer<N> nameSerializer) {
+    noneNull(columnFamilyName, superColumnName, superNameSerializer, nameSerializer);
+    ColumnPath columnPath = createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
+    columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
     return columnPath;
   }
 
   /*package*/ static <SN> ColumnPath createSuperColumnPath(String columnFamilyName,
-      SN superColumnName, Serializer<SN> superNameExtractor) {
-    noneNull(columnFamilyName, superNameExtractor);
+      SN superColumnName, Serializer<SN> superNameSerializer) {
+    noneNull(columnFamilyName, superNameSerializer);
     ColumnPath columnPath = createColumnPath(columnFamilyName, null);
     if (superColumnName != null) {
-      columnPath.setSuper_column(superNameExtractor.toBytes(superColumnName));
+      columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
     }
     return columnPath;
   }

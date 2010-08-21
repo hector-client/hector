@@ -19,14 +19,14 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V,OrderedSuperRows<SN,N,V>> {
 
-  private final Serializer<N> nameExtractor;
+  private final Serializer<N> nameSerializer;
   private final HKeyRange keyRange;
 
-  /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
-      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    super(ko, sNameExtractor, valueExtractor);
-    Assert.notNull(nameExtractor, "nameExtractor cannot be null");
-    this.nameExtractor = nameExtractor;
+  /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, sNameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "nameSerializer cannot be null");
+    this.nameSerializer = nameSerializer;
     keyRange = new HKeyRange();
   }
 
@@ -51,8 +51,8 @@ public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             LinkedHashMap<String, List<SuperColumn>> thriftRet =
                 ks.getSuperRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
-            return new OrderedSuperRows<SN,N,V>(thriftRet, columnNameExtractor, nameExtractor,
-                valueExtractor);
+            return new OrderedSuperRows<SN,N,V>(thriftRet, columnNameSerializer, nameSerializer,
+                valueSerializer);
           }
         }), this);
   }

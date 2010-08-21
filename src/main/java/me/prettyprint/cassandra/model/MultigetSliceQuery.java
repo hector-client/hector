@@ -19,9 +19,9 @@ public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N
 
   private Collection<String> keys;
 
-  /*package*/ MultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameExtractor,
-      Serializer<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
+  /*package*/ MultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    super(ko, nameSerializer, valueSerializer);
   }
 
   public MultigetSliceQuery<N,V> setKeys(String... keys) {
@@ -43,7 +43,7 @@ public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<String, List<Column>> thriftRet =
               ks.multigetSlice(keysList, columnParent, getPredicate());
-            return new Rows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
+            return new Rows<N,V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }
