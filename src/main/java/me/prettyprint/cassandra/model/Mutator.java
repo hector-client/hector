@@ -12,7 +12,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
 
 
 /**
- * A Mutator inserts or deltes values from the cluster.
+ * A Mutator inserts or deletes values from the cluster.
  * There are two main ways to use a mutator:
  * 1. Use the insert/delete methods to immediately insert of delete values.
  * or 2. Use the addInsertion/addDeletion methods to schedule batch operations and then execute()
@@ -47,17 +47,17 @@ public final class Mutator {
   }
 
   public <N> MutationResult delete(final String key, final String cf, final N columnName,
-      final Serializer<N> nameExtractor) {
-    addDeletion(key, cf, columnName, nameExtractor);
+      final Serializer<N> nameSerializer) {
+    addDeletion(key, cf, columnName, nameSerializer);
     return execute();
   }
 
   public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
-      final N columnName, final Serializer<SN> sNameExtractor, final Serializer<N> nameExtractor) {
+      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameExtractor, nameExtractor));
+        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameSerializer, nameSerializer));
         return null;
       }
     }));
@@ -81,9 +81,9 @@ public final class Mutator {
     return this;
   }
 
-  public <N> Mutator addDeletion(String key, String cf, N columnName, Serializer<N> nameExtractor) {
+  public <N> Mutator addDeletion(String key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
-    sp.addToColumn_names(nameExtractor.toBytes(columnName));
+    sp.addToColumn_names(nameSerializer.toBytes(columnName));
     Deletion d = new Deletion(ko.createTimestamp()).setPredicate(sp);
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;

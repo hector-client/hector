@@ -19,13 +19,13 @@ public final class MultigetSuperSliceQuery<SN, N, V> extends
     AbstractSliceQuery<SN, V, SuperRows<SN, N, V>> {
 
   private Collection<String> keys;
-  private final Serializer<N> nameExtractor;
+  private final Serializer<N> nameSerializer;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
-      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-    super(ko, sNameExtractor, valueExtractor);
-    Assert.notNull(nameExtractor, "nameExtractor can't be null");
-    this.nameExtractor = nameExtractor;
+  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, sNameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "nameSerializer can't be null");
+    this.nameSerializer = nameSerializer;
   }
 
   public MultigetSuperSliceQuery<SN, N, V> setKeys(String... keys) {
@@ -44,8 +44,8 @@ public final class MultigetSuperSliceQuery<SN, N, V> extends
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<String, List<SuperColumn>> thriftRet = ks.multigetSuperSlice(keysList,
                 columnParent, getPredicate());
-            return new SuperRows<SN, N, V>(thriftRet, columnNameExtractor, nameExtractor,
-                valueExtractor);
+            return new SuperRows<SN, N, V>(thriftRet, columnNameSerializer, nameSerializer,
+                valueSerializer);
           }
         }), this);
   }

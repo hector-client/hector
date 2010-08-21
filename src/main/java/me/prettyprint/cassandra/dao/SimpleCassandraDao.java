@@ -10,7 +10,6 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
-import me.prettyprint.cassandra.model.HFactory;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;
@@ -18,14 +17,13 @@ import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.Cluster;
 
 public class SimpleCassandraDao {
 
   private String columnFamilyName;
   private KeyspaceOperator keyspaceOperator;
-  private StringSerializer extractor = StringSerializer.get();
-    
+  private final StringSerializer serializer = StringSerializer.get();
+
   /**
    * Insert a new value keyed by key
    *
@@ -34,7 +32,7 @@ public class SimpleCassandraDao {
    */
   public void insert(String key, String columnName, String value) {
     createMutator(keyspaceOperator).insert(
-        key, columnFamilyName, createColumn(columnName, value, extractor, extractor));
+        key, columnFamilyName, createColumn(columnName, value, serializer, serializer));
   }
 
   /**
@@ -58,7 +56,7 @@ public class SimpleCassandraDao {
    * @return
    */
   public Map<String, String> getMulti(String columnName, String... keys) {
-    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, extractor, extractor);
+    MultigetSliceQuery<String,String> q = createMultigetSliceQuery(keyspaceOperator, serializer, serializer);
     q.setColumnFamily(columnFamilyName);
     q.setKeys(keys);
     q.setColumnNames(columnName);
@@ -82,11 +80,11 @@ public class SimpleCassandraDao {
     Mutator m = createMutator(keyspaceOperator);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), columnFamilyName,
-          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createTimestamp(), extractor, extractor));
+          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createTimestamp(), serializer, serializer));
     }
     m.execute();
   }
-  
+
 
   /**
    * Delete multiple values
@@ -94,7 +92,7 @@ public class SimpleCassandraDao {
   public void delete(String columnName, String... keys) {
     Mutator m = createMutator(keyspaceOperator);
     for (String key: keys) {
-      m.addDeletion(key, columnFamilyName,  columnName, extractor);
+      m.addDeletion(key, columnFamilyName,  columnName, serializer);
     }
     m.execute();
   }
@@ -107,6 +105,6 @@ public class SimpleCassandraDao {
   public void setKeyspaceOperator(KeyspaceOperator keyspaceOperator) {
     this.keyspaceOperator = keyspaceOperator;
   }
-  
-  
+
+
 }

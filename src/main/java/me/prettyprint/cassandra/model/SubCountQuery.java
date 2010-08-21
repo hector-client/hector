@@ -15,14 +15,14 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class SubCountQuery<SN> extends AbstractCountQuery implements Query<Integer> {
 
-  private final Serializer<SN> superNameExtractor;
+  private final Serializer<SN> superNameSerializer;
 
   private SN superColumnName;
 
-  /*package*/ SubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameExtractor) {
+  /*package*/ SubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameSerializer) {
     super(ko);
-    Assert.notNull(superNameExtractor, "superNameExtractor is null");
-    this.superNameExtractor = superNameExtractor;
+    Assert.notNull(superNameSerializer, "superNameSerializer is null");
+    this.superNameSerializer = superNameSerializer;
   }
 
   public SubCountQuery<SN> setSuperColumn(SN sc) {
@@ -40,7 +40,7 @@ public final class SubCountQuery<SN> extends AbstractCountQuery implements Query
           @Override
           public Integer doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
-            columnParent.setSuper_column(superNameExtractor.toBytes(superColumnName));
+            columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
             Integer count = ks.getCount(key, columnParent);
             return count;
           }

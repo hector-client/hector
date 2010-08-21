@@ -47,8 +47,8 @@ public class AbstractSliceQueryTest {
 
   private static class ConcreteSliceQueury<N, V, T> extends AbstractSliceQuery<N, V, T> {
 
-    ConcreteSliceQueury(KeyspaceOperator ko, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
-      super(ko, nameExtractor, valueExtractor);
+    ConcreteSliceQueury(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+      super(ko, nameSerializer, valueSerializer);
     }
 
     @Override
