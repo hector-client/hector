@@ -56,7 +56,9 @@ public enum CassandraClientPoolFactory {
     CassandraClientPool pool = new CassandraClientPoolImpl(
         JmxMonitor.INSTANCE.getCassandraMonitor());
     JmxMonitor.INSTANCE.addPool(pool);
-    log.debug("CassandraClientPool was created: {}", pool);
+    if ( log.isDebugEnabled() ) {
+      log.debug("CassandraClientPool was created: {}", pool);
+    }
     return pool;
   }
 
@@ -73,7 +75,9 @@ public enum CassandraClientPoolFactory {
     CassandraClientPool pool = new CassandraClientPoolImpl(
         JmxMonitor.INSTANCE.getCassandraMonitor(), cassandraHostConfigurator);
     JmxMonitor.INSTANCE.addPool(pool);
-    log.debug("CassandraClientPool was created: {}", pool);
+    if ( log.isDebugEnabled() ) {
+      log.debug("CassandraClientPool was created: {}", pool);
+    }
     return pool;
   }
 }
