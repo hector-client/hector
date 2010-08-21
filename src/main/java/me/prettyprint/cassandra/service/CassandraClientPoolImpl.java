@@ -176,7 +176,9 @@ import org.slf4j.LoggerFactory;
       for (Iterator<Entry<CassandraHost, CassandraClientPoolByHost>> iterator = pools.entrySet().iterator(); iterator.hasNext();) {
         Entry<CassandraHost, CassandraClientPoolByHost> pool = iterator.next();
         if (pool.getValue().getLiveClients().isEmpty()) {
-          log.info("Found empty CassandraClientPoolByHost to remove: {}", pool.toString());
+          if ( log.isInfoEnabled() ) {
+            log.info("Found empty CassandraClientPoolByHost to remove: {}", pool.toString());
+          }
           iterator.remove();
         }
       }
@@ -266,7 +268,9 @@ import org.slf4j.LoggerFactory;
       if (pool == null) {         
         pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
         pools.put(cassandraHost, pool);
-        log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
+        if ( log.isDebugEnabled() ) {
+          log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
+        }
       }
     }    
   }
