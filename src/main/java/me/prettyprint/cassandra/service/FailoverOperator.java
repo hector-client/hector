@@ -143,7 +143,9 @@ import org.slf4j.LoggerFactory;
    */
   private void sleepBetweenHostSkips() {
     if (failoverPolicy.sleepBetweenHostsMilli > 0) {
-      log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
+      if ( log.isDebugEnabled() ) {
+        log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
+      }
       try {
         Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
       } catch (InterruptedException e) {
@@ -165,7 +167,9 @@ import org.slf4j.LoggerFactory;
   private boolean operateSingleIteration(Operation<?> op, final StopWatch stopWatch,
       int retries, boolean isFirst) throws HectorException,
       PoolExhaustedException, Exception, UnavailableException, HectorTransportException {
-    log.debug("Performing operation on {}; retries: {}", client.getCassandraHost().getUrl(), retries);
+    if ( log.isDebugEnabled() ) {
+      log.debug("Performing operation on {}; retries: {}", client.getCassandraHost().getUrl(), retries);
+    }
     try {
       // Perform operation and save its result value
       Cassandra.Client c = client.getCassandra();
@@ -175,7 +179,9 @@ import org.slf4j.LoggerFactory;
       op.executeAndSetResult(c);
       // hmmm don't count success, there are too many...
       // monitor.incCounter(op.successCounter);
-      log.debug("Operation succeeded on {}", client.getCassandraHost().getUrl());
+      if ( log.isDebugEnabled() ) {
+        log.debug("Operation succeeded on {}", client.getCassandraHost().getUrl());
+      }
       stopWatch.stop(op.stopWatchTagName + ".success_");
       return true;
     } catch (TimedOutException e) {
@@ -222,8 +228,10 @@ import org.slf4j.LoggerFactory;
    */
   private void skipToNextHost(boolean isRetrySameHostAgain,
       boolean invalidateAllConnectionsToCurrentHost) throws SkipHostException {
-    log.info("Skipping to next host (thread={}). Current host is: {}",
-        Thread.currentThread().getName(), client.getCassandraHost().getUrl());
+    if ( log.isInfoEnabled() ) {
+      log.info("Skipping to next host (thread={}). Current host is: {}",
+          Thread.currentThread().getName(), client.getCassandraHost().getUrl());
+    }
     invalidate();
     if (invalidateAllConnectionsToCurrentHost) {
       clientPools.invalidateAllConnectionsToHost(client);
@@ -248,8 +256,10 @@ import org.slf4j.LoggerFactory;
       throw new SkipHostException(e);
     }
     monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
-    log.info("Skipped host (thread={}). New client is {}", Thread.currentThread().getName(),
-        client);
+    if ( log.isInfoEnabled() ) {
+      log.info("Skipped host (thread={}). New client is {}", Thread.currentThread().getName(),
+          client);
+    }
   }
 
   /**
@@ -259,7 +269,9 @@ import org.slf4j.LoggerFactory;
    * out of the pool indefinitely) and removed the keyspace from the client.
    */
   private void invalidate() {
-    log.info("Invalidating client {} (thread={})", client, Thread.currentThread().getName());
+    if ( log.isInfoEnabled() ) {
+      log.info("Invalidating client {} (thread={})", client, Thread.currentThread().getName());
+    }
     try {
       clientPools.invalidateClient(client);
       if (keyspace != null) {
@@ -302,7 +314,9 @@ import org.slf4j.LoggerFactory;
   private CassandraHost chooseRandomHost(List<CassandraHost> knownHosts) {
     long rnd = Math.round(Math.random() * knownHosts.size());
     CassandraHost host = knownHosts.get((int) rnd);
-    log.info("Choosing random host to skip to: {}", host);
+    if ( log.isInfoEnabled() ) {
+      log.info("Choosing random host to skip to: {}", host);
+    }
     return host;
   }
 
