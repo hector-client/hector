@@ -19,8 +19,8 @@ public final class OrderedRows<N,V> extends Rows<N,V> {
 
   private final List<Row<N,V>> rowsList;
 
-  public OrderedRows(LinkedHashMap<String, List<Column>> thriftRet, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  public OrderedRows(LinkedHashMap<String, List<Column>> thriftRet, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     super(thriftRet, nameExtractor, valueExtractor);
     rowsList = new ArrayList<Row<N,V>>(thriftRet.size());
     for (Map.Entry<String, List<Column>> entry: thriftRet.entrySet()) {

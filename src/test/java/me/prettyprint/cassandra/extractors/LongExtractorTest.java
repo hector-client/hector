@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.extractors;
 
 import static org.junit.Assert.assertEquals;
 
+import me.prettyprint.cassandra.serializers.LongSerializer;
+
 import org.junit.Test;
 
 public class LongExtractorTest {
@@ -17,7 +19,7 @@ public class LongExtractorTest {
   }
 
   private void test(Long number) {
-    LongExtractor ext = new LongExtractor();
+    LongSerializer ext = new LongSerializer();
     assertEquals(number, ext.fromBytes(ext.toBytes(number)));
   }
 }

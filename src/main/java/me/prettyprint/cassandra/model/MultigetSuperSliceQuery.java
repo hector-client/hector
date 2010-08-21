@@ -19,10 +19,10 @@ public final class MultigetSuperSliceQuery<SN, N, V> extends
     AbstractSliceQuery<SN, V, SuperRows<SN, N, V>> {
 
   private Collection<String> keys;
-  private final Extractor<N> nameExtractor;
+  private final Serializer<N> nameExtractor;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, sNameExtractor, valueExtractor);
     Assert.notNull(nameExtractor, "nameExtractor can't be null");
     this.nameExtractor = nameExtractor;

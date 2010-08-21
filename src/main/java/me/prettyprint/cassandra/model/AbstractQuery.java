@@ -6,12 +6,12 @@ public abstract class AbstractQuery<N,V,T> implements Query<T>{
 
   protected final KeyspaceOperator keyspaceOperator;
   protected String columnFamilyName;
-  protected final Extractor<N> columnNameExtractor;
-  protected final Extractor<V> valueExtractor;
+  protected final Serializer<N> columnNameExtractor;
+  protected final Serializer<V> valueExtractor;
 
 
-  /*package*/ AbstractQuery(KeyspaceOperator ko, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ AbstractQuery(KeyspaceOperator ko, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     Assert.noneNull(ko, nameExtractor, valueExtractor);
     keyspaceOperator = ko;
     this.columnNameExtractor = nameExtractor;

@@ -19,11 +19,11 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V,OrderedSuperRows<SN,N,V>> {
 
-  private final Extractor<N> nameExtractor;
+  private final Serializer<N> nameExtractor;
   private final HKeyRange keyRange;
 
-  /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, sNameExtractor, valueExtractor);
     Assert.notNull(nameExtractor, "nameExtractor cannot be null");
     this.nameExtractor = nameExtractor;

@@ -25,7 +25,7 @@ public final class SuperRow<SN, N, V> {
   private final SuperSlice<SN, N, V> slice;
 
   /*package*/SuperRow(String rowKey, List<SuperColumn> thriftSuperColumns,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+      Serializer<SN> sNameExtractor, Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     Assert.noneNull(rowKey, thriftSuperColumns, nameExtractor, valueExtractor);
     this.rowKey = rowKey;
     slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameExtractor, nameExtractor,

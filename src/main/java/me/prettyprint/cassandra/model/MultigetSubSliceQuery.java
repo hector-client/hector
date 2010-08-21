@@ -18,11 +18,11 @@ import org.apache.cassandra.thrift.ColumnParent;
 public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N, V, Rows<N, V>> {
 
   private Collection<String> keys;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameExtractor;
   private SN superColumn;
 
-  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
     Assert.notNull(nameExtractor, "sNameExtractor can't be null");
     this.sNameExtractor = sNameExtractor;

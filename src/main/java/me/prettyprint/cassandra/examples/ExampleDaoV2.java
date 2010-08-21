@@ -10,7 +10,6 @@ import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.extractors.StringExtractor;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
@@ -19,6 +18,7 @@ import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 
 public class ExampleDaoV2 {
@@ -28,7 +28,7 @@ public class ExampleDaoV2 {
   private final static String CF_NAME = "Standard1";
   /** Column name where values are stored */
   private final static String COLUMN_NAME = "v";
-  private final StringExtractor extractor = StringExtractor.get();
+  private final StringSerializer extractor = StringSerializer.get();
 
   private final KeyspaceOperator keyspaceOperator;
 

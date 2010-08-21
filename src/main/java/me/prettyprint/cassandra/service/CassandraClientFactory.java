@@ -73,13 +73,17 @@ import org.slf4j.LoggerFactory;
     } catch (Exception e) {
       throw new HectorException(e);
     }
-    log.debug("Creating client {}", c);
+    if ( log.isDebugEnabled() ) {
+      log.debug("Creating client {}", c);
+    }
     return c;
   }
 
   private Cassandra.Client createThriftClient(CassandraHost cassandraHost)
       throws HectorTransportException {
-    log.debug("Creating a new thrift connection to {}", cassandraHost);
+    if ( log.isDebugEnabled() ) {
+      log.debug("Creating a new thrift connection to {}", cassandraHost);
+    }
     TTransport tr;
     if (useThriftFramedTransport) {
       tr = new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout));
@@ -134,15 +138,21 @@ import org.slf4j.LoggerFactory;
   @Override
   public void destroyObject(Object obj) throws Exception {
     CassandraClient client = (CassandraClient) obj ;
-    log.debug("Closing client {} (thread={})", client, Thread.currentThread().getName());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Closing client {} (thread={})", client, Thread.currentThread().getName());
+    }
     closeClient(client);
   }
 
   @Override
   public Object makeObject() throws Exception {
-    log.debug("Creating a new client... (thread={})", Thread.currentThread().getName());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Creating a new client... (thread={})", Thread.currentThread().getName());
+    }
     CassandraClient c = create();
-    log.debug("New client created: {} (thread={})", c, Thread.currentThread().getName());
+    if ( log.isDebugEnabled() ) {
+      log.debug("New client created: {} (thread={})", c, Thread.currentThread().getName());
+    }
     return c;
   }
 
@@ -156,7 +166,9 @@ import org.slf4j.LoggerFactory;
   }
 
   private void closeClient(CassandraClient cclient) {
-    log.debug("Closing client {}", cclient);
+    if ( log.isDebugEnabled() ) {
+      log.debug("Closing client {}", cclient);
+    }
     ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
     Cassandra.Client client = cclient.getCassandra();
     client.getInputProtocol().getTransport().close();

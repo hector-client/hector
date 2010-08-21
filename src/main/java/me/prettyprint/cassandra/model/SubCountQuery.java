@@ -15,11 +15,11 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class SubCountQuery<SN> extends AbstractCountQuery implements Query<Integer> {
 
-  private final Extractor<SN> superNameExtractor;
+  private final Serializer<SN> superNameExtractor;
 
   private SN superColumnName;
 
-  /*package*/ SubCountQuery(KeyspaceOperator ko, Extractor<SN> superNameExtractor) {
+  /*package*/ SubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameExtractor) {
     super(ko);
     Assert.notNull(superNameExtractor, "superNameExtractor is null");
     this.superNameExtractor = superNameExtractor;

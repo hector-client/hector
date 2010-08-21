@@ -1,6 +1,6 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
-import me.prettyprint.cassandra.model.Extractor;
+import me.prettyprint.cassandra.model.Serializer;
 
 /**
  * The BytesExtractor is a simple identity function. It supports the Extractor interface and
@@ -9,11 +9,11 @@ import me.prettyprint.cassandra.model.Extractor;
  * @author Ran Tavory
  *
  */
-public final class BytesExtractor implements Extractor<byte[]> {
+public final class BytesSerializer implements Serializer<byte[]> {
 
-  private static BytesExtractor instance = new BytesExtractor();
+  private static BytesSerializer instance = new BytesSerializer();
 
-  public static BytesExtractor get() {
+  public static BytesSerializer get() {
     return instance;
   }
 

@@ -21,8 +21,8 @@ public class Rows<N, V> implements Iterable<Row<N, V>> {
 
   protected final Map<String, Row<N, V>> rows;
 
-  public Rows(Map<String, List<Column>> thriftRet, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  public Rows(Map<String, List<Column>> thriftRet, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     Assert.noneNull(thriftRet, nameExtractor, valueExtractor);
     rows = new HashMap<String, Row<N, V>>(thriftRet.size());
     for (Map.Entry<String, List<Column>> entry : thriftRet.entrySet()) {

@@ -17,13 +17,13 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameExtractor;
   private final HKeyRange keyRange;
   private SN superColumn;
 
 
-  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
     Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
     this.sNameExtractor = sNameExtractor;

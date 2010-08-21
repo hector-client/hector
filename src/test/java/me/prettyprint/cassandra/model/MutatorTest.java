@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.utils.StringUtils;
@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 public class MutatorTest extends BaseEmbededServerSetupTest {
 
-  private static final StringExtractor se = new StringExtractor();
+  private static final StringSerializer se = new StringSerializer();
 
   private Cluster cluster;
   private KeyspaceOperator keyspaceOperator;

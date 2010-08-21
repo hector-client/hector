@@ -20,11 +20,11 @@ public final class HColumn<N,V> {
   private N name;
   private V value;
   private long timestamp;
-  private final Extractor<N> nameExtractor;
-  private final Extractor<V> valueExtractor;
+  private final Serializer<N> nameExtractor;
+  private final Serializer<V> valueExtractor;
 
-  /*package*/ HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ HColumn(N name, V value, long timestamp, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     notNull(name, "name is null");
     notNull(value, "value is null");
@@ -34,15 +34,15 @@ public final class HColumn<N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/ HColumn(Column thriftColumn, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+  /*package*/ HColumn(Column thriftColumn, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     this(nameExtractor, valueExtractor);
     notNull(thriftColumn, "thriftColumn is null");
     name = nameExtractor.fromBytes(thriftColumn.getName());
     value = valueExtractor.fromBytes(thriftColumn.getValue());
   }
 
-  /*package*/ HColumn(Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ HColumn(Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     notNull(nameExtractor, "nameExtractor is null");
     notNull(valueExtractor, "valueExtractor is null");
     this.nameExtractor = nameExtractor;
@@ -89,11 +89,11 @@ public final class HColumn<N,V> {
     return this;
   }
 
-  public Extractor<N> getNameExtractor() {
+  public Serializer<N> getNameExtractor() {
     return nameExtractor;
   }
 
-  public Extractor<V> getValueExtractor() {
+  public Serializer<V> getValueExtractor() {
     return valueExtractor;
   }
 

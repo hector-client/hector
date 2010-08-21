@@ -21,10 +21,10 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
 
   private String key;
   private SN superColumn;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameExtractor;
 
-  /*package*/ SubSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
+  /*package*/ SubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameExtractor,
+      Serializer<N> nameExtractor, Serializer<V> valueExtractor) {
     super(ko, nameExtractor, valueExtractor);
     Assert.notNull(sNameExtractor, "Supername extractor cannot be null");
     this.sNameExtractor = sNameExtractor;

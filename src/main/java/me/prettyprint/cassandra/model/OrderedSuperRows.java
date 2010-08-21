@@ -18,8 +18,8 @@ public final class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
   private final List<SuperRow<SN,N,V>> rowsList;
 
   public OrderedSuperRows(LinkedHashMap<String, List<SuperColumn>> thriftRet,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
+      Serializer<SN> sNameExtractor, Serializer<N> nameExtractor,
+      Serializer<V> valueExtractor) {
     super(thriftRet, sNameExtractor, nameExtractor, valueExtractor);
     rowsList = new ArrayList<SuperRow<SN,N,V>>(thriftRet.size());
     for (Map.Entry<String, List<SuperColumn>> entry: thriftRet.entrySet()) {
