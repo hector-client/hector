@@ -17,22 +17,17 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private final HKeyRange keyRange;
   private SN superColumn;
 
 
-  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ RangeSubSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
     keyRange = new HKeyRange();
-  }
-
-  public RangeSubSlicesQuery<SN,N,V> setTokens(String start, String end) {
-    keyRange.setTokens(start, end);
-    return this;
   }
 
   public RangeSubSlicesQuery<SN,N,V> setKeys(String start, String end) {
@@ -61,10 +56,10 @@ public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,Or
           @Override
           public OrderedRows<N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameExtractor.toBytes(superColumn));
+            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             LinkedHashMap<String, List<Column>> thriftRet =
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
-            return new OrderedRows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
+            return new OrderedRows<N,V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

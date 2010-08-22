@@ -3,16 +3,21 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.cassandra.model.HFactory.createColumnPath;
 import me.prettyprint.cassandra.service.Keyspace;
 
-// like a simple get operation
-// may return a Column or a SuperColumn
+/**
+ * like a simple get operation for a standard column
+ * @author Ran Tavory
+ *
+ * @param <N> column name type
+ * @param <V> value type
+ */
 public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
   private String key;
   private N name;
 
-  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    super(keyspaceOperator, nameExtractor, valueExtractor);
+  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    super(keyspaceOperator, nameSerializer, valueSerializer);
   }
 
   public ColumnQuery<N,V> setKey(String key) {
@@ -33,8 +38,8 @@ public final class ColumnQuery<N,V> extends AbstractQuery<N,V,HColumn<N,V>> impl
           public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               org.apache.cassandra.thrift.Column thriftColumn =
-                ks.getColumn(key, createColumnPath(columnFamilyName, name, columnNameExtractor));
-              return new HColumn<N, V>(thriftColumn, columnNameExtractor, valueExtractor);
+                ks.getColumn(key, createColumnPath(columnFamilyName, name, columnNameSerializer));
+              return new HColumn<N, V>(thriftColumn, columnNameSerializer, valueSerializer);
             } catch (NotFoundException e) {
               return null;
             }

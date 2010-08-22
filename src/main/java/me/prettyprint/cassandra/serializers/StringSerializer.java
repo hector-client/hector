@@ -1,19 +1,18 @@
-package me.prettyprint.cassandra.extractors;
+package me.prettyprint.cassandra.serializers;
 
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
-import me.prettyprint.cassandra.model.Extractor;
 
 /**
- * A StringExtractor translates the byte[] to and from string using utf-8 encoding.
+ * A StringSerializer translates the byte[] to and from string using utf-8 encoding.
  * @author Ran Tavory
  *
  */
-public final class StringExtractor implements Extractor<String> {
+public final class StringSerializer extends AbstractSerializer<String> {
 
-  private static final StringExtractor instance = new StringExtractor();
+  private static final StringSerializer instance = new StringSerializer();
 
-  public static StringExtractor get() {
+  public static StringSerializer get() {
     return instance;
   }
 

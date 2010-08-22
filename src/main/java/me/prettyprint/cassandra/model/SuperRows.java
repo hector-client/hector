@@ -21,13 +21,13 @@ public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
 
   private final Map<String, SuperRow<SN, N, V>> rows;
 
-  public SuperRows(Map<String, List<SuperColumn>> thriftSuperColumns, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(thriftSuperColumns, sNameExtractor, nameExtractor, valueExtractor);
+  public SuperRows(Map<String, List<SuperColumn>> thriftSuperColumns, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    Assert.noneNull(thriftSuperColumns, sNameSerializer, nameSerializer, valueSerializer);
     rows = new HashMap<String, SuperRow<SN, N, V>>(thriftSuperColumns.size());
     for (Map.Entry<String, List<SuperColumn>> entry : thriftSuperColumns.entrySet()) {
       rows.put(entry.getKey(), new SuperRow<SN, N, V>(entry.getKey(), entry.getValue(),
-          sNameExtractor, nameExtractor, valueExtractor));
+          sNameSerializer, nameSerializer, valueSerializer));
     }
   }
 

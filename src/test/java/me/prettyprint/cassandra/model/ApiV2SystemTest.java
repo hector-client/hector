@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.model.HFactory.createColumn;
 import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
+import static me.prettyprint.cassandra.model.HFactory.createCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuery;
@@ -11,9 +12,11 @@ import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSubSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSubCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumnQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSuperCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.extractors.StringExtractor;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 
 import org.junit.After;
@@ -39,7 +42,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
   private static final Logger log = LoggerFactory.getLogger(ApiV2SystemTest.class);
   private final static String KEYSPACE = "Keyspace1";
-  private static final StringExtractor se = new StringExtractor();
+  private static final StringSerializer se = new StringSerializer();
   private Cluster cluster;
   private KeyspaceOperator ko;
 
@@ -66,6 +69,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // Check the mutation result metadata
     // assertEquals("127.0.0.1:9170", mr.getHostUsed());
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
     // get value
@@ -73,6 +77,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setName("testInsertGetRemove").setColumnFamily(cf);
     Result<HColumn<String, String>> r = q.setKey("testInsertGetRemove").execute();
     assertNotNull(r);
+    assertTrue("Should have operated on a host", r.getHostUsed() != null);
     HColumn<String, String> c = r.get();
     assertNotNull(c);
     String value = c.getValue();
@@ -81,7 +86,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("testInsertGetRemove", name);
     assertEquals(q, r.getQuery());
     assertTrue("Time should be > 0", r.getExecutionTimeMicro() > 0);
-
+    assertTrue("Should have operated on a host", r.getHostUsed() != null);
     // remove value
     m = createMutator(ko);
     MutationResult mr2 = m.delete("testInsertGetRemove", cf, "testInsertGetRemove", se);
@@ -295,6 +300,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     MutationResult mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
     // get value
@@ -499,7 +505,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     RangeSlicesQuery<String, String> q = createRangeSlicesQuery(ko, se, se);
     q.setColumnFamily(cf);
-    q.setTokens("testRangeSlicesQuery1", "testRangeSlicesQuery3");
+    q.setKeys("testRangeSlicesQuery2", "testRangeSlicesQuery3");
     // try with column name first
     q.setColumnNames("testRangeSlicesQueryColumn1", "testRangeSlicesQueryColumn2");
     Result<OrderedRows<String, String>> r = q.execute();
@@ -555,7 +561,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     RangeSuperSlicesQuery<String,String, String> q = createRangeSuperSlicesQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setTokens("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery3");
+    q.setKeys("testRangeSuperSlicesQuery2", "testRangeSuperSlicesQuery3");
     // try with column name first
     q.setColumnNames("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery2");
     Result<OrderedSuperRows<String, String, String>> r = q.execute();
@@ -607,7 +613,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     RangeSubSlicesQuery<String,String, String> q = createRangeSubSlicesQuery(ko, se, se, se);
     q.setColumnFamily(cf);
-    q.setTokens("testRangeSubSlicesQuery1", "testRangeSubSlicesQuery3");
+    q.setKeys("testRangeSubSlicesQuery2", "testRangeSubSlicesQuery3");
     // try with column name first
     q.setSuperColumn("testRangeSubSlicesQuery1");
     q.setColumnNames("c021", "c111");
@@ -625,6 +631,62 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("v021", slice.getColumnByName("c021").getValue());
     assertEquals("v121", slice.getColumnByName("c111").getValue());
     assertNull(slice.getColumnByName("c033"));
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
+  public void testCountQuery() {
+    String cf = "Standard1";
+
+    TestCleanupDescriptor cleanup = insertColumns(cf, 1, "testCountQuery", 10,
+        "testCountQueryColumn");
+    CountQuery cq = createCountQuery(ko);
+    cq.setColumnFamily(cf).setKey("testCountQuery0");
+    Result<Integer> r = cq.execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(10), r.get());
+
+    // Delete values
+    deleteColumns(cleanup);
+
+    // Try a non existing row, make sure it gets 0 (not exceptions)
+    cq = createCountQuery(ko);
+    cq.setColumnFamily(cf).setKey("testCountQuery_nonexisting");
+    r = cq.execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(0), r.get());
+}
+
+
+  @Test
+  public void testSuperCountQuery() {
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSuperCountQuery", 11,
+        "testSuperCountQueryColumn");
+    SuperCountQuery cq = createSuperCountQuery(ko);
+    cq.setColumnFamily(cf).setKey("testSuperCountQuery0");
+    Result<Integer> r = cq.execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(11), r.get());
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
+  public void testSubCountQuery() {
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSubCountQuery", 1,
+        "testSubCountQueryColumn");
+    SubCountQuery<String> cq = createSubCountQuery(ko, se);
+    Result<Integer> r = cq.setColumnFamily(cf).setKey("testSubCountQuery0").
+        setSuperColumn("testSubCountQueryColumn0").execute();
+    assertNotNull(r);
+    assertEquals(Integer.valueOf(2), r.get());
 
     // Delete values
     deleteColumns(cleanup);

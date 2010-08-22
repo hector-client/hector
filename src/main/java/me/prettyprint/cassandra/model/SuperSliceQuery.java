@@ -10,7 +10,10 @@ import org.apache.cassandra.thrift.SuperColumn;
 
 
 /**
- * A query for the thrift call get_slice
+ * A query for the thrift call get_slice.
+ * <p>
+ * Get a slice of super columns from a super column family.
+ *
  * @author Ran Tavory
  *
  * @param <N>
@@ -19,13 +22,13 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperSlice<SN,N,V>> {
 
   private String key;
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Extractor<SN> sNameExtractor,
-      Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
-    Assert.notNull(sNameExtractor, "sNameExtractor cannot be null");
-    this.sNameExtractor = sNameExtractor;
+  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, nameSerializer, valueSerializer);
+    Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
+    this.sNameSerializer = sNameSerializer;
   }
 
   public SuperSliceQuery<SN,N,V> setKey(String key) {
@@ -41,7 +44,7 @@ public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperS
           public SuperSlice<SN,N,V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate());
-            return new SuperSlice<SN,N,V>(thriftRet, sNameExtractor, columnNameExtractor, valueExtractor);
+            return new SuperSlice<SN,N,V>(thriftRet, sNameSerializer, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

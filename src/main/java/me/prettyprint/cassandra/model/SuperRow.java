@@ -25,11 +25,11 @@ public final class SuperRow<SN, N, V> {
   private final SuperSlice<SN, N, V> slice;
 
   /*package*/SuperRow(String rowKey, List<SuperColumn> thriftSuperColumns,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    Assert.noneNull(rowKey, thriftSuperColumns, nameExtractor, valueExtractor);
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    Assert.noneNull(rowKey, thriftSuperColumns, nameSerializer, valueSerializer);
     this.rowKey = rowKey;
-    slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameExtractor, nameExtractor,
-        valueExtractor);
+    slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameSerializer, nameSerializer,
+        valueSerializer);
   }
 
   public String getKey() {

@@ -11,7 +11,7 @@ public final class Result<T> extends ExecutionResult<T> {
   private final Query<T> query;
 
   /*package*/ Result(ExecutionResult<T> res, Query<T> query) {
-    super(res.get(), res.getExecutionTimeMicro());
+    super(res.get(), res.getExecutionTimeMicro(), res.getHostUsed());
     this.query = query;
   }
 
@@ -25,6 +25,6 @@ public final class Result<T> extends ExecutionResult<T> {
 
   @Override
   public String toString() {
-    return  "Result(" + get() + "," + toStringInternal() + "," + query + ")";
+    return  "Result(" + get() + "," + toStringInternal() + "," + query + ") from host: " + getHostUsed().getName();
   }
 }

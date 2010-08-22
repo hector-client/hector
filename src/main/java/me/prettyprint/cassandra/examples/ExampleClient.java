@@ -25,8 +25,9 @@ public class ExampleClient {
     // A load balanced version would look like this:
     // CassandraClient client = pool.borrowClient(new String[] {"cas1:9160", "cas2:9160", "cas3:9160"});
 
+    Keyspace keyspace = null;
     try {
-      Keyspace keyspace = client.getKeyspace("Keyspace1");
+      keyspace = client.getKeyspace("Keyspace1");
       ColumnPath columnPath = new ColumnPath("Standard1");
       columnPath.setColumn(bytes("column-name"));
 
@@ -38,12 +39,14 @@ public class ExampleClient {
 
       System.out.println("Read from cassandra: " + string(col.getValue()));
 
+    } finally {
       // This line makes sure that even if the client had failures and recovered, a correct
       // releaseClient is called, on the up to date client.
-      client = keyspace.getClient();
-    } finally {
-      // return client to pool. do it in a finally block to make sure it's executed
-      pool.releaseClient(client);
+      if (keyspace != null) {
+        client = keyspace.getClient();
+        // return client to pool. do it in a finally block to make sure it's executed
+        pool.releaseClient(client);
+      }
     }
   }
 }

@@ -20,12 +20,12 @@ public final class HColumn<N,V> {
   private N name;
   private V value;
   private long timestamp;
-  private final Extractor<N> nameExtractor;
-  private final Extractor<V> valueExtractor;
+  private final Serializer<N> nameSerializer;
+  private final Serializer<V> valueSerializer;
 
-  /*package*/ HColumn(N name, V value, long timestamp, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    this(nameExtractor, valueExtractor);
+  /*package*/ HColumn(N name, V value, long timestamp, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    this(nameSerializer, valueSerializer);
     notNull(name, "name is null");
     notNull(value, "value is null");
 
@@ -34,19 +34,19 @@ public final class HColumn<N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/ HColumn(Column thriftColumn, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    this(nameExtractor, valueExtractor);
+  /*package*/ HColumn(Column thriftColumn, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");
-    name = nameExtractor.fromBytes(thriftColumn.getName());
-    value = valueExtractor.fromBytes(thriftColumn.getValue());
+    name = nameSerializer.fromBytes(thriftColumn.getName());
+    value = valueSerializer.fromBytes(thriftColumn.getValue());
   }
 
-  /*package*/ HColumn(Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    notNull(nameExtractor, "nameExtractor is null");
-    notNull(valueExtractor, "valueExtractor is null");
-    this.nameExtractor = nameExtractor;
-    this.valueExtractor = valueExtractor;
+  /*package*/ HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    notNull(nameSerializer, "nameSerializer is null");
+    notNull(valueSerializer, "valueSerializer is null");
+    this.nameSerializer = nameSerializer;
+    this.valueSerializer = valueSerializer;
   }
 
   public HColumn<N,V> setName(N name) {
@@ -79,30 +79,30 @@ public final class HColumn<N,V> {
   }
 
   public Column toThrift() {
-    return new Column(nameExtractor.toBytes(name), valueExtractor.toBytes(value), timestamp);
+    return new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), timestamp);
   }
 
   public HColumn<N, V> fromThrift(Column c) {
     notNull(c, "column is null");
-    name = nameExtractor.fromBytes(c.name);
-    value = valueExtractor.fromBytes(c.value);
+    name = nameSerializer.fromBytes(c.name);
+    value = valueSerializer.fromBytes(c.value);
     return this;
   }
 
-  public Extractor<N> getNameExtractor() {
-    return nameExtractor;
+  public Serializer<N> getNameSerializer() {
+    return nameSerializer;
   }
 
-  public Extractor<V> getValueExtractor() {
-    return valueExtractor;
+  public Serializer<V> getValueSerializer() {
+    return valueSerializer;
   }
 
   public byte[] getValueBytes() {
-    return valueExtractor.toBytes(getValue());
+    return valueSerializer.toBytes(getValue());
   }
 
   public byte[] getNameBytes() {
-    return nameExtractor.toBytes(getName());
+    return nameSerializer.toBytes(getName());
   }
 
   @Override

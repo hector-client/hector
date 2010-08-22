@@ -7,7 +7,7 @@ package me.prettyprint.cassandra.model;
  * The common usage pattern is to create a query, set the required query attributes and invoke
  * {@link Query#execute()} such as in the following example:
  * <pre>
-    ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, extractor, extractor);
+    ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, serializer, serializer);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).

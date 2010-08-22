@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.service.CassandraHost;
+
+
 /**
  * Describes the state of the executed cassandra command.
  * This is a handy call metadata inspector which reports the call's execution time, status,
@@ -12,10 +15,12 @@ package me.prettyprint.cassandra.model;
 
   private final T value;
   private final long execTime;
+  private final CassandraHost cassandraHost;
 
-  public ExecutionResult(T value, long execTime) {
+  public ExecutionResult(T value, long execTime, CassandraHost cassandraHost) {
     this.value = value;
     this.execTime = execTime;
+    this.cassandraHost = cassandraHost;
   }
 
   /**
@@ -32,15 +37,17 @@ package me.prettyprint.cassandra.model;
 
   @Override
   public String toString() {
-    return "ExecutionResult(" + toStringInternal() + ")";
+    return "ExecutionResult(" + toStringInternal() + ") on host: " + cassandraHost != null ? cassandraHost.getName() : "[none]";
   }
 
   protected String toStringInternal() {
     return "" + execTime + "us";
   }
 
-//TODO(ran):  /** The cassandra host that was actually used to execute the operation */
-//  String getHostUsed();
+  /** The cassandra host that was actually used to execute the operation */
+  public CassandraHost getHostUsed() {
+    return this.cassandraHost;
+  }
 
-  // Rest of meta methods here
+
 }

@@ -1,14 +1,12 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.apache.commons.pool.impl.GenericObjectPoolFactory;
@@ -32,7 +30,7 @@ import com.google.common.collect.ImmutableSet;
   private final ExhaustedPolicy exhaustedPolicy;
   private final long maxWaitTimeWhenExhausted;
   private final GenericObjectPool pool;
-  
+
   private final ExceptionsTranslator xTrans;
   private final CassandraHost cassandraHost;
 
@@ -60,7 +58,9 @@ import com.google.common.collect.ImmutableSet;
       CassandraClientPool pools,
       CassandraClientMonitor cassandraClientMonitor,
       CassandraClientFactory cassandraClientFactory) {
-    log.debug("Creating new connection pool for {}", cassandraHost.getUrl());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Creating new connection pool for {}", cassandraHost.getUrl());
+    }
     this.cassandraHost = cassandraHost;
     this.name = cassandraHost.getName();
     this.maxActive = cassandraHost.getMaxActive();
@@ -82,15 +82,21 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public CassandraClient borrowClient() throws HectorException {
-    log.debug("Borrowing client from {}", this);
+    if ( log.isDebugEnabled() ) {
+      log.debug("Borrowing client from {}", this);
+    }
     try {
       blockedThreadsCount.incrementAndGet();
-      log.debug("Just before borrow: {}", toDebugString());
+      if ( log.isDebugEnabled() ) {
+        log.debug("Just before borrow: {}", toDebugString());
+      }
       CassandraClient client = (CassandraClient) pool.borrowObject();
       client.markAsBorrowed();
       liveClientsFromPool.add(client);
-      log.debug("Client {} successfully borrowed from {} (thread={})",
+      if ( log.isDebugEnabled() ) {
+        log.debug("Client {} successfully borrowed from {} (thread={})",          
           new Object[] {client, this, Thread.currentThread().getName()});
+      }
       return client;
     } catch (NoSuchElementException e) {
       log.info("Pool is exhausted {} (thread={})", toDebugString(), Thread.currentThread().getName());
@@ -152,7 +158,9 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void releaseClient(CassandraClient client) throws HectorException {
-    log.debug("Maybe releasing client {}. is aready Released? {}", client, client.isReleased());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Maybe releasing client {}. is aready Released? {}", client, client.isReleased());
+    }
     if (client.isReleased()) {
       // The common case with clients that had errors is that they've already been release.
       // If we release them again the pool's counters will go crazy so we don't want that...
@@ -217,7 +225,7 @@ import com.google.common.collect.ImmutableSet;
   public int getNumBlockedThreads() {
     return blockedThreadsCount.intValue();
   }
-  
+
 
   @Override
   public CassandraHost getCassandraHost() {
@@ -226,7 +234,9 @@ import com.google.common.collect.ImmutableSet;
 
   @Override
   public void invalidateClient(CassandraClient client) {
-    log.debug("Invalidating client {}", client);
+    if ( log.isDebugEnabled() ) {
+      log.debug("Invalidating client {}", client);
+    }
     try {
       liveClientsFromPool.remove(client);
       client.markAsError();
@@ -245,15 +255,20 @@ import com.google.common.collect.ImmutableSet;
   }
 
   void reportDestroyed(CassandraClient client) {
-    log.debug("Client has been destroyed: {} (thread={})", client, Thread.currentThread().getName());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Client has been destroyed: {} (thread={})", client, Thread.currentThread().getName());
+    }
     liveClientsFromPool.remove(client);
   }
 
   @Override
   public void invalidateAll() {
-    log.debug("Invalidating all connections at {} (thread={})", this,
-        Thread.currentThread().getName());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Invalidating all connections at {} (thread={})", this,
+          Thread.currentThread().getName());
+    }      
     while (!liveClientsFromPool.isEmpty()) {
+      //TODO(ran): There's a multithreading sync issue here.
       invalidateClient(liveClientsFromPool.iterator().next());
     }
   }

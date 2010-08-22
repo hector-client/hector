@@ -11,15 +11,15 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 
-  private final Extractor<SN> sNameExtractor;
+  private final Serializer<SN> sNameSerializer;
   private String key;
   private SN superName;
 
   /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
-      Extractor<SN> sNameExtractor, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(keyspaceOperator, nameExtractor, valueExtractor);
-    noneNull(sNameExtractor, nameExtractor, valueExtractor);
-    this.sNameExtractor = sNameExtractor;
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(keyspaceOperator, nameSerializer, valueSerializer);
+    noneNull(sNameSerializer, nameSerializer, valueSerializer);
+    this.sNameSerializer = sNameSerializer;
   }
 
   public SuperColumnQuery<SN,N,V> setKey(String key) {
@@ -42,13 +42,13 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
           public HSuperColumn<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
               ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
-                  sNameExtractor, columnNameExtractor);
+                  sNameSerializer, columnNameSerializer);
               SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath);
               if (thriftSuperColumn == null) {
                 return null;
               }
-              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameExtractor, columnNameExtractor,
-                  valueExtractor);
+              return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameSerializer, columnNameSerializer,
+                  valueSerializer);
             } catch (NotFoundException e) {
               return null;
             }

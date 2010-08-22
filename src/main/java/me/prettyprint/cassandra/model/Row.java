@@ -22,11 +22,11 @@ public final class Row<N,V> {
   private final String rowKey;
   private final ColumnSlice<N,V> columnSlice;
 
-  /*package*/ Row(String rowKey, List<Column> columns, Extractor<N> nameExtractor,
-      Extractor<V> valueExtractor) {
-    Assert.noneNull(rowKey, columns, nameExtractor, valueExtractor);
+  /*package*/ Row(String rowKey, List<Column> columns, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    Assert.noneNull(rowKey, columns, nameSerializer, valueSerializer);
     this.rowKey = rowKey;
-    columnSlice = new ColumnSlice<N,V>(columns, nameExtractor, valueExtractor);
+    columnSlice = new ColumnSlice<N,V>(columns, nameSerializer, valueSerializer);
   }
 
   public String getKey() {

@@ -21,14 +21,9 @@ public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedR
 
   private final HKeyRange keyRange;
 
-  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Extractor<N> nameExtractor, Extractor<V> valueExtractor) {
-    super(ko, nameExtractor, valueExtractor);
+  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(ko, nameSerializer, valueSerializer);
     keyRange = new HKeyRange();
-  }
-
-  public RangeSlicesQuery<N,V> setTokens(String start, String end) {
-    keyRange.setTokens(start, end);
-    return this;
   }
 
   public RangeSlicesQuery<N,V> setKeys(String start, String end) {
@@ -52,7 +47,7 @@ public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedR
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             LinkedHashMap<String, List<Column>> thriftRet =
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
-            return new OrderedRows<N,V>(thriftRet, columnNameExtractor, valueExtractor);
+            return new OrderedRows<N,V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }
