@@ -14,6 +14,7 @@ import me.prettyprint.cassandra.service.Cluster;
 
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.ColumnPath;
+
 /**
  * A convenience class with bunch of factory static methods to help create a mutator,
  * queries etc.
@@ -123,6 +124,13 @@ public final class HFactory {
   public static <K,N,V> MultigetSliceQuery<K,N,V> createMultigetSliceQuery(
       KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new MultigetSliceQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
+  }
+
+  public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(KeyspaceOperator ko,
+      Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    return new SubColumnQuery<K, SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer,
+        valueSerializer);
   }
 
   public static <K,SN,N,V> MultigetSuperSliceQuery<K,SN,N,V> createMultigetSuperSliceQuery(
