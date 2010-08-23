@@ -116,6 +116,11 @@ public final class HFactory {
     return new SuperColumnQuery<SN, N, V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
+  public static <SN,N,V> SubColumnQuery<SN,N,V> createSubColumnQuery(KeyspaceOperator ko,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new SubColumnQuery<SN, N, V>(ko, sNameSerializer, nameSerializer, valueSerializer);
+  }
+
   public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
       KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new MultigetSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
