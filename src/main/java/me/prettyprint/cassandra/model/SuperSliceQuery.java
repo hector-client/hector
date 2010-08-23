@@ -36,6 +36,7 @@ public final class SuperSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Su
     return this;
   }
 
+  @Override
   public Result<SuperSlice<SN,N,V>> execute() {
     return new Result<SuperSlice<SN,N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<SuperSlice<SN,N,V>>() {

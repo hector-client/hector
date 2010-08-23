@@ -22,8 +22,8 @@ public class SimpleCassandraDao {
 
   private String columnFamilyName;
   private KeyspaceOperator keyspaceOperator;
-  private StringSerializer serializer = StringSerializer.get();
-    
+  private final StringSerializer serializer = StringSerializer.get();
+
   /**
    * Insert a new value keyed by key
    *
@@ -85,7 +85,7 @@ public class SimpleCassandraDao {
     }
     m.execute();
   }
-  
+
 
   /**
    * Delete multiple values
@@ -106,6 +106,6 @@ public class SimpleCassandraDao {
   public void setKeyspaceOperator(KeyspaceOperator keyspaceOperator) {
     this.keyspaceOperator = keyspaceOperator;
   }
-  
-  
+
+
 }

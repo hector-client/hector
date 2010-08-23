@@ -39,6 +39,7 @@ public class Rows<K, N, V> implements Iterable<Row<K, N, V>> {
     return rows.size();
   }
 
+  @Override
   public Iterator<Row<K, N, V>> iterator() {
     return rows.values().iterator();
   }

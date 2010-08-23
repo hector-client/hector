@@ -43,6 +43,7 @@ public final class MultigetSubSliceQuery<K, SN, N, V> extends AbstractSliceQuery
   }
 
 
+  @Override
   public Result<Rows<K, N, V>> execute() {
     Assert.noneNull(keys, "Keys cannot be null");
     Assert.noneNull(columnFamilyName, "columnFamilyName cannot be null");

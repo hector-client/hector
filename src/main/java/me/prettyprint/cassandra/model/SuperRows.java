@@ -20,7 +20,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 public class SuperRows<K, SN, N, V> implements Iterable<SuperRow<K, SN, N, V>> {
 
   private final Map<K, SuperRow<K, SN, N, V>> rows;
-  
+
   Serializer<K> keySerializer;
 
   public SuperRows(Map<K, List<SuperColumn>> thriftRet, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
@@ -42,6 +42,7 @@ public class SuperRows<K, SN, N, V> implements Iterable<SuperRow<K, SN, N, V>> {
     return rows.size();
   }
 
+  @Override
   public Iterator<SuperRow<K, SN, N, V>> iterator() {
     return rows.values().iterator();
   }

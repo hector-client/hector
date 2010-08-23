@@ -1,10 +1,12 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.Collection;
+
 import org.apache.cassandra.thrift.SlicePredicate;
 
 
 /**
- * base type for SliceQuery, RangeSliceQuery and MultigetSliceQuery
+ * Base type for SliceQuery, RangeSliceQuery and MultigetSliceQuery
  * @author Ran Tavory
  *
  * @param <N>
@@ -26,6 +28,10 @@ import org.apache.cassandra.thrift.SlicePredicate;
   public AbstractSliceQuery<K,N,V,T> setColumnNames(N... columnNames) {
     slicePredicate.setColumnNames(columnNames);
     return this;
+  }
+
+  public Collection<N> getColumnNames() {
+    return slicePredicate.getColumnNames();
   }
 
   /**

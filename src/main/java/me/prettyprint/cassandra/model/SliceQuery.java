@@ -28,6 +28,7 @@ public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlic
     return this;
   }
 
+  @Override
   public Result<ColumnSlice<N, V>> execute() {
     return new Result<ColumnSlice<N, V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<ColumnSlice<N, V>>() {

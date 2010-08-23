@@ -15,6 +15,7 @@ public final class LongSerializer extends AbstractSerializer<Long> {
     return instance;
   }
 
+  @Override
   public byte[] toBytes(Long obj) {
     if (obj == null) {
       return null;
@@ -28,6 +29,7 @@ public final class LongSerializer extends AbstractSerializer<Long> {
     return b;
   }
 
+  @Override
   public Long fromBytes(byte[] bytes) {
     if (bytes == null) {
       return null;
