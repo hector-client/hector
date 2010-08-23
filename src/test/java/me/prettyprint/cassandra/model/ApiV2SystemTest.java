@@ -12,6 +12,7 @@ import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSubSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
+import static me.prettyprint.cassandra.model.HFactory.createSubColumnQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubCountQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
 import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
@@ -182,6 +183,36 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
+  public void testSubColumnQuery() {
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSubColumnQuery", 1,
+        "testSubColumnQuerySuperColumn");
+
+    // get value
+    SubColumnQuery<String, String, String> q = createSubColumnQuery(ko, se, se, se);
+    q.setSuperColumn("testSubColumnQuerySuperColumn0").setColumn("c000").setColumnFamily(cf);
+    Result<HColumn<String, String>> r = q.setKey("testSubColumnQuery0").execute();
+    assertNotNull(r);
+    HColumn<String, String> c = r.get();
+    assertNotNull(c);
+    String value = c.getValue();
+    assertEquals("v000", value);
+    String name = c.getName();
+    assertEquals("c000", name);
+
+    // get nonexisting value
+    q.setColumn("column doesn't exist");
+    r = q.execute();
+    assertNotNull(r);
+    c = r.get();
+    assertNull(c);
+
+    // remove value
+    deleteColumns(cleanup);
+  }
+
+  @Test
   public void testMultigetSliceQuery() {
     String cf = "Standard1";
 
@@ -235,7 +266,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       }
     }
 
-    // Delete values
     deleteColumns(cleanup);
   }
 
