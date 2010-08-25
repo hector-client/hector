@@ -3,13 +3,13 @@ package me.prettyprint.cassandra.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
-    pools = new HashMap<CassandraHost, CassandraClientPoolByHost>();
+    pools = new ConcurrentHashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
     this.cluster = new Cluster("Default Cluster", this);
   }
