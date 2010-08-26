@@ -202,8 +202,6 @@ public class FailoverOperatorTest {
    */
   @Test
   public void testFailoverBug14() throws IllegalStateException, PoolExhaustedException, Exception {
-
-
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
@@ -211,10 +209,6 @@ public class FailoverOperatorTest {
     // fail the call, use a transport exception
     doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
         (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
-
-    // And also fail the call to borrowClient when trying to borrow from this host again.
-    // This is actually simulation the host down permanently (well, until the test ends at least...)
-    doThrow(new HectorException("test")).when(clientPools).borrowClient("h1", 2);
 
     // And also fail the call to borrowClient when trying to borrow from this host again.
     // This is actually simulation the host down permanently (well, until the test ends at least...)
@@ -231,5 +225,4 @@ public class FailoverOperatorTest {
     // Now run another insert on the same keyspace to make sure it can handle next writes.
     ks.insert("key2", cp, bytes("value2"));
   }
-
 }
