@@ -3,13 +3,13 @@ package me.prettyprint.cassandra.service;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.HectorTransportException;
@@ -35,13 +35,13 @@ import org.slf4j.LoggerFactory;
   private final Map<CassandraHost, CassandraClientPoolByHost> pools;
 
   private final CassandraClientMonitor clientMonitor;
-  
+
   private CassandraHostConfigurator cassandraHostConfigurator;
   private Cluster cluster;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
-    pools = new HashMap<CassandraHost, CassandraClientPoolByHost>();
+    pools = new ConcurrentHashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
     this.cluster = new Cluster("Default Cluster", this);
   }
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
     }
     this.cluster = new Cluster("Default Cluster", this);
   }
-  
+
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
@@ -66,6 +66,7 @@ import org.slf4j.LoggerFactory;
 
 
 
+  @Override
   public CassandraClient borrowClient() throws HectorException {
     String[] clients = new String[pools.size()];
     int x = 0;
@@ -77,15 +78,18 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public CassandraClient borrowClient(String url, int port) throws HectorException {
     return getPool(new CassandraHost(url, port)).borrowClient();
   }
-  
+
+  @Override
   public CassandraClient borrowClient(CassandraHost cassandraHost) throws HectorException {
     return getPool(cassandraHost).borrowClient();
   }
 
 
+  @Override
   public Set<String> getExhaustedPoolNames() {
     Set<String> hosts = new HashSet<String>();
     for (CassandraClientPoolByHost pool: pools.values()) {
@@ -97,6 +101,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public int getNumActive() {
     int count = 0;
     for (CassandraClientPoolByHost pool: pools.values()) {
@@ -106,6 +111,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public int getNumBlockedThreads() {
     int count = 0;
     for (CassandraClientPoolByHost pool: pools.values()) {
@@ -115,6 +121,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public int getNumExhaustedPools() {
     int count = 0;
     for (CassandraClientPoolByHost pool: pools.values()) {
@@ -126,6 +133,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public int getNumIdle() {
     int count = 0;
     for (CassandraClientPoolByHost pool: pools.values()) {
@@ -135,6 +143,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public int getNumPools() {
     return pools.size();
   }
@@ -143,8 +152,8 @@ import org.slf4j.LoggerFactory;
     CassandraClientPoolByHost pool = pools.get(cassandraHost);
     if (pool == null) {
       if (cassandraHostConfigurator != null) {
-        cassandraHostConfigurator.applyConfig(cassandraHost); 
-      } 
+        cassandraHostConfigurator.applyConfig(cassandraHost);
+      }
       addCassandraHost(cassandraHost);
       pool = pools.get(cassandraHost);
     }
@@ -153,6 +162,7 @@ import org.slf4j.LoggerFactory;
 
 
 
+  @Override
   public Set<String> getPoolNames() {
     Set<String> names = new HashSet<String>();
     for (CassandraClientPoolByHost pool: pools.values()) {
@@ -162,6 +172,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public void releaseClient(CassandraClient client) throws HectorException {
     if (client == null) {
       log.error("client is null; cannot release, there's a bug dude");
@@ -171,6 +182,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public void updateKnownHosts() throws HectorTransportException {
     synchronized(pools) {
       for (Iterator<Entry<CassandraHost, CassandraClientPoolByHost>> iterator = pools.entrySet().iterator(); iterator.hasNext();) {
@@ -186,12 +198,14 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public Set<CassandraHost> getKnownHosts() {
     return Collections.unmodifiableSet(pools.keySet());
   }
 
 
 
+  @Override
   public void invalidateClient(CassandraClient client) {
     getPool(client).invalidateClient(client);
   }
@@ -205,11 +219,13 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public void releaseKeyspace(Keyspace k) throws HectorException {
     releaseClient(k.getClient());
   }
 
 
+  @Override
   public CassandraClient borrowClient(String urlPort) throws HectorException {
     String url = parseHostFromUrl(urlPort);
     int port = parsePortFromUrl(urlPort);
@@ -217,6 +233,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public CassandraClient borrowClient(String[] clientUrls) throws HectorException {
     List<String> clients = new ArrayList<String>(Arrays.asList(clientUrls));
     while(!clients.isEmpty()) {
@@ -247,41 +264,40 @@ import org.slf4j.LoggerFactory;
   }
 
 
+  @Override
   public void invalidateAllConnectionsToHost(CassandraClient client) {
     getPool(client).invalidateAll();
   }
 
 
+  @Override
   public CassandraClientMonitorMBean getMbean() {
     return clientMonitor;
   }
 
 
+  @Override
   public String toString() {
     return "CassandraClientPoolImpl(" + pools + ")";
   }
 
-
-  public void addCassandraHost(CassandraHost cassandraHost) {    
+  @Override
+  public void addCassandraHost(CassandraHost cassandraHost) {
     synchronized (pools) {
       CassandraClientPoolByHost pool = pools.get(cassandraHost);
-      if (pool == null) {         
+      if (pool == null) {
         pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
         pools.put(cassandraHost, pool);
         if ( log.isDebugEnabled() ) {
           log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
         }
       }
-    }    
+    }
   }
 
 
+  @Override
   public Cluster getCluster() {
-
     return cluster;
   }
-  
-  
-  
-  
 }

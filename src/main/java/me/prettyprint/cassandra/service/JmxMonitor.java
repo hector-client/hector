@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 
   INSTANCE;
 
-  private final Logger log = LoggerFactory.getLogger(JmxMonitor.class);
+  private final Logger log = LoggerFactory.getLogger(getClass());
 
   private MBeanServer mbs;
   private CassandraClientMonitor cassandraClientMonitor;
