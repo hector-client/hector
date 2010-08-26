@@ -36,57 +36,51 @@ import org.mockito.Matchers;
 
 public class FailoverOperatorTest {
 
-  private CassandraClient h1client = mock(CassandraClient.class);
-  private CassandraClient h2client = mock(CassandraClient.class);
-  private CassandraClient h3client = mock(CassandraClient.class);
-  private Cassandra.Client h1cassandra = mock(Cassandra.Client.class);
-  private Cassandra.Client h2cassandra = mock(Cassandra.Client.class);
-  private Cassandra.Client h3cassandra = mock(Cassandra.Client.class);
-  
-  private List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
-      new CassandraHost("h1:111"), 
-      new CassandraHost("h2:111"),
-      new CassandraHost("h3:111")});
-  private Map<Cassandra.Client,CassandraHost> clientHosts = new HashMap<Cassandra.Client,CassandraHost>();
-  private KsDef keyspaceDesc = new KsDef();
-  private CfDef keyspace1Desc = new CfDef();
-  
-  
-  private String keyspaceName = "Keyspace1";
-  private ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
-  private ColumnPath cp = new ColumnPath("Standard1");
-  private CassandraClientPool clientPools = mock(CassandraClientPool.class);
-  private CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
+  private final KsDef keyspaceDesc = new KsDef();
+  private final CfDef keyspace1Desc = new CfDef();
 
-  
+  private final CassandraClient h1client = mock(CassandraClient.class);
+  private final CassandraClient h2client = mock(CassandraClient.class);
+  private final CassandraClient h3client = mock(CassandraClient.class);
+  private final CassandraHost h1host = new CassandraHost("h1:111");
+  private final CassandraHost h2host = new CassandraHost("h2:111");
+  private final CassandraHost h3host = new CassandraHost("h3:111");
+  private final Cassandra.Client h1cassandra = mock(Cassandra.Client.class);
+  private final Cassandra.Client h2cassandra = mock(Cassandra.Client.class);
+  private final Cassandra.Client h3cassandra = mock(Cassandra.Client.class);
+
+  private final List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
+      h1host, h2host, h3host});
+  private final Map<Cassandra.Client,CassandraHost> clientHosts = new HashMap<Cassandra.Client,CassandraHost>();
+
+  private final String keyspaceName = "Keyspace1";
+  private final ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+  private final ColumnPath cp = new ColumnPath("Standard1");
+  private final CassandraClientPool clientPools = mock(CassandraClientPool.class);
+  private final CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
+
   @Before
   public void setup() {
     clientHosts.put(h1cassandra, hosts.get(0));
     clientHosts.put(h2cassandra, hosts.get(1));
     clientHosts.put(h3cassandra, hosts.get(2));
 
-    
     keyspace1Desc.setKeyspace(keyspaceName);
     keyspace1Desc.setName("Standard1");
     keyspace1Desc.setColumn_type(Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.addToCf_defs(keyspace1Desc);
-    
-    
+
+
     cp.setColumn(bytes("testFailover"));
-    
-  }
-  
-  @Test
-  public void testFailover() throws HectorException,
-  org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
-  org.apache.cassandra.thrift.TimedOutException, TException {
-    
+
+    cp.setColumn(bytes("testFailover"));
+
     when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
+    when(h1client.getCassandraHost()).thenReturn(clientHosts.get(h1cassandra));
     when(h2client.getCassandra()).thenReturn(h2cassandra);
-    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
+    when(h2client.getCassandraHost()).thenReturn(clientHosts.get(h2cassandra));
     when(h3client.getCassandra()).thenReturn(h3cassandra);
-    when(h3client.getCassandraHost()).thenReturn(hosts.get(2));
+    when(h3client.getCassandraHost()).thenReturn(clientHosts.get(h3cassandra));
 
     when(h1client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
     when(h2client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
@@ -94,8 +88,15 @@ public class FailoverOperatorTest {
     when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
     when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
     when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
-    
+
     when(clientPools.getKnownHosts()).thenReturn(new HashSet<CassandraHost>(clientHosts.values()));
+
+  }
+
+  @Test
+  public void testFailover() throws HectorException,
+      org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
+      org.apache.cassandra.thrift.TimedOutException, TException {
 
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
@@ -125,7 +126,7 @@ public class FailoverOperatorTest {
     Cassandra.Client cc = ks.getClient().getCassandra();
     verify(cc).insert((byte[]) anyObject(),
         (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
-    
+
     verify(clientPools).borrowClient(clientHosts.get(cc));
 
     // make both h1 and h2 fail
@@ -146,7 +147,7 @@ public class FailoverOperatorTest {
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
-    
+
     ks.insert("key", cp, bytes("value"));
     cc = ks.getClient().getCassandra();
     verify(cc).insert((byte[]) anyObject(),
@@ -167,7 +168,7 @@ public class FailoverOperatorTest {
       // ok
     }
   }
-  
+
   /**
    * Test case for bug http://github.com/rantav/hector/issues/closed#issue/8
    * @throws IllegalStateException
@@ -176,22 +177,6 @@ public class FailoverOperatorTest {
    */
   @Test
   public void testFailoverBug8() throws IllegalStateException, PoolExhaustedException, Exception {
-    when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h1client.getCassandraHost()).thenReturn(clientHosts.get(h1cassandra));
-    when(h2client.getCassandra()).thenReturn(h2cassandra);    
-    when(h2client.getCassandraHost()).thenReturn(clientHosts.get(h2cassandra));
-    when(h3client.getCassandra()).thenReturn(h3cassandra);    
-    when(h3client.getCassandraHost()).thenReturn(clientHosts.get(h3cassandra));
-    
-    when(clientPools.getKnownHosts()).thenReturn(new HashSet<CassandraHost>(clientHosts.values()));
-     
-    when(h1client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
-    when(h2client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
-    when(h3client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
-    
-    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
-    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
-    when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
@@ -213,33 +198,13 @@ public class FailoverOperatorTest {
     // Now run another insert on the same keyspace to make sure it can handle next writes.
     ks.insert("key2", cp, bytes("value2"));
   }
-  
+
   /**
    * A test case for bug 14 http://github.com/rantav/hector/issues#issue/14
    * A host goes down and can't even reconnect to it, so failover fails to skip to the next host.
-   * @throws Exception
-   * @throws PoolExhaustedException
-   * @throws IllegalStateException
    */
   @Test
   public void testFailoverBug14() throws IllegalStateException, PoolExhaustedException, Exception {
-
-    when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h1client.getCassandraHost()).thenReturn(clientHosts.get(h1cassandra));
-    when(h2client.getCassandra()).thenReturn(h2cassandra);    
-    when(h2client.getCassandraHost()).thenReturn(clientHosts.get(h2cassandra));
-    when(h3client.getCassandra()).thenReturn(h3cassandra);    
-    when(h3client.getCassandraHost()).thenReturn(clientHosts.get(h3cassandra));
-    
-    when(h1client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
-    when(h2client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
-    when(h3client.getClockResolution()).thenReturn(ClockResolution.MICROSECONDS);
-    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
-    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
-    when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
-
-    when(clientPools.getKnownHosts()).thenReturn(new HashSet<CassandraHost>(clientHosts.values()));
-    
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
@@ -250,22 +215,44 @@ public class FailoverOperatorTest {
 
     // And also fail the call to borrowClient when trying to borrow from this host again.
     // This is actually simulation the host down permanently (well, until the test ends at least...)
-    doThrow(new HectorException("test")).when(clientPools).borrowClient("h1", 2);
-
-    // And also fail the call to borrowClient when trying to borrow from this host again.
-    // This is actually simulation the host down permanently (well, until the test ends at least...)
-    doThrow(new HectorException("test")).when(clientPools).borrowClient("h1", 2);
+    doThrow(new HectorException("test")).when(clientPools).borrowClient(h1host);
 
     ks.insert("key", cp, bytes("value"));
 
     // Make sure the client is invalidated
     verify(clientPools, times(2)).invalidateClient(h1client);
 
-    // make sure the next call is to h2
+    // make sure the next call is to h3
     verify(h3client).getCassandra();
 
     // Now run another insert on the same keyspace to make sure it can handle next writes.
     ks.insert("key2", cp, bytes("value2"));
   }
 
+  /**
+   * A test case for bug http://github.com/rantav/hector/issues/issue/53
+   * h1 has an error so we skip to the next (h3) but h3 is down, so we SHOULD
+   * skip to next (h2) and not retry h3 again
+   */
+  @Test
+  public void testFailoverBug53() throws IllegalStateException, PoolExhaustedException, Exception {
+    FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+        failoverPolicy, clientPools, monitor);
+
+    // fail the call, use a transport exception
+    doThrow(new TTransportException()).when(h1cassandra).insert((byte[]) anyObject(),
+        (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
+
+    // And also fail the call to borrowClient when trying to borrow from h3
+    doThrow(new HectorException("test")).when(clientPools).borrowClient(h3host);
+
+    ks.insert("key", cp, bytes("value"));
+
+    // make sure there was a call to h2
+    verify(h2client).getCassandra();
+
+    // Now run another insert on the same keyspace to make sure it can handle next writes.
+    ks.insert("key2", cp, bytes("value2"));
+  }
 }

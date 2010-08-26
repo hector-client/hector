@@ -12,6 +12,7 @@ import me.prettyprint.cassandra.model.TimedOutException;
 import me.prettyprint.cassandra.model.UnavailableException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.utils.Assert;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.perf4j.StopWatch;
@@ -41,6 +42,18 @@ import org.slf4j.LoggerFactory;
 
   private CassandraClient client;
 
+  /**
+   * A reference to the "current host".
+   * The current host under normal conditions is just <code>client.getCassandraHost()</code> however
+   * when skipNextHost is invoked the client.getCassandraHost may differ from currentHost. This can
+   * happen when there was an exception chen borrowing the client, so currentHost is what the client
+   * SHOULD have been if the operation was successful, while the client stays at the previous client.
+   *
+   * currentHost is used as a pointer to the "last host we tried connecting to or sending an
+   * operation to" and by which skipNextHost is operating.
+   */
+  private CassandraHost currentHost;
+
   private final CassandraClientPool clientPools;
 
   /**
@@ -58,10 +71,12 @@ import org.slf4j.LoggerFactory;
    */
   public FailoverOperator(FailoverPolicy policy, CassandraClientMonitor monitor,
       CassandraClient client, CassandraClientPool clientPools, Keyspace keyspace) {
+    Assert.noneNull(policy, monitor, client, clientPools /* keyspace may be null*/);
     this.failoverPolicy = policy;
     this.knownHosts = new ArrayList<CassandraHost>(clientPools.getKnownHosts());
     this.monitor = monitor;
     this.client = client;
+    currentHost = client.getCassandraHost();
     this.clientPools = clientPools;
     this.keyspace = keyspace;
   }
@@ -228,6 +243,8 @@ import org.slf4j.LoggerFactory;
    */
   private void skipToNextHost(boolean isRetrySameHostAgain,
       boolean invalidateAllConnectionsToCurrentHost) throws SkipHostException {
+    Assert.notNull(currentHost, "currentHost is null");
+
     if ( log.isInfoEnabled() ) {
       log.info("Skipping to next host (thread={}). Current host is: {}",
           Thread.currentThread().getName(), client.getCassandraHost().getUrl());
@@ -237,16 +254,15 @@ import org.slf4j.LoggerFactory;
       clientPools.invalidateAllConnectionsToHost(client);
     }
 
-    CassandraHost nextHost = isRetrySameHostAgain ? client.getCassandraHost() :
-      getNextHost(client.getCassandraHost());
+    CassandraHost nextHost = isRetrySameHostAgain ? currentHost : getNextHost(currentHost);
     if (nextHost == null) {
       log.error("Unable to find next host to skip to at {}", toString());
       throw new SkipHostException("Unable to failover to next host");
     }
 
-
     // assume all hosts in the ring use the same port (cassandra's API only provides IPs, not ports)
     try {
+      currentHost = nextHost;
       client = clientPools.borrowClient(nextHost);
     } catch (IllegalStateException e) {
       throw new SkipHostException(e);
