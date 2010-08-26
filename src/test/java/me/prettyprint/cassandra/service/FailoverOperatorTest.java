@@ -63,26 +63,17 @@ public class FailoverOperatorTest {
     clientHosts.put(h2cassandra, hosts.get(1));
     clientHosts.put(h3cassandra, hosts.get(2));
 
-
     keyspace1Desc.put(Keyspace.CF_TYPE, Keyspace.CF_TYPE_STANDARD);
     keyspaceDesc.put("Standard1", keyspace1Desc);
 
-
     cp.setColumn(bytes("testFailover"));
 
-  }
-
-  @Test
-  public void testFailover() throws HectorException,
-  org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
-  org.apache.cassandra.thrift.TimedOutException, TException {
-
     when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h1client.getCassandraHost()).thenReturn(hosts.get(0));
+    when(h1client.getCassandraHost()).thenReturn(clientHosts.get(h1cassandra));
     when(h2client.getCassandra()).thenReturn(h2cassandra);
-    when(h2client.getCassandraHost()).thenReturn(hosts.get(1));
+    when(h2client.getCassandraHost()).thenReturn(clientHosts.get(h2cassandra));
     when(h3client.getCassandra()).thenReturn(h3cassandra);
-    when(h3client.getCassandraHost()).thenReturn(hosts.get(2));
+    when(h3client.getCassandraHost()).thenReturn(clientHosts.get(h3cassandra));
 
     when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
     when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
@@ -92,6 +83,12 @@ public class FailoverOperatorTest {
     when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
 
     when(clientPools.getKnownHosts()).thenReturn(new HashSet<CassandraHost>(clientHosts.values()));
+  }
+
+  @Test
+  public void testFailover() throws HectorException,
+      org.apache.cassandra.thrift.InvalidRequestException, UnavailableException,
+      org.apache.cassandra.thrift.TimedOutException, TException {
 
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
@@ -173,22 +170,7 @@ public class FailoverOperatorTest {
    */
   @Test
   public void testFailoverBug8() throws IllegalStateException, PoolExhaustedException, Exception {
-    when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h1client.getCassandraHost()).thenReturn(clientHosts.get(h1cassandra));
-    when(h2client.getCassandra()).thenReturn(h2cassandra);
-    when(h2client.getCassandraHost()).thenReturn(clientHosts.get(h2cassandra));
-    when(h3client.getCassandra()).thenReturn(h3cassandra);
-    when(h3client.getCassandraHost()).thenReturn(clientHosts.get(h3cassandra));
 
-    when(clientPools.getKnownHosts()).thenReturn(new HashSet<CassandraHost>(clientHosts.values()));
-
-    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(h3client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-
-    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
-    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
-    when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
@@ -221,21 +203,6 @@ public class FailoverOperatorTest {
   @Test
   public void testFailoverBug14() throws IllegalStateException, PoolExhaustedException, Exception {
 
-    when(h1client.getCassandra()).thenReturn(h1cassandra);
-    when(h1client.getCassandraHost()).thenReturn(clientHosts.get(h1cassandra));
-    when(h2client.getCassandra()).thenReturn(h2cassandra);
-    when(h2client.getCassandraHost()).thenReturn(clientHosts.get(h2cassandra));
-    when(h3client.getCassandra()).thenReturn(h3cassandra);
-    when(h3client.getCassandraHost()).thenReturn(clientHosts.get(h3cassandra));
-
-    when(h1client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(h2client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(h3client.getTimestampResolution()).thenReturn(TimestampResolution.MICROSECONDS);
-    when(clientPools.borrowClient(hosts.get(0))).thenReturn(h1client);
-    when(clientPools.borrowClient(hosts.get(1))).thenReturn(h2client);
-    when(clientPools.borrowClient(hosts.get(2))).thenReturn(h3client);
-
-    when(clientPools.getKnownHosts()).thenReturn(new HashSet<CassandraHost>(clientHosts.values()));
 
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
