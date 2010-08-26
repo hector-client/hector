@@ -37,14 +37,15 @@ public class FailoverOperatorTest {
   private final CassandraClient h1client = mock(CassandraClient.class);
   private final CassandraClient h2client = mock(CassandraClient.class);
   private final CassandraClient h3client = mock(CassandraClient.class);
+  private final CassandraHost h1host = new CassandraHost("h1:111");
+  private final CassandraHost h2host = new CassandraHost("h2:111");
+  private final CassandraHost h3host = new CassandraHost("h3:111");
   private final Cassandra.Client h1cassandra = mock(Cassandra.Client.class);
   private final Cassandra.Client h2cassandra = mock(Cassandra.Client.class);
   private final Cassandra.Client h3cassandra = mock(Cassandra.Client.class);
 
   private final List<CassandraHost> hosts = Arrays.asList(new CassandraHost[]{
-      new CassandraHost("h1:111"),
-      new CassandraHost("h2:111"),
-      new CassandraHost("h3:111")});
+      h1host, h2host, h3host,});
   private final Map<Cassandra.Client,CassandraHost> clientHosts = new HashMap<Cassandra.Client,CassandraHost>();
   private final Map<String, Map<String, String>> keyspaceDesc = new HashMap<String, Map<String, String>>();
   private final Map<String, String> keyspace1Desc = new HashMap<String, String>();
@@ -196,9 +197,6 @@ public class FailoverOperatorTest {
   /**
    * A test case for bug 14 http://github.com/rantav/hector/issues#issue/14
    * A host goes down and can't even reconnect to it, so failover fails to skip to the next host.
-   * @throws Exception
-   * @throws PoolExhaustedException
-   * @throws IllegalStateException
    */
   @Test
   public void testFailoverBug14() throws IllegalStateException, PoolExhaustedException, Exception {
@@ -212,15 +210,42 @@ public class FailoverOperatorTest {
 
     // And also fail the call to borrowClient when trying to borrow from this host again.
     // This is actually simulation the host down permanently (well, until the test ends at least...)
-    doThrow(new HectorException("test")).when(clientPools).borrowClient("h1", 2);
+    doThrow(new HectorException("test")).when(clientPools).borrowClient(h1host);
 
     ks.insert("key", cp, bytes("value"));
 
     // Make sure the client is invalidated
     verify(clientPools, times(2)).invalidateClient(h1client);
 
-    // make sure the next call is to h2
+    // make sure the next call is to h3
     verify(h3client).getCassandra();
+
+    // Now run another insert on the same keyspace to make sure it can handle next writes.
+    ks.insert("key2", cp, bytes("value2"));
+  }
+
+  /**
+   * A test case for bug http://github.com/rantav/hector/issues/issue/53
+   * h1 has an error so we skip to the next (h3) but h3 is down, so we SHOULD
+   * skip to next (h2) and not retry h3 again
+   */
+  @Test
+  public void testFailoverBug53() throws IllegalStateException, PoolExhaustedException, Exception {
+    FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
+    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+        failoverPolicy, clientPools, monitor);
+
+    // fail the call, use a transport exception
+    doThrow(new TTransportException()).when(h1cassandra).insert(anyString(), anyString(),
+        (ColumnPath) anyObject(), (byte[]) anyObject(), anyLong(), Matchers.<ConsistencyLevel>any());
+
+    // And also fail the call to borrowClient when trying to borrow from h3
+    doThrow(new HectorException("test")).when(clientPools).borrowClient(h3host);
+
+    ks.insert("key", cp, bytes("value"));
+
+    // make sure there was a call to h2
+    verify(h2client).getCassandra();
 
     // Now run another insert on the same keyspace to make sure it can handle next writes.
     ks.insert("key2", cp, bytes("value2"));
