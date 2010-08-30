@@ -218,8 +218,10 @@ import org.slf4j.LoggerFactory;
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (HectorTransportException e) {
-      log.warn("Got a HectorTException from {}. Num of retries: {} (thread={})",
-          new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
+      log.warn("Got a HectorTException from {}. Num of retries: {}; message: {}; cause: {} " +
+      		"(thread={})",
+          new Object[]{client.getCassandraHost().getUrl(), retries, e.getMessage(), e.getCause(),
+                       Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
