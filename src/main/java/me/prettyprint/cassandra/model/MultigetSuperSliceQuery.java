@@ -21,7 +21,7 @@ public final class MultigetSuperSliceQuery<SN, N, V> extends
   private Collection<String> keys;
   private final Serializer<N> nameSerializer;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, sNameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "nameSerializer can't be null");

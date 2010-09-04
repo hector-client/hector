@@ -1,16 +1,15 @@
 package me.prettyprint.cassandra.examples;
 
-import static me.prettyprint.cassandra.model.HFactory.createColumn;
-import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
-import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
-import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.createMutator;
-import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
+import static me.prettyprint.hector.api.factory.HFactory.createColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspaceOperator;
+import static me.prettyprint.hector.api.factory.HFactory.createMultigetSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createMutator;
+import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -20,6 +19,7 @@ import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.query.ColumnQuery;
 
 public class ExampleDaoV2 {
 

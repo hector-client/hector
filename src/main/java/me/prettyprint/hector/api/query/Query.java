@@ -1,8 +1,11 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api.query;
+
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.ThriftColumnQuery;
 
 
 /**
- * The Query interface defines the common parts of all hector queries, such as {@link ColumnQuery}.
+ * The Query interface defines the common parts of all hector queries, such as {@link ThriftColumnQuery}.
  * <p>
  * The common usage pattern is to create a query, set the required query attributes and invoke
  * {@link Query#execute()} such as in the following example:

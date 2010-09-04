@@ -1,7 +1,5 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
-
 import java.util.Arrays;
 
 import me.prettyprint.cassandra.service.BatchMutation;
@@ -29,7 +27,7 @@ public final class Mutator {
 
   private BatchMutation pendingMutations;
 
-  /*package*/ Mutator(KeyspaceOperator ko) {
+  public Mutator(KeyspaceOperator ko) {
     this.ko = ko;
   }
 
@@ -57,7 +55,8 @@ public final class Mutator {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameSerializer, nameSerializer));
+        ks.remove(key, ThriftFactory.createSuperColumnPath(cf, supercolumnName, columnName,
+            sNameSerializer, nameSerializer));
         return null;
       }
     }));
