@@ -10,12 +10,12 @@ import me.prettyprint.cassandra.service.Keyspace;
  * @param <N> column name type
  * @param <V> value type
  */
-public final class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
+public class ColumnQuery<K,N,V> extends AbstractQuery<K,N,V,HColumn<N,V>> implements Query<HColumn<N,V>> {
 
   private K key;
   private N name;
 
-  /*package*/ ColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<K> keySerializer, Serializer<N> nameSerializer,
+  protected ColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<K> keySerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(keyspaceOperator, keySerializer, nameSerializer, valueSerializer);
   }
