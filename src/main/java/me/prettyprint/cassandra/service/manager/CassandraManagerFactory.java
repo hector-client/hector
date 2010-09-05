@@ -7,8 +7,6 @@ import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
-
 public class CassandraManagerFactory {
 
     private ThreadLocal<CassandraManager> currentManager = new ThreadLocal<CassandraManager>();

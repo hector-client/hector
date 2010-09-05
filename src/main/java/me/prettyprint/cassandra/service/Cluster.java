@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.model.HectorException;
@@ -52,8 +53,6 @@ public final class Cluster {
   private Set<String> knownClusterHosts;
   private Set<CassandraHost> knownPoolHosts;
   private final ExceptionsTranslator xtrans;
-
-  private ThreadLocal<CassandraClient> currentClient = new ThreadLocal<CassandraClient>();
 
   public Cluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     pool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
@@ -125,12 +124,7 @@ public final class Cluster {
   // rest of the methods from the current CassandraCluster
 
   public CassandraClient borrowClient() throws HectorPoolException {
-    CassandraClient client = currentClient.get();
-    if (client == null) {
-        client = pool.borrowClient();
-        currentClient.set(client);
-    }
-    return client;
+    return pool.borrowClient();
   }
 
   public void releaseClient(CassandraClient client) {
