@@ -483,7 +483,7 @@ import org.slf4j.LoggerFactory;
       
       public Map<byte[], Integer> execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.multiget_count(keyspaceName, keys, columnParent, slicePredicate, consistency);
+          return cassandra.multiget_count(keys, columnParent, slicePredicate, consistency);
         } catch (Exception e) {
           throw xtrans.translate(e);
         }

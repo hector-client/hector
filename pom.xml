@@ -177,8 +177,8 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra</artifactId>
-      <version>0.7.0</version>
+      <artifactId>apache-cassandra</artifactId>
+      <version>0.7.0-beta1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -254,13 +254,13 @@
     <dependency>
       <groupId>com.reardencommerce</groupId>
       <artifactId>clhm-production</artifactId>
-      <version>cassandra-0.7</version>
+      <version>1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
-      <version>cassandra-0.7</version>
+      <version>1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
