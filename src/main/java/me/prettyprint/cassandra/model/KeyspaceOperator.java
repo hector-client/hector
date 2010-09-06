@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.model;
 
 import org.apache.cassandra.thrift.Clock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.cassandra.service.CassandraClient;
@@ -9,6 +11,8 @@ import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 
 public /*final*/ class KeyspaceOperator {
+
+   private static final Logger log = LoggerFactory.getLogger(KeyspaceOperator.class);
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
 
@@ -47,6 +51,12 @@ public /*final*/ class KeyspaceOperator {
         c = cluster.borrowClient();
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
         return koc.doInKeyspaceAndMeasure(ks);
+    } catch (NotFoundException ex) {
+        log.error("Keyspace not found", ex);
+        return null;
+    } catch (Exception ex) {
+        log.error("A problem occurred while getting keyspace", ex);
+        return null;
     } finally {
       cluster.releaseClient(ks.getClient());
     }
