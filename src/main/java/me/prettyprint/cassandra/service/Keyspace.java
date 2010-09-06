@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.NotFoundException;
@@ -48,7 +49,7 @@ public interface Keyspace {
   Column getColumn(byte[] key, ColumnPath columnPath) throws HectorException;
 
   Column getColumn(String key, ColumnPath columnPath) throws HectorException;
-  
+
   /**
    * Get the SuperColumn at the given columnPath.
    *
@@ -63,7 +64,7 @@ public interface Keyspace {
   SuperColumn getSuperColumn(byte[] key, ColumnPath columnPath) throws HectorException;
 
   SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException;
-  
+
   /**
    * Get the SuperColumn at the given columnPath.
    *
@@ -94,7 +95,7 @@ public interface Keyspace {
 
   List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
   throws HectorException;
-  
+
   /**
    * Get the group of superColumn contained by columnParent.
    */
@@ -102,8 +103,8 @@ public interface Keyspace {
       SlicePredicate predicate) throws HectorException;
 
   List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
-	      SlicePredicate predicate) throws HectorException;
-  
+          SlicePredicate predicate) throws HectorException;
+
   /**
    * Performs a get for columnPath in parallel on the given list of keys.
    *
@@ -112,7 +113,7 @@ public interface Keyspace {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath)
+  Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath)
       throws HectorException;
 
   /**
@@ -123,21 +124,21 @@ public interface Keyspace {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
+  Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException;
 
   /**
    * Performs a get_slice for columnParent and predicate for the given keys in
    * parallel.
    */
-  Map<byte[], List<Column>> multigetSlice(List<byte[]> keys, ColumnParent columnParent,
+  Map<byte[], List<Column>> multigetSlice(Set<byte[]> keys, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException;
 
   /**
    * Performs a get_slice for a superColumn columnParent and predicate for the
    * given keys in parallel.
    */
-  Map<byte[], List<SuperColumn>> multigetSuperSlice(List<byte[]> keys,
+  Map<byte[], List<SuperColumn>> multigetSuperSlice(Set<byte[]> keys,
       ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
 
   /**
@@ -171,7 +172,7 @@ public interface Keyspace {
   void remove(String key, ColumnPath columnPath) throws HectorException;
 
   void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException;
-  
+
   /**
    * get a description of the specified keyspace
    */
@@ -193,19 +194,19 @@ public interface Keyspace {
    */
   Map<byte[], List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
-  
+
   /**
    * returns a subset of columns for a range of keys.
    */
-  Map<byte[], List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause, 
-      SlicePredicate predicate) throws HectorException;  
+  Map<byte[], List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause,
+      SlicePredicate predicate) throws HectorException;
 
   /**
    * Returns a map of key to column count
    */
-  Map<byte[], Integer> multigetCount(List<byte[]> keys, ColumnParent columnParent, 
+  Map<byte[], Integer> multigetCount(Set<byte[]> keys, ColumnParent columnParent,
       SlicePredicate slicePredicate) throws HectorException;
-  
+
   /**
    * @return The consistency level held by this keyspace instance.
    */
