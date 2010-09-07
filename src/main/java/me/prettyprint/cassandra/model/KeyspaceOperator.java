@@ -13,7 +13,7 @@ public /*final*/ class KeyspaceOperator {
   private final Cluster cluster;
   private final String keyspace;
 
-  /*package*/ KeyspaceOperator(String keyspace, Cluster cluster,
+  public KeyspaceOperator(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
     Assert.noneNull(keyspace, cluster, consistencyLevelPolicy);
     this.keyspace = keyspace;

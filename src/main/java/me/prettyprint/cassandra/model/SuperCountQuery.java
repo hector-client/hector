@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.hector.api.query.Query;
+
 
 /**
  * Counts super column for a of a key in a super column family
@@ -8,7 +10,7 @@ package me.prettyprint.cassandra.model;
  */
 public final class SuperCountQuery extends AbstractCountQuery implements Query<Integer> {
 
-  /*package*/ SuperCountQuery(KeyspaceOperator ko) {
+  public SuperCountQuery(KeyspaceOperator ko) {
     super(ko);
   }
 

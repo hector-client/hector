@@ -21,7 +21,7 @@ public final class MultigetSubSliceQuery<SN, N, V> extends AbstractSliceQuery<N,
   private final Serializer<SN> sNameSerializer;
   private SN superColumn;
 
-  /*package*/MultigetSubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public MultigetSubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "sNameSerializer can't be null");

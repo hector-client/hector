@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.hector.api.query.Query;
+
 /**
  *
  * @author Ran Tavory

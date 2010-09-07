@@ -22,7 +22,7 @@ public final class RangeSuperSlicesQuery<SN,N,V> extends AbstractSliceQuery<SN,V
   private final Serializer<N> nameSerializer;
   private final HKeyRange keyRange;
 
-  /*package*/ RangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public RangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, sNameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "nameSerializer cannot be null");

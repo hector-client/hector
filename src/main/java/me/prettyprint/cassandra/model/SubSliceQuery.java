@@ -23,7 +23,7 @@ public final class SubSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,ColumnSl
   private SN superColumn;
   private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public SubSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "Supername serializer cannot be null");

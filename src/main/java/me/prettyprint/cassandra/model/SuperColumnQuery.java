@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -41,7 +41,7 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
           @Override
           public HSuperColumn<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
-              ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
+              ColumnPath cpath = ThriftFactory.createSuperColumnPath(columnFamilyName, superName, (N) null,
                   sNameSerializer, columnNameSerializer);
               SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath);
               if (thriftSuperColumn == null) {
