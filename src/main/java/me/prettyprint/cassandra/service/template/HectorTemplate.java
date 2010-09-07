@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service.manager;
+package me.prettyprint.cassandra.service.template;
 
 import java.util.List;
 
@@ -27,7 +27,15 @@ import me.prettyprint.cassandra.service.Cluster;
 
 import org.apache.cassandra.thrift.Clock;
 
-public interface CassandraManager {
+/**
+ * The main interface used to operate with the underlying database.
+ *
+ * The interface is mirroring HFactory.
+ *
+ * @author Bozhidar Bozhanov
+ *
+ */
+public interface HectorTemplate {
 
     /**
      * Creates a KeyspaceOperator with the default consistency level policy.
@@ -41,6 +49,8 @@ public interface CassandraManager {
     KeyspaceOperator createKeyspaceOperator(Cluster cluster, ConsistencyLevelPolicy consistencyLevelPolicy);
 
     <K, N, V> Mutator<K> createMutator(Serializer<K> keySerializer);
+
+    <K, N, V> Mutator<K> createMutator();
 
     <K, N, V> ColumnQuery<K, N, V> createColumnQuery();
 
@@ -130,15 +140,7 @@ public interface CassandraManager {
     /**
      * Creates a column with the clock of now.
      */
-    <N, V> HColumn<N, V> createColumn(N name, V value,
-            Serializer<N> nameSerializer, Serializer<V> valueSerializer);
-
-    /**
-     * Convienience method for creating a column with a String name and String
-     * value
-     */
-    HColumn<String, String> createStringColumn(String name,
-            String value);
+    <N, V> HColumn<N, V> createColumn(N name, V value);
 
     /**
      * Creates a clock of now with the default clock resolution (micorosec) as
@@ -146,4 +148,7 @@ public interface CassandraManager {
      */
     Clock createClock();
 
+    Cluster getCluster();
+
+    HectorTemplateFactory getFactory();
 }

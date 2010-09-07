@@ -1,11 +1,13 @@
-package me.prettyprint.cassandra.service.manager;
+package me.prettyprint.cassandra.service.template;
 
 import java.util.List;
 
-import me.prettyprint.cassandra.model.AdvancedColumnQuery;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.CountQuery;
+import me.prettyprint.cassandra.model.DynamicTypedColumnQuery;
+import me.prettyprint.cassandra.model.DynamicTypedMutator;
+import me.prettyprint.cassandra.model.DynamicallyTypedHColumn;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HFactory;
 import me.prettyprint.cassandra.model.HSuperColumn;
@@ -24,7 +26,6 @@ import me.prettyprint.cassandra.model.SubSliceQuery;
 import me.prettyprint.cassandra.model.SuperColumnQuery;
 import me.prettyprint.cassandra.model.SuperCountQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
-import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
 
@@ -32,11 +33,23 @@ import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.commons.lang.Validate;
 
-public class CassandraManagerImpl implements CassandraManager {
+/**
+ * Implementation of the HectorTemplate
+ *
+ * @author Bozhidar Bozhanov
+ *
+ */
+public class HectorTemplateImpl implements HectorTemplate {
 
     private String keyspace;
     private Cluster cluser;
     private KeyspaceOperator keyspaceOperator;
+    private HectorTemplateFactory factory;
+
+    public HectorTemplateImpl(HectorTemplateFactory factory) {
+        this.factory = factory;
+        this.keyspace = factory.getKeyspace();
+    }
 
     /* (non-Javadoc)
      * @see org.helenus.HectorFactory#createKeyspaceOperator(java.lang.String, me.prettyprint.cassandra.service.Cluster)
@@ -68,12 +81,12 @@ public class CassandraManagerImpl implements CassandraManager {
      */
     @Override
     public <K, N, V> ColumnQuery<K, N, V> createColumnQuery() {
-        return new AdvancedColumnQuery<K, N, V>(keyspaceOperator);
+        return new DynamicTypedColumnQuery<K, N, V>(keyspaceOperator);
     }
 
     @Override
     public <K, N, V> ColumnQuery<K, N, V> createColumnQuery(Serializer<V> valueSerializer) {
-        return new AdvancedColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
+        return new DynamicTypedColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
     }
 
     /* (non-Javadoc)
@@ -255,20 +268,8 @@ public class CassandraManagerImpl implements CassandraManager {
      * @see org.helenus.HectorFactory#createColumn(N, V, me.prettyprint.cassandra.model.Serializer, me.prettyprint.cassandra.model.Serializer)
      */
     @Override
-    public <N, V> HColumn<N, V> createColumn(N name, V value,
-            Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-        return HFactory.createColumn(name, value, createClock(), nameSerializer,
-                valueSerializer);
-    }
-
-    /* (non-Javadoc)
-     * @see org.helenus.HectorFactory#createStringColumn(java.lang.String, java.lang.String)
-     */
-    @Override
-    public HColumn<String, String> createStringColumn(String name,
-            String value) {
-        StringSerializer se = StringSerializer.get();
-        return createColumn(name, value, se, se);
+    public <N, V> HColumn<N, V> createColumn(N name, V value) {
+        return new DynamicallyTypedHColumn<N, V>(name, value, createClock());
     }
 
     /* (non-Javadoc)
@@ -350,5 +351,20 @@ public class CassandraManagerImpl implements CassandraManager {
 
     public void setKeyspaceOperator(KeyspaceOperator keyspaceOperator) {
         this.keyspaceOperator = keyspaceOperator;
+    }
+
+    @Override
+    public <K, N, V> Mutator<K> createMutator() {
+        return new DynamicTypedMutator<K>(keyspaceOperator);
+    }
+
+    @Override
+    public Cluster getCluster() {
+        return cluser;
+    }
+
+    @Override
+    public HectorTemplateFactory getFactory() {
+        return factory;
     }
 }
