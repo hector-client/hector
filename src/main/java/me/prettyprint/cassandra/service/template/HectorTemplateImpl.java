@@ -5,9 +5,9 @@ import java.util.List;
 import me.prettyprint.cassandra.model.ColumnQuery;
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.CountQuery;
-import me.prettyprint.cassandra.model.DynamicTypedColumnQuery;
-import me.prettyprint.cassandra.model.DynamicTypedMutator;
-import me.prettyprint.cassandra.model.DynamicallyTypedHColumn;
+import me.prettyprint.cassandra.model.TypeInferringColumnQuery;
+import me.prettyprint.cassandra.model.TypeInferringMutator;
+import me.prettyprint.cassandra.model.TypeInferringHColumn;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HFactory;
 import me.prettyprint.cassandra.model.HSuperColumn;
@@ -81,12 +81,12 @@ public class HectorTemplateImpl implements HectorTemplate {
      */
     @Override
     public <K, N, V> ColumnQuery<K, N, V> createColumnQuery() {
-        return new DynamicTypedColumnQuery<K, N, V>(keyspaceOperator);
+        return new TypeInferringColumnQuery<K, N, V>(keyspaceOperator);
     }
 
     @Override
     public <K, N, V> ColumnQuery<K, N, V> createColumnQuery(Serializer<V> valueSerializer) {
-        return new DynamicTypedColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
+        return new TypeInferringColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
     }
 
     /* (non-Javadoc)
@@ -269,7 +269,7 @@ public class HectorTemplateImpl implements HectorTemplate {
      */
     @Override
     public <N, V> HColumn<N, V> createColumn(N name, V value) {
-        return new DynamicallyTypedHColumn<N, V>(name, value, createClock());
+        return new TypeInferringHColumn<N, V>(name, value, createClock());
     }
 
     /* (non-Javadoc)
@@ -355,7 +355,7 @@ public class HectorTemplateImpl implements HectorTemplate {
 
     @Override
     public <K, N, V> Mutator<K> createMutator() {
-        return new DynamicTypedMutator<K>(keyspaceOperator);
+        return new TypeInferringMutator<K>(keyspaceOperator);
     }
 
     @Override
