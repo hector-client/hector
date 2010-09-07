@@ -51,12 +51,6 @@ public /*final*/ class KeyspaceOperator {
         c = cluster.borrowClient();
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
         return koc.doInKeyspaceAndMeasure(ks);
-    } catch (NotFoundException ex) {
-        log.error("Keyspace not found", ex);
-        return null;
-    } catch (Exception ex) {
-        log.error("A problem occurred while getting keyspace", ex);
-        return null;
     } finally {
       cluster.releaseClient(ks.getClient());
     }
