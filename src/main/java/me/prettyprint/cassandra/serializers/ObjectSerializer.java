@@ -9,6 +9,13 @@ import java.io.ObjectOutputStream;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.serializers.AbstractSerializer;
 
+/**
+ * The ObjectSerializer is used to turn objects into their binary
+ * representations.
+ *
+ * @author Bozhidar Bozhanov
+ *
+ */
 public class ObjectSerializer extends AbstractSerializer<Object> implements Serializer<Object> {
 
     private static final ObjectSerializer INSTANCE = new ObjectSerializer();
