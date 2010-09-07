@@ -1,7 +1,5 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
-
 import java.util.Arrays;
 
 import me.prettyprint.cassandra.service.BatchMutation;
@@ -31,7 +29,7 @@ public final class Mutator<K> {
 
   private BatchMutation<K> pendingMutations;
 
-  /*package*/ Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
+  public Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
     this.ko = ko;
     this.keySerializer = keySerializer;
   }
@@ -55,12 +53,18 @@ public final class Mutator<K> {
     return execute();
   }
 
-  public <SN,N> MutationResult superDelete(final K key, final String cf, final SN supercolumnName,
+/**
+ * Deletes a subcolumn of a supercolumn
+ * @param <SN> super column type
+ * @param <N> subcolumn type
+ */
+  public <SN,N> MutationResult subDelete(final K key, final String cf, final SN supercolumnName,
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer, final Serializer<K> keySerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(keySerializer.toBytes(key), createSuperColumnPath(cf, supercolumnName, columnName, sNameSerializer, nameSerializer));
+        ks.remove(keySerializer.toBytes(key), ThriftFactory.createSuperColumnPath(cf,
+            supercolumnName, columnName, sNameSerializer, nameSerializer));
         return null;
       }
     }));

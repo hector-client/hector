@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Collection;
 
+import me.prettyprint.hector.api.query.Query;
+
 import org.apache.cassandra.thrift.SlicePredicate;
 
 

@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.query.Query;
 
 public abstract class AbstractQuery<K,N,V,T> implements Query<T>{
 
