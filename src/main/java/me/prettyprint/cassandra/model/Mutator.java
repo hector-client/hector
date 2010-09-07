@@ -50,7 +50,12 @@ public final class Mutator {
     return execute();
   }
 
-  public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
+  /**
+   * Deletes a subcolumn of a supercolumn
+   * @param <SN> super column type
+   * @param <N> subcolumn type
+   */
+  public <SN,N> MutationResult subDelete(final String key, final String cf, final SN supercolumnName,
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
