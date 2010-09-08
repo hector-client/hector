@@ -38,7 +38,7 @@ public final class HSuperColumn<SN,N,V> {
    * @param Serializer<SN> the serializer type
    * @param clock
    */
-  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, Clock clock,
+  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, Clock clock,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     notNull(sName, "Name is null");

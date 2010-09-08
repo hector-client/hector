@@ -19,7 +19,7 @@ public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlic
 
   private K key;
 
-  /*package*/ SliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public SliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
   }
 

@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.query.Query;
 
 /**
  * Used to get the value of a subcolumn within a super column

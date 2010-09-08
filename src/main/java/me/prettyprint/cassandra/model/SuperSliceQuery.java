@@ -24,7 +24,7 @@ public final class SuperSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,V,Su
   private K key;
   private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+  public SuperSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");

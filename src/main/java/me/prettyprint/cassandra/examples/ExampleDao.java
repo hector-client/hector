@@ -16,7 +16,7 @@ import org.apache.cassandra.thrift.ColumnPath;
 /**
  * An example DAO (data access object) which uses the Command pattern.
  * <p/>
- * This DAO is simple, it provides a get/insert/delte API for String values.
+ * This DAO is simple, it provides a get/insert/delete API for String values.
  * The underlying cassandra implementation stores the values under Keyspace1.key.Standard1.v
  * where key is the value's key, Standard1 is the name of the column family and "v" is just a column
  * name that's used to hold the value.

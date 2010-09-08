@@ -22,7 +22,7 @@ public final class RangeSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Orde
 
   private final HKeyRange<K> keyRange;
 
-  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public RangeSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
     keyRange = new HKeyRange<K>(keySerializer);
   }

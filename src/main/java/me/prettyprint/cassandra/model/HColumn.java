@@ -24,7 +24,7 @@ public final class HColumn<N,V> {
   private final Serializer<N> nameSerializer;
   private final Serializer<V> valueSerializer;
 
-  /*package*/ HColumn(N name, V value, Clock clock, Serializer<N> nameSerializer,
+  public HColumn(N name, V value, Clock clock, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(name, "name is null");

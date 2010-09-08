@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.hector.api.query.Query;
+
 
 /**
  * Counts column for a standard column family
@@ -8,7 +10,7 @@ package me.prettyprint.cassandra.model;
  */
 public final class CountQuery<K,N> extends AbstractCountQuery<K,N> implements Query<Integer> {
 
-  /*package*/ CountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public CountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
     super(ko, keySerializer, nameSerializer);
   }

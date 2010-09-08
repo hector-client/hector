@@ -1,25 +1,25 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createColumn;
-import static me.prettyprint.cassandra.model.HFactory.createColumnQuery;
-import static me.prettyprint.cassandra.model.HFactory.createCountQuery;
-import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
-import static me.prettyprint.cassandra.model.HFactory.createMultigetSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.createMultigetSubSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.createMultigetSuperSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.createMutator;
-import static me.prettyprint.cassandra.model.HFactory.createRangeSlicesQuery;
-import static me.prettyprint.cassandra.model.HFactory.createRangeSubSlicesQuery;
-import static me.prettyprint.cassandra.model.HFactory.createRangeSuperSlicesQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSubColumnQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSubCountQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSubSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumnQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSuperCountQuery;
-import static me.prettyprint.cassandra.model.HFactory.createSuperSliceQuery;
-import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
+import static me.prettyprint.hector.api.factory.HFactory.createColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createCountQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspaceOperator;
+import static me.prettyprint.hector.api.factory.HFactory.createMultigetSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createMultigetSubSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createMultigetSuperSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createMutator;
+import static me.prettyprint.hector.api.factory.HFactory.createRangeSlicesQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createRangeSubSlicesQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createRangeSuperSlicesQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSubColumnQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSubCountQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSubSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSuperColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createSuperColumnQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSuperCountQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSuperSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -32,6 +32,7 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.query.ColumnQuery;
 
 import org.junit.After;
 import org.junit.Before;
@@ -174,7 +175,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // remove value
     m = createMutator(ko, se);
-    m.superDelete("testSuperInsertGetRemove", cf, "testSuperInsertGetRemove", null, se, se, se);
+    m.subDelete("testSuperInsertGetRemove", cf, "testSuperInsertGetRemove", null, se, se, se);
 
     // test after removal
     r = q.execute();

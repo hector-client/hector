@@ -19,7 +19,7 @@ public final class MultigetSliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,Ro
 
   private Collection<K> keys;
 
-  /*package*/ MultigetSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer,
+  public MultigetSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
   }
