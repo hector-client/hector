@@ -88,7 +88,7 @@ public final class Mutator {
   public <N> Mutator addDeletion(String key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = new Deletion(ko.createTimestamp()).setPredicate(sp);
+    Deletion d = columnName != null ? new Deletion(ko.createTimestamp()).setPredicate(sp) : new Deletion(ko.createTimestamp());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
