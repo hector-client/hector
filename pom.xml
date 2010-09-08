@@ -34,9 +34,24 @@
     </developer>
   </developers>
 
-  <build>
-    <plugins>
-
+	<build>
+		<plugins>
+			<!--
+				run examples thusly: mvn exec:java
+				-Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
+			-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.1</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>java</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
       <plugin>
         <groupId>org.ops4j</groupId>
 	<artifactId>maven-pax-plugin</artifactId>
@@ -358,7 +373,7 @@
             <format>xml</format>
           </formats>
         </configuration>
-      </plugin>
+      </plugin>      
     </plugins>
   </reporting>
 	<profiles>
