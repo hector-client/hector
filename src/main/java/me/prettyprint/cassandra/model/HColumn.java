@@ -40,6 +40,7 @@ public final class HColumn<N,V> {
     notNull(thriftColumn, "thriftColumn is null");
     name = nameSerializer.fromBytes(thriftColumn.getName());
     value = valueSerializer.fromBytes(thriftColumn.getValue());
+    timestamp = thriftColumn.timestamp;
   }
 
   /*package*/ HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
