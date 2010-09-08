@@ -48,7 +48,9 @@ public /*final*/ class KeyspaceOperator {
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
         return koc.doInKeyspaceAndMeasure(ks);
     } finally {
-      cluster.releaseClient(ks.getClient());
+      if ( ks != null ) {
+        cluster.releaseClient(ks.getClient());
+      }
     }
   }
 }
