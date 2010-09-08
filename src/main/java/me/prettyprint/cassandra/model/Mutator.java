@@ -88,10 +88,14 @@ public final class Mutator<K> {
     return this;
   }
 
+  /**
+   * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null
+   * in which case Deletion is created with only the Clock, resulting in the whole row being deleted
+   */
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = new Deletion(ko.createClock()).setPredicate(sp);
+    Deletion d = columnName != null ? new Deletion(ko.createClock()).setPredicate(sp) : new Deletion(ko.createClock()); 
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

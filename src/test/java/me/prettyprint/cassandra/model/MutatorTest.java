@@ -96,6 +96,22 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     }
     m.execute();
   }
+  
+  @Test
+  public void testRowDeletion() {
+    String cf = "Standard1";
+
+    Mutator<String> m = createMutator(keyspaceOperator, se);
+    for (int i = 0; i < 5; i++) {
+      m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
+    }
+    MutationResult r = m.execute();
+    
+    for (int i = 0; i < 5; i++) {
+      m.addDeletion("k" + i, cf, null, se);
+    }    
+    m.execute();    
+  }
 
   private void assertColumnExists(String keyspace, String cf, String key, String column) {
     ColumnPath cp = new ColumnPath(cf);
