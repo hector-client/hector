@@ -1,7 +1,7 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 
 /**
  * The same as ColumnQuery, but dynamically inferring the serializers
@@ -13,28 +13,27 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
  * @param <N> column name type
  * @param <V> value type
  */
-public class TypeInferringColumnQuery<K,N,V> extends ColumnQuery<K,N,V> {
+public class TypeInferringColumnQuery<K, N, V> extends ColumnQuery<K, N, V> {
 
-    public TypeInferringColumnQuery(KeyspaceOperator keyspaceOperator,
-            Serializer<V> valueSerializer) {
-        super(keyspaceOperator, null, null, valueSerializer);
-    }
+  public TypeInferringColumnQuery(KeyspaceOperator keyspaceOperator,
+      Serializer<V> valueSerializer) {
+    super(keyspaceOperator, TypeInferringSerializer.<K>get(),
+        TypeInferringSerializer.<N>get(), valueSerializer);
+  }
 
-    @SuppressWarnings("unchecked")
-    public TypeInferringColumnQuery(KeyspaceOperator keyspaceOperator) {
-        super(keyspaceOperator, null, null, (Serializer<V>) StringSerializer.get());
-    }
+  @SuppressWarnings("unchecked")
+  public TypeInferringColumnQuery(KeyspaceOperator keyspaceOperator) {
+    super(keyspaceOperator, TypeInferringSerializer.<K> get(),
+        TypeInferringSerializer.<N>get(), (Serializer<V>) StringSerializer.get());
+  }
 
-    @Override
-    public ColumnQuery<K,N,V> setKey(K key) {
-        setKeySerializer(SerializerTypeInferer.<K>getSerializer(key));
-        return super.setKey(key);
-    }
+  @Override
+  public ColumnQuery<K, N, V> setKey(K key) {
+    return super.setKey(key);
+  }
 
-    @Override
-    public ColumnQuery<K,N,V> setName(N name) {
-        setColumnNameSerializer(SerializerTypeInferer.<N>getSerializer(name));
-        return super.setName(name);
-    }
-
+  @Override
+  public ColumnQuery<K, N, V> setName(N name) {
+    return super.setName(name);
+  }
 }

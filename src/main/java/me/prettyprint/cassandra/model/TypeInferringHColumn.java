@@ -13,10 +13,10 @@ import org.apache.cassandra.thrift.Clock;
  * @param <N> column name type
  * @param <V> value type
  */
-public class TypeInferringHColumn<N,V> extends HColumn<N,V> {
+public class TypeInferringHColumn<N, V> extends HColumn<N, V> {
 
-    public TypeInferringHColumn(N name, V value, Clock clock) {
-        super(name, value, clock, SerializerTypeInferer.<N>getSerializer(name),
-                SerializerTypeInferer.<V>getSerializer(value));
-    }
+  public TypeInferringHColumn(N name, V value, Clock clock) {
+    super(name, value, clock, SerializerTypeInferer.<N>getSerializer(name),
+        SerializerTypeInferer.<V>getSerializer(value));
+  }
 }

@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import org.apache.commons.lang.Validate;
+import me.prettyprint.cassandra.utils.Assert;
 
 public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
 
@@ -13,7 +13,7 @@ public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
     /* package */AbstractQuery(KeyspaceOperator ko,
             Serializer<K> keySerializer, Serializer<N> nameSerializer,
             Serializer<V> valueSerializer) {
-        Validate.notNull(ko);
+        Assert.noneNull(ko, keySerializer, nameSerializer, valueSerializer);
         keyspaceOperator = ko;
         this.keySerializer = keySerializer;
         this.columnNameSerializer = nameSerializer;
