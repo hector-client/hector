@@ -22,21 +22,23 @@ public class HectorTemplateFactory {
   private String replicationStrategyClass;
   private int replicationFactor;
 
-  private KeyspaceOperator keyspaceOperator;
+  private volatile KeyspaceOperator keyspaceOperator;
 
-  HectorTemplate createTemplate() {
+  public HectorTemplate createTemplate() {
     HectorTemplateImpl template = new HectorTemplateImpl(this);
     initKeyspaceOperator();
     template.setCluser(cluster);
-    template.setKeyspaceOperator(keyspaceOperator);
+    if (keyspaceOperator == null) {
+      template.setKeyspaceOperator(keyspaceOperator);
+    }
 
     return template;
   }
 
-  public void initKeyspaceOperator() {
-    // not setting the KeyspaceOperator externally,
-    // because the keyspace name should be accessible from this factory
+  public synchronized void initKeyspaceOperator() {
     if (keyspaceOperator == null) {
+      // not setting the KeyspaceOperator externally,
+      // because the keyspace name should be accessible from this factory
       ConsistencyLevelPolicy clPolicy;
       if (configurableConsistencyLevelPolicy == null) {
         clPolicy = HFactory.createDefaultConsistencyLevelPolicy();
