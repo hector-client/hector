@@ -24,7 +24,7 @@ public class HectorTemplateFactory {
 
   private KeyspaceOperator keyspaceOperator;
 
-  public HectorTemplate createTemplate() {
+  HectorTemplate createTemplate() {
     HectorTemplateImpl template = new HectorTemplateImpl(this);
     initKeyspaceOperator();
     template.setCluser(cluster);
