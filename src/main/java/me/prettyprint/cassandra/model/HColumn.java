@@ -76,7 +76,7 @@ public final class HColumn<N,V> {
     return value;
   }
 
-  Clock getClock() {
+  public Clock getClock() {
     return clock;
   }
 
