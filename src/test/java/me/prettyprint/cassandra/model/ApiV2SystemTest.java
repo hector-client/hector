@@ -766,6 +766,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     MutationResult mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+    log.debug(mr.toString());
     return new TestCleanupDescriptor(cf, rowCount, rowPrefix, columnCount, columnPrefix);
   }
 

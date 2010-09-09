@@ -15,6 +15,6 @@ public final class MutationResult extends ExecutionResult<Void> {
 
   @Override
   public String toString() {
-    return "MutationResult(" + toStringInternal() + ")";
+    return formatMessage("MutationResult", "n/a");
   }
 }

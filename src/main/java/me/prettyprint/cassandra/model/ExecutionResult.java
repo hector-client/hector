@@ -16,6 +16,8 @@ import me.prettyprint.cassandra.service.CassandraHost;
   private final T value;
   private final long execTime;
   private final CassandraHost cassandraHost;
+  
+  protected static final String BASE_MSG_FORMAT = "%s took (%dus) for query (%s) on host: %s";
 
   public ExecutionResult(T value, long execTime, CassandraHost cassandraHost) {
     this.value = value;
@@ -37,11 +39,11 @@ import me.prettyprint.cassandra.service.CassandraHost;
 
   @Override
   public String toString() {
-    return "ExecutionResult(" + toStringInternal() + ") on host: " + cassandraHost != null ? cassandraHost.getName() : "[none]";
+    return formatMessage("ExecutionResult", "n/a");
   }
-
-  protected String toStringInternal() {
-    return "" + execTime + "us";
+  
+  protected String formatMessage(String resultName, String query) {
+    return String.format(BASE_MSG_FORMAT, resultName, execTime, query, (cassandraHost != null ? cassandraHost.getName() : "[none]"));
   }
 
   /** The cassandra host that was actually used to execute the operation */

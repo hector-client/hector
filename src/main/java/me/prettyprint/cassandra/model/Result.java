@@ -27,6 +27,6 @@ public final class Result<T> extends ExecutionResult<T> {
 
   @Override
   public String toString() {
-    return  "Result(" + get() + "," + toStringInternal() + "," + query + ") from host: " + getHostUsed().getName();
+    return formatMessage("Result", query.toString());
   }
 }
