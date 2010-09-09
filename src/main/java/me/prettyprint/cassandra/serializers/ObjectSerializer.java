@@ -16,40 +16,41 @@ import me.prettyprint.cassandra.serializers.AbstractSerializer;
  * @author Bozhidar Bozhanov
  *
  */
-public class ObjectSerializer extends AbstractSerializer<Object> implements Serializer<Object> {
+public class ObjectSerializer extends AbstractSerializer<Object> implements
+    Serializer<Object> {
 
-    private static final ObjectSerializer INSTANCE = new ObjectSerializer();
+  private static final ObjectSerializer INSTANCE = new ObjectSerializer();
 
-    @Override
-    public byte[] toBytes(Object obj) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream(baos);
-            oos.writeObject(obj);
-            oos.close();
+  @Override
+  public byte[] toBytes(Object obj) {
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      ObjectOutputStream oos = new ObjectOutputStream(baos);
+      oos.writeObject(obj);
+      oos.close();
 
-            return baos.toByteArray();
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+      return baos.toByteArray();
+    } catch (IOException ex) {
+      throw new RuntimeException(ex);
     }
+  }
 
-    @Override
-    public Object fromBytes(byte[] bytes) {
-        try {
-            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-            ObjectInputStream ois = new ObjectInputStream(bais);
-            Object obj = ois.readObject();
-            ois.close();
+  @Override
+  public Object fromBytes(byte[] bytes) {
+    try {
+      ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+      ObjectInputStream ois = new ObjectInputStream(bais);
+      Object obj = ois.readObject();
+      ois.close();
 
-            return obj;
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
+      return obj;
+    } catch (Exception ex) {
+      throw new RuntimeException(ex);
     }
+  }
 
-    public static Serializer<?> get() {
-        return INSTANCE;
-    }
+  public static Serializer<?> get() {
+    return INSTANCE;
+  }
 
 }
