@@ -14,7 +14,7 @@ public final class CassandraHostConfigurator {
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution;
-
+  private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -46,6 +46,7 @@ public final class CassandraHostConfigurator {
     cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
     cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
+    cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
 
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
@@ -108,6 +109,8 @@ public final class CassandraHostConfigurator {
     s.append(maxActive);
     s.append("&hosts=");
     s.append(hosts);
+    s.append("&useThriftFramedTransport=");
+    s.append(useThriftFramedTransport);
     s.append(">");
     return s.toString();
   }
@@ -144,5 +147,10 @@ public final class CassandraHostConfigurator {
     this.port = port;
   }
 
+  public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
+    this.useThriftFramedTransport = useThriftFramedTransport;
+  }
+
+  
   
 }
