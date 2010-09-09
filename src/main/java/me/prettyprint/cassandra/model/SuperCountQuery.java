@@ -4,22 +4,18 @@ import me.prettyprint.hector.api.query.Query;
 
 
 /**
- * Counts super column for a of a key in a super column family
+ * Counts super column just like {@link CountQuery} 
  *
  * @author Ran Tavory
  */
-public final class SuperCountQuery<K,SN> extends AbstractCountQuery<K,SN> implements Query<Integer> {
+public final class SuperCountQuery<K,SN> extends CountQuery<K,SN> implements Query<Integer> {
 
   public SuperCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
       Serializer<SN> superNameSerializer) {
     super(ko, keySerializer, superNameSerializer);
   }
 
-  @Override
-  public Result<Integer> execute() {
-    return countColumns();
-  }
-
+  
   @Override
   public String toString() {
     return "SuperCountQuery(" + columnFamily + "," + key + ")";
