@@ -75,7 +75,7 @@ public final class HColumn<N,V> {
     return value;
   }
 
-  long getTimestamp() {
+  public long getTimestamp() {
     return timestamp;
   }
 
