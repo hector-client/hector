@@ -44,6 +44,17 @@ import org.apache.cassandra.thrift.SliceRange;
     useColumnNames = true;
     return this;
   }
+  
+  /**
+   * Allows the use of returning just the keys. This avoids de-serialization of row data 
+   * and can be a huge optimization in some use cases
+   * 
+   */
+  public HSlicePredicate<N> setKeysOnlyPredicate() {
+    this.columnNames = new ArrayList<N>();
+    useColumnNames = true;
+    return this;
+  }
 
   /**
    * Set a predicate of start/finish to retrieve a list of columns in this range.
@@ -73,7 +84,7 @@ import org.apache.cassandra.thrift.SliceRange;
   public SlicePredicate toThrift() {
     SlicePredicate pred = new SlicePredicate();
     if (useColumnNames) {
-      if (columnNames == null || columnNames.isEmpty()) {
+      if (columnNames == null) {
         return null;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));

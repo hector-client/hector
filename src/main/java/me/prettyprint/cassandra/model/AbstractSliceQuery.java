@@ -28,7 +28,11 @@ import org.apache.cassandra.thrift.SlicePredicate;
    * @param columns a list of column names
    */
   public AbstractSliceQuery<K,N,V,T> setColumnNames(N... columnNames) {
-    slicePredicate.setColumnNames(columnNames);
+    if ( columnNames != null || columnNames.length == 0) {
+      slicePredicate.setColumnNames(columnNames);      
+    } else {
+      slicePredicate.setKeysOnlyPredicate();      
+    }
     return this;
   }
 
