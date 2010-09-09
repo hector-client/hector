@@ -113,9 +113,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ColumnParent columnParent = new ColumnParent("Super1");
     columnParent.setSuper_column(bytes("testInsertSuper_super"));
     Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), keyspace.createClock());
-    
-  
-  
+
+
+
     keyspace.insert(bytes("testInsertSuper_key"), columnParent, column);
     column.setName(bytes("testInsertSuper_column2"));
     keyspace.insert(bytes("testInsertSuper_key"), columnParent, column);
@@ -151,7 +151,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with CFdoesNotExist");
-    } catch (InvalidRequestException e) {    
+    } catch (InvalidRequestException e) {
       assertTrue(StringUtils.contains(e.getWhy(),"column family does not exist"));
     }
 
@@ -783,7 +783,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
-    
+
     /*
     @SuppressWarnings("deprecation")
     Map<String, List<SuperColumn>> keySlices = keyspace.getSuperRangeSlice(clp, sp,
@@ -797,7 +797,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     assertEquals(1, keySlices.get("testGetSuperRangeSlice1").size());
     assertEquals(10, keySlices.get("testGetSuperRangeSlice1").get(0).getColumns().size());
     */
-    
+
     ColumnPath cp = new ColumnPath("Super1");
     keyspace.remove("testGetSuperRangeSlice0", cp);
     keyspace.remove("testGetSuperRangeSlice1", cp);
@@ -838,7 +838,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     keyspace.remove("testGetSuperRangeSlices0", cp);
     keyspace.remove("testGetSuperRangeSlices1", cp);
   }
-  
+
   @Test
   public void testMultigetCount() {
     // insert 25 columns into 10 rows
@@ -847,10 +847,11 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       for (int i = 0; i < 25; i++) {
         ColumnPath cp = new ColumnPath("Standard1");
         cp.setColumn(bytes("testMultigetCount_column_" + i));
-        keyspace.insert("testMultigetCount_key_"+j, cp, bytes("testMultigetCount_value_" + i));  
+        keyspace.insert("testMultigetCount_key_"+j, cp, bytes("testMultigetCount_value_" + i));
       }
-      if (j % 2 == 0)
+      if (j % 2 == 0) {
         keys.add(("testMultigetCount_key_"+j).getBytes());
+      }
     }
 
     // get value
@@ -860,13 +861,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     Map<byte[],Integer> counts = keyspace.multigetCount(keys, clp, slicePredicate);
     assertEquals(5,counts.size());
     assertEquals(new Integer(25),counts.entrySet().iterator().next().getValue());
-    
+
     slicePredicate.setSlice_range(new SliceRange("".getBytes(), "".getBytes(), false, 5));
     counts = keyspace.multigetCount(keys, clp, slicePredicate);
-    
+
     assertEquals(5,counts.size());
     assertEquals(new Integer(5),counts.entrySet().iterator().next().getValue());
-    
+
   }
 
   @Test

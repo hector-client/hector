@@ -31,5 +31,4 @@ public final class StringSerializer extends AbstractSerializer<String> {
     }
     return string(bytes);
   }
-
 }

@@ -1,10 +1,12 @@
 package me.prettyprint.cassandra.serializers;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import me.prettyprint.cassandra.model.Serializer;
 
@@ -26,8 +28,8 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
   public abstract T fromBytes(byte[] bytes);
 
   @Override
-  public List<byte[]> toBytesList(List<T> list) {
-    List<byte[]> bytesList = new ArrayList<byte[]>();
+  public Set<byte[]> toBytesSet(List<T> list) {
+    Set<byte[]> bytesList = new HashSet<byte[]>();
     for (T s : list) {
       bytesList.add(toBytes(s));
     }
@@ -35,12 +37,21 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
   }
 
   @Override
-  public List<T> fromBytesList(List<byte[]> list) {
+  public List<T> fromBytesSet(Set<byte[]> set) {
     List<T> objList = new ArrayList<T>();
-    for (byte[] b : list) {
+    for (byte[] b : set) {
       objList.add(fromBytes(b));
     }
     return objList;
+  }
+
+  @Override
+  public List<byte[]> toBytesList(List<T> list) {
+    List<byte[]> bytesList = new ArrayList<byte[]>();
+    for (T s : list) {
+      bytesList.add(toBytes(s));
+    }
+    return bytesList;
   }
 
   @Override

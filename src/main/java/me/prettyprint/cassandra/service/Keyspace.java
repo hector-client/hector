@@ -48,7 +48,7 @@ public interface Keyspace {
   Column getColumn(byte[] key, ColumnPath columnPath) throws HectorException;
 
   Column getColumn(String key, ColumnPath columnPath) throws HectorException;
-  
+
   /**
    * Get the SuperColumn at the given columnPath.
    *
@@ -63,7 +63,7 @@ public interface Keyspace {
   SuperColumn getSuperColumn(byte[] key, ColumnPath columnPath) throws HectorException;
 
   SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException;
-  
+
   /**
    * Get the SuperColumn at the given columnPath.
    *
@@ -94,7 +94,7 @@ public interface Keyspace {
 
   List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
   throws HectorException;
-  
+
   /**
    * Get the group of superColumn contained by columnParent.
    */
@@ -102,8 +102,8 @@ public interface Keyspace {
       SlicePredicate predicate) throws HectorException;
 
   List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
-	      SlicePredicate predicate) throws HectorException;
-  
+          SlicePredicate predicate) throws HectorException;
+
   /**
    * Performs a get for columnPath in parallel on the given list of keys.
    *
@@ -171,7 +171,7 @@ public interface Keyspace {
   void remove(String key, ColumnPath columnPath) throws HectorException;
 
   void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException;
-  
+
   /**
    * get a description of the specified keyspace
    */
@@ -193,19 +193,19 @@ public interface Keyspace {
    */
   Map<byte[], List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
-  
+
   /**
    * returns a subset of columns for a range of keys.
    */
-  Map<byte[], List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause, 
-      SlicePredicate predicate) throws HectorException;  
+  Map<byte[], List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause,
+      SlicePredicate predicate) throws HectorException;
 
   /**
    * Returns a map of key to column count
    */
-  Map<byte[], Integer> multigetCount(List<byte[]> keys, ColumnParent columnParent, 
+  Map<byte[], Integer> multigetCount(List<byte[]> keys, ColumnParent columnParent,
       SlicePredicate slicePredicate) throws HectorException;
-  
+
   /**
    * @return The consistency level held by this keyspace instance.
    */

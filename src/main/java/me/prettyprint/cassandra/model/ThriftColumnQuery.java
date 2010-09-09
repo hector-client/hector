@@ -13,7 +13,7 @@ import org.apache.cassandra.thrift.Column;
  * @param <N> column name type
  * @param <V> value type
  */
-public final class ThriftColumnQuery<K, N, V> extends AbstractColumnQuery<K, N, V>
+public class ThriftColumnQuery<K, N, V> extends AbstractColumnQuery<K, N, V>
     implements ColumnQuery<K, N, V> {
 
   public ThriftColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<K> keySerializer,

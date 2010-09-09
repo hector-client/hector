@@ -16,13 +16,13 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public final class HColumn<N,V> {
+public class HColumn<N,V> {
 
   private N name;
   private V value;
   private Clock clock;
-  private final Serializer<N> nameSerializer;
-  private final Serializer<V> valueSerializer;
+  private Serializer<N> nameSerializer;
+  private Serializer<V> valueSerializer;
 
   public HColumn(N name, V value, Clock clock, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
@@ -35,7 +35,7 @@ public final class HColumn<N,V> {
     this.clock = clock;
   }
 
-  /*package*/ HColumn(Column thriftColumn, Serializer<N> nameSerializer,
+  public HColumn(Column thriftColumn, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");
@@ -44,7 +44,7 @@ public final class HColumn<N,V> {
     clock = thriftColumn.clock;
   }
 
-  /*package*/ HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     notNull(nameSerializer, "nameSerializer is null");
     notNull(valueSerializer, "valueSerializer is null");
     this.nameSerializer = nameSerializer;

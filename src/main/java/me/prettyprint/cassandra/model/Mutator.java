@@ -21,11 +21,11 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * @author Ran Tavory
  * @author zznate
  */
-public final class Mutator<K> {
+public class Mutator<K> {
 
   private final KeyspaceOperator ko;
 
-  final Serializer<K> keySerializer;
+  protected Serializer<K> keySerializer;
 
   private BatchMutation<K> pendingMutations;
 

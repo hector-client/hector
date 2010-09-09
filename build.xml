@@ -61,6 +61,7 @@
   <!-- ====================================================================== -->
 
   <target name="compile" description="Compile the code">
+    <fail message="ant isn't functional now with all recent changes in trunk, sorry"/>
     <mkdir dir="${build.outputDir}"/>
     <javac destdir="${build.outputDir}"
            nowarn="true"

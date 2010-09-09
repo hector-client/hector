@@ -57,8 +57,8 @@ public final class MultigetSubSliceQuery<K, SN, N, V> extends AbstractSliceQuery
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
-            Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ks.multigetSlice(keySerializer.toBytesList(keysList),
-                columnParent, getPredicate()));
+            Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ks.multigetSlice(
+                keySerializer.toBytesList(keysList), columnParent, getPredicate()));
             return new Rows<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
