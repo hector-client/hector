@@ -2,6 +2,9 @@ package me.prettyprint.cassandra.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import me.prettyprint.cassandra.serializers.StringSerializer;
 
 
 /**
@@ -34,12 +37,14 @@ public interface Serializer<T> {
    */
   public T fromBytes(byte[] bytes);
 
-  public List<byte[]> toBytesList(List<T> list);
+  public Set<byte[]> toBytesSet(List<T> list);
 
-  public List<T> fromBytesList(List<byte[]> list);
+  public List<T> fromBytesSet(Set<byte[]> list);
 
   public <V> Map<byte[], V> toBytesMap(Map<T, V> map);
 
   public <V> Map<T, V> fromBytesMap(Map<byte[], V> map);
+
+  List<byte[]> toBytesList(List<T> list);
 
 }

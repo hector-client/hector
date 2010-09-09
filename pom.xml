@@ -17,8 +17,7 @@
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
-
-	<org.springframework.version>3.0.0.RELEASE</org.springframework.version>
+    <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
   </properties>
 
   <issueManagement>
@@ -34,71 +33,71 @@
     </developer>
   </developers>
 
-	<build>
-		<plugins>
-			<!--
-				run examples thusly: mvn exec:java
-				-Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
-			-->
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>exec-maven-plugin</artifactId>
-				<version>1.1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>java</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+  <build>
+    <plugins>
+      <!--
+        run examples thusly: mvn exec:java
+        -Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.ops4j</groupId>
-	<artifactId>maven-pax-plugin</artifactId>
-	<version>1.4</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <provision>
+        <artifactId>maven-pax-plugin</artifactId>
+        <version>1.4</version>
+        <extensions>true</extensions>
+        <configuration>
+          <provision>
             <param>--platform=equinox</param>
-	  </provision>
-	</configuration>
+          </provision>
+        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.3</version>
-	<configuration>
+        <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
             <Bundle-Version>${pom.version}</Bundle-Version>
 
-	    <Embed-Dependency>
-	      libthrift;scope=compile|runtime;type=!pom;inline=false,
-	      cassandra;scope=compile|runtime;type=!pom;inline=false,
-	      <!-- *;scope=compile|runtime;type=!pom;inline=false -->
+            <Embed-Dependency>
+              libthrift;scope=compile|runtime;type=!pom;inline=false,
+              cassandra;scope=compile|runtime;type=!pom;inline=false,
+              <!-- *;scope=compile|runtime;type=!pom;inline=false -->
             </Embed-Dependency> 
 
-	    <Export-Package>
-	      <!-- !${bundle.namespace}.internal.*, -->
-	      ${bundle.namespace}.*;version="${pom.version}"
-	    </Export-Package>
+            <Export-Package>
+              <!-- !${bundle.namespace}.internal.*, -->
+              ${bundle.namespace}.*;version="${pom.version}"
+            </Export-Package>
 
             <Import-Package>
-	      !org.apache.avro.*,
-	      !javax.jms.*,
-	      !javax.mail.*,
-	      !javax.servlet.*,
-	      !com.sun.*,
-	      !org.antlr.*,
-	      !jline.*,
-	      !sun.misc.*,
+              !org.apache.avro.*,
+              !javax.jms.*,
+              !javax.mail.*,
+              !javax.servlet.*,
+              !com.sun.*,
+              !org.antlr.*,
+              !jline.*,
+              !sun.misc.*,
               *;resolution:=optional
             </Import-Package>
-	    
-	    <Private-Package>
-	      <!-- ${bundle.namespace}.internal.* -->
-	    </Private-Package>
+
+            <Private-Package>
+              <!-- ${bundle.namespace}.internal.* -->
+            </Private-Package>
 
             <_include>-osgi.bnd</_include>
           </instructions>
@@ -112,11 +111,6 @@
           <forkMode>always</forkMode>
           <additionalClasspathElements>
             <additionalClasspathElement>${basedir}/testlib/flexjson-1.7.jar</additionalClasspathElement>
-            <!-- 
-            <additionalClasspathElement>${basedir}/testlib/clhm-production-1.0.jar</additionalClasspathElement>            
-            <additionalClasspathElement>${basedir}/testlib/high-scale-lib-1.0.jar</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/testlib/commons-collections-3.0.jar</additionalClasspathElement>
-            -->
           </additionalClasspathElements>
         </configuration>
       </plugin>
@@ -294,6 +288,11 @@
       <artifactId>cassandra-javautils</artifactId>
       <version>0.7.0</version>     
     </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>${org.springframework.version}</version>
+     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>

@@ -8,7 +8,7 @@ import me.prettyprint.hector.api.query.Query;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
-public final class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuperColumn <SN,N,V>>
+public class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuperColumn <SN,N,V>>
     implements Query<HSuperColumn<SN,N,V>> {
 
   private final Serializer<SN> sNameSerializer;
