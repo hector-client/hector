@@ -89,15 +89,8 @@ import org.apache.cassandra.thrift.SliceRange;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
     } else {
-      SliceRange range;
-      if (start == null || finish == null) {
-        range = new SliceRange(findBytes(start),findBytes(finish),
-            reversed, count);
-      } else {
-        range = new SliceRange(columnNameSerializer.toBytes(start),
-            columnNameSerializer.toBytes(finish), reversed, count);
-      }
-      pred.setSlice_range(range);
+      pred.setSlice_range(new SliceRange(findBytes(start),findBytes(finish),
+          reversed, count));
     }
     return pred;
   }
