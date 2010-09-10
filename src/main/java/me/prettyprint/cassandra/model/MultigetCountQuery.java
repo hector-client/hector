@@ -66,5 +66,10 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
           }
         }), this);
   }
+  
+  @Override
+  public String toString() {
+   return String.format("MultigetCountQuery(%s) on cf: %s with keys: %s",slicePredicate.toString(),columnFamily,keys.toString());
+  }
 
 }

@@ -28,14 +28,24 @@ import org.apache.cassandra.thrift.SlicePredicate;
    * @param columns a list of column names
    */
   public AbstractSliceQuery<K,N,V,T> setColumnNames(N... columnNames) {
-    if ( columnNames != null || columnNames.length == 0) {
+    if ( columnNames != null && columnNames.length > 0) {
       slicePredicate.setColumnNames(columnNames);      
     } else {
       slicePredicate.setKeysOnlyPredicate();      
     }
     return this;
   }
-
+  
+  /**
+   * Wraps the underlying call to {@link HSlicePredicate#setKeysOnlyPredicate()}
+   * Use this for a substantial performance increase when you only need the keys returned
+   */
+  public AbstractSliceQuery<K,N,V,T> setReturnKeysOnly() {
+    slicePredicate.setKeysOnlyPredicate();          
+    return this;
+  }
+  
+  
   public Collection<N> getColumnNames() {
     return slicePredicate.getColumnNames();
   }
