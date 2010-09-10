@@ -89,16 +89,29 @@ import org.apache.cassandra.thrift.SliceRange;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
     } else {
+      SliceRange range;
       if (start == null || finish == null) {
-        return null;
+        range = new SliceRange(findBytes(start),findBytes(finish),
+            reversed, count);
+      } else {
+        range = new SliceRange(columnNameSerializer.toBytes(start),
+            columnNameSerializer.toBytes(finish), reversed, count);
       }
-      SliceRange range = new SliceRange(columnNameSerializer.toBytes(start),
-          columnNameSerializer.toBytes(finish), reversed, count);
       pred.setSlice_range(range);
     }
     return pred;
   }
 
+  private byte[] findBytes(N val) {
+    byte[] valBytes;
+    if (val == null) {
+      valBytes =  new byte[]{};
+    } else {
+      valBytes = columnNameSerializer.toBytes(val);
+    }
+    return valBytes;
+  }
+  
   private List<byte[]> toThriftColumnNames(Collection<N> clms) {
     List<byte[]> ret = new ArrayList<byte[]>(clms.size());
     for (N name : clms) {
