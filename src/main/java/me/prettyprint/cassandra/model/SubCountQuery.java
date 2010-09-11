@@ -14,7 +14,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  *
  * @param <SN> super column name tyoe
  */
-public final class SubCountQuery<K,SN,N> extends AbstractCountQuery<K,N> implements Query<Integer> {
+public final class SubCountQuery<K,SN,N> extends CountQuery<K,N> implements Query<Integer> {
 
   private final Serializer<SN> superNameSerializer;
 

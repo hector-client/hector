@@ -404,5 +404,10 @@
 			<name>riptano</name>
 			<url>http://mvn.riptano.com/content/repositories/public/</url>
 		</repository>
+		<repository>
+		    <id>codehaus</id>
+		    <name>codehaus</name>
+		    <url>http://repository.codehaus.org/</url>
+		</repository>
 	</repositories>
 </project>

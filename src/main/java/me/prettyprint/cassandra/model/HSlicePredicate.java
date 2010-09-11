@@ -44,6 +44,17 @@ import org.apache.cassandra.thrift.SliceRange;
     useColumnNames = true;
     return this;
   }
+  
+  /**
+   * Allows the use of returning just the keys. This avoids de-serialization of row data 
+   * and can be a huge optimization in some use cases
+   * 
+   */
+  public HSlicePredicate<N> setKeysOnlyPredicate() {
+    this.columnNames = new ArrayList<N>();
+    useColumnNames = true;
+    return this;
+  }
 
   /**
    * Set a predicate of start/finish to retrieve a list of columns in this range.
@@ -73,21 +84,27 @@ import org.apache.cassandra.thrift.SliceRange;
   public SlicePredicate toThrift() {
     SlicePredicate pred = new SlicePredicate();
     if (useColumnNames) {
-      if (columnNames == null || columnNames.isEmpty()) {
+      if (columnNames == null) {
         return null;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
     } else {
-      if (start == null || finish == null) {
-        return null;
-      }
-      SliceRange range = new SliceRange(columnNameSerializer.toBytes(start),
-          columnNameSerializer.toBytes(finish), reversed, count);
-      pred.setSlice_range(range);
+      pred.setSlice_range(new SliceRange(findBytes(start),findBytes(finish),
+          reversed, count));
     }
     return pred;
   }
 
+  private byte[] findBytes(N val) {
+    byte[] valBytes;
+    if (val == null) {
+      valBytes =  new byte[]{};
+    } else {
+      valBytes = columnNameSerializer.toBytes(val);
+    }
+    return valBytes;
+  }
+  
   private List<byte[]> toThriftColumnNames(Collection<N> clms) {
     List<byte[]> ret = new ArrayList<byte[]>(clms.size());
     for (N name : clms) {

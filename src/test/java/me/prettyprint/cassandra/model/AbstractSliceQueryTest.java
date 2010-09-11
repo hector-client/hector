@@ -23,7 +23,6 @@ public class AbstractSliceQueryTest {
   public void testGetSetPredicate_columnNames() {
     ConcreteSliceQueury<String, String, String, Rows<String, String, String>> q =
       new ConcreteSliceQueury<String, String, String, Rows<String, String,String>>(ko, se, se, se);
-    assertNull(q.getPredicate());
     q.setColumnNames("1", "2", "3");
     SlicePredicate p = q.getPredicate();
     assertEquals(3, p.getColumn_names().size());
@@ -34,7 +33,6 @@ public class AbstractSliceQueryTest {
   public void testGetSetPredicate_range() {
     ConcreteSliceQueury<String, String, String, Rows<String, String, String>> q =
       new ConcreteSliceQueury<String, String, String, Rows<String, String,String>>(ko, se, se, se);
-    assertNull(q.getPredicate());
     q.setRange("1", "100", false, 10);
     SlicePredicate p = q.getPredicate();
     assertNull(p.getColumn_names());

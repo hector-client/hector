@@ -27,11 +27,12 @@ public class HectorTemplateFactory {
   public HectorTemplate createTemplate() {
     HectorTemplateImpl template = new HectorTemplateImpl(this);
     initKeyspaceOperator();
-    template.setCluser(cluster);
+    template.setCluser(cluster);    
     if (keyspaceOperator == null) {
-      template.setKeyspaceOperator(keyspaceOperator);
+       initKeyspaceOperator();
     }
-
+    template.setKeyspaceOperator(keyspaceOperator); 
+    
     return template;
   }
 
