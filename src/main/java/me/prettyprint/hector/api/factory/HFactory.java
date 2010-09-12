@@ -22,7 +22,7 @@ import me.prettyprint.cassandra.model.SliceQuery;
 import me.prettyprint.cassandra.model.SubColumnQuery;
 import me.prettyprint.cassandra.model.SubCountQuery;
 import me.prettyprint.cassandra.model.SubSliceQuery;
-import me.prettyprint.cassandra.model.SuperColumnQuery;
+import me.prettyprint.cassandra.model.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.model.SuperCountQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
 import me.prettyprint.cassandra.model.ThriftColumnQuery;
@@ -31,6 +31,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.SuperColumnQuery;
 /**
  * A convenience class with bunch of factory static methods to help create a mutator,
  * queries etc.
@@ -129,9 +130,9 @@ public final class HFactory {
     return createColumnQuery(ko, se, se);
   }
 
-  public static <SN,N,V> SuperColumnQuery<SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
+  public static <SN,N,V> SuperColumnQuery<SN, N, V> createSuperColumnQuery(KeyspaceOperator ko,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new SuperColumnQuery<SN, N, V>(ko, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftSuperColumnQuery<SN, N, V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> SubColumnQuery<SN,N,V> createSubColumnQuery(KeyspaceOperator ko,

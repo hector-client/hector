@@ -1,35 +1,27 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.service.Keyspace;
-import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
-public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
-    implements Query<HSuperColumn<SN,N,V>> {
+/**
+ * Thrift implementation of the SuperColumnQuery
+ *
+ * @author Ran Tavory
+ *
+ * @param <SN>
+ * @param <N>
+ * @param <V>
+ */
+public final class ThriftSuperColumnQuery<SN,N,V> extends AbstractSuperColumnQuery<SN, N, V>
+    implements SuperColumnQuery<SN, N, V> {
 
-  private final Serializer<SN> sNameSerializer;
-  private String key;
-  private SN superName;
-
-  /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
+  /*package*/ public ThriftSuperColumnQuery(KeyspaceOperator keyspaceOperator,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(keyspaceOperator, nameSerializer, valueSerializer);
-    noneNull(sNameSerializer, nameSerializer, valueSerializer);
-    this.sNameSerializer = sNameSerializer;
-  }
-
-  public SuperColumnQuery<SN,N,V> setKey(String key) {
-    this.key = key;
-    return this;
-  }
-
-  public SuperColumnQuery<SN,N,V> setSuperName(SN superName) {
-    this.superName = superName;
-    return this;
+    super(keyspaceOperator, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   @Override
@@ -54,10 +46,5 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
             }
           }
         }), this);
-  }
-
-  @Override
-  public String toString() {
-    return "SuperColumnQuery(" + key + "," + superName + ")";
   }
 }

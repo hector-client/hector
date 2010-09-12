@@ -22,25 +22,26 @@ import me.prettyprint.hector.api.query.ColumnQuery;
   }
 
   @Override
-  public AbstractColumnQuery<N, V> setKey(String key) {
+  public ColumnQuery<N, V> setKey(String key) {
     this.key = key;
     return this;
   }
 
   @Override
-  public AbstractColumnQuery<N, V> setName(N name) {
+  public ColumnQuery<N, V> setName(N name) {
     this.name = name;
     return this;
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  public AbstractColumnQuery<N,V> setColumnFamily(String cf) {
-    return (AbstractColumnQuery<N,V>) super.setColumnFamily(cf);
+  public ColumnQuery<N, V> setColumnFamily(String cf) {
+    return (ColumnQuery<N, V>) super.setColumnFamily(cf);
   }
 
   @Override
   public String toString() {
-    return "ColumnQuery(" + key + "," + name + ")";
+    return "AbstractColumnQuery(" + key + "," + name + ")";
   }
 
 }
