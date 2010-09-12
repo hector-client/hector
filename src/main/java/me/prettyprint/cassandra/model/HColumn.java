@@ -34,7 +34,7 @@ public final class HColumn<N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/ HColumn(Column thriftColumn, Serializer<N> nameSerializer,
+  public HColumn(Column thriftColumn, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");

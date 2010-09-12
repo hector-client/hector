@@ -1,7 +1,8 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
+import me.prettyprint.cassandra.model.Serializer;
 
 import org.apache.cassandra.thrift.ColumnPath;
 
@@ -31,7 +32,7 @@ public class ThriftFactory {
     return createColumnPath(columnFamilyName, null);
   }
 
-  /*package*/ static <SN,N> ColumnPath createSuperColumnPath(String columnFamilyName,
+  public static <SN,N> ColumnPath createSuperColumnPath(String columnFamilyName,
       SN superColumnName, N columnName, Serializer<SN> superNameSerializer,
       Serializer<N> nameSerializer) {
     noneNull(columnFamilyName, superColumnName, superNameSerializer, nameSerializer);
