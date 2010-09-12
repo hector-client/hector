@@ -9,7 +9,6 @@ import me.prettyprint.cassandra.model.CountQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
-import me.prettyprint.cassandra.model.IndexedSlicesQueryTest;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.MultigetSubSliceQuery;
@@ -172,9 +171,9 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new RangeSuperSlicesQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
-  
+
   public static <K,N,V> IndexedSlicesQuery<K, N, V> createIndexedSlicesQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, 
+      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     return new IndexedSlicesQuery<K, N, V>(ko, keySerializer, nameSerializer, valueSerializer);
   }

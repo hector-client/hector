@@ -31,7 +31,7 @@ public final class CassandraHostConfigurator {
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
-      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port); 
+      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port);
       applyConfig(cassandraHost);
       cassandraHosts[x] = cassandraHost;
     }
@@ -39,7 +39,7 @@ public final class CassandraHostConfigurator {
   }
 
   public void applyConfig(CassandraHost cassandraHost) {
-    
+
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setMaxIdle(maxIdle);
     cassandraHost.setLifo(lifo);
@@ -150,7 +150,4 @@ public final class CassandraHostConfigurator {
   public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
     this.useThriftFramedTransport = useThriftFramedTransport;
   }
-
-  
-  
 }

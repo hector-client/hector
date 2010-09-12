@@ -1,14 +1,14 @@
 package me.prettyprint.cassandra.model;
 
-import org.apache.cassandra.thrift.Clock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+
+import org.apache.cassandra.thrift.Clock;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public /*final*/ class KeyspaceOperator {
 
@@ -52,7 +52,7 @@ public /*final*/ class KeyspaceOperator {
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
         return koc.doInKeyspaceAndMeasure(ks);
     } finally {
-      if ( ks != null ) {
+      if (ks != null) {
         cluster.releaseClient(ks.getClient());
       }
     }

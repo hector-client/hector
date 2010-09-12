@@ -29,7 +29,9 @@ import org.apache.cassandra.thrift.ColumnPath;
  * the {@link Keyspace} instance and releasing it after the operation completes.
  *
  * @author Ran Tavory (rantav@gmail.com)
+ * @deprecated use ExampleDaoV2
  */
+@Deprecated
 public class ExampleDao {
 
   private final static String CASSANDRA_KEYSPACE = "Keyspace1";
