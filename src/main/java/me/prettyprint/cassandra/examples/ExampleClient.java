@@ -16,7 +16,9 @@ import org.apache.cassandra.thrift.ColumnPath;
  *
  * @author Ran Tavory (rantav@gmail.com)
  *
+ * @deprecated use ExampleDaoV2
  */
+@Deprecated
 public class ExampleClient {
 
   public static void main(String[] args) throws HectorException {
