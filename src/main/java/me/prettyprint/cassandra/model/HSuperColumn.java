@@ -48,7 +48,7 @@ public final class HSuperColumn<SN,N,V> {
     this.clock = clock;
   }
 
-  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
+  public HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     noneNull(thriftSuperColumn, sNameSerializer, nameSerializer, valueSerializer);

@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 

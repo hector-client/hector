@@ -10,13 +10,13 @@ import me.prettyprint.hector.api.query.ColumnQuery;
  * @param <N>
  * @param <V>
  */
-/*package*/ abstract class AbstractColumnQuery<K, N, V> extends AbstractQuery<K, N, V, HColumn<N, V>>
+public abstract class AbstractColumnQuery<K, N, V> extends AbstractQuery<K, N, V, HColumn<N, V>>
     implements ColumnQuery<K, N, V>{
 
   protected K key;
   protected N name;
 
-  public AbstractColumnQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  protected AbstractColumnQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);

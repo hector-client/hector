@@ -44,7 +44,7 @@ public /*final*/ class KeyspaceOperator {
     return cluster.createClock();
   }
 
-  /*package*/ <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
+  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     CassandraClient c = null;
     Keyspace ks = null;
     try {

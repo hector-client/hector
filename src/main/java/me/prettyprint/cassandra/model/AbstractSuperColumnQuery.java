@@ -12,14 +12,14 @@ import me.prettyprint.hector.api.query.SuperColumnQuery;
  * @param <N>
  * @param <V>
  */
-/*package*/ abstract class AbstractSuperColumnQuery<K, SN, N, V> extends
+public abstract class AbstractSuperColumnQuery<K, SN, N, V> extends
     AbstractQuery<K, N, V, HSuperColumn<SN, N, V>> implements SuperColumnQuery<K, SN, N, V>{
 
   protected final Serializer<SN> sNameSerializer;
   protected K key;
   protected SN superName;
 
-  public AbstractSuperColumnQuery(KeyspaceOperator ko,
+  protected AbstractSuperColumnQuery(KeyspaceOperator ko,
       Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer,

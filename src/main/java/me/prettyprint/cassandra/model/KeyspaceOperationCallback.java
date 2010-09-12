@@ -2,7 +2,14 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.Keyspace;
 
-/*package*/ abstract class KeyspaceOperationCallback<T> {
+/**
+ * A callback template used by the package classes. Not for external use.
+ *
+ * @author Ran Tavory
+ *
+ * @param <T>
+ */
+public abstract class KeyspaceOperationCallback<T> {
 
   public abstract T doInKeyspace(final Keyspace ks) throws HectorException;
 
@@ -10,7 +17,7 @@ import me.prettyprint.cassandra.service.Keyspace;
     long start = System.nanoTime();
     T value = null;
     value = doInKeyspace(ks);
-    
+
     return new ExecutionResult<T>(value, System.nanoTime() - start, ks.getClient().getCassandraHost());
   }
 

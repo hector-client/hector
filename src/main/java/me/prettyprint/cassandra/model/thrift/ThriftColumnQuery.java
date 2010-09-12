@@ -1,5 +1,13 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
+import me.prettyprint.cassandra.model.AbstractColumnQuery;
+import me.prettyprint.cassandra.model.HColumn;
+import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.NotFoundException;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.hector.api.query.ColumnQuery;
 
