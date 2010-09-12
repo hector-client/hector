@@ -33,6 +33,7 @@ import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.junit.After;

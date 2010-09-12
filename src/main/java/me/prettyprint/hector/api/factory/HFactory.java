@@ -20,18 +20,19 @@ import me.prettyprint.cassandra.model.RangeSubSlicesQuery;
 import me.prettyprint.cassandra.model.RangeSuperSlicesQuery;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.SliceQuery;
-import me.prettyprint.cassandra.model.SubColumnQuery;
 import me.prettyprint.cassandra.model.SubCountQuery;
 import me.prettyprint.cassandra.model.SubSliceQuery;
 import me.prettyprint.cassandra.model.SuperCountQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
 import me.prettyprint.cassandra.model.ThriftColumnQuery;
+import me.prettyprint.cassandra.model.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.cassandra.thrift.Clock;
@@ -141,6 +142,7 @@ public final class HFactory {
     return new ThriftSuperColumnQuery<K,SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
+
   public static <K,N,V> MultigetSliceQuery<K,N,V> createMultigetSliceQuery(
       KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new MultigetSliceQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
@@ -149,7 +151,7 @@ public final class HFactory {
   public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(KeyspaceOperator ko,
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new SubColumnQuery<K, SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer,
+    return new ThriftSubColumnQuery<K, SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer,
         valueSerializer);
   }
 
