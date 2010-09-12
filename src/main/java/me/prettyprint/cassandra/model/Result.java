@@ -12,7 +12,7 @@ public final class Result<T> extends ExecutionResult<T> {
 
   private final Query<T> query;
 
-  /*package*/ Result(ExecutionResult<T> res, Query<T> query) {
+  public Result(ExecutionResult<T> res, Query<T> query) {
     super(res.get(), res.getExecutionTimeMicro(), res.getHostUsed());
     this.query = query;
   }

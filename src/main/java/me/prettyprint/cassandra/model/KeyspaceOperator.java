@@ -38,7 +38,7 @@ public /*final*/ class KeyspaceOperator {
     return cluster.createTimestamp();
   }
 
-  /*package*/ <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
+  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     CassandraClient c = null;
     Keyspace ks = null;
     try {
@@ -46,7 +46,7 @@ public /*final*/ class KeyspaceOperator {
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
         return koc.doInKeyspaceAndMeasure(ks);
     } finally {
-      if ( ks != null ) { 
+      if ( ks != null ) {
         cluster.releaseClient(ks.getClient());
       }
     }

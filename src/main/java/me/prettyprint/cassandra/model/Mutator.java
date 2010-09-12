@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Arrays;
 
+import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 
