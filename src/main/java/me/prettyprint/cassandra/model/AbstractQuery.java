@@ -11,7 +11,7 @@ public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
   protected Serializer<N> columnNameSerializer;
   protected Serializer<V> valueSerializer;
 
-  /* package */AbstractQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  /*package*/ AbstractQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(ko, keySerializer, nameSerializer, valueSerializer);
     keyspaceOperator = ko;
@@ -20,7 +20,7 @@ public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
     this.valueSerializer = valueSerializer;
   }
 
-  public AbstractQuery<K, N, V, T> setColumnFamily(String cf) {
+  public Query<T> setColumnFamily(String cf) {
     this.columnFamilyName = cf;
     return this;
   }
@@ -50,5 +50,4 @@ public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
   public void setValueSerializer(Serializer<V> valueSerializer) {
     this.valueSerializer = valueSerializer;
   }
-
 }

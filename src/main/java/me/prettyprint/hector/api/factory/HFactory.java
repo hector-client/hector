@@ -23,17 +23,19 @@ import me.prettyprint.cassandra.model.SliceQuery;
 import me.prettyprint.cassandra.model.SubColumnQuery;
 import me.prettyprint.cassandra.model.SubCountQuery;
 import me.prettyprint.cassandra.model.SubSliceQuery;
-import me.prettyprint.cassandra.model.SuperColumnQuery;
 import me.prettyprint.cassandra.model.SuperCountQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
 import me.prettyprint.cassandra.model.ThriftColumnQuery;
+import me.prettyprint.cassandra.model.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.cassandra.thrift.Clock;
+
 /**
  * A convenience class with bunch of factory static methods to help create a mutator,
  * queries etc.
@@ -136,7 +138,7 @@ public final class HFactory {
 
   public static <K,SN,N,V> SuperColumnQuery<K,SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new SuperColumnQuery<K,SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftSuperColumnQuery<K,SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,N,V> MultigetSliceQuery<K,N,V> createMultigetSliceQuery(

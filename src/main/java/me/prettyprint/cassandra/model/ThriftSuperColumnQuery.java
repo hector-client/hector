@@ -1,35 +1,30 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.service.Keyspace;
-import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
-public class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuperColumn <SN,N,V>>
-    implements Query<HSuperColumn<SN,N,V>> {
+/**
+ * Thrift implementation of the SuperColumnQuery
+ *
+ * @author Ran Tavory
+ *
+ * @param <SN>
+ * @param <N>
+ * @param <V>
+ */
+public final class ThriftSuperColumnQuery<K, SN,N,V> extends AbstractSuperColumnQuery<K, SN, N, V>
+    implements SuperColumnQuery<K, SN, N, V> {
 
-  private final Serializer<SN> sNameSerializer;
-  private K key;
-  private SN superName;
-
-  /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
-      Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(keyspaceOperator, keySerializer, nameSerializer, valueSerializer);
-    noneNull(sNameSerializer, nameSerializer, valueSerializer);
-    this.sNameSerializer = sNameSerializer;
-  }
-
-  public SuperColumnQuery<K,SN,N,V> setKey(K key, Serializer<K> keySerializer) {
-    this.key = key;
-    return this;
-  }
-
-  public SuperColumnQuery<K,SN,N,V> setSuperName(SN superName) {
-    this.superName = superName;
-    return this;
+  /*package*/ public ThriftSuperColumnQuery(KeyspaceOperator keyspaceOperator,
+      Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer,
+      Serializer<N> nameSerializer,
+      Serializer<V> valueSerializer) {
+    super(keyspaceOperator, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   @Override
@@ -54,10 +49,5 @@ public class SuperColumnQuery<K,SN,N,V> extends AbstractQuery<K,N,V,HSuperColumn
             }
           }
         }), this);
-  }
-
-  @Override
-  public String toString() {
-    return "SuperColumnQuery(" + key + "," + superName + ")";
   }
 }

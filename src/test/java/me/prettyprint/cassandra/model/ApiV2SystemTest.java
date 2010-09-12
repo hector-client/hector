@@ -33,6 +33,7 @@ import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.junit.After;
 import org.junit.Before;
@@ -158,7 +159,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // get value
     SuperColumnQuery<String, String, String, String> q = createSuperColumnQuery(ko, se, se, se, se);
     q.setSuperName("testSuperInsertGetRemove").setColumnFamily(cf);
-    Result<HSuperColumn<String, String, String>> r = q.setKey("testSuperInsertGetRemove", StringSerializer.get()).execute();
+    Result<HSuperColumn<String, String, String>> r = q.setKey("testSuperInsertGetRemove").execute();
     assertNotNull(r);
     HSuperColumn<String, String, String> sc = r.get();
     assertNotNull(sc);
