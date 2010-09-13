@@ -2,24 +2,25 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Map;
 
-import org.apache.cassandra.thrift.ColumnParent;
-
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
+
+import org.apache.cassandra.thrift.ColumnParent;
 
 /**
  * Does a multi_get_count within a given superColumn
- * 
+ *
  * @author zznate
  */
 public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
 
-  private final Serializer<SN> superNameSerializer;  
+  private final Serializer<SN> superNameSerializer;
   private SN superColumnName;
-  
+
   public MultigetSubCountQuery(KeyspaceOperator ko,
       Serializer<SN> superNameSerializer,
-      Serializer<K> keySerializer, 
+      Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
     super(ko, keySerializer, nameSerializer);
     Assert.notNull(superNameSerializer, "superNameSerializer is null");
@@ -30,7 +31,7 @@ public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
     superColumnName = sc;
     return this;
   }
-  
+
   @Override
   public Result<Map<K, Integer>> execute() {
     Assert.notNull(keys, "keys list is null");

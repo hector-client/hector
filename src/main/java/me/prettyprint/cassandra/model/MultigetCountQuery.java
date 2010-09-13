@@ -1,15 +1,15 @@
 package me.prettyprint.cassandra.model;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.ColumnParent;
-
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.Query;
+
+import org.apache.cassandra.thrift.ColumnParent;
 
 public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
 
@@ -17,7 +17,7 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
   protected final Serializer<K> keySerializer;
   protected String columnFamily;
   protected List<K> keys;
-  
+
   /** The slice predicate for which the count it performed*/
   protected final HSlicePredicate<N> slicePredicate;
 
@@ -30,17 +30,17 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
     this.keySerializer = keySerializer;
     this.slicePredicate = new HSlicePredicate<N>(nameSerializer);
   }
-  
+
   public MultigetCountQuery<K, N> setKeys(K... keys) {
     this.keys = Arrays.asList(keys);
     return this;
   }
-  
+
   public MultigetCountQuery<K,N> setColumnFamily(String cf) {
     this.columnFamily = cf;
     return this;
   }
-  
+
   public MultigetCountQuery<K,N> setColumnNames(N... columnNames) {
     slicePredicate.setColumnNames(columnNames);
     return this;
@@ -50,7 +50,7 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
     slicePredicate.setRange(start, finish, false, count);
     return this;
   }
-  
+
   @Override
   public Result<Map<K, Integer>> execute() {
     Assert.notNull(keys, "keys list is null");
@@ -66,7 +66,7 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
           }
         }), this);
   }
-  
+
   @Override
   public String toString() {
    return String.format("MultigetCountQuery(%s) on cf: %s with keys: %s",slicePredicate.toString(),columnFamily,keys.toString());

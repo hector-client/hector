@@ -8,10 +8,10 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.NotFoundException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.KsDef;
@@ -46,7 +46,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
     try {
       client.getKeyspace("KeyspaceDoesntExist");
       fail("Should have thrown an exception IllegalArgumentException");
-    } catch (NotFoundException e) {
+    } catch (HNotFoundException e) {
       // good
     }
   }

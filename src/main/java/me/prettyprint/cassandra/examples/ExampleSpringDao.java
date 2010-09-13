@@ -4,11 +4,11 @@ import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.dao.SpringCommand;
 import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -61,7 +61,7 @@ public class ExampleSpringDao {
       public String execute(final Keyspace ks) throws HectorException {
         try {
           return string(ks.getColumn(keySerializer.toBytes(key), createColumnPath(columnName)).getValue());
-        } catch (NotFoundException e) {
+        } catch (HNotFoundException e) {
           return null;
         }
       }

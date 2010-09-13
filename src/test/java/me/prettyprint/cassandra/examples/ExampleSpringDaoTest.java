@@ -6,8 +6,8 @@ import static org.junit.Assert.assertNull;
 import javax.annotation.Resource;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

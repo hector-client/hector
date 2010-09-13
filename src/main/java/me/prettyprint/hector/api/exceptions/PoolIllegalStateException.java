@@ -1,4 +1,5 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api.exceptions;
+
 
 /**
  * Happens when the pool has been closed, but new borrow request come to it.

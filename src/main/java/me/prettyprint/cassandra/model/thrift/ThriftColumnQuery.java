@@ -2,13 +2,13 @@ package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.AbstractColumnQuery;
 import me.prettyprint.cassandra.model.HColumn;
-import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.ColumnQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -41,7 +41,7 @@ public class ThriftColumnQuery<K, N, V> extends AbstractColumnQuery<K, N, V>
               Column thriftColumn = ks.getColumn(keySerializer.toBytes(key),
                   ThriftFactory.createColumnPath(columnFamilyName, name, columnNameSerializer));
               return new HColumn<N, V>(thriftColumn, columnNameSerializer, valueSerializer);
-            } catch (NotFoundException e) {
+            } catch (HNotFoundException e) {
               return null;
             }
           }

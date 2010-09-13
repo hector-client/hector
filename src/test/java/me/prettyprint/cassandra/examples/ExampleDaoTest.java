@@ -5,15 +5,15 @@ import static org.junit.Assert.assertNull;
 
 import java.io.IOException;
 
-import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
+import org.apache.cassandra.config.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.apache.cassandra.config.ConfigurationException;
 
 public class ExampleDaoTest {
 

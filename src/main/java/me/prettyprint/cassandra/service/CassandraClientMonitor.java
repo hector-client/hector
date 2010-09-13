@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

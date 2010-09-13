@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.InvalidRequestException;
-import me.prettyprint.cassandra.model.NotFoundException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -68,7 +68,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsertAndGetAndRemove() throws IllegalArgumentException, NoSuchElementException,
-  IllegalStateException, NotFoundException, Exception {
+  IllegalStateException, HNotFoundException, Exception {
 
     // insert value
     ColumnPath cp = new ColumnPath("Standard1");
@@ -96,7 +96,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       try {
         keyspace.getColumn("testInsertAndGetAndRemove_" + i, cp);
         fail("the value should already being deleted");
-      } catch (NotFoundException e) {
+      } catch (HNotFoundException e) {
         // good
       }
     }
@@ -107,7 +107,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testInsertSuper() throws IllegalArgumentException, NoSuchElementException,
-  IllegalStateException, NotFoundException, Exception {
+  IllegalStateException, HNotFoundException, Exception {
 
     // insert value
     ColumnParent columnParent = new ColumnParent("Super1");
@@ -142,7 +142,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       keyspace.remove("testValideColumnPath", cp);
-    } catch (InvalidRequestException e) {
+    } catch (HInvalidRequestException e) {
       fail("Should not have thrown an error for Standard1");
     }
 
@@ -151,7 +151,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with CFdoesNotExist");
-    } catch (InvalidRequestException e) {
+    } catch (HInvalidRequestException e) {
       assertTrue(StringUtils.contains(e.getWhy(),"column family does not exist"));
     }
 
@@ -160,7 +160,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
-    } catch (InvalidRequestException e) {
+    } catch (HInvalidRequestException e) {
       assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have the right type"));
     }
 
@@ -169,7 +169,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     try {
       keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
       fail("Should have failed with supercolumn");
-    } catch (InvalidRequestException e) {
+    } catch (HInvalidRequestException e) {
       assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have"));
     }
   }
@@ -281,7 +281,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         try {
           keyspace.getColumn("testBatchMutateColumn_" + i, cp);
           fail();
-        } catch (NotFoundException e) {
+        } catch (HNotFoundException e) {
         }
 
       }
@@ -335,7 +335,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         try {
           keyspace.getColumn("testBatchMutateColumn_" + i, cp);
           fail();
-        } catch (NotFoundException e) {
+        } catch (HNotFoundException e) {
           // good, we want this to throw.
         }
 

@@ -15,10 +15,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
-import me.prettyprint.cassandra.model.TimedOutException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -112,7 +112,7 @@ public class FailoverOperatorTest {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
           + "FAIL_FAST");
-    } catch (TimedOutException e) {
+    } catch (HTimedOutException e) {
       // ok
     }
 
@@ -138,7 +138,7 @@ public class FailoverOperatorTest {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
           + "ON_FAIL_TRY_ONE_NEXT_AVAILABLE");
-    } catch (TimedOutException e) {
+    } catch (HTimedOutException e) {
       // ok
     }
 
@@ -164,7 +164,7 @@ public class FailoverOperatorTest {
       ks.insert("key", cp, bytes("value"));
       fail("Should not have gotten here. The method should have failed with TimedOutException; "
           + "ON_FAIL_TRY_ALL_AVAILABLE");
-    } catch (TimedOutException e) {
+    } catch (HTimedOutException e) {
       // ok
     }
   }

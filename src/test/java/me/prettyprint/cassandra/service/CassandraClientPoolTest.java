@@ -8,7 +8,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.junit.Before;
 import org.junit.Test;

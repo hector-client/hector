@@ -1,10 +1,11 @@
 package me.prettyprint.cassandra.model;
 
-import org.apache.cassandra.thrift.ColumnParent;
-
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.Query;
+
+import org.apache.cassandra.thrift.ColumnParent;
 
 
 /**
@@ -13,7 +14,7 @@ import me.prettyprint.hector.api.query.Query;
  * @author Ran Tavory
  */
 public class CountQuery<K,N> implements Query<Integer> {
-  
+
   protected final KeyspaceOperator keyspaceOperator;
   protected final Serializer<K> keySerializer;
   protected String columnFamily;
@@ -61,7 +62,7 @@ public class CountQuery<K,N> implements Query<Integer> {
     this.columnFamily = cf;
     return this;
   }
-  
+
   public CountQuery<K,N> setColumnNames(N... columnNames) {
     slicePredicate.setColumnNames(columnNames);
     return this;

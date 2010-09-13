@@ -7,10 +7,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
-import me.prettyprint.cassandra.model.InvalidRequestException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
@@ -71,7 +71,6 @@ import org.slf4j.LoggerFactory;
     this.monitor = monitor;
     xtrans = new ExceptionsTranslatorImpl();
   }
-
 
 
   @Override
@@ -640,11 +639,11 @@ import org.slf4j.LoggerFactory;
    * InvalidRequestException if not.
    *
    * @param columnPath
-   * @throws InvalidRequestException
+   * @throws HInvalidRequestException
    *           if either the column family does not exist or that it's type does
    *           not match (super)..
    */
-  private void valideColumnPath(ColumnPath columnPath) throws InvalidRequestException {
+  private void valideColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
     String cf = columnPath.getColumn_family();
     CfDef cfdefine;
     String errorMsg;
@@ -664,23 +663,23 @@ import org.slf4j.LoggerFactory;
     } else {
       errorMsg = "The specified column family does not exist: " + cf;
     }
-    throw new InvalidRequestException(errorMsg);
+    throw new HInvalidRequestException(errorMsg);
   }
 
   /**
    * Make sure that the given column path is a SuperColumn in the DB, Throws an
    * exception if it's not.
    *
-   * @throws InvalidRequestException
+   * @throws HInvalidRequestException
    */
-  private void valideSuperColumnPath(ColumnPath columnPath) throws InvalidRequestException {
+  private void valideSuperColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
     String cf = columnPath.getColumn_family();
     CfDef cfdefine;
     if ((cfdefine = getCfDef(cf)) != null && cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
         && columnPath.getSuper_column() != null) {
       return;
     }
-    throw new InvalidRequestException(
+    throw new HInvalidRequestException(
         "Invalid super column name or super column family does not exist: " + cf);
   }
 
