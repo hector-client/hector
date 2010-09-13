@@ -3,9 +3,9 @@ package me.prettyprint.cassandra.examples;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.dao.Command;
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.ColumnPath;
 
@@ -71,7 +71,7 @@ public class ExampleDao {
       public String execute(final Keyspace ks) throws HectorException {
         try {
           return string(ks.getColumn(key, createColumnPath(COLUMN_NAME)).getValue());
-        } catch (NotFoundException e) {
+        } catch (HNotFoundException e) {
           return null;
         }
       }

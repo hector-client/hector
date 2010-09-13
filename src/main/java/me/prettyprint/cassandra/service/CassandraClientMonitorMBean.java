@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
-import me.prettyprint.cassandra.model.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 /**
  * Defines the various JMX methods the CassandraClientMonitor exposes.

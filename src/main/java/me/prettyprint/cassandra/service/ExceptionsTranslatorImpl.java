@@ -2,14 +2,14 @@ package me.prettyprint.cassandra.service;
 
 import java.util.NoSuchElementException;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
-import me.prettyprint.cassandra.model.InvalidRequestException;
-import me.prettyprint.cassandra.model.NotFoundException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
-import me.prettyprint.cassandra.model.PoolIllegalStateException;
-import me.prettyprint.cassandra.model.TimedOutException;
-import me.prettyprint.cassandra.model.UnavailableException;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
+import me.prettyprint.hector.api.exceptions.HUnavailableException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.PoolIllegalStateException;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -23,17 +23,17 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
     } else if (original instanceof TException || original instanceof TTransportException) {
       return new HectorTransportException(original);
     } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {
-      return new TimedOutException(original);
+      return new HTimedOutException(original);
     } else if (original instanceof org.apache.cassandra.thrift.InvalidRequestException) {
-      InvalidRequestException e = new InvalidRequestException(original);
+      HInvalidRequestException e = new HInvalidRequestException(original);
       e.setWhy(((org.apache.cassandra.thrift.InvalidRequestException) original).getWhy());
       return e;
     } else if (original instanceof org.apache.cassandra.thrift.NotFoundException) {
-      return new NotFoundException(original);
+      return new HNotFoundException(original);
     } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {
-      return new TimedOutException(original);
+      return new HTimedOutException(original);
     } else if (original instanceof org.apache.cassandra.thrift.UnavailableException) {
-      return new UnavailableException(original);
+      return new HUnavailableException(original);
     } else if (original instanceof NoSuchElementException) {
       return new PoolExhaustedException(original);
     } else if (original instanceof IllegalStateException) {

@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;

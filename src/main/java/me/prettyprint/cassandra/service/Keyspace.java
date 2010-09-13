@@ -4,9 +4,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -40,7 +40,7 @@ public interface Keyspace {
    *
    * If no value is present, NotFoundException is thrown.
    *
-   * @throws NotFoundException
+   * @throws HNotFoundException
    *           if no value exists for the column
    */
   Column getColumn(String key, ColumnPath columnPath) throws HectorException;
@@ -53,7 +53,7 @@ public interface Keyspace {
    * by default will return column with native order and the size of the list is
    * unlimited (so be careful...)
    *
-   * @throws NotFoundException
+   * @throws HNotFoundException
    *           when a supercolumn is not found
    */
   SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException;
@@ -70,7 +70,7 @@ public interface Keyspace {
    *          the result Column sort
    * @param size
    *          the result column size
-   * @throws NotFoundException
+   * @throws HNotFoundException
    *           when a supercolumn is not found
    */
   SuperColumn getSuperColumn(String key, ColumnPath columnPath, boolean reversed, int size)

@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.ColumnParent;

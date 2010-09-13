@@ -2,9 +2,9 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.commons.pool.PoolableObjectFactory;
 
