@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.List;
 
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.Keyspace;
 
 import org.apache.cassandra.thrift.Column;
@@ -21,6 +22,10 @@ public final class SliceQuery<K,N,V> extends AbstractSliceQuery<K,N,V,ColumnSlic
 
   public SliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
+  }
+
+  public SliceQuery(KeyspaceOperator ko, Serializer<V> valueSerializer) {
+    super(ko, TypeInferringSerializer.<K>get(), TypeInferringSerializer.<N>get(), valueSerializer);
   }
 
   public SliceQuery<K,N,V> setKey(K key) {
