@@ -2,10 +2,12 @@ package me.prettyprint.cassandra.service.spring;
 
 import java.util.List;
 
+import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.model.ConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.CountQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
+import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.MultigetSubSliceQuery;
@@ -21,9 +23,9 @@ import me.prettyprint.cassandra.model.SubSliceQuery;
 import me.prettyprint.cassandra.model.SuperColumnQuery;
 import me.prettyprint.cassandra.model.SuperCountQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
-import me.prettyprint.cassandra.model.ThriftTypeInferringColumnQuery;
-import me.prettyprint.cassandra.model.TypeInferringHColumn;
-import me.prettyprint.cassandra.model.TypeInferringMutator;
+import me.prettyprint.cassandra.model.ThriftColumnQuery;
+import me.prettyprint.cassandra.serializers.BytesSerializer;
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -42,13 +44,28 @@ import org.apache.commons.lang.Validate;
 public class HectorTemplateImpl implements HectorTemplate {
 
   private String keyspace;
-  private Cluster cluser;
+  private Cluster cluster;
   private KeyspaceOperator keyspaceOperator;
-  private final HectorTemplateFactory factory;
 
-  public HectorTemplateImpl(HectorTemplateFactory factory) {
-    this.factory = factory;
-    this.keyspace = factory.getKeyspace();
+  private ConfigurableConsistencyLevel configurableConsistencyLevelPolicy;
+  private String replicationStrategyClass;
+  private int replicationFactor;
+
+
+  public HectorTemplateImpl() {
+  }
+
+  public HectorTemplateImpl(Cluster cluster, String keyspace, int replicationFactor, String replicationStrategyClass, ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
+    this.cluster = cluster;
+    this.keyspace = keyspace;
+    this.replicationFactor = replicationFactor;
+    this.replicationStrategyClass = replicationStrategyClass;
+    this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
+    initKeyspaceOperator();
+  }
+
+  public void init() {
+    initKeyspaceOperator();
   }
 
   /*
@@ -57,22 +74,14 @@ public class HectorTemplateImpl implements HectorTemplate {
    * @see org.helenus.HectorFactory#createKeyspaceOperator(java.lang.String,
    * me.prettyprint.cassandra.service.Cluster)
    */
-  @Override
-  public KeyspaceOperator createKeyspaceOperator(Cluster cluster) {
-    return createKeyspaceOperator(cluster, HFactory.createDefaultConsistencyLevelPolicy());
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createKeyspaceOperator(java.lang.String,
-   * me.prettyprint.cassandra.service.Cluster,
-   * me.prettyprint.cassandra.model.ConsistencyLevelPolicy)
-   */
-  @Override
-  public KeyspaceOperator createKeyspaceOperator(Cluster cluster,
-      ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return HFactory.createKeyspaceOperator(keyspace, cluster, consistencyLevelPolicy);
+  private void initKeyspaceOperator() {
+    ConsistencyLevelPolicy clPolicy;
+    if (configurableConsistencyLevelPolicy == null) {
+      clPolicy = HFactory.createDefaultConsistencyLevelPolicy();
+    } else {
+      clPolicy = configurableConsistencyLevelPolicy;
+    }
+    keyspaceOperator = HFactory.createKeyspaceOperator(keyspace, cluster, clPolicy);
   }
 
   /*
@@ -98,12 +107,12 @@ public class HectorTemplateImpl implements HectorTemplate {
    */
   @Override
   public <K, N, V> ColumnQuery<K, N, V> createColumnQuery() {
-    return new ThriftTypeInferringColumnQuery<K, N, V>(keyspaceOperator);
+    return new ThriftColumnQuery<K, N, V>(keyspaceOperator);
   }
 
   @Override
   public <K, N, V> ColumnQuery<K, N, V> createColumnQuery(Serializer<V> valueSerializer) {
-    return new ThriftTypeInferringColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
+    return new ThriftColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
   }
 
   /*
@@ -380,7 +389,7 @@ public class HectorTemplateImpl implements HectorTemplate {
    */
   @Override
   public <N, V> HColumn<N, V> createColumn(N name, V value) {
-    return new TypeInferringHColumn<N, V>(name, value, createClock());
+    return new HColumn<N, V>(name, value, createClock());
   }
 
   /*
@@ -434,20 +443,39 @@ public class HectorTemplateImpl implements HectorTemplate {
     Validate.noNullElements(elements);
   }
 
+  @Override
+  public <K, N, V> Mutator<K> createMutator() {
+    return new Mutator<K>(keyspaceOperator);
+  }
+
+  @Override
+  public <K, N> IndexedSlicesQuery<K, N> createIndexSlicesQuery(Serializer<K> keySerializer, Serializer<N> nameSerializer) {
+    return new IndexedSlicesQuery<K, N>(keyspaceOperator, keySerializer, nameSerializer);
+  }
+
+  @Override
+  public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
+      List<HColumn<N, V>> columns) {
+    return createSuperColumn(name, columns, TypeInferringSerializer.<SN>get(), TypeInferringSerializer.<N>get(), TypeInferringSerializer.<V>get());
+  }
+
+  @Override
+  public <K> SliceQuery<K, byte[], byte[]> createSliceQuery() {
+    return createSliceQuery(TypeInferringSerializer.<K>get(), BytesSerializer.get(), BytesSerializer.get());
+  }
+
+
+  @Override
+  public <K> SuperSliceQuery<K, byte[], byte[], byte[]> createSuperSliceQuery() {
+    return createSuperSliceQuery(TypeInferringSerializer.<K>get(), BytesSerializer.get(), BytesSerializer.get(), BytesSerializer.get());
+  }
+
   public String getKeyspace() {
     return keyspace;
   }
 
   public void setKeyspace(String keyspace) {
     this.keyspace = keyspace;
-  }
-
-  public Cluster getCluser() {
-    return cluser;
-  }
-
-  public void setCluser(Cluster cluser) {
-    this.cluser = cluser;
   }
 
   public KeyspaceOperator getKeyspaceOperator() {
@@ -458,18 +486,36 @@ public class HectorTemplateImpl implements HectorTemplate {
     this.keyspaceOperator = keyspaceOperator;
   }
 
-  @Override
-  public <K, N, V> Mutator<K> createMutator() {
-    return new TypeInferringMutator<K>(keyspaceOperator);
+  public ConfigurableConsistencyLevel getConfigurableConsistencyLevelPolicy() {
+    return configurableConsistencyLevelPolicy;
   }
 
-  @Override
+  public void setConfigurableConsistencyLevelPolicy(
+      ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
+    this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
+  }
+
+  public String getReplicationStrategyClass() {
+    return replicationStrategyClass;
+  }
+
+  public void setReplicationStrategyClass(String replicationStrategyClass) {
+    this.replicationStrategyClass = replicationStrategyClass;
+  }
+
+  public int getReplicationFactor() {
+    return replicationFactor;
+  }
+
+  public void setReplicationFactor(int replicationFactor) {
+    this.replicationFactor = replicationFactor;
+  }
+
   public Cluster getCluster() {
-    return cluser;
+    return cluster;
   }
 
-  @Override
-  public HectorTemplateFactory getFactory() {
-    return factory;
+  public void setCluster(Cluster cluster) {
+    this.cluster = cluster;
   }
 }

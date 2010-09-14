@@ -2,11 +2,10 @@ package me.prettyprint.cassandra.service.spring;
 
 import java.util.List;
 
-import me.prettyprint.cassandra.model.ConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.CountQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.MultigetSubSliceQuery;
 import me.prettyprint.cassandra.model.MultigetSuperSliceQuery;
@@ -25,6 +24,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
 
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Clock;
 
 /**
@@ -36,18 +36,6 @@ import org.apache.cassandra.thrift.Clock;
  *
  */
 public interface HectorTemplate {
-
-  /**
-   * Creates a KeyspaceOperator with the default consistency level policy.
-   *
-   * @param keyspace
-   * @param cluster
-   * @return
-   */
-  KeyspaceOperator createKeyspaceOperator(Cluster cluster);
-
-  KeyspaceOperator createKeyspaceOperator(Cluster cluster,
-      ConsistencyLevelPolicy consistencyLevelPolicy);
 
   <K, N, V> Mutator<K> createMutator(Serializer<K> keySerializer);
 
@@ -93,11 +81,17 @@ public interface HectorTemplate {
   <K, N, V> SliceQuery<K, N, V> createSliceQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer);
 
+  <K> SliceQuery<K, byte[], byte[]> createSliceQuery();
+
   <K, SN, N, V> SubSliceQuery<K, SN, N, V> createSubSliceQuery(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer);
 
   <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer);
+
+  <K> SuperSliceQuery<K, byte[], byte[], byte[]> createSuperSliceQuery();
+
+  <K, N> IndexedSlicesQuery<K, N> createIndexSlicesQuery(Serializer<K> keySerializer, Serializer<N> nameSerializer);
 
   /**
    * createSuperColumn accepts a variable number of column arguments
@@ -110,6 +104,8 @@ public interface HectorTemplate {
   <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns,
       Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer);
+
+  <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns);
 
   <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns,
       Clock clock, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
@@ -131,5 +127,9 @@ public interface HectorTemplate {
 
   Cluster getCluster();
 
-  HectorTemplateFactory getFactory();
+  String getReplicationStrategyClass();
+
+  int getReplicationFactor();
+
+  String getKeyspace();
 }
