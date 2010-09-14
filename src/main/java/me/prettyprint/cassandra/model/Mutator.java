@@ -27,7 +27,7 @@ public class Mutator<K> {
 
   private final KeyspaceOperator ko;
 
-  protected Serializer<K> keySerializer;
+  protected final Serializer<K> keySerializer;
 
   private BatchMutation<K> pendingMutations;
 
@@ -61,7 +61,7 @@ public class Mutator<K> {
  * @param <N> subcolumn type
  */
   public <SN,N> MutationResult subDelete(final K key, final String cf, final SN supercolumnName,
-      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer, final Serializer<K> keySerializer) {
+      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {

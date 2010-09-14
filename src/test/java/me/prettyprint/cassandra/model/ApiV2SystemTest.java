@@ -177,7 +177,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // remove value
     m = createMutator(ko, se);
-    m.subDelete("testSuperInsertGetRemove", cf, "testSuperInsertGetRemove", null, se, se, se);
+    m.subDelete("testSuperInsertGetRemove", cf, "testSuperInsertGetRemove", null, se, se);
 
     // test after removal
     r = q.execute();
