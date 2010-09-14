@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Arrays;
 
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 
@@ -32,6 +33,10 @@ public class Mutator<K> {
   public Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
     this.ko = ko;
     this.keySerializer = keySerializer;
+  }
+
+  public Mutator(KeyspaceOperator ko) {
+    this(ko, TypeInferringSerializer.<K> get());
   }
 
   // Simple and immediate insertion of a column
@@ -95,7 +100,7 @@ public class Mutator<K> {
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = columnName != null ? new Deletion(ko.createClock()).setPredicate(sp) : new Deletion(ko.createClock()); 
+    Deletion d = columnName != null ? new Deletion(ko.createClock()).setPredicate(sp) : new Deletion(ko.createClock());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

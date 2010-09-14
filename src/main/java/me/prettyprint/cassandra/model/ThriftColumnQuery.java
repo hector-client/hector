@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.hector.api.query.ColumnQuery;
 
@@ -20,6 +22,17 @@ public class ThriftColumnQuery<K, N, V> extends AbstractColumnQuery<K, N, V>
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(keyspaceOperator, keySerializer, nameSerializer, valueSerializer);
+  }
+
+  public ThriftColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<V> valueSerializer) {
+    super(keyspaceOperator, TypeInferringSerializer.<K>get(), TypeInferringSerializer.<N>get(),
+        valueSerializer);
+  }
+
+  @SuppressWarnings("unchecked")
+  public ThriftColumnQuery(KeyspaceOperator keyspaceOperator) {
+    super(keyspaceOperator, TypeInferringSerializer.<K> get(), TypeInferringSerializer.<N> get(),
+        (Serializer<V>) StringSerializer.get());
   }
 
   @Override
