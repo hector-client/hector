@@ -68,7 +68,6 @@ import org.apache.cassandra.thrift.SliceRange;
    * @return
    */
   public HSlicePredicate<N> setRange(N start, N finish, boolean reversed, int count) {
-    Assert.noneNull(start, finish);
     this.start = start;
     this.finish = finish;
     this.reversed = reversed;
