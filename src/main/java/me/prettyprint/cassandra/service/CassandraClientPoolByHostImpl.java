@@ -94,7 +94,7 @@ import com.google.common.collect.ImmutableSet;
       client.markAsBorrowed();
       liveClientsFromPool.add(client);
       if ( log.isDebugEnabled() ) {
-        log.debug("Client {} successfully borrowed from {} (thread={})",          
+        log.debug("Client {} successfully borrowed from {} (thread={})",
           new Object[] {client, this, Thread.currentThread().getName()});
       }
       return client;
@@ -233,20 +233,12 @@ import com.google.common.collect.ImmutableSet;
   }
 
   @Override
-  public void invalidateClient(CassandraClient client) {
+  public void invalidateClient(final CassandraClient client) {
     if ( log.isDebugEnabled() ) {
       log.debug("Invalidating client {}", client);
     }
-    try {
-      liveClientsFromPool.remove(client);
-      client.markAsError();
-      if (!client.isReleased()) {
-        client.markAsReleased();
-        pool.invalidateObject(client);
-      }
-    } catch (Exception e) {
-      log.error("Unable to invalidate client " + client, e);
-    }
+    liveClientsFromPool.remove(client);
+    internalInvalidateClient(client);
   }
 
   @Override
@@ -264,15 +256,29 @@ import com.google.common.collect.ImmutableSet;
   @Override
   public void invalidateAll() {
     if ( log.isDebugEnabled() ) {
-      log.debug("Invalidating all connections at {} (thread={})", this,
-          Thread.currentThread().getName());
-    }      
-    while (!liveClientsFromPool.isEmpty()) {
-      //TODO(ran): There's a multithreading sync issue here.
-      invalidateClient(liveClientsFromPool.iterator().next());
+      log.debug("Invalidating all connections at {} (thread={})", this, Thread.currentThread().getName());
+    }
+    if (!liveClientsFromPool.isEmpty()) {
+      final Set<CassandraClient> clients = getLiveClients(); // makes a copy of all clients
+      liveClientsFromPool.clear(); // clear pool
+      // invalidate all clients
+      for (final CassandraClient cassandraClient : clients) {
+        internalInvalidateClient(cassandraClient);
+      }
     }
   }
 
+  private void internalInvalidateClient(final CassandraClient client) {
+    try {
+      client.markAsError();
+      if ( !client.isReleased() ) {
+        client.markAsReleased();
+        pool.invalidateObject(client);
+      }
+    } catch (final Exception e) {
+      log.error("Unable to invalidate client " + client, e);
+    }
+  }
   public Long getMinEvictableIdleTimeMillis() {
     return minEvictableIdleTimeMillis;
   }
