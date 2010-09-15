@@ -81,6 +81,7 @@ import com.google.common.collect.ImmutableSet;
   }
 
 
+  @Override
   public CassandraClient borrowClient() throws HectorException {
     if ( log.isDebugEnabled() ) {
       log.debug("Borrowing client from {}", this);
@@ -94,7 +95,7 @@ import com.google.common.collect.ImmutableSet;
       client.markAsBorrowed();
       liveClientsFromPool.add(client);
       if ( log.isDebugEnabled() ) {
-        log.debug("Client {} successfully borrowed from {} (thread={})",          
+        log.debug("Client {} successfully borrowed from {} (thread={})",
           new Object[] {client, this, Thread.currentThread().getName()});
       }
       return client;
@@ -133,6 +134,7 @@ import com.google.common.collect.ImmutableSet;
   }
 
 
+  @Override
   public void close() {
     try {
       pool.close();
@@ -142,21 +144,25 @@ import com.google.common.collect.ImmutableSet;
   }
 
 
+  @Override
   public int getNumIdle() {
     return pool.getNumIdle();
   }
 
 
+  @Override
   public int getNumActive() {
     return pool.getNumActive();
   }
 
 
+  @Override
   public int getNumBeforeExhausted() {
     return maxActive - pool.getNumActive();
   }
 
 
+  @Override
   public void releaseClient(CassandraClient client) throws HectorException {
     if ( log.isDebugEnabled() ) {
       log.debug("Maybe releasing client {}. is aready Released? {}", client, client.isReleased());
@@ -205,16 +211,19 @@ import com.google.common.collect.ImmutableSet;
   }
 
 
+  @Override
   public String toString() {
     return String.format("CassandraClientPoolImpl<%s>", name);
   }
 
 
+  @Override
   public String getName() {
     return name;
   }
 
 
+  @Override
   public boolean isExhausted() {
     return getNumBeforeExhausted() <= 0 &&
         (exhaustedPolicy.equals(ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK) ||
@@ -222,34 +231,29 @@ import com.google.common.collect.ImmutableSet;
   }
 
 
+  @Override
   public int getNumBlockedThreads() {
     return blockedThreadsCount.intValue();
   }
 
 
 
+  @Override
   public CassandraHost getCassandraHost() {
     return cassandraHost;
   }
 
-
-  public void invalidateClient(CassandraClient client) {
+  @Override
+  public void invalidateClient(final CassandraClient client) {
     if ( log.isDebugEnabled() ) {
       log.debug("Invalidating client {}", client);
     }
-    try {
-      liveClientsFromPool.remove(client);
-      client.markAsError();
-      if (!client.isReleased()) {
-        client.markAsReleased();
-        pool.invalidateObject(client);
-      }
-    } catch (Exception e) {
-      log.error("Unable to invalidate client " + client, e);
-    }
+    liveClientsFromPool.remove(client);
+    internalInvalidateClient(client);
   }
 
 
+  @Override
   public Set<CassandraClient> getLiveClients() {
     return ImmutableSet.copyOf(liveClientsFromPool);
   }
@@ -262,17 +266,32 @@ import com.google.common.collect.ImmutableSet;
   }
 
 
+  @Override
   public void invalidateAll() {
     if ( log.isDebugEnabled() ) {
-      log.debug("Invalidating all connections at {} (thread={})", this,
-          Thread.currentThread().getName());
-    }      
-    while (!liveClientsFromPool.isEmpty()) {
-      //TODO(ran): There's a multithreading sync issue here.
-      invalidateClient(liveClientsFromPool.iterator().next());
+      log.debug("Invalidating all connections at {} (thread={})", this, Thread.currentThread().getName());
+    }
+    if (!liveClientsFromPool.isEmpty()) {
+      final Set<CassandraClient> clients = getLiveClients(); // makes a copy of all clients
+      liveClientsFromPool.clear(); // clear pool
+      // invalidate all clients
+      for (final CassandraClient cassandraClient : clients) {
+        internalInvalidateClient(cassandraClient);
+      }
     }
   }
 
+  private void internalInvalidateClient(final CassandraClient client) {
+    try {
+      client.markAsError();
+      if ( !client.isReleased() ) {
+        client.markAsReleased();
+        pool.invalidateObject(client);
+      }
+    } catch (final Exception e) {
+      log.error("Unable to invalidate client " + client, e);
+    }
+  }
   public Long getMinEvictableIdleTimeMillis() {
     return minEvictableIdleTimeMillis;
   }

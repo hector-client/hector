@@ -8,6 +8,10 @@ Changes by version:
 0.6.0-16
 ========
 Add CountQuery, SuperCountQuery and SubCountQuery
+Move all the API stuff to me.prettyprint.hector.api.*. Extract interfaces and prepare the ground for more avro good.
+Rename a few exceptions to begin with HSomething so they are hard to unintentionally mix with their thrift doubles.
+
+
 
 0.6.0-15
 ========
