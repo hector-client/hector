@@ -75,7 +75,9 @@ public final class Cluster {
   public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
       knownPoolHosts = pool.getKnownHosts();
-      log.info("found knownPoolHosts: {}", knownPoolHosts);
+      if ( log.isInfoEnabled() ) {
+        log.info("found knownPoolHosts: {}", knownPoolHosts);
+      }
     }
     return knownPoolHosts;
   }
