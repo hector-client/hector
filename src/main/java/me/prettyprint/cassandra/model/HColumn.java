@@ -23,6 +23,7 @@ public class HColumn<N,V> {
   private N name;
   private V value;
   private Clock clock;
+  private int ttl;
   private Serializer<N> nameSerializer;
   private Serializer<V> valueSerializer;
 
@@ -31,7 +32,7 @@ public class HColumn<N,V> {
     this(nameSerializer, valueSerializer);
     notNull(name, "name is null");
     notNull(value, "value is null");
-
+    
     this.name = name;
     this.value = value;
     this.clock = clock;
@@ -74,7 +75,16 @@ public class HColumn<N,V> {
     this.clock = clock;
     return this;
   }
+  
+  HColumn<N,V> setTtl(int ttl) {
+    this.ttl = ttl;
+    return this;
+  }
 
+  public int getTtl() {
+    return ttl;
+  }
+  
   public N getName() {
     return name;
   }
@@ -88,13 +98,16 @@ public class HColumn<N,V> {
   }
 
   public Column toThrift() {
-    return new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock);
+    return ttl > 0 ? new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock).setTtl(ttl) :
+      new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock);
   }
 
   public HColumn<N, V> fromThrift(Column c) {
     notNull(c, "column is null");
     name = nameSerializer.fromBytes(c.name);
     value = valueSerializer.fromBytes(c.value);
+    clock = c.clock;
+    ttl = c.ttl;
     return this;
   }
 
