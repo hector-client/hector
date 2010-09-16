@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
@@ -19,7 +21,7 @@ public final class SubCountQuery<SN> extends AbstractCountQuery implements Query
 
   private SN superColumnName;
 
-  /*package*/ SubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameSerializer) {
+  public SubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameSerializer) {
     super(ko);
     Assert.notNull(superNameSerializer, "superNameSerializer is null");
     this.superNameSerializer = superNameSerializer;

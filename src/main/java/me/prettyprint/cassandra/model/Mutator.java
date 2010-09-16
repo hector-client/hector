@@ -1,11 +1,11 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
-
 import java.util.Arrays;
 
+import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -29,7 +29,7 @@ public final class Mutator {
 
   private BatchMutation pendingMutations;
 
-  /*package*/ Mutator(KeyspaceOperator ko) {
+  public Mutator(KeyspaceOperator ko) {
     this.ko = ko;
   }
 
@@ -52,12 +52,18 @@ public final class Mutator {
     return execute();
   }
 
-  public <SN,N> MutationResult superDelete(final String key, final String cf, final SN supercolumnName,
+  /**
+   * Deletes a subcolumn of a supercolumn
+   * @param <SN> super column type
+   * @param <N> subcolumn type
+   */
+  public <SN,N> MutationResult subDelete(final String key, final String cf, final SN supercolumnName,
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
     return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(Keyspace ks) throws HectorException {
-        ks.remove(key, createSuperColumnPath(cf, supercolumnName, columnName, sNameSerializer, nameSerializer));
+        ks.remove(key, ThriftFactory.createSuperColumnPath(cf, supercolumnName, columnName,
+            sNameSerializer, nameSerializer));
         return null;
       }
     }));
@@ -84,7 +90,7 @@ public final class Mutator {
   public <N> Mutator addDeletion(String key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = new Deletion(ko.createTimestamp()).setPredicate(sp);
+    Deletion d = columnName != null ? new Deletion(ko.createTimestamp()).setPredicate(sp) : new Deletion(ko.createTimestamp());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

@@ -5,6 +5,7 @@ import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 public /*final*/ class KeyspaceOperator {
 
@@ -13,7 +14,7 @@ public /*final*/ class KeyspaceOperator {
   private final Cluster cluster;
   private final String keyspace;
 
-  /*package*/ KeyspaceOperator(String keyspace, Cluster cluster,
+  public KeyspaceOperator(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
     Assert.noneNull(keyspace, cluster, consistencyLevelPolicy);
     this.keyspace = keyspace;
@@ -38,7 +39,7 @@ public /*final*/ class KeyspaceOperator {
     return cluster.createTimestamp();
   }
 
-  /*package*/ <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
+  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     CassandraClient c = null;
     Keyspace ks = null;
     try {
@@ -46,7 +47,9 @@ public /*final*/ class KeyspaceOperator {
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
         return koc.doInKeyspaceAndMeasure(ks);
     } finally {
-      cluster.releaseClient(ks.getClient());
+      if ( ks != null ) {
+        cluster.releaseClient(ks.getClient());
+      }
     }
   }
 }

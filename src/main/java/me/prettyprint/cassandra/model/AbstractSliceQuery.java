@@ -3,9 +3,11 @@ package me.prettyprint.cassandra.model;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -41,6 +43,10 @@ import org.apache.cassandra.thrift.SliceRange;
     this.columnNames = Arrays.asList(columnNames);
     useColumnNames = true;
     return this;
+  }
+
+  public Collection<N> getColumnNames() {
+    return Collections.unmodifiableCollection(columnNames);
   }
 
   /**

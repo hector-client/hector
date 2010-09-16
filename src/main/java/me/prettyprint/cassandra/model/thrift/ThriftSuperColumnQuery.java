@@ -1,35 +1,35 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumnPath;
-import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
+import me.prettyprint.cassandra.model.AbstractSuperColumnQuery;
+import me.prettyprint.cassandra.model.HSuperColumn;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.SuperColumn;
 
-public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColumn <SN,N,V>>
-    implements Query<HSuperColumn<SN,N,V>> {
+/**
+ * Thrift implementation of the SuperColumnQuery
+ *
+ * @author Ran Tavory
+ *
+ * @param <SN>
+ * @param <N>
+ * @param <V>
+ */
+public final class ThriftSuperColumnQuery<SN,N,V> extends AbstractSuperColumnQuery<SN, N, V>
+    implements SuperColumnQuery<SN, N, V> {
 
-  private final Serializer<SN> sNameSerializer;
-  private String key;
-  private SN superName;
-
-  /*package*/ public SuperColumnQuery(KeyspaceOperator keyspaceOperator,
+  /*package*/ public ThriftSuperColumnQuery(KeyspaceOperator keyspaceOperator,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(keyspaceOperator, nameSerializer, valueSerializer);
-    noneNull(sNameSerializer, nameSerializer, valueSerializer);
-    this.sNameSerializer = sNameSerializer;
-  }
-
-  public SuperColumnQuery<SN,N,V> setKey(String key) {
-    this.key = key;
-    return this;
-  }
-
-  public SuperColumnQuery<SN,N,V> setSuperName(SN superName) {
-    this.superName = superName;
-    return this;
+    super(keyspaceOperator, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   @Override
@@ -41,7 +41,7 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
           @Override
           public HSuperColumn<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
             try {
-              ColumnPath cpath = createSuperColumnPath(columnFamilyName, superName, (N) null,
+              ColumnPath cpath = ThriftFactory.createSuperColumnPath(columnFamilyName, superName, (N) null,
                   sNameSerializer, columnNameSerializer);
               SuperColumn thriftSuperColumn = ks.getSuperColumn(key, cpath);
               if (thriftSuperColumn == null) {
@@ -49,15 +49,10 @@ public final class SuperColumnQuery<SN,N,V> extends AbstractQuery<N,V,HSuperColu
               }
               return new HSuperColumn<SN, N, V>(thriftSuperColumn, sNameSerializer, columnNameSerializer,
                   valueSerializer);
-            } catch (NotFoundException e) {
+            } catch (HNotFoundException e) {
               return null;
             }
           }
         }), this);
-  }
-
-  @Override
-  public String toString() {
-    return "SuperColumnQuery(" + key + "," + superName + ")";
   }
 }

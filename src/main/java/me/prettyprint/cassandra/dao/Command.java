@@ -1,11 +1,11 @@
 package me.prettyprint.cassandra.dao;
 
-import me.prettyprint.cassandra.model.HectorException;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 

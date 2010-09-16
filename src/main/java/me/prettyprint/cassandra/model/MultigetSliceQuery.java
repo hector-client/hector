@@ -8,6 +8,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -19,7 +20,7 @@ public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N
 
   private Collection<String> keys;
 
-  /*package*/ MultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer,
+  public MultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
   }

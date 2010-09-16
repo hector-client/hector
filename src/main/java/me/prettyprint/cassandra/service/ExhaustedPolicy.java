@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.model.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 /**
  * Policy what to do when the connection pool is exhausted.

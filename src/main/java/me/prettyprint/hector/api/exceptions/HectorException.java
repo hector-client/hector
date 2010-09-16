@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api.exceptions;
 
 /**
  * Base exception class for all Hector related exceptions.

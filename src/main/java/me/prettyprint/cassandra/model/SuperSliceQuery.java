@@ -4,6 +4,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -24,7 +25,7 @@ public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperS
   private String key;
   private final Serializer<SN> sNameSerializer;
 
-  /*package*/ SuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public SuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");

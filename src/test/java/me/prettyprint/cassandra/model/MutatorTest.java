@@ -1,10 +1,10 @@
 package me.prettyprint.cassandra.model;
 
-import static me.prettyprint.cassandra.model.HFactory.createColumn;
-import static me.prettyprint.cassandra.model.HFactory.createKeyspaceOperator;
-import static me.prettyprint.cassandra.model.HFactory.createMutator;
-import static me.prettyprint.cassandra.model.HFactory.createSuperColumn;
-import static me.prettyprint.cassandra.model.HFactory.getOrCreateCluster;
+import static me.prettyprint.hector.api.factory.HFactory.createColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspaceOperator;
+import static me.prettyprint.hector.api.factory.HFactory.createMutator;
+import static me.prettyprint.hector.api.factory.HFactory.createSuperColumn;
+import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;

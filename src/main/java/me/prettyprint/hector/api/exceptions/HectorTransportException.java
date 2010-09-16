@@ -1,4 +1,5 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api.exceptions;
+
 
 
 /**

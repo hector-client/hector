@@ -4,14 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
-import me.prettyprint.cassandra.model.InvalidRequestException;
-import me.prettyprint.cassandra.model.PoolExhaustedException;
-import me.prettyprint.cassandra.model.TimedOutException;
-import me.prettyprint.cassandra.model.UnavailableException;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
+import me.prettyprint.hector.api.exceptions.HUnavailableException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.perf4j.StopWatch;
@@ -41,6 +42,18 @@ import org.slf4j.LoggerFactory;
 
   private CassandraClient client;
 
+  /**
+   * A reference to the "current host".
+   * The current host under normal conditions is just <code>client.getCassandraHost()</code> however
+   * when skipNextHost is invoked the client.getCassandraHost may differ from currentHost. This can
+   * happen when there was an exception chen borrowing the client, so currentHost is what the client
+   * SHOULD have been if the operation was successful, while the client stays at the previous client.
+   *
+   * currentHost is used as a pointer to the "last host we tried connecting to or sending an
+   * operation to" and by which skipNextHost is operating.
+   */
+  private CassandraHost currentHost;
+
   private final CassandraClientPool clientPools;
 
   /**
@@ -58,10 +71,12 @@ import org.slf4j.LoggerFactory;
    */
   public FailoverOperator(FailoverPolicy policy, CassandraClientMonitor monitor,
       CassandraClient client, CassandraClientPool clientPools, Keyspace keyspace) {
+    Assert.noneNull(policy, monitor, client, clientPools /* keyspace may be null*/);
     this.failoverPolicy = policy;
     this.knownHosts = new ArrayList<CassandraHost>(clientPools.getKnownHosts());
     this.monitor = monitor;
     this.client = client;
+    currentHost = client.getCassandraHost();
     this.clientPools = clientPools;
     this.keyspace = keyspace;
   }
@@ -69,7 +84,7 @@ import org.slf4j.LoggerFactory;
   /**
    * Performs the operation and retries in in case the class is configured for
    * retries, and there are enough hosts to try and the error was
-   * {@link TimedOutException}.
+   * {@link HTimedOutException}.
    */
   public CassandraClient operate(Operation<?> op) throws HectorException {
     final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
@@ -92,11 +107,11 @@ import org.slf4j.LoggerFactory;
         sleepBetweenHostSkips();
         isFirst = false;
       }
-    } catch (InvalidRequestException e) {
+    } catch (HInvalidRequestException e) {
       monitor.incCounter(op.failCounter);
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       throw e;
-    } catch (UnavailableException e) {
+    } catch (HUnavailableException e) {
       invalidate();
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
@@ -106,7 +121,7 @@ import org.slf4j.LoggerFactory;
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
       throw e;
-    } catch (TimedOutException e) {
+    } catch (HTimedOutException e) {
       invalidate();
       stopWatch.stop(op.stopWatchTagName + ".fail_");
       monitor.incCounter(op.failCounter);
@@ -166,7 +181,7 @@ import org.slf4j.LoggerFactory;
    */
   private boolean operateSingleIteration(Operation<?> op, final StopWatch stopWatch,
       int retries, boolean isFirst) throws HectorException,
-      PoolExhaustedException, Exception, UnavailableException, HectorTransportException {
+      PoolExhaustedException, Exception, HUnavailableException, HectorTransportException {
     if ( log.isDebugEnabled() ) {
       log.debug("Performing operation on {}; retries: {}", client.getCassandraHost().getUrl(), retries);
     }
@@ -180,7 +195,7 @@ import org.slf4j.LoggerFactory;
       }
       stopWatch.stop(op.stopWatchTagName + ".success_");
       return true;
-    } catch (TimedOutException e) {
+    } catch (HTimedOutException e) {
       log.warn("Got a TimedOutException from {}. Num of retries: {} (thread={})",
           new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
@@ -189,7 +204,7 @@ import org.slf4j.LoggerFactory;
         skipToNextHost(isFirst, false);
         monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
       }
-    } catch (UnavailableException e) {
+    } catch (HUnavailableException e) {
       log.warn("Got a UnavailableException from {}. Num of retries: {} (thread={})",
           new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
       if (retries == 0) {
@@ -199,8 +214,10 @@ import org.slf4j.LoggerFactory;
         monitor.incCounter(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS);
       }
     } catch (HectorTransportException e) {
-      log.warn("Got a HectorTException from {}. Num of retries: {} (thread={})",
-          new Object[]{client.getCassandraHost().getUrl(), retries, Thread.currentThread().getName()});
+      log.warn("Got a HectorTException from {}. Num of retries: {}; message: {}; cause: {} " +
+      		"(thread={})",
+          new Object[]{client.getCassandraHost().getUrl(), retries, e.getMessage(), e.getCause(),
+                       Thread.currentThread().getName()});
       if (retries == 0) {
         throw e;
       } else {
@@ -224,6 +241,8 @@ import org.slf4j.LoggerFactory;
    */
   private void skipToNextHost(boolean isRetrySameHostAgain,
       boolean invalidateAllConnectionsToCurrentHost) throws SkipHostException {
+    Assert.notNull(currentHost, "currentHost is null");
+
     if ( log.isInfoEnabled() ) {
       log.info("Skipping to next host (thread={}). Current host is: {}",
           Thread.currentThread().getName(), client.getCassandraHost().getUrl());
@@ -233,16 +252,15 @@ import org.slf4j.LoggerFactory;
       clientPools.invalidateAllConnectionsToHost(client);
     }
 
-    CassandraHost nextHost = isRetrySameHostAgain ? client.getCassandraHost() :
-      getNextHost(client.getCassandraHost());
+    CassandraHost nextHost = isRetrySameHostAgain ? currentHost : getNextHost(currentHost);
     if (nextHost == null) {
       log.error("Unable to find next host to skip to at {}", toString());
       throw new SkipHostException("Unable to failover to next host");
     }
 
-
     // assume all hosts in the ring use the same port (cassandra's API only provides IPs, not ports)
     try {
+      currentHost = nextHost;
       client = clientPools.borrowClient(nextHost);
     } catch (IllegalStateException e) {
       throw new SkipHostException(e);

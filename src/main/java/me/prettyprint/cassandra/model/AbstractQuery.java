@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.query.Query;
 
 public abstract class AbstractQuery<N,V,T> implements Query<T>{
 
@@ -18,7 +19,7 @@ public abstract class AbstractQuery<N,V,T> implements Query<T>{
     this.valueSerializer = valueSerializer;
   }
 
-  public AbstractQuery<N,V,T> setColumnFamily(String cf) {
+  public Query<T> setColumnFamily(String cf) {
     this.columnFamilyName = cf;
     return this;
   }

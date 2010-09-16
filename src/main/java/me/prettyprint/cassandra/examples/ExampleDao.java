@@ -3,16 +3,16 @@ package me.prettyprint.cassandra.examples;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.dao.Command;
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.NotFoundException;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.ColumnPath;
 
 /**
  * An example DAO (data access object) which uses the Command pattern.
  * <p/>
- * This DAO is simple, it provides a get/insert/delte API for String values.
+ * This DAO is simple, it provides a get/insert/delete API for String values.
  * The underlying cassandra implementation stores the values under Keyspace1.key.Standard1.v
  * where key is the value's key, Standard1 is the name of the column family and "v" is just a column
  * name that's used to hold the value.
@@ -25,7 +25,9 @@ import org.apache.cassandra.thrift.ColumnPath;
  * the {@link Keyspace} instance and releasing it after the operation completes.
  *
  * @author Ran Tavory (rantav@gmail.com)
+ * @deprecated use ExampleDaoV2
  */
+@Deprecated
 public class ExampleDao {
 
   private final static String CASSANDRA_KEYSPACE = "Keyspace1";
@@ -69,7 +71,7 @@ public class ExampleDao {
       public String execute(final Keyspace ks) throws HectorException {
         try {
           return string(ks.getColumn(key, createColumnPath(COLUMN_NAME)).getValue());
-        } catch (NotFoundException e) {
+        } catch (HNotFoundException e) {
           return null;
         }
       }

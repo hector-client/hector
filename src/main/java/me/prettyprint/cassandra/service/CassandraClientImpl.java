@@ -9,9 +9,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
-import me.prettyprint.cassandra.model.NotFoundException;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
@@ -99,14 +99,14 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Keyspace getKeyspace(String keySpaceName, ConsistencyLevel consistency) throws IllegalArgumentException,
-      NotFoundException, HectorTransportException {
+      HNotFoundException, HectorTransportException {
     return getKeyspace(keySpaceName, consistency, DEFAULT_FAILOVER_POLICY);
   }
 
   @Override
   public Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy)
-      throws IllegalArgumentException, NotFoundException, HectorTransportException {
+      throws IllegalArgumentException, HNotFoundException, HectorTransportException {
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
     KeyspaceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
@@ -118,7 +118,7 @@ import org.slf4j.LoggerFactory;
         } catch (TException e) {
           throw new HectorTransportException(e);
         } catch (org.apache.cassandra.thrift.NotFoundException e) {
-          throw new NotFoundException(e);
+          throw new HNotFoundException(e);
         }
         KeyspaceImpl tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
         if (tmp != null) {

@@ -10,13 +10,13 @@ import org.slf4j.LoggerFactory;
 /**
  * Encapsulates the information required for connecting to a Cassandra host.
  * Also exposes pool configuration parameters for that host.
- * 
+ *
  * @author zznate(nate@riptano.com)
  *
  */
 public final class CassandraHost {
   private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
-  
+
   /**
    * The default port number to which we will connect
    */
@@ -36,8 +36,8 @@ public final class CassandraHost {
   public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
 
   /**
-   * The default max idle number is 5, so if clients keep idle, the total connection
-   * number will decrease to 5
+   * The default max idle number determines how many idle connections may reside in the pool.
+   * If -1 then it's infinity.
    */
   public static final int DEFAULT_MAX_IDLE = -1;
 

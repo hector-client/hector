@@ -8,6 +8,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -21,7 +22,7 @@ public final class MultigetSuperSliceQuery<SN, N, V> extends
   private Collection<String> keys;
   private final Serializer<N> nameSerializer;
 
-  /*package*/MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public MultigetSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, sNameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "nameSerializer can't be null");

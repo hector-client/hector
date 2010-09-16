@@ -1,19 +1,20 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api.exceptions;
+
 
 /**
  * @author Ran Tavory (rantav@gmail.com)
  */
-public final class InvalidRequestException extends HectorException {
+public final class HInvalidRequestException extends HectorException {
 
   private static final long serialVersionUID = 7186392651338685069L;
 
   private String why;
 
-  public InvalidRequestException(String msg) {
+  public HInvalidRequestException(String msg) {
     super(msg);
     setWhy(msg);
   }
-  public InvalidRequestException(Throwable t) {
+  public HInvalidRequestException(Throwable t) {
     super(t);
   }
 

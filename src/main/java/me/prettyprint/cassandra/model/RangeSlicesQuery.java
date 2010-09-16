@@ -5,6 +5,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -21,7 +22,7 @@ public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedR
 
   private final HKeyRange keyRange;
 
-  /*package*/ RangeSlicesQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public RangeSlicesQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     keyRange = new HKeyRange();
   }

@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -19,7 +20,7 @@ public final class SliceQuery<N,V> extends AbstractSliceQuery<N,V,ColumnSlice<N,
 
   private String key;
 
-  /*package*/ SliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  /*package*/ public SliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
   }
 

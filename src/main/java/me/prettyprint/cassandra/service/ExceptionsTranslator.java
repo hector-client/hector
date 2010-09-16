@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.model.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 /**
  * Translates exceptions throw by thrift or pool to HectorException instances.

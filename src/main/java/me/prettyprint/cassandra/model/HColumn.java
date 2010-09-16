@@ -23,7 +23,7 @@ public final class HColumn<N,V> {
   private final Serializer<N> nameSerializer;
   private final Serializer<V> valueSerializer;
 
-  /*package*/ HColumn(N name, V value, long timestamp, Serializer<N> nameSerializer,
+  public HColumn(N name, V value, long timestamp, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(name, "name is null");
@@ -34,12 +34,13 @@ public final class HColumn<N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/ HColumn(Column thriftColumn, Serializer<N> nameSerializer,
+  public HColumn(Column thriftColumn, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");
     name = nameSerializer.fromBytes(thriftColumn.getName());
     value = valueSerializer.fromBytes(thriftColumn.getValue());
+    timestamp = thriftColumn.timestamp;
   }
 
   /*package*/ HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -74,7 +75,7 @@ public final class HColumn<N,V> {
     return value;
   }
 
-  long getTimestamp() {
+  public long getTimestamp() {
     return timestamp;
   }
 

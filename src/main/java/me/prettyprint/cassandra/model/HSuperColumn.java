@@ -37,7 +37,7 @@ public final class HSuperColumn<SN,N,V> {
    * @param Serializer<SN> the serializer type
    * @param timestamp
    */
-  /*package*/ HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
+  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     notNull(sName, "Name is null");
@@ -47,7 +47,7 @@ public final class HSuperColumn<SN,N,V> {
     this.timestamp = timestamp;
   }
 
-  /*package*/ HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
+  public HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     noneNull(thriftSuperColumn, sNameSerializer, nameSerializer, valueSerializer);

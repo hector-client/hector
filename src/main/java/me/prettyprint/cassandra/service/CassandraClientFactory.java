@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.service;
 
 
-import me.prettyprint.cassandra.model.HectorException;
-import me.prettyprint.cassandra.model.HectorTransportException;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.commons.pool.PoolableObjectFactory;
