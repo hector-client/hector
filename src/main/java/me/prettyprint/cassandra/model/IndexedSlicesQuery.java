@@ -31,7 +31,8 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
 
   private final IndexClause indexClause;
 
-  public IndexedSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public IndexedSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
     indexClause = new IndexClause();
   }
