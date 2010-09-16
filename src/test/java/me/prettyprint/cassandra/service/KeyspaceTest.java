@@ -135,46 +135,6 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     keyspace.remove("testInsertSuper_super", cp2);
   }
 
-  @Test
-  public void testValideColumnPath() throws HectorException {
-    // Try to insert invalid columns
-    // insert value
-    ColumnPath cp = new ColumnPath("Standard1");
-    cp.setColumn(bytes("testValideColumnPath"));
-    try {
-      keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
-      keyspace.remove("testValideColumnPath", cp);
-    } catch (HInvalidRequestException e) {
-      fail("Should not have thrown an error for Standard1");
-    }
-
-    cp = new ColumnPath("CFdoesNotExist");
-    cp.setColumn(bytes("testInsertAndGetAndRemove"));
-    try {
-      keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
-      fail("Should have failed with CFdoesNotExist");
-    } catch (HInvalidRequestException e) {
-      assertTrue(StringUtils.contains(e.getWhy(),"column family does not exist"));
-    }
-
-    cp = new ColumnPath("Standard1");
-    cp.setSuper_column(bytes("testInsertAndGetAndRemove"));
-    try {
-      keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
-      fail("Should have failed with supercolumn");
-    } catch (HInvalidRequestException e) {
-      assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have the right type"));
-    }
-
-    cp = new ColumnPath("Super1");
-    cp.setColumn(bytes("testInsertAndGetAndRemove"));
-    try {
-      keyspace.insert("testValideColumnPath", cp, bytes("testValideColumnPath_value"));
-      fail("Should have failed with supercolumn");
-    } catch (HInvalidRequestException e) {
-      assertTrue(StringUtils.contains(e.getWhy(),"Make sure you have"));
-    }
-  }
 
   @Test
   public void testBatchInsertColumn() throws HectorException {
