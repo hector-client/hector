@@ -7,6 +7,8 @@ import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.cassandra.thrift.Clock;
+
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.MultigetSliceQuery;

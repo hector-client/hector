@@ -41,7 +41,7 @@ public /*final*/ class KeyspaceOperator {
     return "KeyspaceOperator(" + keyspace +"," + cluster + ")";
   }
 
-  public Clock createClock() {
+  public long createClock() {
     return cluster.createClock();
   }
 

@@ -220,11 +220,11 @@ public interface Keyspace {
   FailoverPolicy getFailoverPolicy();
 
   /**
-   * Creates a clock.
+   * Creates a clock timestamp.
    * Clocks are created according to the system's current time milli and if needed are
    * multiplied by 1000 (if micro is required).
    * The clock resolution is determined by {@link me.prettyprint.cassandra.service.CassandraClient#getClockResolution()}
    * @return a clock!
    */
-  Clock createClock();
+  long createClock();
 }

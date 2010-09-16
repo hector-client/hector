@@ -24,8 +24,6 @@ import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
-import org.apache.cassandra.thrift.Clock;
-
 /**
  * The main interface used to operate with the underlying database.
  *
@@ -108,10 +106,10 @@ public interface HectorTemplate {
   <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns);
 
   <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns,
-      Clock clock, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
+      long clock, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer);
 
-  <N, V> HColumn<N, V> createColumn(N name, V value, Clock clock, Serializer<N> nameSerializer,
+  <N, V> HColumn<N, V> createColumn(N name, V value, long clock, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer);
 
   /**
@@ -123,7 +121,7 @@ public interface HectorTemplate {
    * Creates a clock of now with the default clock resolution (micorosec) as defined in
    * {@link CassandraHost}
    */
-  Clock createClock();
+  long createClock();
 
   Cluster getCluster();
 

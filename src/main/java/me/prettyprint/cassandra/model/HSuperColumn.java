@@ -27,7 +27,7 @@ public final class HSuperColumn<SN,N,V> {
 
   private SN superName;
   private List<HColumn<N,V>> columns;
-  private Clock clock;
+  private long clock;
   private final Serializer<SN> superNameSerializer;
   private final Serializer<N> nameSerializer;
   private final Serializer<V> valueSerializer;
@@ -38,7 +38,7 @@ public final class HSuperColumn<SN,N,V> {
    * @param Serializer<SN> the serializer type
    * @param clock
    */
-  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, Clock clock,
+  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, long clock,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     notNull(sName, "Name is null");
@@ -76,12 +76,12 @@ public final class HSuperColumn<SN,N,V> {
     return this;
   }
 
-  public HSuperColumn<SN, N, V> setClock(Clock clock) {
+  public HSuperColumn<SN, N, V> setClock(long clock) {
     this.clock = clock;
     return this;
   }
 
-  public Clock getClock() {
+  public long getClock() {
     return clock;
   }
 

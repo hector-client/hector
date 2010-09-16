@@ -347,7 +347,7 @@ import org.slf4j.LoggerFactory;
       if (columnPath.isSetSuper_column()) {
         columnParent.setSuper_column(columnPath.getSuper_column());
       }
-      Column column = new Column(columnPath.getColumn(), value, createClock());
+      Column column = new Column(columnPath.getColumn(), value, createClockInternal());
       insert(key.getBytes(), columnParent, column);
   }
 
@@ -507,7 +507,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void remove(byte[] key, ColumnPath columnPath) {
-    this.remove(key, columnPath, createClock());
+    this.remove(key, columnPath, createClockInternal());
   }
 
   @Override
@@ -619,8 +619,12 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Clock createClock() {
+  public long createClock() {
     return client.getClockResolution().createClock();
+  }
+  
+  private Clock createClockInternal() {
+    return new Clock(createClock());
   }
 
   private CfDef getCfDef(String cf) {

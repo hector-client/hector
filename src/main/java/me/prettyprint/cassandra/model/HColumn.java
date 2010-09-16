@@ -22,12 +22,12 @@ public class HColumn<N,V> {
 
   private N name;
   private V value;
-  private Clock clock;
+  private long clock;
   private int ttl;
   private Serializer<N> nameSerializer;
   private Serializer<V> valueSerializer;
 
-  public HColumn(N name, V value, Clock clock, Serializer<N> nameSerializer,
+  public HColumn(N name, V value, long clock, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(name, "name is null");
@@ -44,7 +44,7 @@ public class HColumn<N,V> {
     notNull(thriftColumn, "thriftColumn is null");
     name = nameSerializer.fromBytes(thriftColumn.getName());
     value = valueSerializer.fromBytes(thriftColumn.getValue());
-    clock = thriftColumn.clock;
+    clock = thriftColumn.clock.getTimestamp();
   }
 
   public HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -54,7 +54,7 @@ public class HColumn<N,V> {
     this.valueSerializer = valueSerializer;
   }
 
-  public HColumn(N name, V value, Clock clock) {
+  public HColumn(N name, V value, long clock) {
     this(name, value, clock, SerializerTypeInferer.<N>getSerializer(name),
         SerializerTypeInferer.<V>getSerializer(value));
   }
@@ -71,7 +71,7 @@ public class HColumn<N,V> {
     return this;
   }
 
-  HColumn<N,V> setClock(Clock clock) {
+  HColumn<N,V> setClock(long clock) {
     this.clock = clock;
     return this;
   }
@@ -93,20 +93,20 @@ public class HColumn<N,V> {
     return value;
   }
 
-  public Clock getClock() {
+  public long getClock() {
     return clock;
   }
 
   public Column toThrift() {
-    return ttl > 0 ? new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock).setTtl(ttl) :
-      new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock);
+    return ttl > 0 ? new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), new Clock(clock)).setTtl(ttl) :
+      new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), new Clock(clock));
   }
 
   public HColumn<N, V> fromThrift(Column c) {
     notNull(c, "column is null");
     name = nameSerializer.fromBytes(c.name);
     value = valueSerializer.fromBytes(c.value);
-    clock = c.clock;
+    clock = c.clock.timestamp;
     ttl = c.ttl;
     return this;
   }

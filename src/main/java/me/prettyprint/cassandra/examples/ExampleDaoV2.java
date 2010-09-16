@@ -59,7 +59,7 @@ public class ExampleDaoV2 {
   }
 
   private Clock createClock() {
-    return keyspaceOperator.createClock();
+    return new Clock(keyspaceOperator.createClock());
   }
 
   /**
@@ -107,7 +107,7 @@ public class ExampleDaoV2 {
     Mutator<K> m = createMutator(keyspaceOperator, keySerializer);
     for (Map.Entry<K, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), CF_NAME,
-          createColumn(COLUMN_NAME, keyValue.getValue(), createClock(), serializer, serializer));
+          createColumn(COLUMN_NAME, keyValue.getValue(), keyspaceOperator.createClock(), serializer, serializer));
     }
     m.execute();
   }

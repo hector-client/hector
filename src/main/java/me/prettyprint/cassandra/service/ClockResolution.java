@@ -13,16 +13,16 @@ import org.apache.cassandra.thrift.Clock;
 public enum ClockResolution {
   SECONDS, MILLISECONDS, MICROSECONDS;
   
-  public Clock createClock() {
+  public long createClock() {
     long current = System.currentTimeMillis();
     switch(this) {
     case MICROSECONDS:
-      return new Clock(current * 1000);
+      return current * 1000;
     case MILLISECONDS:
-      return new Clock(current);
+      return current;
     case SECONDS:
-      return new Clock(current / 1000);
+      return current / 1000;
     };
-    return new Clock(current);
+    return current;
   }
 }

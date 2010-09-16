@@ -145,7 +145,7 @@ public final class Cluster {
     return this;
   }
 
-  public Clock createClock() {
+  public long createClock() {
     return clockResolution.createClock();
   }
 

@@ -360,7 +360,7 @@ public class HectorTemplateImpl implements HectorTemplate {
    */
   @Override
   public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns,
-      Clock clock, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
+      long clock, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     return HFactory.createSuperColumn(name, columns, clock, superNameSerializer, nameSerializer,
         valueSerializer);
@@ -375,7 +375,7 @@ public class HectorTemplateImpl implements HectorTemplate {
    * me.prettyprint.cassandra.model.Serializer)
    */
   @Override
-  public <N, V> HColumn<N, V> createColumn(N name, V value, Clock clock,
+  public <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return HFactory.createColumn(name, value, clock, nameSerializer, valueSerializer);
   }
@@ -398,7 +398,7 @@ public class HectorTemplateImpl implements HectorTemplate {
    * @see org.helenus.HectorFactory#createClock()
    */
   @Override
-  public Clock createClock() {
+  public long createClock() {
     return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();
   }
 

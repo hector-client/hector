@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
+import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
@@ -45,7 +46,7 @@ public class ExampleSpringDao {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
       public Void execute(final Keyspace ks) throws HectorException {
-        ks.insert(keySerializer.toBytes(key), new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), ks.createClock()));
+        ks.insert(keySerializer.toBytes(key), new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), new Clock(ks.createClock())));
         return null;
       }
     });
