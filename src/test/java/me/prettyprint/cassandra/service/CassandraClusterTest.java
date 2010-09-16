@@ -65,4 +65,9 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     assertEquals(7, keyspaceDetail.cf_defs.size());
   }
 
+  @Test
+  public void testDescribePartitioner() throws Exception {
+    String partitioner = cassandraCluster.describePartitioner();
+    assertEquals("org.apache.cassandra.dht.OrderPreservingPartitioner",partitioner);
+  }
 }

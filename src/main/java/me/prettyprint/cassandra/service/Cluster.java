@@ -223,7 +223,9 @@ public final class Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          log.info("in execute with client {}", cassandra);
+          if ( log.isInfoEnabled() ) {
+            log.info("in execute with client {}", cassandra);
+          }
           return cassandra.describe_cluster_name();
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -244,6 +246,25 @@ public final class Cluster {
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+  
+  public String describePartitioner() throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_READ) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          if ( log.isInfoEnabled() ) {
+            log.info("in execute with client {}", cassandra);
+          }
+          return cassandra.describe_partitioner();
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+
       }
     };
     operateWithFailover(op);
