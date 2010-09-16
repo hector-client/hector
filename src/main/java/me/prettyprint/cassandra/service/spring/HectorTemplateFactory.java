@@ -25,14 +25,14 @@ public class HectorTemplateFactory {
   private volatile KeyspaceOperator keyspaceOperator;
 
   public HectorTemplate createTemplate() {
-    HectorTemplateImpl template = new HectorTemplateImpl(this);
+    HectorTemplateImpl template = new HectorTemplateImpl(cluster, keyspace, replicationFactor,
+        replicationStrategyClass, configurableConsistencyLevelPolicy);
     initKeyspaceOperator();
-    template.setCluser(cluster);    
     if (keyspaceOperator == null) {
        initKeyspaceOperator();
     }
-    template.setKeyspaceOperator(keyspaceOperator); 
-    
+    template.setKeyspaceOperator(keyspaceOperator);
+
     return template;
   }
 

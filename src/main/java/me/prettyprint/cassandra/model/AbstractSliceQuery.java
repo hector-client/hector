@@ -14,7 +14,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
  * @param <N>
  * @param <T>
  */
-/*package*/ abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T> implements Query<T> {
+public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T> implements Query<T> {
 
   protected final HSlicePredicate<N> slicePredicate;
 
@@ -29,23 +29,23 @@ import org.apache.cassandra.thrift.SlicePredicate;
    */
   public AbstractSliceQuery<K,N,V,T> setColumnNames(N... columnNames) {
     if ( columnNames != null && columnNames.length > 0) {
-      slicePredicate.setColumnNames(columnNames);      
+      slicePredicate.setColumnNames(columnNames);
     } else {
-      slicePredicate.setKeysOnlyPredicate();      
+      slicePredicate.setKeysOnlyPredicate();
     }
     return this;
   }
-  
+
   /**
    * Wraps the underlying call to {@link HSlicePredicate#setKeysOnlyPredicate()}
    * Use this for a substantial performance increase when you only need the keys returned
    */
   public AbstractSliceQuery<K,N,V,T> setReturnKeysOnly() {
-    slicePredicate.setKeysOnlyPredicate();          
+    slicePredicate.setKeysOnlyPredicate();
     return this;
   }
-  
-  
+
+
   public Collection<N> getColumnNames() {
     return slicePredicate.getColumnNames();
   }

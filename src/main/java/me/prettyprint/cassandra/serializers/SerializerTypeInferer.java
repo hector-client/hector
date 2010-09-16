@@ -3,10 +3,6 @@ package me.prettyprint.cassandra.serializers;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.serializers.BytesSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.UUIDSerializer;
 
 /**
  * Utility class that infers the concrete Serializer needed to turn a value into
@@ -26,7 +22,34 @@ public class SerializerTypeInferer {
       serializer = StringSerializer.get();
     } else if (value instanceof Long) {
       serializer = LongSerializer.get();
+    } else if (value instanceof Integer) {
+      serializer = IntegerSerializer.get();
+    } else if (value instanceof Boolean) {
+      serializer = BooleanSerializer.get();
     } else if (value instanceof byte[]) {
+      serializer = BytesSerializer.get();
+    } else {
+      serializer = ObjectSerializer.get();
+    }
+    // TODO other number serializers
+
+    return serializer;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public static <T> Serializer<T> getSerializer(Class<?> valueClass) {
+    Serializer serializer = null;
+    if (valueClass.equals(UUID.class)) {
+      serializer = UUIDSerializer.get();
+    } else if (valueClass.equals(String.class)) {
+      serializer = StringSerializer.get();
+    } else if (valueClass.equals(Long.class) || valueClass.equals(long.class)) {
+      serializer = LongSerializer.get();
+    } else if (valueClass.equals(Integer.class) || valueClass.equals(int.class)) {
+      serializer = IntegerSerializer.get();
+    } else if (valueClass.equals(Boolean.class) || valueClass.equals(boolean.class)) {
+      serializer = BooleanSerializer.get();
+    } else if (valueClass.equals(byte[].class)) {
       serializer = BytesSerializer.get();
     } else {
       serializer = ObjectSerializer.get();

@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
+import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
+
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.commons.lang.builder.EqualsBuilder;
@@ -49,6 +51,11 @@ public class HColumn<N,V> {
     notNull(valueSerializer, "valueSerializer is null");
     this.nameSerializer = nameSerializer;
     this.valueSerializer = valueSerializer;
+  }
+
+  public HColumn(N name, V value, Clock clock) {
+    this(name, value, clock, SerializerTypeInferer.<N>getSerializer(name),
+        SerializerTypeInferer.<V>getSerializer(value));
   }
 
   public HColumn<N,V> setName(N name) {

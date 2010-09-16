@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import java.util.Arrays;
 
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -34,6 +35,10 @@ public class Mutator<K> {
   public Mutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
     this.ko = ko;
     this.keySerializer = keySerializer;
+  }
+
+  public Mutator(KeyspaceOperator ko) {
+    this(ko, TypeInferringSerializer.<K> get());
   }
 
   // Simple and immediate insertion of a column
