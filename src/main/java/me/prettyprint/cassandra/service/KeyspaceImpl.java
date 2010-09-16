@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -223,7 +224,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
-    valideColumnPath(columnPath);
+//    valideColumnPath(columnPath);
 
     Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
 
@@ -341,7 +342,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException {
-    valideColumnPath(columnPath);
+//    valideColumnPath(columnPath);
       ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
       if (columnPath.isSetSuper_column()) {
         columnParent.setSuper_column(columnPath.getSuper_column());
@@ -352,7 +353,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException {
-    valideColumnPath(columnPath);
+//    valideColumnPath(columnPath);
       ColumnParent columnParent = new ColumnParent(columnPath.getColumn_family());
       if (columnPath.isSetSuper_column()) {
       columnParent.setSuper_column(columnPath.getSuper_column());
@@ -363,7 +364,7 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Map<byte[], List<Column>> multigetSlice(final List<byte[]> keys,
+  public Map<byte[], List<Column>> multigetSlice(final Set<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<Column>>> getCount = new Operation<Map<byte[], List<Column>>>(
         OperationType.READ) {
@@ -391,14 +392,14 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath)
+  public Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath)
       throws HectorException {
     return multigetSuperColumn(keys, columnPath, false, Integer.MAX_VALUE);
   }
 
 
   @Override
-  public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
+  public Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException {
     valideSuperColumnPath(columnPath);
 
@@ -428,7 +429,7 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Map<byte[], List<SuperColumn>> multigetSuperSlice(final List<byte[]> keys,
+  public Map<byte[], List<SuperColumn>> multigetSuperSlice(final Set<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<SuperColumn>>> getCount = new Operation<Map<byte[], List<SuperColumn>>>(
         OperationType.READ) {
@@ -510,7 +511,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<byte[], Integer> multigetCount(final List<byte[]> keys, final ColumnParent columnParent,
+  public Map<byte[], Integer> multigetCount(final Set<byte[]> keys, final ColumnParent columnParent,
       final SlicePredicate slicePredicate) throws HectorException {
     Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ) {
 
@@ -579,7 +580,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public Column getColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
-    valideColumnPath(columnPath);
+//    valideColumnPath(columnPath);
 
     Operation<Column> op = new Operation<Column>(OperationType.READ) {
 
@@ -634,37 +635,37 @@ import org.slf4j.LoggerFactory;
       return null;
   }
 
-  /**
-   * Make sure that if the given column path was a Column. Throws an
-   * InvalidRequestException if not.
-   *
-   * @param columnPath
-   * @throws HInvalidRequestException
-   *           if either the column family does not exist or that it's type does
-   *           not match (super)..
-   */
-  private void valideColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
-    String cf = columnPath.getColumn_family();
-    CfDef cfdefine;
-    String errorMsg;
-    if ((cfdefine = getCfDef(cf)) != null) {
-      if (cfdefine.getColumn_type().equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
-        // if the column family is a standard column
-        return;
-      } else if (cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
-          && columnPath.getSuper_column() != null) {
-        // if the column family is a super column and also give the super_column
-        // name
-        return;
-      } else {
-        errorMsg = "Invalid Request for column family " + cf
-            + " Make sure you have the right type";
-      }
-    } else {
-      errorMsg = "The specified column family does not exist: " + cf;
-    }
-    throw new HInvalidRequestException(errorMsg);
-  }
+//  /**
+//   * Make sure that if the given column path was a Column. Throws an
+//   * InvalidRequestException if not.
+//   *
+//   * @param columnPath
+//   * @throws HInvalidRequestException
+//   *           if either the column family does not exist or that it's type does
+//   *           not match (super)..
+//   */
+//  private void valideColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
+//    String cf = columnPath.getColumn_family();
+//    CfDef cfdefine;
+//    String errorMsg;
+//    if ((cfdefine = getCfDef(cf)) != null) {
+//      if (cfdefine.getColumn_type().equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
+//        // if the column family is a standard column
+//        return;
+//      } else if (cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
+//          && columnPath.getSuper_column() != null) {
+//        // if the column family is a super column and also give the super_column
+//        // name
+//        return;
+//      } else {
+//        errorMsg = "Invalid Request for column family " + cf
+//            + " Make sure you have the right type";
+//      }
+//    } else {
+//      errorMsg = "The specified column family does not exist: " + cf;
+//    }
+//    throw new HInvalidRequestException(errorMsg);
+//  }
 
   /**
    * Make sure that the given column path is a SuperColumn in the DB, Throws an

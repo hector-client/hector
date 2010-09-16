@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
@@ -112,7 +113,7 @@ public interface Keyspace {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath)
+  Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath)
       throws HectorException;
 
   /**
@@ -123,21 +124,21 @@ public interface Keyspace {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
+  Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException;
 
   /**
    * Performs a get_slice for columnParent and predicate for the given keys in
    * parallel.
    */
-  Map<byte[], List<Column>> multigetSlice(List<byte[]> keys, ColumnParent columnParent,
+  Map<byte[], List<Column>> multigetSlice(Set<byte[]> keys, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException;
 
   /**
    * Performs a get_slice for a superColumn columnParent and predicate for the
    * given keys in parallel.
    */
-  Map<byte[], List<SuperColumn>> multigetSuperSlice(List<byte[]> keys,
+  Map<byte[], List<SuperColumn>> multigetSuperSlice(Set<byte[]> keys,
       ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
 
   /**
@@ -203,7 +204,7 @@ public interface Keyspace {
   /**
    * Returns a map of key to column count
    */
-  Map<byte[], Integer> multigetCount(List<byte[]> keys, ColumnParent columnParent,
+  Map<byte[], Integer> multigetCount(Set<byte[]> keys, ColumnParent columnParent,
       SlicePredicate slicePredicate) throws HectorException;
 
   /**

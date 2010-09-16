@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -565,7 +567,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
-    Map<String, List<Column>> ms = se.fromBytesMap(keyspace.multigetSlice(se.toBytesList(keys), clp, sp));
+    Map<String, List<Column>> ms = se.fromBytesMap(keyspace.multigetSlice(se.toBytesSet(keys), clp, sp));
     for (int i = 0; i < 100; i++) {
       List<Column> cl = ms.get(keys.get(i));
       assertNotNull(cl);
@@ -842,7 +844,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   @Test
   public void testMultigetCount() {
     // insert 25 columns into 10 rows
-    List<byte[]> keys = new ArrayList<byte[]>();
+    Set<byte[]> keys = new HashSet<byte[]>();
     for ( int j=0; j < 10; j++ ) {
       for (int i = 0; i < 25; i++) {
         ColumnPath cp = new ColumnPath("Standard1");
