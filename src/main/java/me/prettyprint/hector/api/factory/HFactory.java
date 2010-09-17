@@ -7,7 +7,6 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.MultigetSubSliceQuery;
 import me.prettyprint.cassandra.model.MultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
@@ -21,6 +20,7 @@ import me.prettyprint.cassandra.model.SubSliceQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
@@ -31,6 +31,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
@@ -142,9 +143,9 @@ public final class HFactory {
     return new ThriftSubColumnQuery<SN, N, V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
-  public static <N,V> MultigetSliceQuery<N,V> createMultigetSliceQuery(
+  public static <N,V> MultigetSliceQuery<N, V> createMultigetSliceQuery(
       KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new MultigetSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
+    return new ThriftMultigetSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> MultigetSuperSliceQuery<SN,N,V> createMultigetSuperSliceQuery(
