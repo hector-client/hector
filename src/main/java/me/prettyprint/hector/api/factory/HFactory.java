@@ -7,7 +7,6 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.MultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.RangeSlicesQuery;
@@ -21,6 +20,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSubSliceQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
@@ -33,6 +33,7 @@ import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
+import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
@@ -149,9 +150,9 @@ public final class HFactory {
     return new ThriftMultigetSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
-  public static <SN,N,V> MultigetSuperSliceQuery<SN,N,V> createMultigetSuperSliceQuery(
+  public static <SN,N,V> MultigetSuperSliceQuery<SN, N, V> createMultigetSuperSliceQuery(
       KeyspaceOperator ko, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new MultigetSuperSliceQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftMultigetSuperSliceQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> MultigetSubSliceQuery<SN, N, V> createMultigetSubSliceQuery(

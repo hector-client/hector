@@ -18,16 +18,16 @@ public interface MultigetSubSliceQuery<SN, N, V> extends Query<Rows<N, V>>{
    */
   MultigetSubSliceQuery<SN, N, V> setSuperColumn(SN superColumn);
 
-  public MultigetSubSliceQuery<SN, N, V> setColumnFamily(String cf);
+  MultigetSubSliceQuery<SN, N, V> setColumnFamily(String cf);
 
-  public MultigetSubSliceQuery<SN, N, V> setRange(N start, N finish, boolean reversed, int count);
+  MultigetSubSliceQuery<SN, N, V> setRange(N start, N finish, boolean reversed, int count);
 
-  public Collection<N> getColumnNames();
+  Collection<N> getColumnNames();
 
   /**
    * Sets the column names to be retrieved by this query
    * @param columns a list of column names
    */
-  public MultigetSubSliceQuery<SN, N, V> setColumnNames(N... columnNames);
+  MultigetSubSliceQuery<SN, N, V> setColumnNames(N... columnNames);
 
 }

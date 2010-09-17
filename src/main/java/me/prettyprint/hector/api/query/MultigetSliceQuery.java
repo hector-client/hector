@@ -17,11 +17,11 @@ public interface MultigetSliceQuery<N, V> extends Query<Rows<N,V>> {
    * Sets the column names to be retrieved by this query
    * @param columns a list of column names
    */
-  public MultigetSliceQuery<N, V> setColumnNames(N... columnNames);
+  MultigetSliceQuery<N, V> setColumnNames(N... columnNames);
 
-  public Collection<N> getColumnNames();
+  Collection<N> getColumnNames();
 
-  public MultigetSliceQuery<N, V> setColumnFamily(String cf);
+  MultigetSliceQuery<N, V> setColumnFamily(String cf);
 
   /**
    * Set a predicate of start/finish to retrieve a list of columns in this range.
@@ -32,5 +32,5 @@ public interface MultigetSliceQuery<N, V> extends Query<Rows<N,V>> {
    * @param count
    * @return
    */
-  public MultigetSliceQuery<N, V> setRange(N start, N finish, boolean reversed, int count);
+  MultigetSliceQuery<N, V> setRange(N start, N finish, boolean reversed, int count);
 }
