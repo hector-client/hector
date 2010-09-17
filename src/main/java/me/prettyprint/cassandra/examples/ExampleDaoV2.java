@@ -12,7 +12,6 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
@@ -21,8 +20,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.ColumnQuery;
-
-import org.apache.cassandra.thrift.Clock;
+import me.prettyprint.hector.api.query.MultigetSliceQuery;
 
 public class ExampleDaoV2 {
 
@@ -56,10 +54,6 @@ public class ExampleDaoV2 {
   public <K> void insert(final K key, final String value, Serializer<K> keySerializer) {
     createMutator(keyspaceOperator, keySerializer).insert(
         key, CF_NAME, createColumn(COLUMN_NAME, value, serializer, serializer));
-  }
-
-  private Clock createClock() {
-    return new Clock(keyspaceOperator.createClock());
   }
 
   /**

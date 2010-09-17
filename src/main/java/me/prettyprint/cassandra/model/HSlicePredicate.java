@@ -17,7 +17,7 @@ import org.apache.cassandra.thrift.SliceRange;
  * @author Ran Tavory
  *
  */
-/*package*/final class HSlicePredicate<N> {
+public final class HSlicePredicate<N> {
 
   /** Use column names or start/finish? */
   protected boolean useColumnNames;
@@ -44,11 +44,11 @@ import org.apache.cassandra.thrift.SliceRange;
     useColumnNames = true;
     return this;
   }
-  
+
   /**
-   * Allows the use of returning just the keys. This avoids de-serialization of row data 
+   * Allows the use of returning just the keys. This avoids de-serialization of row data
    * and can be a huge optimization in some use cases
-   * 
+   *
    */
   public HSlicePredicate<N> setKeysOnlyPredicate() {
     this.columnNames = new ArrayList<N>();
@@ -103,7 +103,7 @@ import org.apache.cassandra.thrift.SliceRange;
     }
     return valBytes;
   }
-  
+
   private List<byte[]> toThriftColumnNames(Collection<N> clms) {
     List<byte[]> ret = new ArrayList<byte[]>(clms.size());
     for (N name : clms) {

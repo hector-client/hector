@@ -18,7 +18,7 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
 
   protected final HSlicePredicate<N> slicePredicate;
 
-  /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public AbstractSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, keySerializer, nameSerializer, valueSerializer);
     slicePredicate = new HSlicePredicate<N>(nameSerializer);
   }
@@ -27,7 +27,7 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
    * Sets the column names to be retrieved by this query
    * @param columns a list of column names
    */
-  public AbstractSliceQuery<K,N,V,T> setColumnNames(N... columnNames) {
+  public Query<T> setColumnNames(N... columnNames) {
     if ( columnNames != null && columnNames.length > 0) {
       slicePredicate.setColumnNames(columnNames);
     } else {
@@ -59,7 +59,7 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
    * @param count
    * @return
    */
-  public AbstractSliceQuery<K,N,V,T> setRange(N start, N finish, boolean reversed, int count) {
+  public Query<T> setRange(N start, N finish, boolean reversed, int count) {
     slicePredicate.setRange(start, finish, reversed, count);
     return this;
   }
@@ -68,7 +68,7 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
    *
    * @return the thrift representation of the predicate
    */
-  /*package*/ SlicePredicate getPredicate() {
+  public SlicePredicate getPredicate() {
     return slicePredicate.toThrift();
   }
 

@@ -1,10 +1,11 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.model.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Clock;

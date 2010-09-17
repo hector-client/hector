@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
 

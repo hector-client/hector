@@ -1,9 +1,13 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.SubCountQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
@@ -15,19 +19,21 @@ import org.apache.cassandra.thrift.ColumnParent;
  *
  * @param <SN> super column name tyoe
  */
-public final class SubCountQuery<K,SN,N> extends CountQuery<K,N> implements Query<Integer> {
+public final class ThriftSubCountQuery<K,SN,N> extends AbstractThriftCountQuery<K,N>
+    implements SubCountQuery<K, SN, N> {
 
   private final Serializer<SN> superNameSerializer;
 
   private SN superColumnName;
 
-  public SubCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public ThriftSubCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
       Serializer<SN> superNameExtractor, Serializer<N> nameSerializer) {
     super(ko, keySerializer, nameSerializer);
     Assert.notNull(superNameExtractor, "superNameExtractor is null");
     this.superNameSerializer = superNameExtractor;
   }
 
+  @Override
   public SubCountQuery<K,SN,N> setSuperColumn(SN sc) {
     superColumnName = sc;
     return this;
@@ -66,5 +72,17 @@ public final class SubCountQuery<K,SN,N> extends CountQuery<K,N> implements Quer
   @Override
   public SubCountQuery<K,SN,N> setColumnFamily(String cf) {
     return (SubCountQuery<K,SN,N>) super.setColumnFamily(cf);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public SubCountQuery<K,SN,N> setColumnNames(N... columnNames) {
+    return (SubCountQuery<K, SN, N>) super.setColumnNames(columnNames);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public SubCountQuery<K,SN,N> setRange(N start, N finish, int count) {
+    return (SubCountQuery<K, SN, N>) super.setRange(start, finish, count);
   }
 }

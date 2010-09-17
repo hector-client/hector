@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.service.spring;
 
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
-import me.prettyprint.cassandra.model.ConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.factory.HFactory;
 
 /**

@@ -7,11 +7,8 @@ import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.Clock;
-
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.MultigetSliceQuery;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Rows;
@@ -19,6 +16,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.MultigetSliceQuery;
 
 public class SimpleCassandraDao {
 
