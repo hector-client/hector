@@ -20,7 +20,7 @@ import org.apache.cassandra.thrift.SliceRange;
  * @param <N>
  * @param <T>
  */
-/*package*/ abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> implements Query<T> {
+public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
 
   protected Collection<N> columnNames;
   protected N start;
@@ -31,7 +31,7 @@ import org.apache.cassandra.thrift.SliceRange;
   /** Use column names or start/finish? */
   protected boolean useColumnNames;
 
-  /*package*/ AbstractSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public AbstractSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
   }
 
@@ -39,7 +39,7 @@ import org.apache.cassandra.thrift.SliceRange;
    * Sets the column names to be retrieved by this query
    * @param columns a list of column names
    */
-  public AbstractSliceQuery<N,V,T> setColumnNames(N... columnNames) {
+  public Query<T> setColumnNames(N... columnNames) {
     this.columnNames = Arrays.asList(columnNames);
     useColumnNames = true;
     return this;
@@ -58,7 +58,7 @@ import org.apache.cassandra.thrift.SliceRange;
    * @param count
    * @return
    */
-  public AbstractSliceQuery<N,V,T> setRange(N start, N finish, boolean reversed, int count) {
+  public Query<T> setRange(N start, N finish, boolean reversed, int count) {
     Assert.noneNull(start, finish);
     this.start = start;
     this.finish = finish;
@@ -72,7 +72,7 @@ import org.apache.cassandra.thrift.SliceRange;
    *
    * @return the thrift representation of the predicate
    */
-  /*package*/ SlicePredicate getPredicate() {
+  public SlicePredicate getPredicate() {
     SlicePredicate pred = new SlicePredicate();
     if (useColumnNames) {
       if (columnNames == null || columnNames.isEmpty()) {

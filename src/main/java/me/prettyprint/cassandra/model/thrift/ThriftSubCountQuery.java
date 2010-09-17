@@ -1,9 +1,13 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.SubCountQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
@@ -15,18 +19,19 @@ import org.apache.cassandra.thrift.ColumnParent;
  *
  * @param <SN> super column name tyoe
  */
-public final class SubCountQuery<SN> extends AbstractCountQuery implements Query<Integer> {
+public final class ThriftSubCountQuery<SN> extends AbstractThriftCountQuery implements SubCountQuery<SN> {
 
   private final Serializer<SN> superNameSerializer;
 
   private SN superColumnName;
 
-  public SubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameSerializer) {
+  public ThriftSubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameSerializer) {
     super(ko);
     Assert.notNull(superNameSerializer, "superNameSerializer is null");
     this.superNameSerializer = superNameSerializer;
   }
 
+  @Override
   public SubCountQuery<SN> setSuperColumn(SN sc) {
     superColumnName = sc;
     return this;
@@ -56,13 +61,13 @@ public final class SubCountQuery<SN> extends AbstractCountQuery implements Query
 
   @SuppressWarnings("unchecked")
   @Override
-  public SubCountQuery<SN> setKey(String key) {
-    return (SubCountQuery<SN>) super.setKey(key);
+  public ThriftSubCountQuery<SN> setKey(String key) {
+    return (ThriftSubCountQuery<SN>) super.setKey(key);
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public SubCountQuery<SN> setColumnFamily(String cf) {
-    return (SubCountQuery<SN>) super.setColumnFamily(cf);
+  public ThriftSubCountQuery<SN> setColumnFamily(String cf) {
+    return (ThriftSubCountQuery<SN>) super.setColumnFamily(cf);
   }
 }

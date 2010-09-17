@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,9 +6,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.AbstractSliceQuery;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.MultigetSliceQuery;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -16,16 +23,18 @@ import org.apache.cassandra.thrift.ColumnParent;
 /**
  * A query wrapper for the thrift call multiget_slice
  */
-public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N,V>> {
+public final class ThriftMultigetSliceQuery<N, V> extends AbstractSliceQuery<N, V, Rows<N, V>>
+    implements MultigetSliceQuery<N, V> {
 
   private Collection<String> keys;
 
-  public MultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer,
+  public ThriftMultigetSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
   }
 
-  public MultigetSliceQuery<N,V> setKeys(String... keys) {
+  @Override
+  public MultigetSliceQuery<N, V> setKeys(String... keys) {
     this.keys = Arrays.asList(keys);
     return this;
   }
@@ -52,5 +61,24 @@ public final class MultigetSliceQuery<N,V> extends AbstractSliceQuery<N,V,Rows<N
   @Override
   public String toString() {
     return "MultigetSliceQuery(" + keys + "," + super.toStringInternal() + ")";
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public MultigetSliceQuery<N, V> setColumnNames(N... columnNames) {
+    return (MultigetSliceQuery<N, V>) super.setColumnNames(columnNames);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public MultigetSliceQuery<N, V> setRange(N start, N finish, boolean reversed,
+      int count) {
+    return (MultigetSliceQuery<N, V>) super.setRange(start, finish, reversed, count);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public MultigetSliceQuery<N, V> setColumnFamily(String cf) {
+    return (MultigetSliceQuery<N, V>) super.setColumnFamily(cf);
   }
 }

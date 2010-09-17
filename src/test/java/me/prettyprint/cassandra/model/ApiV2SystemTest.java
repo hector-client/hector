@@ -30,10 +30,16 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.MultigetSliceQuery;
+import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
+import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
+import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.junit.After;
@@ -675,7 +681,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     TestCleanupDescriptor cleanup = insertColumns(cf, 1, "testCountQuery", 10,
         "testCountQueryColumn");
-    CountQuery cq = createCountQuery(ko);
+    ThriftCountQuery cq = createCountQuery(ko);
     cq.setColumnFamily(cf).setKey("testCountQuery0");
     Result<Integer> r = cq.execute();
     assertNotNull(r);
@@ -699,7 +705,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1, "testSuperCountQuery", 11,
         "testSuperCountQueryColumn");
-    SuperCountQuery cq = createSuperCountQuery(ko);
+    ThriftSuperCountQuery cq = createSuperCountQuery(ko);
     cq.setColumnFamily(cf).setKey("testSuperCountQuery0");
     Result<Integer> r = cq.execute();
     assertNotNull(r);
