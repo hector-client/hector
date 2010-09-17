@@ -405,7 +405,7 @@ import org.slf4j.LoggerFactory;
  * Specifies the "type" of operation - read or write.
  * It's used for perf4j, so should be in sync with hectorLog4j.xml
  * @author Ran Tavory (ran@outbain.com)
- *
+ * 
  */
 /*package*/ enum OperationType {
   /** Read operations*/
@@ -413,7 +413,9 @@ import org.slf4j.LoggerFactory;
   /** Write operations */
   WRITE,
   /** Meta read operations, such as describe*() */
-  META_READ;
+  META_READ,
+  /** Operation on one of the system_ methods */
+  META_WRITE;
 }
 
 

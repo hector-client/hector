@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +11,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
@@ -163,7 +165,7 @@ public final class Cluster {
         }
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
 
@@ -178,7 +180,7 @@ public final class Cluster {
         }
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
 
@@ -193,7 +195,7 @@ public final class Cluster {
         }
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
 
@@ -214,7 +216,7 @@ public final class Cluster {
         }
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
 
@@ -235,7 +237,7 @@ public final class Cluster {
 
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
 
@@ -250,7 +252,7 @@ public final class Cluster {
         }
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
   
@@ -269,16 +271,169 @@ public final class Cluster {
 
       }
     };
-    operateWithFailover(op);
+    operateWithFailover(null,op);
     return op.getResult();
   }
+  
+  /**
+   * Renames the Keyspace from oldName to newName
+   *
+   * @return the new SchemaId
+   * @throws HectorException
+   */
+  public String renameKeyspace(final String oldName, final String newName) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_rename_keyspace(oldName, newName);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(oldName,op);
+    return op.getResult();
+  }
+  
+  /**
+   * Renames the ColumnFamily from oldName to newName
+   *
+   * @return the new SchemaId
+   * @throws HectorException
+   */
+  public String renameColumnFamily(final String oldName, final String newName) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_rename_column_family(oldName, newName);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(null,op);
+    return op.getResult();
+  }
+  
+  /**
+   * Drops the Keyspace from the cluster. Equivalent of 'drop database' in SQL terms
+   * 
+   */
+  public String dropKeyspace(final String keyspace) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_drop_keyspace(keyspace);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(null,op);
+    return op.getResult();
+  }
+  
+  /**
+   * Drops the Keyspace from the cluster. Equivalent of 'drop database' in SQL terms
+   *   
+   */
+  public String addKeyspace(final KsDef ksdef) throws HectorException {
+    
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_add_keyspace(ksdef);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(null,op);
+    return op.getResult();
+  }
+  
+  /**
+   * Updates the Keyspace from the cluster. 
+   */
+  public String updateKeyspace(final KsDef ksdef) throws HectorException {
+    
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_update_keyspace(ksdef);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(null,op);
+    return op.getResult();
+  }
+  
+  /**
+   * Drops the ColumnFamily from the Keyspace. Equivalent of 'drop table' in SQL terms
+   *
+   */
+  public String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_drop_column_family(columnFamily);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(keyspaceName,op);
+    return op.getResult();
+  }
+  
+  public String addColumnFamily(final CfDef cfdef) throws HectorException {
 
-  private void operateWithFailover(Operation<?> op) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {          
+          return cassandra.system_add_column_family(cfdef);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(cfdef.keyspace, op);
+    return op.getResult();
+  }
+  
+  public String updateColumnFamily(final CfDef cfdef) throws HectorException {
+
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {          
+          return cassandra.system_update_column_family(cfdef);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(cfdef.keyspace, op);
+    return op.getResult();
+  }
+    
+  
+  private void operateWithFailover(final String keyspaceName, Operation<?> op) throws HectorException {
     CassandraClient client = null;
     try {
       client = borrowClient();
+      Keyspace keyspace = keyspaceName != null ? client.getKeyspace(keyspaceName) : null;
       FailoverOperator operator = new FailoverOperator(failoverPolicy,
-          cassandraClientMonitor, client, pool, null);
+          cassandraClientMonitor, client, pool, keyspace);
       client = operator.operate(op);
     } finally {
       try {
