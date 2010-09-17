@@ -1,5 +1,8 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -12,23 +15,23 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @author Ran Tavory
  *
  */
-/*package*/ abstract class AbstractCountQuery implements Query<Integer>{
+/*package*/ abstract class AbstractThriftCountQuery implements Query<Integer>{
 
   protected final KeyspaceOperator keyspaceOperator;
   protected String columnFamily;
   protected String key;
 
-  public AbstractCountQuery(KeyspaceOperator ko) {
+  public AbstractThriftCountQuery(KeyspaceOperator ko) {
     Assert.notNull(ko, "keyspaceOperator can't be null");
     this.keyspaceOperator = ko;
   }
 
-  public AbstractCountQuery setKey(String key) {
+  public AbstractThriftCountQuery setKey(String key) {
     this.key = key;
     return this;
   }
 
-  public AbstractCountQuery setColumnFamily(String cf) {
+  public AbstractThriftCountQuery setColumnFamily(String cf) {
     this.columnFamily = cf;
     return this;
   }

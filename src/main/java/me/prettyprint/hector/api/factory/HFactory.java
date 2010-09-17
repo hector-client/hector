@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.CountQuery;
 import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
@@ -18,13 +17,14 @@ import me.prettyprint.cassandra.model.RangeSubSlicesQuery;
 import me.prettyprint.cassandra.model.RangeSuperSlicesQuery;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.SliceQuery;
-import me.prettyprint.cassandra.model.SubCountQuery;
 import me.prettyprint.cassandra.model.SubSliceQuery;
-import me.prettyprint.cassandra.model.SuperCountQuery;
 import me.prettyprint.cassandra.model.SuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
@@ -32,6 +32,7 @@ import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
+import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 /**
  * A convenience class with bunch of factory static methods to help create a mutator,
@@ -108,17 +109,17 @@ public final class HFactory {
     return new Mutator(ko);
   }
 
-  public static CountQuery createCountQuery(KeyspaceOperator ko) {
-    return new CountQuery(ko);
+  public static ThriftCountQuery createCountQuery(KeyspaceOperator ko) {
+    return new ThriftCountQuery(ko);
   }
 
-  public static SuperCountQuery createSuperCountQuery(KeyspaceOperator ko) {
-    return new SuperCountQuery(ko);
+  public static ThriftSuperCountQuery createSuperCountQuery(KeyspaceOperator ko) {
+    return new ThriftSuperCountQuery(ko);
   }
 
   public static <SN> SubCountQuery<SN> createSubCountQuery(KeyspaceOperator ko,
       Serializer<SN> superNameSerializer) {
-    return new SubCountQuery<SN>(ko, superNameSerializer);
+    return new ThriftSubCountQuery<SN>(ko, superNameSerializer);
   }
 
   public static <N,V> ColumnQuery<N, V> createColumnQuery(KeyspaceOperator ko,
