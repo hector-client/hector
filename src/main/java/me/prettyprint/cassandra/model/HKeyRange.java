@@ -13,7 +13,7 @@ import org.apache.cassandra.thrift.KeyRange;
  * @author Ran Tavory
  *
  */
-/*package*/ final class HKeyRange<K> {
+public final class HKeyRange<K> {
 
   private K startKey;
   private K endKey;

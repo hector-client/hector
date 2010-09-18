@@ -6,13 +6,8 @@ import me.prettyprint.cassandra.model.HColumn;
 import me.prettyprint.cassandra.model.HSuperColumn;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.Mutator;
-import me.prettyprint.cassandra.model.RangeSlicesQuery;
-import me.prettyprint.cassandra.model.RangeSubSlicesQuery;
-import me.prettyprint.cassandra.model.RangeSuperSlicesQuery;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.SliceQuery;
-import me.prettyprint.cassandra.model.SubSliceQuery;
-import me.prettyprint.cassandra.model.SuperSliceQuery;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.query.ColumnQuery;
@@ -20,9 +15,14 @@ import me.prettyprint.hector.api.query.CountQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
+import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
+import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
+import me.prettyprint.hector.api.query.SubSliceQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 import me.prettyprint.hector.api.query.SuperCountQuery;
+import me.prettyprint.hector.api.query.SuperSliceQuery;
 
 /**
  * The main interface used to operate with the underlying database.
