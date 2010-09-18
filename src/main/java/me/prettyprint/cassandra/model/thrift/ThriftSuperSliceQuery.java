@@ -1,10 +1,17 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
 import java.util.List;
 
+import me.prettyprint.cassandra.model.AbstractSliceQuery;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.cassandra.model.SuperSlice;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.SuperSliceQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -20,19 +27,21 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N>
  * @param <V>
  */
-public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperSlice<SN,N,V>> {
+public final class ThriftSuperSliceQuery<SN, N, V> extends
+    AbstractSliceQuery<N, V, SuperSlice<SN, N, V>> implements SuperSliceQuery<SN, N, V> {
 
   private String key;
   private final Serializer<SN> sNameSerializer;
 
-  public SuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public ThriftSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
     this.sNameSerializer = sNameSerializer;
   }
 
-  public SuperSliceQuery<SN,N,V> setKey(String key) {
+  @Override
+  public SuperSliceQuery<SN, N, V> setKey(String key) {
     this.key = key;
     return this;
   }
@@ -54,4 +63,22 @@ public final class SuperSliceQuery<SN,N,V> extends AbstractSliceQuery<N,V,SuperS
   public String toString() {
     return "SuperSliceQuery(" + key + "," + toStringInternal() + ")";
   }
+
+  @SuppressWarnings("unchecked")
+  @Override
+    public SuperSliceQuery<SN, N, V> setColumnNames(N... columnNames) {
+      return (SuperSliceQuery<SN, N, V>) super.setColumnNames(columnNames);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public SuperSliceQuery<SN, N, V> setRange(N start, N finish, boolean reversed, int count) {
+      return (SuperSliceQuery<SN, N, V>) super.setRange(start, finish, reversed, count);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public SuperSliceQuery<SN, N, V> setColumnFamily(String cf) {
+      return (SuperSliceQuery<SN, N, V>) super.setColumnFamily(cf);
+    }
 }

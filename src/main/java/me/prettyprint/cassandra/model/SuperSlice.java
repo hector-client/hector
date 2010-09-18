@@ -23,7 +23,7 @@ public final class SuperSlice<SN,N,V> {
 
   private final List<HSuperColumn<SN,N,V>> columnsList;
 
-  /*package*/ SuperSlice(List<SuperColumn> tSuperColumns, Serializer<SN> sNameSerializer,
+  public SuperSlice(List<SuperColumn> tSuperColumns, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(tSuperColumns, sNameSerializer, nameSerializer, valueSerializer);
     columnsMap = new HashMap<SN,HSuperColumn<SN,N,V>>(tSuperColumns.size());

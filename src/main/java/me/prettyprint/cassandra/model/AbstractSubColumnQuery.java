@@ -5,6 +5,7 @@ import java.util.List;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.SubColumnQuery;
+import me.prettyprint.hector.api.query.SubSliceQuery;
 
 public class AbstractSubColumnQuery<SN, N, V> implements SubColumnQuery<SN, N, V>{
 
