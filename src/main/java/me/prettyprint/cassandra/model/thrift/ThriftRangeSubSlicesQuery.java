@@ -1,11 +1,19 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.prettyprint.cassandra.model.AbstractSliceQuery;
+import me.prettyprint.cassandra.model.HKeyRange;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.OrderedRows;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -16,14 +24,14 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @author Ran Tavory
  *
  */
-public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public final class ThriftRangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> implements RangeSubSlicesQuery<SN, N, V> {
 
   private final Serializer<SN> sNameSerializer;
   private final HKeyRange keyRange;
   private SN superColumn;
 
 
-  public RangeSubSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public ThriftRangeSubSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
@@ -31,17 +39,20 @@ public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,Or
     keyRange = new HKeyRange();
   }
 
-  public RangeSubSlicesQuery<SN,N,V> setKeys(String start, String end) {
+  @Override
+  public RangeSubSlicesQuery<SN, N, V> setKeys(String start, String end) {
     keyRange.setKeys(start, end);
     return this;
   }
 
-  public RangeSubSlicesQuery<SN,N,V> setRowCount(int rowCount) {
+  @Override
+  public RangeSubSlicesQuery<SN, N, V> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
     return this;
   }
 
-  public  RangeSubSlicesQuery<SN,N,V> setSuperColumn(SN sc) {
+  @Override
+  public RangeSubSlicesQuery<SN, N, V> setSuperColumn(SN sc) {
     Assert.notNull(sc, "sc can't be null");
     superColumn = sc;
     return this;
@@ -68,6 +79,24 @@ public final class RangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<N,V,Or
   @Override
   public String toString() {
     return "RangeSuperSlicesQuery(" + keyRange + super.toStringInternal() + ")";
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public RangeSubSlicesQuery<SN, N, V> setColumnNames(N... columnNames) {
+    return (RangeSubSlicesQuery<SN, N, V>) super.setColumnNames(columnNames);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public RangeSubSlicesQuery<SN, N, V> setRange(N start, N finish, boolean reversed, int count) {
+    return (RangeSubSlicesQuery<SN, N, V>) super.setRange(start, finish, reversed, count);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public RangeSubSlicesQuery<SN, N, V> setColumnFamily(String cf) {
+    return (RangeSubSlicesQuery<SN, N, V>) super.setColumnFamily(cf);
   }
 
 }

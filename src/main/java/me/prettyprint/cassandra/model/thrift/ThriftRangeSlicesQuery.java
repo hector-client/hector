@@ -1,11 +1,19 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.prettyprint.cassandra.model.AbstractSliceQuery;
+import me.prettyprint.cassandra.model.HKeyRange;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.KeyspaceOperator;
+import me.prettyprint.cassandra.model.OrderedRows;
+import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -18,21 +26,24 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>> {
+public final class ThriftRangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedRows<N,V>>
+    implements RangeSlicesQuery<N, V> {
 
   private final HKeyRange keyRange;
 
-  public RangeSlicesQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public ThriftRangeSlicesQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     keyRange = new HKeyRange();
   }
 
-  public RangeSlicesQuery<N,V> setKeys(String start, String end) {
+  @Override
+  public RangeSlicesQuery<N, V> setKeys(String start, String end) {
     keyRange.setKeys(start, end);
     return this;
   }
 
-  public RangeSlicesQuery<N,V> setRowCount(int rowCount) {
+  @Override
+  public RangeSlicesQuery<N, V> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
     return this;
   }
@@ -56,5 +67,23 @@ public final class RangeSlicesQuery<N,V> extends AbstractSliceQuery<N,V,OrderedR
   @Override
   public String toString() {
     return "RangeSlicesQuery(" + keyRange + super.toStringInternal() + ")";
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public RangeSlicesQuery<N, V> setRange(N start, N finish, boolean reversed, int count) {
+    return (RangeSlicesQuery<N, V>) super.setRange(start, finish, reversed, count);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public RangeSlicesQuery<N, V> setColumnFamily(String cf) {
+    return (RangeSlicesQuery<N, V>) super.setColumnFamily(cf);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public RangeSlicesQuery<N, V> setColumnNames(N... columnNames) {
+    return (RangeSlicesQuery<N, V>) super.setColumnNames(columnNames);
   }
 }

@@ -13,7 +13,7 @@ import org.apache.cassandra.thrift.KeyRange;
  * @author Ran Tavory
  *
  */
-/*package*/ final class HKeyRange {
+public final class HKeyRange {
 
   private String start, end;
   private int rowCount = 100;

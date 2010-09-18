@@ -1,0 +1,30 @@
+package me.prettyprint.hector.api.query;
+
+import java.util.Collection;
+
+import me.prettyprint.cassandra.model.SuperSlice;
+
+/**
+ * A query for the  call get_slice.
+ * <p>
+ * Get a slice of super columns from a super column family.
+ *
+ * @author Ran Tavory
+ *
+ * @param <SN> type of the super column name
+ * @param <N> type of the column name
+ * @param <V> type of the column value
+ */
+public interface SuperSliceQuery<SN, N, V> extends Query<SuperSlice<SN, N, V>> {
+
+  SuperSliceQuery<SN, N, V> setKey(String key);
+
+  SuperSliceQuery<SN, N, V> setColumnNames(N... columnNames);
+
+  SuperSliceQuery<SN, N, V> setRange(N start, N finish, boolean reversed, int count);
+
+  SuperSliceQuery<SN, N, V> setColumnFamily(String cf);
+
+  Collection<N> getColumnNames();
+
+}
