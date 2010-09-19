@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
+import me.prettyprint.hector.api.beans.HColumn;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -15,7 +17,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-public final class HColumn<N,V> {
+public final class HColumnImpl<N,V> implements HColumn<N, V> {
 
   private N name;
   private V value;
@@ -23,7 +25,7 @@ public final class HColumn<N,V> {
   private final Serializer<N> nameSerializer;
   private final Serializer<V> valueSerializer;
 
-  public HColumn(N name, V value, long timestamp, Serializer<N> nameSerializer,
+  public HColumnImpl(N name, V value, long timestamp, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(name, "name is null");
@@ -34,7 +36,7 @@ public final class HColumn<N,V> {
     this.timestamp = timestamp;
   }
 
-  public HColumn(Column thriftColumn, Serializer<N> nameSerializer,
+  public HColumnImpl(Column thriftColumn, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");
@@ -43,38 +45,43 @@ public final class HColumn<N,V> {
     timestamp = thriftColumn.timestamp;
   }
 
-  /*package*/ HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  /*package*/ HColumnImpl(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     notNull(nameSerializer, "nameSerializer is null");
     notNull(valueSerializer, "valueSerializer is null");
     this.nameSerializer = nameSerializer;
     this.valueSerializer = valueSerializer;
   }
 
-  public HColumn<N,V> setName(N name) {
+  @Override
+  public HColumn<N, V> setName(N name) {
     notNull(name, "name is null");
     this.name = name;
     return this;
   }
 
-  public HColumn<N,V> setValue(V value) {
+  @Override
+  public HColumn<N, V> setValue(V value) {
     notNull(value, "value is null");
     this.value = value;
     return this;
   }
 
-  HColumn<N,V> setTimestamp(long timestamp) {
+  HColumn<N, V> setTimestamp(long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
 
+  @Override
   public N getName() {
     return name;
   }
 
+  @Override
   public V getValue() {
     return value;
   }
 
+  @Override
   public long getTimestamp() {
     return timestamp;
   }
@@ -90,21 +97,16 @@ public final class HColumn<N,V> {
     return this;
   }
 
+  @Override
   public Serializer<N> getNameSerializer() {
     return nameSerializer;
   }
 
+  @Override
   public Serializer<V> getValueSerializer() {
     return valueSerializer;
   }
 
-  public byte[] getValueBytes() {
-    return valueSerializer.toBytes(getValue());
-  }
-
-  public byte[] getNameBytes() {
-    return nameSerializer.toBytes(getName());
-  }
 
   @Override
   public String toString() {
@@ -128,7 +130,7 @@ public final class HColumn<N,V> {
       return false;
     }
     @SuppressWarnings("unchecked")
-    HColumn<N,V> other = (HColumn<N,V>) obj;
+    HColumnImpl<N,V> other = (HColumnImpl<N,V>) obj;
     return new EqualsBuilder().appendSuper(super.equals(obj)).append(name, other.name).
         append(value, other.value).append(timestamp, other.timestamp).isEquals();
   }

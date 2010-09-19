@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.HColumn;
 
 import org.apache.cassandra.thrift.Column;
 
@@ -24,7 +25,7 @@ public final class ColumnSlice<N,V> {
     columnsMap = new HashMap<N,HColumn<N,V>>(tColumns.size());
     List<HColumn<N,V>> list = new ArrayList<HColumn<N,V>>(tColumns.size());
     for (Column c: tColumns) {
-      HColumn<N, V> column = new HColumn<N,V>(c, nameSerializer, valueSerializer);
+      HColumn<N, V> column = new HColumnImpl<N,V>(c, nameSerializer, valueSerializer);
       columnsMap.put(column.getName(), column);
       list.add(column);
     }
@@ -39,7 +40,7 @@ public final class ColumnSlice<N,V> {
     return columnsList;
   }
 
-  public HColumn<N,V> getColumnByName(N columnName) {
+  public HColumn<N, V> getColumnByName(N columnName) {
     return columnsMap.get(columnName);
   }
 

@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import me.prettyprint.hector.api.beans.HColumn;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -25,7 +27,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class HSuperColumn<SN,N,V> {
 
   private SN superName;
-  private List<HColumn<N,V>> columns;
+  private List<? extends HColumn<N,V>> columns;
   private long timestamp;
   private final Serializer<SN> superNameSerializer;
   private final Serializer<N> nameSerializer;
@@ -100,7 +102,7 @@ public final class HSuperColumn<SN,N,V> {
     return Collections.unmodifiableList(columns);
   }
 
-  public HColumn<N,V> get(int i) {
+  public HColumn<N, V> get(int i) {
     return columns.get(i);
   }
 
@@ -122,7 +124,7 @@ public final class HSuperColumn<SN,N,V> {
   private List<Column> toThriftColumn() {
     List<Column> ret = new ArrayList<Column>(columns.size());
     for (HColumn<N, V> c: columns) {
-      ret.add(c.toThrift());
+      ret.add(((HColumnImpl<N, V>) c).toThrift());
     }
     return ret;
   }
@@ -130,7 +132,7 @@ public final class HSuperColumn<SN,N,V> {
   private List<HColumn<N, V>> fromThriftColumns(List<Column> tcolumns) {
     List<HColumn<N, V>> cs = new ArrayList<HColumn<N,V>>(tcolumns.size());
     for (Column c: tcolumns) {
-      cs.add(new HColumn<N, V>(c, nameSerializer, valueSerializer));
+      cs.add(new HColumnImpl<N, V>(c, nameSerializer, valueSerializer));
     }
     return cs;
   }

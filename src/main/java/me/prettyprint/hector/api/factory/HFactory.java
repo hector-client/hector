@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HColumn;
+import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSuperColumn;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Mutator;
@@ -30,6 +30,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
@@ -217,23 +218,23 @@ public final class HFactory {
         valueSerializer);
   }
 
-  public static <N,V> HColumn<N,V> createColumn(N name, V value, long timestamp,
+  public static <N,V> HColumn<N, V> createColumn(N name, V value, long timestamp,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new HColumn<N, V>(name, value, timestamp, nameSerializer, valueSerializer);
+    return new HColumnImpl<N, V>(name, value, timestamp, nameSerializer, valueSerializer);
   }
 
   /**
    * Creates a column with the timestamp of now.
    */
-  public static <N,V> HColumn<N,V> createColumn(N name, V value,
+  public static <N,V> HColumn<N, V> createColumn(N name, V value,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new HColumn<N, V>(name, value, createTimestamp(), nameSerializer, valueSerializer);
+    return new HColumnImpl<N, V>(name, value, createTimestamp(), nameSerializer, valueSerializer);
   }
 
   /**
    * Convienience method for creating a column with a String name and String value
    */
-  public static HColumn<String,String> createStringColumn(String name, String value) {
+  public static HColumn<String, String> createStringColumn(String name, String value) {
     StringSerializer se = StringSerializer.get();
     return createColumn(name, value, se, se);
   }

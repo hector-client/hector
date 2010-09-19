@@ -17,6 +17,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.utils.StringUtils;
+import me.prettyprint.hector.api.beans.HColumn;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.junit.After;

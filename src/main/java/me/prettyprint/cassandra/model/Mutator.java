@@ -5,6 +5,7 @@ import java.util.Arrays;
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Deletion;
@@ -75,7 +76,7 @@ public final class Mutator {
   // keyspaces and CFs on each add/delete call
   // also, should throw a typed StatementValidationException or similar perhaps?
   public <N,V> Mutator addInsertion(String key, String cf, HColumn<N,V> c) {
-    getPendingMutations().addInsertion(key, Arrays.asList(cf), c.toThrift());
+    getPendingMutations().addInsertion(key, Arrays.asList(cf), ((HColumnImpl<N, V>) c).toThrift());
     return this;
   }
 
