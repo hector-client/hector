@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.SubColumnQuery;

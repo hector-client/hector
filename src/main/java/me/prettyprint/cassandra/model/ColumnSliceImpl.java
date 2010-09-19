@@ -7,19 +7,17 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 
 import org.apache.cassandra.thrift.Column;
 
-/**
- * A ColumnSlice represents a set of columns as returned by calls such as get_slice
- */
-public final class ColumnSlice<N,V> {
+public final class ColumnSliceImpl<N,V> implements ColumnSlice<N, V> {
 
   private final Map<N,HColumn<N,V>> columnsMap;
   private final List<HColumn<N,V>> columnsList;
 
-  public ColumnSlice(List<Column> tColumns, Serializer<N> nameSerializer,
+  public ColumnSliceImpl(List<Column> tColumns, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     Assert.noneNull(tColumns, nameSerializer, valueSerializer);
     columnsMap = new HashMap<N,HColumn<N,V>>(tColumns.size());
@@ -36,10 +34,12 @@ public final class ColumnSlice<N,V> {
    *
    * @return an unmodifiable list of the columns
    */
+  @Override
   public List<HColumn<N,V>> getColumns() {
     return columnsList;
   }
 
+  @Override
   public HColumn<N, V> getColumnByName(N columnName) {
     return columnsMap.get(columnName);
   }
