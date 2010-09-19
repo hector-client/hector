@@ -2,8 +2,6 @@ package me.prettyprint.hector.api.beans;
 
 import java.util.List;
 
-import me.prettyprint.cassandra.model.Row;
-
 /**
  * Return type from get_range_slices for simple columns
  * @author Ran Tavory

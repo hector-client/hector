@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.beans.Rows;
 
 import org.apache.cassandra.thrift.Column;
@@ -27,7 +28,7 @@ public class RowsImpl<N, V> implements Rows<N, V> {
     Assert.noneNull(thriftRet, nameSerializer, valueSerializer);
     rows = new HashMap<String, Row<N, V>>(thriftRet.size());
     for (Map.Entry<String, List<Column>> entry : thriftRet.entrySet()) {
-      rows.put(entry.getKey(), new Row<N, V>(entry.getKey(), entry.getValue(), nameSerializer,
+      rows.put(entry.getKey(), new RowImpl<N, V>(entry.getKey(), entry.getValue(), nameSerializer,
           valueSerializer));
     }
   }

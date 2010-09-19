@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Row;
 
 import org.apache.cassandra.thrift.Column;
 
@@ -26,7 +27,7 @@ public final class OrderedRowsImpl<N,V> extends RowsImpl<N,V> implements Ordered
     super(thriftRet, nameSerializer, valueSerializer);
     rowsList = new ArrayList<Row<N,V>>(thriftRet.size());
     for (Map.Entry<String, List<Column>> entry: thriftRet.entrySet()) {
-      rowsList.add(new Row<N,V>(entry.getKey(), entry.getValue(), nameSerializer, valueSerializer));
+      rowsList.add(new RowImpl<N,V>(entry.getKey(), entry.getValue(), nameSerializer, valueSerializer));
     }
   }
 
