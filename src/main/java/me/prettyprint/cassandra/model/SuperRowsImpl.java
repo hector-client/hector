@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.SuperRows;
 
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -17,11 +18,11 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N>
  * @param <V>
  */
-public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
+public class SuperRowsImpl<SN, N, V> implements SuperRows<SN, N, V> {
 
   private final Map<String, SuperRow<SN, N, V>> rows;
 
-  public SuperRows(Map<String, List<SuperColumn>> thriftSuperColumns, Serializer<SN> sNameSerializer,
+  public SuperRowsImpl(Map<String, List<SuperColumn>> thriftSuperColumns, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(thriftSuperColumns, sNameSerializer, nameSerializer, valueSerializer);
     rows = new HashMap<String, SuperRow<SN, N, V>>(thriftSuperColumns.size());
@@ -31,10 +32,12 @@ public class SuperRows<SN, N, V> implements Iterable<SuperRow<SN, N, V>> {
     }
   }
 
+  @Override
   public SuperRow<SN, N, V> getByKey(String key) {
     return rows.get(key);
   }
 
+  @Override
   public int getCount() {
     return rows.size();
   }

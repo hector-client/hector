@@ -2,7 +2,7 @@ package me.prettyprint.hector.api.query;
 
 import java.util.Collection;
 
-import me.prettyprint.cassandra.model.SuperRows;
+import me.prettyprint.hector.api.beans.SuperRows;
 
 /**
  * A query wrapper for the call multiget_slice for a slice of supercolumns
