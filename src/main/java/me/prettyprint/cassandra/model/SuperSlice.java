@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -29,7 +30,7 @@ public final class SuperSlice<SN,N,V> {
     columnsMap = new HashMap<SN,HSuperColumn<SN,N,V>>(tSuperColumns.size());
     columnsList = new ArrayList<HSuperColumn<SN,N,V>>(tSuperColumns.size());
     for (SuperColumn sc: tSuperColumns) {
-      HSuperColumn<SN,N,V> column = new HSuperColumn<SN,N,V>(sc, sNameSerializer, nameSerializer,
+      HSuperColumn<SN,N,V> column = new HSuperColumnImpl<SN,N,V>(sc, sNameSerializer, nameSerializer,
           valueSerializer);
       columnsMap.put(column.getName(), column);
       columnsList.add(column);
@@ -44,7 +45,7 @@ public final class SuperSlice<SN,N,V> {
 
   }
 
-  public HSuperColumn<SN,N,V> getColumnByName(SN columnName) {
+  public HSuperColumn<SN, N, V> getColumnByName(SN columnName) {
     return columnsMap.get(columnName);
   }
   @Override

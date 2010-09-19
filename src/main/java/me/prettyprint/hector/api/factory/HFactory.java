@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.model.HColumnImpl;
-import me.prettyprint.cassandra.model.HSuperColumn;
+import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
@@ -31,6 +31,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
@@ -205,16 +206,16 @@ public final class HFactory {
    * @param name supercolumn name
    * @param createColumn a variable number of column arguments
    */
-  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
+  public static <SN,N,V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
       Serializer<SN> superNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new HSuperColumn<SN, N, V>(name, columns, createTimestamp(), superNameSerializer,
+    return new HSuperColumnImpl<SN, N, V>(name, columns, createTimestamp(), superNameSerializer,
         nameSerializer, valueSerializer);
   }
 
-  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
+  public static <SN,N,V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
       long timestamp, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new HSuperColumn<SN, N, V>(name, columns, timestamp, superNameSerializer, nameSerializer,
+    return new HSuperColumnImpl<SN, N, V>(name, columns, timestamp, superNameSerializer, nameSerializer,
         valueSerializer);
   }
 

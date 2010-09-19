@@ -6,6 +6,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Deletion;
@@ -84,7 +85,8 @@ public final class Mutator {
    * Schedule an insertion of a supercolumn to be inserted in batch mode by {@link #execute()}
    */
   public <SN,N,V> Mutator addInsertion(String key, String cf, HSuperColumn<SN,N,V> sc) {
-    getPendingMutations().addSuperInsertion(key, Arrays.asList(cf), sc.toThrift());
+    getPendingMutations().addSuperInsertion(key, Arrays.asList(cf),
+        ((HSuperColumnImpl<SN,N,V>) sc).toThrift());
     return this;
   }
 
