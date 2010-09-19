@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.Rows;
 
 import org.apache.cassandra.thrift.Column;
 
@@ -17,11 +18,11 @@ import org.apache.cassandra.thrift.Column;
  * @param <N>
  * @param <V>
  */
-public class Rows<N, V> implements Iterable<Row<N, V>> {
+public class RowsImpl<N, V> implements Rows<N, V> {
 
   protected final Map<String, Row<N, V>> rows;
 
-  public Rows(Map<String, List<Column>> thriftRet, Serializer<N> nameSerializer,
+  public RowsImpl(Map<String, List<Column>> thriftRet, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     Assert.noneNull(thriftRet, nameSerializer, valueSerializer);
     rows = new HashMap<String, Row<N, V>>(thriftRet.size());
@@ -31,10 +32,12 @@ public class Rows<N, V> implements Iterable<Row<N, V>> {
     }
   }
 
+  @Override
   public Row<N, V> getByKey(String key) {
     return rows.get(key);
   }
 
+  @Override
   public int getCount() {
     return rows.size();
   }

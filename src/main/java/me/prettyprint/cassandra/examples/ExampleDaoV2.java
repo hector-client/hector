@@ -13,10 +13,10 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Rows;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
@@ -86,7 +86,7 @@ public class ExampleDaoV2 {
     q.setColumnNames(COLUMN_NAME);
 
     Result<Rows<String,String>> r = q.execute();
-    Rows<String,String> rows = r.get();
+    Rows<String, String> rows = r.get();
     Map<String, String> ret = new HashMap<String, String>(keys.length);
     for (String k: keys) {
       HColumn<String, String> c = rows.getByKey(k).getColumnSlice().getColumnByName(COLUMN_NAME);

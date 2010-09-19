@@ -10,10 +10,11 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.model.RowsImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 
@@ -70,7 +71,7 @@ public final class ThriftMultigetSubSliceQuery<SN, N, V> extends
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             Map<String, List<Column>> thriftRet = ks.multigetSlice(keysList,
                 columnParent, getPredicate());
-            return new Rows<N, V>(thriftRet, columnNameSerializer, valueSerializer);
+            return new RowsImpl<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }
