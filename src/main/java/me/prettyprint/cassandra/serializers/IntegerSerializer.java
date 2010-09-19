@@ -2,9 +2,9 @@ package me.prettyprint.cassandra.serializers;
 
 
 /**
- * Converts bytes to Long and vise a versa
+ * Converts bytes to Integer and vice versa
  *
- * @author Ran Tavory
+ * @author Bozhidar Bozhanov
  *
  */
 public final class IntegerSerializer extends AbstractSerializer<Integer> {

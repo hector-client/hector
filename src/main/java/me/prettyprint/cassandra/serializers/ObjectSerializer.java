@@ -46,7 +46,7 @@ public class ObjectSerializer extends AbstractSerializer<Object> implements Seri
     }
   }
 
-  public static Serializer<?> get() {
+  public static ObjectSerializer get() {
     return INSTANCE;
   }
 
