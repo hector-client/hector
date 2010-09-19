@@ -48,6 +48,7 @@ import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;

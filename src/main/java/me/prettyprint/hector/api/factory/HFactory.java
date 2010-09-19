@@ -10,7 +10,6 @@ import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.model.SliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
@@ -19,6 +18,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubSliceQuery;
@@ -39,6 +39,7 @@ import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
@@ -184,9 +185,9 @@ public final class HFactory {
     return new ThriftRangeSubSlicesQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
-  public static <N,V> SliceQuery<N,V> createSliceQuery(
+  public static <N,V> SliceQuery<N, V> createSliceQuery(
       KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new SliceQuery<N,V>(ko, nameSerializer, valueSerializer);
+    return new ThriftSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> SubSliceQuery<SN, N, V> createSubSliceQuery(
