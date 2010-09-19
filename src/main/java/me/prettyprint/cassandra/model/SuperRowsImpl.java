@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.SuperRow;
 import me.prettyprint.hector.api.beans.SuperRows;
 
 import org.apache.cassandra.thrift.SuperColumn;
@@ -27,7 +28,7 @@ public class SuperRowsImpl<SN, N, V> implements SuperRows<SN, N, V> {
     Assert.noneNull(thriftSuperColumns, sNameSerializer, nameSerializer, valueSerializer);
     rows = new HashMap<String, SuperRow<SN, N, V>>(thriftSuperColumns.size());
     for (Map.Entry<String, List<SuperColumn>> entry : thriftSuperColumns.entrySet()) {
-      rows.put(entry.getKey(), new SuperRow<SN, N, V>(entry.getKey(), entry.getValue(),
+      rows.put(entry.getKey(), new SuperRowImpl<SN, N, V>(entry.getKey(), entry.getValue(),
           sNameSerializer, nameSerializer, valueSerializer));
     }
   }

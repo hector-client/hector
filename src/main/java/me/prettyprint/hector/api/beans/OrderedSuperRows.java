@@ -2,8 +2,6 @@ package me.prettyprint.hector.api.beans;
 
 import java.util.List;
 
-import me.prettyprint.cassandra.model.SuperRow;
-
 public interface OrderedSuperRows<SN, N, V> extends SuperRows<SN, N, V>{
 
   /**

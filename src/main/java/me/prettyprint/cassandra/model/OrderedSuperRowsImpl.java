@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
+import me.prettyprint.hector.api.beans.SuperRow;
 
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -25,7 +26,7 @@ public final class OrderedSuperRowsImpl<SN,N,V> extends SuperRowsImpl<SN,N,V> im
     super(thriftRet, sNameSerializer, nameSerializer, valueSerializer);
     rowsList = new ArrayList<SuperRow<SN,N,V>>(thriftRet.size());
     for (Map.Entry<String, List<SuperColumn>> entry: thriftRet.entrySet()) {
-      rowsList.add(new SuperRow<SN,N,V>(entry.getKey(), entry.getValue(), sNameSerializer,
+      rowsList.add(new SuperRowImpl<SN,N,V>(entry.getKey(), entry.getValue(), sNameSerializer,
           nameSerializer, valueSerializer));
     }
   }

@@ -1,6 +1,5 @@
 package me.prettyprint.hector.api.beans;
 
-import me.prettyprint.cassandra.model.SuperRow;
 
 /**
  * Returned by a MultigetSuperSliceQuery (multiget_slice for supercolumns)
