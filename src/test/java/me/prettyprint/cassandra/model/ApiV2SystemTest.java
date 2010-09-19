@@ -43,6 +43,7 @@ import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.beans.SuperRow;
 import me.prettyprint.hector.api.beans.SuperRows;
+import me.prettyprint.hector.api.beans.SuperSlice;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;

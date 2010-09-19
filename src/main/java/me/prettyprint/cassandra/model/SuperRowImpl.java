@@ -4,6 +4,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.beans.SuperRow;
+import me.prettyprint.hector.api.beans.SuperSlice;
 
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -29,7 +30,7 @@ public final class SuperRowImpl<SN, N, V> implements SuperRow<SN, N, V> {
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(rowKey, thriftSuperColumns, nameSerializer, valueSerializer);
     this.rowKey = rowKey;
-    slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameSerializer, nameSerializer,
+    slice = new SuperSliceImpl<SN, N, V>(thriftSuperColumns, sNameSerializer, nameSerializer,
         valueSerializer);
   }
 

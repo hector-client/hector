@@ -1,6 +1,5 @@
 package me.prettyprint.hector.api.beans;
 
-import me.prettyprint.cassandra.model.SuperSlice;
 
 /**
  * A SuperRow is a touple consisting of a Key and a SuperSlice.
