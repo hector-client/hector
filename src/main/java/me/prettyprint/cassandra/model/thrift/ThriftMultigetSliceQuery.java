@@ -54,7 +54,7 @@ public final class ThriftMultigetSliceQuery<K, N, V> extends AbstractSliceQuery<
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
-                ks.multigetSlice(keySerializer.toBytesSet(keysList), columnParent, getPredicate()));
+                ks.multigetSlice(keySerializer.toBytesList(keysList), columnParent, getPredicate()));
             return new Rows<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);

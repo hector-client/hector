@@ -57,7 +57,7 @@ public final class ThriftMultigetSuperSliceQuery<K, SN, N, V> extends
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<SuperColumn>> thriftRet = keySerializer.fromBytesMap(ks.multigetSuperSlice(
-                keySerializer.toBytesSet(keysList), columnParent, getPredicate()));
+                keySerializer.toBytesList(keysList), columnParent, getPredicate()));
             return new SuperRows<K, SN, N, V>(thriftRet, keySerializer, columnNameSerializer,
                 nameSerializer, valueSerializer);
           }
