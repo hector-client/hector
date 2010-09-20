@@ -10,10 +10,11 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.cassandra.model.RowsImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 
@@ -47,13 +48,13 @@ public final class ThriftMultigetSliceQuery<N, V> extends AbstractSliceQuery<N, 
     return new Result<Rows<N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<Rows<N,V>>() {
           @Override
-          public Rows<N,V> doInKeyspace(Keyspace ks) throws HectorException {
+          public Rows<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             List<String> keysList = new ArrayList<String>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<String, List<Column>> thriftRet =
               ks.multigetSlice(keysList, columnParent, getPredicate());
-            return new Rows<N,V>(thriftRet, columnNameSerializer, valueSerializer);
+            return new RowsImpl<N,V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

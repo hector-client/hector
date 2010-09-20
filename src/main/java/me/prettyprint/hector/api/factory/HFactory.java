@@ -4,13 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.HColumn;
-import me.prettyprint.cassandra.model.HSuperColumn;
+import me.prettyprint.cassandra.model.HColumnImpl;
+import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.model.SliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
@@ -19,6 +18,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubSliceQuery;
@@ -30,6 +30,8 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
@@ -37,6 +39,7 @@ import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
@@ -182,9 +185,9 @@ public final class HFactory {
     return new ThriftRangeSubSlicesQuery<SN,N,V>(ko, sNameSerializer, nameSerializer, valueSerializer);
   }
 
-  public static <N,V> SliceQuery<N,V> createSliceQuery(
+  public static <N,V> SliceQuery<N, V> createSliceQuery(
       KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new SliceQuery<N,V>(ko, nameSerializer, valueSerializer);
+    return new ThriftSliceQuery<N,V>(ko, nameSerializer, valueSerializer);
   }
 
   public static <SN,N,V> SubSliceQuery<SN, N, V> createSubSliceQuery(
@@ -204,36 +207,36 @@ public final class HFactory {
    * @param name supercolumn name
    * @param createColumn a variable number of column arguments
    */
-  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
+  public static <SN,N,V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
       Serializer<SN> superNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new HSuperColumn<SN, N, V>(name, columns, createTimestamp(), superNameSerializer,
+    return new HSuperColumnImpl<SN, N, V>(name, columns, createTimestamp(), superNameSerializer,
         nameSerializer, valueSerializer);
   }
 
-  public static <SN,N,V> HSuperColumn<SN,N,V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
+  public static <SN,N,V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N,V>> columns,
       long timestamp, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new HSuperColumn<SN, N, V>(name, columns, timestamp, superNameSerializer, nameSerializer,
+    return new HSuperColumnImpl<SN, N, V>(name, columns, timestamp, superNameSerializer, nameSerializer,
         valueSerializer);
   }
 
-  public static <N,V> HColumn<N,V> createColumn(N name, V value, long timestamp,
+  public static <N,V> HColumn<N, V> createColumn(N name, V value, long timestamp,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new HColumn<N, V>(name, value, timestamp, nameSerializer, valueSerializer);
+    return new HColumnImpl<N, V>(name, value, timestamp, nameSerializer, valueSerializer);
   }
 
   /**
    * Creates a column with the timestamp of now.
    */
-  public static <N,V> HColumn<N,V> createColumn(N name, V value,
+  public static <N,V> HColumn<N, V> createColumn(N name, V value,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new HColumn<N, V>(name, value, createTimestamp(), nameSerializer, valueSerializer);
+    return new HColumnImpl<N, V>(name, value, createTimestamp(), nameSerializer, valueSerializer);
   }
 
   /**
    * Convienience method for creating a column with a String name and String value
    */
-  public static HColumn<String,String> createStringColumn(String name, String value) {
+  public static HColumn<String, String> createStringColumn(String name, String value) {
     StringSerializer se = StringSerializer.get();
     return createColumn(name, value, se, se);
   }

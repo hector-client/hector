@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.hector.api.beans.OrderedSuperRows;
+import me.prettyprint.hector.api.beans.SuperRow;
+
 import org.apache.cassandra.thrift.SuperColumn;
 
 /**
@@ -13,17 +16,17 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @author Ran Tavory
  *
  */
-public final class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
+public final class OrderedSuperRowsImpl<SN,N,V> extends SuperRowsImpl<SN,N,V> implements OrderedSuperRows<SN, N, V> {
 
   private final List<SuperRow<SN,N,V>> rowsList;
 
-  public OrderedSuperRows(LinkedHashMap<String, List<SuperColumn>> thriftRet,
+  public OrderedSuperRowsImpl(LinkedHashMap<String, List<SuperColumn>> thriftRet,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(thriftRet, sNameSerializer, nameSerializer, valueSerializer);
     rowsList = new ArrayList<SuperRow<SN,N,V>>(thriftRet.size());
     for (Map.Entry<String, List<SuperColumn>> entry: thriftRet.entrySet()) {
-      rowsList.add(new SuperRow<SN,N,V>(entry.getKey(), entry.getValue(), sNameSerializer,
+      rowsList.add(new SuperRowImpl<SN,N,V>(entry.getKey(), entry.getValue(), sNameSerializer,
           nameSerializer, valueSerializer));
     }
   }
@@ -32,6 +35,7 @@ public final class OrderedSuperRows<SN,N,V> extends SuperRows<SN,N,V> {
    * Preserves rows order
    * @return an unmodifiable list of Rows
    */
+  @Override
   public List<SuperRow<SN,N,V>> getList() {
     return Collections.unmodifiableList(rowsList);
   }

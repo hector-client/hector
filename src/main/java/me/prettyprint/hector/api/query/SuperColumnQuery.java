@@ -1,6 +1,6 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.HSuperColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 
 /**
  * A SuperColumnQuery is used for querying the value of a single entire supercolumn from a SC family

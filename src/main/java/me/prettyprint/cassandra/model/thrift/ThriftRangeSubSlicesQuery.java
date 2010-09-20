@@ -7,11 +7,12 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.OrderedRows;
+import me.prettyprint.cassandra.model.OrderedRowsImpl;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 
@@ -66,12 +67,12 @@ public final class ThriftRangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<
     return new Result<OrderedRows<N,V>>(keyspaceOperator.doExecute(
         new KeyspaceOperationCallback<OrderedRows<N,V>>() {
           @Override
-          public OrderedRows<N,V> doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedRows<N, V> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             LinkedHashMap<String, List<Column>> thriftRet =
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift());
-            return new OrderedRows<N,V>(thriftRet, columnNameSerializer, valueSerializer);
+            return new OrderedRowsImpl<N,V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

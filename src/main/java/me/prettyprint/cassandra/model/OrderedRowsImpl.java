@@ -6,6 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Row;
+
 import org.apache.cassandra.thrift.Column;
 
 /**
@@ -15,16 +18,16 @@ import org.apache.cassandra.thrift.Column;
  * @param <N>
  * @param <V>
  */
-public final class OrderedRows<N,V> extends Rows<N,V> {
+public final class OrderedRowsImpl<N,V> extends RowsImpl<N,V> implements OrderedRows<N, V> {
 
   private final List<Row<N,V>> rowsList;
 
-  public OrderedRows(LinkedHashMap<String, List<Column>> thriftRet, Serializer<N> nameSerializer,
+  public OrderedRowsImpl(LinkedHashMap<String, List<Column>> thriftRet, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(thriftRet, nameSerializer, valueSerializer);
     rowsList = new ArrayList<Row<N,V>>(thriftRet.size());
     for (Map.Entry<String, List<Column>> entry: thriftRet.entrySet()) {
-      rowsList.add(new Row<N,V>(entry.getKey(), entry.getValue(), nameSerializer, valueSerializer));
+      rowsList.add(new RowImpl<N,V>(entry.getKey(), entry.getValue(), nameSerializer, valueSerializer));
     }
   }
 
@@ -32,6 +35,7 @@ public final class OrderedRows<N,V> extends Rows<N,V> {
    * Preserves rows order
    * @return an unmodifiable list of Rows
    */
+  @Override
   public List<Row<N,V>> getList() {
     return Collections.unmodifiableList(rowsList);
   }

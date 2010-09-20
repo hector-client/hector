@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
+
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -22,10 +25,10 @@ import org.apache.cassandra.thrift.SuperColumn;
  *
  * @author zznate
  */
-public final class HSuperColumn<SN,N,V> {
+public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
 
   private SN superName;
-  private List<HColumn<N,V>> columns;
+  private List<? extends HColumn<N,V>> columns;
   private long timestamp;
   private final Serializer<SN> superNameSerializer;
   private final Serializer<N> nameSerializer;
@@ -37,7 +40,7 @@ public final class HSuperColumn<SN,N,V> {
    * @param Serializer<SN> the serializer type
    * @param timestamp
    */
-  public HSuperColumn(SN sName, List<HColumn<N, V>> columns, long timestamp,
+  public HSuperColumnImpl(SN sName, List<HColumn<N, V>> columns, long timestamp,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     notNull(sName, "Name is null");
@@ -47,7 +50,7 @@ public final class HSuperColumn<SN,N,V> {
     this.timestamp = timestamp;
   }
 
-  public HSuperColumn(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
+  public HSuperColumnImpl(SuperColumn thriftSuperColumn, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     noneNull(thriftSuperColumn, sNameSerializer, nameSerializer, valueSerializer);
@@ -55,7 +58,7 @@ public final class HSuperColumn<SN,N,V> {
     columns = fromThriftColumns(thriftSuperColumn.getColumns());
   }
 
-  /*package*/ HSuperColumn(Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+  /*package*/ HSuperColumnImpl(Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     noneNull(sNameSerializer, nameSerializer, valueSerializer);
     this.superNameSerializer = sNameSerializer;
@@ -63,31 +66,37 @@ public final class HSuperColumn<SN,N,V> {
     this.valueSerializer = valueSerializer;
   }
 
+  @Override
   public HSuperColumn<SN, N, V> setName(SN name) {
     notNull(name, "name is null");
     this.superName = name;
     return this;
   }
 
+  @Override
   public HSuperColumn<SN, N, V> setSubcolumns(List<HColumn<N, V>> subcolumns) {
     notNull(subcolumns, "subcolumns are null");
     this.columns = subcolumns;
     return this;
   }
 
+  @Override
   public HSuperColumn<SN, N, V> setTimestamp(long timestamp) {
     this.timestamp = timestamp;
     return this;
   }
 
+  @Override
   public long getTimestamp() {
     return timestamp;
   }
 
+  @Override
   public int getSize() {
     return columns == null ? 0 : columns.size();
   }
 
+  @Override
   public SN getName() {
     return superName;
   }
@@ -96,18 +105,22 @@ public final class HSuperColumn<SN,N,V> {
    *
    * @return an unmodifiable list of columns
    */
+  @Override
   public List<HColumn<N,V>> getColumns() {
     return Collections.unmodifiableList(columns);
   }
 
-  public HColumn<N,V> get(int i) {
+  @Override
+  public HColumn<N, V> get(int i) {
     return columns.get(i);
   }
 
+  @Override
   public Serializer<SN> getNameSerializer() {
     return superNameSerializer;
   }
 
+  @Override
   public byte[] getNameBytes() {
     return superNameSerializer.toBytes(getName());
   }
@@ -122,7 +135,7 @@ public final class HSuperColumn<SN,N,V> {
   private List<Column> toThriftColumn() {
     List<Column> ret = new ArrayList<Column>(columns.size());
     for (HColumn<N, V> c: columns) {
-      ret.add(c.toThrift());
+      ret.add(((HColumnImpl<N, V>) c).toThrift());
     }
     return ret;
   }
@@ -130,15 +143,17 @@ public final class HSuperColumn<SN,N,V> {
   private List<HColumn<N, V>> fromThriftColumns(List<Column> tcolumns) {
     List<HColumn<N, V>> cs = new ArrayList<HColumn<N,V>>(tcolumns.size());
     for (Column c: tcolumns) {
-      cs.add(new HColumn<N, V>(c, nameSerializer, valueSerializer));
+      cs.add(new HColumnImpl<N, V>(c, nameSerializer, valueSerializer));
     }
     return cs;
   }
 
+  @Override
   public Serializer<SN> getSuperNameSerializer() {
     return superNameSerializer;
   }
 
+  @Override
   public Serializer<V> getValueSerializer() {
     return valueSerializer;
   }

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.beans.SuperSlice;
 
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -17,19 +19,19 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <N> Column name type
  * @param <V> Column value type
  */
-public final class SuperSlice<SN,N,V> {
+public final class SuperSliceImpl<SN,N,V> implements SuperSlice<SN, N, V> {
 
   private final Map<SN,HSuperColumn<SN,N,V>> columnsMap;
 
   private final List<HSuperColumn<SN,N,V>> columnsList;
 
-  public SuperSlice(List<SuperColumn> tSuperColumns, Serializer<SN> sNameSerializer,
+  public SuperSliceImpl(List<SuperColumn> tSuperColumns, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(tSuperColumns, sNameSerializer, nameSerializer, valueSerializer);
     columnsMap = new HashMap<SN,HSuperColumn<SN,N,V>>(tSuperColumns.size());
     columnsList = new ArrayList<HSuperColumn<SN,N,V>>(tSuperColumns.size());
     for (SuperColumn sc: tSuperColumns) {
-      HSuperColumn<SN,N,V> column = new HSuperColumn<SN,N,V>(sc, sNameSerializer, nameSerializer,
+      HSuperColumn<SN,N,V> column = new HSuperColumnImpl<SN,N,V>(sc, sNameSerializer, nameSerializer,
           valueSerializer);
       columnsMap.put(column.getName(), column);
       columnsList.add(column);
@@ -39,12 +41,14 @@ public final class SuperSlice<SN,N,V> {
   /**
    * @return an unmodifiable list of supercolumns
    */
+  @Override
   public List<HSuperColumn<SN,N,V>> getSuperColumns() {
     return Collections.unmodifiableList(columnsList);
 
   }
 
-  public HSuperColumn<SN,N,V> getColumnByName(SN columnName) {
+  @Override
+  public HSuperColumn<SN, N, V> getColumnByName(SN columnName) {
     return columnsMap.get(columnName);
   }
   @Override

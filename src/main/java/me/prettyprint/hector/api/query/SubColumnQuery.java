@@ -1,6 +1,6 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.HColumn;
+import me.prettyprint.hector.api.beans.HColumn;
 
 /**
  * Used to get the value of a subcolumn within a super column
