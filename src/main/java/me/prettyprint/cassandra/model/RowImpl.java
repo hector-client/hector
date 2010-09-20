@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.beans.Row;
 
 import org.apache.cassandra.thrift.Column;
 
@@ -17,23 +19,25 @@ import org.apache.cassandra.thrift.Column;
  * @param <V> Column value type
  *
  */
-public final class Row<K,N,V> {
+public final class RowImpl<K,N,V> implements Row<K, N, V>{
 
   private final K rowKey;
   private final ColumnSlice<N,V> columnSlice;
 
-  /*package*/ Row(K k, List<Column> columns, Serializer<N> nameSerializer,
+  /*package*/ RowImpl(K k, List<Column> columns, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     Assert.noneNull(k, columns, nameSerializer, valueSerializer);
     this.rowKey = k;
-    columnSlice = new ColumnSlice<N,V>(columns, nameSerializer, valueSerializer);
+    columnSlice = new ColumnSliceImpl<N,V>(columns, nameSerializer, valueSerializer);
   }
 
+  @Override
   public K getKey() {
     return rowKey;
   }
 
-  public ColumnSlice<N,V> getColumnSlice() {
+  @Override
+  public ColumnSlice<N, V> getColumnSlice() {
     return columnSlice;
   }
 

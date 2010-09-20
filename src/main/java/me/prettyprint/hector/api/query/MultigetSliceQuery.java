@@ -2,7 +2,7 @@ package me.prettyprint.hector.api.query;
 
 import java.util.Collection;
 
-import me.prettyprint.cassandra.model.Rows;
+import me.prettyprint.hector.api.beans.Rows;
 
 /**
  * A query wrapper for the multiget_slice call

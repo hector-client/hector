@@ -2,7 +2,7 @@ package me.prettyprint.hector.api.query;
 
 import java.util.Collection;
 
-import me.prettyprint.cassandra.model.SuperSlice;
+import me.prettyprint.hector.api.beans.SuperSlice;
 
 /**
  * A query for the  call get_slice.

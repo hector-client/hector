@@ -8,11 +8,12 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.OrderedSuperRows;
+import me.prettyprint.cassandra.model.OrderedSuperRowsImpl;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 
@@ -68,8 +69,9 @@ public final class ThriftRangeSuperSlicesQuery<K, SN, N, V> extends
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<SuperColumn>> thriftRet = keySerializer.fromBytesMap(
                 ks.getSuperRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
-            return new OrderedSuperRows<K,SN,N,V>((LinkedHashMap<K, List<SuperColumn>>) thriftRet, keySerializer, columnNameSerializer, nameSerializer,
-                valueSerializer);
+            return new OrderedSuperRowsImpl<K, SN, N, V>(
+                (LinkedHashMap<K, List<SuperColumn>>) thriftRet, keySerializer,
+                columnNameSerializer, nameSerializer, valueSerializer);
           }
         }), this);
   }

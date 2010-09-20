@@ -3,19 +3,19 @@ package me.prettyprint.cassandra.service.spring;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
-import me.prettyprint.cassandra.model.HColumn;
-import me.prettyprint.cassandra.model.HSuperColumn;
+import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.model.SliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.BytesSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
@@ -25,6 +25,7 @@ import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
@@ -388,7 +389,7 @@ public class HectorTemplateImpl implements HectorTemplate {
    */
   @Override
   public <N, V> HColumn<N, V> createColumn(N name, V value) {
-    return new HColumn<N, V>(name, value, createClock());
+    return new HColumnImpl<N, V>(name, value, createClock());
   }
 
   /*

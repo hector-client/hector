@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
@@ -59,7 +60,7 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getIndexedSlices(columnParent, indexClause, getPredicate()));
-            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
+            return new OrderedRowsImpl<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

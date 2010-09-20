@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.SuperRow;
+import me.prettyprint.hector.api.beans.SuperSlice;
 
 import org.apache.cassandra.thrift.SuperColumn;
 
@@ -19,23 +21,25 @@ import org.apache.cassandra.thrift.SuperColumn;
  *          Column value type
  *
  */
-public final class SuperRow<K, SN, N, V> {
+public final class SuperRowImpl<K, SN, N, V> implements SuperRow<K, SN, N, V>{
 
   private final K rowKey;
   private final SuperSlice<SN, N, V> slice;
 
-  /*package*/SuperRow(K bs, List<SuperColumn> thriftSuperColumns,
+  /*package*/SuperRowImpl(K bs, List<SuperColumn> thriftSuperColumns,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(bs, thriftSuperColumns, nameSerializer, valueSerializer);
     this.rowKey = bs;
-    slice = new SuperSlice<SN, N, V>(thriftSuperColumns, sNameSerializer, nameSerializer,
+    slice = new SuperSliceImpl<SN, N, V>(thriftSuperColumns, sNameSerializer, nameSerializer,
         valueSerializer);
   }
 
+  @Override
   public K getKey() {
     return rowKey;
   }
 
+  @Override
   public SuperSlice<SN, N, V> getSuperSlice() {
     return slice;
   }

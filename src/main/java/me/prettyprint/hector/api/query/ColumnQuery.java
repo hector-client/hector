@@ -1,6 +1,6 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.HColumn;
+import me.prettyprint.hector.api.beans.HColumn;
 
 /**
  * A ColumnQuery is used for querying the value of a single and standard column.

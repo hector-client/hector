@@ -3,13 +3,14 @@ package me.prettyprint.cassandra.model.thrift;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
-import me.prettyprint.cassandra.model.ColumnSlice;
+import me.prettyprint.cassandra.model.ColumnSliceImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 
@@ -65,7 +66,7 @@ public final class ThriftSubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());
-            return new ColumnSlice<N, V>(thriftRet, columnNameSerializer, valueSerializer);
+            return new ColumnSliceImpl<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

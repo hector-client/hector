@@ -1,6 +1,6 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.OrderedSuperRows;
+import me.prettyprint.hector.api.beans.OrderedSuperRows;
 
 /**
  * A query for the call get_range_slices of supercolumns

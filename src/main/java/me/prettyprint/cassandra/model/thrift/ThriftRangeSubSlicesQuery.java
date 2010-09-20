@@ -8,11 +8,12 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.OrderedRows;
+import me.prettyprint.cassandra.model.OrderedRowsImpl;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 
@@ -73,7 +74,7 @@ public final class ThriftRangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuer
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
-            return new OrderedRows<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
+            return new OrderedRowsImpl<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }
