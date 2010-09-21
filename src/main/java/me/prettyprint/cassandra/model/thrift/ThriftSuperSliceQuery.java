@@ -4,14 +4,15 @@ import java.util.List;
 
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.SuperSliceImpl;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.SuperSlice;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperSliceQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -34,7 +35,7 @@ public final class ThriftSuperSliceQuery<SN, N, V> extends
   private String key;
   private final Serializer<SN> sNameSerializer;
 
-  public ThriftSuperSliceQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public ThriftSuperSliceQuery(Keyspace ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
@@ -48,11 +49,11 @@ public final class ThriftSuperSliceQuery<SN, N, V> extends
   }
 
   @Override
-  public Result<SuperSlice<SN,N,V>> execute() {
-    return new Result<SuperSlice<SN,N,V>>(keyspaceOperator.doExecute(
+  public QueryResult<SuperSlice<SN, N, V>> execute() {
+    return new QueryResultImpl<SuperSlice<SN,N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<SuperSlice<SN,N,V>>() {
           @Override
-          public SuperSlice<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
+          public SuperSlice<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate());
             return new SuperSliceImpl<SN,N,V>(thriftRet, sNameSerializer, columnNameSerializer, valueSerializer);

@@ -7,7 +7,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.Rows;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -18,7 +21,7 @@ public class AbstractSliceQueryTest {
 
 
   private static final StringSerializer se = StringSerializer.get();
-  private static final KeyspaceOperator ko = Mockito.mock(KeyspaceOperator.class);
+  private static final Keyspace ko = Mockito.mock(ExecutingKeyspace.class);
 
   @Test
   public void testGetSetPredicate_columnNames() {
@@ -48,12 +51,12 @@ public class AbstractSliceQueryTest {
 
   private static class ConcreteSliceQueury<N, V, T> extends AbstractSliceQuery<N, V, T> {
 
-    ConcreteSliceQueury(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    ConcreteSliceQueury(Keyspace ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
       super(ko, nameSerializer, valueSerializer);
     }
 
     @Override
-    public Result<T> execute() {
+    public QueryResult<T> execute() {
       return null;
     }
   }

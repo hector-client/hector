@@ -1,8 +1,8 @@
 package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.AbstractSubColumnQuery;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 
 /**
@@ -15,11 +15,11 @@ import me.prettyprint.hector.api.query.SubColumnQuery;
  */
 public final class ThriftSubColumnQuery<SN,N,V> extends AbstractSubColumnQuery<SN, N, V> implements SubColumnQuery<SN, N, V> {
 
-  /*package*/ public ThriftSubColumnQuery(KeyspaceOperator keyspaceOperator,
+  /*package*/ public ThriftSubColumnQuery(Keyspace keyspace,
       Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(keyspaceOperator, sNameSerializer, nameSerializer, valueSerializer);
+    super(keyspace, sNameSerializer, nameSerializer, valueSerializer);
   }
 
 }

@@ -13,7 +13,7 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SuperColumn;
 
 /**
- * A BatchMutation object is used to construct the {@link Keyspace#batchMutate(BatchMutation)} call.
+ * A BatchMutation object is used to construct the {@link KeyspaceService#batchMutate(BatchMutation)} call.
  *
  * A BatchMutation encapsulates a set of updates (or insertions) and deletions all submitted at the
  * same time to cassandra. The BatchMutation object is useful for user friendly construction of

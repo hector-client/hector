@@ -1,7 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
-import static me.prettyprint.hector.api.factory.HFactory.createKeyspaceOperator;
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.createSuperColumn;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
@@ -17,8 +17,11 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.utils.StringUtils;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.mutation.MutationResult;
+import me.prettyprint.hector.api.mutation.Mutator;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.junit.After;
@@ -29,23 +32,23 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   private static final StringSerializer se = new StringSerializer();
 
   private Cluster cluster;
-  private KeyspaceOperator keyspaceOperator;
+  private Keyspace keyspace;
 
   @Before
   public void setupCase() {
     cluster = getOrCreateCluster("Test Cluster", "127.0.0.1:9170");
-    keyspaceOperator = createKeyspaceOperator("Keyspace1", cluster);
+    keyspace = createKeyspace("Keyspace1", cluster);
   }
 
   @After
   public void teardownCase() {
-    keyspaceOperator = null;
+    keyspace = null;
     cluster = null;
   }
 
   @Test
   public void testInsert() {
-    Mutator m = createMutator(keyspaceOperator);
+    Mutator m = createMutator(keyspace);
     MutationResult mr = m.insert("k", "Standard1", createColumn("name", "value", se, se));
     assertTrue("Execution time on single insert should be > 0",mr.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", mr.getHostUsed() != null);
@@ -54,7 +57,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testInsertSuper() {
-    Mutator m = createMutator(keyspaceOperator);
+    Mutator m = createMutator(keyspace);
     List<HColumn<String, String>> columnList = new ArrayList<HColumn<String,String>>();
     columnList.add(createColumn("name","value",se,se));
     HSuperColumn<String, String, String> superColumn =
@@ -68,7 +71,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   public void testBatchMutationManagement() {
     String cf = "Standard1";
 
-    Mutator m = createMutator(keyspaceOperator);
+    Mutator m = createMutator(keyspace);
     for (int i = 0; i < 5; i++) {
       m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
     }

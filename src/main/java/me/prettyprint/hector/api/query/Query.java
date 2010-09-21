@@ -1,6 +1,5 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 
 
@@ -10,7 +9,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
  * The common usage pattern is to create a query, set the required query attributes and invoke
  * {@link Query#execute()} such as in the following example:
  * <pre>
-    ColumnQuery<String, String> q = createColumnQuery(keyspaceOperator, serializer, serializer);
+    ColumnQuery<String, String> q = createColumnQuery(keyspace, serializer, serializer);
     Result<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).
@@ -28,6 +27,6 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
  */
 public interface Query<T> {
 
-  Result<T> execute();
+  QueryResult<T> execute();
 
 }

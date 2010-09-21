@@ -3,7 +3,7 @@ package me.prettyprint.cassandra.dao;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
@@ -11,7 +11,7 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 
 /**
  * Provides an abstraction for running an operation, or a command on a cassandra keyspace.
- * Clients of Hector implement the {@link #execute(Keyspace)} and then call
+ * Clients of Hector implement the {@link #execute(KeyspaceService)} and then call
  * {@link #execute(String, int, String)} on an instance of this implementation.
  *
  * The class provides the comfort of managing connections by borowing and then releasing them.
@@ -34,10 +34,10 @@ public abstract class Command<OUTPUT> {
    * @param ks
    * @return
    */
-  public abstract OUTPUT execute(final Keyspace ks) throws HectorException;
+  public abstract OUTPUT execute(final KeyspaceService ks) throws HectorException;
 
   /**
-   * Call this method to run the code within the {@link #execute(Keyspace)} method.
+   * Call this method to run the code within the {@link #execute(KeyspaceService)} method.
    *
    * @param host
    * @param port
@@ -79,7 +79,7 @@ public abstract class Command<OUTPUT> {
   public final OUTPUT execute(CassandraClientPool pool, String[] hosts, String keyspace,
       ConsistencyLevel consistency) throws HectorException {
     CassandraClient c = pool.borrowClient(hosts);
-    Keyspace ks = c.getKeyspace(keyspace, consistency);
+    KeyspaceService ks = c.getKeyspace(keyspace, consistency);
     try {
       return execute(ks);
     } finally {
@@ -97,7 +97,7 @@ public abstract class Command<OUTPUT> {
 
   protected OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency,
       FailoverPolicy failoverPolicy) throws HectorException {
-    Keyspace ks = c.getKeyspace(keyspace, consistency, failoverPolicy);
+    KeyspaceService ks = c.getKeyspace(keyspace, consistency, failoverPolicy);
     try {
       return execute(ks);
     } finally {
@@ -111,7 +111,7 @@ public abstract class Command<OUTPUT> {
    */
   protected final OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency)
       throws HectorException {
-    Keyspace ks = c.getKeyspace(keyspace, consistency);
+    KeyspaceService ks = c.getKeyspace(keyspace, consistency);
     try {
       return execute(ks);
     } finally {

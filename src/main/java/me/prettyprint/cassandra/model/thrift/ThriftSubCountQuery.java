@@ -1,12 +1,13 @@
 package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SubCountQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -25,7 +26,7 @@ public final class ThriftSubCountQuery<SN> extends AbstractThriftCountQuery impl
 
   private SN superColumnName;
 
-  public ThriftSubCountQuery(KeyspaceOperator ko, Serializer<SN> superNameSerializer) {
+  public ThriftSubCountQuery(Keyspace ko, Serializer<SN> superNameSerializer) {
     super(ko);
     Assert.notNull(superNameSerializer, "superNameSerializer is null");
     this.superNameSerializer = superNameSerializer;
@@ -38,14 +39,14 @@ public final class ThriftSubCountQuery<SN> extends AbstractThriftCountQuery impl
   }
 
   @Override
-  public Result<Integer> execute() {
+  public QueryResult<Integer> execute() {
     Assert.notNull(key, "key is null");
     Assert.notNull(columnFamily, "columnFamily is null");
     Assert.notNull(superColumnName, "superColumnName is null");
-    return new Result<Integer>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<Integer>(keyspace.doExecute(
         new KeyspaceOperationCallback<Integer>() {
           @Override
-          public Integer doInKeyspace(Keyspace ks) throws HectorException {
+          public Integer doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
             Integer count = ks.getCount(key, columnParent);

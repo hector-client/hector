@@ -34,10 +34,10 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/* package */class KeyspaceImpl implements Keyspace {
+/* package */class KeyspaceServiceImpl implements KeyspaceService {
 
   @SuppressWarnings("unused")
-  private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
+  private static final Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
 
   private CassandraClient client;
 
@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
   private final ExceptionsTranslator xtrans;
 
-  public KeyspaceImpl(CassandraClient client, String keyspaceName,
+  public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
       Map<String, Map<String, String>> keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws HectorTransportException {

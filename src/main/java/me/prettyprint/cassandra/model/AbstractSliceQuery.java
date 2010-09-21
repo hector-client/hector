@@ -7,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -31,7 +33,7 @@ public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
   /** Use column names or start/finish? */
   protected boolean useColumnNames;
 
-  public AbstractSliceQuery(KeyspaceOperator ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+  public AbstractSliceQuery(Keyspace ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
   }
 

@@ -6,14 +6,15 @@ import java.util.List;
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.OrderedSuperRowsImpl;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -34,7 +35,7 @@ public final class ThriftRangeSuperSlicesQuery<SN, N, V> extends
   private final Serializer<N> nameSerializer;
   private final HKeyRange keyRange;
 
-  public ThriftRangeSuperSlicesQuery(KeyspaceOperator ko, Serializer<SN> sNameSerializer,
+  public ThriftRangeSuperSlicesQuery(Keyspace ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, sNameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "nameSerializer cannot be null");
@@ -55,13 +56,13 @@ public final class ThriftRangeSuperSlicesQuery<SN, N, V> extends
   }
 
   @Override
-  public Result<OrderedSuperRows<SN,N, V>> execute() {
+  public QueryResult<OrderedSuperRows<SN, N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 
-    return new Result<OrderedSuperRows<SN,N,V>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<OrderedSuperRows<SN,N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<OrderedSuperRows<SN,N,V>>() {
           @Override
-          public OrderedSuperRows<SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedSuperRows<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             LinkedHashMap<String, List<SuperColumn>> thriftRet =
                 ks.getSuperRangeSlices(columnParent, getPredicate(), keyRange.toThrift());

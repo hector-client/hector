@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.examples;
 
-import static me.prettyprint.hector.api.factory.HFactory.createKeyspaceOperator;
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -45,7 +45,7 @@ public class ExampleDaoV2Test {
   @Test
   public void testInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
-    ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
+    ExampleDaoV2 dao = new ExampleDaoV2(createKeyspace("Keyspace1", c));
     assertNull(dao.get("key"));
     dao.insert("key", "value");
     assertEquals("value", dao.get("key"));
@@ -56,7 +56,7 @@ public class ExampleDaoV2Test {
   @Test
   public void testMultiInsertGetDelete() throws HectorException {
     Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
-    ExampleDaoV2 dao = new ExampleDaoV2(createKeyspaceOperator("Keyspace1", c));
+    ExampleDaoV2 dao = new ExampleDaoV2(createKeyspace("Keyspace1", c));
 
     // Get non-existing values
     Map<String, String> ret = dao.getMulti("key1", "key2");

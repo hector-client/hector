@@ -52,7 +52,7 @@ import org.junit.Test;
 public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
-  private Keyspace keyspace;
+  private KeyspaceService keyspace;
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {

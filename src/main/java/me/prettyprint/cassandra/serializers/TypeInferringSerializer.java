@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
 
 /**
  * A serializer that dynamically delegates to a proper serializer based on the

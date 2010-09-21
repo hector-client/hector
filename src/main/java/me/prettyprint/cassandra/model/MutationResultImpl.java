@@ -1,14 +1,15 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.hector.api.mutation.MutationResult;
 
-public final class MutationResult extends ExecutionResult<Void> {
+public final class MutationResultImpl extends ExecutionResult<Void> implements MutationResult {
 
-  /*package*/ MutationResult(boolean success, long execTime, CassandraHost cassandraHost) {
+  /*package*/ MutationResultImpl(boolean success, long execTime, CassandraHost cassandraHost) {
     super(null, execTime, cassandraHost);
   }
 
-  /*package*/ MutationResult(ExecutionResult<Void> res) {
+  /*package*/ MutationResultImpl(ExecutionResult<Void> res) {
     super(null, res.getExecutionTimeMicro(), res.getHostUsed());
   }
 

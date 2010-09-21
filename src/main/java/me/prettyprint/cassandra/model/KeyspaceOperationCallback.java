@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 /**
@@ -12,9 +12,9 @@ import me.prettyprint.hector.api.exceptions.HectorException;
  */
 public abstract class KeyspaceOperationCallback<T> {
 
-  public abstract T doInKeyspace(final Keyspace ks) throws HectorException;
+  public abstract T doInKeyspace(final KeyspaceService ks) throws HectorException;
 
-  public ExecutionResult<T> doInKeyspaceAndMeasure(final Keyspace ks) {
+  public ExecutionResult<T> doInKeyspaceAndMeasure(final KeyspaceService ks) {
     long start = System.nanoTime();
     T value = null;
     value = doInKeyspace(ks);
