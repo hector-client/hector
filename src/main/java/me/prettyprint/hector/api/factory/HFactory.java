@@ -7,7 +7,7 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
-import me.prettyprint.cassandra.model.Mutator;
+import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
@@ -33,6 +33,7 @@ import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
@@ -118,7 +119,7 @@ public final class HFactory {
   }
 
   public static <N,V> Mutator createMutator(Keyspace ko) {
-    return new Mutator(ko);
+    return new MutatorImpl(ko);
   }
 
   public static ThriftCountQuery createCountQuery(Keyspace ko) {
