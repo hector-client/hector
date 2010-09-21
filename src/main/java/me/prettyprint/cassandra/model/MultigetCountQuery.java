@@ -61,7 +61,7 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
           public Map<K,Integer> doInKeyspace(Keyspace ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             Map<K,Integer> counts = keySerializer.fromBytesMap(
-                ks.multigetCount(keySerializer.toBytesSet(keys), columnParent, slicePredicate.toThrift()));
+                ks.multigetCount(keySerializer.toBytesList(keys), columnParent, slicePredicate.toThrift()));
             return counts;
           }
         }), this);

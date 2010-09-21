@@ -44,7 +44,7 @@ public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
             Map<K,Integer> counts = keySerializer.fromBytesMap(
-                ks.multigetCount(keySerializer.toBytesSet(keys), columnParent, slicePredicate.toThrift()));
+                ks.multigetCount(keySerializer.toBytesList(keys), columnParent, slicePredicate.toThrift()));
             return counts;
           }
         }), this);

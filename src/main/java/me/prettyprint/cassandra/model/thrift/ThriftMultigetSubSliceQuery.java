@@ -70,7 +70,7 @@ public final class ThriftMultigetSubSliceQuery<K, SN, N, V> extends AbstractSlic
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ks.multigetSlice(
-                keySerializer.toBytesSet(keysList), columnParent, getPredicate()));
+                keySerializer.toBytesList(keysList), columnParent, getPredicate()));
             return new RowsImpl<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);

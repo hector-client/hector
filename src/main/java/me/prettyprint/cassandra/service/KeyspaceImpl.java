@@ -364,7 +364,7 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Map<byte[], List<Column>> multigetSlice(final Set<byte[]> keys,
+  public Map<byte[], List<Column>> multigetSlice(final List<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<Column>>> getCount = new Operation<Map<byte[], List<Column>>>(
         OperationType.READ) {
@@ -392,14 +392,14 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath)
+  public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath)
       throws HectorException {
     return multigetSuperColumn(keys, columnPath, false, Integer.MAX_VALUE);
   }
 
 
   @Override
-  public Map<byte[], SuperColumn> multigetSuperColumn(Set<byte[]> keys, ColumnPath columnPath,
+  public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException {
     valideSuperColumnPath(columnPath);
 
@@ -429,7 +429,7 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public Map<byte[], List<SuperColumn>> multigetSuperSlice(final Set<byte[]> keys,
+  public Map<byte[], List<SuperColumn>> multigetSuperSlice(final List<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<SuperColumn>>> getCount = new Operation<Map<byte[], List<SuperColumn>>>(
         OperationType.READ) {
@@ -511,7 +511,7 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public Map<byte[], Integer> multigetCount(final Set<byte[]> keys, final ColumnParent columnParent,
+  public Map<byte[], Integer> multigetCount(final List<byte[]> keys, final ColumnParent columnParent,
       final SlicePredicate slicePredicate) throws HectorException {
     Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ) {
 
