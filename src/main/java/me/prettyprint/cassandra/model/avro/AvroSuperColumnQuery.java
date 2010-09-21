@@ -2,10 +2,10 @@ package me.prettyprint.cassandra.model.avro;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.model.AbstractSuperColumnQuery;
-import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.commons.lang.NotImplementedException;
@@ -28,7 +28,7 @@ public final class AvroSuperColumnQuery<SN,N,V> extends AbstractSuperColumnQuery
   }
 
   @Override
-  public Result<HSuperColumn<SN, N, V>> execute() {
+  public QueryResult<HSuperColumn<SN, N, V>> execute() {
     notNull(columnFamilyName, "columnFamilyName is null");
     notNull(superName, "superName is null");
     // TODO: implement

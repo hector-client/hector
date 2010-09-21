@@ -10,7 +10,6 @@ import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -20,6 +19,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
+import me.prettyprint.hector.api.query.QueryResult;
 
 public class ExampleDaoV2 {
 
@@ -66,7 +66,7 @@ public class ExampleDaoV2 {
    */
   public String get(final String key) throws HectorException {
     ColumnQuery<String, String> q = createColumnQuery(keyspace, serializer, serializer);
-    Result<HColumn<String, String>> r = q.setKey(key).
+    QueryResult<HColumn<String, String>> r = q.setKey(key).
         setName(COLUMN_NAME).
         setColumnFamily(CF_NAME).
         execute();
@@ -85,7 +85,7 @@ public class ExampleDaoV2 {
     q.setKeys(keys);
     q.setColumnNames(COLUMN_NAME);
 
-    Result<Rows<String,String>> r = q.execute();
+    QueryResult<Rows<String,String>> r = q.execute();
     Rows<String, String> rows = r.get();
     Map<String, String> ret = new HashMap<String, String>(keys.length);
     for (String k: keys) {

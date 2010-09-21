@@ -8,7 +8,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.RowsImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
@@ -17,6 +17,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -41,11 +42,11 @@ public final class ThriftMultigetSliceQuery<N, V> extends AbstractSliceQuery<N, 
   }
 
   @Override
-  public Result<Rows<N,V>> execute() {
+  public QueryResult<Rows<N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
     Assert.notNull(keys, "keys can't be null");
 
-    return new Result<Rows<N,V>>(keyspace.doExecute(
+    return new QueryResultImpl<Rows<N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<Rows<N,V>>() {
           @Override
           public Rows<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {

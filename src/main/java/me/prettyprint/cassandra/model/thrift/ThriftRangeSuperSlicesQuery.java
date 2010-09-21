@@ -7,13 +7,14 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.OrderedSuperRowsImpl;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -55,10 +56,10 @@ public final class ThriftRangeSuperSlicesQuery<SN, N, V> extends
   }
 
   @Override
-  public Result<OrderedSuperRows<SN,N, V>> execute() {
+  public QueryResult<OrderedSuperRows<SN, N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 
-    return new Result<OrderedSuperRows<SN,N,V>>(keyspace.doExecute(
+    return new QueryResultImpl<OrderedSuperRows<SN,N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<OrderedSuperRows<SN,N,V>>() {
           @Override
           public OrderedSuperRows<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {

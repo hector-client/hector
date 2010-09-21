@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.QueryResult;
 
 /**
  *
@@ -8,11 +9,11 @@ import me.prettyprint.hector.api.query.Query;
  *
  * @param <T> The type of the result. May be for example Column of SuperColumn
  */
-public final class Result<T> extends ExecutionResult<T> {
+public final class QueryResultImpl<T> extends ExecutionResult<T> implements QueryResult<T> {
 
   private final Query<T> query;
 
-  public Result(ExecutionResult<T> res, Query<T> query) {
+  public QueryResultImpl(ExecutionResult<T> res, Query<T> query) {
     super(res.get(), res.getExecutionTimeMicro(), res.getHostUsed());
     this.query = query;
   }

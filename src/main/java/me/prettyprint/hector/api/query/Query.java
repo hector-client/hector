@@ -1,6 +1,5 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 
 
@@ -28,6 +27,6 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
  */
 public interface Query<T> {
 
-  Result<T> execute();
+  QueryResult<T> execute();
 
 }

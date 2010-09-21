@@ -7,13 +7,14 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.OrderedRowsImpl;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -60,11 +61,11 @@ public final class ThriftRangeSubSlicesQuery<SN,N,V> extends AbstractSliceQuery<
   }
 
   @Override
-  public Result<OrderedRows<N, V>> execute() {
+  public QueryResult<OrderedRows<N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
     Assert.notNull(superColumn, "superColumn cannot be null");
 
-    return new Result<OrderedRows<N,V>>(keyspace.doExecute(
+    return new QueryResultImpl<OrderedRows<N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<OrderedRows<N,V>>() {
           @Override
           public OrderedRows<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {

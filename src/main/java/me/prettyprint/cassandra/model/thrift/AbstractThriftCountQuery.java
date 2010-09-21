@@ -2,12 +2,13 @@ package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
@@ -37,10 +38,10 @@ import org.apache.cassandra.thrift.ColumnParent;
     return this;
   }
 
-  protected  Result<Integer> countColumns() {
+  protected  QueryResult<Integer> countColumns() {
     Assert.notNull(key, "key is null");
     Assert.notNull(columnFamily, "columnFamily is null");
-    return new Result<Integer>(keyspace.doExecute(
+    return new QueryResultImpl<Integer>(keyspace.doExecute(
         new KeyspaceOperationCallback<Integer>() {
           @Override
           public Integer doInKeyspace(KeyspaceService ks) throws HectorException {

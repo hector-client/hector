@@ -1,12 +1,13 @@
 package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SubCountQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -38,11 +39,11 @@ public final class ThriftSubCountQuery<SN> extends AbstractThriftCountQuery impl
   }
 
   @Override
-  public Result<Integer> execute() {
+  public QueryResult<Integer> execute() {
     Assert.notNull(key, "key is null");
     Assert.notNull(columnFamily, "columnFamily is null");
     Assert.notNull(superColumnName, "superColumnName is null");
-    return new Result<Integer>(keyspace.doExecute(
+    return new QueryResultImpl<Integer>(keyspace.doExecute(
         new KeyspaceOperationCallback<Integer>() {
           @Override
           public Integer doInKeyspace(KeyspaceService ks) throws HectorException {

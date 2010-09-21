@@ -9,6 +9,7 @@ import static org.junit.Assert.assertNull;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.Rows;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -54,7 +55,7 @@ public class AbstractSliceQueryTest {
     }
 
     @Override
-    public Result<T> execute() {
+    public QueryResult<T> execute() {
       return null;
     }
   }

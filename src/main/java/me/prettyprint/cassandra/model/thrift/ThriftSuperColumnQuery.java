@@ -4,13 +4,14 @@ import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.model.AbstractSuperColumnQuery;
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
 import org.apache.cassandra.thrift.ColumnPath;
@@ -34,10 +35,10 @@ public final class ThriftSuperColumnQuery<SN,N,V> extends AbstractSuperColumnQue
   }
 
   @Override
-  public Result<HSuperColumn<SN, N, V>> execute() {
+  public QueryResult<HSuperColumn<SN, N, V>> execute() {
     notNull(columnFamilyName, "columnFamilyName is null");
     notNull(superName, "superName is null");
-    return new Result<HSuperColumn<SN, N, V>>(keyspace.doExecute(
+    return new QueryResultImpl<HSuperColumn<SN, N, V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<HSuperColumn<SN, N, V>>() {
           @Override
           public HSuperColumn<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {

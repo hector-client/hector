@@ -1,7 +1,7 @@
 package me.prettyprint.cassandra.model.thrift;
 
-import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperCountQuery;
 
 
@@ -17,7 +17,7 @@ public final class ThriftSuperCountQuery extends AbstractThriftCountQuery implem
   }
 
   @Override
-  public Result<Integer> execute() {
+  public QueryResult<Integer> execute() {
     return countColumns();
   }
 

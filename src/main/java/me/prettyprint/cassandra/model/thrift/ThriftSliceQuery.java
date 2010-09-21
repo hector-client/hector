@@ -5,12 +5,13 @@ import java.util.List;
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.ColumnSliceImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -41,8 +42,8 @@ public final class ThriftSliceQuery<N, V> extends AbstractSliceQuery<N, V, Colum
   }
 
   @Override
-  public Result<ColumnSlice<N, V>> execute() {
-    return new Result<ColumnSlice<N, V>>(
+  public QueryResult<ColumnSlice<N, V>> execute() {
+    return new QueryResultImpl<ColumnSlice<N, V>>(
         keyspace.doExecute(new KeyspaceOperationCallback<ColumnSlice<N, V>>() {
           @Override
           public ColumnSlice<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {

@@ -4,7 +4,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.Result;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.SuperSliceImpl;
 import me.prettyprint.cassandra.service.KeyspaceService;
@@ -12,6 +12,7 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.SuperSlice;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperSliceQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -48,8 +49,8 @@ public final class ThriftSuperSliceQuery<SN, N, V> extends
   }
 
   @Override
-  public Result<SuperSlice<SN,N,V>> execute() {
-    return new Result<SuperSlice<SN,N,V>>(keyspace.doExecute(
+  public QueryResult<SuperSlice<SN, N, V>> execute() {
+    return new QueryResultImpl<SuperSlice<SN,N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<SuperSlice<SN,N,V>>() {
           @Override
           public SuperSlice<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
