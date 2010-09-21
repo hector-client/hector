@@ -92,7 +92,7 @@ public class CassandraClientPoolTest extends BaseEmbededServerSetupTest {
     CassandraClient client = store.borrowClient("localhost", 9170);
     CassandraHost cassandraHost = client.getCassandraHost();
     assertNotNull(client);
-    Keyspace ks = client.getKeyspace("Keyspace1");
+    KeyspaceService ks = client.getKeyspace("Keyspace1");
     assertNotNull(ks);
     System.out.print(store.getKnownHosts());
     assertTrue("127.0.0.1 is in not in knownHosts", store.getKnownHosts().contains(cassandraHost));    

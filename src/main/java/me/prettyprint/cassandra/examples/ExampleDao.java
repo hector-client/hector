@@ -3,7 +3,7 @@ package me.prettyprint.cassandra.examples;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.dao.Command;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
@@ -19,10 +19,10 @@ import org.apache.cassandra.thrift.ColumnPath;
  * <p/>
  * what's interesting to notice here is that ease of operation that the command pattern provides.
  * The pattern assumes only one keyspace is required to perform the operation (get/insert/remove)
- * and injects it to the {@link Command#execute(Keyspace)} abstract method which is implemented
+ * and injects it to the {@link Command#execute(KeyspaceService)} abstract method which is implemented
  * by all the dao methods.
  * The {@link Command#execute(String, int, String)} which is then invoked, takes care of creating
- * the {@link Keyspace} instance and releasing it after the operation completes.
+ * the {@link KeyspaceService} instance and releasing it after the operation completes.
  *
  * @author Ran Tavory (rantav@gmail.com)
  * @deprecated use ExampleDaoV2
@@ -53,7 +53,7 @@ public class ExampleDao {
   public void insert(final String key, final String value) throws HectorException {
     execute(new Command<Void>() {
       @Override
-      public Void execute(final Keyspace ks) throws HectorException {
+      public Void execute(final KeyspaceService ks) throws HectorException {
         ks.insert(key, createColumnPath(COLUMN_NAME), bytes(value));
         return null;
       }
@@ -68,7 +68,7 @@ public class ExampleDao {
   public String get(final String key) throws HectorException {
     return execute(new Command<String>() {
       @Override
-      public String execute(final Keyspace ks) throws HectorException {
+      public String execute(final KeyspaceService ks) throws HectorException {
         try {
           return string(ks.getColumn(key, createColumnPath(COLUMN_NAME)).getValue());
         } catch (HNotFoundException e) {
@@ -84,7 +84,7 @@ public class ExampleDao {
   public void delete(final String key) throws HectorException {
     execute(new Command<Void>() {
       @Override
-      public Void execute(final Keyspace ks) throws HectorException {
+      public Void execute(final KeyspaceService ks) throws HectorException {
         ks.remove(key, createColumnPath(COLUMN_NAME));
         return null;
       }

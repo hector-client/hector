@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * //get a cluster:
  * Cluster cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
  * //get a keyspace from this cluster:
- * KeyspaceOperator ko = createKeyspaceOperator("Keyspace1", cluster);
+ * Keyspace ko = createKeyspace("Keyspace1", cluster);
  * //Create a mutator:
  * Mutator m = createMutator(ko);
  * // Make a mutation:

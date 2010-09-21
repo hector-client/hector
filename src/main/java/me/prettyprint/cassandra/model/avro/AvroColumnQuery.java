@@ -2,10 +2,10 @@ package me.prettyprint.cassandra.model.avro;
 
 import me.prettyprint.cassandra.model.AbstractColumnQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.ColumnQuery;
@@ -21,17 +21,17 @@ import me.prettyprint.hector.api.query.ColumnQuery;
 public final class AvroColumnQuery<N, V> extends AbstractColumnQuery<N, V>
     implements ColumnQuery<N, V> {
 
-  public AvroColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<N> nameSerializer,
+  public AvroColumnQuery(Keyspace keyspace, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(keyspaceOperator, nameSerializer, valueSerializer);
+    super(keyspace, nameSerializer, valueSerializer);
   }
 
   @Override
   public Result<HColumn<N, V>> execute() {
-    return new Result<HColumn<N, V>>(keyspaceOperator.doExecute(
+    return new Result<HColumn<N, V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<HColumn<N, V>>() {
           @Override
-          public HColumn<N, V> doInKeyspace(Keyspace ks) throws HectorException {
+          public HColumn<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             //TODO: not implemented yet.
             return null;
           }

@@ -2,20 +2,26 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-public /*final*/ class KeyspaceOperator {
+/**
+ *
+ * @author Ran Tavory
+ *
+ */
+public class ExecutingKeyspace implements Keyspace {
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
 
   private final Cluster cluster;
   private final String keyspace;
 
-  public KeyspaceOperator(String keyspace, Cluster cluster,
+  public ExecutingKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
     Assert.noneNull(keyspace, cluster, consistencyLevelPolicy);
     this.keyspace = keyspace;
@@ -23,26 +29,29 @@ public /*final*/ class KeyspaceOperator {
     this.consistencyLevelPolicy = consistencyLevelPolicy;
   }
 
+  @Override
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
     this.consistencyLevelPolicy = cp;
   }
 
+  @Override
   public Cluster getCluster() {
     return cluster;
   }
 
   @Override
   public String toString() {
-    return "KeyspaceOperator(" + keyspace +"," + cluster + ")";
+    return "ExecutingKeyspace(" + keyspace +"," + cluster + ")";
   }
 
+  @Override
   public long createTimestamp() {
     return cluster.createTimestamp();
   }
 
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     CassandraClient c = null;
-    Keyspace ks = null;
+    KeyspaceService ks = null;
     try {
         c = cluster.borrowClient();
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));

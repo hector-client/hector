@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.service.BatchMutation;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -27,12 +28,12 @@ import org.apache.cassandra.thrift.SlicePredicate;
  */
 public final class Mutator {
 
-  private final KeyspaceOperator ko;
+  private final ExecutingKeyspace keyspace;
 
   private BatchMutation pendingMutations;
 
-  public Mutator(KeyspaceOperator ko) {
-    this.ko = ko;
+  public Mutator(Keyspace keyspace) {
+    this.keyspace = (ExecutingKeyspace) keyspace;
   }
 
   // Simple and immediate insertion of a column
@@ -61,9 +62,9 @@ public final class Mutator {
    */
   public <SN,N> MutationResult subDelete(final String key, final String cf, final SN supercolumnName,
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
-    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
+    return new MutationResult(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
-      public Void doInKeyspace(Keyspace ks) throws HectorException {
+      public Void doInKeyspace(KeyspaceService ks) throws HectorException {
         ks.remove(key, ThriftFactory.createSuperColumnPath(cf, supercolumnName, columnName,
             sNameSerializer, nameSerializer));
         return null;
@@ -93,7 +94,7 @@ public final class Mutator {
   public <N> Mutator addDeletion(String key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = columnName != null ? new Deletion(ko.createTimestamp()).setPredicate(sp) : new Deletion(ko.createTimestamp());
+    Deletion d = columnName != null ? new Deletion(keyspace.createTimestamp()).setPredicate(sp) : new Deletion(keyspace.createTimestamp());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
@@ -109,9 +110,9 @@ public final class Mutator {
     }
     final BatchMutation mutations = pendingMutations.makeCopy();
     pendingMutations = null;
-    return new MutationResult(ko.doExecute(new KeyspaceOperationCallback<Void>() {
+    return new MutationResult(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
-      public Void doInKeyspace(Keyspace ks) throws HectorException {
+      public Void doInKeyspace(KeyspaceService ks) throws HectorException {
         ks.batchMutate(mutations);
         return null;
       }
@@ -128,7 +129,7 @@ public final class Mutator {
 
   @Override
   public String toString() {
-    return "Mutator(" + ko.toString() + ")";
+    return "Mutator(" + keyspace.toString() + ")";
   }
 
   private BatchMutation getPendingMutations() {

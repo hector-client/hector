@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -13,11 +14,11 @@ public class AbstractSubColumnQuery<SN, N, V> implements SubColumnQuery<SN, N, V
 
   protected final SubSliceQuery<SN,N,V> subSliceQuery;
 
-  public AbstractSubColumnQuery(KeyspaceOperator keyspaceOperator,
+  public AbstractSubColumnQuery(Keyspace keyspace,
       Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    subSliceQuery = HFactory.createSubSliceQuery(keyspaceOperator, sNameSerializer, nameSerializer,
+    subSliceQuery = HFactory.createSubSliceQuery(keyspace, sNameSerializer, nameSerializer,
         valueSerializer);
   }
 

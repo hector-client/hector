@@ -3,7 +3,7 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createCountQuery;
-import static me.prettyprint.hector.api.factory.HFactory.createKeyspaceOperator;
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createMultigetSubSliceQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createMultigetSuperSliceQuery;
@@ -34,6 +34,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -70,12 +71,12 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   private final static String KEYSPACE = "Keyspace1";
   private static final StringSerializer se = new StringSerializer();
   private Cluster cluster;
-  private KeyspaceOperator ko;
+  private Keyspace ko;
 
   @Before
   public void setupCase() {
     cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
-    ko = createKeyspaceOperator(KEYSPACE, cluster);
+    ko = createKeyspace(KEYSPACE, cluster);
   }
 
   @After
