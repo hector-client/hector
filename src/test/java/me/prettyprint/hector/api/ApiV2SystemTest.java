@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api;
 
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
@@ -30,6 +30,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.MutationResult;
+import me.prettyprint.cassandra.model.Mutator;
+import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
