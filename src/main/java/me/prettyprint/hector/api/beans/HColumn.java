@@ -1,6 +1,6 @@
 package me.prettyprint.hector.api.beans;
 
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
 
 /**
  * Hector Column definition.

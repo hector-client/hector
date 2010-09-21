@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.model.thrift;
 
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.ColumnPath;
 

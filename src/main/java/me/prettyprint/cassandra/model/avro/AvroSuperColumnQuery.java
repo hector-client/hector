@@ -2,8 +2,8 @@ package me.prettyprint.cassandra.model.avro;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.model.AbstractSuperColumnQuery;
-import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperColumnQuery;

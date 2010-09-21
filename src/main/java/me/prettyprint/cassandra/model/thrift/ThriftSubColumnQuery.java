@@ -1,8 +1,8 @@
 package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.AbstractSubColumnQuery;
-import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 
 /**

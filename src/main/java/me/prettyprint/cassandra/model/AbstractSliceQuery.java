@@ -8,6 +8,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.SlicePredicate;

@@ -2,7 +2,7 @@ package me.prettyprint.hector.api.beans;
 
 import java.util.List;
 
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
 
 /**
  * Models a SuperColumn in a protocol independant manner

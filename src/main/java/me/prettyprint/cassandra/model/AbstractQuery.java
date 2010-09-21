@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.Query;
 
 public abstract class AbstractQuery<N,V,T> implements Query<T>{
