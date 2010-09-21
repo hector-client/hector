@@ -30,7 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.model.MutationResultImpl;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
@@ -357,7 +356,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       m.addInsertion("testSuperSliceQuery", cf, sc);
     }
 
-    MutationResultImpl mr = m.execute();
+    MutationResult mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
@@ -786,7 +785,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
         m.addInsertion(rowPrefix + i, cf, createColumn(columnPrefix + j, "value" + i + j, se, se));
       }
     }
-    MutationResultImpl mr = m.execute();
+    MutationResult mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
     return new TestCleanupDescriptor(cf, rowCount, rowPrefix, columnCount, columnPrefix);

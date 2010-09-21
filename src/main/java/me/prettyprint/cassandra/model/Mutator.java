@@ -105,7 +105,7 @@ public final class Mutator {
    * May throw a HectorException which is a RuntimeException.
    * @return A MutationResult holds the status.
    */
-  public MutationResultImpl execute() {
+  public MutationResult execute() {
     if (pendingMutations == null || pendingMutations.isEmpty()) {
       return new MutationResultImpl(true, 0, null);
     }
