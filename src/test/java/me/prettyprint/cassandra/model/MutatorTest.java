@@ -20,6 +20,7 @@ import me.prettyprint.cassandra.utils.StringUtils;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.mutation.MutationResult;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.junit.After;
@@ -73,7 +74,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 5; i++) {
       m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
     }
-    MutationResult r = m.execute();
+    MutationResultImpl r = m.execute();
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", r.getHostUsed() != null);
 

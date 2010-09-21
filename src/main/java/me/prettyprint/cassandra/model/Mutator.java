@@ -9,6 +9,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.mutation.MutationResult;
 
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -62,7 +63,7 @@ public final class Mutator {
    */
   public <SN,N> MutationResult subDelete(final String key, final String cf, final SN supercolumnName,
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
-    return new MutationResult(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(KeyspaceService ks) throws HectorException {
         ks.remove(key, ThriftFactory.createSuperColumnPath(cf, supercolumnName, columnName,
@@ -104,13 +105,13 @@ public final class Mutator {
    * May throw a HectorException which is a RuntimeException.
    * @return A MutationResult holds the status.
    */
-  public MutationResult execute() {
+  public MutationResultImpl execute() {
     if (pendingMutations == null || pendingMutations.isEmpty()) {
-      return new MutationResult(true, 0, null);
+      return new MutationResultImpl(true, 0, null);
     }
     final BatchMutation mutations = pendingMutations.makeCopy();
     pendingMutations = null;
-    return new MutationResult(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(KeyspaceService ks) throws HectorException {
         ks.batchMutate(mutations);

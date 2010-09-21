@@ -30,14 +30,13 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.model.MutationResult;
+import me.prettyprint.cassandra.model.MutationResultImpl;
 import me.prettyprint.cassandra.model.Mutator;
 import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -48,6 +47,7 @@ import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.beans.SuperRow;
 import me.prettyprint.hector.api.beans.SuperRows;
 import me.prettyprint.hector.api.beans.SuperSlice;
+import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
@@ -357,7 +357,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
       m.addInsertion("testSuperSliceQuery", cf, sc);
     }
 
-    MutationResult mr = m.execute();
+    MutationResultImpl mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", mr.getHostUsed() != null);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
@@ -786,7 +786,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
         m.addInsertion(rowPrefix + i, cf, createColumn(columnPrefix + j, "value" + i + j, se, se));
       }
     }
-    MutationResult mr = m.execute();
+    MutationResultImpl mr = m.execute();
     assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
     return new TestCleanupDescriptor(cf, rowCount, rowPrefix, columnCount, columnPrefix);
