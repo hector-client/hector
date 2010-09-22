@@ -7,7 +7,6 @@ import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
@@ -166,7 +165,7 @@ public interface KeyspaceService {
 /**
    * Same as two argument version, but the caller must specify their own clock
    */
-  void remove(byte[] key, ColumnPath columnPath, Clock clock) throws HectorException;
+  void remove(byte[] key, ColumnPath columnPath, long timestamp) throws HectorException;
 
   void remove(String key, ColumnPath columnPath) throws HectorException;
 

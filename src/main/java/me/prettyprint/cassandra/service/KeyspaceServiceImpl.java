@@ -14,7 +14,6 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -347,7 +346,7 @@ import org.slf4j.LoggerFactory;
       if (columnPath.isSetSuper_column()) {
         columnParent.setSuper_column(columnPath.getSuper_column());
       }
-      Column column = new Column(columnPath.getColumn(), value, createClockInternal());
+      Column column = new Column(columnPath.getColumn(), value, createClock());
       insert(key.getBytes(), columnParent, column);
   }
 
@@ -358,7 +357,7 @@ import org.slf4j.LoggerFactory;
       if (columnPath.isSetSuper_column()) {
       columnParent.setSuper_column(columnPath.getSuper_column());
     }
-      Column column = new Column(columnPath.getColumn(), value, new Clock(timestamp));
+      Column column = new Column(columnPath.getColumn(), value, timestamp);
       insert(key.getBytes(), columnParent, column);
   }
 
@@ -507,7 +506,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void remove(byte[] key, ColumnPath columnPath) {
-    this.remove(key, columnPath, createClockInternal());
+    this.remove(key, columnPath, createClock());
   }
 
   @Override
@@ -529,14 +528,14 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public void remove(final byte[] key, final ColumnPath columnPath, final Clock clock)
+  public void remove(final byte[] key, final ColumnPath columnPath, final long timestamp)
   throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.remove(key, columnPath, clock, consistency);
+          cassandra.remove(key, columnPath, timestamp, consistency);
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -556,7 +555,7 @@ import org.slf4j.LoggerFactory;
    */
   @Override
   public void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException {
-    remove(key.getBytes(), columnPath, new Clock(timestamp));
+    remove(key.getBytes(), columnPath, timestamp);
   }
 
 
@@ -621,10 +620,6 @@ import org.slf4j.LoggerFactory;
   @Override
   public long createClock() {
     return client.getClockResolution().createClock();
-  }
-
-  private Clock createClockInternal() {
-    return new Clock(createClock());
   }
 
   private CfDef getCfDef(String cf) {
@@ -738,6 +733,6 @@ import org.slf4j.LoggerFactory;
     b.append("KeyspaceImpl<");
     b.append(getClient());
     b.append(">");
-    return super.toString();
+    return b.toString();
   }
 }

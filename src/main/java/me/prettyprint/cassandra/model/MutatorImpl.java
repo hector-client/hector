@@ -14,7 +14,6 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 
@@ -119,8 +118,8 @@ public final class MutatorImpl<K> implements Mutator<K> {
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = columnName != null ? new Deletion(new Clock(keyspace.createClock())).setPredicate(sp)
-                                   : new Deletion(new Clock(keyspace.createClock()));
+    Deletion d = columnName != null ? new Deletion(keyspace.createClock()).setPredicate(sp)
+                                   : new Deletion(keyspace.createClock());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

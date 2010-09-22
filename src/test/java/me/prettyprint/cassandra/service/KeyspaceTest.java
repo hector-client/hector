@@ -21,7 +21,6 @@ import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -47,7 +46,7 @@ import org.junit.Test;
  * CompareSubcolumnsWith="UTF8Type" Name="Super1"/&gt;
  *
  * @author Ran Tavory (rantav@gmail.com)
- *
+ * @author zznate (nate@riptano.com)
  */
 public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
@@ -111,7 +110,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     // insert value
     ColumnParent columnParent = new ColumnParent("Super1");
     columnParent.setSuper_column(bytes("testInsertSuper_super"));
-    Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), new Clock(keyspace.createClock()));
+    Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), keyspace.createClock());
 
 
 
@@ -185,7 +184,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), new Clock(keyspace.createClock()));
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -223,7 +222,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(new Clock(keyspace.createClock()));
+      Deletion deletion = new Deletion(keyspace.createClock());
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -255,7 +254,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), new Clock(keyspace.createClock()));
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -281,7 +280,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       for (int j = 0; j < 10; j++) {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(new Clock(keyspace.createClock()));
+      Deletion deletion = new Deletion(keyspace.createClock());
       deletion.setPredicate(slicePredicate);
       batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
@@ -319,14 +318,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), new Clock(keyspace.createClock()));
+            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
 
-    Deletion deletion = new Deletion(new Clock(keyspace.createClock()));
+    Deletion deletion = new Deletion(keyspace.createClock());
     deletion.setPredicate(slicePredicate);
 
     batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);

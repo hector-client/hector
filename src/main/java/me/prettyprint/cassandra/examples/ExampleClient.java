@@ -8,7 +8,6 @@ import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
@@ -37,7 +36,7 @@ public class ExampleClient {
       columnPath.setColumn(bytes("column-name"));
 
       // insert
-      keyspace.insert(bytes("key"), columnParent, new Column(bytes("column-name"), bytes("value"), new Clock(keyspace.createClock())));
+      keyspace.insert(bytes("key"), columnParent, new Column(bytes("column-name"), bytes("value"), keyspace.createClock()));
 
       // read
       Column col = keyspace.getColumn(bytes("key"), columnPath);

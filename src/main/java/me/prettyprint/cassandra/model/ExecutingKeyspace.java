@@ -44,6 +44,7 @@ public class ExecutingKeyspace implements Keyspace {
     return "ExecutingKeyspace(" + keyspace +"," + cluster + ")";
   }
 
+  @Override
   public long createClock() {
     return cluster.createClock();
   }
