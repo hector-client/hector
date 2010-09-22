@@ -67,7 +67,7 @@ public class FailoverOperatorTest {
 
     keyspace1Desc.setKeyspace(keyspaceName);
     keyspace1Desc.setName("Standard1");
-    keyspace1Desc.setColumn_type(Keyspace.CF_TYPE_STANDARD);
+    keyspace1Desc.setColumn_type(KeyspaceService.CF_TYPE_STANDARD);
     keyspaceDesc.addToCf_defs(keyspace1Desc);
 
 
@@ -100,7 +100,7 @@ public class FailoverOperatorTest {
 
     // Create one positive pass without failures
     FailoverPolicy failoverPolicy = FailoverPolicy.FAIL_FAST;
-    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+    KeyspaceService ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
@@ -119,7 +119,7 @@ public class FailoverOperatorTest {
     // Now try the ON_FAIL_TRY_ONE_NEXT_AVAILABLE policy
     // h1 fails, h3 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ONE_NEXT_AVAILABLE;
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+    ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
@@ -130,7 +130,7 @@ public class FailoverOperatorTest {
     verify(clientPools).borrowClient(clientHosts.get(cc));
 
     // make both h1 and h2 fail
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+    ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
     doThrow(new org.apache.cassandra.thrift.TimedOutException()).when(cc).insert((byte[]) anyObject(),
         (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
@@ -145,7 +145,7 @@ public class FailoverOperatorTest {
     // Now try the full cycle
     // h1 fails, h2 fails, h3 succeeds
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+    ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
@@ -154,7 +154,7 @@ public class FailoverOperatorTest {
         (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
 
     // now fail them all. h1 fails, h2 fails, h3 fails
-    ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
+    ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel, failoverPolicy,
         clientPools, monitor);
     doThrow(new org.apache.cassandra.thrift.TimedOutException()).when(h2cassandra).insert((byte[]) anyObject(),
         (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
@@ -178,7 +178,7 @@ public class FailoverOperatorTest {
   @Test
   public void testFailoverBug8() throws IllegalStateException, PoolExhaustedException, Exception {
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+    KeyspaceService ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
 
     // fail the call, use a transport exception.
@@ -206,7 +206,7 @@ public class FailoverOperatorTest {
   @Test
   public void testFailoverBug14() throws IllegalStateException, PoolExhaustedException, Exception {
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+    KeyspaceService ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
 
     // fail the call, use a transport exception
@@ -237,7 +237,7 @@ public class FailoverOperatorTest {
   @Test
   public void testFailoverBug53() throws IllegalStateException, PoolExhaustedException, Exception {
     FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    Keyspace ks = new KeyspaceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
+    KeyspaceService ks = new KeyspaceServiceImpl(h1client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, monitor);
 
     // fail the call, use a transport exception

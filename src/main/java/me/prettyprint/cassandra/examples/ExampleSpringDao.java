@@ -3,10 +3,10 @@ package me.prettyprint.cassandra.examples;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 import me.prettyprint.cassandra.dao.SpringCommand;
-import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
@@ -45,7 +45,7 @@ public class ExampleSpringDao {
   public <K> void insert(final K key, final String value, final Serializer<K> keySerializer) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
-      public Void execute(final Keyspace ks) throws HectorException {
+      public Void execute(final KeyspaceService ks) throws HectorException {
         ks.insert(keySerializer.toBytes(key), new ColumnParent(columnFamilyName), new Column(bytes(columnName), bytes(value), new Clock(ks.createClock())));
         return null;
       }
@@ -59,7 +59,7 @@ public class ExampleSpringDao {
   public <K> String get(final K key, final Serializer<K> keySerializer) throws HectorException {
     return execute(new SpringCommand<String>(cassandraClientPool){
       @Override
-      public String execute(final Keyspace ks) throws HectorException {
+      public String execute(final KeyspaceService ks) throws HectorException {
         try {
           return string(ks.getColumn(keySerializer.toBytes(key), createColumnPath(columnName)).getValue());
         } catch (HNotFoundException e) {
@@ -75,7 +75,7 @@ public class ExampleSpringDao {
   public <K> void delete(final K key, final Serializer<K> keySerializer) throws HectorException {
     execute(new SpringCommand<Void>(cassandraClientPool){
       @Override
-      public Void execute(final Keyspace ks) throws HectorException {
+      public Void execute(final KeyspaceService ks) throws HectorException {
         ks.remove(keySerializer.toBytes(key), createColumnPath(columnName));
         return null;
       }
@@ -108,7 +108,3 @@ public class ExampleSpringDao {
     this.consistencyLevel = consistencyLevel;
   }
 }
-
-
-
-

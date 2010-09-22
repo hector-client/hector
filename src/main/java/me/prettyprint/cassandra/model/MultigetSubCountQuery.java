@@ -2,9 +2,12 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
@@ -18,7 +21,7 @@ public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
   private final Serializer<SN> superNameSerializer;
   private SN superColumnName;
 
-  public MultigetSubCountQuery(KeyspaceOperator ko,
+  public MultigetSubCountQuery(Keyspace ko,
       Serializer<SN> superNameSerializer,
       Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
@@ -33,14 +36,14 @@ public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
   }
 
   @Override
-  public Result<Map<K, Integer>> execute() {
+  public QueryResult<Map<K, Integer>> execute() {
     Assert.notNull(keys, "keys list is null");
     Assert.notNull(columnFamily, "columnFamily is null");
     Assert.notNull(superColumnName, "superColumnName is null");
-    return new Result<Map<K,Integer>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<Map<K,Integer>>(keyspace.doExecute(
         new KeyspaceOperationCallback<Map<K,Integer>>() {
           @Override
-          public Map<K,Integer> doInKeyspace(Keyspace ks) throws HectorException {
+          public Map<K,Integer> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
             Map<K,Integer> counts = keySerializer.fromBytesMap(

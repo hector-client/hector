@@ -2,7 +2,6 @@ package me.prettyprint.cassandra.service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
@@ -27,7 +26,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  *
  * @author rantav
  */
-public interface Keyspace {
+public interface KeyspaceService {
 
   public static String CF_TYPE = "Type" ;
   public static String CF_TYPE_STANDARD = "Standard" ;

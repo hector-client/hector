@@ -5,13 +5,14 @@ import java.util.List;
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.ColumnSliceImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -33,9 +34,9 @@ public final class ThriftSubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,
   private SN superColumn;
   private final Serializer<SN> sNameSerializer;
 
-  public ThriftSubSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+  public ThriftSubSliceQuery(Keyspace k, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "Supername serializer cannot be null");
     this.sNameSerializer = sNameSerializer;
   }
@@ -56,13 +57,13 @@ public final class ThriftSubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,
   }
 
   @Override
-  public Result<ColumnSlice<N, V>> execute() {
+  public QueryResult<ColumnSlice<N, V>> execute() {
     Assert.notNull(key, "Key cannot be null");
     Assert.notNull(superColumn, "Supercolumn cannot be null");
-    return new Result<ColumnSlice<N, V>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<ColumnSlice<N, V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<ColumnSlice<N, V>>() {
           @Override
-          public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
+          public ColumnSlice<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());

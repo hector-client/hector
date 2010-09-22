@@ -5,18 +5,19 @@ import java.util.List;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Mutator;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.BytesSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
@@ -43,9 +44,9 @@ import org.apache.commons.lang.Validate;
  */
 public class HectorTemplateImpl implements HectorTemplate {
 
-  private String keyspace;
+  private String keyspaceName;
   private Cluster cluster;
-  private KeyspaceOperator keyspaceOperator;
+  private Keyspace keyspace;
 
   private ConfigurableConsistencyLevel configurableConsistencyLevelPolicy;
   private String replicationStrategyClass;
@@ -57,7 +58,7 @@ public class HectorTemplateImpl implements HectorTemplate {
 
   public HectorTemplateImpl(Cluster cluster, String keyspace, int replicationFactor, String replicationStrategyClass, ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
     this.cluster = cluster;
-    this.keyspace = keyspace;
+    this.keyspaceName = keyspace;
     this.replicationFactor = replicationFactor;
     this.replicationStrategyClass = replicationStrategyClass;
     this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
@@ -81,7 +82,7 @@ public class HectorTemplateImpl implements HectorTemplate {
     } else {
       clPolicy = configurableConsistencyLevelPolicy;
     }
-    keyspaceOperator = HFactory.createKeyspaceOperator(keyspace, cluster, clPolicy);
+    keyspace = HFactory.createKeyspace(keyspaceName, cluster, clPolicy);
   }
 
   /*
@@ -93,7 +94,7 @@ public class HectorTemplateImpl implements HectorTemplate {
    */
   @Override
   public <K, N, V> Mutator<K> createMutator(Serializer<K> keySerializer) {
-    return HFactory.createMutator(keyspaceOperator, keySerializer);
+    return HFactory.createMutator(keyspace, keySerializer);
   }
 
   /*
@@ -107,12 +108,12 @@ public class HectorTemplateImpl implements HectorTemplate {
    */
   @Override
   public <K, N, V> ColumnQuery<K, N, V> createColumnQuery() {
-    return new ThriftColumnQuery<K, N, V>(keyspaceOperator);
+    return new ThriftColumnQuery<K, N, V>(keyspace);
   }
 
   @Override
   public <K, N, V> ColumnQuery<K, N, V> createColumnQuery(Serializer<V> valueSerializer) {
-    return new ThriftColumnQuery<K, N, V>(keyspaceOperator, valueSerializer);
+    return new ThriftColumnQuery<K, N, V>(keyspace, valueSerializer);
   }
 
   /*
@@ -126,7 +127,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, N> CountQuery<K, N> createCountQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
-    return HFactory.createCountQuery(keyspaceOperator, keySerializer, nameSerializer);
+    return HFactory.createCountQuery(keyspace, keySerializer, nameSerializer);
   }
 
   /*
@@ -140,7 +141,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, SN> SuperCountQuery<K, SN> createSuperCountQuery(Serializer<K> keySerializer,
       Serializer<SN> superNameSerializer) {
-    return HFactory.createSuperCountQuery(keyspaceOperator, keySerializer, superNameSerializer);
+    return HFactory.createSuperCountQuery(keyspace, keySerializer, superNameSerializer);
   }
 
   /*
@@ -155,7 +156,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, SN, N> SubCountQuery<K, SN, N> createSubCountQuery(Serializer<K> keySerializer,
       Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
-    return HFactory.createSubCountQuery(keyspaceOperator, keySerializer, superNameSerializer,
+    return HFactory.createSubCountQuery(keyspace, keySerializer, superNameSerializer,
         nameSerializer);
   }
 
@@ -173,7 +174,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <K, SN, N, V> SuperColumnQuery<K, SN, N, V> createSuperColumnQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return HFactory.createSuperColumnQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createSuperColumnQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -189,7 +190,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, N, V> MultigetSliceQuery<K, N, V> createMultigetSliceQuery(
       Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return HFactory.createMultigetSliceQuery(keyspaceOperator, keySerializer, nameSerializer,
+    return HFactory.createMultigetSliceQuery(keyspace, keySerializer, nameSerializer,
         valueSerializer);
   }
 
@@ -208,7 +209,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <K, SN, N, V> MultigetSuperSliceQuery<K, SN, N, V> createMultigetSuperSliceQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return HFactory.createMultigetSuperSliceQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createMultigetSuperSliceQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -226,7 +227,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <K, SN, N, V> MultigetSubSliceQuery<K, SN, N, V> createMultigetSubSliceQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return HFactory.createMultigetSubSliceQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createMultigetSubSliceQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -242,7 +243,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, N, V> RangeSlicesQuery<K, N, V> createRangeSlicesQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return HFactory.createRangeSlicesQuery(keyspaceOperator, keySerializer, nameSerializer,
+    return HFactory.createRangeSlicesQuery(keyspace, keySerializer, nameSerializer,
         valueSerializer);
   }
 
@@ -260,7 +261,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <K, SN, N, V> RangeSuperSlicesQuery<K, SN, N, V> createRangeSuperSlicesQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return HFactory.createRangeSuperSlicesQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createRangeSuperSlicesQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -278,7 +279,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <K, SN, N, V> RangeSubSlicesQuery<K, SN, N, V> createRangeSubSlicesQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return HFactory.createRangeSubSlicesQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createRangeSubSlicesQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -294,7 +295,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, N, V> SliceQuery<K, N, V> createSliceQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return HFactory.createSliceQuery(keyspaceOperator, keySerializer, nameSerializer,
+    return HFactory.createSliceQuery(keyspace, keySerializer, nameSerializer,
         valueSerializer);
   }
 
@@ -311,7 +312,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   @Override
   public <K, SN, N, V> SubSliceQuery<K, SN, N, V> createSubSliceQuery(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return HFactory.createSubSliceQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createSubSliceQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -329,7 +330,7 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return HFactory.createSuperSliceQuery(keyspaceOperator, keySerializer, sNameSerializer,
+    return HFactory.createSuperSliceQuery(keyspace, keySerializer, sNameSerializer,
         nameSerializer, valueSerializer);
   }
 
@@ -445,13 +446,13 @@ public class HectorTemplateImpl implements HectorTemplate {
 
   @Override
   public <K, N, V> Mutator<K> createMutator() {
-    return new Mutator<K>(keyspaceOperator);
+    return new MutatorImpl<K>(keyspace);
   }
 
   @Override
   public <K, N, V> IndexedSlicesQuery<K, N, V> createIndexSlicesQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new IndexedSlicesQuery<K, N, V>(keyspaceOperator, keySerializer, nameSerializer,
+    return new IndexedSlicesQuery<K, N, V>(keyspace, keySerializer, nameSerializer,
         valueSerializer);
   }
 
@@ -473,20 +474,20 @@ public class HectorTemplateImpl implements HectorTemplate {
   }
 
   @Override
-  public String getKeyspace() {
+  public String getKeyspaceName() {
+    return keyspaceName;
+  }
+
+  public void setKeyspaceName(String keyspace) {
+    this.keyspaceName = keyspace;
+  }
+
+  public Keyspace getKeyspace() {
     return keyspace;
   }
 
-  public void setKeyspace(String keyspace) {
+  public void setKeyspace(Keyspace keyspace) {
     this.keyspace = keyspace;
-  }
-
-  public KeyspaceOperator getKeyspaceOperator() {
-    return keyspaceOperator;
-  }
-
-  public void setKeyspaceOperator(KeyspaceOperator keyspaceOperator) {
-    this.keyspaceOperator = keyspaceOperator;
   }
 
   public ConfigurableConsistencyLevel getConfigurableConsistencyLevelPolicy() {

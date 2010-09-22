@@ -7,14 +7,15 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.OrderedRowsImpl;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -33,9 +34,9 @@ public final class ThriftRangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuer
   private final HKeyRange<K> keyRange;
   private SN superColumn;
 
-  public ThriftRangeSubSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
+  public ThriftRangeSubSlicesQuery(Keyspace k, Serializer<K> keySerializer, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
     Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
     this.sNameSerializer = sNameSerializer;
     keyRange = new HKeyRange<K>(keySerializer);
@@ -62,14 +63,14 @@ public final class ThriftRangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuer
   }
 
   @Override
-  public Result<OrderedRows<K,N, V>> execute() {
+  public QueryResult<OrderedRows<K,N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
     Assert.notNull(superColumn, "superColumn cannot be null");
 
-    return new Result<OrderedRows<K,N,V>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<OrderedRows<K,N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<OrderedRows<K,N,V>>() {
           @Override
-          public OrderedRows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedRows<K,N,V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(

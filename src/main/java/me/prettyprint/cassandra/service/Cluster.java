@@ -1,9 +1,7 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
@@ -12,7 +10,6 @@ import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
 import org.slf4j.Logger;
@@ -28,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * //get a cluster:
  * Cluster cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
  * //get a keyspace from this cluster:
- * KeyspaceOperator ko = createKeyspaceOperator("Keyspace1", cluster);
+ * Keyspace ko = createKeyspace("Keyspace1", cluster);
  * //Create a mutator:
  * Mutator m = createMutator(ko);
  * // Make a mutation:
@@ -255,7 +252,7 @@ public final class Cluster {
     operateWithFailover(null,op);
     return op.getResult();
   }
-  
+
   public String describePartitioner() throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
@@ -274,7 +271,7 @@ public final class Cluster {
     operateWithFailover(null,op);
     return op.getResult();
   }
-  
+
   /**
    * Renames the Keyspace from oldName to newName
    *
@@ -295,7 +292,7 @@ public final class Cluster {
     operateWithFailover(oldName,op);
     return op.getResult();
   }
-  
+
   /**
    * Renames the ColumnFamily from oldName to newName
    *
@@ -316,10 +313,10 @@ public final class Cluster {
     operateWithFailover(null,op);
     return op.getResult();
   }
-  
+
   /**
    * Drops the Keyspace from the cluster. Equivalent of 'drop database' in SQL terms
-   * 
+   *
    */
   public String dropKeyspace(final String keyspace) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
@@ -335,13 +332,13 @@ public final class Cluster {
     operateWithFailover(null,op);
     return op.getResult();
   }
-  
+
   /**
    * Drops the Keyspace from the cluster. Equivalent of 'drop database' in SQL terms
-   *   
+   *
    */
   public String addKeyspace(final KsDef ksdef) throws HectorException {
-    
+
     Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
@@ -355,12 +352,12 @@ public final class Cluster {
     operateWithFailover(null,op);
     return op.getResult();
   }
-  
+
   /**
-   * Updates the Keyspace from the cluster. 
+   * Updates the Keyspace from the cluster.
    */
   public String updateKeyspace(final KsDef ksdef) throws HectorException {
-    
+
     Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
@@ -374,7 +371,7 @@ public final class Cluster {
     operateWithFailover(null,op);
     return op.getResult();
   }
-  
+
   /**
    * Drops the ColumnFamily from the Keyspace. Equivalent of 'drop table' in SQL terms
    *
@@ -393,13 +390,13 @@ public final class Cluster {
     operateWithFailover(keyspaceName,op);
     return op.getResult();
   }
-  
+
   public String addColumnFamily(final CfDef cfdef) throws HectorException {
 
     Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {          
+        try {
           return cassandra.system_add_column_family(cfdef);
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -409,13 +406,13 @@ public final class Cluster {
     operateWithFailover(cfdef.keyspace, op);
     return op.getResult();
   }
-  
+
   public String updateColumnFamily(final CfDef cfdef) throws HectorException {
 
     Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {          
+        try {
           return cassandra.system_update_column_family(cfdef);
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -425,13 +422,13 @@ public final class Cluster {
     operateWithFailover(cfdef.keyspace, op);
     return op.getResult();
   }
-    
-  
+
+
   private void operateWithFailover(final String keyspaceName, Operation<?> op) throws HectorException {
     CassandraClient client = null;
     try {
       client = borrowClient();
-      Keyspace keyspace = keyspaceName != null ? client.getKeyspace(keyspaceName) : null;
+      KeyspaceService keyspace = keyspaceName != null ? client.getKeyspace(keyspaceName) : null;
       FailoverOperator operator = new FailoverOperator(failoverPolicy,
           cassandraClientMonitor, client, pool, keyspace);
       client = operator.operate(op);

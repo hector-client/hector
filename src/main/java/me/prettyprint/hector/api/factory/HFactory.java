@@ -4,13 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Mutator;
+import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
-import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
@@ -31,8 +30,11 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
@@ -101,119 +103,119 @@ public final class HFactory {
   }
 
   /**
-   * Creates a KeyspaceOperator with the default consistency level policy.
+   * Creates a Keyspace with the default consistency level policy.
    * @param keyspace
    * @param cluster
    * @return
    */
-  public static KeyspaceOperator createKeyspaceOperator(String keyspace, Cluster cluster) {
-    return createKeyspaceOperator(keyspace, cluster, createDefaultConsistencyLevelPolicy());
+  public static Keyspace createKeyspace(String keyspace, Cluster cluster) {
+    return createKeyspace(keyspace, cluster, createDefaultConsistencyLevelPolicy());
   }
 
-  public static KeyspaceOperator createKeyspaceOperator(String keyspace, Cluster cluster,
+  public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return new KeyspaceOperator(keyspace, cluster, consistencyLevelPolicy);
+    return new ExecutingKeyspace(keyspace, cluster, consistencyLevelPolicy);
   }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {
     return DEFAULT_CONSISTENCY_LEVEL_POLICY;
   }
 
-  public static <K,N,V> Mutator<K> createMutator(KeyspaceOperator ko, Serializer<K> keySerializer) {
-    return new Mutator<K>(ko, keySerializer);
+  public static <K,N,V> Mutator<K> createMutator(Keyspace keyspace, Serializer<K> keySerializer) {
+    return new MutatorImpl<K>(keyspace, keySerializer);
   }
 
-  public static <K,N,V> ColumnQuery<K,N,V> createColumnQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public static <K,N,V> ColumnQuery<K,N,V> createColumnQuery(Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftColumnQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
+    return new ThriftColumnQuery<K,N,V>(keyspace, keySerializer, nameSerializer, valueSerializer);
   }
 
-  public static <K, N> CountQuery<K, N> createCountQuery(KeyspaceOperator ko,
+  public static <K, N> CountQuery<K, N> createCountQuery(Keyspace keyspace,
       Serializer<K> keySerializer, Serializer<N> nameSerializer) {
-    return new ThriftCountQuery<K, N>(ko, keySerializer, nameSerializer);
+    return new ThriftCountQuery<K, N>(keyspace, keySerializer, nameSerializer);
   }
 
-  public static <K,SN> SuperCountQuery<K,SN> createSuperCountQuery(KeyspaceOperator ko,
+  public static <K,SN> SuperCountQuery<K,SN> createSuperCountQuery(Keyspace keyspace,
       Serializer<K> keySerializer, Serializer<SN> superNameSerializer) {
-    return new ThriftSuperCountQuery<K,SN>(ko, keySerializer, superNameSerializer);
+    return new ThriftSuperCountQuery<K,SN>(keyspace, keySerializer, superNameSerializer);
   }
 
-  public static <K,SN,N> SubCountQuery<K,SN,N> createSubCountQuery(KeyspaceOperator ko,
+  public static <K,SN,N> SubCountQuery<K,SN,N> createSubCountQuery(Keyspace keyspace,
       Serializer<K> keySerializer, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
-    return new ThriftSubCountQuery<K,SN,N>(ko, keySerializer, superNameSerializer, nameSerializer);
+    return new ThriftSubCountQuery<K,SN,N>(keyspace, keySerializer, superNameSerializer, nameSerializer);
   }
 
-  public static ColumnQuery<String, String, String> createStringColumnQuery(KeyspaceOperator ko) {
+  public static ColumnQuery<String, String, String> createStringColumnQuery(Keyspace keyspace) {
     StringSerializer se = StringSerializer.get();
-    return createColumnQuery(ko, se, se, se);
+    return createColumnQuery(keyspace, se, se, se);
   }
 
-  public static <K,SN,N,V> SuperColumnQuery<K,SN,N,V> createSuperColumnQuery(KeyspaceOperator ko,
+  public static <K,SN,N,V> SuperColumnQuery<K,SN,N,V> createSuperColumnQuery(Keyspace keyspace,
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftSuperColumnQuery<K,SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftSuperColumnQuery<K,SN, N, V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
 
   public static <K,N,V> MultigetSliceQuery<K,N,V> createMultigetSliceQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftMultigetSliceQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new ThriftMultigetSliceQuery<K,N,V>(keyspace, keySerializer, nameSerializer, valueSerializer);
   }
 
-  public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(KeyspaceOperator ko,
+  public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(Keyspace keyspace,
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new ThriftSubColumnQuery<K, SN, N, V>(ko, keySerializer, sNameSerializer, nameSerializer,
+    return new ThriftSubColumnQuery<K, SN, N, V>(keyspace, keySerializer, sNameSerializer, nameSerializer,
         valueSerializer);
   }
 
   public static <K,SN,N,V> MultigetSuperSliceQuery<K,SN,N,V> createMultigetSuperSliceQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftMultigetSuperSliceQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new ThriftMultigetSuperSliceQuery<K,SN,N,V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,SN,N,V> MultigetSubSliceQuery<K,SN,N,V> createMultigetSubSliceQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftMultigetSubSliceQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new ThriftMultigetSubSliceQuery<K,SN,N,V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,N,V> RangeSlicesQuery<K,N,V> createRangeSlicesQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftRangeSlicesQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new ThriftRangeSlicesQuery<K,N,V>(keyspace, keySerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,SN,N,V> RangeSuperSlicesQuery<K,SN,N,V> createRangeSuperSlicesQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new ThriftRangeSuperSlicesQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftRangeSuperSlicesQuery<K,SN,N,V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,N,V> IndexedSlicesQuery<K, N, V> createIndexedSlicesQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer,
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new IndexedSlicesQuery<K, N, V>(ko, keySerializer, nameSerializer, valueSerializer);
+    return new IndexedSlicesQuery<K, N, V>(keyspace, keySerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,SN,N,V> RangeSubSlicesQuery<K,SN,N,V> createRangeSubSlicesQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new ThriftRangeSubSlicesQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftRangeSubSlicesQuery<K,SN,N,V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,N,V> SliceQuery<K,N,V> createSliceQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    return new ThriftSliceQuery<K,N,V>(ko, keySerializer, nameSerializer, valueSerializer);
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new ThriftSliceQuery<K,N,V>(keyspace, keySerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,SN,N,V> SubSliceQuery<K,SN,N,V> createSubSliceQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new ThriftSubSliceQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftSubSliceQuery<K,SN,N,V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   public static <K,SN,N,V> SuperSliceQuery<K,SN,N,V> createSuperSliceQuery(
-      KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    return new ThriftSuperSliceQuery<K,SN,N,V>(ko, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    return new ThriftSuperSliceQuery<K,SN,N,V>(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
   /**
@@ -262,5 +264,4 @@ public final class HFactory {
   public static long createClock() {
     return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();
   }
-
 }

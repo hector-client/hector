@@ -7,21 +7,21 @@ import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Mutator;
-import me.prettyprint.cassandra.model.Result;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
+import me.prettyprint.hector.api.query.QueryResult;
 
 public class SimpleCassandraDao {
 
   private String columnFamilyName;
-  private KeyspaceOperator keyspaceOperator;
+  private Keyspace keyspace;
   private final StringSerializer serializer = StringSerializer.get();
 
   /**
@@ -31,7 +31,7 @@ public class SimpleCassandraDao {
    * @param value the String value to insert
    */
   public void insert(final String key, final String columnName, final String value) {
-    createMutator(keyspaceOperator, serializer).insert(
+    createMutator(keyspace, serializer).insert(
         key, columnFamilyName, createColumn(columnName, value, serializer, serializer));
 
   }
@@ -42,9 +42,9 @@ public class SimpleCassandraDao {
    * @return The string value; null if no value exists for the given key.
    */
   public String get(final String key, final String columnName) throws HectorException {
-    ColumnQuery<String, String, String> q = HFactory.createColumnQuery(keyspaceOperator,
+    ColumnQuery<String, String, String> q = HFactory.createColumnQuery(keyspace,
         serializer, serializer, serializer);
-    Result<HColumn<String, String>> r = q.setKey(key).
+    QueryResult<HColumn<String, String>> r = q.setKey(key).
         setName(columnName).
         setColumnFamily(columnFamilyName).
         execute();
@@ -58,12 +58,12 @@ public class SimpleCassandraDao {
    * @return
    */
   public Map<String, String> getMulti(String columnName, String... keys) {
-    MultigetSliceQuery<String, String,String> q = createMultigetSliceQuery(keyspaceOperator, serializer, serializer, serializer);
+    MultigetSliceQuery<String, String,String> q = createMultigetSliceQuery(keyspace, serializer, serializer, serializer);
     q.setColumnFamily(columnFamilyName);
     q.setKeys(keys);
     q.setColumnNames(columnName);
 
-    Result<Rows<String,String,String>> r = q.execute();
+    QueryResult<Rows<String,String,String>> r = q.execute();
     Rows<String,String,String> rows = r.get();
     Map<String, String> ret = new HashMap<String, String>(keys.length);
     for (String k: keys) {
@@ -79,10 +79,10 @@ public class SimpleCassandraDao {
    * Insert multiple values for a given columnName
    */
   public void insertMulti(String columnName, Map<String, String> keyValues) {
-    Mutator<String> m = createMutator(keyspaceOperator, serializer);
+    Mutator<String> m = createMutator(keyspace, serializer);
     for (Map.Entry<String, String> keyValue: keyValues.entrySet()) {
       m.addInsertion(keyValue.getKey(), columnFamilyName,
-          createColumn(columnName, keyValue.getValue(), keyspaceOperator.createClock(), serializer, serializer));
+          createColumn(columnName, keyValue.getValue(), keyspace.createClock(), serializer, serializer));
     }
     m.execute();
   }
@@ -92,7 +92,7 @@ public class SimpleCassandraDao {
    * Delete multiple values
    */
   public void delete(String columnName, String... keys) {
-    Mutator<String> m = createMutator(keyspaceOperator, serializer);
+    Mutator<String> m = createMutator(keyspace, serializer);
     for (String key: keys) {
       m.addDeletion(key, columnFamilyName,  columnName, serializer);
     }
@@ -104,9 +104,8 @@ public class SimpleCassandraDao {
   }
 
 
-  public void setKeyspaceOperator(KeyspaceOperator keyspaceOperator) {
-    this.keyspaceOperator = keyspaceOperator;
+  public void setKeyspace(Keyspace keyspace) {
+    this.keyspace = keyspace;
   }
-
 
 }

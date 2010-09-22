@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.KeyRange;
 

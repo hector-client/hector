@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.service.spring;
 
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
 
 /**
@@ -17,27 +17,27 @@ public class HectorTemplateFactory {
   private final ThreadLocal<HectorTemplate> currentManager = new ThreadLocal<HectorTemplate>();
 
   private Cluster cluster;
-  private String keyspace;
+  private String keyspaceName;
   private ConfigurableConsistencyLevel configurableConsistencyLevelPolicy;
   private String replicationStrategyClass;
   private int replicationFactor;
 
-  private volatile KeyspaceOperator keyspaceOperator;
+  private volatile Keyspace keyspace;
 
   public HectorTemplate createTemplate() {
-    HectorTemplateImpl template = new HectorTemplateImpl(cluster, keyspace, replicationFactor,
+    HectorTemplateImpl template = new HectorTemplateImpl(cluster, keyspaceName, replicationFactor,
         replicationStrategyClass, configurableConsistencyLevelPolicy);
     initKeyspaceOperator();
-    if (keyspaceOperator == null) {
+    if (keyspace == null) {
        initKeyspaceOperator();
     }
-    template.setKeyspaceOperator(keyspaceOperator);
+    template.setKeyspaceName(keyspaceName);
 
     return template;
   }
 
   public synchronized void initKeyspaceOperator() {
-    if (keyspaceOperator == null) {
+    if (keyspace == null) {
       // not setting the KeyspaceOperator externally,
       // because the keyspace name should be accessible from this factory
       ConsistencyLevelPolicy clPolicy;
@@ -46,7 +46,7 @@ public class HectorTemplateFactory {
       } else {
         clPolicy = configurableConsistencyLevelPolicy;
       }
-      keyspaceOperator = HFactory.createKeyspaceOperator(keyspace, cluster, clPolicy);
+      keyspace = HFactory.createKeyspace(keyspaceName, cluster, clPolicy);
     }
   }
 
@@ -60,12 +60,12 @@ public class HectorTemplateFactory {
     return current;
   }
 
-  public String getKeyspace() {
-    return keyspace;
+  public String getKeyspaceName() {
+    return keyspaceName;
   }
 
   public void setKeyspace(String keyspace) {
-    this.keyspace = keyspace;
+    this.keyspaceName = keyspace;
   }
 
   public ConfigurableConsistencyLevel getConfigurableConsistencyLevelPolicy() {

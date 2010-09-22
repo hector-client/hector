@@ -2,26 +2,26 @@ package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.Cluster;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.Clock;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public /*final*/ class KeyspaceOperator {
-
-   private static final Logger log = LoggerFactory.getLogger(KeyspaceOperator.class);
+/**
+ *
+ * @author Ran Tavory
+ *
+ */
+public class ExecutingKeyspace implements Keyspace {
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
 
   private final Cluster cluster;
   private final String keyspace;
 
-  public KeyspaceOperator(String keyspace, Cluster cluster,
+  public ExecutingKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
     Assert.noneNull(keyspace, cluster, consistencyLevelPolicy);
     this.keyspace = keyspace;
@@ -29,17 +29,19 @@ public /*final*/ class KeyspaceOperator {
     this.consistencyLevelPolicy = consistencyLevelPolicy;
   }
 
+  @Override
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
     this.consistencyLevelPolicy = cp;
   }
 
+  @Override
   public Cluster getCluster() {
     return cluster;
   }
 
   @Override
   public String toString() {
-    return "KeyspaceOperator(" + keyspace +"," + cluster + ")";
+    return "ExecutingKeyspace(" + keyspace +"," + cluster + ")";
   }
 
   public long createClock() {
@@ -48,7 +50,7 @@ public /*final*/ class KeyspaceOperator {
 
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     CassandraClient c = null;
-    Keyspace ks = null;
+    KeyspaceService ks = null;
     try {
         c = cluster.borrowClient();
         ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));

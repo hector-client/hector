@@ -220,7 +220,7 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public void releaseKeyspace(Keyspace k) throws HectorException {
+  public void releaseKeyspace(KeyspaceService k) throws HectorException {
     releaseClient(k.getClient());
   }
 

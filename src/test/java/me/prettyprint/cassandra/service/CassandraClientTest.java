@@ -38,7 +38,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeySpaceString() throws HectorException {
-    Keyspace k = client.getKeyspace("Keyspace1");
+    KeyspaceService k = client.getKeyspace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
 
@@ -53,7 +53,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeySpaceConsistencyLevel() throws HectorException {
-    Keyspace k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
+    KeyspaceService k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
     assertEquals(ConsistencyLevel.ALL, k.getConsistencyLevel());
@@ -66,7 +66,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeySpaceFailoverPolicy() throws HectorException {
-    Keyspace k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
+    KeyspaceService k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
         FailoverPolicy.FAIL_FAST);
     assertNotNull(k);
     assertEquals(FailoverPolicy.FAIL_FAST, k.getFailoverPolicy());

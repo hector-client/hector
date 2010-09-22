@@ -1,12 +1,13 @@
 package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SubCountQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
@@ -26,9 +27,9 @@ public final class ThriftSubCountQuery<K,SN,N> extends AbstractThriftCountQuery<
 
   private SN superColumnName;
 
-  public ThriftSubCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public ThriftSubCountQuery(Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<SN> superNameExtractor, Serializer<N> nameSerializer) {
-    super(ko, keySerializer, nameSerializer);
+    super(keyspace, keySerializer, nameSerializer);
     Assert.notNull(superNameExtractor, "superNameExtractor is null");
     this.superNameSerializer = superNameExtractor;
   }
@@ -40,14 +41,14 @@ public final class ThriftSubCountQuery<K,SN,N> extends AbstractThriftCountQuery<
   }
 
   @Override
-  public Result<Integer> execute() {
+  public QueryResult<Integer> execute() {
     Assert.notNull(key, "key is null");
     Assert.notNull(columnFamily, "columnFamily is null");
     Assert.notNull(superColumnName, "superColumnName is null");
-    return new Result<Integer>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<Integer>(keyspace.doExecute(
         new KeyspaceOperationCallback<Integer>() {
           @Override
-          public Integer doInKeyspace(Keyspace ks) throws HectorException {
+          public Integer doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
             Integer count = ks.getCount(keySerializer.toBytes(key), columnParent,

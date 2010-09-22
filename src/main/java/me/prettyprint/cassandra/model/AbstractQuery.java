@@ -1,20 +1,22 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.Query;
 
 public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
 
-  protected final KeyspaceOperator keyspaceOperator;
+  protected final ExecutingKeyspace keyspace;
   protected String columnFamilyName;
   protected Serializer<K> keySerializer;
   protected Serializer<N> columnNameSerializer;
   protected Serializer<V> valueSerializer;
 
-  /*package*/ AbstractQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  /*package*/ AbstractQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    Assert.noneNull(ko, keySerializer, nameSerializer, valueSerializer);
-    keyspaceOperator = ko;
+    Assert.noneNull(k, keySerializer, nameSerializer, valueSerializer);
+    keyspace = (ExecutingKeyspace) k;
     this.keySerializer = keySerializer;
     this.columnNameSerializer = nameSerializer;
     this.valueSerializer = valueSerializer;

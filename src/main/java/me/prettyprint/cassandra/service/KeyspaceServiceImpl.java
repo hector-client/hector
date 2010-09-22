@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -39,9 +38,10 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/* package */class KeyspaceImpl implements Keyspace {
+/* package */class KeyspaceServiceImpl implements KeyspaceService {
 
-  private static final Logger log = LoggerFactory.getLogger(KeyspaceImpl.class);
+  @SuppressWarnings("unused")
+  private static final Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
 
   private CassandraClient client;
 
@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
 
   private final ExceptionsTranslator xtrans;
 
-  public KeyspaceImpl(CassandraClient client, String keyspaceName,
+  public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
       KsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws HectorTransportException {
@@ -622,7 +622,7 @@ import org.slf4j.LoggerFactory;
   public long createClock() {
     return client.getClockResolution().createClock();
   }
-  
+
   private Clock createClockInternal() {
     return new Clock(createClock());
   }

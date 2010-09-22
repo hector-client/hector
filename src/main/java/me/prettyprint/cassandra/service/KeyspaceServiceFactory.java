@@ -6,26 +6,24 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.KsDef;
 
-import java.util.Map;
-
 /**
  *
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/*package*/ class KeyspaceFactory {
+/*package*/ class KeyspaceServiceFactory {
 
   private final CassandraClientMonitor clientMonitor;
 
-  public KeyspaceFactory(CassandraClientMonitor clientMonitor) {
+  public KeyspaceServiceFactory(CassandraClientMonitor clientMonitor) {
     this.clientMonitor = clientMonitor;
   }
 
-  public Keyspace create(CassandraClient client, String keyspaceName,
+  public KeyspaceService create(CassandraClient client, String keyspaceName,
       KsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
       throws HectorTransportException {
-    return new KeyspaceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
+    return new KeyspaceServiceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
         failoverPolicy, clientPools, clientMonitor);
   }
 }

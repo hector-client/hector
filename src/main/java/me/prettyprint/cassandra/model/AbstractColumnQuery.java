@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.ColumnQuery;
 
@@ -17,10 +19,10 @@ public abstract class AbstractColumnQuery<K, N, V> extends AbstractQuery<K, N, V
   protected K key;
   protected N name;
 
-  protected AbstractColumnQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  protected AbstractColumnQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
   }
 
   @Override

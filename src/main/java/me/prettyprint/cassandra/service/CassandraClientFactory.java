@@ -68,7 +68,7 @@ import org.slf4j.LoggerFactory;
     CassandraClient c;
     try {
       c = new CassandraClientImpl(createThriftClient(cassandraHost),
-          new KeyspaceFactory(clientMonitor), cassandraHost, pool, 
+          new KeyspaceServiceFactory(clientMonitor), cassandraHost, pool,
           pool.getCluster(), clockResolution);
     } catch (Exception e) {
       throw new HectorException(e);
@@ -130,10 +130,12 @@ import org.slf4j.LoggerFactory;
     return timeoutVar;
   }
 
+  @Override
   public void activateObject(Object obj) throws Exception {
     // nada
   }
 
+  @Override
   public void destroyObject(Object obj) throws Exception {
     CassandraClient client = (CassandraClient) obj ;
     if ( log.isDebugEnabled() ) {
@@ -142,6 +144,7 @@ import org.slf4j.LoggerFactory;
     closeClient(client);
   }
 
+  @Override
   public Object makeObject() throws Exception {
     if ( log.isDebugEnabled() ) {
       log.debug("Creating a new client... (thread={})", Thread.currentThread().getName());
@@ -153,6 +156,7 @@ import org.slf4j.LoggerFactory;
     return c;
   }
 
+  @Override
   public boolean validateObject(Object obj) {
     return validateClient((CassandraClient) obj);
   }
@@ -172,6 +176,7 @@ import org.slf4j.LoggerFactory;
     cclient.markAsClosed();
   }
 
+  @Override
   public void passivateObject(Object obj) throws Exception {
     // none
   }

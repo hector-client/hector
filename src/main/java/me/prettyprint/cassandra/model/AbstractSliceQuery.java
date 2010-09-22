@@ -2,6 +2,8 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Collection;
 
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.Query;
 
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -18,8 +20,8 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
 
   protected final HSlicePredicate<N> slicePredicate;
 
-  public AbstractSliceQuery(KeyspaceOperator ko, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+  public AbstractSliceQuery(Keyspace k, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    super(k, keySerializer, nameSerializer, valueSerializer);
     slicePredicate = new HSlicePredicate<N>(nameSerializer);
   }
 

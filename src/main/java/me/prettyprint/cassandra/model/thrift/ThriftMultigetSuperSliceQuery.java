@@ -8,15 +8,16 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.model.SuperRowsImpl;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.SuperRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -32,12 +33,12 @@ public final class ThriftMultigetSuperSliceQuery<K, SN, N, V> extends
   private Collection<K> keys;
   private final Serializer<N> nameSerializer;
 
-  public ThriftMultigetSuperSliceQuery(KeyspaceOperator ko,
+  public ThriftMultigetSuperSliceQuery(Keyspace keyspace,
       Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(ko, keySerializer, sNameSerializer, valueSerializer);
+    super(keyspace, keySerializer, sNameSerializer, valueSerializer);
     Assert.notNull(nameSerializer, "nameSerializer can't be null");
     this.nameSerializer = nameSerializer;
   }
@@ -49,11 +50,11 @@ public final class ThriftMultigetSuperSliceQuery<K, SN, N, V> extends
   }
 
   @Override
-  public Result<SuperRows<K, SN, N, V>> execute() {
-    return new Result<SuperRows<K, SN, N, V>>(
-        keyspaceOperator.doExecute(new KeyspaceOperationCallback<SuperRows<K, SN, N, V>>() {
+  public QueryResult<SuperRows<K, SN, N, V>> execute() {
+    return new QueryResultImpl<SuperRows<K, SN, N, V>>(
+        keyspace.doExecute(new KeyspaceOperationCallback<SuperRows<K, SN, N, V>>() {
           @Override
-          public SuperRows<K, SN, N, V> doInKeyspace(Keyspace ks) throws HectorException {
+          public SuperRows<K, SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             List<K> keysList = new ArrayList<K>();
             keysList.addAll(keys);
             ColumnParent columnParent = new ColumnParent(columnFamilyName);

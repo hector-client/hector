@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
 
 import org.junit.Test;
 
@@ -37,42 +37,51 @@ public class TypeInferringSerializerTest {
   }
 
   private static class SampleObject implements Serializable {
-    private String a = "test";
-    private List<Void> b = new ArrayList<Void>();
-    private Calendar c = Calendar.getInstance();
+    private final String a = "test";
+    private final List<Void> b = new ArrayList<Void>();
+    private final Calendar c = Calendar.getInstance();
     @Override
     public int hashCode() {
       final int prime = 31;
       int result = 1;
-      result = prime * result + ((a == null) ? 0 : a.hashCode());
-      result = prime * result + ((b == null) ? 0 : b.hashCode());
-      result = prime * result + ((c == null) ? 0 : c.hashCode());
+      result = prime * result + (a == null ? 0 : a.hashCode());
+      result = prime * result + (b == null ? 0 : b.hashCode());
+      result = prime * result + (c == null ? 0 : c.hashCode());
       return result;
     }
     @Override
     public boolean equals(Object obj) {
-      if (this == obj)
+      if (this == obj) {
         return true;
-      if (obj == null)
+      }
+      if (obj == null) {
         return false;
-      if (getClass() != obj.getClass())
+      }
+      if (getClass() != obj.getClass()) {
         return false;
+      }
       SampleObject other = (SampleObject) obj;
       if (a == null) {
-        if (other.a != null)
+        if (other.a != null) {
           return false;
-      } else if (!a.equals(other.a))
+        }
+      } else if (!a.equals(other.a)) {
         return false;
+      }
       if (b == null) {
-        if (other.b != null)
+        if (other.b != null) {
           return false;
-      } else if (!b.equals(other.b))
+        }
+      } else if (!b.equals(other.b)) {
         return false;
+      }
       if (c == null) {
-        if (other.c != null)
+        if (other.c != null) {
           return false;
-      } else if (!c.equals(other.c))
+        }
+      } else if (!c.equals(other.c)) {
         return false;
+      }
       return true;
     }
   }

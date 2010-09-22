@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.serializers;
 
 import java.util.UUID;
 
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
 
 /**
  * Utility class that infers the concrete Serializer needed to turn a value into

@@ -1,8 +1,8 @@
 package me.prettyprint.cassandra.model.avro;
 
 import me.prettyprint.cassandra.model.AbstractSubColumnQuery;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 
 /**
@@ -16,12 +16,12 @@ import me.prettyprint.hector.api.query.SubColumnQuery;
 public final class AvroSubColumnQuery<K, SN,N,V> extends AbstractSubColumnQuery<K, SN, N, V>
     implements SubColumnQuery<K, SN, N, V> {
 
-  public AvroSubColumnQuery(KeyspaceOperator keyspaceOperator,
+  public AvroSubColumnQuery(Keyspace keyspace,
       Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(keyspaceOperator, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+    super(keyspace, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
 
 }

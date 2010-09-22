@@ -6,8 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.serializers.BytesSerializer;
+import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -16,7 +15,7 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SuperColumn;
 
 /**
- * A BatchMutation object is used to construct the {@link Keyspace#batchMutate(BatchMutation)} call.
+ * A BatchMutation object is used to construct the {@link KeyspaceService#batchMutate(BatchMutation)} call.
  *
  * A BatchMutation encapsulates a set of updates (or insertions) and deletions all submitted at the
  * same time to cassandra. The BatchMutation object is useful for user friendly construction of
@@ -32,8 +31,8 @@ public final class BatchMutation<K> {
   private final Serializer<K> keySerializer;
 
   public BatchMutation(Serializer<K> serializer) {
-    this.keySerializer = serializer;    
-    mutationMap = new HashMap<K,Map<String,List<Mutation>>>();            
+    this.keySerializer = serializer;
+    mutationMap = new HashMap<K,Map<String,List<Mutation>>>();
   }
 
   private BatchMutation(Serializer<K> serializer, Map<K,Map<String,List<Mutation>>> mutationMap) {
@@ -52,7 +51,7 @@ public final class BatchMutation<K> {
     return this;
   }
 
-  
+
   /**
    * Add an SuperColumn insertion (or update) to the batch mutation request.
    */
@@ -99,12 +98,12 @@ public final class BatchMutation<K> {
   Map<byte[],Map<String,List<Mutation>>> getMutationMap() {
     return keySerializer.toBytesMap(mutationMap);
   }
-  
+
   Map<K,Map<String,List<Mutation>>> getRawMutationMap() {
     return mutationMap;
   }
-  
-  
+
+
 
   /**
    * Makes a shallow copy of the mutation object.

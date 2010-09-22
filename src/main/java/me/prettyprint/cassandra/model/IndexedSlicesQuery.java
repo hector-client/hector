@@ -4,9 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -32,9 +35,9 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
 
   private final IndexClause indexClause;
 
-  public IndexedSlicesQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public IndexedSlicesQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
     indexClause = new IndexClause();
   }
 
@@ -51,12 +54,12 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
   }
 
   @Override
-  public Result<OrderedRows<K,N, V>> execute() {
+  public QueryResult<OrderedRows<K,N, V>> execute() {
 
-    return new Result<OrderedRows<K,N,V>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<OrderedRows<K,N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<OrderedRows<K,N,V>>() {
           @Override
-          public OrderedRows<K,N,V> doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedRows<K,N,V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getIndexedSlices(columnParent, indexClause, getPredicate()));

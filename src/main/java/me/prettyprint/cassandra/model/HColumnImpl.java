@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 
 import org.apache.cassandra.thrift.Clock;

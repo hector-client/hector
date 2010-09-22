@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -57,11 +58,11 @@ public final class HSlicePredicate<N> {
   }
 
   /**
-   * Set a predicate of start/finish to retrieve a list of columns in this range. 
-   * Either start and or finish can be null which will toggle the underlying predicate to 
+   * Set a predicate of start/finish to retrieve a list of columns in this range.
+   * Either start and or finish can be null which will toggle the underlying predicate to
    * use an empty byte[]
    * @param start
-   *          Start key 
+   *          Start key
    * @param finish
    *          End key
    * @param reversed

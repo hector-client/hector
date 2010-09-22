@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Serializer;
+
 
 /**
  * A base class for serializer implementations.

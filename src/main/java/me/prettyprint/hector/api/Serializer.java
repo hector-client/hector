@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.hector.api;
 
 import java.util.List;
 import java.util.Map;

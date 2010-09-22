@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.model.thrift;
 
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.CountQuery;
+import me.prettyprint.hector.api.query.QueryResult;
 
 
 /**
@@ -14,13 +14,13 @@ import me.prettyprint.hector.api.query.CountQuery;
 public final class ThriftCountQuery<K, N> extends AbstractThriftCountQuery<K, N> implements
     CountQuery<K, N> {
 
-  public ThriftCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public ThriftCountQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
-    super(ko, keySerializer, nameSerializer);
+    super(k, keySerializer, nameSerializer);
   }
 
   @Override
-  public Result<Integer> execute() {
+  public QueryResult<Integer> execute() {
     return countColumns();
   }
 

@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
    * A reference to the keyspace operating in this context, if it's a keyspace.
    * This can be null if no keyspace in context.
    */
-  private final Keyspace keyspace;
+  private final KeyspaceService keyspace;
 
   /**
    *
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
    * be null
    */
   public FailoverOperator(FailoverPolicy policy, CassandraClientMonitor monitor,
-      CassandraClient client, CassandraClientPool clientPools, Keyspace keyspace) {
+      CassandraClient client, CassandraClientPool clientPools, KeyspaceService keyspace) {
     Assert.noneNull(policy, monitor, client, clientPools /* keyspace may be null*/);
     this.failoverPolicy = policy;
     this.knownHosts = new ArrayList<CassandraHost>(clientPools.getKnownHosts());

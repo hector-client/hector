@@ -7,14 +7,15 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
 import me.prettyprint.cassandra.model.OrderedRowsImpl;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -33,11 +34,11 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
 
   private final HKeyRange<K> keyRange;
 
-  public ThriftRangeSlicesQuery(KeyspaceOperator ko,
+  public ThriftRangeSlicesQuery(Keyspace keyspace,
       Serializer<K> keySerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(keyspace, keySerializer, nameSerializer, valueSerializer);
     keyRange = new HKeyRange<K>(keySerializer);
   }
 
@@ -54,13 +55,13 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
   }
 
   @Override
-  public Result<OrderedRows<K, N, V>> execute() {
+  public QueryResult<OrderedRows<K, N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 
-    return new Result<OrderedRows<K, N,V>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<OrderedRows<K, N,V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<OrderedRows<K, N,V>>() {
           @Override
-          public OrderedRows<K, N,V > doInKeyspace(Keyspace ks) throws HectorException {
+          public OrderedRows<K, N,V > doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));

@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.beans.SuperRow;
 

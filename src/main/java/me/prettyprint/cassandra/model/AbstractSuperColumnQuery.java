@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
@@ -20,12 +22,12 @@ public abstract class AbstractSuperColumnQuery<K, SN, N, V> extends
   protected K key;
   protected SN superName;
 
-  protected AbstractSuperColumnQuery(KeyspaceOperator ko,
+  protected AbstractSuperColumnQuery(Keyspace k,
       Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
     noneNull(sNameSerializer, nameSerializer, valueSerializer);
     this.sNameSerializer = sNameSerializer;
   }

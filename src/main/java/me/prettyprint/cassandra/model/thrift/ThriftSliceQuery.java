@@ -5,12 +5,13 @@ import java.util.List;
 import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.ColumnSliceImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -29,11 +30,11 @@ public final class ThriftSliceQuery<K, N, V> extends AbstractSliceQuery<K, N, V,
 
   private K key;
 
-  public ThriftSliceQuery(KeyspaceOperator ko,
+  public ThriftSliceQuery(Keyspace k,
       Serializer<K> keySerializer,
       Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(ko, keySerializer, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
   }
 
   @Override
@@ -43,11 +44,11 @@ public final class ThriftSliceQuery<K, N, V> extends AbstractSliceQuery<K, N, V,
   }
 
   @Override
-  public Result<ColumnSlice<N, V>> execute() {
-    return new Result<ColumnSlice<N, V>>(keyspaceOperator.doExecute(
+  public QueryResult<ColumnSlice<N, V>> execute() {
+    return new QueryResultImpl<ColumnSlice<N, V>>(keyspace.doExecute(
         new KeyspaceOperationCallback<ColumnSlice<N, V>>() {
           @Override
-          public ColumnSlice<N, V> doInKeyspace(Keyspace ks) throws HectorException {
+          public ColumnSlice<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());
             return new ColumnSliceImpl<N, V>(thriftRet, columnNameSerializer, valueSerializer);

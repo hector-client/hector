@@ -11,15 +11,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
@@ -36,7 +33,6 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,7 +52,7 @@ import org.junit.Test;
 public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   private CassandraClient client;
-  private Keyspace keyspace;
+  private KeyspaceService keyspace;
   private static final StringSerializer se = new StringSerializer();
 
   @Before

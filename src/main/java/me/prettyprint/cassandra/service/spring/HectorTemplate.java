@@ -3,12 +3,12 @@ package me.prettyprint.cassandra.service.spring;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
-import me.prettyprint.cassandra.model.Mutator;
-import me.prettyprint.cassandra.model.Serializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
@@ -129,5 +129,5 @@ public interface HectorTemplate {
 
   int getReplicationFactor();
 
-  String getKeyspace();
+  String getKeyspaceName();
 }

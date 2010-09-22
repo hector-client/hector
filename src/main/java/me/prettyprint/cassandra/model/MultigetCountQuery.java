@@ -4,16 +4,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
 public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
 
-  protected final KeyspaceOperator keyspaceOperator;
+  protected final ExecutingKeyspace keyspace;
   protected final Serializer<K> keySerializer;
   protected String columnFamily;
   protected List<K> keys;
@@ -21,12 +24,12 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
   /** The slice predicate for which the count it performed*/
   protected final HSlicePredicate<N> slicePredicate;
 
-  public MultigetCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public MultigetCountQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
-    Assert.notNull(ko, "keyspaceOperator can't be null");
+    Assert.notNull(k, "keyspace can't be null");
     Assert.notNull(keySerializer, "keySerializer can't be null");
     Assert.notNull(nameSerializer, "columnNameSerializer is null");
-    this.keyspaceOperator = ko;
+    this.keyspace = (ExecutingKeyspace) k;
     this.keySerializer = keySerializer;
     this.slicePredicate = new HSlicePredicate<N>(nameSerializer);
   }
@@ -52,13 +55,13 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
   }
 
   @Override
-  public Result<Map<K, Integer>> execute() {
+  public QueryResult<Map<K, Integer>> execute() {
     Assert.notNull(keys, "keys list is null");
     Assert.notNull(columnFamily, "columnFamily is null");
-    return new Result<Map<K,Integer>>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<Map<K,Integer>>(keyspace.doExecute(
         new KeyspaceOperationCallback<Map<K,Integer>>() {
           @Override
-          public Map<K,Integer> doInKeyspace(Keyspace ks) throws HectorException {
+          public Map<K,Integer> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             Map<K,Integer> counts = keySerializer.fromBytesMap(
                 ks.multigetCount(keySerializer.toBytesList(keys), columnParent, slicePredicate.toThrift()));

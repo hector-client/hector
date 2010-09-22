@@ -1,14 +1,16 @@
 package me.prettyprint.cassandra.model.thrift;
 
+import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.KeyspaceOperator;
-import me.prettyprint.cassandra.model.Result;
-import me.prettyprint.cassandra.model.Serializer;
-import me.prettyprint.cassandra.service.Keyspace;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.Query;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.ColumnParent;
 
@@ -19,19 +21,19 @@ import org.apache.cassandra.thrift.ColumnParent;
  */
 /*package*/ abstract class AbstractThriftCountQuery<K, N> implements Query<Integer>{
 
-  protected final KeyspaceOperator keyspaceOperator;
+  protected final ExecutingKeyspace keyspace;
   protected String columnFamily;
   protected K key;
   protected final Serializer<K> keySerializer;
   /** The slice predicate for which the count it performed*/
   protected final HSlicePredicate<N> slicePredicate;
 
-  public AbstractThriftCountQuery(KeyspaceOperator ko, Serializer<K> keySerializer,
+  public AbstractThriftCountQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
-    Assert.notNull(ko, "keyspaceOperator can't be null");
+    Assert.notNull(k, "keyspaceOperator can't be null");
     Assert.notNull(nameSerializer, "nameSerializer is null");
     Assert.notNull(keySerializer, "keySerializer is null");
-    this.keyspaceOperator = ko;
+    this.keyspace = (ExecutingKeyspace) k;
     this.keySerializer = keySerializer;
     this.slicePredicate = new HSlicePredicate<N>(nameSerializer);
   }
@@ -46,13 +48,13 @@ import org.apache.cassandra.thrift.ColumnParent;
     return this;
   }
 
-  protected  Result<Integer> countColumns() {
+  protected  QueryResult<Integer> countColumns() {
     Assert.notNull(key, "key is null");
     Assert.notNull(columnFamily, "columnFamily is null");
-    return new Result<Integer>(keyspaceOperator.doExecute(
+    return new QueryResultImpl<Integer>(keyspace.doExecute(
         new KeyspaceOperationCallback<Integer>() {
           @Override
-          public Integer doInKeyspace(Keyspace ks) throws HectorException {
+          public Integer doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
             return ks.getCount(keySerializer.toBytes(key), columnParent,
                 slicePredicate.toThrift());

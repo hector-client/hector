@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.model;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 
 /**
  * The same as ColumnQuery, but dynamically inferring the serializers needed to transform the key
@@ -16,14 +18,14 @@ import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
  */
 public class ThriftTypeInferringColumnQuery<K, N, V> extends ThriftColumnQuery<K, N, V> {
 
-  public ThriftTypeInferringColumnQuery(KeyspaceOperator keyspaceOperator, Serializer<V> valueSerializer) {
-    super(keyspaceOperator, TypeInferringSerializer.<K>get(), TypeInferringSerializer.<N>get(),
+  public ThriftTypeInferringColumnQuery(Keyspace keyspace, Serializer<V> valueSerializer) {
+    super(keyspace, TypeInferringSerializer.<K>get(), TypeInferringSerializer.<N>get(),
         valueSerializer);
   }
 
   @SuppressWarnings("unchecked")
-  public ThriftTypeInferringColumnQuery(KeyspaceOperator keyspaceOperator) {
-    super(keyspaceOperator, TypeInferringSerializer.<K> get(), TypeInferringSerializer.<N> get(),
+  public ThriftTypeInferringColumnQuery(Keyspace keyspace) {
+    super(keyspace, TypeInferringSerializer.<K> get(), TypeInferringSerializer.<N> get(),
         (Serializer<V>) StringSerializer.get());
   }
 }
