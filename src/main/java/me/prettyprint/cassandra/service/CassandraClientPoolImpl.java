@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
     log.info("Creating a CassandraClientPool");
     pools = new ConcurrentHashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
-    this.cluster = new Cluster("Default Cluster", this);
+    this.cluster = new ClusterImpl("Default Cluster", this);
   }
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
@@ -54,14 +54,14 @@ import org.slf4j.LoggerFactory;
       log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
       getPool(cassandraHost);
     }
-    this.cluster = new Cluster("Default Cluster", this);
+    this.cluster = new ClusterImpl("Default Cluster", this);
   }
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
     this.cassandraHostConfigurator = cassandraHostConfigurator;
-    this.cluster = new Cluster("Default Cluster", this);
+    this.cluster = new ClusterImpl("Default Cluster", this);
   }
 
 
