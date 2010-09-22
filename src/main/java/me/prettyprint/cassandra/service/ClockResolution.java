@@ -1,7 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import org.apache.cassandra.thrift.Clock;
-
 /**
  * Resolution used to create clocks.
  * Clients may wish to use millisec, micro or sec, depending on the application

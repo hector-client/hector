@@ -8,7 +8,6 @@ import me.prettyprint.cassandra.service.BatchMutation;
 import me.prettyprint.cassandra.service.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 
@@ -103,7 +102,7 @@ public class Mutator<K> {
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
     sp.addToColumn_names(nameSerializer.toBytes(columnName));
-    Deletion d = columnName != null ? new Deletion(new Clock(ko.createClock())).setPredicate(sp) : new Deletion(new Clock(ko.createClock()));
+    Deletion d = columnName != null ? new Deletion(ko.createClock()).setPredicate(sp) : new Deletion(ko.createClock());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

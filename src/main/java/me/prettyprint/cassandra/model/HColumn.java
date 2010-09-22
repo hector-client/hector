@@ -4,7 +4,6 @@ import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 
-import org.apache.cassandra.thrift.Clock;
 import org.apache.cassandra.thrift.Column;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
@@ -44,7 +43,7 @@ public class HColumn<N,V> {
     notNull(thriftColumn, "thriftColumn is null");
     name = nameSerializer.fromBytes(thriftColumn.getName());
     value = valueSerializer.fromBytes(thriftColumn.getValue());
-    clock = thriftColumn.clock.getTimestamp();
+    clock = thriftColumn.timestamp;
   }
 
   public HColumn(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -98,15 +97,15 @@ public class HColumn<N,V> {
   }
 
   public Column toThrift() {
-    return ttl > 0 ? new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), new Clock(clock)).setTtl(ttl) :
-      new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), new Clock(clock));
+    return ttl > 0 ? new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock).setTtl(ttl) :
+      new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock);
   }
 
   public HColumn<N, V> fromThrift(Column c) {
     notNull(c, "column is null");
     name = nameSerializer.fromBytes(c.name);
     value = valueSerializer.fromBytes(c.value);
-    clock = c.clock.timestamp;
+    clock = c.timestamp;
     ttl = c.ttl;
     return this;
   }

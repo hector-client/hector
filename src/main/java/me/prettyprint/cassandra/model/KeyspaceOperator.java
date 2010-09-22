@@ -8,7 +8,6 @@ import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.Clock;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
