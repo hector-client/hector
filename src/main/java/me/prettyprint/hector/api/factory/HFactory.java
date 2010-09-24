@@ -28,6 +28,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.cassandra.service.ClusterImpl;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
@@ -56,7 +57,7 @@ import me.prettyprint.hector.api.query.SuperSliceQuery;
  */
 public final class HFactory {
 
-  private static final Map<String, Cluster> clusters = new HashMap<String, Cluster>();
+  private static final Map<String, ClusterImpl> clusters = new HashMap<String, ClusterImpl>();
 
   private static final ConsistencyLevelPolicy DEFAULT_CONSISTENCY_LEVEL_POLICY =
     new QuorumAllConsistencyLevelPolicy();
@@ -82,7 +83,7 @@ public final class HFactory {
 
   public static Cluster getOrCreateCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    Cluster c = clusters.get(clusterName);
+    ClusterImpl c = clusters.get(clusterName);
     if (c == null) {
       synchronized (clusters) {
         c = clusters.get(clusterName);
@@ -95,8 +96,8 @@ public final class HFactory {
     return c;
   }
 
-  public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
-    return new Cluster(clusterName, cassandraHostConfigurator);
+  public static ClusterImpl createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
+    return new ClusterImpl(clusterName, cassandraHostConfigurator);
   }
 
   /**

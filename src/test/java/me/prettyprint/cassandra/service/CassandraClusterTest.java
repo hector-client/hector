@@ -28,7 +28,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
           NotFoundException, UnknownHostException, Exception {
     cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");        
-    cassandraCluster = new Cluster("Test Cluster", cassandraHostConfigurator);
+    cassandraCluster = new ClusterImpl("Test Cluster", cassandraHostConfigurator);
   }
   
   @Test
