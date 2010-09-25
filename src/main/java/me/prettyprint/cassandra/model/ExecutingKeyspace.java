@@ -1,9 +1,9 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.Cluster;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.hector.api.Keyspace;
