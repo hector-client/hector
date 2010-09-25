@@ -14,7 +14,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  */
 public class HectorTemplateFactory {
 
-  private final ThreadLocal<HectorTemplate> currentManager = new ThreadLocal<HectorTemplate>();
+  private final ThreadLocal<HectorTemplate> currentTemplate = new ThreadLocal<HectorTemplate>();
 
   private Cluster cluster;
   private String keyspaceName;
@@ -27,18 +27,18 @@ public class HectorTemplateFactory {
   public HectorTemplate createTemplate() {
     HectorTemplateImpl template = new HectorTemplateImpl(cluster, keyspaceName, replicationFactor,
         replicationStrategyClass, configurableConsistencyLevelPolicy);
-    initKeyspaceOperator();
+    initKeyspace();
     if (keyspace == null) {
-       initKeyspaceOperator();
+       initKeyspace();
     }
     template.setKeyspaceName(keyspaceName);
 
     return template;
   }
 
-  public synchronized void initKeyspaceOperator() {
+  public synchronized void initKeyspace() {
     if (keyspace == null) {
-      // not setting the KeyspaceOperator externally,
+      // not setting the Keyspace externally,
       // because the keyspace name should be accessible from this factory
       ConsistencyLevelPolicy clPolicy;
       if (configurableConsistencyLevelPolicy == null) {
@@ -51,10 +51,10 @@ public class HectorTemplateFactory {
   }
 
   public HectorTemplate currentTemplate() {
-    HectorTemplate current = currentManager.get();
+    HectorTemplate current = currentTemplate.get();
     if (current == null) {
       current = createTemplate();
-      currentManager.set(current);
+      currentTemplate.set(current);
     }
 
     return current;
