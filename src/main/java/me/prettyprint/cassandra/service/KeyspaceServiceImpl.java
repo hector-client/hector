@@ -709,6 +709,6 @@ import org.slf4j.LoggerFactory;
     b.append("KeyspaceImpl<");
     b.append(getClient());
     b.append(">");
-    return super.toString();
+    return b.toString();
   }
 }

@@ -18,33 +18,33 @@ import org.junit.Before;
 import org.junit.Test;
 
 
-public class CassandraClusterTest extends BaseEmbededServerSetupTest { 
-  
-  private Cluster cassandraCluster;
+public class CassandraClusterTest extends BaseEmbededServerSetupTest {
+
+  private ThriftCluster cassandraCluster;
   private CassandraHostConfigurator cassandraHostConfigurator;
 
-  
+
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
           NotFoundException, UnknownHostException, Exception {
-    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");        
-    cassandraCluster = new Cluster("Test Cluster", cassandraHostConfigurator);
+    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+    cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
   }
-  
+
   @Test
   public void testDescribeKeyspaces() throws Exception {
     Set<String> keyspaces = cassandraCluster.describeKeyspaces();
     assertEquals(2,keyspaces.size());
   }
-  
+
   @Test
   public void testDescribeClusterName() throws Exception {
     assertEquals("Test Cluster",cassandraCluster.describeClusterName());
   }
-  
+
   /**
    * This will need to be updated as we update the Thrift API, but probably a good sanity check
-   * 
+   *
    */
   @Test
   public void testDescribeThriftVersion() throws Exception {
@@ -56,14 +56,14 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     List<TokenRange> ring = cassandraCluster.describeRing("Keyspace1");
     assertEquals(1, ring.size());
   }
-  
-  
-  
+
+
+
   @Test
   public void testDescribeKeyspace() throws Exception {
     Map<String, Map<String, String>> keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
     assertNotNull(keyspaceDetail);
-    assertEquals(4,keyspaceDetail.size());    
+    assertEquals(4,keyspaceDetail.size());
   }
-  
+
 }

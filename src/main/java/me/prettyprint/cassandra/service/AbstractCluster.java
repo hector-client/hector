@@ -1,16 +1,16 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.TokenRange;
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,11 +36,11 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory
  * @author zznate
  */
-public final class Cluster {
+public abstract class AbstractCluster implements Cluster {
 
-  private final Logger log = LoggerFactory.getLogger(Cluster.class);
+  private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
 
-  private static final String KEYSPACE_SYSTEM = "system";
+  protected static final String KEYSPACE_SYSTEM = "system";
 
   private final CassandraClientPool pool;
   private final String name;
@@ -50,9 +50,9 @@ public final class Cluster {
   private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
   private Set<CassandraHost> knownPoolHosts;
-  private final ExceptionsTranslator xtrans;
+  protected final ExceptionsTranslator xtrans;
 
-  public Cluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
+  public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     pool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
     name = clusterName;
     configurator = cassandraHostConfigurator;
@@ -61,7 +61,7 @@ public final class Cluster {
     xtrans = new ExceptionsTranslatorImpl();
   }
 
-  public Cluster(String clusterName, CassandraClientPool pool) {
+  public AbstractCluster(String clusterName, CassandraClientPool pool) {
     this.pool = pool;
     name = clusterName;
     configurator = null;
@@ -70,6 +70,10 @@ public final class Cluster {
     xtrans = new ExceptionsTranslatorImpl();
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#getKnownPoolHosts(boolean)
+   */
+  @Override
   public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
       knownPoolHosts = pool.getKnownHosts();
@@ -78,11 +82,10 @@ public final class Cluster {
     return knownPoolHosts;
   }
 
-  /**
-   * These are all the hosts known to the cluster
-   * @param refresh
-   * @return
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#getClusterHosts(boolean)
    */
+  @Override
   public Set<String> getClusterHosts(boolean refresh) {
     if (refresh || knownClusterHosts == null) {
       CassandraClient client = borrowClient();
@@ -95,12 +98,12 @@ public final class Cluster {
     return knownClusterHosts;
   }
 
-  /**
-   * Adds the host to this Cluster. Unless skipApplyConfig is set to true, the settings in
-   * the CassandraHostConfigurator will be applied to the provided CassandraHost
-   * @param cassandraHost
-   * @param skipApplyConfig
+  protected abstract Set<String> buildHostNames(Client cassandra);
+
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#addHost(me.prettyprint.cassandra.service.CassandraHost, boolean)
    */
+  @Override
   public void addHost(CassandraHost cassandraHost, boolean skipApplyConfig) {
     if (!skipApplyConfig && configurator != null) {
       configurator.applyConfig(cassandraHost);
@@ -110,21 +113,28 @@ public final class Cluster {
   }
 
 
-  /**
-   * Descriptive name of the cluster.
-   * This name is used to identify the cluster.
-   * @return
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#getName()
    */
+  @Override
   public String getName() {
     return name;
   }
 
   // rest of the methods from the current CassandraCluster
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#borrowClient()
+   */
+  @Override
   public CassandraClient borrowClient() throws HectorPoolException {
     return pool.borrowClient();
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#releaseClient(me.prettyprint.cassandra.service.CassandraClient)
+   */
+  @Override
   public void releaseClient(CassandraClient client) {
     pool.releaseClient(client);
   }
@@ -134,20 +144,36 @@ public final class Cluster {
     return String.format("Cluster(%s,%s)", name, pool.toString());
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#getTimestampResolution()
+   */
+  @Override
   public TimestampResolution getTimestampResolution() {
     return timestampResolution;
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#setTimestampResolution(me.prettyprint.cassandra.service.TimestampResolution)
+   */
+  @Override
   public Cluster setTimestampResolution(TimestampResolution timestampResolution) {
     this.timestampResolution = timestampResolution;
     return this;
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#createTimestamp()
+   */
+  @Override
   public long createTimestamp() {
     return timestampResolution.createTimestamp();
   }
 
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#describeKeyspaces()
+   */
+  @Override
   public Set<String> describeKeyspaces() throws HectorException {
     Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {
       @Override
@@ -163,6 +189,10 @@ public final class Cluster {
     return op.getResult();
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#describeClusterName()
+   */
+  @Override
   public String describeClusterName() throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
@@ -178,6 +208,10 @@ public final class Cluster {
     return op.getResult();
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#describeThriftVersion()
+   */
+  @Override
   public String describeThriftVersion() throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
       @Override
@@ -193,6 +227,10 @@ public final class Cluster {
     return op.getResult();
   }
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#describeKeyspace(java.lang.String)
+   */
+  @Override
   public Map<String, Map<String, String>> describeKeyspace(final String keyspace)
   throws HectorException {
     Operation<Map<String, Map<String, String>>> op = new Operation<Map<String, Map<String, String>>>(
@@ -215,6 +253,10 @@ public final class Cluster {
   }
 
 
+  /* (non-Javadoc)
+   * @see me.prettyprint.cassandra.service.Cluster#getClusterName()
+   */
+  @Override
   public String getClusterName() throws HectorException {
     log.info("in execute with client");
     Operation<String> op = new Operation<String>(OperationType.META_READ) {
@@ -233,22 +275,7 @@ public final class Cluster {
     return op.getResult();
   }
 
-  public List<TokenRange> describeRing(final String keyspace) throws HectorException {
-    Operation<List<TokenRange>> op = new Operation<List<TokenRange>>(OperationType.META_READ) {
-      @Override
-      public List<TokenRange> execute(Cassandra.Client cassandra) throws HectorException {
-        try {
-          return cassandra.describe_ring(keyspace);
-        } catch (Exception e) {
-          throw xtrans.translate(e);
-        }
-      }
-    };
-    operateWithFailover(op);
-    return op.getResult();
-  }
-
-  private void operateWithFailover(Operation<?> op) throws HectorException {
+  protected void operateWithFailover(Operation<?> op) throws HectorException {
     CassandraClient client = null;
     try {
       client = borrowClient();
@@ -261,26 +288,6 @@ public final class Cluster {
       } catch (Exception e) {
         log.error("Unable to release a client", e);
       }
-    }
-  }
-
-  private Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
-    try {
-      Set<String> hostnames = new HashSet<String>();
-      for (String keyspace : cassandra.describe_keyspaces()) {
-        if (!keyspace.equals(KEYSPACE_SYSTEM)) {
-          List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace);
-          for (TokenRange tokenRange : tokenRanges) {
-            for (String host : tokenRange.getEndpoints()) {
-              hostnames.add(host);
-            }
-          }
-          break;
-        }
-      }
-      return hostnames;
-    } catch (Exception e) {
-      throw xtrans.translate(e);
     }
   }
 
