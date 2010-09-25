@@ -1,13 +1,13 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.hector.api;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.TimestampResolution;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorPoolException;
-
-import org.apache.cassandra.thrift.TokenRange;
 
 public interface Cluster {
 
@@ -57,8 +57,4 @@ public interface Cluster {
       final String keyspace) throws HectorException;
 
   public abstract String getClusterName() throws HectorException;
-
-  public abstract List<TokenRange> describeRing(final String keyspace)
-      throws HectorException;
-
 }
