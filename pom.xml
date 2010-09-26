@@ -192,8 +192,8 @@
               <packaging>jar</packaging>
               <groupId>org.apache.cassandra</groupId>
               <artifactId>cassandra</artifactId>
-              <version>0.6.0</version>
-              <file>${basedir}/lib/apache-cassandra-0.6.0.jar</file>
+              <version>0.6.5</version>
+              <file>${basedir}/lib/apache-cassandra-0.6.5.jar</file>
             </configuration>
           </execution>
           <execution>
@@ -255,7 +255,7 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra</artifactId>
-      <version>0.6.0</version>
+      <version>0.6.5</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
