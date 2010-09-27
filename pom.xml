@@ -112,6 +112,7 @@
           <additionalClasspathElements>
             <additionalClasspathElement>${basedir}/testlib/flexjson-1.7.jar</additionalClasspathElement>
           </additionalClasspathElements>
+          <argLine>-Xmx1G</argLine>
         </configuration>
       </plugin>
 

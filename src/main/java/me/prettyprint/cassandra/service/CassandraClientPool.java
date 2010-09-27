@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 

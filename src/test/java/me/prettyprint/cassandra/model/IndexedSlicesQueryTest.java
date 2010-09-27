@@ -8,7 +8,7 @@ import static org.junit.Assert.assertEquals;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.query.QueryResult;

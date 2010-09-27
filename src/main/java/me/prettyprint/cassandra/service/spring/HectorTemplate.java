@@ -4,7 +4,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;

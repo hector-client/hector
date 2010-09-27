@@ -1,6 +1,5 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.model.thrift;
 
-import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.hector.api.Keyspace;

@@ -10,7 +10,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.BytesSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.Cluster;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
