@@ -3,3 +3,6 @@
 hector.iml
 releases
 target/
+.classpath
+.project
+.settings/
