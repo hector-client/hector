@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.query.Query;
+import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -31,7 +32,8 @@ public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
   protected int count;
 
   /** Use column names or start/finish? */
-  protected boolean useColumnNames;
+  protected enum PredicateType {Unknown, ColumnNames, Range}; 
+  protected PredicateType predicateType = PredicateType.Unknown;
 
   public AbstractSliceQuery(Keyspace ko, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(ko, nameSerializer, valueSerializer);
@@ -43,7 +45,7 @@ public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
    */
   public Query<T> setColumnNames(N... columnNames) {
     this.columnNames = Arrays.asList(columnNames);
-    useColumnNames = true;
+    predicateType = PredicateType.ColumnNames;
     return this;
   }
 
@@ -60,13 +62,12 @@ public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
    * @param count
    * @return
    */
-  public Query<T> setRange(N start, N finish, boolean reversed, int count) {
-    Assert.noneNull(start, finish);
+  public Query<T> setRange(N start, N finish, boolean reversed, int count) {    
     this.start = start;
     this.finish = finish;
     this.reversed = reversed;
-    this.count = count;
-    useColumnNames = false;
+    this.count = count;    
+    predicateType = PredicateType.Range;
     return this;
   }
 
@@ -76,18 +77,21 @@ public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
    */
   public SlicePredicate getPredicate() {
     SlicePredicate pred = new SlicePredicate();
-    if (useColumnNames) {
-      if (columnNames == null || columnNames.isEmpty()) {
-        return null;
-      }
-      pred.setColumn_names(toThriftColumnNames(columnNames));
-    } else {
-      if (start == null || finish == null) {
-        return null;
-      }
-      SliceRange range = new SliceRange(columnNameSerializer.toBytes(start), columnNameSerializer.toBytes(finish),
-          reversed, count);
-      pred.setSlice_range(range);
+    switch(predicateType) {
+    	case ColumnNames:
+    		if (columnNames == null || columnNames.isEmpty()) {
+    	        return null;
+    	    }
+    		pred.setColumn_names(toThriftColumnNames(columnNames));
+    		break;
+    	case Range:
+    		byte[] startBytes = (start == null ? bytes("") : columnNameSerializer.toBytes(start));
+    	    byte[] finishBytes = (finish == null ? bytes("") : columnNameSerializer.toBytes(finish));
+    	    SliceRange range = new SliceRange(startBytes, finishBytes, reversed, count);
+    	    pred.setSlice_range(range);
+    	    break;    		
+    	case Unknown:
+    		return null;
     }
     return pred;
   }
@@ -101,6 +105,6 @@ public abstract class AbstractSliceQuery<N,V,T> extends AbstractQuery<N,V,T> {
   }
 
   protected String toStringInternal() {
-    return "" + (useColumnNames ? columnNames : "cStart:" + start + ",cFinish:" + finish);
+    return "" + (predicateType == PredicateType.ColumnNames ? columnNames : "cStart:" + start + ",cFinish:" + finish);
   }
 }
