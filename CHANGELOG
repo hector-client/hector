@@ -12,7 +12,7 @@ Move all the API stuff to me.prettyprint.hector.api.*. Extract interfaces and pr
  - Move all the queries and extract their interfaces
  - Rename KeyspaceOperator and extract a Keyspace interface from it
 Rename a few exceptions to begin with HSomething so they are hard to unintentionally mix with their thrift doubles.
-
+Up version of cassandra and thrift to the 0.6.5 cassandra versions
 
 
 0.6.0-15
