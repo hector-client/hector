@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientMonitor clientMonitor;
 
   private CassandraHostConfigurator cassandraHostConfigurator;
-  private Cluster cluster;
+  private final Cluster cluster;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
@@ -54,15 +54,13 @@ import org.slf4j.LoggerFactory;
     for (CassandraHost cassandraHost: cassandraHosts) {
       log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
       getPool(cassandraHost);
-    }
-    this.cluster = new ThriftCluster("Default Cluster", this);
+    }    
   }
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
-    this.cassandraHostConfigurator = cassandraHostConfigurator;
-    this.cluster = new ThriftCluster("Default Cluster", this);
+    this.cassandraHostConfigurator = cassandraHostConfigurator;    
   }
 
 
