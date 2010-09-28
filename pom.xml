@@ -245,7 +245,7 @@
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
-    
+
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -298,7 +298,7 @@
       <artifactId>spring-beans</artifactId>
       <version>${org.springframework.version}</version>
       <scope>provided</scope>
-     </dependency>
+    </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
@@ -310,48 +310,48 @@
           <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
-     </dependency>
-     <dependency>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
       <version>${org.springframework.version}</version>   
       <scope>test</scope>               
     </dependency>
-	<dependency>
-	    <groupId>com.google.guava</groupId>
-	    <artifactId>guava</artifactId>
-	    <version>r06</version>
-        <scope>test</scope>               
-	</dependency>
-	<dependency>
-		<groupId>org.apache.hadoop</groupId>
-		<artifactId>avro</artifactId>
-		<version>1.4.0-rc4</version>
-		<scope>test</scope>
-	</dependency>
     <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-mapper-asl</artifactId>
-        <version>1.4.0</version>
-        <scope>test</scope>
-    </dependency>    	
-    <dependency>
-        <groupId>org.codehaus.jackson</groupId>
-        <artifactId>jackson-core-asl</artifactId>
-        <version>1.4.0</version>
-        <scope>test</scope>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r06</version>
+      <scope>test</scope>               
     </dependency>
     <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty</artifactId>
-        <version>6.1.21</version>
-        <scope>test</scope>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>avro</artifactId>
+      <version>1.4.0-rc4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.4.0</version>
+      <scope>test</scope>
+    </dependency>    	
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+      <version>1.4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.21</version>
+      <scope>test</scope>
     </dependency>	
     <dependency>
-        <groupId>org.mortbay.jetty</groupId>
-        <artifactId>jetty-util</artifactId>
-        <version>6.1.21</version>
-        <scope>test</scope>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.1.21</version>
+      <scope>test</scope>
     </dependency>    
     <dependency>
       <groupId>snakeyaml</groupId>
@@ -405,38 +405,38 @@
       </plugin>      
     </plugins>
   </reporting>
-	<profiles>
-		<profile>
-			<id>outbrain</id>
-			<distributionManagement>
-				<repository>
-					<id>nexus</id>
-					<name>nexus</name>
-					<url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-		<profile>
-			<id>riptano</id>
-			<distributionManagement>
-				<repository>
-					<id>riptano</id>
-					<name>riptano</name>
-					<url>http://mvn.riptano.com/content/repositories/public/</url>
-				</repository>
-			</distributionManagement>
-		</profile>
-	</profiles>
-	<repositories>
-		<repository>
-			<id>riptano</id>
-			<name>riptano</name>
-			<url>http://mvn.riptano.com/content/repositories/public/</url>
-		</repository>
-		<repository>
-		    <id>codehaus</id>
-		    <name>codehaus</name>
-		    <url>http://repository.codehaus.org/</url>
-		</repository>
-	</repositories>
+  <profiles>
+    <profile>
+      <id>outbrain</id>
+      <distributionManagement>
+        <repository>
+          <id>nexus</id>
+          <name>nexus</name>
+          <url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>riptano</id>
+      <distributionManagement>
+        <repository>
+          <id>riptano</id>
+          <name>riptano</name>
+          <url>http://mvn.riptano.com/content/repositories/public/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+  <repositories>
+    <repository>
+      <id>riptano</id>
+      <name>riptano</name>
+      <url>http://mvn.riptano.com/content/repositories/public/</url>
+    </repository>
+    <repository>
+      <id>codehaus</id>
+      <name>codehaus</name>
+      <url>http://repository.codehaus.org/</url>
+    </repository>
+  </repositories>
 </project>

@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
-    this.cassandraHostConfigurator = cassandraHostConfigurator;    
+    this.cassandraHostConfigurator = cassandraHostConfigurator;
   }
 
 
