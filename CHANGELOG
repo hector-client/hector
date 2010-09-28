@@ -5,7 +5,7 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
-0.6.0-16
+0.6.0-17
 ========
 Add CountQuery, SuperCountQuery and SubCountQuery
 Move all the API stuff to me.prettyprint.hector.api.*. Extract interfaces and prepare the ground for more avro good.
