@@ -5,12 +5,24 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.7.0-17
 ========
 Add CountQuery, SuperCountQuery and SubCountQuery
 Move all the API stuff to me.prettyprint.hector.api.*. Extract interfaces and prepare the ground for more avro good.
  - Move all the queries and extract their interfaces
  - Rename KeyspaceOperator and extract a Keyspace interface from it
 Rename a few exceptions to begin with HSomething so they are hard to unintentionally mix with their thrift doubles.
+Bug fixes:
+ CassandraClientPoolByHostImpl can throw NoSuchElementException 
+ KeyspaceImpl.toString returns super.toString()
+ API V2 has no means of getting all columns from a row.
+ KeyspaceOperator throws NPE that masks real exceptions
+ Timestamp (and Clock in 0.7.0) are not set on HColumn in the constructor
+ Friendlier API and spring integration
+ Error in failover - incorrect operation when borrowClient throws an 
+ batchMutate doesn't work with null predicate in deletion. Cannot batch-delete rows.
+ getSuperColumn() does not return null
+ KeyspaceImpl.getSuperColumn() should use cassandra.get() and not cassandra.get_slice()
 
 
 
