@@ -4,26 +4,19 @@ set -e
 # Require variable declaration
 set -u
 
-echo Running mvn install
-mvn clean install -DskipTests
-
-
 # read the version from pom.xml
 version=$(sed -n "s/<version>\(.*\)<\/version>/\1/p" pom.xml | head -1)
 # remove whitespace
 version=$(echo $version)
-
 echo Version is: $version
-
-echo Copying artifacts
 target="releases/hector-$version"
 rm -rf $target*
 mkdir -p $target
-cp target/hector-$version* $target
 
-echo Copying lib jars
-cp lib/* $target
-cp antlib/* $target
+echo Running mvn install and copy-dependencies
+mvn clean install -DskipTests dependency:copy-dependencies -DincludeScope=runtime -DexcludeTransitive=true -DexcludeArtifactIds=properties-maven-plugin -DoutputDirectory=$target
+
+cp target/hector-$version* $target
 
 echo Copying CHANGELOG
 cp CHANGELOG $target
