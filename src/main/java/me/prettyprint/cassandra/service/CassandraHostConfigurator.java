@@ -46,6 +46,7 @@ public final class CassandraHostConfigurator {
     cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
     cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
+    cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
 
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
