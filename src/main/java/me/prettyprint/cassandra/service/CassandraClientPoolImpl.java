@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 
   private CassandraHostConfigurator cassandraHostConfigurator;
   private final Cluster cluster;
+  private DownCassandraHostRetryService downCassandraHostRetryService;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
@@ -266,6 +267,9 @@ import org.slf4j.LoggerFactory;
   @Override
   public void invalidateAllConnectionsToHost(CassandraClient client) {
     getPool(client).invalidateAll();
+    if ( downCassandraHostRetryService != null ) {
+      downCassandraHostRetryService.add(client.getCassandraHost());
+    }
   }
 
 
@@ -299,4 +303,19 @@ import org.slf4j.LoggerFactory;
   public Cluster getCluster() {
     return cluster;
   }
+
+  @Override
+  public void initializeDownHostRetryService() {
+    if ( cassandraHostConfigurator == null ) {
+      throw new IllegalArgumentException("CassandraClientPool must be created with a CassandraHostConfigurator to use this feature");
+    }
+    downCassandraHostRetryService = new DownCassandraHostRetryService(this, cassandraHostConfigurator);
+    try {
+      JmxMonitor.INSTANCE.registerMonitor("me.prettyprint.cassandra.service", "hector", downCassandraHostRetryService);
+    } catch (Exception e) {
+      log.error("Could not initialize DownedHostRetryService MBean", e);
+    }
+  }
+  
+  
 }

@@ -15,6 +15,10 @@ public final class CassandraHostConfigurator {
   private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  private boolean retryDownedHosts = false;
+  private int retryDownedHostsQueueSize = DownCassandraHostRetryService.DEF_QUEUE_SIZE;
+  private int retryDownedHostsDelayInSeconds = DownCassandraHostRetryService.DEF_RETRY_DELAY;
+  
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -82,6 +86,30 @@ public final class CassandraHostConfigurator {
 
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
+  }  
+  
+  public boolean getRetryDownedHosts() {
+    return this.retryDownedHosts;
+  }
+  
+  public void setRetryDownedHosts(boolean retryDownedHosts) {
+    this.retryDownedHosts = retryDownedHosts;
+  }
+
+  public void setRetryDownedHostsQueueSize(int retryDownedHostsQueueSize) {
+    this.retryDownedHostsQueueSize = retryDownedHostsQueueSize;
+  }
+
+  public int getRetryDownedHostsQueueSize() {
+    return retryDownedHostsQueueSize;
+  }
+
+  public void setRetryDownedHostsDelayInSeconds(int retryDownedHostsDelayInSeconds) {
+    this.retryDownedHostsDelayInSeconds = retryDownedHostsDelayInSeconds;
+  }  
+  
+  public int getRetryDownedHostsDelayInSeconds() {
+    return retryDownedHostsDelayInSeconds;
   }
 
   /**
@@ -111,6 +139,8 @@ public final class CassandraHostConfigurator {
     s.append(hosts);
     s.append("&useThriftFramedTransport=");
     s.append(useThriftFramedTransport);
+    s.append("&retryDownedHosts=");
+    s.append(retryDownedHosts);
     s.append(">");
     return s.toString();
   }

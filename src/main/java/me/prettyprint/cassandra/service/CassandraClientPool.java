@@ -181,4 +181,6 @@ public interface CassandraClientPool {
    * @return
    */
   Cluster getCluster();
+  
+  void initializeDownHostRetryService();
 }
