@@ -7,6 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.exceptions.HectorSerializationException;
 
 /**
  * The ObjectSerializer is used to turn objects into their binary representations.
@@ -34,6 +35,9 @@ public class ObjectSerializer extends AbstractSerializer<Object> implements Seri
 
   @Override
   public Object fromBytes(byte[] bytes) {
+    if (bytes == null || bytes.length == 0) {
+      return null;
+    }
     try {
       ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
       ObjectInputStream ois = new ObjectInputStream(bais);
@@ -42,7 +46,7 @@ public class ObjectSerializer extends AbstractSerializer<Object> implements Seri
 
       return obj;
     } catch (Exception ex) {
-      throw new RuntimeException(ex);
+      throw new HectorSerializationException(ex);
     }
   }
 
