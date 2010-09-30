@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.util.Date;
 import java.util.UUID;
 
 import me.prettyprint.hector.api.Serializer;
@@ -28,6 +29,8 @@ public class SerializerTypeInferer {
       serializer = BooleanSerializer.get();
     } else if (value instanceof byte[]) {
       serializer = BytesSerializer.get();
+    } else if (value instanceof Date) {
+      serializer = DateSerializer.get();
     } else {
       serializer = ObjectSerializer.get();
     }
@@ -36,7 +39,7 @@ public class SerializerTypeInferer {
     return serializer;
   }
 
-  @SuppressWarnings("rawtypes")
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public static <T> Serializer<T> getSerializer(Class<?> valueClass) {
     Serializer serializer = null;
     if (valueClass.equals(UUID.class)) {
