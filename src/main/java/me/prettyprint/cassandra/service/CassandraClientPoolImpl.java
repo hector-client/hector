@@ -12,6 +12,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
@@ -37,13 +38,14 @@ import org.slf4j.LoggerFactory;
   private final CassandraClientMonitor clientMonitor;
 
   private CassandraHostConfigurator cassandraHostConfigurator;
-  private Cluster cluster;
+  private final Cluster cluster;
+  private DownCassandraHostRetryService downCassandraHostRetryService;
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
     pools = new ConcurrentHashMap<CassandraHost, CassandraClientPoolByHost>();
     this.clientMonitor = clientMonitor;
-    this.cluster = new Cluster("Default Cluster", this);
+    this.cluster = new ThriftCluster("Default Cluster", this);
   }
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
@@ -53,16 +55,15 @@ import org.slf4j.LoggerFactory;
     for (CassandraHost cassandraHost: cassandraHosts) {
       log.debug("Maybe creating pool-by-host instance for {} at {}", cassandraHost, this);
       getPool(cassandraHost);
-    }
-    this.cluster = new Cluster("Default Cluster", this);
+    }    
   }
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
     this.cassandraHostConfigurator = cassandraHostConfigurator;
-    this.cluster = new Cluster("Default Cluster", this);
   }
+
 
 
   @Override
@@ -76,6 +77,7 @@ import org.slf4j.LoggerFactory;
     return borrowClient(clients);
   }
 
+
   @Override
   public CassandraClient borrowClient(String url, int port) throws HectorException {
     return getPool(new CassandraHost(url, port)).borrowClient();
@@ -85,6 +87,7 @@ import org.slf4j.LoggerFactory;
   public CassandraClient borrowClient(CassandraHost cassandraHost) throws HectorException {
     return getPool(cassandraHost).borrowClient();
   }
+
 
   @Override
   public Set<String> getExhaustedPoolNames() {
@@ -97,6 +100,7 @@ import org.slf4j.LoggerFactory;
     return hosts;
   }
 
+
   @Override
   public int getNumActive() {
     int count = 0;
@@ -106,6 +110,7 @@ import org.slf4j.LoggerFactory;
     return count;
   }
 
+
   @Override
   public int getNumBlockedThreads() {
     int count = 0;
@@ -114,6 +119,7 @@ import org.slf4j.LoggerFactory;
     }
     return count;
   }
+
 
   @Override
   public int getNumExhaustedPools() {
@@ -126,6 +132,7 @@ import org.slf4j.LoggerFactory;
     return count;
   }
 
+
   @Override
   public int getNumIdle() {
     int count = 0;
@@ -134,6 +141,7 @@ import org.slf4j.LoggerFactory;
     }
     return count;
   }
+
 
   @Override
   public int getNumPools() {
@@ -153,6 +161,7 @@ import org.slf4j.LoggerFactory;
   }
 
 
+
   @Override
   public Set<String> getPoolNames() {
     Set<String> names = new HashSet<String>();
@@ -162,6 +171,7 @@ import org.slf4j.LoggerFactory;
     return names;
   }
 
+
   @Override
   public void releaseClient(CassandraClient client) throws HectorException {
     if (client == null) {
@@ -170,6 +180,7 @@ import org.slf4j.LoggerFactory;
     }
     getPool(client).releaseClient(client);
   }
+
 
   @Override
   public void updateKnownHosts() throws HectorTransportException {
@@ -186,10 +197,12 @@ import org.slf4j.LoggerFactory;
     }
   }
 
+
   @Override
   public Set<CassandraHost> getKnownHosts() {
     return Collections.unmodifiableSet(pools.keySet());
   }
+
 
 
   @Override
@@ -205,10 +218,12 @@ import org.slf4j.LoggerFactory;
     return getPool(c.getCassandraHost());
   }
 
+
   @Override
-  public void releaseKeyspace(Keyspace k) throws HectorException {
+  public void releaseKeyspace(KeyspaceService k) throws HectorException {
     releaseClient(k.getClient());
   }
+
 
   @Override
   public CassandraClient borrowClient(String urlPort) throws HectorException {
@@ -216,6 +231,7 @@ import org.slf4j.LoggerFactory;
     int port = parsePortFromUrl(urlPort);
     return borrowClient(url, port);
   }
+
 
   @Override
   public CassandraClient borrowClient(String[] clientUrls) throws HectorException {
@@ -247,15 +263,21 @@ import org.slf4j.LoggerFactory;
     return Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length()));
   }
 
+
   @Override
   public void invalidateAllConnectionsToHost(CassandraClient client) {
     getPool(client).invalidateAll();
+    if ( downCassandraHostRetryService != null ) {
+      downCassandraHostRetryService.add(client.getCassandraHost());
+    }
   }
+
 
   @Override
   public CassandraClientMonitorMBean getMbean() {
     return clientMonitor;
   }
+
 
   @Override
   public String toString() {
@@ -276,8 +298,24 @@ import org.slf4j.LoggerFactory;
     }
   }
 
+
   @Override
   public Cluster getCluster() {
     return cluster;
   }
+
+  @Override
+  public void initializeDownHostRetryService() {
+    if ( cassandraHostConfigurator == null ) {
+      throw new IllegalArgumentException("CassandraClientPool must be created with a CassandraHostConfigurator to use this feature");
+    }
+    downCassandraHostRetryService = new DownCassandraHostRetryService(this, cassandraHostConfigurator);
+    try {
+      JmxMonitor.INSTANCE.registerMonitor("me.prettyprint.cassandra.service", "hector", downCassandraHostRetryService);
+    } catch (Exception e) {
+      log.error("Could not initialize DownedHostRetryService MBean", e);
+    }
+  }
+  
+  
 }

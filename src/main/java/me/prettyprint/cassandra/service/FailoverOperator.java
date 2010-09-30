@@ -60,7 +60,7 @@ import org.slf4j.LoggerFactory;
    * A reference to the keyspace operating in this context, if it's a keyspace.
    * This can be null if no keyspace in context.
    */
-  private final Keyspace keyspace;
+  private final KeyspaceService keyspace;
 
   /**
    *
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
    * be null
    */
   public FailoverOperator(FailoverPolicy policy, CassandraClientMonitor monitor,
-      CassandraClient client, CassandraClientPool clientPools, Keyspace keyspace) {
+      CassandraClient client, CassandraClientPool clientPools, KeyspaceService keyspace) {
     Assert.noneNull(policy, monitor, client, clientPools /* keyspace may be null*/);
     this.failoverPolicy = policy;
     this.knownHosts = new ArrayList<CassandraHost>(clientPools.getKnownHosts());
@@ -187,7 +187,11 @@ import org.slf4j.LoggerFactory;
     }
     try {
       // Perform operation and save its result value
-      op.executeAndSetResult(client.getCassandra());
+      Cassandra.Client c = client.getCassandra();
+      if (keyspace != null) {
+        c.set_keyspace(keyspace.getName());
+      }
+      op.executeAndSetResult(c);
       // hmmm don't count success, there are too many...
       // monitor.incCounter(op.successCounter);
       if ( log.isDebugEnabled() ) {
@@ -401,7 +405,7 @@ import org.slf4j.LoggerFactory;
  * Specifies the "type" of operation - read or write.
  * It's used for perf4j, so should be in sync with hectorLog4j.xml
  * @author Ran Tavory (ran@outbain.com)
- *
+ * 
  */
 /*package*/ enum OperationType {
   /** Read operations*/
@@ -409,7 +413,9 @@ import org.slf4j.LoggerFactory;
   /** Write operations */
   WRITE,
   /** Meta read operations, such as describe*() */
-  META_READ;
+  META_READ,
+  /** Operation on one of the system_ methods */
+  META_WRITE;
 }
 
 

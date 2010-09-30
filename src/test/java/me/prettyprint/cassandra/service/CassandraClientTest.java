@@ -9,10 +9,12 @@ import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.thrift.transport.TFramedTransport;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,7 +38,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeySpaceString() throws HectorException {
-    Keyspace k = client.getKeyspace("Keyspace1");
+    KeyspaceService k = client.getKeyspace("Keyspace1");
     assertNotNull(k);
     assertEquals(CassandraClient.DEFAULT_CONSISTENCY_LEVEL, k.getConsistencyLevel());
 
@@ -44,14 +46,14 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
     try {
       client.getKeyspace("KeyspaceDoesntExist");
       fail("Should have thrown an exception IllegalArgumentException");
-    } catch (IllegalArgumentException e) {
+    } catch (HNotFoundException e) {
       // good
     }
   }
 
   @Test
   public void testGetKeySpaceConsistencyLevel() throws HectorException {
-    Keyspace k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
+    KeyspaceService k = client.getKeyspace("Keyspace1", ConsistencyLevel.ALL,
         CassandraClient.DEFAULT_FAILOVER_POLICY);
     assertNotNull(k);
     assertEquals(ConsistencyLevel.ALL, k.getConsistencyLevel());
@@ -64,7 +66,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeySpaceFailoverPolicy() throws HectorException {
-    Keyspace k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
+    KeyspaceService k = client.getKeyspace("Keyspace1", CassandraClient.DEFAULT_CONSISTENCY_LEVEL,
         FailoverPolicy.FAIL_FAST);
     assertNotNull(k);
     assertEquals(FailoverPolicy.FAIL_FAST, k.getFailoverPolicy());
@@ -72,11 +74,11 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetKeyspaces() throws HectorException {
-    List<String> spaces = client.getKeyspaces();
+    List<KsDef> spaces = client.getKeyspaces();
     assertNotNull(spaces);
     // There should be two spaces: Keyspace1 and system
     assertEquals(2, spaces.size());
-    assertTrue("Keyspace1".equals(spaces.get(0)) || "Keyspace1".equals(spaces.get(1)));
+    assertTrue("Keyspace1".equals(spaces.get(0).getName()) || "Keyspace1".equals(spaces.get(1).getName()));
   }
 
   @Test

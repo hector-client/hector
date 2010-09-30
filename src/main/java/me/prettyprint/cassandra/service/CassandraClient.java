@@ -1,13 +1,13 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.List;
-import java.util.Set;
 
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.KsDef;
 
 
 /**
@@ -74,17 +74,17 @@ public interface CassandraClient {
    * <p>
    * Uses the default failover policy {@link #DEFAULT_FAILOVER_POLICY}
    */
-  Keyspace getKeyspace(String keyspaceName) throws HectorException;
+  KeyspaceService getKeyspace(String keyspaceName) throws HectorException;
 
   /**
    * Gets s keyspace with the specified consistency level
    */
-  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel) throws HectorException;
+  KeyspaceService getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel) throws HectorException;
 
   /**
    * Gets s keyspace with the specified consistency level and failover policy
    */
-  Keyspace getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, 
+  KeyspaceService getKeyspace(String keyspaceName, ConsistencyLevel consistencyLevel, 
       FailoverPolicy failoverPolicy)
       throws HectorException;
 
@@ -92,7 +92,7 @@ public interface CassandraClient {
   /**
    * @return all keyspaces name of this client.
    */
-  List<String> getKeyspaces() throws HectorTransportException;
+  List<KsDef> getKeyspaces() throws HectorTransportException;
 
 
   /**
@@ -116,9 +116,9 @@ public interface CassandraClient {
 
   boolean hasErrors();
 
-  void removeKeyspace(Keyspace k);
+  void removeKeyspace(KeyspaceService k);
 
-  TimestampResolution getTimestampResolution();
+  ClockResolution getClockResolution();
 
   /**
    * @return Whether this client has been released (returned) to the pool

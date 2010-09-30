@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>bundle</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.6.0-16</version>
+  <version>0.7.0-17</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -17,6 +17,7 @@
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
+    <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
   </properties>
 
   <issueManagement>
@@ -34,69 +35,69 @@
 
   <build>
     <plugins>
-   <!--
-	run examples thusly: mvn exec:java
-	-Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
-    -->
-	<plugin>
-	  <groupId>org.codehaus.mojo</groupId>
-	  <artifactId>exec-maven-plugin</artifactId>
-	  <version>1.1</version>
-	  <executions>
-	    <execution>
-	      <goals>
-		<goal>java</goal>
-	      </goals>
-	    </execution>
-	  </executions>
+      <!--
+        run examples thusly: mvn exec:java
+        -Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.ops4j</groupId>
-	<artifactId>maven-pax-plugin</artifactId>
-	<version>1.4</version>
-	<extensions>true</extensions>
-	<configuration>
-	  <provision>
+        <artifactId>maven-pax-plugin</artifactId>
+        <version>1.4</version>
+        <extensions>true</extensions>
+        <configuration>
+          <provision>
             <param>--platform=equinox</param>
-	  </provision>
-	</configuration>
+          </provision>
+        </configuration>
       </plugin>
 
       <plugin>
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.3</version>
-	<configuration>
+        <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
             <Bundle-Version>${pom.version}</Bundle-Version>
 
-	    <Embed-Dependency>
-	      libthrift;scope=compile|runtime;type=!pom;inline=false,
-	      cassandra;scope=compile|runtime;type=!pom;inline=false,
-	      <!-- *;scope=compile|runtime;type=!pom;inline=false -->
+            <Embed-Dependency>
+              libthrift;scope=compile|runtime;type=!pom;inline=false,
+              cassandra;scope=compile|runtime;type=!pom;inline=false,
+              <!-- *;scope=compile|runtime;type=!pom;inline=false -->
             </Embed-Dependency> 
 
-	    <Export-Package>
-	      <!-- !${bundle.namespace}.internal.*, -->
-	      ${bundle.namespace}.*;version="${pom.version}"
-	    </Export-Package>
+            <Export-Package>
+              <!-- !${bundle.namespace}.internal.*, -->
+              ${bundle.namespace}.*;version="${pom.version}"
+            </Export-Package>
 
             <Import-Package>
-	      !org.apache.avro.*,
-	      !javax.jms.*,
-	      !javax.mail.*,
-	      !javax.servlet.*,
-	      !com.sun.*,
-	      !org.antlr.*,
-	      !jline.*,
-	      !sun.misc.*,
+              !org.apache.avro.*,
+              !javax.jms.*,
+              !javax.mail.*,
+              !javax.servlet.*,
+              !com.sun.*,
+              !org.antlr.*,
+              !jline.*,
+              !sun.misc.*,
               *;resolution:=optional
             </Import-Package>
-	    
-	    <Private-Package>
-	      <!-- ${bundle.namespace}.internal.* -->
-	    </Private-Package>
+
+            <Private-Package>
+              <!-- ${bundle.namespace}.internal.* -->
+            </Private-Package>
 
             <_include>-osgi.bnd</_include>
           </instructions>
@@ -109,11 +110,9 @@
         <configuration>
           <forkMode>always</forkMode>
           <additionalClasspathElements>
-            <additionalClasspathElement>${basedir}/testlib/clhm-production-1.0.jar</additionalClasspathElement>
             <additionalClasspathElement>${basedir}/testlib/flexjson-1.7.jar</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/testlib/high-scale-lib-1.0.jar</additionalClasspathElement>
-            <additionalClasspathElement>${basedir}/testlib/commons-collections-3.0.jar</additionalClasspathElement>
           </additionalClasspathElements>
+          <argLine>-Xmx1G</argLine>
         </configuration>
       </plugin>
 
@@ -167,73 +166,7 @@
         </executions>
       </plugin>
       <!-- install various artifacts -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.3.1</version>
-        <executions>
-          <execution>
-            <id>install libthrift</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>libthrift</groupId>
-              <artifactId>libthrift</artifactId>
-              <version>917130</version>
-              <file>${basedir}/lib/libthrift-r917130.jar</file>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install cassandra</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>org.apache.cassandra</groupId>
-              <artifactId>cassandra</artifactId>
-              <version>0.6.0</version>
-              <file>${basedir}/lib/apache-cassandra-0.6.0.jar</file>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install high-scale-lib</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>org.cliffc.high_scale_lib</groupId>
-              <artifactId>high-scale-lib</artifactId>
-              <version>1.0.0</version>
-              <file>${basedir}/lib/high-scale-lib.jar</file>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install clhm-production</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>com.reardencommerce</groupId>
-              <artifactId>clhm-production</artifactId>
-              <version>1.0.0</version>
-              <file>${basedir}/lib/clhm-production.jar</file>
-            </configuration>
-          </execution>
-          <execution>
-            <id>install cassandra-javautils</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>org.apache.cassandra</groupId>
-              <artifactId>cassandra-javautils</artifactId>
-              <version>1.0.0</version>
-              <file>${basedir}/lib/cassandra-javautils.jar</file>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
     </plugins>
   </build>
   <dependencies>
@@ -250,12 +183,12 @@
     <dependency>
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>917130</version>
+      <version>959516</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra</artifactId>
-      <version>0.6.0</version>
+      <artifactId>apache-cassandra</artifactId>
+      <version>0.7.0-beta2-r999745</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -292,7 +225,11 @@
       <artifactId>commons-lang</artifactId>
       <version>2.4</version>
     </dependency>
-
+    <dependency>
+      <groupId>org.safehaus.jug</groupId>
+      <artifactId>jug-asl</artifactId>
+      <version>2.0.0</version>
+    </dependency>
     <!-- OSGi deps -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -308,7 +245,7 @@
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
-    
+
     <!-- Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
@@ -331,13 +268,13 @@
     <dependency>
       <groupId>com.reardencommerce</groupId>
       <artifactId>clhm-production</artifactId>
-      <version>1.0.0</version>
+      <version>1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
-      <version>1.0.0</version>
+      <version>1.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -354,12 +291,18 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-javautils</artifactId>
-      <version>1.0.0</version>
+      <version>0.7.0</version>     
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>${org.springframework.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
-      <version>3.0.0.RELEASE</version>
+      <version>${org.springframework.version}</version>
       <scope>test</scope>
       <exclusions>
         <exclusion>
@@ -367,12 +310,54 @@
           <artifactId>commons-logging</artifactId>
         </exclusion>
       </exclusions>
-     </dependency>
-     <dependency>
+    </dependency>
+    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-test</artifactId>
-      <version>3.0.0.RELEASE</version>   
+      <version>${org.springframework.version}</version>   
       <scope>test</scope>               
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r06</version>
+      <scope>test</scope>               
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>avro</artifactId>
+      <version>1.4.0-rc4</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-mapper-asl</artifactId>
+      <version>1.4.0</version>
+      <scope>test</scope>
+    </dependency>    	
+    <dependency>
+      <groupId>org.codehaus.jackson</groupId>
+      <artifactId>jackson-core-asl</artifactId>
+      <version>1.4.0</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.1.21</version>
+      <scope>test</scope>
+    </dependency>	
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty-util</artifactId>
+      <version>6.1.21</version>
+      <scope>test</scope>
+    </dependency>    
+    <dependency>
+      <groupId>snakeyaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.6</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -417,14 +402,41 @@
             <format>xml</format>
           </formats>
         </configuration>
-      </plugin>
+      </plugin>      
     </plugins>
   </reporting>
-  <distributionManagement>
+  <profiles>
+    <profile>
+      <id>outbrain</id>
+      <distributionManagement>
+        <repository>
+          <id>nexus</id>
+          <name>nexus</name>
+          <url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>riptano</id>
+      <distributionManagement>
+        <repository>
+          <id>riptano</id>
+          <name>riptano</name>
+          <url>http://mvn.riptano.com/content/repositories/public/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+  <repositories>
     <repository>
-      <id>nexus</id>
-      <name>nexus</name>
-      <url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
+      <id>riptano</id>
+      <name>riptano</name>
+      <url>http://mvn.riptano.com/content/repositories/public/</url>
     </repository>
-  </distributionManagement>
+    <repository>
+      <id>codehaus</id>
+      <name>codehaus</name>
+      <url>http://repository.codehaus.org/</url>
+    </repository>
+  </repositories>
 </project>

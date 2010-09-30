@@ -17,14 +17,6 @@ public final class StringSerializer extends AbstractSerializer<String> {
   }
 
   @Override
-  public String fromBytes(byte[] bytes) {
-    if (bytes == null) {
-      return null;
-    }
-    return string(bytes);
-  }
-
-  @Override
   public byte[] toBytes(String obj) {
     if (obj == null) {
       return null;
@@ -32,4 +24,11 @@ public final class StringSerializer extends AbstractSerializer<String> {
     return bytes(obj);
   }
 
+  @Override
+  public String fromBytes(byte[] bytes) {
+    if (bytes == null) {
+      return null;
+    }
+    return string(bytes);
+  }
 }

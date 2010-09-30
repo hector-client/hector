@@ -13,8 +13,12 @@ public final class CassandraHostConfigurator {
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
-  private TimestampResolution timestampResolution;
+  private ClockResolution clockResolution;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  private boolean retryDownedHosts = false;
+  private int retryDownedHostsQueueSize = DownCassandraHostRetryService.DEF_QUEUE_SIZE;
+  private int retryDownedHostsDelayInSeconds = DownCassandraHostRetryService.DEF_RETRY_DELAY;
+  
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -31,7 +35,7 @@ public final class CassandraHostConfigurator {
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
-      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port); 
+      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port);
       applyConfig(cassandraHost);
       cassandraHosts[x] = cassandraHost;
     }
@@ -39,13 +43,14 @@ public final class CassandraHostConfigurator {
   }
 
   public void applyConfig(CassandraHost cassandraHost) {
-    
+
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setMaxIdle(maxIdle);
     cassandraHost.setLifo(lifo);
     cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
     cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
+    cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
 
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
@@ -54,8 +59,8 @@ public final class CassandraHostConfigurator {
     if (exhaustedPolicy != null) {
       cassandraHost.setExhaustedPolicy(exhaustedPolicy);
     }
-    if (timestampResolution != null) {
-      cassandraHost.setTimestampResolution(timestampResolution);
+    if (clockResolution != null) {
+      cassandraHost.setClockResolution(clockResolution);
     }
   }
 
@@ -81,21 +86,45 @@ public final class CassandraHostConfigurator {
 
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
+  }  
+  
+  public boolean getRetryDownedHosts() {
+    return this.retryDownedHosts;
+  }
+  
+  public void setRetryDownedHosts(boolean retryDownedHosts) {
+    this.retryDownedHosts = retryDownedHosts;
+  }
+
+  public void setRetryDownedHostsQueueSize(int retryDownedHostsQueueSize) {
+    this.retryDownedHostsQueueSize = retryDownedHostsQueueSize;
+  }
+
+  public int getRetryDownedHostsQueueSize() {
+    return retryDownedHostsQueueSize;
+  }
+
+  public void setRetryDownedHostsDelayInSeconds(int retryDownedHostsDelayInSeconds) {
+    this.retryDownedHostsDelayInSeconds = retryDownedHostsDelayInSeconds;
+  }  
+  
+  public int getRetryDownedHostsDelayInSeconds() {
+    return retryDownedHostsDelayInSeconds;
   }
 
   /**
    * @param resolutionString one of "SECONDS", "MILLISECONDS" or "MICROSECONDS"
    */
-  public void setTimestampResolution(String resolutionString) {
-    timestampResolution = TimestampResolution.valueOf(resolutionString);
+  public void setClockResolution(String resolutionString) {
+    clockResolution = ClockResolution.valueOf(resolutionString);
   }
 
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder();
     s.append("CassandraHostConfigurator<");
-    s.append("timestampResolution=");
-    s.append(timestampResolution);
+    s.append("clockResolution=");
+    s.append(clockResolution);
     s.append("&exhaustedPolicy=");
     s.append(exhaustedPolicy);
     s.append("&cassandraThriftSocketTimeout=");
@@ -110,6 +139,8 @@ public final class CassandraHostConfigurator {
     s.append(hosts);
     s.append("&useThriftFramedTransport=");
     s.append(useThriftFramedTransport);
+    s.append("&retryDownedHosts=");
+    s.append(retryDownedHosts);
     s.append(">");
     return s.toString();
   }
@@ -149,5 +180,4 @@ public final class CassandraHostConfigurator {
   public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
     this.useThriftFramedTransport = useThriftFramedTransport;
   }
-  
 }

@@ -75,6 +75,9 @@ public enum CassandraClientPoolFactory {
     CassandraClientPool pool = new CassandraClientPoolImpl(
         JmxMonitor.INSTANCE.getCassandraMonitor(), cassandraHostConfigurator);
     JmxMonitor.INSTANCE.addPool(pool);
+    if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
+      pool.initializeDownHostRetryService();      
+    }
     if ( log.isDebugEnabled() ) {
       log.debug("CassandraClientPool was created: {}", pool);
     }

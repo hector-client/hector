@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.ColumnQuery;
 
 /**
@@ -10,33 +13,34 @@ import me.prettyprint.hector.api.query.ColumnQuery;
  * @param <N>
  * @param <V>
  */
-public abstract class AbstractColumnQuery<N, V> extends AbstractQuery<N, V, HColumn<N, V>>
-    implements ColumnQuery<N, V>{
+public abstract class AbstractColumnQuery<K, N, V> extends AbstractQuery<K, N, V, HColumn<N, V>>
+    implements ColumnQuery<K, N, V>{
 
-  protected String key;
+  protected K key;
   protected N name;
 
-  protected AbstractColumnQuery(KeyspaceOperator ko, Serializer<N> nameSerializer,
+  protected AbstractColumnQuery(Keyspace k, Serializer<K> keySerializer,
+      Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
-    super(ko, nameSerializer, valueSerializer);
+    super(k, keySerializer, nameSerializer, valueSerializer);
   }
 
   @Override
-  public ColumnQuery<N, V> setKey(String key) {
+  public ColumnQuery<K, N, V> setKey(K key) {
     this.key = key;
     return this;
   }
 
   @Override
-  public ColumnQuery<N, V> setName(N name) {
+  public ColumnQuery<K, N, V> setName(N name) {
     this.name = name;
     return this;
   }
 
   @SuppressWarnings("unchecked")
   @Override
-  public ColumnQuery<N, V> setColumnFamily(String cf) {
-    return (ColumnQuery<N, V>) super.setColumnFamily(cf);
+  public ColumnQuery<K, N, V> setColumnFamily(String cf) {
+    return (ColumnQuery<K, N, V>) super.setColumnFamily(cf);
   }
 
   @Override

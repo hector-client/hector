@@ -41,4 +41,5 @@ public final class LongSerializer extends AbstractSerializer<Long> {
     }
     return l;
   }
+
 }

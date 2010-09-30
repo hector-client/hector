@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
    */
   private final CassandraClientPool pool;
   private final boolean useThriftFramedTransport;
-  private final TimestampResolution timestampResolution;
+  private final ClockResolution clockResolution;
   private final CassandraHost cassandraHost;
 
   public CassandraClientFactory(CassandraClientPool pools, CassandraHost cassandraHost,
@@ -45,7 +45,7 @@ import org.slf4j.LoggerFactory;
     timeout = getTimeout(cassandraHost);
     this.clientMonitor = clientMonitor;
     this.useThriftFramedTransport = cassandraHost.getUseThriftFramedTransport();
-    timestampResolution = cassandraHost.getTimestampResolution();
+    clockResolution = cassandraHost.getClockResolution();
   }
 
   /**
@@ -61,15 +61,15 @@ import org.slf4j.LoggerFactory;
     this.cassandraHost = new CassandraHost(url,port);
     timeout = getTimeout(null);
     this.useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
-    timestampResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
+    clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   }
 
   public CassandraClient create() throws HectorException {
     CassandraClient c;
     try {
       c = new CassandraClientImpl(createThriftClient(cassandraHost),
-          new KeyspaceFactory(clientMonitor), cassandraHost, pool, 
-          pool.getCluster(), timestampResolution);
+          new KeyspaceServiceFactory(clientMonitor), cassandraHost, pool,
+          pool.getCluster(), clockResolution);
     } catch (Exception e) {
       throw new HectorException(e);
     }

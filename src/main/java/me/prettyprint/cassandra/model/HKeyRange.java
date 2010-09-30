@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.KeyRange;
 
@@ -13,18 +14,26 @@ import org.apache.cassandra.thrift.KeyRange;
  * @author Ran Tavory
  *
  */
-/*package*/ final class HKeyRange {
+public final class HKeyRange<K> {
 
-  private String start, end;
+  private K startKey;
+  private K endKey;
+
   private int rowCount = 100;
 
-  public HKeyRange setKeys(String start, String end) {
-    this.start = start;
-    this.end = end;
-    return this;
+  private final Serializer<K> keySerializer;
+
+  public HKeyRange(Serializer<K> keySerializer) {
+    Assert.notNull(keySerializer, "keySerializer is null");
+    this.keySerializer = keySerializer;
   }
 
-  public HKeyRange setRowCount(int rowCount) {
+  public HKeyRange<K> setKeys(K start, K end) {
+    this.startKey = start;
+    this.endKey = end;
+    return this;
+  }
+  public HKeyRange<K> setRowCount(int rowCount) {
     this.rowCount = rowCount;
     return this;
   }
@@ -34,17 +43,17 @@ import org.apache.cassandra.thrift.KeyRange;
    * @return The thrift representation of this object
    */
   public KeyRange toThrift() {
-    Assert.notNull(start, "start can't be null");
-    Assert.notNull(end, "end can't be null");
+    Assert.notNull(startKey, "start can't be null");
+    Assert.notNull(endKey, "end can't be null");
 
     KeyRange keyRange = new KeyRange(rowCount);
-    keyRange.setStart_key(start);
-    keyRange.setEnd_key(end);
+    keyRange.setStart_key(keySerializer.toBytes(startKey));
+    keyRange.setEnd_key(keySerializer.toBytes(endKey));
     return keyRange;
   }
 
   @Override
   public String toString() {
-    return "HKeyRange(start:" + start + ",end:" + end + "," + ")";
+    return "HKeyRange(start:" + startKey + ",end:" + endKey + "," + ")";
   }
 }

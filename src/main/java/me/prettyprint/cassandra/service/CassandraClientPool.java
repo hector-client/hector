@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Set;
 
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
@@ -128,7 +129,7 @@ public interface CassandraClientPool {
    * Returns the client associated with this keyspace to the connection pool.
    * This is just short for releaseClient(k.getClient());
    */
-  void releaseKeyspace(Keyspace k) throws HectorException;
+  void releaseKeyspace(KeyspaceService k) throws HectorException;
 
   /**
    * Tells all the clients in the pool to update their list of known hosts.
@@ -180,4 +181,6 @@ public interface CassandraClientPool {
    * @return
    */
   Cluster getCluster();
+  
+  void initializeDownHostRetryService();
 }

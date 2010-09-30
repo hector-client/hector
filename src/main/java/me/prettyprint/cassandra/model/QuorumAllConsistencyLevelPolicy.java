@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+
 import org.apache.cassandra.thrift.ConsistencyLevel;
 
 /**
@@ -11,12 +13,10 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
  */
 public final class QuorumAllConsistencyLevelPolicy implements ConsistencyLevelPolicy {
 
-  @Override
   public ConsistencyLevel get(OperationType op) {
     return ConsistencyLevel.QUORUM;
   }
 
-  @Override
   public ConsistencyLevel get(OperationType op, String cfName) {
     return ConsistencyLevel.QUORUM;
   }
