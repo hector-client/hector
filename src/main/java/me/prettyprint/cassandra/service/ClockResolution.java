@@ -10,12 +10,22 @@ package me.prettyprint.cassandra.service;
  */
 public enum ClockResolution {
   SECONDS, MILLISECONDS, MICROSECONDS;
-  
+  /**
+   * The last time value issued. Used to try to prevent duplicates.
+   */
+  private static long lastTime = Long.MIN_VALUE;
+
   public long createClock() {
     long current = System.currentTimeMillis();
     switch(this) {
     case MICROSECONDS:
-      return current * 1000;
+      long us = current * 1000;
+      if (us > lastTime) {
+        lastTime = us;
+      } else {
+        us = ++lastTime;
+      }
+      return us;
     case MILLISECONDS:
       return current;
     case SECONDS:
