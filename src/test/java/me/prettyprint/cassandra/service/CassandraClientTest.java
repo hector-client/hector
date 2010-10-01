@@ -9,6 +9,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
@@ -32,8 +33,9 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
-    client = new CassandraClientFactory(pools,
-        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
+    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+    Cluster cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
+    client = cassandraCluster.borrowClient();
   }
 
   @Test
@@ -72,14 +74,7 @@ public class CassandraClientTest extends BaseEmbededServerSetupTest {
     assertEquals(FailoverPolicy.FAIL_FAST, k.getFailoverPolicy());
   }
 
-  @Test
-  public void testGetKeyspaces() throws HectorException {
-    List<KsDef> spaces = client.getKeyspaces();
-    assertNotNull(spaces);
-    // There should be two spaces: Keyspace1 and system
-    assertEquals(2, spaces.size());
-    assertTrue("Keyspace1".equals(spaces.get(0).getName()) || "Keyspace1".equals(spaces.get(1).getName()));
-  }
+
 
   @Test
   public void testGetClusterName() throws HectorException {

@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.List;
 
+import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
@@ -88,11 +89,6 @@ public interface CassandraClient {
       FailoverPolicy failoverPolicy)
       throws HectorException;
 
-
-  /**
-   * @return all keyspaces name of this client.
-   */
-  List<KsDef> getKeyspaces() throws HectorTransportException;
 
 
   /**
