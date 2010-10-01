@@ -171,10 +171,6 @@ public interface KeyspaceService {
 
   void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException;
 
-  /**
-   * get a description of the specified keyspace
-   */
-  KsDef describeKeyspace() throws HectorException;
 
   /**
    * Counts the columns present in columnParent.
