@@ -290,6 +290,6 @@ keyspaces:
           
         - name: Indexed1
           column_metadata:
-            - name: birthdate
+            - name: birthyear
               validator_class: LongType
               index_type: KEYS          
