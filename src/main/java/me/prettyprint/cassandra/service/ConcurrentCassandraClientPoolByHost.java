@@ -28,9 +28,10 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
   private final CassandraClientPool cassandraClientPool;
   private final CassandraHost cassandraHost;
   private final CassandraClientMonitor monitor;
-  private final AtomicInteger numActive;
+  private final AtomicInteger numActive, numBlocked;
   private final AtomicBoolean active;
   private final CassandraClientFactory cassandraClientFactory;
+  private final long maxWaitTimeWhenExhausted;
   
   public ConcurrentCassandraClientPoolByHost(CassandraHost host,
       CassandraClientPool cassandraClientPool,
@@ -40,21 +41,33 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
     this.monitor = monitor;
     clientQueue = new ArrayBlockingQueue<CassandraClient>(cassandraHost.getMaxActive(), true);
     numActive = new AtomicInteger();
+    numBlocked = new AtomicInteger();
     active = new AtomicBoolean(true);
     cassandraClientFactory = new CassandraClientFactory(cassandraClientPool, cassandraHost, monitor);
-    for (int i = 0; i < cassandraHost.getMaxActive()/3; i++) {      
-      releaseClient(borrowClient());
+    maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted() < 0 ? 0 : cassandraHost.getMaxWaitTimeWhenExhausted();
+    
+    for (int i = 0; i < cassandraHost.getMaxActive()/3; i++) {
+      clientQueue.add(cassandraClientFactory.create());
     }
+    if ( log.isDebugEnabled() ) {
+      log.debug("Concurrent Host pool started with {} active clients; max: {} exhausted wait: {}", 
+          new Object[]{getNumIdle(), 
+          cassandraHost.getMaxActive(), 
+          maxWaitTimeWhenExhausted});
+    }    
   }
   
   @Override
   public CassandraClient borrowClient() throws HectorException {
     CassandraClient cassandraClient;
     try {
-      cassandraClient = clientQueue.poll(cassandraHost.getMaxWaitTimeWhenExhausted(), TimeUnit.MILLISECONDS);
+      numBlocked.incrementAndGet();
+      // blocked take on the queue if we are configured to wait forever
+      cassandraClient = maxWaitTimeWhenExhausted == 0 ? clientQueue.take() : clientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);      
       if ( cassandraClient == null ) {
         cassandraClient = cassandraClientFactory.create();
       }
+      numBlocked.decrementAndGet();
       cassandraClient.markAsBorrowed();
       numActive.incrementAndGet();
     } catch (InterruptedException ie) {
@@ -64,6 +77,9 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
           Thread.currentThread().getName(), 
           cassandraHost.getName()}
       ));      
+    }
+    if ( log.isDebugEnabled() ) {
+      log.debug("borrowed client {} from pool", cassandraClient);
     }
     return cassandraClient;
   }
@@ -80,14 +96,14 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
 
   @Override
   public Set<CassandraClient> getLiveClients() {
-    // TODO Auto-generated method stub
+    // TODO this is not germaine. NO ONE should have direct visibility into 
+    // *any* of the clients - this has caused us all sorts of issues
     return null;
   }
 
   @Override
   public String getName() {
-    // TODO Auto-generated method stub
-    return null;
+    return String.format("<ConcurrentCassandraClientPoolByHost>:{}", cassandraHost.getName());
   }
 
   @Override
@@ -97,13 +113,12 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
 
   @Override
   public int getNumBeforeExhausted() {
-    return cassandraHost.getMaxActive() - (numActive.get() + clientQueue.size());
+    return cassandraHost.getMaxActive() - numActive.get();
   }
 
   @Override
-  public int getNumBlockedThreads() {
-    // TODO Auto-generated method stub
-    return 0;
+  public int getNumBlockedThreads() {    
+    return numBlocked.get();
   }
 
   @Override
@@ -113,7 +128,7 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
 
   /**
    * This invalidateAll invocation is potentially time consuming as we will
-   * block for 5 seconds for additional CassandraClients to be returned 
+   * block for 500 mseconds for additional CassandraClients to be returned 
    * for cleanup. Ideally, the API can be modified to return a Future so 
    * we can shut things down correctly regardless of how long they take
    */
@@ -124,7 +139,7 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
       clientQueue.drainTo(clients);
       while ( numActive.get() > 0 ) {
         try {
-          clients.add(clientQueue.poll(5, TimeUnit.SECONDS));
+          clients.add(clientQueue.poll(500, TimeUnit.MILLISECONDS));
         } catch (InterruptedException ie) {
           log.error("Wait time exceeded while invalidating all clients");
           break;
@@ -139,7 +154,7 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
   @Override
   public void invalidateClient(CassandraClient client) {
     boolean removed = clientQueue.remove(client);    
-    log.info("Client {} was invalidated", client.toString());    
+    log.info("Client {} was invalidated? {}", client.toString(), removed);    
   }
 
   @Override
@@ -151,6 +166,9 @@ public class ConcurrentCassandraClientPoolByHost implements CassandraClientPoolB
   public void releaseClient(CassandraClient client) throws HectorException {
     numActive.decrementAndGet();
     if ( !client.hasErrors() && !client.isClosed() ) {
+      if ( log.isDebugEnabled() ) {
+        log.debug("adding released client {} to queue", client.toString());
+      }
       client.markAsReleased();
       clientQueue.add(client);  
     }
