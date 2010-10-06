@@ -30,16 +30,16 @@ import org.apache.cassandra.thrift.SuperColumn;
  * @param <V>
  */
 public final class ThriftSuperSliceQuery<SN, N, V> extends
-    AbstractSliceQuery<N, V, SuperSlice<SN, N, V>> implements SuperSliceQuery<SN, N, V> {
+    AbstractSliceQuery<SN, V, SuperSlice<SN, N, V>> implements SuperSliceQuery<SN, N, V> {
 
   private String key;
-  private final Serializer<SN> sNameSerializer;
+  private final Serializer<N> nameSerializer;
 
   public ThriftSuperSliceQuery(Keyspace ko, Serializer<SN> sNameSerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-    super(ko, nameSerializer, valueSerializer);
-    Assert.notNull(sNameSerializer, "sNameSerializer cannot be null");
-    this.sNameSerializer = sNameSerializer;
+    super(ko, sNameSerializer, valueSerializer);
+    Assert.notNull(nameSerializer, "nameSerializer cannot be null");
+    this.nameSerializer = nameSerializer;
   }
 
   @Override
@@ -56,7 +56,7 @@ public final class ThriftSuperSliceQuery<SN, N, V> extends
           public SuperSlice<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             List<SuperColumn> thriftRet = ks.getSuperSlice(key, columnParent, getPredicate());
-            return new SuperSliceImpl<SN,N,V>(thriftRet, sNameSerializer, columnNameSerializer, valueSerializer);
+            return new SuperSliceImpl<SN,N,V>(thriftRet, columnNameSerializer, nameSerializer, valueSerializer);
           }
         }), this);
   }
@@ -68,13 +68,13 @@ public final class ThriftSuperSliceQuery<SN, N, V> extends
 
   @SuppressWarnings("unchecked")
   @Override
-    public SuperSliceQuery<SN, N, V> setColumnNames(N... columnNames) {
+    public SuperSliceQuery<SN, N, V> setColumnNames(SN... columnNames) {
       return (SuperSliceQuery<SN, N, V>) super.setColumnNames(columnNames);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public SuperSliceQuery<SN, N, V> setRange(N start, N finish, boolean reversed, int count) {
+    public SuperSliceQuery<SN, N, V> setRange(SN start, SN finish, boolean reversed, int count) {
       return (SuperSliceQuery<SN, N, V>) super.setRange(start, finish, reversed, count);
     }
 
