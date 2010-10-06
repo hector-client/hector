@@ -8,6 +8,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -20,8 +21,6 @@ import org.apache.cassandra.thrift.SliceRange;
  */
 public final class HSlicePredicate<N> {
 
-  /** Use column names or start/finish? */
-  protected boolean useColumnNames;
   protected Collection<N> columnNames;
   protected N start;
   protected N finish;
@@ -30,6 +29,8 @@ public final class HSlicePredicate<N> {
   /** Is count already set? */
   private boolean countSet = false;
   protected final Serializer<N> columnNameSerializer;
+  protected enum PredicateType {Unknown, ColumnNames, Range};
+  protected PredicateType predicateType = PredicateType.Unknown;
 
   public HSlicePredicate(Serializer<N> columnNameSerializer) {
     Assert.notNull(columnNameSerializer, "columnNameSerializer can't be null");
@@ -44,7 +45,7 @@ public final class HSlicePredicate<N> {
    */
   public HSlicePredicate<N> setColumnNames(N... columnNames) {
     this.columnNames = Arrays.asList(columnNames);
-    useColumnNames = true;
+    predicateType = PredicateType.ColumnNames;
     return this;
   }
 
@@ -55,7 +56,7 @@ public final class HSlicePredicate<N> {
    */
   public HSlicePredicate<N> setKeysOnlyPredicate() {
     this.columnNames = new ArrayList<N>();
-    useColumnNames = true;
+    predicateType = PredicateType.ColumnNames;
     return this;
   }
 
@@ -77,7 +78,7 @@ public final class HSlicePredicate<N> {
     this.reversed = reversed;
     this.count = count;
     countSet = true;
-    useColumnNames = false;
+    predicateType = PredicateType.Range;
     return this;
   }
 
@@ -91,15 +92,23 @@ public final class HSlicePredicate<N> {
    */
   public SlicePredicate toThrift() {
     SlicePredicate pred = new SlicePredicate();
-    if (useColumnNames) {
-      if (columnNames == null) {
+
+    switch (predicateType) {
+    case ColumnNames:
+      if (columnNames == null || columnNames.isEmpty()) {
         return null;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
-    } else {
+      break;
+    case Range:
       Assert.isTrue(countSet, "Count was not set, neither were column-names set, can't execute");
-      pred.setSlice_range(new SliceRange(findBytes(start),findBytes(finish),
-          reversed, count));
+      SliceRange range = new SliceRange(findBytes(start), findBytes(finish), reversed, count);
+      pred.setSlice_range(range);
+      break;
+    case Unknown:
+    default:
+      throw new HectorException(
+          "Neither column names nor range were set, this is an invalid slice predicate");
     }
     return pred;
   }
@@ -125,6 +134,7 @@ public final class HSlicePredicate<N> {
   @Override
   public String toString() {
     return "HSlicePredicate("
-        + (useColumnNames ? columnNames : "cStart:" + start + ",cFinish:" + finish) + ")";
+        + (predicateType == PredicateType.ColumnNames ? columnNames :
+          "cStart:" + start + ",cFinish:" + finish) + ")";
   }
 }
