@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
   private CassandraHostConfigurator cassandraHostConfigurator;
   private final Cluster cluster;
   private DownCassandraHostRetryService downCassandraHostRetryService;
+  private PoolType poolType = PoolType.COMMONS;
+  
 
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor) {
     log.info("Creating a CassandraClientPool");
@@ -61,7 +63,8 @@ import org.slf4j.LoggerFactory;
   public CassandraClientPoolImpl(CassandraClientMonitor clientMonitor,
       CassandraHostConfigurator cassandraHostConfigurator) {
     this(clientMonitor, cassandraHostConfigurator.buildCassandraHosts());
-    this.cassandraHostConfigurator = cassandraHostConfigurator;
+    this.poolType = cassandraHostConfigurator.getPoolType();
+    this.cassandraHostConfigurator = cassandraHostConfigurator;    
   }
 
 
@@ -289,7 +292,11 @@ import org.slf4j.LoggerFactory;
     synchronized (pools) {
       CassandraClientPoolByHost pool = pools.get(cassandraHost);
       if (pool == null) {
-        pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
+        if ( poolType.equals(PoolType.COMMONS)) {
+          pool = new CassandraClientPoolByHostImpl(cassandraHost, this, clientMonitor);
+        } else {
+          pool = new ConcurrentCassandraClientPoolByHost(cassandraHost, this, clientMonitor);
+        }
         pools.put(cassandraHost, pool);
         if ( log.isDebugEnabled() ) {
           log.debug("GenerigObjectPool created: {} {}", pool, pool.hashCode());
@@ -316,6 +323,5 @@ import org.slf4j.LoggerFactory;
       log.error("Could not initialize DownedHostRetryService MBean", e);
     }
   }
-  
   
 }
