@@ -27,6 +27,8 @@ public final class HSlicePredicate<N> {
   protected N finish;
   protected boolean reversed;
   protected int count;
+  /** Is count already set? */
+  private boolean countSet = false;
   protected final Serializer<N> columnNameSerializer;
 
   public HSlicePredicate(Serializer<N> columnNameSerializer) {
@@ -74,6 +76,7 @@ public final class HSlicePredicate<N> {
     this.finish = finish;
     this.reversed = reversed;
     this.count = count;
+    countSet = true;
     useColumnNames = false;
     return this;
   }
@@ -82,6 +85,10 @@ public final class HSlicePredicate<N> {
     return Collections.unmodifiableCollection(columnNames);
   }
 
+  /**
+   * Will throw a runtime exception if neither columnsNames nor count were set.
+   * @return
+   */
   public SlicePredicate toThrift() {
     SlicePredicate pred = new SlicePredicate();
     if (useColumnNames) {
@@ -90,6 +97,7 @@ public final class HSlicePredicate<N> {
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
     } else {
+      Assert.isTrue(countSet, "Count was not set, neither were column-names set, can't execute");
       pred.setSlice_range(new SliceRange(findBytes(start),findBytes(finish),
           reversed, count));
     }
