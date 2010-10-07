@@ -8,7 +8,10 @@ Changes by version:
 0.7.0-19
 ========
 Fix issue 74 with fix suggested by Patricio Echague
-Release sync with Apache Cassandra 0.7.0-beta2
+
+
+0.7.0-17
+========
 Add CountQuery, SuperCountQuery and SubCountQuery
 Move all the API stuff to me.prettyprint.hector.api.*. Extract interfaces and prepare the ground for more avro good.
  - Move all the queries and extract their interfaces
