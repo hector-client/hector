@@ -78,6 +78,23 @@ import org.slf4j.LoggerFactory;
     }
     return c;
   }
+  
+  public CassandraClient tearDown(CassandraClient cassandraClient) throws HectorException {
+    Cassandra.Client client = cassandraClient.getCassandra();
+    if ( client != null ) {
+      if ( client.getInputProtocol() != null ) {
+        if ( client.getInputProtocol().getTransport() != null ) {
+          try {
+            client.getInputProtocol().getTransport().flush();
+            client.getInputProtocol().getTransport().close();
+          } catch (Exception e) {
+            log.error("Could not close transport in tearDown", e);
+          }
+        }
+      }
+    }
+    return cassandraClient;
+  }
 
   private Cassandra.Client createThriftClient(CassandraHost cassandraHost)
       throws HectorTransportException {
