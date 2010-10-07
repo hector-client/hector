@@ -18,6 +18,7 @@ public final class CassandraHostConfigurator {
   private boolean retryDownedHosts = false;
   private int retryDownedHostsQueueSize = DownCassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = DownCassandraHostRetryService.DEF_RETRY_DELAY;
+  private PoolType poolType = PoolType.COMMONS;
   
 
   public CassandraHostConfigurator() {
@@ -180,4 +181,14 @@ public final class CassandraHostConfigurator {
   public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
     this.useThriftFramedTransport = useThriftFramedTransport;
   }
+
+  public PoolType getPoolType() {
+    return poolType;
+  }
+
+  public void setPoolType(PoolType poolType) {
+    this.poolType = poolType;
+  }
+  
+  
 }
