@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -108,15 +109,14 @@ import org.slf4j.LoggerFactory;
     String keyspaceMapKey = buildKeyspaceMapName(keyspaceName, consistencyLevel, failoverPolicy);
     KeyspaceServiceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
-      try {
-        KsDef keyspaceDesc = cassandra.describe_keyspace(keyspaceName);
-        keyspace = (KeyspaceServiceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
-            consistencyLevel, failoverPolicy, cassandraClientPool);
-      } catch (TException e) {
-        throw new HectorTransportException(e);
-      } catch (org.apache.cassandra.thrift.NotFoundException e) {
-        throw new HNotFoundException(e);
+
+      HKsDef keyspaceDesc = cluster.describeKeyspace(keyspaceName);
+      if ( keyspaceDesc == null ) {
+        throw new HNotFoundException("That keyspace is not defined on the cluster: " + keyspaceName);
       }
+      keyspace = (KeyspaceServiceImpl) keyspaceFactory.create(this, keyspaceName, keyspaceDesc,
+          consistencyLevel, failoverPolicy, cassandraClientPool);
+
       KeyspaceServiceImpl tmp = keyspaceMap.putIfAbsent(keyspaceMapKey , keyspace);
       if (tmp != null) {
         // There was another put that got here before we did.
@@ -124,28 +124,6 @@ import org.slf4j.LoggerFactory;
       }
     }
     return keyspace;
-  }
-
-
-  @Override
-  public List<KsDef> getKeyspaces() throws HectorTransportException {
-    List<KsDef> keyspaces = null;
-    try {
-      keyspaces = new ArrayList<KsDef>(cassandra.describe_keyspaces());
-    } catch (TException e) {
-      throw new HectorTransportException(e);
-    }
-    return keyspaces;
-  }
-
-  public boolean keyspaceExists(String keyspace) {
-    List<KsDef> ksDefs = getKeyspaces();
-    for (KsDef ksDef : ksDefs) {
-      if (ksDef.getName().equals(keyspace)) {
-        return true;
-      }
-    }
-    return false;
   }
 
 

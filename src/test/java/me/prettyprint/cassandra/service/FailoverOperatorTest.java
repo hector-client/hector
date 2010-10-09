@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.ddl.HCfDef;
+import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
@@ -36,8 +38,8 @@ import org.mockito.Matchers;
 
 public class FailoverOperatorTest {
 
-  private final KsDef keyspaceDesc = new KsDef();
-  private final CfDef keyspace1Desc = new CfDef();
+  private final HKsDef keyspaceDesc = mock(HKsDef.class);
+  private final HCfDef keyspace1Desc = mock(HCfDef.class);
 
   private final CassandraClient h1client = mock(CassandraClient.class);
   private final CassandraClient h2client = mock(CassandraClient.class);
@@ -65,11 +67,11 @@ public class FailoverOperatorTest {
     clientHosts.put(h2cassandra, hosts.get(1));
     clientHosts.put(h3cassandra, hosts.get(2));
 
-    keyspace1Desc.setKeyspace(keyspaceName);
-    keyspace1Desc.setName("Standard1");
-    keyspace1Desc.setColumn_type(KeyspaceService.CF_TYPE_STANDARD);
-    keyspaceDesc.addToCf_defs(keyspace1Desc);
-
+    when(keyspace1Desc.getKeyspace()).thenReturn(keyspaceName);
+    when(keyspace1Desc.getName()).thenReturn("Standard1");
+    when(keyspace1Desc.getColumnType()).thenReturn(KeyspaceService.CF_TYPE_STANDARD);
+    when(keyspaceDesc.getCfDefs()).thenReturn(Arrays.asList(keyspace1Desc));
+    
 
     cp.setColumn(bytes("testFailover"));
 

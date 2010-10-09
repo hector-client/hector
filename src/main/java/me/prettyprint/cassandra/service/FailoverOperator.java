@@ -330,8 +330,8 @@ import org.slf4j.LoggerFactory;
    * @return
    */
   private CassandraHost chooseRandomHost(List<CassandraHost> knownHosts) {
-    long rnd = Math.round(Math.random() * knownHosts.size());
-    CassandraHost host = knownHosts.get((int) rnd);
+    int rnd = (int) (Math.random() * knownHosts.size());
+    CassandraHost host = knownHosts.get(rnd);
     if ( log.isInfoEnabled() ) {
       log.info("Choosing random host to skip to: {}", host);
     }

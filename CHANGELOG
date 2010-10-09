@@ -5,6 +5,11 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.7.0-19
+========
+Fix issue 74 with fix suggested by Patricio Echague
+
+
 0.7.0-17
 ========
 Add CountQuery, SuperCountQuery and SubCountQuery

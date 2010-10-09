@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.ddl.HCfDef;
+import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -46,7 +48,7 @@ import org.slf4j.LoggerFactory;
 
   private final String keyspaceName;
 
-  private final KsDef keyspaceDesc;
+  private final HKsDef keyspaceDesc;
 
   private final ConsistencyLevel consistency;
 
@@ -59,7 +61,7 @@ import org.slf4j.LoggerFactory;
   private final ExceptionsTranslator xtrans;
 
   public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
-      KsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
+      HKsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws HectorTransportException {
     this.client = client;
@@ -566,12 +568,6 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public KsDef describeKeyspace() throws HectorException {
-    return keyspaceDesc;
-  }
-
-
-  @Override
   public CassandraClient getClient() {
     return client;
   }
@@ -622,10 +618,10 @@ import org.slf4j.LoggerFactory;
     return client.getClockResolution().createClock();
   }
 
-  private CfDef getCfDef(String cf) {
-      List<CfDef> cfDefs = keyspaceDesc.getCf_defs();
+  private HCfDef getCfDef(String cf) {
+      List<HCfDef> cfDefs = keyspaceDesc.getCfDefs();
       if (cfDefs != null) {
-          for (CfDef cfDef: cfDefs) {
+          for (HCfDef cfDef: cfDefs) {
               if (cf.equals(cfDef.getName())) {
                   return cfDef;
               }
@@ -674,8 +670,8 @@ import org.slf4j.LoggerFactory;
    */
   private void valideSuperColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
     String cf = columnPath.getColumn_family();
-    CfDef cfdefine;
-    if ((cfdefine = getCfDef(cf)) != null && cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
+    HCfDef cfdefine;
+    if ((cfdefine = getCfDef(cf)) != null && cfdefine.getColumnType().equals(CF_TYPE_SUPER)
         && columnPath.getSuper_column() != null) {
       return;
     }
