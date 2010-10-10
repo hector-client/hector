@@ -275,7 +275,6 @@
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
       <version>1.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
