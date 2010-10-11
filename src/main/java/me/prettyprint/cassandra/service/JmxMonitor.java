@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.service;
 
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.URL;
 
 import javax.management.InstanceAlreadyExistsException;
@@ -10,7 +12,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
-import org.apache.log4j.xml.DOMConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,9 +83,25 @@ import org.slf4j.LoggerFactory;
   private void registerPerf4J() {
     URL url = getClass().getClassLoader().getResource("hectorLog4j.xml");
     if (url == null) {
-      log.error("Unable to locate hectorLog4j.xml; performance counters will not be exported");
+      log.warn("Unable to locate hectorLog4j.xml; performance counters will not be exported");
     } else {
-      DOMConfigurator.configure(url);
+      try {
+        final Class<?> domConfiguratorClass = getClass().getClassLoader().loadClass("org.apache.log4j.xml.DOMConfigurator");
+        final Method method = domConfiguratorClass.getMethod( "configure", URL.class );
+        method.invoke( null, url );
+      } catch( ClassNotFoundException e ) {
+        log.warn("Unable to load log4j's DOMConfigurator. Performance counters will not be exported. To fix, include the log4j jar in your application's classpath.");
+      } catch( SecurityException e ) {
+        log.error( "Could not access method DOMConfigurator.configure(URL)", e );
+      } catch( NoSuchMethodException e ) {
+        log.error( "Could not find method DOMConfigurator.configure(URL)", e );
+      } catch( IllegalArgumentException e ) {
+        log.error( "Could not invoke method DOMConfigurator.configure(URL)", e );
+      } catch( IllegalAccessException e ) {
+        log.error( "Could not invoke method DOMConfigurator.configure(URL)", e );
+      } catch( InvocationTargetException e ) {
+        throw (RuntimeException) e.getCause();
+      }
     }
   }
 
