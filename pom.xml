@@ -17,6 +17,7 @@
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
+    <slf4j.version>1.5.11</slf4j.version>
   </properties>
 
   <issueManagement>
@@ -260,22 +261,26 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.5.8</version>
+      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.8</version>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>1.5.8</version>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.14</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>            
     <dependency>
       <groupId>org.perf4j</groupId>
