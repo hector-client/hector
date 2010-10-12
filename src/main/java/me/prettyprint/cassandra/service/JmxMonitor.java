@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-/*package*/ enum JmxMonitor {
+public enum JmxMonitor {
 
   INSTANCE;
 

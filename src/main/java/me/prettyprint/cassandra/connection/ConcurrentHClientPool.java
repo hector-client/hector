@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.ConcurrentCassandraClientPoolByHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -52,6 +50,9 @@ public class ConcurrentHClientPool {
   
 
   public HThriftClient borrowClient() throws HectorException {
+    if ( !active.get() ) {
+      throw new HectorException("Attempt to borrow on in-active pool: " + getName());
+    }
     HThriftClient cassandraClient;
     try {
       numBlocked.incrementAndGet();
@@ -80,7 +81,18 @@ public class ConcurrentHClientPool {
     return cassandraClient;
   }
 
-
+  void shutdown() {
+    if (!active.compareAndSet(true, false) ) {
+      throw new IllegalArgumentException("shutdown() called for inactive pool: " + getName());
+    }
+    log.error("Shutdown triggered on {}", getName());
+    Set<HThriftClient> clients = new HashSet<HThriftClient>();
+    clientQueue.drainTo(clients);
+    for (HThriftClient hThriftClient : clients) {
+      hThriftClient.close();
+    }
+    log.error("Shutdown complete on {}", getName());
+  }
 
   public CassandraHost getCassandraHost() {   
     return cassandraHost;
@@ -115,6 +127,10 @@ public class ConcurrentHClientPool {
     return getNumBeforeExhausted() == 0;
   }
 
+  public String getStatusAsString() {
+    return String.format("%s; Active: %d; Blocked: %d; Idle: %d; NumBeforeExhausted: %d", 
+        getName(), getNumActive(), getNumBlockedThreads(), getNumIdle(), getNumBeforeExhausted());
+  }
 
   public void releaseClient(HThriftClient client) throws HectorException {
     numActive.decrementAndGet();
@@ -126,6 +142,9 @@ public class ConcurrentHClientPool {
       log.debug("Status of releaseClient {} to queue: {}", client.toString(), open);
     }
   }
+
+
+
 
 
 }

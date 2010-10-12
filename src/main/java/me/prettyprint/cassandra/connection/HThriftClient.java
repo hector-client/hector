@@ -23,7 +23,7 @@ public class HThriftClient {
   
   private static final AtomicLong serial = new AtomicLong(0);
   
-  private final CassandraHost cassandraHost;    
+  final CassandraHost cassandraHost;    
 
   private final long mySerial;
   private final int timeout;

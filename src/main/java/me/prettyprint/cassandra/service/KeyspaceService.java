@@ -3,7 +3,6 @@ package me.prettyprint.cassandra.service;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 

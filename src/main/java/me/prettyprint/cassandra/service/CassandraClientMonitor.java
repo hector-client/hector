@@ -13,7 +13,7 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*package*/ class CassandraClientMonitor implements CassandraClientMonitorMBean {
+public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
   private final Map<Counter, AtomicLong> counters;

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -26,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/*package*/ class FailoverOperator {
+public class FailoverOperator {
 
   private static final Logger log = LoggerFactory.getLogger(FailoverOperator.class);
 
@@ -340,83 +339,6 @@ import org.slf4j.LoggerFactory;
 
 }
 
-/**
- * Defines the interface of an operation performed on cassandra
- *
- * @param <T>
- *          The result type of the operation (if it has a result), such as the
- *          result of get_count or get_column
- *
- *          Oh closures, how I wish you were here...
- */
-/*package*/ abstract class Operation<T> {
-
-  /** Counts failed attempts */
-  protected final Counter failCounter;
-
-  /** The stopwatch used to measure operation performance */
-  protected final String stopWatchTagName;
-
-  protected T result;
-  private HectorException exception;
-
-  public Operation(OperationType operationType) {
-    this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
-      Counter.WRITE_FAIL;
-    this.stopWatchTagName = operationType.name();
-  }
-
-  public void setResult(T executionResult) {
-    result = executionResult;
-  }
-
-  /**
-   *
-   * @return The result of the operation, if this is an operation that has a
-   *         result (such as getColumn etc.
-   */
-  public T getResult() {
-    return result;
-  }
-
-  /**
-   * Performs the operation on the given cassandra instance.
-   */
-  public abstract T execute(Cassandra.Client cassandra) throws HectorException;
-
-  public void executeAndSetResult(Cassandra.Client cassandra) throws HectorException {
-    setResult(execute(cassandra));
-  }
-
-  public void setException(HectorException e) {
-    exception = e;
-  }
-
-  public boolean hasException() {
-    return exception != null;
-  }
-
-  public HectorException getException() {
-    return exception;
-  }
-}
-
-/**
- * Specifies the "type" of operation - read or write.
- * It's used for perf4j, so should be in sync with hectorLog4j.xml
- * @author Ran Tavory (ran@outbain.com)
- * 
- */
-/*package*/ enum OperationType {
-  /** Read operations*/
-  READ,
-  /** Write operations */
-  WRITE,
-  /** Meta read operations, such as describe*() */
-  META_READ,
-  /** Operation on one of the system_ methods */
-  META_WRITE;
-}
 
 
 /**
