@@ -20,11 +20,14 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
         return 0;
       }            
     });
-    ConcurrentHClientPool concurrentHClientPool = null;
-    for (Iterator iterator = vals.iterator(); iterator.hasNext();) {
-      concurrentHClientPool = (ConcurrentHClientPool) iterator.next();
-      if ( !excludeHosts.contains(concurrentHClientPool.getCassandraHost()) ) {
-        break;
+    Iterator<ConcurrentHClientPool> iterator = vals.iterator();
+    ConcurrentHClientPool concurrentHClientPool = iterator.next();
+    if ( excludeHosts != null && excludeHosts.size() > 0 ) {          
+      while (iterator.hasNext()) {
+        concurrentHClientPool = (ConcurrentHClientPool) iterator.next();
+        if ( !excludeHosts.contains(concurrentHClientPool.getCassandraHost()) ) {
+          break;
+        }
       }
     }
     return concurrentHClientPool;
