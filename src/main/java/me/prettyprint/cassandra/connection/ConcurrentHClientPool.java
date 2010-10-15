@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.ConcurrentCassandraClientPoolByHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.slf4j.Logger;
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class ConcurrentHClientPool {
   
-  private static final Logger log = LoggerFactory.getLogger(ConcurrentCassandraClientPoolByHost.class);
+  private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
   private final ArrayBlockingQueue<HThriftClient> clientQueue;
 

@@ -10,6 +10,8 @@ import javax.management.MalformedObjectNameException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
 
+import me.prettyprint.cassandra.connection.HConnectionManager;
+
 import org.apache.log4j.xml.DOMConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,17 +22,16 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-public enum JmxMonitor {
-
-  INSTANCE;
+public class JmxMonitor {
 
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   private MBeanServer mbs;
   private CassandraClientMonitor cassandraClientMonitor;
+  private static JmxMonitor monitorInstance;
 
-  private JmxMonitor() {
-    CassandraClientMonitor cassandraClientMonitor = new CassandraClientMonitor();
+  private JmxMonitor(HConnectionManager connectionManager) {
+    CassandraClientMonitor cassandraClientMonitor = new CassandraClientMonitor(connectionManager);
     mbs = ManagementFactory.getPlatformMBeanServer();
     this.cassandraClientMonitor = cassandraClientMonitor;
     try {
@@ -47,14 +48,15 @@ public enum JmxMonitor {
     }
   }
 
-  public static JmxMonitor getInstance() {
-    return INSTANCE;
+  public static JmxMonitor getInstance(HConnectionManager connectionManager) {
+    if ( monitorInstance == null ) {
+      monitorInstance = new JmxMonitor(connectionManager);
+    }
+    return monitorInstance;
   }
 
-  public void addPool(CassandraClientPool pool) {
-    cassandraClientMonitor.addPool(pool);
-  }
-
+  // TOOD addPool? addConnectionManager?
+  
   public void registerMonitor(String name, String monitorType, Object monitoringInterface)
       throws MalformedObjectNameException, InstanceAlreadyExistsException,
       MBeanRegistrationException, NotCompliantMBeanException {

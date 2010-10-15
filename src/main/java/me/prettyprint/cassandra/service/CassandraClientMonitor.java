@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import me.prettyprint.cassandra.connection.ConcurrentHClientPool;
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.slf4j.Logger;
@@ -18,7 +20,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   private static final Logger log = LoggerFactory.getLogger(CassandraClientMonitor.class);
   private final Map<Counter, AtomicLong> counters;
 
-  private final Set<CassandraClientPool> pools;
+  private final HConnectionManager connectionManager;
 
   /**
    * List of available JMX counts
@@ -39,9 +41,8 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     CONNECT_ERROR,
   }
 
-  public CassandraClientMonitor() {
-    // Use a high concurrency map.
-    pools = Collections.newSetFromMap(new ConcurrentHashMap<CassandraClientPool,Boolean>());
+  public CassandraClientMonitor(HConnectionManager connectionManager) {
+    this.connectionManager = connectionManager;
     counters = new HashMap<Counter, AtomicLong>();
     for (Counter counter: Counter.values()) {
       counters.put(counter, new AtomicLong(0));
@@ -88,9 +89,12 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   public void updateKnownHosts() throws HectorTransportException {
    log.info("Updating all known cassandra hosts on all clients");
-   for (CassandraClientPool pool: pools) {
+   /*
+    TODO is this a noop given retry service?
+   for (ConcurrentHClientPool pool: pools) {
      pool.updateKnownHosts();
    }
+   */
   }
 
 
@@ -101,72 +105,56 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   public Set<String> getExhaustedPoolNames() {
     Set<String> ret = new HashSet<String>();
-    for (CassandraClientPool pool: pools) {
-      ret.addAll(pool.getExhaustedPoolNames());
-    }
+    // TODO connectionManager...
     return ret;
   }
 
 
   public int getNumActive() {
     int ret = 0;
-    for (CassandraClientPool pool: pools) {
-      ret += pool.getNumActive();
-    }
+    // TODO connectionmanager....
     return ret;
   }
 
 
   public int getNumBlockedThreads() {
     int ret = 0;
-    for (CassandraClientPool pool: pools) {
-      ret += pool.getNumBlockedThreads();
-    }
+    // TODO connectionManager...
     return ret;
   }
 
 
   public int getNumExhaustedPools() {
     int ret = 0;
-    for (CassandraClientPool pool: pools) {
-      ret += pool.getNumExhaustedPools();
-    }
+    // TODO connectionManager...
     return ret;
   }
 
 
   public int getNumIdleConnections() {
     int ret = 0;
-    for (CassandraClientPool pool: pools) {
-      ret += pool.getNumIdle();
-    }
+    // TODO ?
     return ret;
   }
 
 
   public int getNumPools() {
     int ret = 0;
-    for (CassandraClientPool pool: pools) {
-      ret += pool.getNumPools();
-    }
+    // TODO connectionManager....
     return ret;
   }
 
 
   public Set<String> getPoolNames() {
     Set<String> ret = new HashSet<String>();
-    for (CassandraClientPool pool: pools) {
-      ret.addAll(pool.getPoolNames());
-    }
+    // TODO connectionManager...
     return ret;
   }
 
 
   public Set<CassandraHost> getKnownHosts() {
     Set<CassandraHost> ret = new HashSet<CassandraHost>();
-    for (CassandraClientPool pool: pools) {
-      ret.addAll(pool.getKnownHosts());
-    }
+    // TODO connectionManager...
     return ret;
   }
 
@@ -181,9 +169,11 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
         getRecoverableUnavailableCount() + getRecoverableLoadBalancedConnectErrors();
   }
 
+  /*
   public void addPool(CassandraClientPool pool) {
-    pools.add(pool);
+    // TODO no longer germain?
   }
+  */
 
 
   public long getRecoverableLoadBalancedConnectErrors() {

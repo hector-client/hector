@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.ddl.HCfDef;
 import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -38,38 +39,32 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/* package */class KeyspaceServiceImpl implements KeyspaceService {
+public class KeyspaceServiceImpl implements KeyspaceService {
 
   @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
 
-  private CassandraClient client;
-
   private final String keyspaceName;
 
-  private final HKsDef keyspaceDesc;
+  //private final HKsDef keyspaceDesc;
 
-  private final ConsistencyLevel consistency;
-
-  private final FailoverPolicy failoverPolicy;
-
-  private final CassandraClientPool clientPools;
-
-  private final CassandraClientMonitor monitor;
+  private final ConsistencyLevel consistency;  
 
   private final ExceptionsTranslator xtrans;
+  
+  private final HConnectionManager connectionManager;
+  
+  private CassandraHost cassandraHost;
+  
+  
 
-  public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
-      HKsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
+  public KeyspaceServiceImpl(String keyspaceName, 
+      ConsistencyLevel consistencyLevel,
+      HConnectionManager connectionManager)
       throws HectorTransportException {
-    this.client = client;
     this.consistency = consistencyLevel;
-    this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
-    this.failoverPolicy = failoverPolicy;
-    this.clientPools = clientPools;
-    this.monitor = monitor;
+    this.connectionManager = connectionManager;
     xtrans = new ExceptionsTranslatorImpl();
   }
 
@@ -117,11 +112,13 @@ import org.slf4j.LoggerFactory;
   }
 
   private void operateWithFailover(Operation<?> op) throws HectorException {
-    FailoverOperator operator = new FailoverOperator(failoverPolicy, monitor, client,
-        clientPools, this);
-    client = operator.operate(op);
+    this.cassandraHost = op.getCassandraHost();
+    connectionManager.operateWithFailover(op);
   }
 
+  public CassandraHost getCassandraHost() {
+    return this.cassandraHost;
+  }
 
 
   @Override
@@ -260,7 +257,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath,
       final boolean reversed, final int size) throws HectorException {
-    valideSuperColumnPath(columnPath);
+    //valideSuperColumnPath(columnPath);
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
     Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
 
@@ -347,7 +344,7 @@ import org.slf4j.LoggerFactory;
       if (columnPath.isSetSuper_column()) {
         columnParent.setSuper_column(columnPath.getSuper_column());
       }
-      Column column = new Column(columnPath.getColumn(), value, createClock());
+      Column column = new Column(columnPath.getColumn(), value, connectionManager.createClock());
       insert(key.getBytes(), columnParent, column);
   }
 
@@ -401,7 +398,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException {
-    valideSuperColumnPath(columnPath);
+    //valideSuperColumnPath(columnPath);
 
     // only can get supercolumn by multigetSuperSlice
     ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
@@ -507,7 +504,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void remove(byte[] key, ColumnPath columnPath) {
-    this.remove(key, columnPath, createClock());
+    this.remove(key, columnPath, connectionManager.createClock());
   }
 
   @Override
@@ -567,12 +564,6 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public CassandraClient getClient() {
-    return client;
-  }
-
-
-  @Override
   public Column getColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
 //    valideColumnPath(columnPath);
 
@@ -611,12 +602,7 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
-
-  @Override
-  public long createClock() {
-    return client.getClockResolution().createClock();
-  }
-
+/*
   private HCfDef getCfDef(String cf) {
       List<HCfDef> cfDefs = keyspaceDesc.getCfDefs();
       if (cfDefs != null) {
@@ -628,7 +614,7 @@ import org.slf4j.LoggerFactory;
       }
       return null;
   }
-
+*/
 //  /**
 //   * Make sure that if the given column path was a Column. Throws an
 //   * InvalidRequestException if not.
@@ -667,6 +653,7 @@ import org.slf4j.LoggerFactory;
    *
    * @throws HInvalidRequestException
    */
+  /*
   private void valideSuperColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
     String cf = columnPath.getColumn_family();
     HCfDef cfdefine;
@@ -677,6 +664,7 @@ import org.slf4j.LoggerFactory;
     throw new HInvalidRequestException(
         "Invalid super column name or super column family does not exist: " + cf);
   }
+  */
 
   private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
@@ -715,18 +703,12 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  @Override
-  public FailoverPolicy getFailoverPolicy() {
-    return failoverPolicy;
-  }
-
-
 
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("KeyspaceImpl<");
-    b.append(getClient());
+    b.append(keyspaceName);
     b.append(">");
     return b.toString();
   }

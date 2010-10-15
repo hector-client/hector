@@ -28,6 +28,7 @@ public abstract class Operation<T> {
   
   protected T result;
   private HectorException exception;
+  private CassandraHost cassandraHost;
 
   /**
    * Most commonly used for system_* calls as the keyspaceName is null
@@ -37,7 +38,7 @@ public abstract class Operation<T> {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
     this.stopWatchTagName = operationType.name();
-    this.failoverPolicy = CassandraClient.DEFAULT_FAILOVER_POLICY;
+    this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.keyspaceName = null;
   }
   
@@ -67,7 +68,8 @@ public abstract class Operation<T> {
    */
   public abstract T execute(Cassandra.Client cassandra) throws HectorException;
 
-  public void executeAndSetResult(Cassandra.Client cassandra) throws HectorException {
+  public void executeAndSetResult(Cassandra.Client cassandra, CassandraHost cassandraHost) throws HectorException {
+    this.cassandraHost = cassandraHost;
     setResult(execute(cassandra));
   }
 
@@ -81,6 +83,10 @@ public abstract class Operation<T> {
 
   public HectorException getException() {
     return exception;
+  }
+  
+  public CassandraHost getCassandraHost() {
+    return this.cassandraHost;
   }
 }
 

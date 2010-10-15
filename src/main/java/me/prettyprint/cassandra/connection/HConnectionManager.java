@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -36,18 +37,20 @@ public class HConnectionManager {
   private final CassandraHostRetryService cassandraHostRetryService;
   private LoadBalancingPolicy loadBalancingPolicy = new LeastActiveBalancingPolicy();
   
+  private final ClockResolution clock;
+  
 
   private CassandraClientMonitor monitor;
   
   public HConnectionManager(CassandraHostConfigurator cassandraHostConfigurator) {    
-    
+    clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new NonBlockingIdentityHashMap<CassandraHost, ConcurrentHClientPool>();
     for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
       hostPools.put(host,new ConcurrentHClientPool(host));      
     }
     
     cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
-    monitor = JmxMonitor.INSTANCE.getCassandraMonitor();  
+    monitor = JmxMonitor.getInstance(this).getCassandraMonitor();  
   }
     
   public void addCassandraHost(CassandraHost cassandraHost) {
@@ -59,10 +62,6 @@ public class HConnectionManager {
       log.info("Host already existed for pool {}", cassandraHost.getName());
     }    
   }
-  
-  int getRetryCount() {
-    return hostPools.size();
-  }
       
   
   public void operateWithFailover(Operation<?> op) throws HectorException {
@@ -71,7 +70,8 @@ public class HConnectionManager {
     HThriftClient client = null;
     boolean success = false;
     Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>();
-    while (--retries >= 0) {
+    // TODO start timer for limiting retry time spent
+    while ( !success ) {
       try {
         
         client = loadBalancingPolicy.getPool(hostPools.values(), excludeHosts).borrowClient(); 
@@ -81,7 +81,7 @@ public class HConnectionManager {
           c.set_keyspace(op.keyspaceName);
         }
 
-        op.executeAndSetResult(c);
+        op.executeAndSetResult(c, client.cassandraHost);
         success = true;
         stopWatch.stop(op.stopWatchTagName + ".success_");                        
         break;
@@ -131,19 +131,21 @@ public class HConnectionManager {
     client.close();
     cassandraHostRetryService.add(client.cassandraHost);
   }
-  
 
   
-  // void setBalancingStrategy()
-  // 
-  
+  public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
+    this.loadBalancingPolicy = loadBalancingPolicy;
+  }
+    
+  public long createClock() {
+    return this.clock.createClock();
+  }
   
 }
 
 /*
- - should this be abstract and Failover 'connection managers' just extend and implement operateWithFailover as needed?
  
- - interplay between operate methods in DefaultFailoverOperator? is full exception catch stack needed?
-
-return (++i == items.length)? 0 : i;
+- Make failoverPolicy a class
+  ~ add max time skipping parameter
+  ~ configurable and passed in via setter with default
 */

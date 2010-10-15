@@ -10,7 +10,7 @@ import me.prettyprint.cassandra.jndi.CassandraClientJndiResourcePool;
  *
  */
 
-public final class JndiCassandraClientFactory extends CassandraClientFactory {
+public final class JndiCassandraClientFactory  {
   /**
    * JndiCassandraClientFactory constructor.
    *
@@ -19,6 +19,7 @@ public final class JndiCassandraClientFactory extends CassandraClientFactory {
    */
 
   public JndiCassandraClientFactory(String url, int port) {
-    super(url, port);
+    // TODO: how's this going to work?
+    //super(url, port);
   }
 }

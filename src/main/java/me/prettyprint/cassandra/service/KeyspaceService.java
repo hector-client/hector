@@ -30,10 +30,6 @@ public interface KeyspaceService {
   public static String CF_TYPE_STANDARD = "Standard" ;
   public static String CF_TYPE_SUPER = "Super" ;
 
-  /**
-   * @return The cassandra client object used to obtain this KeySpace.
-   */
-  CassandraClient getClient();
 
   /**
    * Get the Column at the given columnPath.
@@ -207,17 +203,5 @@ public interface KeyspaceService {
 
   String getName();
 
-  /**
-   * @return The failover policy used by this keyspace.
-   */
-  FailoverPolicy getFailoverPolicy();
-
-  /**
-   * Creates a clock timestamp.
-   * Clocks are created according to the system's current time milli and if needed are
-   * multiplied by 1000 (if micro is required).
-   * The clock resolution is determined by {@link me.prettyprint.cassandra.service.CassandraClient#getClockResolution()}
-   * @return a clock!
-   */
-  long createClock();
+  CassandraHost getCassandraHost();
 }

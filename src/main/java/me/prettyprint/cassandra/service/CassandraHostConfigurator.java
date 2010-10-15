@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.connection.CassandraHostRetryService;
+
 
 public final class CassandraHostConfigurator {
 
@@ -16,8 +18,8 @@ public final class CassandraHostConfigurator {
   private ClockResolution clockResolution;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean retryDownedHosts = false;
-  private int retryDownedHostsQueueSize = DownCassandraHostRetryService.DEF_QUEUE_SIZE;
-  private int retryDownedHostsDelayInSeconds = DownCassandraHostRetryService.DEF_RETRY_DELAY;
+  private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
+  private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
   private PoolType poolType = PoolType.COMMONS;
   
 
@@ -189,6 +191,13 @@ public final class CassandraHostConfigurator {
   public void setPoolType(PoolType poolType) {
     this.poolType = poolType;
   }
-  
+
+  public ClockResolution getClockResolution() {
+    return clockResolution;
+  }
+
+  public void setClockResolution(ClockResolution clockResolution) {
+    this.clockResolution = clockResolution;
+  } 
   
 }
