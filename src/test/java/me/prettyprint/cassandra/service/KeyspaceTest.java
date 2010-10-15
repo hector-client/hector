@@ -50,18 +50,14 @@ import org.junit.Test;
  */
 public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
-  private CassandraClient client;
   private KeyspaceService keyspace;
   private static final StringSerializer se = new StringSerializer();
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
-    client = new CassandraClientFactory(pools,
-        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
-
-    keyspace = client.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
-        CassandraClient.DEFAULT_FAILOVER_POLICY);
+    
+    keyspace = new KeyspaceServiceImpl("Keyspace1", ConsistencyLevel.ONE, connectionManager);
   }
 
   @Test
@@ -110,7 +106,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     // insert value
     ColumnParent columnParent = new ColumnParent("Super1");
     columnParent.setSuper_column(bytes("testInsertSuper_super"));
-    Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), keyspace.createClock());
+    Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), connectionManager.createClock());
 
 
 
@@ -184,7 +180,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
+            bytes("testBatchMutateColumn_value_" + j), connectionManager.createClock());
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -222,7 +218,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(keyspace.createClock());
+      Deletion deletion = new Deletion(connectionManager.createClock());
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -254,7 +250,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
+            bytes("testBatchMutateColumn_value_" + j), connectionManager.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -280,7 +276,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       for (int j = 0; j < 10; j++) {
         slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(keyspace.createClock());
+      Deletion deletion = new Deletion(connectionManager.createClock());
       deletion.setPredicate(slicePredicate);
       batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
@@ -318,14 +314,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       for (int j = 0; j < 10; j++) {
         Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
+            bytes("testBatchMutateColumn_value_" + j), connectionManager.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
 
-    Deletion deletion = new Deletion(keyspace.createClock());
+    Deletion deletion = new Deletion(connectionManager.createClock());
     deletion.setPredicate(slicePredicate);
 
     batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);
@@ -350,10 +346,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     }
   }
 
-  @Test
-  public void testGetClient() {
-    assertEquals(client, keyspace.getClient());
-  }
+
 
   @Test
   public void testGetSuperColumn() throws HectorException {

@@ -2,15 +2,14 @@ package me.prettyprint.cassandra;
 
 import java.io.IOException;
 
-import me.prettyprint.cassandra.service.CassandraClientPool;
-import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 
+import org.apache.cassandra.config.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.apache.cassandra.config.ConfigurationException;
 
 /**
  * Base class for test cases that need access to EmbeddedServerHelper
@@ -22,7 +21,7 @@ public abstract class BaseEmbededServerSetupTest {
 
   private static EmbeddedServerHelper embedded;
 
-  protected CassandraClientPool pools;
+  protected HConnectionManager connectionManager;
   protected CassandraHostConfigurator cassandraHostConfigurator;
 
   /**
@@ -47,6 +46,6 @@ public abstract class BaseEmbededServerSetupTest {
 
   protected void setupClient() {
     cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
-    pools = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
+    connectionManager = new HConnectionManager(cassandraHostConfigurator);
   }
 }

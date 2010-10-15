@@ -15,7 +15,7 @@ public final class CassandraHostConfigurator {
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
-  private ClockResolution clockResolution;
+  private ClockResolution clockResolution = ClockResolution.MILLISECONDS;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean retryDownedHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;

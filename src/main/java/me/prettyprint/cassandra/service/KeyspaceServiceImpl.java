@@ -72,7 +72,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   @Override
   public void batchMutate(final Map<byte[],Map<String,List<Mutation>>> mutationMap)
       throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
@@ -96,7 +96,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   @Override
   public int getCount(final byte[] key, final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
-    Operation<Integer> op = new Operation<Integer>(OperationType.READ) {
+    Operation<Integer> op = new Operation<Integer>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Integer execute(Cassandra.Client cassandra) throws HectorException {
@@ -111,9 +111,9 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     return op.getResult();
   }
 
-  private void operateWithFailover(Operation<?> op) throws HectorException {
-    this.cassandraHost = op.getCassandraHost();
+  private void operateWithFailover(Operation<?> op) throws HectorException {    
     connectionManager.operateWithFailover(op);
+    this.cassandraHost = op.getCassandraHost();
   }
 
   public CassandraHost getCassandraHost() {
@@ -125,7 +125,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public Map<byte[], List<Column>> getRangeSlices(final ColumnParent columnParent,
       final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
     Operation<Map<byte[], List<Column>>> op = new Operation<Map<byte[], List<Column>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<Column>> execute(Cassandra.Client cassandra)
@@ -158,7 +158,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange)
       throws HectorException {
     Operation<Map<byte[], List<SuperColumn>>> op = new Operation<Map<byte[], List<SuperColumn>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<SuperColumn>> execute(Cassandra.Client cassandra)
@@ -188,7 +188,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   @Override
   public List<Column> getSlice(final byte[] key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws HectorException {
-    Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ) {
+    Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public List<Column> execute(Cassandra.Client cassandra) throws HectorException {
@@ -223,7 +223,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
 //    valideColumnPath(columnPath);
 
-    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
@@ -259,7 +259,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       final boolean reversed, final int size) throws HectorException {
     //valideSuperColumnPath(columnPath);
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
-    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
@@ -294,7 +294,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   @Override
   public List<SuperColumn> getSuperSlice(final byte[] key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws HectorException {
-    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ) {
+    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public List<SuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
@@ -322,7 +322,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   @Override
   public void insert(final byte[] key, final ColumnParent columnParent, final Column column) throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
@@ -364,7 +364,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public Map<byte[], List<Column>> multigetSlice(final List<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<Column>>> getCount = new Operation<Map<byte[], List<Column>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
@@ -429,7 +429,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public Map<byte[], List<SuperColumn>> multigetSuperSlice(final List<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<SuperColumn>>> getCount = new Operation<Map<byte[], List<SuperColumn>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<SuperColumn>> execute(Cassandra.Client cassandra)
@@ -476,7 +476,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       final IndexClause indexClause,
       final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<Column>>> op = new Operation<Map<byte[], List<Column>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<Column>> execute(Cassandra.Client cassandra)
@@ -510,7 +510,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   @Override
   public Map<byte[], Integer> multigetCount(final List<byte[]> keys, final ColumnParent columnParent,
       final SlicePredicate slicePredicate) throws HectorException {
-    Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ) {
+    Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], Integer> execute(Cassandra.Client cassandra) throws HectorException {
@@ -528,7 +528,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   @Override
   public void remove(final byte[] key, final ColumnPath columnPath, final long timestamp)
   throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
@@ -567,7 +567,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public Column getColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
 //    valideColumnPath(columnPath);
 
-    Operation<Column> op = new Operation<Column>(OperationType.READ) {
+    Operation<Column> op = new Operation<Column>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Column execute(Cassandra.Client cassandra) throws HectorException {
