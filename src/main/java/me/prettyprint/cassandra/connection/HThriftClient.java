@@ -136,7 +136,17 @@ public class HThriftClient {
   @Override
   public String toString() {
     return String.format(NAME_FORMAT, cassandraHost.getUrl(), mySerial);    
-  }
+  }    
   
+  /**
+   * Compares the toString of these clients
+   */
+  @Override
+  public boolean equals(Object obj) {  
+    return this.toString().equals(obj.toString());
+  }
+
+
+
   private static final String NAME_FORMAT = "CassandraClient<%s-%d>"; 
 }

@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
+import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -17,6 +18,7 @@ import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.cliffc.high_scale_lib.NonBlockingIdentityHashMap;
@@ -90,23 +92,31 @@ public class HConnectionManager {
         stopWatch.stop(op.stopWatchTagName + ".success_");                        
         break;
 
-      } catch (Exception ex) {
-        HectorException he = exceptionsTranslator.translate(ex);
+      } catch (Exception ex) {        
+        HectorException he = exceptionsTranslator.translate(ex);        
         if ( he instanceof HInvalidRequestException ) {
           throw he;
         } else if ( he instanceof HUnavailableException || he instanceof HectorTransportException) {
+          --retries;
           client.close();
           markHostAsDown(client);
-          excludeHosts.add(client.cassandraHost);
-          --retries;
+          excludeHosts.add(client.cassandraHost);          
         } else if ( he instanceof HTimedOutException ) {
+          // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
           client.close();
+          // TODO add back sleepBetweenRetries
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users 
+        } else if ( he instanceof PoolExhaustedException ) {
+          --retries;
+          if ( hostPools.size() == 1 ) {
+            throw he;
+          }
+          excludeHosts.add(client.cassandraHost);
         }
         if ( retries == 0 ) throw he;
-        log.error("Could not fullfill request on this host {}", client.cassandraHost); 
-      
+        log.error("Could not fullfill request on this host {}", client.cassandraHost);
+        sleepBetweenHostSkips(op.failoverPolicy);
       } finally {                
         if ( !success ) {
           monitor.incCounter(op.failCounter);
@@ -116,6 +126,24 @@ public class HConnectionManager {
       }
     }
   }
+  
+  /**
+  * Sleeps for the specified time as determined by sleepBetweenHostsMilli.
+  * In many cases failing over to other hosts is done b/c the cluster is too busy, so the sleep b/w
+  * hosts may help reduce load on the cluster.
+  */
+    private void sleepBetweenHostSkips(FailoverPolicy failoverPolicy) {
+      if (failoverPolicy.sleepBetweenHostsMilli > 0) {
+        if ( log.isDebugEnabled() ) {
+          log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
+        }
+        try {
+          Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
+        } catch (InterruptedException e) {
+          log.warn("Sleep between hosts interrupted", e);
+        }
+      }
+    }
   
   private HThriftClient getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     HThriftClient client;

@@ -24,7 +24,7 @@ public class CassandraHostRetryService {
   private static Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
 
   public static final int DEF_QUEUE_SIZE = 3;
-  public static final int DEF_RETRY_DELAY = 30;
+  public static final int DEF_RETRY_DELAY = 10;
   private LinkedBlockingQueue<CassandraHost> downedHostQueue;
   
   private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
