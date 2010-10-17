@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
+import org.cliffc.high_scale_lib.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +31,7 @@ public class ConcurrentHClientPool {
     this.cassandraHost = host;
 
     clientQueue = new ArrayBlockingQueue<HThriftClient>(cassandraHost.getMaxActive(), true);
-    numActive = new AtomicInteger();
+    numActive = new AtomicInteger();    
     numBlocked = new AtomicInteger();
     active = new AtomicBoolean(true);
 
@@ -53,30 +54,34 @@ public class ConcurrentHClientPool {
       throw new HectorException("Attempt to borrow on in-active pool: " + getName());
     }
     HThriftClient cassandraClient;
-    try {
+    int currentActive = numActive.incrementAndGet();
+    int tillExhausted = cassandraHost.getMaxActive() - currentActive;
+    try {      
       numBlocked.incrementAndGet();
       cassandraClient = clientQueue.poll();
       if ( cassandraClient == null ) {
-        if ( getNumBeforeExhausted() > 0 ) {
-          cassandraClient = new HThriftClient(cassandraHost).open();
-        } else {
-          // blocked take on the queue if we are configured to wait forever
-          cassandraClient = maxWaitTimeWhenExhausted == 0 ? clientQueue.take() : clientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);    
+        if ( tillExhausted > 0 ) {
+          clientQueue.add(new HThriftClient(cassandraHost).open());          
+          log.debug("created new client. NumActive:{} untilExhausted: {}", currentActive, tillExhausted);
         }
-      }                  
+        // blocked take on the queue if we are configured to wait forever  
+        if ( log.isDebugEnabled() ) {
+          log.debug("blocking on queue - current block count {}", numBlocked.get());
+        }
+        cassandraClient = maxWaitTimeWhenExhausted == 0 ? clientQueue.take() : clientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
+        log.debug("blocking complete");
+      }      
       numBlocked.decrementAndGet();
-      numActive.incrementAndGet();
     } catch (InterruptedException ie) {
       //monitor.incCounter(Counter.POOL_EXHAUSTED);
+      numActive.decrementAndGet();
       throw new HectorException(String.format("maxWaitTimeWhenExhausted exceeded for thread {} on host {}",
           new Object[]{
           Thread.currentThread().getName(), 
           cassandraHost.getName()}
       ));      
     }
-    if ( log.isDebugEnabled() ) {
-      log.debug("borrowed client {} from pool", cassandraClient);
-    }
+        
     return cassandraClient;
   }
 
@@ -87,8 +92,10 @@ public class ConcurrentHClientPool {
     log.error("Shutdown triggered on {}", getName());
     Set<HThriftClient> clients = new HashSet<HThriftClient>();
     clientQueue.drainTo(clients);
-    for (HThriftClient hThriftClient : clients) {
-      hThriftClient.close();
+    if ( clients.size() > 0 ) {
+      for (HThriftClient hThriftClient : clients) {
+        hThriftClient.close();
+      }
     }
     log.error("Shutdown complete on {}", getName());
   }
@@ -103,17 +110,17 @@ public class ConcurrentHClientPool {
 
 
   public int getNumActive() {
-    return numActive.get();
+    return numActive.intValue();
   }
 
 
   public int getNumBeforeExhausted() {
-    return cassandraHost.getMaxActive() - numActive.get();
+    return cassandraHost.getMaxActive() - numActive.intValue();
   }
 
 
   public int getNumBlockedThreads() {    
-    return numBlocked.get();
+    return numBlocked.intValue();
   }
 
 
@@ -136,7 +143,8 @@ public class ConcurrentHClientPool {
     boolean open = client.isOpen();
     if ( open ) {      
       clientQueue.add(client);  
-    }
+    } 
+    
     if ( log.isDebugEnabled() ) {
       log.debug("Status of releaseClient {} to queue: {}", client.toString(), open);
     }

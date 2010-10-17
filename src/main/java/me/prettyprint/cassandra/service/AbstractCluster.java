@@ -73,9 +73,10 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
-      // TODO fix this
-      //knownPoolHosts = pool.getKnownHosts();
-      log.info("found knownPoolHosts: {}", knownPoolHosts);
+      knownPoolHosts = connectionManager.getHosts();
+      if ( log.isInfoEnabled() ) {
+        log.info("found knownPoolHosts: {}", knownPoolHosts);
+      }
     }
     return knownPoolHosts;
   }

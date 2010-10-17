@@ -31,7 +31,7 @@ public class CassandraHostRetryService {
   
   private final HConnectionManager connectionManager;
   
-  private ScheduledFuture<CassandraHost> sf;
+  private ScheduledFuture sf;
   private int retryDelayInSeconds = DEF_RETRY_DELAY;
   
   public CassandraHostRetryService(HConnectionManager connectionManager,
@@ -39,7 +39,7 @@ public class CassandraHostRetryService {
     this.connectionManager = connectionManager;
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize());
-    sf = executor.schedule(new RetryRunner(), this.retryDelayInSeconds, TimeUnit.SECONDS);
+    sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
         log.error("Downed Host retry shutdown hook called");
@@ -90,14 +90,14 @@ public class CassandraHostRetryService {
 
 
 
-  class RetryRunner implements Callable<CassandraHost>{
+  class RetryRunner implements Runnable {
     
     @Override
-    public CassandraHost call() throws Exception {
+    public void run() {
       CassandraHost cassandraHost = downedHostQueue.poll();
       if ( cassandraHost == null ) {
         log.info("Retry service fired... nothing to do.");
-        return null;
+        return;
       }
       boolean reconnected = verifyConnection(cassandraHost);
       log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
@@ -105,10 +105,10 @@ public class CassandraHostRetryService {
         //cassandraClientPool.getCluster().addHost(cassandraHost, true);
         connectionManager.addCassandraHost(cassandraHost);
       }
-      if ( cassandraHost != null ) {
+      if ( !reconnected && cassandraHost != null ) {
         downedHostQueue.add(cassandraHost);
       }
-      return cassandraHost;
+
     }
     
     private boolean verifyConnection(CassandraHost cassandraHost) {

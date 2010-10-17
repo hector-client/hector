@@ -52,12 +52,18 @@ public class HThriftClient {
       log.debug("Closing client {}", this);
     }    
     if (transport != null) {   
-      try {
+      try {        
         transport.flush();
-        transport.close();  
+          
       } catch (Exception e) {
         log.error("Could not close transport in close for client" + toString(), e);
-      }     
+      } finally {
+        try {
+          transport.close();
+        } catch (Exception e) {
+          log.error("Error on transport close for client: " +toString(), e);
+        }
+      }
     }
     return this;
   }
