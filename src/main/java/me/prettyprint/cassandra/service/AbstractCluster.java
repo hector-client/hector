@@ -263,8 +263,8 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   @Override
-  public String renameColumnFamily(final String oldName, final String newName) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+  public String renameColumnFamily(final String keyspaceName, final String oldName, final String newName) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {

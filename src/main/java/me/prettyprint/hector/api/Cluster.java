@@ -63,7 +63,7 @@ public interface Cluster {
 
   String addColumnFamily(final HCfDef cfdef) throws HectorException;
 
-  String renameColumnFamily(final String oldName, final String newName) throws HectorException;
+  String renameColumnFamily(final String keyspaceName, final String oldName, final String newName) throws HectorException;
 
   String dropColumnFamily(final String keyspaceName, final String columnFamily)
       throws HectorException;

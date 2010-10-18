@@ -77,7 +77,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   public void testAddDropColdropumnFamily() throws Exception {
     HCfDef cfDef = new ThriftCfDef("Keyspace1", "DynCf");
     String cfid = cassandraCluster.addColumnFamily(cfDef);
-    cassandraCluster.renameColumnFamily("DynCf", "MyDynCf");
+    cassandraCluster.renameColumnFamily("Keyspace1","DynCf", "MyDynCf");
     assertNotNull(cfid);
     String cfid2 = cassandraCluster.dropColumnFamily("Keyspace1", "MyDynCf");
     assertNotNull(cfid2);

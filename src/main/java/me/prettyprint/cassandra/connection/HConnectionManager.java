@@ -104,7 +104,6 @@ public class HConnectionManager {
         } else if ( he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
           client.close();
-          // TODO add back sleepBetweenRetries
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users 
         } else if ( he instanceof PoolExhaustedException ) {
