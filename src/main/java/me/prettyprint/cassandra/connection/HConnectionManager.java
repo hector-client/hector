@@ -13,6 +13,7 @@ import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
@@ -100,9 +101,13 @@ public class HConnectionManager {
           --retries;
           client.close();
           markHostAsDown(client);
-          excludeHosts.add(client.cassandraHost);          
+          excludeHosts.add(client.cassandraHost);         
+          if ( retries > 0 ) {
+            monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
+          }
         } else if ( he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
+          monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
           client.close();
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users 
@@ -111,10 +116,12 @@ public class HConnectionManager {
           if ( hostPools.size() == 1 ) {
             throw he;
           }
+          monitor.incCounter(Counter.POOL_EXHAUSTED);
           excludeHosts.add(client.cassandraHost);
         }
         if ( retries == 0 ) throw he;
         log.error("Could not fullfill request on this host {}", client.cassandraHost);
+        monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
         sleepBetweenHostSkips(op.failoverPolicy);
       } finally {                
         if ( !success ) {
@@ -179,10 +186,12 @@ public class HConnectionManager {
       pool.shutdown();
       cassandraHostRetryService.add(client.cassandraHost);
     }
-    client.close();
-    
+    client.close();    
   }
 
+  public Set<CassandraHost> getDownedHosts() {
+    return cassandraHostRetryService.getDownedHosts();
+  }
   
   public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
     this.loadBalancingPolicy = loadBalancingPolicy;

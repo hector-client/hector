@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -67,6 +70,10 @@ public class CassandraHostRetryService {
   public boolean contains(CassandraHost cassandraHost) {
     return downedHostQueue.contains(cassandraHost);
   }    
+  
+  public Set<CassandraHost> getDownedHosts() {
+    return Collections.unmodifiableSet(new HashSet<CassandraHost>(downedHostQueue));
+  }
   
   public void applyRetryDelay() {
     sf.cancel(false);
