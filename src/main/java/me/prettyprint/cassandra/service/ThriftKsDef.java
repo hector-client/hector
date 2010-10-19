@@ -17,7 +17,7 @@ public class ThriftKsDef implements HKsDef {
   private String strategyClass;
   private Map<String, String> strategyOptions;
   private int replicationFactor;
-  private final List<HCfDef> cfDefs;
+  private List<HCfDef> cfDefs;
 
   public ThriftKsDef(KsDef k) {
     Assert.notNull(k, "KsDef is null");
@@ -34,6 +34,12 @@ public class ThriftKsDef implements HKsDef {
     this.strategyClass = strategyClass;
     this.replicationFactor = replicationFactor;
     this.cfDefs = cfDefs;
+  }
+
+  public ThriftKsDef(String keyspaceName) {
+    this.name = keyspaceName;
+    this.cfDefs = new ArrayList<HCfDef>();
+    this.replicationFactor = 1;
   }
 
   public static List<HKsDef> fromThriftList(List<KsDef> ks) {

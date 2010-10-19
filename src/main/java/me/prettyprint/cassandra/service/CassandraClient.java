@@ -2,13 +2,14 @@ package me.prettyprint.cassandra.service;
 
 import java.util.List;
 
+import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.KsDef;
+//import org.apache.cassandra.thrift.Cassandra;
+//import org.apache.cassandra.thrift.ConsistencyLevel;
+//import org.apache.cassandra.thrift.KsDef;
 
 
 /**
@@ -62,7 +63,7 @@ public interface CassandraClient {
   /**
    * @return the underline cassandra thrift object, all remote calls will be sent to this client.
    */
-  Cassandra.Client getCassandra();
+  //Cassandra.Client getCassandra();
 
   /**
    * Return given key space, if keySpaceName not exist, will throw an exception.
