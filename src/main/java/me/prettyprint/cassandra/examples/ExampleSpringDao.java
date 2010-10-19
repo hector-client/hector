@@ -6,6 +6,7 @@ import me.prettyprint.cassandra.dao.SpringCommand;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -13,7 +14,6 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.ConsistencyLevel;
 
 public class ExampleSpringDao {
   // statics for default values

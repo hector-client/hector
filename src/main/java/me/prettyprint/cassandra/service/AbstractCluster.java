@@ -88,7 +88,7 @@ public abstract class AbstractCluster implements Cluster {
     if (refresh || knownClusterHosts == null) {
       CassandraClient client = borrowClient();
       try {
-        knownClusterHosts = new HashSet<String>(buildHostNames(client.getCassandra()));
+        knownClusterHosts = new HashSet<String>(buildHostNames( ((CassandraClientImpl) client).getCassandra()));
       } finally {
         releaseClient(client);
       }

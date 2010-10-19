@@ -187,7 +187,7 @@ import org.slf4j.LoggerFactory;
     }
     try {
       // Perform operation and save its result value
-      Cassandra.Client c = client.getCassandra();
+      Cassandra.Client c = ((CassandraClientImpl)client).getCassandra();
       if (keyspace != null) {
         c.set_keyspace(keyspace.getName());
       }

@@ -3,9 +3,8 @@ package me.prettyprint.cassandra.dao;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
-import org.apache.cassandra.thrift.ConsistencyLevel;
 
 public abstract class SpringCommand<OUTPUT> {
   private final CassandraClientPool cassandraClientPool;

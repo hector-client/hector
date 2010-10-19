@@ -86,6 +86,9 @@ import org.slf4j.LoggerFactory;
     return clusterName;
   }
 
+  public Cassandra.Client getCassandra() {
+    return this.cassandra;
+  }
 
   @Override
   public KeyspaceService getKeyspace(String keySpaceName) throws HectorException {
@@ -143,7 +146,7 @@ import org.slf4j.LoggerFactory;
       FailoverPolicy failoverPolicy) {
     StringBuilder b = new StringBuilder(keyspaceName);
     b.append('[');
-    b.append(consistencyLevel.getValue());
+    b.append(consistencyLevel.ordinal());
     b.append(',');
     b.append(failoverPolicy);
     b.append(']');
@@ -171,7 +174,19 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public void markAsClosed() {
+  public void close() {
+    if ( this.cassandra != null ) {
+      if ( this.cassandra.getInputProtocol() != null ) {
+        if ( this.cassandra.getInputProtocol().getTransport() != null ) {
+          try {
+            this.cassandra.getInputProtocol().getTransport().flush();
+            this.cassandra.getInputProtocol().getTransport().close();
+          } catch (Exception e) {
+            log.error("Could not close transport in closing client", e);
+          }
+        }
+      }
+    }
     closed = true;
   }
 

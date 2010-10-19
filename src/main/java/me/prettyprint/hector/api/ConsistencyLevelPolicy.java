@@ -1,7 +1,5 @@
 package me.prettyprint.hector.api;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
-
 public interface ConsistencyLevelPolicy {
 
   enum OperationType{READ, WRITE};

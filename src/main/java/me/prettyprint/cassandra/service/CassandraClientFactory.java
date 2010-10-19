@@ -80,19 +80,7 @@ import org.slf4j.LoggerFactory;
   }
   
   public CassandraClient tearDown(CassandraClient cassandraClient) throws HectorException {
-    Cassandra.Client client = cassandraClient.getCassandra();
-    if ( client != null ) {
-      if ( client.getInputProtocol() != null ) {
-        if ( client.getInputProtocol().getTransport() != null ) {
-          try {
-            client.getInputProtocol().getTransport().flush();
-            client.getInputProtocol().getTransport().close();
-          } catch (Exception e) {
-            log.error("Could not close transport in tearDown", e);
-          }
-        }
-      }
-    }
+    cassandraClient.close();
     return cassandraClient;
   }
 
@@ -187,10 +175,7 @@ import org.slf4j.LoggerFactory;
       log.debug("Closing client {}", cclient);
     }
     ((CassandraClientPoolImpl) pool).reportDestroyed(cclient);
-    Cassandra.Client client = cclient.getCassandra();
-    client.getInputProtocol().getTransport().close();
-    client.getOutputProtocol().getTransport().close();
-    cclient.markAsClosed();
+    cclient.close();
   }
 
   @Override

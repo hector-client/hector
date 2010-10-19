@@ -61,11 +61,11 @@ import org.slf4j.LoggerFactory;
   private final ExceptionsTranslator xtrans;
 
   public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
-      HKsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
+      HKsDef keyspaceDesc,  me.prettyprint.hector.api.ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws HectorTransportException {
     this.client = client;
-    this.consistency = consistencyLevel;
+    this.consistency = ConsistencyLevel.valueOf(consistencyLevel.name());
     this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
     this.failoverPolicy = failoverPolicy;
@@ -122,8 +122,6 @@ import org.slf4j.LoggerFactory;
         clientPools, this);
     client = operator.operate(op);
   }
-
-
 
   @Override
   public Map<byte[], List<Column>> getRangeSlices(final ColumnParent columnParent,
@@ -608,10 +606,9 @@ import org.slf4j.LoggerFactory;
   }
 
   @Override
-  public ConsistencyLevel getConsistencyLevel() {
-    return consistency;
+  public me.prettyprint.hector.api.ConsistencyLevel getConsistencyLevel() {
+      return me.prettyprint.hector.api.ConsistencyLevel.valueOf(consistency.name());
   }
-
 
   @Override
   public long createClock() {

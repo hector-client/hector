@@ -5,9 +5,8 @@ import me.prettyprint.cassandra.service.CassandraClientPool;
 import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
-import org.apache.cassandra.thrift.ConsistencyLevel;
 
 /**
  * Provides an abstraction for running an operation, or a command on a cassandra keyspace.

@@ -23,12 +23,10 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
@@ -41,9 +39,9 @@ public class FailoverOperatorTest {
   private final HKsDef keyspaceDesc = mock(HKsDef.class);
   private final HCfDef keyspace1Desc = mock(HCfDef.class);
 
-  private final CassandraClient h1client = mock(CassandraClient.class);
-  private final CassandraClient h2client = mock(CassandraClient.class);
-  private final CassandraClient h3client = mock(CassandraClient.class);
+  private final CassandraClientImpl h1client = mock(CassandraClientImpl.class);
+  private final CassandraClientImpl h2client = mock(CassandraClientImpl.class);
+  private final CassandraClientImpl h3client = mock(CassandraClientImpl.class);
   private final CassandraHost h1host = new CassandraHost("h1:111");
   private final CassandraHost h2host = new CassandraHost("h2:111");
   private final CassandraHost h3host = new CassandraHost("h3:111");
@@ -56,7 +54,7 @@ public class FailoverOperatorTest {
   private final Map<Cassandra.Client,CassandraHost> clientHosts = new HashMap<Cassandra.Client,CassandraHost>();
 
   private final String keyspaceName = "Keyspace1";
-  private final ConsistencyLevel consistencyLevel = ConsistencyLevel.ONE;
+  private final me.prettyprint.hector.api.ConsistencyLevel consistencyLevel = me.prettyprint.hector.api.ConsistencyLevel.ONE;
   private final ColumnPath cp = new ColumnPath("Standard1");
   private final CassandraClientPool clientPools = mock(CassandraClientPool.class);
   private final CassandraClientMonitor monitor = mock(CassandraClientMonitor.class);
@@ -125,7 +123,7 @@ public class FailoverOperatorTest {
         clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
-    Cassandra.Client cc = ks.getClient().getCassandra();
+    Cassandra.Client cc = ((CassandraClientImpl)ks.getClient()).getCassandra();
     verify(cc).insert((byte[]) anyObject(),
         (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
 
@@ -151,7 +149,7 @@ public class FailoverOperatorTest {
         clientPools, monitor);
 
     ks.insert("key", cp, bytes("value"));
-    cc = ks.getClient().getCassandra();
+    cc = ((CassandraClientImpl)ks.getClient()).getCassandra();
     verify(cc).insert((byte[]) anyObject(),
         (ColumnParent) anyObject(), (Column) anyObject(), Matchers.<ConsistencyLevel>any());
 

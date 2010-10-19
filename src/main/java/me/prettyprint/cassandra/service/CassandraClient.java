@@ -105,7 +105,7 @@ public interface CassandraClient {
 
   CassandraHost getCassandraHost();  
 
-  void markAsClosed();
+  void close();
 
   boolean isClosed();
 

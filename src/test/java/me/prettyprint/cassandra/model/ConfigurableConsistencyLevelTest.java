@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.junit.Before;
 import org.junit.Test;
 

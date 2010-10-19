@@ -3,9 +3,9 @@ package me.prettyprint.cassandra.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
