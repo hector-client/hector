@@ -30,8 +30,6 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
       return e;
     } else if (original instanceof org.apache.cassandra.thrift.NotFoundException) {
       return new HNotFoundException(original);
-    } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {
-      return new HTimedOutException(original);
     } else if (original instanceof org.apache.cassandra.thrift.UnavailableException) {
       return new HUnavailableException(original);
     } else if (original instanceof NoSuchElementException) {
