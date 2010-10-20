@@ -6,18 +6,18 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 
 import org.apache.cassandra.thrift.KsDef;
 
-public class ThriftKsDef implements HKsDef {
+public class ThriftKsDef implements KeyspaceDefinition {
 
   private final String name;
   private String strategyClass;
   private Map<String, String> strategyOptions;
   private int replicationFactor;
-  private List<HCfDef> cfDefs;
+  private List<ColumnFamilyDefinition> cfDefs;
 
   public ThriftKsDef(KsDef k) {
     Assert.notNull(k, "KsDef is null");
@@ -29,7 +29,7 @@ public class ThriftKsDef implements HKsDef {
   }
 
   public ThriftKsDef(String keyspaceName, String strategyClass, int replicationFactor,
-      List<HCfDef> cfDefs) {
+      List<ColumnFamilyDefinition> cfDefs) {
     this.name = keyspaceName;
     this.strategyClass = strategyClass;
     this.replicationFactor = replicationFactor;
@@ -38,15 +38,15 @@ public class ThriftKsDef implements HKsDef {
 
   public ThriftKsDef(String keyspaceName) {
     this.name = keyspaceName;
-    this.cfDefs = new ArrayList<HCfDef>();
+    this.cfDefs = new ArrayList<ColumnFamilyDefinition>();
     this.replicationFactor = 1;
   }
 
-  public static List<HKsDef> fromThriftList(List<KsDef> ks) {
+  public static List<KeyspaceDefinition> fromThriftList(List<KsDef> ks) {
     if (ks == null || ks.isEmpty()) {
       return Collections.emptyList();
     }
-    List<HKsDef> l = new ArrayList<HKsDef>(ks.size());
+    List<KeyspaceDefinition> l = new ArrayList<KeyspaceDefinition>(ks.size());
     for (KsDef k: ks) {
       l.add(new ThriftKsDef(k));
     }
@@ -74,7 +74,7 @@ public class ThriftKsDef implements HKsDef {
   }
 
   @Override
-  public List<HCfDef> getCfDefs() {
+  public List<ColumnFamilyDefinition> getCfDefs() {
     return Collections.unmodifiableList(cfDefs);
   }
 

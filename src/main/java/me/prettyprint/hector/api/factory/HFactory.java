@@ -36,7 +36,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
@@ -272,7 +272,7 @@ public final class HFactory {
     return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();
   }
 
-  public static HKsDef createHKsDef( String keyspace ) {
+  public static KeyspaceDefinition createHKsDef( String keyspace ) {
     return new ThriftKsDef( keyspace );
 
   }

@@ -5,12 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HColumnDef;
+import me.prettyprint.hector.api.ddl.ColumnDefinition;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 
 import org.apache.cassandra.thrift.CfDef;
 
-public class ThriftCfDef implements HCfDef {
+public class ThriftCfDef implements ColumnFamilyDefinition {
 
   private final String keyspace;
   private final String name;
@@ -22,7 +22,7 @@ public class ThriftCfDef implements HCfDef {
   private boolean preloadRowCache;
   private double keyCacheSize;
   private double readRepairChance;
-  private List<HColumnDef> columnMetadata;
+  private List<ColumnDefinition> columnMetadata;
   private int gcGraceSeconds;
   private String defaultValidationClass;
   private int id;
@@ -56,11 +56,11 @@ public class ThriftCfDef implements HCfDef {
     columnMetadata = Collections.emptyList();
   }
 
-  public static List<HCfDef> fromThriftList(List<CfDef> cfDefs) {
+  public static List<ColumnFamilyDefinition> fromThriftList(List<CfDef> cfDefs) {
     if (cfDefs == null || cfDefs.isEmpty()) {
       return Collections.emptyList();
     }
-    List<HCfDef> l = new ArrayList<HCfDef>(cfDefs.size());
+    List<ColumnFamilyDefinition> l = new ArrayList<ColumnFamilyDefinition>(cfDefs.size());
     for (CfDef d: cfDefs) {
       l.add(new ThriftCfDef(d));
     }
@@ -119,7 +119,7 @@ public class ThriftCfDef implements HCfDef {
   }
 
   @Override
-  public List<HColumnDef> getColumnMetadata() {
+  public List<ColumnDefinition> getColumnMetadata() {
     return columnMetadata;
   }
 
@@ -128,12 +128,12 @@ public class ThriftCfDef implements HCfDef {
     return gcGraceSeconds;
   }
 
-  public static List<CfDef> toThriftList(List<HCfDef> cfDefs) {
+  public static List<CfDef> toThriftList(List<ColumnFamilyDefinition> cfDefs) {
     if (cfDefs == null || cfDefs.isEmpty()) {
       return Collections.emptyList();
     }
     List<CfDef> l = new ArrayList<CfDef>(cfDefs.size());
-    for (HCfDef d: cfDefs) {
+    for (ColumnFamilyDefinition d: cfDefs) {
       l.add(((ThriftCfDef) d).toThrift());
     }
     return l;
@@ -210,7 +210,7 @@ public class ThriftCfDef implements HCfDef {
     this.readRepairChance = readRepairChance;
   }
 
-  public void setColumnMetadata(List<HColumnDef> columnMetadata) {
+  public void setColumnMetadata(List<ColumnDefinition> columnMetadata) {
     this.columnMetadata = columnMetadata;
   }
 

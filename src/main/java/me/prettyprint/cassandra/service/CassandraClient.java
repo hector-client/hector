@@ -1,9 +1,6 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.List;
-
 import me.prettyprint.hector.api.ConsistencyLevel;
-import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 

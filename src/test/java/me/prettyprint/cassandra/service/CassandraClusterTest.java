@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
@@ -34,7 +34,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testDescribeKeyspaces() throws Exception {
-    List<HKsDef> keyspaces = cassandraCluster.describeKeyspaces();
+    List<KeyspaceDefinition> keyspaces = cassandraCluster.describeKeyspaces();
     assertEquals(2,keyspaces.size());
   }
 
@@ -62,7 +62,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testDescribeKeyspace() throws Exception {
-    HKsDef keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
+    KeyspaceDefinition keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
     assertNotNull(keyspaceDetail);
     assertEquals(7, keyspaceDetail.getCfDefs().size());
   }
@@ -75,7 +75,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testAddDropColdropumnFamily() throws Exception {
-    HCfDef cfDef = new ThriftCfDef("Keyspace1", "DynCf");
+    ColumnFamilyDefinition cfDef = new ThriftCfDef("Keyspace1", "DynCf");
     String cfid = cassandraCluster.addColumnFamily(cfDef);
     cassandraCluster.renameColumnFamily("DynCf", "MyDynCf");
     assertNotNull(cfid);
@@ -85,7 +85,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testAddDropKeyspace() throws Exception {
-    HCfDef cfDef = new ThriftCfDef("DynKeyspace", "DynCf");
+    ColumnFamilyDefinition cfDef = new ThriftCfDef("DynKeyspace", "DynCf");
     cassandraCluster.addKeyspace(
         new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)));
     cassandraCluster.renameKeyspace("DynKeyspace", "MyDynKeyspace");

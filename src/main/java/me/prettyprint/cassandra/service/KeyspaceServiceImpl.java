@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -24,7 +23,6 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -48,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
   private final String keyspaceName;
 
-  private final HKsDef keyspaceDesc;
+  private final KeyspaceDefinition keyspaceDesc;
 
   private final ConsistencyLevel consistency;
 
@@ -61,7 +59,7 @@ import org.slf4j.LoggerFactory;
   private final ExceptionsTranslator xtrans;
 
   public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
-      HKsDef keyspaceDesc,  me.prettyprint.hector.api.ConsistencyLevel consistencyLevel,
+      KeyspaceDefinition keyspaceDesc,  me.prettyprint.hector.api.ConsistencyLevel consistencyLevel,
       FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
       throws HectorTransportException {
     this.client = client;
@@ -615,10 +613,10 @@ import org.slf4j.LoggerFactory;
     return client.getClockResolution().createClock();
   }
 
-  private HCfDef getCfDef(String cf) {
-      List<HCfDef> cfDefs = keyspaceDesc.getCfDefs();
+  private ColumnFamilyDefinition getCfDef(String cf) {
+      List<ColumnFamilyDefinition> cfDefs = keyspaceDesc.getCfDefs();
       if (cfDefs != null) {
-          for (HCfDef cfDef: cfDefs) {
+          for (ColumnFamilyDefinition cfDef: cfDefs) {
               if (cf.equals(cfDef.getName())) {
                   return cfDef;
               }
@@ -667,7 +665,7 @@ import org.slf4j.LoggerFactory;
    */
   private void valideSuperColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
     String cf = columnPath.getColumn_family();
-    HCfDef cfdefine;
+    ColumnFamilyDefinition cfdefine;
     if ((cfdefine = getCfDef(cf)) != null && cfdefine.getColumnType().equals(CF_TYPE_SUPER)
         && columnPath.getSuper_column() != null) {
       return;

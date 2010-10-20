@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
@@ -36,8 +36,8 @@ import org.mockito.Matchers;
 
 public class FailoverOperatorTest {
 
-  private final HKsDef keyspaceDesc = mock(HKsDef.class);
-  private final HCfDef keyspace1Desc = mock(HCfDef.class);
+  private final KeyspaceDefinition keyspaceDesc = mock(KeyspaceDefinition.class);
+  private final ColumnFamilyDefinition keyspace1Desc = mock(ColumnFamilyDefinition.class);
 
   private final CassandraClientImpl h1client = mock(CassandraClientImpl.class);
   private final CassandraClientImpl h2client = mock(CassandraClientImpl.class);

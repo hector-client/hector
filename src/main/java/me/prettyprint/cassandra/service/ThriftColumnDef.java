@@ -5,17 +5,17 @@ import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.ddl.HColumnDef;
-import me.prettyprint.hector.api.ddl.HIndexType;
+import me.prettyprint.hector.api.ddl.ColumnDefinition;
+import me.prettyprint.hector.api.ddl.ColumnIndexType;
 
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.IndexType;
 
-public class ThriftColumnDef implements HColumnDef {
+public class ThriftColumnDef implements ColumnDefinition {
 
   private final byte[] name; //TODO(ran): use a serializer and type safety?
   private final String validationClass;
-  private final HIndexType indexType;
+  private final ColumnIndexType indexType;
   private final String indexName;
 
   public ThriftColumnDef(ColumnDef cd) {
@@ -26,20 +26,20 @@ public class ThriftColumnDef implements HColumnDef {
     indexName = cd.index_name;
   }
 
-  private HIndexType indexTypeFromThrift(IndexType tIndexType) {
+  private ColumnIndexType indexTypeFromThrift(IndexType tIndexType) {
     switch (tIndexType) {
     case KEYS:
-      return HIndexType.KEYS;
+      return ColumnIndexType.KEYS;
     default:
       throw new RuntimeException("Unknown thrift IndexType: " + tIndexType);
     }
   }
 
-  public static List<HColumnDef> fromThriftList(List<ColumnDef> columnDefs) {
+  public static List<ColumnDefinition> fromThriftList(List<ColumnDef> columnDefs) {
     if (columnDefs == null || columnDefs.isEmpty()) {
       return Collections.emptyList();
     }
-    List<HColumnDef> l = new ArrayList<HColumnDef>(columnDefs.size());
+    List<ColumnDefinition> l = new ArrayList<ColumnDefinition>(columnDefs.size());
     for (ColumnDef cd: columnDefs) {
       l.add(new ThriftColumnDef(cd));
     }
@@ -57,7 +57,7 @@ public class ThriftColumnDef implements HColumnDef {
   }
 
   @Override
-  public HIndexType getIndexType() {
+  public ColumnIndexType getIndexType() {
     return indexType;
   }
 
@@ -66,12 +66,12 @@ public class ThriftColumnDef implements HColumnDef {
     return indexName;
   }
 
-  public static List<ColumnDef> toThriftList(List<HColumnDef> columnDefs) {
+  public static List<ColumnDef> toThriftList(List<ColumnDefinition> columnDefs) {
     if (columnDefs == null || columnDefs.isEmpty()) {
       return Collections.emptyList();
     }
     List<ColumnDef> l = new ArrayList<ColumnDef>(columnDefs.size());
-    for (HColumnDef d: columnDefs) {
+    for (ColumnDefinition d: columnDefs) {
       l.add(((ThriftColumnDef) d).toThrift());
     }
     return l;
@@ -86,12 +86,12 @@ public class ThriftColumnDef implements HColumnDef {
     return d;
   }
 
-  private IndexType indexTypeToThrift(HIndexType indexType2) {
+  private IndexType indexTypeToThrift(ColumnIndexType indexType2) {
     switch (indexType2) {
     case KEYS:
       return IndexType.KEYS;
     default:
-      throw new RuntimeException("Unknown HIndexType value: " + indexType2);
+      throw new RuntimeException("Unknown ColumnIndexType value: " + indexType2);
     }
   }
 }

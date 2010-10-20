@@ -8,7 +8,7 @@ import java.util.List;
  * @author Ran Tavory
  *
  */
-public interface HCfDef {
+public interface ColumnFamilyDefinition {
 
   String getKeyspace();
   String getName();
@@ -20,7 +20,7 @@ public interface HCfDef {
   boolean isPreloadRowCache();
   double getKeyCacheSize();
   double getReadRepairChance();
-  List<HColumnDef> getColumnMetadata();
+  List<ColumnDefinition> getColumnMetadata();
   int getGcGraceSeconds();
   String getDefaultValidationClass();
   int getId();

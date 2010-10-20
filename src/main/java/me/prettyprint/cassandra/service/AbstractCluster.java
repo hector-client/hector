@@ -6,7 +6,7 @@ import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
@@ -162,10 +162,10 @@ public abstract class AbstractCluster implements Cluster {
    * @see me.prettyprint.cassandra.service.Cluster#describeKeyspaces()
    */
   @Override
-  public List<HKsDef> describeKeyspaces() throws HectorException {
-    Operation<List<HKsDef>> op = new Operation<List<HKsDef>>(OperationType.META_READ) {
+  public List<KeyspaceDefinition> describeKeyspaces() throws HectorException {
+    Operation<List<KeyspaceDefinition>> op = new Operation<List<KeyspaceDefinition>>(OperationType.META_READ) {
       @Override
-      public List<HKsDef> execute(Cassandra.Client cassandra) throws HectorException {
+      public List<KeyspaceDefinition> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           return ThriftKsDef.fromThriftList(cassandra.describe_keyspaces());
         } catch (Exception e) {
@@ -219,12 +219,12 @@ public abstract class AbstractCluster implements Cluster {
    * @see me.prettyprint.cassandra.service.Cluster#describeKeyspace(java.lang.String)
    */
   @Override
-  public HKsDef describeKeyspace(final String keyspace)
+  public KeyspaceDefinition describeKeyspace(final String keyspace)
   throws HectorException {
-    Operation<HKsDef> op = new Operation<HKsDef>(
+    Operation<KeyspaceDefinition> op = new Operation<KeyspaceDefinition>(
         OperationType.META_READ) {
       @Override
-      public HKsDef execute(Cassandra.Client cassandra)
+      public KeyspaceDefinition execute(Cassandra.Client cassandra)
       throws HectorException {
         try {
           return new ThriftKsDef(cassandra.describe_keyspace(keyspace));

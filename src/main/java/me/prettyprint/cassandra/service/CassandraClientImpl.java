@@ -1,13 +1,11 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevel;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -111,7 +109,7 @@ import org.slf4j.LoggerFactory;
     KeyspaceServiceImpl keyspace = keyspaceMap.get(keyspaceMapKey);
     if (keyspace == null) {
 
-      HKsDef keyspaceDesc = cluster.describeKeyspace(keyspaceName);
+      KeyspaceDefinition keyspaceDesc = cluster.describeKeyspace(keyspaceName);
       if ( keyspaceDesc == null ) {
         throw new HNotFoundException("That keyspace is not defined on the cluster: " + keyspaceName);
       }

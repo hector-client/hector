@@ -6,8 +6,8 @@ import java.util.Set;
 import me.prettyprint.cassandra.service.CassandraClient;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.ClockResolution;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
@@ -51,11 +51,11 @@ public interface Cluster {
 
   String describeThriftVersion() throws HectorException;
 
-  HKsDef describeKeyspace(final String keyspace) throws HectorException;
+  KeyspaceDefinition describeKeyspace(final String keyspace) throws HectorException;
 
   String getClusterName() throws HectorException;
 
-  List<HKsDef> describeKeyspaces() throws HectorException;
+  List<KeyspaceDefinition> describeKeyspaces() throws HectorException;
 
   /**
    * Drops the Keyspace from the cluster. Equivalent of 'drop database' in SQL terms
@@ -66,18 +66,18 @@ public interface Cluster {
   /**
    * Updates the Keyspace from the cluster.
    */
-  String updateKeyspace(final HKsDef ksdef) throws HectorException;
+  String updateKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
 
   String describePartitioner() throws HectorException;
 
-  String addColumnFamily(final HCfDef cfdef) throws HectorException;
+  String addColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException;
 
   String renameColumnFamily(final String oldName, final String newName) throws HectorException;
 
   String dropColumnFamily(final String keyspaceName, final String columnFamily)
       throws HectorException;
 
-  String addKeyspace(final HKsDef ksdef) throws HectorException;
+  String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
 
   String renameKeyspace(final String oldName, final String newName) throws HectorException;
 }

@@ -1,10 +1,10 @@
 package me.prettyprint.hector.api.ddl;
 
-public interface HColumnDef {
+public interface ColumnDefinition {
   // TODO(ran): should be typed
   byte[] getName();
   String getValidationClass();
-  HIndexType getIndexType();
+  ColumnIndexType getIndexType();
   String getIndexName();
 
 }
