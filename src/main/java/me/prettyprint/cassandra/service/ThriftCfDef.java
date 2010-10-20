@@ -8,13 +8,15 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 
+import me.prettyprint.hector.api.ddl.ColumnType;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import org.apache.cassandra.thrift.CfDef;
 
 public class ThriftCfDef implements ColumnFamilyDefinition {
 
-  private final String keyspace;
+  private final KeyspaceDefinition keyspace;
   private final String name;
-  private String columnType;
+  private ColumnType columnType;
   private String comparatorType;
   private String subcomparatorType;
   private String comment;
@@ -33,7 +35,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     Assert.notNull(d, "CfDef is null");
     keyspace = d.keyspace;
     name = d.name;
-    columnType = d.column_type;
+    columnType = ColumnType.getFromValue(d.column_type);
     comparatorType = d.comparator_type;
     subcomparatorType = d.subcomparator_type;
     comment = d.comment;
@@ -47,7 +49,6 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     id = d.id;
     minCompactionThreshold = d.min_compaction_threshold;
     maxCompactionThreshold = d.max_compaction_threshold;
-
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
@@ -68,7 +69,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public String getKeyspace() {
+  public KeyspaceDefinition getKeyspace() {
     return keyspace;
   }
 
@@ -78,7 +79,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public String getColumnType() {
+  public ColumnType getColumnType() {
     return columnType;
   }
 
@@ -140,9 +141,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   public CfDef toThrift() {
-    CfDef d = new CfDef(keyspace, name);
+    CfDef d = new CfDef(keyspace.getName(), name);
     d.column_metadata = ThriftColumnDef.toThriftList(columnMetadata);
-    d.column_type = columnType;
+    d.column_type = columnType.getValue();
     d.comment = comment;
     d.comparator_type = comparatorType;
     d.default_validation_class = defaultValidationClass;
@@ -178,7 +179,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     return minCompactionThreshold;
   }
 
-  public void setColumnType(String columnType) {
+  public void setColumnType(ColumnType columnType) {
     this.columnType = columnType;
   }
 

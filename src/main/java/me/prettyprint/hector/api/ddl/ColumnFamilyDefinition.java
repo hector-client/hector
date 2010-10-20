@@ -10,9 +10,9 @@ import java.util.List;
  */
 public interface ColumnFamilyDefinition {
 
-  String getKeyspace();
+  KeyspaceDefinition getKeyspace();
   String getName();
-  String getColumnType();
+  ColumnType getColumnType();
   String getComparatorType();
   String getSubcomparatorType();
   String getComment();

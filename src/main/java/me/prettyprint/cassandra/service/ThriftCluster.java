@@ -87,7 +87,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(cfdef.getKeyspace(), op);
+    operateWithFailover(cfdef.getKeyspace().getName(), op);
     return op.getResult();
   }
 
