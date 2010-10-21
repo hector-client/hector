@@ -74,6 +74,7 @@ public class ConcurrentHClientPool {
         if ( log.isDebugEnabled() ) {
           log.debug("blocking on queue - current block count {}", numBlocked.get());
         }
+        // wait and catch, creating a new one if the counts have changed. Infinite wait should just recurse.
         cassandraClient = maxWaitTimeWhenExhausted == 0 ? availableClientQueue.take() : availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
         log.debug("blocking complete");
       }      
@@ -155,7 +156,11 @@ public class ConcurrentHClientPool {
     boolean open = client.isOpen();
     if ( open ) {      
       availableClientQueue.add(client);  
-    } 
+    } else {
+      if ( activeClients.size() < getMaxActive() && numBlocked.get() > 0) {
+        availableClientQueue.add(new HThriftClient(cassandraHost).open());
+      }
+    }
     
     if ( log.isDebugEnabled() ) {
       log.debug("Status of releaseClient {} to queue: {}", client.toString(), open);
