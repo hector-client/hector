@@ -67,7 +67,8 @@ public class ConcurrentHClientPool {
       cassandraClient = availableClientQueue.poll();
       if ( cassandraClient == null ) {
         if ( tillExhausted > 0 ) {
-          availableClientQueue.add(new HThriftClient(cassandraHost).open());          
+          // if we start with #of threads == getMaxActive, we could trigger this condition
+          addClientToPoolGently(new HThriftClient(cassandraHost).open());
           log.debug("created new client. NumActive:{} untilExhausted: {}", currentActive, tillExhausted);
         }
         // blocked take on the queue if we are configured to wait forever  
@@ -155,19 +156,32 @@ public class ConcurrentHClientPool {
     numActive.decrementAndGet();    
     boolean open = client.isOpen();
     if ( open ) {      
-      availableClientQueue.add(client);  
+        addClientToPoolGently(client);
     } else {
       if ( activeClients.size() < getMaxActive() && numBlocked.get() > 0) {
-        availableClientQueue.add(new HThriftClient(cassandraHost).open());
+        addClientToPoolGently(new HThriftClient(cassandraHost).open());
       }
-    }
+    }    
     
     if ( log.isDebugEnabled() ) {
       log.debug("Status of releaseClient {} to queue: {}", client.toString(), open);
     }
   }
 
-
+  /**
+   * Avoids a race condition on adding clients back to the pool if pool is almost full.
+   * Almost always a result of batch operation startup and shutdown (when multiple threads 
+   * are releasing at the same time).
+   * @param client
+   */
+  private void addClientToPoolGently(HThriftClient client) {
+    try {
+      availableClientQueue.add(client);
+    } catch (IllegalStateException ise) {
+      log.error("Capacity hit adding client back to queue. Closing extra.");
+      client.close();
+    }
+  }
 
 
 
