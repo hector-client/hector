@@ -52,7 +52,7 @@ public class ConcurrentHClientPool {
           cassandraHost.getMaxActive(), 
           maxWaitTimeWhenExhausted});
     }
-  }
+  }  
   
 
   public HThriftClient borrowClient() throws HectorException {
@@ -62,35 +62,50 @@ public class ConcurrentHClientPool {
     HThriftClient cassandraClient;
     int currentActive = numActive.incrementAndGet();
     int tillExhausted = cassandraHost.getMaxActive() - currentActive;
-    try {      
-      numBlocked.incrementAndGet();
-      cassandraClient = availableClientQueue.poll();
-      if ( cassandraClient == null ) {
-        if ( tillExhausted > 0 ) {
-          // if we start with #of threads == getMaxActive, we could trigger this condition
-          addClientToPoolGently(new HThriftClient(cassandraHost).open());
-          log.debug("created new client. NumActive:{} untilExhausted: {}", currentActive, tillExhausted);
+
+    numBlocked.incrementAndGet();
+    cassandraClient = availableClientQueue.poll();
+    if ( cassandraClient == null ) {
+      if ( tillExhausted > 0 ) {
+        // if we start with #of threads == getMaxActive, we could trigger this condition
+        addClientToPoolGently(new HThriftClient(cassandraHost).open());
+        log.debug("created new client. NumActive:{} untilExhausted: {}", currentActive, tillExhausted);
+      }
+      // blocked take on the queue if we are configured to wait forever  
+      if ( log.isDebugEnabled() ) {
+        log.debug("blocking on queue - current block count {}", numBlocked.get());
+      }
+      // wait and catch, creating a new one if the counts have changed. Infinite wait should just recurse.
+      if ( maxWaitTimeWhenExhausted == 0 ) {
+        while (cassandraClient == null && active.get() ) {
+          try {
+            log.debug("polling...");
+            cassandraClient = availableClientQueue.poll(1, TimeUnit.SECONDS);
+            log.debug("polling complete.");
+          } catch (InterruptedException ie) {
+            log.debug("Spun through poll operation on retry forever");
+          }
         }
-        // blocked take on the queue if we are configured to wait forever  
-        if ( log.isDebugEnabled() ) {
-          log.debug("blocking on queue - current block count {}", numBlocked.get());
+      } else {
+
+        try {
+          cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ie) {
+          //monitor.incCounter(Counter.POOL_EXHAUSTED);
+          numActive.decrementAndGet();
+          throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread {} on host {}",
+              new Object[]{
+              Thread.currentThread().getName(), 
+              cassandraHost.getName()}
+          ));      
         }
-        // wait and catch, creating a new one if the counts have changed. Infinite wait should just recurse.
-        cassandraClient = maxWaitTimeWhenExhausted == 0 ? availableClientQueue.take() : availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
-        log.debug("blocking complete");
-      }      
-      activeClients.add(cassandraClient);
-      numBlocked.decrementAndGet();
-    } catch (InterruptedException ie) {
-      //monitor.incCounter(Counter.POOL_EXHAUSTED);
-      numActive.decrementAndGet();
-      throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread {} on host {}",
-          new Object[]{
-          Thread.currentThread().getName(), 
-          cassandraHost.getName()}
-      ));      
-    }
-        
+      }
+
+    }      
+    activeClients.add(cassandraClient);
+    numBlocked.decrementAndGet();
+
+
     return cassandraClient;
   }
 
