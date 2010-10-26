@@ -79,25 +79,26 @@ public class ConcurrentHClientPool {
       if ( maxWaitTimeWhenExhausted == 0 ) {
         while (cassandraClient == null && active.get() ) {
           try {
-            log.debug("polling...");
-            cassandraClient = availableClientQueue.poll(1, TimeUnit.SECONDS);
-            log.debug("polling complete.");
-          } catch (InterruptedException ie) {
-            log.debug("Spun through poll operation on retry forever");
+            cassandraClient = availableClientQueue.poll(100, TimeUnit.MILLISECONDS);
+          } catch (InterruptedException ie) {            
+            log.error("InterruptedException poll operation on retry forever", ie);
+            break;
           }
         }
       } else {
 
         try {
           cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
+          if ( cassandraClient == null ) {
+            throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread %s on host %s",
+                new Object[]{
+                Thread.currentThread().getName(), 
+                cassandraHost.getName()}
+            )); 
+          }
         } catch (InterruptedException ie) {
           //monitor.incCounter(Counter.POOL_EXHAUSTED);
-          numActive.decrementAndGet();
-          throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread {} on host {}",
-              new Object[]{
-              Thread.currentThread().getName(), 
-              cassandraHost.getName()}
-          ));      
+          numActive.decrementAndGet();     
         }
       }
 

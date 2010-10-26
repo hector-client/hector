@@ -120,7 +120,8 @@ public class HConnectionManager {
           excludeHosts.add(client.cassandraHost);
         }
         if ( retries == 0 ) throw he;
-        log.error("Could not fullfill request on this host {}", client.cassandraHost);
+        log.error("Could not fullfill request on this host {}", client);
+        log.error("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
         sleepBetweenHostSkips(op.failoverPolicy);
       } finally {                
