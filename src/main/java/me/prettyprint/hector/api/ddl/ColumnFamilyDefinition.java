@@ -10,11 +10,11 @@ import java.util.List;
  */
 public interface ColumnFamilyDefinition {
 
-  KeyspaceDefinition getKeyspace();
+  String getKeyspaceName();
   String getName();
   ColumnType getColumnType();
-  String getComparatorType();
-  String getSubcomparatorType();
+  ComparatorType getComparatorType();
+  ComparatorType getSubcomparatorType();
   String getComment();
   double getRowCacheSize();
   boolean isPreloadRowCache();

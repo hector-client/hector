@@ -5,20 +5,17 @@ import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.ddl.ColumnDefinition;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.*;
 
-import me.prettyprint.hector.api.ddl.ColumnType;
-import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import org.apache.cassandra.thrift.CfDef;
 
 public class ThriftCfDef implements ColumnFamilyDefinition {
 
-  private final KeyspaceDefinition keyspace;
+  private final String keyspace;
   private final String name;
   private ColumnType columnType;
-  private String comparatorType;
-  private String subcomparatorType;
+  private ComparatorType comparatorType;
+  private ComparatorType subcomparatorType;
   private String comment;
   private double rowCacheSize;
   private boolean preloadRowCache;
@@ -36,8 +33,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     keyspace = d.keyspace;
     name = d.name;
     columnType = ColumnType.getFromValue(d.column_type);
-    comparatorType = d.comparator_type;
-    subcomparatorType = d.subcomparator_type;
+    comparatorType = ComparatorType.valueOf(d.comparator_type);
+    subcomparatorType = ComparatorType.valueOf(d.subcomparator_type);
     comment = d.comment;
     rowCacheSize = d.row_cache_size;
     preloadRowCache = d.preload_row_cache;
@@ -69,7 +66,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public KeyspaceDefinition getKeyspace() {
+  public String getKeyspaceName() {
     return keyspace;
   }
 
@@ -84,12 +81,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public String getComparatorType() {
+  public ComparatorType getComparatorType() {
     return comparatorType;
   }
 
   @Override
-  public String getSubcomparatorType() {
+  public ComparatorType getSubcomparatorType() {
     return subcomparatorType;
   }
 
@@ -141,11 +138,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   public CfDef toThrift() {
-    CfDef d = new CfDef(keyspace.getName(), name);
+    CfDef d = new CfDef(keyspace, name);
     d.column_metadata = ThriftColumnDef.toThriftList(columnMetadata);
     d.column_type = columnType.getValue();
     d.comment = comment;
-    d.comparator_type = comparatorType;
+    d.comparator_type = comparatorType.name();
     d.default_validation_class = defaultValidationClass;
     d.gc_grace_seconds = gcGraceSeconds;
     d.id = id;
@@ -155,7 +152,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.preload_row_cache = preloadRowCache;
     d.read_repair_chance = readRepairChance;
     d.row_cache_size = rowCacheSize;
-    d.subcomparator_type = subcomparatorType;
+    d.subcomparator_type = subcomparatorType.name();
     return d;
   }
 
@@ -183,11 +180,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.columnType = columnType;
   }
 
-  public void setComparatorType(String comparatorType) {
+  public void setComparatorType(ComparatorType comparatorType) {
     this.comparatorType = comparatorType;
   }
 
-  public void setSubcomparatorType(String subcomparatorType) {
+  public void setSubcomparatorType(ComparatorType subcomparatorType) {
     this.subcomparatorType = subcomparatorType;
   }
 

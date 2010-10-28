@@ -17,6 +17,8 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ColumnType;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -65,9 +67,9 @@ public class FailoverOperatorTest {
     clientHosts.put(h2cassandra, hosts.get(1));
     clientHosts.put(h3cassandra, hosts.get(2));
 
-    when(keyspace1Desc.getKeyspace()).thenReturn(keyspaceName);
+    when(keyspace1Desc.getKeyspaceName()).thenReturn(keyspaceName);
     when(keyspace1Desc.getName()).thenReturn("Standard1");
-    when(keyspace1Desc.getColumnType()).thenReturn(KeyspaceService.CF_TYPE_STANDARD);
+    when(keyspace1Desc.getColumnType()).thenReturn(ColumnType.valueOf(KeyspaceService.CF_TYPE_STANDARD));
     when(keyspaceDesc.getCfDefs()).thenReturn(Arrays.asList(keyspace1Desc));
     
 

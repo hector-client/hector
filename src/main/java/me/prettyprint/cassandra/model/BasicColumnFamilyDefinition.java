@@ -1,10 +1,8 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.hector.api.ddl.ColumnDefinition;
-import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
-import me.prettyprint.hector.api.ddl.ColumnType;
-import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.ddl.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -17,89 +15,176 @@ import java.util.List;
 public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
 
+  private String keyspaceName;
+  private String name;
+  private ColumnType columnType;
+  private ComparatorType comparitorType;
+  private ComparatorType subComparitorType;
+  private String comment;
+  private double rowCacheSize;
+  private boolean preloadRowCache;
+  private double keyCacheSize;
+  private double readRepairChance;
+  private int gcGraceSeconds;
+  private String defaultValidationClass;
+  private int id;
+  private int maxCompactionThreshold;
+  private int minCompactionThreshold;
 
+  private List<ColumnDefinition> columnDefinitions;
+
+
+  public BasicColumnFamilyDefinition() {
+    this.columnDefinitions = new ArrayList<ColumnDefinition>();
+  }
+
+  public void setKeyspaceName(String keyspaceName) {
+    this.keyspaceName = keyspaceName;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setColumnType(ColumnType columnType) {
+    this.columnType = columnType;
+  }
+
+  public void setComparitorType(ComparatorType comparitorType) {
+    this.comparitorType = comparitorType;
+  }
+
+  public void setSubComparitorType(ComparatorType subComparitorType) {
+    this.subComparitorType = subComparitorType;
+  }
+
+  public void setComment(String comment) {
+    this.comment = comment;
+  }
+
+  public void setRowCacheSize(double rowCacheSize) {
+    this.rowCacheSize = rowCacheSize;
+  }
+
+  public void setPreloadRowCache(boolean preloadRowCache) {
+    this.preloadRowCache = preloadRowCache;
+  }
+
+  public void setKeyCacheSize(double keyCacheSize) {
+    this.keyCacheSize = keyCacheSize;
+  }
+
+  public void setReadRepairChance(double readRepairChance) {
+    this.readRepairChance = readRepairChance;
+  }
+
+  public void setGcGraceSeconds(int gcGraceSeconds) {
+    this.gcGraceSeconds = gcGraceSeconds;
+  }
+
+  public void setDefaultValidationClass(String defaultValidationClass) {
+    this.defaultValidationClass = defaultValidationClass;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setMaxCompactionThreshold(int maxCompactionThreshold) {
+    this.maxCompactionThreshold = maxCompactionThreshold;
+  }
+
+  public void setMinCompactionThreshold(int minCompactionThreshold) {
+    this.minCompactionThreshold = minCompactionThreshold;
+  }
+
+  public void addColumnDefinition( ColumnDefinition columnDefinition){
+    this.columnDefinitions.add( columnDefinition );
+  }
 
   /**
    * SHOULD THIS BE HERE? A COLUMN DEFINITION IS PART OF A KEYSPACE BY VIRTUE
    * OF BEING IN A KEYSPACE LIST
    */
   @Override
-  public KeyspaceDefinition getKeyspace() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  public String getKeyspaceName() {
+    return this.keyspaceName;
   }
 
   @Override
   public String getName() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.name;
   }
 
   @Override
   public ColumnType getColumnType() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.columnType;
   }
 
   @Override
-  public String getComparatorType() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  public ComparatorType getComparatorType() {
+    return this.comparitorType;
   }
 
   @Override
-  public String getSubcomparatorType() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+  public ComparatorType getSubcomparatorType() {
+    return this.subComparitorType;
   }
 
   @Override
   public String getComment() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.comment;
   }
 
   @Override
   public double getRowCacheSize() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.rowCacheSize;
   }
 
   @Override
   public boolean isPreloadRowCache() {
-    return false;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.preloadRowCache;
   }
 
   @Override
   public double getKeyCacheSize() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.keyCacheSize;
   }
 
   @Override
   public double getReadRepairChance() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.readRepairChance;
   }
 
   @Override
   public List<ColumnDefinition> getColumnMetadata() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.columnDefinitions;
   }
 
   @Override
   public int getGcGraceSeconds() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.gcGraceSeconds;
   }
 
   @Override
   public String getDefaultValidationClass() {
-    return null;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.defaultValidationClass;
   }
 
   @Override
   public int getId() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.id;
   }
 
   @Override
   public int getMaxCompactionThreshold() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.maxCompactionThreshold;
   }
 
   @Override
   public int getMinCompactionThreshold() {
-    return 0;  //To change body of implemented methods use File | Settings | File Templates.
+    return this.minCompactionThreshold;
   }
+
+
 }
