@@ -1,16 +1,6 @@
 package me.prettyprint.cassandra.examples;
 
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
-import static me.prettyprint.cassandra.utils.StringUtils.string;
-import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.CassandraClientPool;
-import me.prettyprint.cassandra.service.CassandraClientPoolFactory;
-import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
 
 /**
  * Example client that uses the cassandra hector client.
@@ -23,6 +13,7 @@ import org.apache.cassandra.thrift.ColumnPath;
 public class ExampleClient {
 
   public static void main(String[] args) throws HectorException {
+    /*
     CassandraClientPool pool = CassandraClientPoolFactory.INSTANCE.get();
     CassandraClient client = pool.borrowClient("tush", 9160);
     // A load balanced version would look like this:
@@ -52,5 +43,6 @@ public class ExampleClient {
         pool.releaseClient(client);
       }
     }
+    */
   }
 }

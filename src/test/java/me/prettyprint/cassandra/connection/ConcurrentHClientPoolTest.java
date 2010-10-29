@@ -1,24 +1,22 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.cassandra.connection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.service.CassandraHost;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-
-public class ConcurrentCassandraClientPoolByHostTest extends BaseEmbededServerSetupTest {
+public class ConcurrentHClientPoolTest extends BaseEmbededServerSetupTest {
     
   private CassandraHost cassandraHost;
-  private ConcurrentCassandraClientPoolByHost clientPool;
+  private ConcurrentHClientPool clientPool;
   
   @Before
   public void setupTest() {
     setupClient();
     cassandraHost = cassandraHostConfigurator.buildCassandraHosts()[0];
-    clientPool = new ConcurrentCassandraClientPoolByHost(cassandraHost, 
-        pools, 
-        JmxMonitor.INSTANCE.getCassandraMonitor());
+    clientPool = new ConcurrentHClientPool(cassandraHost);
   }
   
   @Test
@@ -30,8 +28,8 @@ public class ConcurrentCassandraClientPoolByHostTest extends BaseEmbededServerSe
   }
   
   @Test
-  public void testInvalidateAll() {
-    clientPool.invalidateAll();
+  public void testShutdown() {
+    clientPool.shutdown();
     assertEquals(0, clientPool.getNumIdle());
     assertEquals(0, clientPool.getNumBlockedThreads());
     assertEquals(0, clientPool.getNumActive());
@@ -39,7 +37,7 @@ public class ConcurrentCassandraClientPoolByHostTest extends BaseEmbededServerSe
   
   @Test
   public void testBorrowRelease() {
-    CassandraClient client = clientPool.borrowClient();
+    HThriftClient client = clientPool.borrowClient();
     assertEquals(1, clientPool.getNumActive());
     clientPool.releaseClient(client);
     assertEquals(0, clientPool.getNumActive());

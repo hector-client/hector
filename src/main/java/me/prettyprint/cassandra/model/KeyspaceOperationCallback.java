@@ -19,7 +19,7 @@ public abstract class KeyspaceOperationCallback<T> {
     T value = null;
     value = doInKeyspace(ks);
 
-    return new ExecutionResult<T>(value, System.nanoTime() - start, ks.getClient().getCassandraHost());
+    return new ExecutionResult<T>(value, System.nanoTime() - start, ks.getCassandraHost());
   }
 
 }

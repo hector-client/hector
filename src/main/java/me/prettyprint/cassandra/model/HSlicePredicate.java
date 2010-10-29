@@ -44,7 +44,17 @@ public final class HSlicePredicate<N> {
    *          a list of column names
    */
   public HSlicePredicate<N> setColumnNames(N... columnNames) {
-    this.columnNames = Arrays.asList(columnNames);
+    return setColumnNames(Arrays.asList(columnNames));
+  }
+  
+  /**
+   * Same as varargs signature, except we take a collection
+   *
+   * @param columns
+   *          a list of column names
+   */
+  public HSlicePredicate<N> setColumnNames(Collection<N> columnNames) {
+    this.columnNames = columnNames;
     predicateType = PredicateType.ColumnNames;
     return this;
   }
