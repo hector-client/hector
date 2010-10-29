@@ -15,7 +15,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private final String name;
   private ColumnType columnType;
   private ComparatorType comparatorType;
-  private ComparatorType subcomparatorType;
+  private ComparatorType subComparatorType;
   private String comment;
   private double rowCacheSize;
   private boolean preloadRowCache;
@@ -33,8 +33,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     keyspace = d.keyspace;
     name = d.name;
     columnType = ColumnType.getFromValue(d.column_type);
-    comparatorType = ComparatorType.valueOf(d.comparator_type);
-    subcomparatorType = ComparatorType.valueOf(d.subcomparator_type);
+    comparatorType = ComparatorType.getByClassName(d.comparator_type);
+    subComparatorType = ComparatorType.getByClassName(d.subcomparator_type);
     comment = d.comment;
     rowCacheSize = d.row_cache_size;
     preloadRowCache = d.preload_row_cache;
@@ -52,6 +52,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.keyspace = keyspace;
     this.name = columnFamilyName;
     columnMetadata = Collections.emptyList();
+
+    this.columnType = ColumnType.STANDARD;
+    this.comparatorType = ComparatorType.BYTESTYPE;
   }
 
   public static List<ColumnFamilyDefinition> fromThriftList(List<CfDef> cfDefs) {
@@ -86,8 +89,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public ComparatorType getSubcomparatorType() {
-    return subcomparatorType;
+  public ComparatorType getSubComparatorType() {
+    return subComparatorType;
   }
 
 
@@ -142,7 +145,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.column_metadata = ThriftColumnDef.toThriftList(columnMetadata);
     d.column_type = columnType.getValue();
     d.comment = comment;
-    d.comparator_type = comparatorType.name();
+    d.comparator_type = comparatorType.getClassName();
     d.default_validation_class = defaultValidationClass;
     d.gc_grace_seconds = gcGraceSeconds;
     d.id = id;
@@ -152,7 +155,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.preload_row_cache = preloadRowCache;
     d.read_repair_chance = readRepairChance;
     d.row_cache_size = rowCacheSize;
-    d.subcomparator_type = subcomparatorType.name();
+    if( subComparatorType!=null ){
+      d.subcomparator_type = subComparatorType.getClassName();
+    }
     return d;
   }
 
@@ -184,8 +189,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.comparatorType = comparatorType;
   }
 
-  public void setSubcomparatorType(ComparatorType subcomparatorType) {
-    this.subcomparatorType = subcomparatorType;
+  public void setSubComparatorType(ComparatorType subComparatorType) {
+    this.subComparatorType = subComparatorType;
   }
 
   public void setComment(String comment) {

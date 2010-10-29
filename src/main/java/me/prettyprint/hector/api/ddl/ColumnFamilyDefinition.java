@@ -14,7 +14,7 @@ public interface ColumnFamilyDefinition {
   String getName();
   ColumnType getColumnType();
   ComparatorType getComparatorType();
-  ComparatorType getSubcomparatorType();
+  ComparatorType getSubComparatorType();
   String getComment();
   double getRowCacheSize();
   boolean isPreloadRowCache();

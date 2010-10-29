@@ -23,7 +23,21 @@ public enum ComparatorType {
     this.className = className;
   }
 
+  public String getClassName() {
+    return this.className;
+  }
 
+  public static ComparatorType getByClassName( String className ){
 
-
+    for( int a=0; a<values().length; a++){
+      ComparatorType type = values()[a];
+      if( type.getClassName().equals( className)){
+        return type;
+      }
+      if( type.getClassName().equals( "org.apache.cassandra.db.marshal." + className)){
+        return type;
+      }
+    }
+    return null;
+  }
 }

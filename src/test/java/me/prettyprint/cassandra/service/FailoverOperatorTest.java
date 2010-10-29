@@ -69,7 +69,7 @@ public class FailoverOperatorTest {
 
     when(keyspace1Desc.getKeyspaceName()).thenReturn(keyspaceName);
     when(keyspace1Desc.getName()).thenReturn("Standard1");
-    when(keyspace1Desc.getColumnType()).thenReturn(ColumnType.valueOf(KeyspaceService.CF_TYPE_STANDARD));
+    when(keyspace1Desc.getColumnType()).thenReturn(ColumnType.STANDARD);
     when(keyspaceDesc.getCfDefs()).thenReturn(Arrays.asList(keyspace1Desc));
     
 

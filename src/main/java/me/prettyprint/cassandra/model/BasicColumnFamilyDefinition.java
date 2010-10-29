@@ -127,7 +127,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   }
 
   @Override
-  public ComparatorType getSubcomparatorType() {
+  public ComparatorType getSubComparatorType() {
     return this.subComparitorType;
   }
 

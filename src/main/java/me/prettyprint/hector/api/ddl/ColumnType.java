@@ -22,6 +22,10 @@ public enum ColumnType {
 
   public static ColumnType getFromValue( String value ){
 
+    if( value==null){
+      return ColumnType.STANDARD;
+    }
+
     ColumnType[] types = ColumnType.values();
     for( int a=0; a<types.length; a++){
       ColumnType type = types[a];
