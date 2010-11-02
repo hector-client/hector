@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service.spring;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
@@ -406,10 +407,10 @@ public class HectorTemplateImpl implements HectorTemplate {
   // probably should be typed for thrift vs. avro
   <N> ColumnPath createColumnPath(String columnFamilyName, N columnName,
       Serializer<N> nameSerializer) {
-    return createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
+    return createColumnPath(columnFamilyName, nameSerializer.toByteBuffer(columnName));
   }
 
-  private <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
+  private <N> ColumnPath createColumnPath(String columnFamilyName, ByteBuffer columnName) {
     Validate.notNull(columnFamilyName, "columnFamilyName cannot be null");
     ColumnPath columnPath = new ColumnPath(columnFamilyName);
     if (columnName != null) {
@@ -425,8 +426,8 @@ public class HectorTemplateImpl implements HectorTemplate {
   <SN, N> ColumnPath createSuperColumnPath(String columnFamilyName, SN superColumnName,
       N columnName, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
     noNullElements(columnFamilyName, superColumnName, superNameSerializer, nameSerializer);
-    ColumnPath columnPath = createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
-    columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
+    ColumnPath columnPath = createColumnPath(columnFamilyName, nameSerializer.toByteBuffer(columnName));
+    columnPath.setSuper_column(superNameSerializer.toByteBuffer(superColumnName));
     return columnPath;
   }
 
@@ -435,7 +436,7 @@ public class HectorTemplateImpl implements HectorTemplate {
     noNullElements(columnFamilyName, superNameSerializer);
     ColumnPath columnPath = createColumnPath(columnFamilyName, null);
     if (superColumnName != null) {
-      columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
+      columnPath.setSuper_column(superNameSerializer.toByteBuffer(superColumnName));
     }
     return columnPath;
   }
@@ -463,13 +464,13 @@ public class HectorTemplateImpl implements HectorTemplate {
   }
 
   @Override
-  public <K> SliceQuery<K, byte[], byte[]> createSliceQuery() {
+  public <K> SliceQuery<K, ByteBuffer, ByteBuffer> createSliceQuery() {
     return createSliceQuery(TypeInferringSerializer.<K>get(), BytesSerializer.get(), BytesSerializer.get());
   }
 
 
   @Override
-  public <K> SuperSliceQuery<K, byte[], byte[], byte[]> createSuperSliceQuery() {
+  public <K> SuperSliceQuery<K, ByteBuffer, ByteBuffer, ByteBuffer> createSuperSliceQuery() {
     return createSuperSliceQuery(TypeInferringSerializer.<K>get(), BytesSerializer.get(), BytesSerializer.get(), BytesSerializer.get());
   }
 

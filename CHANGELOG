@@ -14,6 +14,7 @@ Refactoring of the connection pooling innards to fix epic race condition on fail
 - Command is gone. It was no longer needed and was more confusing than anything else
 - Pooling logic has been stress tested by a neutral third party (no, really!)
 Upgrade to thrift 0.5 to match Cassandra (it caught us by surprise as well). 
+The system_rename_* methods were removed matching removal of such in Thrift API
 
 
 0.7.0-17

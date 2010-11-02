@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.nio.ByteBuffer;
+
 import me.prettyprint.hector.api.Serializer;
 
 
@@ -10,7 +12,7 @@ import me.prettyprint.hector.api.Serializer;
  * @author Ran Tavory
  *
  */
-public final class BytesSerializer extends AbstractSerializer<byte[]> implements Serializer<byte[]>{
+public final class BytesSerializer extends AbstractSerializer<ByteBuffer> implements Serializer<ByteBuffer>{
 
   private static BytesSerializer instance = new BytesSerializer();
 
@@ -19,12 +21,12 @@ public final class BytesSerializer extends AbstractSerializer<byte[]> implements
   }
 
   @Override
-  public byte[] fromBytes(byte[] bytes) {
+  public ByteBuffer fromByteBuffer(ByteBuffer bytes) {
     return bytes;
   }
 
   @Override
-  public byte[] toBytes(byte[] obj) {
+  public ByteBuffer toByteBuffer(ByteBuffer obj) {
     return obj;
   }
 }

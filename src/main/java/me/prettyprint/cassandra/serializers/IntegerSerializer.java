@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.nio.ByteBuffer;
+
 
 /**
  * Converts bytes to Integer and vice versa
@@ -16,7 +18,7 @@ public final class IntegerSerializer extends AbstractSerializer<Integer> {
   }
 
   @Override
-  public byte[] toBytes(Integer obj) {
+  public ByteBuffer toByteBuffer(Integer obj) {
     if (obj == null) {
       return null;
     }
@@ -26,18 +28,18 @@ public final class IntegerSerializer extends AbstractSerializer<Integer> {
     for (int i = 0; i < size; ++i) {
       b[i] = (byte) (l >> (size - i - 1 << 3));
     }
-    return b;
+    return ByteBuffer.wrap(b);
   }
 
   @Override
-  public Integer fromBytes(byte[] bytes) {
-    if (bytes == null) {
+  public Integer fromByteBuffer(ByteBuffer byteBuffer) {
+    if (byteBuffer == null) {
       return null;
-    }
+    }    
     int in = 0;
-    int size = bytes.length;
+    int size = byteBuffer.capacity();
     for (int i = 0; i < size; ++i) {
-      in |= (bytes[i] & 0xff) << (size - i - 1 << 3);
+      in |= (byteBuffer.get(i) & 0xff) << (size - i - 1 << 3);
     }
     return in;
   }

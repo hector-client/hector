@@ -1,6 +1,9 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.cassandra.utils.Assert.notNull;
+
+import java.nio.ByteBuffer;
+
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -42,8 +45,8 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");
-    name = nameSerializer.fromBytes(thriftColumn.getName());
-    value = valueSerializer.fromBytes(thriftColumn.getValue());
+    name = nameSerializer.fromByteBuffer(ByteBuffer.wrap(thriftColumn.getName()));
+    value = valueSerializer.fromByteBuffer(ByteBuffer.wrap(thriftColumn.getValue()));
     clock = thriftColumn.timestamp;
   }
 
@@ -106,14 +109,14 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
   }
 
   public Column toThrift() {
-    return ttl > 0 ? new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock).setTtl(ttl) :
-      new Column(nameSerializer.toBytes(name), valueSerializer.toBytes(value), clock);
+    return ttl > 0 ? new Column(nameSerializer.toByteBuffer(name), valueSerializer.toByteBuffer(value), clock).setTtl(ttl) :
+      new Column(nameSerializer.toByteBuffer(name), valueSerializer.toByteBuffer(value), clock);
   }
 
   public HColumn<N, V> fromThrift(Column c) {
     notNull(c, "column is null");
-    name = nameSerializer.fromBytes(c.name);
-    value = valueSerializer.fromBytes(c.value);
+    name = nameSerializer.fromByteBuffer(c.name);
+    value = valueSerializer.fromByteBuffer(c.value);
     clock = c.timestamp;
     ttl = c.ttl;
     return this;

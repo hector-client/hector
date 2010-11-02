@@ -1,5 +1,6 @@
 package me.prettyprint.hector.api.beans;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import me.prettyprint.hector.api.Serializer;
@@ -41,6 +42,8 @@ public interface HSuperColumn<SN, N, V> {
   Serializer<SN> getNameSerializer();
 
   byte[] getNameBytes();
+  
+  ByteBuffer getNameByteBuffer();
 
   Serializer<SN> getSuperNameSerializer();
 

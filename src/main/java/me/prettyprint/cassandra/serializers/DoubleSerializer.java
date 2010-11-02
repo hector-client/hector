@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.nio.ByteBuffer;
+
 import me.prettyprint.cassandra.serializers.AbstractSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 
@@ -17,13 +19,13 @@ public class DoubleSerializer extends AbstractSerializer<Double> {
   }
   
   @Override
-  public byte[] toBytes(Double obj) {
-    return LongSerializer.get().toBytes(Double.doubleToRawLongBits(obj));
+  public ByteBuffer toByteBuffer(Double obj) {
+    return LongSerializer.get().toByteBuffer(Double.doubleToRawLongBits(obj));
   }
 
   @Override
-  public Double fromBytes(byte[] bytes) {
-    return Double.longBitsToDouble (LongSerializer.get().fromBytes(bytes));
+  public Double fromByteBuffer(ByteBuffer bytes) {
+    return Double.longBitsToDouble (LongSerializer.get().fromByteBuffer(bytes));
   }
 
 }

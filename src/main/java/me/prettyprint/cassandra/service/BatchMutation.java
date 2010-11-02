@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -95,7 +96,7 @@ public final class BatchMutation<K> {
     return innerMutationMap;
   }
 
-  Map<byte[],Map<String,List<Mutation>>> getMutationMap() {
+  Map<ByteBuffer,Map<String,List<Mutation>>> getMutationMap() {
     return keySerializer.toBytesMap(mutationMap);
   }
 

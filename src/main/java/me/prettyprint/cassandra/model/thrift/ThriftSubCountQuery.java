@@ -50,8 +50,8 @@ public final class ThriftSubCountQuery<K,SN,N> extends AbstractThriftCountQuery<
           @Override
           public Integer doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
-            columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
-            Integer count = ks.getCount(keySerializer.toBytes(key), columnParent,
+            columnParent.setSuper_column(superNameSerializer.toByteBuffer(superColumnName));
+            Integer count = ks.getCount(keySerializer.toByteBuffer(key), columnParent,
                 slicePredicate.toThrift());
             return count;
           }

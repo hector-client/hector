@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -123,20 +124,20 @@ public final class HSlicePredicate<N> {
     return pred;
   }
 
-  private byte[] findBytes(N val) {
-    byte[] valBytes;
+  private ByteBuffer findBytes(N val) {
+    ByteBuffer valBytes;
     if (val == null) {
-      valBytes =  new byte[]{};
+      valBytes =  ByteBuffer.wrap(new byte[0]);
     } else {
-      valBytes = columnNameSerializer.toBytes(val);
+      valBytes = columnNameSerializer.toByteBuffer(val);
     }
     return valBytes;
   }
 
-  private List<byte[]> toThriftColumnNames(Collection<N> clms) {
-    List<byte[]> ret = new ArrayList<byte[]>(clms.size());
+  private List<ByteBuffer> toThriftColumnNames(Collection<N> clms) {
+    List<ByteBuffer> ret = new ArrayList<ByteBuffer>(clms.size());
     for (N name : clms) {
-      ret.add(columnNameSerializer.toBytes(name));
+      ret.add(columnNameSerializer.toByteBuffer(name));
     }
     return ret;
   }

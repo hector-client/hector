@@ -19,7 +19,7 @@ public class ThriftCfDef implements HCfDef {
   private String subcomparatorType;
   private String comment;
   private double rowCacheSize;
-  private boolean preloadRowCache;
+  private int rowCacheSavePeriodInSeconds;
   private double keyCacheSize;
   private double readRepairChance;
   private List<HColumnDef> columnMetadata;
@@ -38,7 +38,7 @@ public class ThriftCfDef implements HCfDef {
     subcomparatorType = d.subcomparator_type;
     comment = d.comment;
     rowCacheSize = d.row_cache_size;
-    preloadRowCache = d.preload_row_cache;
+    rowCacheSavePeriodInSeconds = d.row_cache_save_period_in_seconds;
     keyCacheSize = d.key_cache_size;
     readRepairChance = d.read_repair_chance;
     columnMetadata = ThriftColumnDef.fromThriftList(d.column_metadata);
@@ -101,11 +101,11 @@ public class ThriftCfDef implements HCfDef {
   @Override
   public double getRowCacheSize() {
     return rowCacheSize;
-  }
-
+  }  
+    
   @Override
-  public boolean isPreloadRowCache() {
-    return preloadRowCache;
+  public int getRowCacheSavePeriodInSeconds() {
+    return rowCacheSavePeriodInSeconds;
   }
 
   @Override
@@ -151,7 +151,7 @@ public class ThriftCfDef implements HCfDef {
     d.key_cache_size = keyCacheSize;
     d.max_compaction_threshold = maxCompactionThreshold;
     d.min_compaction_threshold = minCompactionThreshold;
-    d.preload_row_cache = preloadRowCache;
+    d.row_cache_save_period_in_seconds = rowCacheSavePeriodInSeconds;
     d.read_repair_chance = readRepairChance;
     d.row_cache_size = rowCacheSize;
     d.subcomparator_type = subcomparatorType;
@@ -196,10 +196,10 @@ public class ThriftCfDef implements HCfDef {
 
   public void setRowCacheSize(double rowCacheSize) {
     this.rowCacheSize = rowCacheSize;
-  }
+  }  
 
-  public void setPreloadRowCache(boolean preloadRowCache) {
-    this.preloadRowCache = preloadRowCache;
+  public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
+    this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
   }
 
   public void setKeyCacheSize(double keyCacheSize) {

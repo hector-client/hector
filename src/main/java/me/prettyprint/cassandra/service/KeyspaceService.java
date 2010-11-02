@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public interface KeyspaceService {
    * @throws HNotFoundException
    *           if no value exists for the column
    */
-  Column getColumn(byte[] key, ColumnPath columnPath) throws HectorException;
+  Column getColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
 
   Column getColumn(String key, ColumnPath columnPath) throws HectorException;
 
@@ -54,7 +55,7 @@ public interface KeyspaceService {
    * @throws HNotFoundException
    *           when a supercolumn is not found
    */
-  SuperColumn getSuperColumn(byte[] key, ColumnPath columnPath) throws HectorException;
+  SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
 
   SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException;
 
@@ -73,7 +74,7 @@ public interface KeyspaceService {
    * @throws HNotFoundException
    *           when a supercolumn is not found
    */
-  SuperColumn getSuperColumn(byte[] key, ColumnPath columnPath, boolean reversed, int size)
+  SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath, boolean reversed, int size)
       throws HectorException;
 
   /**
@@ -83,7 +84,7 @@ public interface KeyspaceService {
    * by the given predicate. If no matching values are found, an empty list is
    * returned.
    */
-  List<Column> getSlice(byte[] key, ColumnParent columnParent, SlicePredicate predicate)
+  List<Column> getSlice(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException;
 
   List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
@@ -92,7 +93,7 @@ public interface KeyspaceService {
   /**
    * Get the group of superColumn contained by columnParent.
    */
-  List<SuperColumn> getSuperSlice(byte[] key, ColumnParent columnParent,
+  List<SuperColumn> getSuperSlice(ByteBuffer key, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException;
 
   List<SuperColumn> getSuperSlice(String key, ColumnParent columnParent,
@@ -106,7 +107,7 @@ public interface KeyspaceService {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath)
+  Map<ByteBuffer, SuperColumn> multigetSuperColumn(List<ByteBuffer> keys, ColumnPath columnPath)
       throws HectorException;
 
   /**
@@ -117,37 +118,37 @@ public interface KeyspaceService {
    * both the column and superColumn references of the ColumnOrSuperColumn
    * object it maps to will be null.
    */
-  Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
+  Map<ByteBuffer, SuperColumn> multigetSuperColumn(List<ByteBuffer> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException;
 
   /**
    * Performs a get_slice for columnParent and predicate for the given keys in
    * parallel.
    */
-  Map<byte[], List<Column>> multigetSlice(List<byte[]> keys, ColumnParent columnParent,
+  Map<ByteBuffer, List<Column>> multigetSlice(List<ByteBuffer> keys, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException;
 
   /**
    * Performs a get_slice for a superColumn columnParent and predicate for the
    * given keys in parallel.
    */
-  Map<byte[], List<SuperColumn>> multigetSuperSlice(List<byte[]> keys,
+  Map<ByteBuffer, List<SuperColumn>> multigetSuperSlice(List<ByteBuffer> keys,
       ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
 
   /**
    * Inserts a column.
    */
-  void insert(byte[] key, ColumnParent columnParent, Column column) throws HectorException;
+  void insert(ByteBuffer key, ColumnParent columnParent, Column column) throws HectorException;
 
-  void insert(String key, ColumnPath columnPath, byte[] value) throws HectorException;
+  void insert(String key, ColumnPath columnPath, ByteBuffer value) throws HectorException;
 
-  void insert(String key, ColumnPath columnPath, byte[] value, long timestamp) throws HectorException;
+  void insert(String key, ColumnPath columnPath, ByteBuffer value, long timestamp) throws HectorException;
 
   /**
    * Call batch mutate with the assembled mutationMap. This method is a direct pass-through
    * to the underlying Thrift API
    */
-  void batchMutate(Map<byte[],Map<String,List<Mutation>>> mutationMap) throws HectorException;
+  void batchMutate(Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap) throws HectorException;
 
   /**
    * Call batch mutate with the BatchMutation object which encapsulates some of the complexity
@@ -155,12 +156,12 @@ public interface KeyspaceService {
    */
   void batchMutate(BatchMutation batchMutation) throws HectorException;
 
-  void remove(byte[] key, ColumnPath columnPath);
+  void remove(ByteBuffer key, ColumnPath columnPath);
 
 /**
    * Same as two argument version, but the caller must specify their own clock
    */
-  void remove(byte[] key, ColumnPath columnPath, long timestamp) throws HectorException;
+  void remove(ByteBuffer key, ColumnPath columnPath, long timestamp) throws HectorException;
 
   void remove(String key, ColumnPath columnPath) throws HectorException;
 
@@ -170,30 +171,30 @@ public interface KeyspaceService {
   /**
    * Counts the columns present in columnParent.
    */
-  int getCount(byte[] key, ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
+  int getCount(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
 
   /**
    * returns a subset of columns for a range of keys.
    */
-  Map<byte[], List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
+  Map<ByteBuffer, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
 
   /**
    * returns a subset of super columns for a range of keys.
    */
-  Map<byte[], List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
+  Map<ByteBuffer, List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
 
   /**
    * returns a subset of columns for a range of keys.
    */
-  Map<byte[], List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause,
+  Map<ByteBuffer, List<Column>> getIndexedSlices(ColumnParent columnParent, IndexClause indexClause,
       SlicePredicate predicate) throws HectorException;
 
   /**
    * Returns a map of key to column count
    */
-  Map<byte[], Integer> multigetCount(List<byte[]> keys, ColumnParent columnParent,
+  Map<ByteBuffer, Integer> multigetCount(List<ByteBuffer> keys, ColumnParent columnParent,
       SlicePredicate slicePredicate) throws HectorException;
 
   /**

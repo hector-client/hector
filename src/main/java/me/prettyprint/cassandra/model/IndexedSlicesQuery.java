@@ -42,44 +42,44 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
   }
 
   public IndexedSlicesQuery<K,N,V> addEqualsExpression(N columnName, V columnValue) {
-    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toBytes(columnName),
+    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
         IndexOperator.EQ,
-        valueSerializer.toBytes(columnValue)));
+        valueSerializer.toByteBuffer(columnValue)));
     return this;
   }
   
   public IndexedSlicesQuery<K,N,V> addLteExpression(N columnName, V columnValue) {
-    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toBytes(columnName),
+    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
         IndexOperator.LTE,
-        valueSerializer.toBytes(columnValue)));
+        valueSerializer.toByteBuffer(columnValue)));
     return this;
   }
   
   public IndexedSlicesQuery<K,N,V> addGteExpression(N columnName, V columnValue) {
-    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toBytes(columnName),
+    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
         IndexOperator.GTE,
-        valueSerializer.toBytes(columnValue)));
+        valueSerializer.toByteBuffer(columnValue)));
     return this;
   }
   
   public IndexedSlicesQuery<K,N,V> addLtExpression(N columnName, V columnValue) {
-    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toBytes(columnName),
+    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
         IndexOperator.LT,
-        valueSerializer.toBytes(columnValue)));
+        valueSerializer.toByteBuffer(columnValue)));
     return this;
   }
   
   public IndexedSlicesQuery<K,N,V> addGtExpression(N columnName, V columnValue) {
-    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toBytes(columnName),
+    indexClause.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
         IndexOperator.GT,
-        valueSerializer.toBytes(columnValue)));
+        valueSerializer.toByteBuffer(columnValue)));
     return this;
   }
   
   
 
   public IndexedSlicesQuery<K,N,V> setStartKey(K startKey) {
-    indexClause.setStart_key(keySerializer.toBytes(startKey));
+    indexClause.setStart_key(keySerializer.toByteBuffer(startKey));
     return this;
   }
 

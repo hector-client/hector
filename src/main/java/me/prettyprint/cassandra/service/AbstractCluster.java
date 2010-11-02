@@ -262,22 +262,7 @@ public abstract class AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-  @Override
-  public String renameColumnFamily(final String keyspaceName, final String oldName, final String newName) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
-      @Override
-      public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {
-          return cassandra.system_rename_column_family(oldName, newName);
-        } catch (Exception e) {
-          throw xtrans.translate(e);
-        }
-      }
-    };
-    connectionManager.operateWithFailover(op);
-    return op.getResult();
-  }
-
+  
   @Override
   public String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE,FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
@@ -294,21 +279,6 @@ public abstract class AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-  @Override
-  public String renameKeyspace(final String oldName, final String newName) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, oldName) {
-      @Override
-      public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {
-          return cassandra.system_rename_keyspace(oldName, newName);
-        } catch (Exception e) {
-          throw xtrans.translate(e);
-        }
-      }
-    };
-    connectionManager.operateWithFailover(op);
-    return op.getResult();
-  }
-
+  
 
 }
