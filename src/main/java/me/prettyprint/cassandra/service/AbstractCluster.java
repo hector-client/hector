@@ -4,7 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.connection.HThriftClient;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -43,7 +44,7 @@ public abstract class AbstractCluster implements Cluster {
 
   protected static final String KEYSPACE_SYSTEM = "system";
 
-  private final CassandraClientPool pool;
+  protected final HConnectionManager connectionManager;
   private final String name;
   private final CassandraHostConfigurator configurator;
   private ClockResolution clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
@@ -54,21 +55,16 @@ public abstract class AbstractCluster implements Cluster {
   protected final ExceptionsTranslator xtrans;
 
   public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
-    pool = CassandraClientPoolFactory.INSTANCE.createNew(cassandraHostConfigurator);
+    connectionManager = new HConnectionManager(cassandraHostConfigurator);
     name = clusterName;
     configurator = cassandraHostConfigurator;
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
+    cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
     xtrans = new ExceptionsTranslatorImpl();
   }
-
-  public AbstractCluster(String clusterName, CassandraClientPool pool) {
-    this.pool = pool;
-    name = clusterName;
-    configurator = null;
-    failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor();
-    xtrans = new ExceptionsTranslatorImpl();
+  
+  public HConnectionManager getConnectionManager() {
+    return connectionManager;
   }
 
   /* (non-Javadoc)
@@ -77,14 +73,17 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
-      knownPoolHosts = pool.getKnownHosts();
-      log.info("found knownPoolHosts: {}", knownPoolHosts);
+      knownPoolHosts = connectionManager.getHosts();
+      if ( log.isInfoEnabled() ) {
+        log.info("found knownPoolHosts: {}", knownPoolHosts);
+      }
     }
     return knownPoolHosts;
   }
 
   @Override
   public Set<String> getClusterHosts(boolean refresh) {
+    /* create an op
     if (refresh || knownClusterHosts == null) {
       CassandraClient client = borrowClient();
       try {
@@ -94,6 +93,8 @@ public abstract class AbstractCluster implements Cluster {
       }
     }
     return knownClusterHosts;
+    */
+    return null;
   }
 
   protected abstract Set<String> buildHostNames(Client cassandra);
@@ -106,8 +107,7 @@ public abstract class AbstractCluster implements Cluster {
     if (!skipApplyConfig && configurator != null) {
       configurator.applyConfig(cassandraHost);
     }
-    pool.addCassandraHost(cassandraHost);
-    pool.updateKnownHosts();
+    connectionManager.addCassandraHost(cassandraHost);    
   }
 
 
@@ -118,44 +118,9 @@ public abstract class AbstractCluster implements Cluster {
   public String getName() {
     return name;
   }
+  
 
-  @Override
-  public ClockResolution getClockResolution() {
-    return clockResolution;
-  }
-
-  @Override
-  public Cluster setClockResolution(ClockResolution clockResolution) {
-    this.clockResolution = clockResolution;
-    return this;
-  }
-
-
-  /* (non-Javadoc)
-   * @see me.prettyprint.cassandra.service.Cluster#borrowClient()
-   */
-  @Override
-  public CassandraClient borrowClient() throws HectorPoolException {
-    return pool.borrowClient();
-  }
-
-  /* (non-Javadoc)
-   * @see me.prettyprint.cassandra.service.Cluster#releaseClient(me.prettyprint.cassandra.service.CassandraClient)
-   */
-  @Override
-  public void releaseClient(CassandraClient client) {
-    pool.releaseClient(client);
-  }
-
-
-  /* (non-Javadoc)
-   * @see me.prettyprint.cassandra.service.Cluster#createTimestamp()
-   */
-  @Override
-  public long createClock() {
-    return clockResolution.createClock();
-  }
-
+  
 
 
   /* (non-Javadoc)
@@ -173,7 +138,7 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null, op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
@@ -192,7 +157,7 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null, op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
@@ -211,7 +176,7 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null, op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
@@ -236,7 +201,7 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null, op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
@@ -257,7 +222,7 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null, op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
@@ -273,7 +238,7 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null,op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
@@ -293,13 +258,13 @@ public abstract class AbstractCluster implements Cluster {
 
       }
     };
-    operateWithFailover(null,op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
   @Override
-  public String renameColumnFamily(final String oldName, final String newName) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+  public String renameColumnFamily(final String keyspaceName, final String oldName, final String newName) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -309,13 +274,13 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(null,op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
   @Override
   public String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE,FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -325,13 +290,13 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(keyspaceName,op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
 
   @Override
   public String renameKeyspace(final String oldName, final String newName) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, oldName) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -341,24 +306,9 @@ public abstract class AbstractCluster implements Cluster {
         }
       }
     };
-    operateWithFailover(oldName,op);
+    connectionManager.operateWithFailover(op);
     return op.getResult();
   }
-  protected void operateWithFailover(final String keyspaceName, Operation<?> op) throws HectorException {
-    CassandraClient client = null;
-    try {
-      client = borrowClient();
-      KeyspaceService keyspace = keyspaceName != null ? client.getKeyspace(keyspaceName) : null;
-      FailoverOperator operator = new FailoverOperator(failoverPolicy,
-          cassandraClientMonitor, client, pool, keyspace);
-      client = operator.operate(op);
-    } finally {
-      try {
-        releaseClient(client);
-      } catch (Exception e) {
-        log.error("Unable to release a client", e);
-      }
-    }
-  }
+
 
 }

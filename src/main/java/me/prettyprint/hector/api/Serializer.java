@@ -1,5 +1,6 @@
 package me.prettyprint.hector.api;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +30,8 @@ public interface Serializer<T> {
    * @return
    */
   public byte[] toBytes(T obj);
+  
+  public ByteBuffer toByteBuffer(T obj);  
 
   /**
    * Extract an object of type T from the bytes.
@@ -36,6 +39,8 @@ public interface Serializer<T> {
    * @return
    */
   public T fromBytes(byte[] bytes);
+  
+  public T fromByteBuffer(ByteBuffer byteBuffer);
 
   public Set<byte[]> toBytesSet(List<T> list);
 

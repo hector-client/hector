@@ -1,7 +1,9 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.connection.HThriftClient;
 import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
@@ -18,14 +20,14 @@ public class ExecutingKeyspace implements Keyspace {
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
 
-  private final Cluster cluster;
+  private final HConnectionManager connectionManager;
   private final String keyspace;
 
-  public ExecutingKeyspace(String keyspace, Cluster cluster,
+  public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
-    Assert.noneNull(keyspace, cluster, consistencyLevelPolicy);
+    Assert.noneNull(keyspace, consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
-    this.cluster = cluster;
+    this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
   }
 
@@ -33,32 +35,25 @@ public class ExecutingKeyspace implements Keyspace {
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
     this.consistencyLevelPolicy = cp;
   }
-
-  @Override
-  public Cluster getCluster() {
-    return cluster;
-  }
-
+  
   @Override
   public String toString() {
-    return "ExecutingKeyspace(" + keyspace +"," + cluster + ")";
+    return "ExecutingKeyspace(" + keyspace +"," + connectionManager + ")";
   }
 
   @Override
   public long createClock() {
-    return cluster.createClock();
+    return connectionManager.createClock();
   }
 
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
-    CassandraClient c = null;
     KeyspaceService ks = null;
     try {
-        c = cluster.borrowClient();
-        ks = c.getKeyspace(keyspace, consistencyLevelPolicy.get(OperationType.READ));
-        return koc.doInKeyspaceAndMeasure(ks);
+      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy.get(OperationType.READ), connectionManager);      
+      return koc.doInKeyspaceAndMeasure(ks);
     } finally {
       if (ks != null) {
-        cluster.releaseClient(ks.getClient());
+        //connectionManager.releaseClient(ks.getClient());
       }
     }
   }

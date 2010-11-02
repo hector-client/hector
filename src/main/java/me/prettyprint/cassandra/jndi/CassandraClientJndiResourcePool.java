@@ -1,8 +1,6 @@
 package me.prettyprint.cassandra.jndi;
 
 
-import me.prettyprint.cassandra.service.CassandraClient;
-import me.prettyprint.cassandra.service.JndiCassandraClientFactory;
 
 import org.apache.commons.pool.impl.GenericObjectPool;
 
@@ -24,6 +22,7 @@ public class CassandraClientJndiResourcePool extends GenericObjectPool {
    */
   
   public CassandraClientJndiResourcePool(String url, int port) {
-    super(new JndiCassandraClientFactory(url, port)); 
+    // TODO fix this
+    //super(new JndiCassandraClientFactory(url, port)); 
   }
 }

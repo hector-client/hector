@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.ddl.HCfDef;
 import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -39,38 +39,32 @@ import org.slf4j.LoggerFactory;
  * @author Ran Tavory (rantav@gmail.com)
  *
  */
-/* package */class KeyspaceServiceImpl implements KeyspaceService {
+public class KeyspaceServiceImpl implements KeyspaceService {
 
   @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
 
-  private CassandraClient client;
-
   private final String keyspaceName;
 
-  private final HKsDef keyspaceDesc;
+  //private final HKsDef keyspaceDesc;
 
-  private final ConsistencyLevel consistency;
-
-  private final FailoverPolicy failoverPolicy;
-
-  private final CassandraClientPool clientPools;
-
-  private final CassandraClientMonitor monitor;
+  private final ConsistencyLevel consistency;  
 
   private final ExceptionsTranslator xtrans;
+  
+  private final HConnectionManager connectionManager;
+  
+  private CassandraHost cassandraHost;
+  
+  
 
-  public KeyspaceServiceImpl(CassandraClient client, String keyspaceName,
-      HKsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPool clientPools, CassandraClientMonitor monitor)
+  public KeyspaceServiceImpl(String keyspaceName, 
+      ConsistencyLevel consistencyLevel,
+      HConnectionManager connectionManager)
       throws HectorTransportException {
-    this.client = client;
     this.consistency = consistencyLevel;
-    this.keyspaceDesc = keyspaceDesc;
     this.keyspaceName = keyspaceName;
-    this.failoverPolicy = failoverPolicy;
-    this.clientPools = clientPools;
-    this.monitor = monitor;
+    this.connectionManager = connectionManager;
     xtrans = new ExceptionsTranslatorImpl();
   }
 
@@ -78,7 +72,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public void batchMutate(final Map<byte[],Map<String,List<Mutation>>> mutationMap)
       throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
@@ -102,7 +96,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public int getCount(final byte[] key, final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
-    Operation<Integer> op = new Operation<Integer>(OperationType.READ) {
+    Operation<Integer> op = new Operation<Integer>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Integer execute(Cassandra.Client cassandra) throws HectorException {
@@ -117,19 +111,21 @@ import org.slf4j.LoggerFactory;
     return op.getResult();
   }
 
-  private void operateWithFailover(Operation<?> op) throws HectorException {
-    FailoverOperator operator = new FailoverOperator(failoverPolicy, monitor, client,
-        clientPools, this);
-    client = operator.operate(op);
+  private void operateWithFailover(Operation<?> op) throws HectorException {    
+    connectionManager.operateWithFailover(op);
+    this.cassandraHost = op.getCassandraHost();
   }
 
+  public CassandraHost getCassandraHost() {
+    return this.cassandraHost;
+  }
 
 
   @Override
   public Map<byte[], List<Column>> getRangeSlices(final ColumnParent columnParent,
       final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
     Operation<Map<byte[], List<Column>>> op = new Operation<Map<byte[], List<Column>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<Column>> execute(Cassandra.Client cassandra)
@@ -162,7 +158,7 @@ import org.slf4j.LoggerFactory;
       final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange)
       throws HectorException {
     Operation<Map<byte[], List<SuperColumn>>> op = new Operation<Map<byte[], List<SuperColumn>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<SuperColumn>> execute(Cassandra.Client cassandra)
@@ -192,7 +188,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public List<Column> getSlice(final byte[] key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws HectorException {
-    Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ) {
+    Operation<List<Column>> op = new Operation<List<Column>>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public List<Column> execute(Cassandra.Client cassandra) throws HectorException {
@@ -227,7 +223,7 @@ import org.slf4j.LoggerFactory;
   public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
 //    valideColumnPath(columnPath);
 
-    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
@@ -261,9 +257,9 @@ import org.slf4j.LoggerFactory;
   @Override
   public SuperColumn getSuperColumn(final byte[] key, final ColumnPath columnPath,
       final boolean reversed, final int size) throws HectorException {
-    valideSuperColumnPath(columnPath);
+    //valideSuperColumnPath(columnPath);
     final SliceRange sliceRange = new SliceRange(new byte[0], new byte[0], reversed, size);
-    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ) {
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
@@ -298,7 +294,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public List<SuperColumn> getSuperSlice(final byte[] key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws HectorException {
-    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ) {
+    Operation<List<SuperColumn>> op = new Operation<List<SuperColumn>>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public List<SuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
@@ -326,7 +322,7 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void insert(final byte[] key, final ColumnParent columnParent, final Column column) throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
@@ -348,7 +344,7 @@ import org.slf4j.LoggerFactory;
       if (columnPath.isSetSuper_column()) {
         columnParent.setSuper_column(columnPath.getSuper_column());
       }
-      Column column = new Column(columnPath.getColumn(), value, createClock());
+      Column column = new Column(columnPath.getColumn(), value, connectionManager.createClock());
       insert(key.getBytes(), columnParent, column);
   }
 
@@ -368,7 +364,7 @@ import org.slf4j.LoggerFactory;
   public Map<byte[], List<Column>> multigetSlice(final List<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<Column>>> getCount = new Operation<Map<byte[], List<Column>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
@@ -402,7 +398,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public Map<byte[], SuperColumn> multigetSuperColumn(List<byte[]> keys, ColumnPath columnPath,
       boolean reversed, int size) throws HectorException {
-    valideSuperColumnPath(columnPath);
+    //valideSuperColumnPath(columnPath);
 
     // only can get supercolumn by multigetSuperSlice
     ColumnParent clp = new ColumnParent(columnPath.getColumn_family());
@@ -433,7 +429,7 @@ import org.slf4j.LoggerFactory;
   public Map<byte[], List<SuperColumn>> multigetSuperSlice(final List<byte[]> keys,
       final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<SuperColumn>>> getCount = new Operation<Map<byte[], List<SuperColumn>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<SuperColumn>> execute(Cassandra.Client cassandra)
@@ -480,7 +476,7 @@ import org.slf4j.LoggerFactory;
       final IndexClause indexClause,
       final SlicePredicate predicate) throws HectorException {
     Operation<Map<byte[], List<Column>>> op = new Operation<Map<byte[], List<Column>>>(
-        OperationType.READ) {
+        OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], List<Column>> execute(Cassandra.Client cassandra)
@@ -508,13 +504,13 @@ import org.slf4j.LoggerFactory;
 
   @Override
   public void remove(byte[] key, ColumnPath columnPath) {
-    this.remove(key, columnPath, createClock());
+    this.remove(key, columnPath, connectionManager.createClock());
   }
 
   @Override
   public Map<byte[], Integer> multigetCount(final List<byte[]> keys, final ColumnParent columnParent,
       final SlicePredicate slicePredicate) throws HectorException {
-    Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ) {
+    Operation<Map<byte[],Integer>> op = new Operation<Map<byte[],Integer>>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Map<byte[], Integer> execute(Cassandra.Client cassandra) throws HectorException {
@@ -532,7 +528,7 @@ import org.slf4j.LoggerFactory;
   @Override
   public void remove(final byte[] key, final ColumnPath columnPath, final long timestamp)
   throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.WRITE) {
+    Operation<Void> op = new Operation<Void>(OperationType.WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
@@ -568,16 +564,10 @@ import org.slf4j.LoggerFactory;
 
 
   @Override
-  public CassandraClient getClient() {
-    return client;
-  }
-
-
-  @Override
   public Column getColumn(final byte[] key, final ColumnPath columnPath) throws HectorException {
 //    valideColumnPath(columnPath);
 
-    Operation<Column> op = new Operation<Column>(OperationType.READ) {
+    Operation<Column> op = new Operation<Column>(OperationType.READ, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
 
       @Override
       public Column execute(Cassandra.Client cassandra) throws HectorException {
@@ -612,12 +602,7 @@ import org.slf4j.LoggerFactory;
     return consistency;
   }
 
-
-  @Override
-  public long createClock() {
-    return client.getClockResolution().createClock();
-  }
-
+/*
   private HCfDef getCfDef(String cf) {
       List<HCfDef> cfDefs = keyspaceDesc.getCfDefs();
       if (cfDefs != null) {
@@ -629,7 +614,7 @@ import org.slf4j.LoggerFactory;
       }
       return null;
   }
-
+*/
 //  /**
 //   * Make sure that if the given column path was a Column. Throws an
 //   * InvalidRequestException if not.
@@ -668,6 +653,7 @@ import org.slf4j.LoggerFactory;
    *
    * @throws HInvalidRequestException
    */
+  /*
   private void valideSuperColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
     String cf = columnPath.getColumn_family();
     HCfDef cfdefine;
@@ -678,6 +664,7 @@ import org.slf4j.LoggerFactory;
     throw new HInvalidRequestException(
         "Invalid super column name or super column family does not exist: " + cf);
   }
+  */
 
   private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
@@ -716,18 +703,12 @@ import org.slf4j.LoggerFactory;
   }
 
 
-  @Override
-  public FailoverPolicy getFailoverPolicy() {
-    return failoverPolicy;
-  }
-
-
 
   @Override
   public String toString() {
     StringBuilder b = new StringBuilder();
     b.append("KeyspaceImpl<");
-    b.append(getClient());
+    b.append(keyspaceName);
     b.append(">");
     return b.toString();
   }
