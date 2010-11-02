@@ -56,7 +56,6 @@
         <groupId>org.ops4j</groupId>
         <artifactId>maven-pax-plugin</artifactId>
         <version>1.4</version>
-        <extensions>true</extensions>
         <configuration>
           <provision>
             <param>--platform=equinox</param>
@@ -68,6 +67,7 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.3</version>
+        <extensions>true</extensions>
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>

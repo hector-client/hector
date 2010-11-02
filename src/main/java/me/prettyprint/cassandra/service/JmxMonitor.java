@@ -14,7 +14,6 @@ import javax.management.ObjectName;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
 
-import org.apache.log4j.xml.DOMConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
