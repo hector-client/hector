@@ -20,6 +20,6 @@ public class BooleanSerializerTest {
 
   private void test(Boolean bool) {
     BooleanSerializer ext = BooleanSerializer.get();
-    assertEquals(bool, ext.fromBytes(ext.toBytes(bool)));
+    assertEquals(bool, ext.fromByteBuffer(ext.toByteBuffer(bool)));
   }
 }

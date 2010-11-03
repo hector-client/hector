@@ -21,6 +21,6 @@ public class UUIDSerializerTest {
 
   private void test(UUID uuid) {
     UUIDSerializer ext = UUIDSerializer.get();
-    assertEquals(uuid, ext.fromBytes(ext.toBytes(uuid)));
+    assertEquals(uuid, ext.fromByteBuffer(ext.toByteBuffer(uuid)));
   }
 }
