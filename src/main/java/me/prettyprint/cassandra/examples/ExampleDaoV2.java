@@ -22,6 +22,11 @@ import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 
+/**
+ * Thread Safe
+ * @author Ran Tavory
+ *
+ */
 public class ExampleDaoV2 {
 
   private final static String KEYSPACE = "Keyspace1";

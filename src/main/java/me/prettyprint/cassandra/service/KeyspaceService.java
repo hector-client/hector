@@ -13,7 +13,6 @@ import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
@@ -21,7 +20,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 /**
  * The keyspace is a high level handle to all read/write operations to cassandra.
  *
- * A Keyspace object is not thread safe. Use one keyspace per thread please!
+ * A Keyspace object is NOT THREAD SAFE. Use one keyspace per thread please!
  *
  * @author rantav
  */
