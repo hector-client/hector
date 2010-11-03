@@ -25,8 +25,9 @@ import me.prettyprint.hector.api.Serializer;
 public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
-  public abstract byte[] toBytes(T obj);
+  public abstract ByteBuffer toByteBuffer(T obj);
   
+  /*
   public ByteBuffer toByteBuffer(T obj) {
     return ByteBuffer.wrap(toBytes(obj));
   }
@@ -35,10 +36,12 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
     byteBuffer.put(toBytes(obj), offset, length);
     return byteBuffer;
   }
+  */
 
   @Override
-  public abstract T fromBytes(byte[] bytes);
-  
+  public abstract T fromByteBuffer(ByteBuffer byteBuffer);
+
+  /*
   public T fromByteBuffer(ByteBuffer byteBuffer) {
     return fromBytes(byteBuffer.array());
   }
@@ -46,49 +49,49 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
   public T fromByteBuffer(ByteBuffer byteBuffer, int offset, int length) {
     return fromBytes(Arrays.copyOfRange(byteBuffer.array(), offset, length));
   }
-  
+  */
 
   @Override
-  public Set<byte[]> toBytesSet(List<T> list) {
-    Set<byte[]> bytesList = new HashSet<byte[]>();
+  public Set<ByteBuffer> toBytesSet(List<T> list) {
+    Set<ByteBuffer> bytesList = new HashSet<ByteBuffer>();
     for (T s : list) {
-      bytesList.add(toBytes(s));
+      bytesList.add(toByteBuffer(s));
     }
     return bytesList;
   }
 
   @Override
-  public List<T> fromBytesSet(Set<byte[]> set) {
+  public List<T> fromBytesSet(Set<ByteBuffer> set) {
     List<T> objList = new ArrayList<T>();
-    for (byte[] b : set) {
-      objList.add(fromBytes(b));
+    for (ByteBuffer b : set) {
+      objList.add(fromByteBuffer(b));
     }
     return objList;
   }
 
   @Override
-  public List<byte[]> toBytesList(List<T> list) {
-    List<byte[]> bytesList = new ArrayList<byte[]>();
+  public List<ByteBuffer> toBytesList(List<T> list) {
+    List<ByteBuffer> bytesList = new ArrayList<ByteBuffer>();
     for (T s : list) {
-      bytesList.add(toBytes(s));
+      bytesList.add(toByteBuffer(s));
     }
     return bytesList;
   }
 
   @Override
-  public <V> Map<byte[], V> toBytesMap(Map<T, V> map) {
-    Map<byte[], V> bytesMap = new LinkedHashMap<byte[], V>();
+  public <V> Map<ByteBuffer, V> toBytesMap(Map<T, V> map) {
+    Map<ByteBuffer, V> bytesMap = new LinkedHashMap<ByteBuffer, V>();
     for (Entry<T, V> entry : map.entrySet()) {
-      bytesMap.put(toBytes(entry.getKey()), entry.getValue());
+      bytesMap.put(toByteBuffer(entry.getKey()), entry.getValue());
     }
     return bytesMap;
   }
 
   @Override
-  public <V> Map<T, V> fromBytesMap(Map<byte[], V> map) {
+  public <V> Map<T, V> fromBytesMap(Map<ByteBuffer, V> map) {
     Map<T, V> objMap = new LinkedHashMap<T, V>();
-    for (Entry<byte[], V> entry : map.entrySet()) {
-      objMap.put(fromBytes(entry.getKey()), entry.getValue());
+    for (Entry<ByteBuffer, V> entry : map.entrySet()) {
+      objMap.put(fromByteBuffer(entry.getKey()), entry.getValue());
     }
     return objMap;
   }

@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.cassandra.utils.Assert.noneNull;
 import static me.prettyprint.cassandra.utils.Assert.notNull;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -55,7 +56,7 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     this(sNameSerializer, nameSerializer, valueSerializer);
     noneNull(thriftSuperColumn, sNameSerializer, nameSerializer, valueSerializer);
-    superName = sNameSerializer.fromBytes(thriftSuperColumn.getName());
+    superName = sNameSerializer.fromByteBuffer(ByteBuffer.wrap(thriftSuperColumn.getName()));
     columns = fromThriftColumns(thriftSuperColumn.getColumns());
   }
 
@@ -123,14 +124,18 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
 
   @Override
   public byte[] getNameBytes() {
-    return superNameSerializer.toBytes(getName());
+    return superNameSerializer.toByteBuffer(getName()).array();
+  }
+  
+  public ByteBuffer getNameByteBuffer() {
+    return superNameSerializer.toByteBuffer(getName());
   }
 
   public SuperColumn toThrift() {
     if (superName == null || columns == null) {
       return null;
     }
-    return new SuperColumn(superNameSerializer.toBytes(superName), toThriftColumn());
+    return new SuperColumn(superNameSerializer.toByteBuffer(superName), toThriftColumn());
   }
 
   private List<Column> toThriftColumn() {

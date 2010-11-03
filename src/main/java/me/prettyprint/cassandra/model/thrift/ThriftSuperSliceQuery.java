@@ -58,7 +58,7 @@ public final class ThriftSuperSliceQuery<K, SN, N, V> extends
           @Override
           public SuperSlice<SN, N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            List<SuperColumn> thriftRet = ks.getSuperSlice(keySerializer.toBytes(key),
+            List<SuperColumn> thriftRet = ks.getSuperSlice(keySerializer.toByteBuffer(key),
                 columnParent, getPredicate());
             return new SuperSliceImpl<SN, N, V>(thriftRet, columnNameSerializer, nameSerializer,
                 valueSerializer);

@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.nio.ByteBuffer;
 import java.util.Date;
 
 /**
@@ -20,18 +21,18 @@ public final class DateSerializer extends AbstractSerializer<Date> {
   }
 
   @Override
-  public byte[] toBytes(Date obj) {
+  public ByteBuffer toByteBuffer(Date obj) {
     if (obj == null) {
       return null;
     }
-    return LONG_SERIALIZER.toBytes(obj.getTime());
+    return LONG_SERIALIZER.toByteBuffer(obj.getTime());
   }
 
   @Override
-  public Date fromBytes(byte[] bytes) {
+  public Date fromByteBuffer(ByteBuffer bytes) {
     if (bytes == null) {
       return null;
     }
-    return new Date(LONG_SERIALIZER.fromBytes(bytes));
+    return new Date(LONG_SERIALIZER.fromByteBuffer(bytes));
   }
 }
