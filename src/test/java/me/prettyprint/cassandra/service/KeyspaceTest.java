@@ -811,6 +811,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ColumnParent clp = new ColumnParent("Standard1");
     SlicePredicate slicePredicate = new SlicePredicate();
     SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
+    slicePredicate.setSlice_range(sr);
     Map<ByteBuffer,Integer> counts = keyspace.multigetCount(keys, clp, slicePredicate);
     assertEquals(5,counts.size());
     assertEquals(new Integer(25),counts.entrySet().iterator().next().getValue());

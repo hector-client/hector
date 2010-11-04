@@ -87,7 +87,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     cassandraCluster.addKeyspace(
         new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)));
     
-    String ksid2 = cassandraCluster.dropKeyspace("MyDynKeyspace");
+    String ksid2 = cassandraCluster.dropKeyspace("DynKeyspace");
     assertNotNull(ksid2);
   }
 }
