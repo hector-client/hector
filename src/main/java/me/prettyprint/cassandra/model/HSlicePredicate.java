@@ -106,7 +106,7 @@ public final class HSlicePredicate<N> {
 
     switch (predicateType) {
     case ColumnNames:
-      if (columnNames == null || columnNames.isEmpty()) {
+      if (columnNames == null ) {
         return null;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
