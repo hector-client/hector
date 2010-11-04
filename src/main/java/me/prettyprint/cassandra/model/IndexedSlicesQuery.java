@@ -90,7 +90,7 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
         new KeyspaceOperationCallback<OrderedRows<K,N,V>>() {
           @Override
           public OrderedRows<K,N,V> doInKeyspace(KeyspaceService ks) throws HectorException {
-            if (indexClause.getStart_key() == null) {
+            if (!indexClause.isSetStart_key()) {
               indexClause.setStart_key(new byte[0]);
             }
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
