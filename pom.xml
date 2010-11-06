@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>bundle</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.7.0-18</version>
+  <version>0.7.0-19_10252010</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -18,6 +18,7 @@
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
     <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
+    <slf4j.version>1.5.11</slf4j.version>
   </properties>
 
   <issueManagement>
@@ -55,7 +56,6 @@
         <groupId>org.ops4j</groupId>
         <artifactId>maven-pax-plugin</artifactId>
         <version>1.4</version>
-        <extensions>true</extensions>
         <configuration>
           <provision>
             <param>--platform=equinox</param>
@@ -67,6 +67,7 @@
         <groupId>org.apache.felix</groupId>
         <artifactId>maven-bundle-plugin</artifactId>
         <version>1.4.3</version>
+        <extensions>true</extensions>
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
@@ -183,32 +184,36 @@
     <dependency>
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
-      <version>959516</version>
+      <version>0.5</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>apache-cassandra</artifactId>
-      <version>0.7.0-beta2</version>
+      <version>0.7.0-rc1</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
-      <version>1.5.8</version>
+      <version>${slf4j.version}</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>
-      <version>1.5.8</version>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
-      <version>1.5.8</version>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
       <version>1.2.14</version>
+      <scope>runtime</scope>
+      <optional>true</optional>
     </dependency>            
     <dependency>
       <groupId>org.perf4j</groupId>
@@ -275,7 +280,6 @@
       <groupId>org.cliffc.high_scale_lib</groupId>
       <artifactId>high-scale-lib</artifactId>
       <version>1.0</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>

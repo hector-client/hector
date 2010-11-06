@@ -45,7 +45,7 @@ public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
           @Override
           public Map<K,Integer> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
-            columnParent.setSuper_column(superNameSerializer.toBytes(superColumnName));
+            columnParent.setSuper_column(superNameSerializer.toByteBuffer(superColumnName));
             Map<K,Integer> counts = keySerializer.fromBytesMap(
                 ks.multigetCount(keySerializer.toBytesList(keys), columnParent, slicePredicate.toThrift()));
             return counts;

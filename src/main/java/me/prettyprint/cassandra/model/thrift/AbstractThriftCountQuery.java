@@ -56,7 +56,7 @@ import org.apache.cassandra.thrift.ColumnParent;
           @Override
           public Integer doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamily);
-            return ks.getCount(keySerializer.toBytes(key), columnParent,
+            return ks.getCount(keySerializer.toByteBuffer(key), columnParent,
                 slicePredicate.toThrift());
           }
         }), this);

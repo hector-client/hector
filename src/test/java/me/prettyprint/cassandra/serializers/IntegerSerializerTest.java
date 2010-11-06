@@ -25,6 +25,6 @@ public class IntegerSerializerTest {
 
   private void test(Integer number) {
     IntegerSerializer ext = IntegerSerializer.get();
-    assertEquals(number, ext.fromBytes(ext.toBytes(number)));
+    assertEquals(number, ext.fromByteBuffer(ext.toByteBuffer(number)));
   }
 }

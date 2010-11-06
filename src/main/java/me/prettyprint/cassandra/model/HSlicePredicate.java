@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -20,14 +22,16 @@ import org.apache.cassandra.thrift.SliceRange;
  */
 public final class HSlicePredicate<N> {
 
-  /** Use column names or start/finish? */
-  protected boolean useColumnNames;
   protected Collection<N> columnNames;
   protected N start;
   protected N finish;
   protected boolean reversed;
   protected int count;
+  /** Is count already set? */
+  private boolean countSet = false;
   protected final Serializer<N> columnNameSerializer;
+  protected enum PredicateType {Unknown, ColumnNames, Range};
+  protected PredicateType predicateType = PredicateType.Unknown;
 
   public HSlicePredicate(Serializer<N> columnNameSerializer) {
     Assert.notNull(columnNameSerializer, "columnNameSerializer can't be null");
@@ -41,8 +45,18 @@ public final class HSlicePredicate<N> {
    *          a list of column names
    */
   public HSlicePredicate<N> setColumnNames(N... columnNames) {
-    this.columnNames = Arrays.asList(columnNames);
-    useColumnNames = true;
+    return setColumnNames(Arrays.asList(columnNames));
+  }
+  
+  /**
+   * Same as varargs signature, except we take a collection
+   *
+   * @param columns
+   *          a list of column names
+   */
+  public HSlicePredicate<N> setColumnNames(Collection<N> columnNames) {
+    this.columnNames = columnNames;
+    predicateType = PredicateType.ColumnNames;
     return this;
   }
 
@@ -53,7 +67,7 @@ public final class HSlicePredicate<N> {
    */
   public HSlicePredicate<N> setKeysOnlyPredicate() {
     this.columnNames = new ArrayList<N>();
-    useColumnNames = true;
+    predicateType = PredicateType.ColumnNames;
     return this;
   }
 
@@ -74,7 +88,8 @@ public final class HSlicePredicate<N> {
     this.finish = finish;
     this.reversed = reversed;
     this.count = count;
-    useColumnNames = false;
+    countSet = true;
+    predicateType = PredicateType.Range;
     return this;
   }
 
@@ -82,34 +97,47 @@ public final class HSlicePredicate<N> {
     return Collections.unmodifiableCollection(columnNames);
   }
 
+  /**
+   * Will throw a runtime exception if neither columnsNames nor count were set.
+   * @return
+   */
   public SlicePredicate toThrift() {
     SlicePredicate pred = new SlicePredicate();
-    if (useColumnNames) {
-      if (columnNames == null) {
+
+    switch (predicateType) {
+    case ColumnNames:
+      if (columnNames == null || columnNames.isEmpty()) {
         return null;
       }
       pred.setColumn_names(toThriftColumnNames(columnNames));
-    } else {
-      pred.setSlice_range(new SliceRange(findBytes(start),findBytes(finish),
-          reversed, count));
+      break;
+    case Range:
+      Assert.isTrue(countSet, "Count was not set, neither were column-names set, can't execute");
+      SliceRange range = new SliceRange(findBytes(start), findBytes(finish), reversed, count);
+      pred.setSlice_range(range);
+      break;
+    case Unknown:
+    default:
+      throw new HectorException(
+          "Neither column names nor range were set, this is an invalid slice predicate");
     }
     return pred;
   }
 
-  private byte[] findBytes(N val) {
-    byte[] valBytes;
+  private ByteBuffer findBytes(N val) {
+    ByteBuffer valBytes;
     if (val == null) {
-      valBytes =  new byte[]{};
+      valBytes =  ByteBuffer.wrap(new byte[0]);
     } else {
-      valBytes = columnNameSerializer.toBytes(val);
+      valBytes = columnNameSerializer.toByteBuffer(val);
     }
     return valBytes;
   }
 
-  private List<byte[]> toThriftColumnNames(Collection<N> clms) {
-    List<byte[]> ret = new ArrayList<byte[]>(clms.size());
+  private List<ByteBuffer> toThriftColumnNames(Collection<N> clms) {
+    List<ByteBuffer> ret = new ArrayList<ByteBuffer>(clms.size());
     for (N name : clms) {
-      ret.add(columnNameSerializer.toBytes(name));
+      ret.add(columnNameSerializer.toByteBuffer(name));
     }
     return ret;
   }
@@ -117,6 +145,7 @@ public final class HSlicePredicate<N> {
   @Override
   public String toString() {
     return "HSlicePredicate("
-        + (useColumnNames ? columnNames : "cStart:" + start + ",cFinish:" + finish) + ")";
+        + (predicateType == PredicateType.ColumnNames ? columnNames :
+          "cStart:" + start + ",cFinish:" + finish) + ")";
   }
 }

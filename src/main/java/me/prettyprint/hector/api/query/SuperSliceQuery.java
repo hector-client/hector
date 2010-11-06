@@ -19,12 +19,12 @@ public interface SuperSliceQuery<K, SN, N, V> extends Query<SuperSlice<SN, N, V>
 
   SuperSliceQuery<K, SN, N, V> setKey(K key);
 
-  SuperSliceQuery<K, SN, N, V> setColumnNames(N... columnNames);
+  SuperSliceQuery<K, SN, N, V> setColumnNames(SN... columnNames);
 
-  SuperSliceQuery<K, SN, N, V> setRange(N start, N finish, boolean reversed, int count);
+  SuperSliceQuery<K, SN, N, V> setRange(SN start, SN finish, boolean reversed, int count);
 
   SuperSliceQuery<K, SN, N, V> setColumnFamily(String cf);
 
-  Collection<N> getColumnNames();
+  Collection<SN> getColumnNames();
 
 }

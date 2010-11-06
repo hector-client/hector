@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -31,18 +32,18 @@ public class ObjectSerializerTest {
   @Test
   public void testEmptyByteArray_shouldReturnNull() {
     ObjectSerializer ser = ObjectSerializer.get();
-    assertNull("An empty byte array should be translated to null", ser.fromBytes(new byte[0]));
+    assertNull("An empty byte array should be translated to null", ser.fromByteBuffer(ByteBuffer.wrap(new byte[0])));
   }
 
   @Test(expected = HectorSerializationException.class)
   public void testMalformedObject_shouldThrow() {
     ObjectSerializer ser = ObjectSerializer.get();
-    ser.fromBytes(new byte[]{1, 2, 3});
+    ser.fromByteBuffer(ByteBuffer.wrap(new byte[]{1, 2, 3}));
   }
 
   private void test(Object object) {
     ObjectSerializer ser = ObjectSerializer.get();
-    assertEquals(object, ser.fromBytes(ser.toBytes(object)));
+    assertEquals(object, ser.fromByteBuffer(ser.toByteBuffer(object)));
   }
 
 

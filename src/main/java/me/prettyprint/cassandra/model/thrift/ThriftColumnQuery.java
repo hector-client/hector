@@ -54,7 +54,7 @@ public class ThriftColumnQuery<K, N, V> extends AbstractColumnQuery<K, N, V> imp
           @Override
           public HColumn<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             try {
-              Column thriftColumn = ks.getColumn(keySerializer.toBytes(key),
+              Column thriftColumn = ks.getColumn(keySerializer.toByteBuffer(key),
                   ThriftFactory.createColumnPath(columnFamilyName, name, columnNameSerializer));
               return new HColumnImpl<N, V>(thriftColumn, columnNameSerializer, valueSerializer);
             } catch (HNotFoundException e) {

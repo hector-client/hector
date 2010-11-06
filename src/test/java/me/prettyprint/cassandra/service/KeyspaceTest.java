@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,18 +51,14 @@ import org.junit.Test;
  */
 public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
-  private CassandraClient client;
   private KeyspaceService keyspace;
   private static final StringSerializer se = new StringSerializer();
 
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
-    client = new CassandraClientFactory(pools,
-        new CassandraHost("127.0.0.1", 9170), JmxMonitor.getInstance().getCassandraMonitor()).create();
-
-    keyspace = client.getKeyspace("Keyspace1", ConsistencyLevel.ONE,
-        CassandraClient.DEFAULT_FAILOVER_POLICY);
+    
+    keyspace = new KeyspaceServiceImpl("Keyspace1", ConsistencyLevel.ONE, connectionManager);
   }
 
   @Test
@@ -73,7 +70,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     cp.setColumn(bytes("testInsertAndGetAndRemove"));
     for (int i = 0; i < 100; i++) {
       keyspace.insert("testInsertAndGetAndRemove_" + i, cp,
-          bytes("testInsertAndGetAndRemove_value_" + i));
+          StringSerializer.get().toByteBuffer("testInsertAndGetAndRemove_value_" + i));
     }
 
     // get value
@@ -109,14 +106,15 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
     // insert value
     ColumnParent columnParent = new ColumnParent("Super1");
-    columnParent.setSuper_column(bytes("testInsertSuper_super"));
-    Column column = new Column(bytes("testInsertSuper_column"), bytes("testInsertSuper_value"), keyspace.createClock());
+    columnParent.setSuper_column(StringSerializer.get().toByteBuffer("testInsertSuper_super"));
+    Column column = new Column(StringSerializer.get().toByteBuffer("testInsertSuper_column"), 
+        StringSerializer.get().toByteBuffer("testInsertSuper_value"), connectionManager.createClock());
 
 
 
-    keyspace.insert(bytes("testInsertSuper_key"), columnParent, column);
-    column.setName(bytes("testInsertSuper_column2"));
-    keyspace.insert(bytes("testInsertSuper_key"), columnParent, column);
+    keyspace.insert(StringSerializer.get().toByteBuffer("testInsertSuper_key"), columnParent, column);
+    column.setName(StringSerializer.get().toByteBuffer("testInsertSuper_column2"));
+    keyspace.insert(StringSerializer.get().toByteBuffer("testInsertSuper_key"), columnParent, column);
 
     // get value and assert
     ColumnPath cp2 = new ColumnPath("Super1");
@@ -183,8 +181,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
-        Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
+        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j),
+            StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j), connectionManager.createClock());
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -219,10 +217,10 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       Map<String, List<Mutation>> mutationMap = new HashMap<String, List<Mutation>>();
       SlicePredicate slicePredicate = new SlicePredicate();
       for (int j = 0; j < 10; j++) {
-        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
+        slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(keyspace.createClock());
+      Deletion deletion = new Deletion(connectionManager.createClock());
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -253,8 +251,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 10; i++) {
 
       for (int j = 0; j < 10; j++) {
-        Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
+        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j),
+            StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j), connectionManager.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -278,9 +276,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 10; i++) {
       SlicePredicate slicePredicate = new SlicePredicate();
       for (int j = 0; j < 10; j++) {
-        slicePredicate.addToColumn_names(bytes("testBatchMutateColumn_" + j));
+        slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(keyspace.createClock());
+      Deletion deletion = new Deletion(connectionManager.createClock());
       deletion.setPredicate(slicePredicate);
       batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
@@ -307,7 +305,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     ColumnPath sta1 = new ColumnPath("Standard1");
     sta1.setColumn(bytes("deleteThroughInserBatch_col"));
 
-    keyspace.insert("deleteThroughInserBatch_key", sta1, bytes("deleteThroughInserBatch_val"));
+    keyspace.insert("deleteThroughInserBatch_key", sta1, StringSerializer.get().toByteBuffer("deleteThroughInserBatch_val"));
 
     Column found = keyspace.getColumn("deleteThroughInserBatch_key", sta1);
     assertNotNull(found);
@@ -317,15 +315,15 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 10; i++) {
 
       for (int j = 0; j < 10; j++) {
-        Column col = new Column(bytes("testBatchMutateColumn_" + j),
-            bytes("testBatchMutateColumn_value_" + j), keyspace.createClock());
+        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j),
+            StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j), connectionManager.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
     SlicePredicate slicePredicate = new SlicePredicate();
-    slicePredicate.addToColumn_names(bytes("deleteThroughInserBatch_col"));
+    slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("deleteThroughInserBatch_col"));
 
-    Deletion deletion = new Deletion(keyspace.createClock());
+    Deletion deletion = new Deletion(connectionManager.createClock());
     deletion.setPredicate(slicePredicate);
 
     batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);
@@ -350,10 +348,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     }
   }
 
-  @Test
-  public void testGetClient() {
-    assertEquals(client, keyspace.getClient());
-  }
+
 
   @Test
   public void testGetSuperColumn() throws HectorException {
@@ -392,13 +387,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 100; i++) {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetSlice_" + i));
-      keyspace.insert("testGetSlice", cp, bytes("testGetSlice_Value_" + i));
+      keyspace.insert("testGetSlice", cp, StringSerializer.get().toByteBuffer("testGetSlice_Value_" + i));
       columnnames.add("testGetSlice_" + i);
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Standard2");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
     List<Column> cols = keyspace.getSlice("testGetSlice", clp, sp);
@@ -432,13 +427,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       cp2.setSuper_column(bytes("SuperColumn_2"));
       cp2.setColumn(bytes("testGetSuperSlice_" + i));
 
-      keyspace.insert("testGetSuperSlice", cp, bytes("testGetSuperSlice_Value_" + i));
-      keyspace.insert("testGetSuperSlice", cp2, bytes("testGetSuperSlice_Value_" + i));
+      keyspace.insert("testGetSuperSlice", cp, StringSerializer.get().toByteBuffer("testGetSuperSlice_Value_" + i));
+      keyspace.insert("testGetSuperSlice", cp2, StringSerializer.get().toByteBuffer("testGetSuperSlice_Value_" + i));
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Super1");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
     List<SuperColumn> cols = keyspace.getSuperSlice("testGetSuperSlice", clp, sp);
@@ -457,7 +452,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     cp.setColumn(bytes("testMultigetColumn"));
     ArrayList<String> keys = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
-      keyspace.insert("testMultigetColumn_" + i, cp, bytes("testMultigetColumn_value_" + i));
+      keyspace.insert("testMultigetColumn_" + i, cp, StringSerializer.get().toByteBuffer("testMultigetColumn_value_" + i));
       keys.add("testMultigetColumn_" + i);
     }
 
@@ -515,12 +510,12 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     cp.setColumn(bytes("testMultigetSlice"));
     ArrayList<String> keys = new ArrayList<String>(100);
     for (int i = 0; i < 100; i++) {
-      keyspace.insert("testMultigetSlice_" + i, cp, bytes("testMultigetSlice_value_" + i));
+      keyspace.insert("testMultigetSlice_" + i, cp, StringSerializer.get().toByteBuffer("testMultigetSlice_value_" + i));
       keys.add("testMultigetSlice_" + i);
     }
     // get value
     ColumnParent clp = new ColumnParent("Standard1");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
     Map<String, List<Column>> ms = se.fromBytesMap(keyspace.multigetSlice(se.toBytesList(keys), clp, sp));
@@ -646,7 +641,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 100; i++) {
       ColumnPath cp = new ColumnPath("Standard1");
       cp.setColumn(bytes("testInsertAndGetAndRemove_" + i));
-      keyspace.insert("testGetCount", cp, bytes("testInsertAndGetAndRemove_value_" + i));
+      keyspace.insert("testGetCount", cp, StringSerializer.get().toByteBuffer("testInsertAndGetAndRemove_value_" + i));
     }
 
     // get value
@@ -664,14 +659,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlice_" + i));
 
-      keyspace.insert("testGetRangeSlice0", cp, bytes("testGetRangeSlice_Value_" + i));
-      keyspace.insert("testGetRangeSlice1", cp, bytes("testGetRangeSlice_Value_" + i));
-      keyspace.insert("testGetRangeSlice2", cp, bytes("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice0", cp, StringSerializer.get().toByteBuffer("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice1", cp, StringSerializer.get().toByteBuffer("testGetRangeSlice_Value_" + i));
+      keyspace.insert("testGetRangeSlice2", cp, StringSerializer.get().toByteBuffer("testGetRangeSlice_Value_" + i));
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Standard2");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
     /*
@@ -697,14 +692,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ColumnPath cp = new ColumnPath("Standard2");
       cp.setColumn(bytes("testGetRangeSlices_" + i));
 
-      keyspace.insert("testGetRangeSlices0", cp, bytes("testGetRangeSlices_Value_" + i));
-      keyspace.insert("testGetRangeSlices1", cp, bytes("testGetRangeSlices_Value_" + i));
-      keyspace.insert("testGetRangeSlices2", cp, bytes("testGetRangeSlices_Value_" + i));
+      keyspace.insert("testGetRangeSlices0", cp, StringSerializer.get().toByteBuffer("testGetRangeSlices_Value_" + i));
+      keyspace.insert("testGetRangeSlices1", cp, StringSerializer.get().toByteBuffer("testGetRangeSlices_Value_" + i));
+      keyspace.insert("testGetRangeSlices2", cp, StringSerializer.get().toByteBuffer("testGetRangeSlices_Value_" + i));
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Standard2");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
 
@@ -732,13 +727,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ColumnPath cp = new ColumnPath("Super1");
       cp.setSuper_column(bytes("SuperColumn_1"));
       cp.setColumn(bytes("testGetSuperRangeSlice_" + i));
-      keyspace.insert("testGetSuperRangeSlice0", cp, bytes("testGetSuperRangeSlice_Value_" + i));
-      keyspace.insert("testGetSuperRangeSlice1", cp, bytes("testGetSuperRangeSlice_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlice0", cp, StringSerializer.get().toByteBuffer("testGetSuperRangeSlice_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlice1", cp, StringSerializer.get().toByteBuffer("testGetSuperRangeSlice_Value_" + i));
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Super1");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
 
@@ -767,13 +762,13 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       ColumnPath cp = new ColumnPath("Super1");
       cp.setSuper_column(bytes("SuperColumn_1"));
       cp.setColumn(bytes("testGetSuperRangeSlices_" + i));
-      keyspace.insert("testGetSuperRangeSlices0", cp, bytes("testGetSuperRangeSlices_Value_" + i));
-      keyspace.insert("testGetSuperRangeSlices1", cp, bytes("testGetSuperRangeSlices_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlices0", cp, StringSerializer.get().toByteBuffer("testGetSuperRangeSlices_Value_" + i));
+      keyspace.insert("testGetSuperRangeSlices1", cp, StringSerializer.get().toByteBuffer("testGetSuperRangeSlices_Value_" + i));
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Super1");
-    SliceRange sr = new SliceRange(new byte[0], new byte[0], false, 150);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
     SlicePredicate sp = new SlicePredicate();
     sp.setSlice_range(sr);
 
@@ -800,27 +795,28 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   @Test
   public void testMultigetCount() {
     // insert 25 columns into 10 rows
-    List<byte[]> keys = new ArrayList<byte[]>();
+    List<ByteBuffer> keys = new ArrayList<ByteBuffer>();
     for ( int j=0; j < 10; j++ ) {
       for (int i = 0; i < 25; i++) {
         ColumnPath cp = new ColumnPath("Standard1");
-        cp.setColumn(bytes("testMultigetCount_column_" + i));
-        keyspace.insert("testMultigetCount_key_"+j, cp, bytes("testMultigetCount_value_" + i));
+        cp.setColumn(StringSerializer.get().toByteBuffer("testMultigetCount_column_" + i));
+        keyspace.insert("testMultigetCount_key_"+j, cp, StringSerializer.get().toByteBuffer("testMultigetCount_value_" + i));
       }
       if (j % 2 == 0) {
-        keys.add(("testMultigetCount_key_"+j).getBytes());
+        keys.add(StringSerializer.get().toByteBuffer("testMultigetCount_key_"+j));
       }
     }
 
     // get value
     ColumnParent clp = new ColumnParent("Standard1");
     SlicePredicate slicePredicate = new SlicePredicate();
-    slicePredicate.setSlice_range(new SliceRange("".getBytes(), "".getBytes(), false, 100));
-    Map<byte[],Integer> counts = keyspace.multigetCount(keys, clp, slicePredicate);
+    SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), false, 150);
+    Map<ByteBuffer,Integer> counts = keyspace.multigetCount(keys, clp, slicePredicate);
     assertEquals(5,counts.size());
     assertEquals(new Integer(25),counts.entrySet().iterator().next().getValue());
 
-    slicePredicate.setSlice_range(new SliceRange("".getBytes(), "".getBytes(), false, 5));
+    slicePredicate.setSlice_range(new SliceRange(StringSerializer.get().toByteBuffer(""), 
+        StringSerializer.get().toByteBuffer(""), false, 5));
     counts = keyspace.multigetCount(keys, clp, slicePredicate);
 
     assertEquals(5,counts.size());

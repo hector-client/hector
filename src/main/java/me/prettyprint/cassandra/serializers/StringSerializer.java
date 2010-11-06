@@ -3,6 +3,9 @@ package me.prettyprint.cassandra.serializers;
 import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static me.prettyprint.cassandra.utils.StringUtils.string;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+
 /**
  * A StringSerializer translates the byte[] to and from string using utf-8 encoding.
  * @author Ran Tavory
@@ -17,18 +20,22 @@ public final class StringSerializer extends AbstractSerializer<String> {
   }
 
   @Override
-  public byte[] toBytes(String obj) {
+  public ByteBuffer toByteBuffer(String obj) {
     if (obj == null) {
       return null;
     }
-    return bytes(obj);
+    try {
+      return ByteBuffer.wrap(obj.getBytes("UTF-8"));
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException(e);
+    }    
   }
 
   @Override
-  public String fromBytes(byte[] bytes) {
-    if (bytes == null) {
+  public String fromByteBuffer(ByteBuffer byteBuffer) {
+    if (byteBuffer == null) {
       return null;
     }
-    return string(bytes);
+    return new String(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(), byteBuffer.remaining());    
   }
 }

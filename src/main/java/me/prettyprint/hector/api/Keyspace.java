@@ -10,7 +10,6 @@ public interface Keyspace {
 
   void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp);
 
-  Cluster getCluster();
 
   long createClock();
 
