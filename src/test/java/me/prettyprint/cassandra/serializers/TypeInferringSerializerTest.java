@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.serializers;
 import static org.junit.Assert.assertEquals;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -30,9 +31,9 @@ public class TypeInferringSerializerTest {
   @SuppressWarnings("rawtypes")
   private void test(Object object) {
     TypeInferringSerializer ext = TypeInferringSerializer.get();
-    byte[] bytes = ext.toBytes(object);
+    ByteBuffer bytes = ext.toByteBuffer(object);
     Serializer ser = SerializerTypeInferer.getSerializer(object.getClass());
-    Object target = ser.fromBytes(bytes);
+    Object target = ser.fromByteBuffer(bytes);
     assertEquals(object, target);
   }
 

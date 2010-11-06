@@ -47,8 +47,8 @@ public final class HKeyRange<K> {
     Assert.notNull(endKey, "end can't be null");
 
     KeyRange keyRange = new KeyRange(rowCount);
-    keyRange.setStart_key(keySerializer.toBytes(startKey));
-    keyRange.setEnd_key(keySerializer.toBytes(endKey));
+    keyRange.setStart_key(keySerializer.toByteBuffer(startKey));
+    keyRange.setEnd_key(keySerializer.toByteBuffer(endKey));
     return keyRange;
   }
 

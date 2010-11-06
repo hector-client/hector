@@ -48,7 +48,7 @@ public final class ThriftSuperColumnQuery<K, SN,N,V> extends AbstractSuperColumn
             try {
               ColumnPath cpath = ThriftFactory.createSuperColumnPath(columnFamilyName, superName, (N) null,
                   sNameSerializer, columnNameSerializer);
-              SuperColumn thriftSuperColumn = ks.getSuperColumn(keySerializer.toBytes(key), cpath);
+              SuperColumn thriftSuperColumn = ks.getSuperColumn(keySerializer.toByteBuffer(key), cpath);
               if (thriftSuperColumn == null) {
                 return null;
               }

@@ -115,7 +115,7 @@ public final class HFactory {
 
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return new ExecutingKeyspace(keyspace, cluster, consistencyLevelPolicy);
+    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy);
   }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {

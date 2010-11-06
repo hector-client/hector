@@ -16,7 +16,7 @@ public final class UUIDSerializer extends AbstractSerializer<UUID> {
     return instance;
   }
 
-  public byte[] toBytes(UUID uuid) {
+  public ByteBuffer toByteBuffer(UUID uuid) {
     if (uuid == null) {
       return null;
     }
@@ -31,15 +31,14 @@ public final class UUIDSerializer extends AbstractSerializer<UUID> {
       buffer[i] = (byte) (lsb >>> 8 * (7 - i));
     }
 
-    return buffer;
+    return ByteBuffer.wrap(buffer);
   }
 
-  public UUID fromBytes(byte[] bytes) {
+  public UUID fromByteBuffer(ByteBuffer bytes) {
     if (bytes == null) {
       return null;
-    }
-    ByteBuffer bb = ByteBuffer.wrap(bytes, 0, 16);
-    return new UUID(bb.getLong(), bb.getLong());
+    }    
+    return new UUID(bytes.getLong(), bytes.getLong());
   }
 
 }

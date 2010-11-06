@@ -17,5 +17,7 @@ This client provides:
  o JMX conters for monitoring and management
  o load balancing
 
+Detailed documentation of Hector features and usage can be found in PDF hosted by Riptano: http://www.riptano.com/sites/default/files/hector-v2-client-doc.pdf
+
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 
