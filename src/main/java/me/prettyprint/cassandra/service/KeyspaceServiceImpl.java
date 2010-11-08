@@ -445,7 +445,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           // filled
           // with column,
           // this is a bad interface design.
-          if (columnParent.getSuper_column() == null) {
+          if (!columnParent.isSetSuper_column()) {
             Map<ByteBuffer, List<SuperColumn>> result = new HashMap<ByteBuffer, List<SuperColumn>>();
             for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
               result.put(entry.getKey(), getSuperColumnList(entry.getValue()));

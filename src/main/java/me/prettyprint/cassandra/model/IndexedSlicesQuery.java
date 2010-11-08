@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.Query;
 import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.Column;
@@ -74,12 +76,45 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
         IndexOperator.GT,
         valueSerializer.toByteBuffer(columnValue)));
     return this;
+  }  
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public IndexedSlicesQuery<K, N, V> setColumnNames(Collection<N> columnNames) {
+    super.setColumnNames(columnNames);
+    return this;
   }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public IndexedSlicesQuery<K, N, V> setColumnNames(N... columnNames) {
+    super.setColumnNames(columnNames);
+    return this;
+  }
 
+  @SuppressWarnings("unchecked")
+  @Override
+  public IndexedSlicesQuery<K, N, V> setRange(N start, N finish,
+      boolean reversed, int count) {
+    super.setRange(start, finish, reversed, count);
+    return this;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public IndexedSlicesQuery<K, N, V> setReturnKeysOnly() {
+    super.setReturnKeysOnly();
+    return this;
+  }
 
   public IndexedSlicesQuery<K,N,V> setStartKey(K startKey) {
     indexClause.setStart_key(keySerializer.toByteBuffer(startKey));
+    return this;
+  }    
+
+  @Override
+  public IndexedSlicesQuery<K,N,V> setColumnFamily(String cf) {
+    super.setColumnFamily(cf);
     return this;
   }
 
@@ -90,7 +125,7 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
         new KeyspaceOperationCallback<OrderedRows<K,N,V>>() {
           @Override
           public OrderedRows<K,N,V> doInKeyspace(KeyspaceService ks) throws HectorException {
-            if (indexClause.getStart_key() == null) {
+            if (!indexClause.isSetStart_key()) {
               indexClause.setStart_key(new byte[0]);
             }
             ColumnParent columnParent = new ColumnParent(columnFamilyName);

@@ -49,7 +49,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testDescribeThriftVersion() throws Exception {
-    assertEquals("17.1.0",cassandraCluster.describeThriftVersion());
+    assertEquals("19.4.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test
@@ -87,7 +87,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     cassandraCluster.addKeyspace(
         new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)));
     
-    String ksid2 = cassandraCluster.dropKeyspace("MyDynKeyspace");
+    String ksid2 = cassandraCluster.dropKeyspace("DynKeyspace");
     assertNotNull(ksid2);
   }
 }

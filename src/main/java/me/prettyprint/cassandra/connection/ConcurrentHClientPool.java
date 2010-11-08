@@ -90,6 +90,7 @@ public class ConcurrentHClientPool {
         try {
           cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
           if ( cassandraClient == null ) {
+            numBlocked.decrementAndGet();
             throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread %s on host %s",
                 new Object[]{
                 Thread.currentThread().getName(), 

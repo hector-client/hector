@@ -76,6 +76,7 @@ public class HConnectionManager {
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());    
     HThriftClient client = null;
     boolean success = false;
+    boolean retryable = false;
     Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>();
     // TODO start timer for limiting retry time spent
     while ( !success ) {
@@ -101,17 +102,20 @@ public class HConnectionManager {
           --retries;
           client.close();
           markHostAsDown(client);
-          excludeHosts.add(client.cassandraHost);         
+          excludeHosts.add(client.cassandraHost);
+          retryable = true;
           if ( retries > 0 ) {
             monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
           }
         } else if ( he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
+          retryable = true;
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
-          client.close();
+          client.close();          
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users 
         } else if ( he instanceof PoolExhaustedException ) {
+          retryable = true;
           --retries;
           if ( hostPools.size() == 1 ) {
             throw he;
@@ -119,7 +123,7 @@ public class HConnectionManager {
           monitor.incCounter(Counter.POOL_EXHAUSTED);
           excludeHosts.add(client.cassandraHost);
         }
-        if ( retries == 0 ) throw he;
+        if ( retries == 0 || retryable == false) throw he;
         log.error("Could not fullfill request on this host {}", client);
         log.error("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
