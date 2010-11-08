@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
+import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.hector.api.Serializer;
 
@@ -28,5 +30,20 @@ public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer> i
   @Override
   public ByteBuffer toByteBuffer(ByteBuffer obj) {
     return obj;
+  }
+
+  @Override
+  public List<ByteBuffer> toBytesList(List<ByteBuffer> list) {
+    return list;
+  }
+
+  @Override
+  public <V> Map<ByteBuffer, V> toBytesMap(Map<ByteBuffer, V> map) {
+    return map;
+  }
+
+  @Override
+  public <V> Map<ByteBuffer, V> fromBytesMap(Map<ByteBuffer, V> map) {
+    return map;
   }
 }

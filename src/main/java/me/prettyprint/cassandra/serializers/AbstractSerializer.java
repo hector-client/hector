@@ -2,7 +2,6 @@ package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,12 +25,12 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public abstract ByteBuffer toByteBuffer(T obj);
-  
+
   /*
   public ByteBuffer toByteBuffer(T obj) {
     return ByteBuffer.wrap(toBytes(obj));
   }
-  
+
   public ByteBuffer toByteBuffer(T obj, ByteBuffer byteBuffer, int offset, int length) {
     byteBuffer.put(toBytes(obj), offset, length);
     return byteBuffer;
@@ -45,7 +44,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
   public T fromByteBuffer(ByteBuffer byteBuffer) {
     return fromBytes(byteBuffer.array());
   }
-  
+
   public T fromByteBuffer(ByteBuffer byteBuffer, int offset, int length) {
     return fromBytes(Arrays.copyOfRange(byteBuffer.array(), offset, length));
   }
