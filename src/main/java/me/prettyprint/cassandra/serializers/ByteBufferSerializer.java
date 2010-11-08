@@ -12,11 +12,11 @@ import me.prettyprint.hector.api.Serializer;
  * @author Ran Tavory
  *
  */
-public final class BytesSerializer extends AbstractSerializer<ByteBuffer> implements Serializer<ByteBuffer>{
+public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer> implements Serializer<ByteBuffer>{
 
-  private static BytesSerializer instance = new BytesSerializer();
+  private static ByteBufferSerializer instance = new ByteBufferSerializer();
 
-  public static BytesSerializer get() {
+  public static ByteBufferSerializer get() {
     return instance;
   }
 

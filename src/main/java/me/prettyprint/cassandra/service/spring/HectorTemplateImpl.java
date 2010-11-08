@@ -8,7 +8,7 @@ import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
-import me.prettyprint.cassandra.serializers.BytesSerializer;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
@@ -465,13 +465,13 @@ public class HectorTemplateImpl implements HectorTemplate {
 
   @Override
   public <K> SliceQuery<K, ByteBuffer, ByteBuffer> createSliceQuery() {
-    return createSliceQuery(TypeInferringSerializer.<K>get(), BytesSerializer.get(), BytesSerializer.get());
+    return createSliceQuery(TypeInferringSerializer.<K>get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
   }
 
 
   @Override
   public <K> SuperSliceQuery<K, ByteBuffer, ByteBuffer, ByteBuffer> createSuperSliceQuery() {
-    return createSuperSliceQuery(TypeInferringSerializer.<K>get(), BytesSerializer.get(), BytesSerializer.get(), BytesSerializer.get());
+    return createSuperSliceQuery(TypeInferringSerializer.<K>get(), ByteBufferSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
   }
 
   @Override

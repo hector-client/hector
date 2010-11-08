@@ -6,7 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import junit.framework.Assert;
-import me.prettyprint.cassandra.serializers.BytesSerializer;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.SuperSlice;
@@ -26,7 +26,7 @@ public class SuperColumnSliceTest {
   public void testConstruction() {
     LongSerializer le = LongSerializer.get();
     StringSerializer se = StringSerializer.get();
-    BytesSerializer be = BytesSerializer.get();
+    ByteBufferSerializer be = ByteBufferSerializer.get();
     // empty one
     List<SuperColumn> tColumns = new ArrayList<SuperColumn>();
     SuperSlice<String, Long, ByteBuffer> slice = new SuperSliceImpl<String, Long, ByteBuffer>(tColumns, se, le,
