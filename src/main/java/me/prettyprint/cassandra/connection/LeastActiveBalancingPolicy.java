@@ -17,7 +17,12 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
     List<ConcurrentHClientPool> vals = new ArrayList<ConcurrentHClientPool>(pools); 
       Collections.sort(vals, new Comparator<ConcurrentHClientPool>() {      
         public int compare(ConcurrentHClientPool o1, ConcurrentHClientPool o2) {
-        return 0;
+          if ( o1.getNumActive() < o2.getNumActive() ) {
+            return 1;
+          } else if ( o1.getNumActive() > o2.getNumActive() ) {
+            return -1;
+          }
+          return 0;
       }            
     });
     Iterator<ConcurrentHClientPool> iterator = vals.iterator();
@@ -34,17 +39,3 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   }
 
 }
-
-/*
-
-@Override
-public int compareTo(ConcurrentHClientPool o) {    
-  if ( getNumBeforeExhausted() > o.getNumBeforeExhausted() ) {
-    return 1;
-  } else if ( getNumBeforeExhausted() < o.getNumBeforeExhausted() ) {
-    return -1;
-  }
-  return 0;
-}
-
-*/
