@@ -45,19 +45,22 @@ public class CassandraHostRetryService {
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
-        log.error("Downed Host retry shutdown hook called");
-        if ( sf != null ) 
-          sf.cancel(true);
-        if ( executor != null ) 
-          executor.shutdownNow();
-         
-        log.error("Downed Host retry shutdown complete");        
+        shutdown();        
       }
     });
     log.info("Downed Host Retry service started with queue size {} and retry delay {}s", 
         cassandraHostConfigurator.getRetryDownedHostsQueueSize(), 
         retryDelayInSeconds);
     
+  }
+  
+  void shutdown() {
+    log.error("Downed Host retry shutdown hook called");
+    if ( sf != null ) 
+      sf.cancel(true);
+    if ( executor != null ) 
+      executor.shutdownNow();     
+    log.error("Downed Host retry shutdown complete");    
   }
     
   public void add(CassandraHost cassandraHost) {    

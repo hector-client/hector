@@ -205,6 +205,17 @@ public class HConnectionManager {
   public long createClock() {
     return this.clock.createClock();
   }
+  
+  public void shutdown() {
+    cassandraHostRetryService.shutdown();
+    for (ConcurrentHClientPool pool : hostPools.values()) {
+      try {
+        pool.shutdown();
+      } catch (IllegalArgumentException iae) {
+        log.error("Out of order in HConnectionManager shutdown()?: {}", iae.getMessage());
+      }
+    }
+  }
 
   
 }
