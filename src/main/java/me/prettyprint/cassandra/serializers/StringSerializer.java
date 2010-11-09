@@ -1,8 +1,5 @@
 package me.prettyprint.cassandra.serializers;
 
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
-import static me.prettyprint.cassandra.utils.StringUtils.string;
-
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
@@ -28,7 +25,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
       return ByteBuffer.wrap(obj.getBytes("UTF-8"));
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
-    }    
+    }
   }
 
   @Override
@@ -36,6 +33,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
     if (byteBuffer == null) {
       return null;
     }
-    return new String(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(), byteBuffer.remaining());    
+    return new String(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(),
+        byteBuffer.remaining());
   }
 }
