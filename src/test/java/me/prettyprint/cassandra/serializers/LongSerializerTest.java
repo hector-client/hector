@@ -20,6 +20,6 @@ public class LongSerializerTest {
 
   private void test(Long number) {
     LongSerializer ext = new LongSerializer();
-    assertEquals(number, ext.fromBytes(ext.toBytes(number)));
+    assertEquals(number, ext.fromByteBuffer(ext.toByteBuffer(number)));
   }
 }

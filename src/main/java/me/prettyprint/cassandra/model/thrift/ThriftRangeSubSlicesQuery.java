@@ -72,7 +72,7 @@ public final class ThriftRangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuer
           @Override
           public OrderedRows<K,N,V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
+            columnParent.setSuper_column(sNameSerializer.toByteBuffer(superColumn));
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
             return new OrderedRowsImpl<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);

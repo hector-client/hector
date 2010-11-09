@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.service.CassandraClient.FailoverPolicy;
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
@@ -20,11 +20,11 @@ import org.apache.cassandra.thrift.KsDef;
     this.clientMonitor = clientMonitor;
   }
 
-  public KeyspaceService create(CassandraClient client, String keyspaceName,
-      HKsDef keyspaceDesc, ConsistencyLevel consistencyLevel,
-      FailoverPolicy failoverPolicy, CassandraClientPool clientPools)
+  public KeyspaceService create(String keyspaceName,
+      ConsistencyLevel consistencyLevel,
+      HConnectionManager connectionManager)
       throws HectorTransportException {
-    return new KeyspaceServiceImpl(client, keyspaceName, keyspaceDesc, consistencyLevel,
-        failoverPolicy, clientPools, clientMonitor);
+    return new KeyspaceServiceImpl(keyspaceName, consistencyLevel,
+        connectionManager);
   }
 }

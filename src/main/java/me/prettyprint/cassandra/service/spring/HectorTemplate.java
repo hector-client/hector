@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service.spring;
 
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
@@ -78,7 +79,7 @@ public interface HectorTemplate {
   <K, N, V> SliceQuery<K, N, V> createSliceQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer);
 
-  <K> SliceQuery<K, byte[], byte[]> createSliceQuery();
+  <K> SliceQuery<K, ByteBuffer, ByteBuffer> createSliceQuery();
 
   <K, SN, N, V> SubSliceQuery<K, SN, N, V> createSubSliceQuery(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer);
@@ -86,7 +87,7 @@ public interface HectorTemplate {
   <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer);
 
-  <K> SuperSliceQuery<K, byte[], byte[], byte[]> createSuperSliceQuery();
+  <K> SuperSliceQuery<K, ByteBuffer, ByteBuffer, ByteBuffer> createSuperSliceQuery();
 
   <K, N, V> IndexedSlicesQuery<K, N, V> createIndexSlicesQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer);

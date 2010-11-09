@@ -81,7 +81,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
     return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
       @Override
       public Void doInKeyspace(KeyspaceService ks) throws HectorException {
-        ks.remove(keySerializer.toBytes(key), ThriftFactory.createSuperColumnPath(cf,
+        ks.remove(keySerializer.toByteBuffer(key), ThriftFactory.createSuperColumnPath(cf,
             supercolumnName, columnName, sNameSerializer, nameSerializer));
         return null;
       }
@@ -117,7 +117,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
-    sp.addToColumn_names(nameSerializer.toBytes(columnName));
+    sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
     Deletion d = columnName != null ? new Deletion(keyspace.createClock()).setPredicate(sp)
                                    : new Deletion(keyspace.createClock());
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);

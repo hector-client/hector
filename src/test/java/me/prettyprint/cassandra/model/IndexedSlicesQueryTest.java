@@ -57,7 +57,8 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
 
     IndexedSlicesQuery<String, String, Long> indexedSlicesQuery = new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le);
     indexedSlicesQuery.addEqualsExpression("birthyear", 1975L);
-    indexedSlicesQuery.setColumnNames("birthyear");
+    //indexedSlicesQuery.setColumnNames("birthyear");
+    indexedSlicesQuery.setReturnKeysOnly();
     indexedSlicesQuery.setColumnFamily(cf);
     indexedSlicesQuery.setStartKey("");
     QueryResult<OrderedRows<String, String, Long>> result = indexedSlicesQuery.execute();
@@ -69,14 +70,15 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
   @Test
   public void testMultiClause() {        
 
-    IndexedSlicesQuery<String, String, Long> indexedSlicesQuery = new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le);
-    indexedSlicesQuery.addEqualsExpression("birthyear", 1975L);
-    indexedSlicesQuery.addGteExpression("birthmonth", 4L);
-    indexedSlicesQuery.addLteExpression("birthmonth", 6L);
-    indexedSlicesQuery.setColumnNames("birthyear");
-    indexedSlicesQuery.setColumnFamily(cf);
-    indexedSlicesQuery.setStartKey("");
-    QueryResult<OrderedRows<String, String, Long>> result = indexedSlicesQuery.execute();
+    QueryResult<OrderedRows<String, String, Long>> result = 
+      new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le)
+    .addEqualsExpression("birthyear", 1975L)
+    .addGteExpression("birthmonth", 4L)
+    .addLteExpression("birthmonth", 6L)
+    .setColumnNames("birthyear")
+    .setColumnFamily(cf)
+    .setStartKey("")
+    .execute();
     assertEquals(3, result.get().getList().size());
 
 

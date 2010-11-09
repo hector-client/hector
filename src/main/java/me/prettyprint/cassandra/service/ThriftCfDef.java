@@ -19,7 +19,7 @@ public class ThriftCfDef implements HCfDef {
   private String subcomparatorType;
   private String comment;
   private double rowCacheSize;
-  private boolean preloadRowCache;
+  private int rowCacheSavePeriodInSeconds;
   private double keyCacheSize;
   private double readRepairChance;
   private List<HColumnDef> columnMetadata;
@@ -38,7 +38,7 @@ public class ThriftCfDef implements HCfDef {
     subcomparatorType = d.subcomparator_type;
     comment = d.comment;
     rowCacheSize = d.row_cache_size;
-    preloadRowCache = d.preload_row_cache;
+    rowCacheSavePeriodInSeconds = d.row_cache_save_period_in_seconds;
     keyCacheSize = d.key_cache_size;
     readRepairChance = d.read_repair_chance;
     columnMetadata = ThriftColumnDef.fromThriftList(d.column_metadata);
@@ -104,8 +104,8 @@ public class ThriftCfDef implements HCfDef {
   }
 
   @Override
-  public boolean isPreloadRowCache() {
-    return preloadRowCache;
+  public int getRowCacheSavePeriodInSeconds() {
+    return rowCacheSavePeriodInSeconds;
   }
 
   @Override
@@ -141,20 +141,19 @@ public class ThriftCfDef implements HCfDef {
 
   public CfDef toThrift() {
     CfDef d = new CfDef(keyspace, name);
-    d.column_metadata = ThriftColumnDef.toThriftList(columnMetadata);
-    d.column_type = columnType;
-    d.comment = comment;
-    d.comparator_type = comparatorType;
-    d.default_validation_class = defaultValidationClass;
-    d.gc_grace_seconds = gcGraceSeconds;
-    d.id = id;
-    d.key_cache_size = keyCacheSize;
-    d.max_compaction_threshold = maxCompactionThreshold;
-    d.min_compaction_threshold = minCompactionThreshold;
-    d.preload_row_cache = preloadRowCache;
-    d.read_repair_chance = readRepairChance;
-    d.row_cache_size = rowCacheSize;
-    d.subcomparator_type = subcomparatorType;
+    d.setColumn_metadata(ThriftColumnDef.toThriftList(columnMetadata));
+    d.setColumn_type(columnType);
+    d.setComment(comment);
+    d.setComparator_type(comparatorType);
+    d.setDefault_validation_class(defaultValidationClass);
+    d.setGc_grace_seconds(gcGraceSeconds);
+    d.setId(id);
+    d.setKey_cache_size(keyCacheSize);
+    d.setMax_compaction_threshold(maxCompactionThreshold);
+    d.setMin_compaction_threshold(minCompactionThreshold);
+    d.setRead_repair_chance(readRepairChance);
+    d.setRow_cache_size(rowCacheSize);
+    d.setSubcomparator_type(subcomparatorType);
     return d;
   }
 
@@ -198,8 +197,8 @@ public class ThriftCfDef implements HCfDef {
     this.rowCacheSize = rowCacheSize;
   }
 
-  public void setPreloadRowCache(boolean preloadRowCache) {
-    this.preloadRowCache = preloadRowCache;
+  public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
+    this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
   }
 
   public void setKeyCacheSize(double keyCacheSize) {

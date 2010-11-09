@@ -22,6 +22,6 @@ public class StringSerializerTest {
 
   private void test(String str) {
     StringSerializer e = new StringSerializer();
-    assertEquals(str, e.fromBytes(e.toBytes(str))) ;
+    assertEquals(str, e.fromByteBuffer(e.toByteBuffer(str))) ;
   }
 }

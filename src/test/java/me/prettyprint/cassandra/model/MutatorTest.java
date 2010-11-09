@@ -14,14 +14,16 @@ import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.StringUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.ColumnQuery;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.junit.After;
@@ -121,10 +123,12 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   private void assertColumnExists(String keyspace, String cf, String key, String column) {
     ColumnPath cp = new ColumnPath(cf);
     cp.setColumn(StringUtils.bytes(column));
-    CassandraClient client = cluster.borrowClient();
+    Keyspace ks = HFactory.createKeyspace(keyspace, cluster);
+    ColumnQuery<String, String, String> columnQuery = HFactory.createStringColumnQuery(ks);
     assertNotNull(String.format("Should have value for %s.%s[%s][%s]", keyspace, cf, key, column),
-        client.getKeyspace(keyspace).getColumn(key, cp));
-    cluster.releaseClient(client);
+        columnQuery.setColumnFamily(cf).setKey(key).setName(column).execute().get().getValue());
+        //client.getKeyspace(keyspace).getColumn(key, cp));
+    //cluster.releaseClient(client);
   }
 
 }

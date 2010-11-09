@@ -17,7 +17,7 @@ public interface HCfDef {
   String getSubcomparatorType();
   String getComment();
   double getRowCacheSize();
-  boolean isPreloadRowCache();
+  int getRowCacheSavePeriodInSeconds();
   double getKeyCacheSize();
   double getReadRepairChance();
   List<HColumnDef> getColumnMetadata();

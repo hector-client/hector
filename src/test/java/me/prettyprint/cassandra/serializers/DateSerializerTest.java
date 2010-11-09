@@ -24,6 +24,6 @@ public class DateSerializerTest {
 
   private void test(Date date) {
     DateSerializer ext = DateSerializer.get();
-    assertEquals(date, ext.fromBytes(ext.toBytes(date)));
+    assertEquals(date, ext.fromByteBuffer(ext.toByteBuffer(date)));
   }
 }

@@ -27,7 +27,7 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
 
   /**
    * Sets the column names to be retrieved by this query
-   * @param columns a list of column names
+   * @param columns a varargs of column names
    */
   public Query<T> setColumnNames(N... columnNames) {
     if ( columnNames != null && columnNames.length > 0) {
@@ -38,6 +38,19 @@ public abstract class AbstractSliceQuery<K,N,V,T> extends AbstractQuery<K,N,V,T>
     return this;
   }
 
+  /**
+   * Sets the column names to be retrieved by this query
+   * @param columns a Collection of column names
+   */
+  public Query<T> setColumnNames(Collection<N> columnNames) {
+    if ( columnNames != null && columnNames.size() > 0) {
+      slicePredicate.setColumnNames(columnNames);
+    } else {
+      slicePredicate.setKeysOnlyPredicate();
+    }
+    return this;
+  }
+  
   /**
    * Wraps the underlying call to {@link HSlicePredicate#setKeysOnlyPredicate()}
    * Use this for a substantial performance increase when you only need the keys returned
