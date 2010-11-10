@@ -38,7 +38,7 @@ public class ClockResolutionTest {
 			log.debug("previous=" + previous + " - current=" +  current);
 			if (current == previous) {
 				fail("Two calls to clock generated the same timestamp. (previous="
-						+ previous + " - current=" +  current + ")");
+						+ previous + " - current=" +  current + "). Cycle:" + i);
 			}
 			current = previous;
 
