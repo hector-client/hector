@@ -199,7 +199,7 @@ public interface KeyspaceService {
   /**
    * @return The consistency level held by this keyspace instance.
    */
-  ConsistencyLevel getConsistencyLevel();
+  ConsistencyLevel getConsistencyLevel(OperationType operationType);
 
   String getName();
 

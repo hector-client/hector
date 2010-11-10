@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 
 import org.apache.cassandra.thrift.ConsistencyLevel;
