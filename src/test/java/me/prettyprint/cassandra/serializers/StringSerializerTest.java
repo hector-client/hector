@@ -1,27 +1,41 @@
 package me.prettyprint.cassandra.serializers;
 
 
-import static org.junit.Assert.assertEquals;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.Collection;
 
-import me.prettyprint.cassandra.serializers.StringSerializer;
-
+import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
+@RunWith(value = Parameterized.class)
 public class StringSerializerTest {
 
-  @Test
-  public void testConversions() {
-    test("");
-    test(null);
-    test("123");
-    test("QWER");
-    test("!@#$#$^%&^*fdghdfghdfgh%^&*");
-    // unicode
-    test("\u1234");
+  private final String str;
+
+  public StringSerializerTest(String str) {
+    this.str = str;
   }
 
-  private void test(String str) {
+  @Parameters
+  public static Collection<Object[]> data() throws UnsupportedEncodingException {
+    Object[][] data = new Object[][] {
+                                      {"" },
+                                      {null},
+                                      {"123"},
+                                      {"QWER"},
+                                      {"!@#$#$^%&^*fdghdfghdfgh%^&*"},
+                                      {new String("\u05E9".getBytes(), "utf-8")}
+                                      };
+    return Arrays.asList(data);
+  }
+
+  @Test
+  public void test() {
     StringSerializer e = new StringSerializer();
-    assertEquals(str, e.fromBytes(e.toBytes(str))) ;
+    Assert.assertEquals(str, e.fromByteBuffer(e.toByteBuffer(str))) ;
   }
 }

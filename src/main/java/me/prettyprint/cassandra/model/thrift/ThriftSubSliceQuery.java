@@ -65,8 +65,8 @@ public final class ThriftSubSliceQuery<K,SN,N,V> extends AbstractSliceQuery<K,N,
           @Override
           public ColumnSlice<N, V> doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
-            columnParent.setSuper_column(sNameSerializer.toBytes(superColumn));
-            List<Column> thriftRet = ks.getSlice(keySerializer.toBytes(key), columnParent, getPredicate());
+            columnParent.setSuper_column(sNameSerializer.toByteBuffer(superColumn));
+            List<Column> thriftRet = ks.getSlice(keySerializer.toByteBuffer(key), columnParent, getPredicate());
             return new ColumnSliceImpl<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);

@@ -3,18 +3,19 @@ package me.prettyprint.hector.api;
 import java.util.List;
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraClient;
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
 public interface Cluster {
 
   Set<CassandraHost> getKnownPoolHosts(boolean refresh);
 
+  HConnectionManager getConnectionManager();
+  
   /**
    * These are all the hosts known to the cluster
    * @param refresh
@@ -37,15 +38,6 @@ public interface Cluster {
    */
   String getName();
 
-  CassandraClient borrowClient() throws HectorPoolException;
-
-  void releaseClient(CassandraClient client);
-
-  ClockResolution getClockResolution();
-
-  Cluster setClockResolution(ClockResolution clockResolution);
-
-  long createClock();
 
   String describeClusterName() throws HectorException;
 
@@ -72,12 +64,10 @@ public interface Cluster {
 
   String addColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException;
 
-  String renameColumnFamily(final String oldName, final String newName) throws HectorException;
-
   String dropColumnFamily(final String keyspaceName, final String columnFamily)
       throws HectorException;
 
   String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
 
-  String renameKeyspace(final String oldName, final String newName) throws HectorException;
+
 }

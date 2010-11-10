@@ -8,6 +8,13 @@ Changes by version:
 0.7.0-19
 ========
 Fix issue 74 with fix suggested by Patricio Echague
+CassandraHostRetry service will retry downed hosts in a background thread at the interval specified on CassandraHostConfigurator
+Refactoring of the connection pooling innards to fix epic race condition on failover. This includes but is not limited to:
+- Removal of classes effectively matching the pattern CassandraClient* from the service package
+- Command is gone. It was no longer needed and was more confusing than anything else
+- Pooling logic has been stress tested by a neutral third party (no, really!)
+Upgrade to thrift 0.5 to match Cassandra (it caught us by surprise as well). 
+The system_rename_* methods were removed matching removal of such in Thrift API
 
 
 0.7.0-17

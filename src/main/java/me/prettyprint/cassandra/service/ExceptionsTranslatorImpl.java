@@ -12,6 +12,7 @@ import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.PoolIllegalStateException;
 
 import org.apache.thrift.TException;
+import org.apache.thrift.protocol.TProtocolException;
 import org.apache.thrift.transport.TTransportException;
 
 public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
@@ -28,10 +29,10 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
       HInvalidRequestException e = new HInvalidRequestException(original);
       e.setWhy(((org.apache.cassandra.thrift.InvalidRequestException) original).getWhy());
       return e;
+    } else if (original instanceof TProtocolException) {
+      return new HInvalidRequestException(original);      
     } else if (original instanceof org.apache.cassandra.thrift.NotFoundException) {
       return new HNotFoundException(original);
-    } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {
-      return new HTimedOutException(original);
     } else if (original instanceof org.apache.cassandra.thrift.UnavailableException) {
       return new HUnavailableException(original);
     } else if (original instanceof NoSuchElementException) {

@@ -17,7 +17,9 @@ public class SerializerTypeInferer {
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public static <T> Serializer<T> getSerializer(Object value) {
     Serializer serializer = null;
-    if (value instanceof UUID) {
+    if (value == null) {
+      serializer = ByteBufferSerializer.get();
+    } else if (value instanceof UUID) {
       serializer = UUIDSerializer.get();
     } else if (value instanceof String) {
       serializer = StringSerializer.get();
@@ -28,13 +30,13 @@ public class SerializerTypeInferer {
     } else if (value instanceof Boolean) {
       serializer = BooleanSerializer.get();
     } else if (value instanceof byte[]) {
-      serializer = BytesSerializer.get();
+      serializer = ByteBufferSerializer.get();
     } else if (value instanceof Date) {
       serializer = DateSerializer.get();
     } else {
       serializer = ObjectSerializer.get();
     }
-    // TODO other number serializers
+    // Add other serializers here
 
     return serializer;
   }
@@ -53,11 +55,11 @@ public class SerializerTypeInferer {
     } else if (valueClass.equals(Boolean.class) || valueClass.equals(boolean.class)) {
       serializer = BooleanSerializer.get();
     } else if (valueClass.equals(byte[].class)) {
-      serializer = BytesSerializer.get();
+      serializer = ByteBufferSerializer.get();
     } else {
       serializer = ObjectSerializer.get();
     }
-    // TODO other number serializers
+    // Add other serializers here
 
     return serializer;
   }

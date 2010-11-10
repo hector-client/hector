@@ -92,4 +92,5 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
   public RangeSlicesQuery<K, N, V> setColumnNames(N... columnNames) {
     return (RangeSlicesQuery<K, N, V>) super.setColumnNames(columnNames);
   }
+
 }

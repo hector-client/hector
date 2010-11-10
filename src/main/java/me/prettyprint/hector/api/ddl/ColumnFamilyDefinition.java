@@ -17,7 +17,7 @@ public interface ColumnFamilyDefinition {
   ComparatorType getSubComparatorType();
   String getComment();
   double getRowCacheSize();
-  boolean isPreloadRowCache();
+  int getRowCacheSavePeriodInSeconds();
   double getKeyCacheSize();
   double getReadRepairChance();
   List<ColumnDefinition> getColumnMetadata();

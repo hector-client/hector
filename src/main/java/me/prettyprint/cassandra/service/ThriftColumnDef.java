@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ import org.apache.cassandra.thrift.IndexType;
 
 public class ThriftColumnDef implements ColumnDefinition {
 
-  private final byte[] name; //TODO(ran): use a serializer and type safety?
+  private final ByteBuffer name; //TODO(ran): use a serializer and type safety?
   private final String validationClass;
   private final ColumnIndexType indexType;
   private final String indexName;
@@ -47,7 +48,7 @@ public class ThriftColumnDef implements ColumnDefinition {
   }
 
   @Override
-  public byte[] getName() {
+  public ByteBuffer getName() {
     return name;
   }
 
@@ -79,10 +80,10 @@ public class ThriftColumnDef implements ColumnDefinition {
 
   private ColumnDef toThrift() {
     ColumnDef d = new ColumnDef();
-    d.index_name = indexName;
-    d.index_type = indexTypeToThrift(indexType);
-    d.name = name;
-    d.validation_class = validationClass;
+    d.setIndex_name(indexName);
+    d.setIndex_type(indexTypeToThrift(indexType));
+    d.setName(name);
+    d.setValidation_class(validationClass);
     return d;
   }
 

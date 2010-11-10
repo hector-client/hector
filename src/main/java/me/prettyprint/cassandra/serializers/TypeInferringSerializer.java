@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.nio.ByteBuffer;
+
 import me.prettyprint.hector.api.Serializer;
 
 /**
@@ -21,12 +23,12 @@ public class TypeInferringSerializer<T> extends AbstractSerializer<T> implements
   }
 
   @Override
-  public byte[] toBytes(T obj) {
-    return SerializerTypeInferer.getSerializer(obj).toBytes(obj);
+  public ByteBuffer toByteBuffer(T obj) {
+    return SerializerTypeInferer.getSerializer(obj).toByteBuffer(obj);
   }
 
   @Override
-  public T fromBytes(byte[] bytes) {
+  public T fromByteBuffer(ByteBuffer byteBuffer) {
     throw new IllegalStateException(
         "The type inferring serializer can only be used for data going to the database, and not data coming from the database");
   }

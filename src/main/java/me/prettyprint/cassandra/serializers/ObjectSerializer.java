@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorSerializationException;
@@ -20,26 +21,26 @@ public class ObjectSerializer extends AbstractSerializer<Object> implements Seri
   private static final ObjectSerializer INSTANCE = new ObjectSerializer();
 
   @Override
-  public byte[] toBytes(Object obj) {
+  public ByteBuffer toByteBuffer(Object obj) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream();
       ObjectOutputStream oos = new ObjectOutputStream(baos);
       oos.writeObject(obj);
       oos.close();
 
-      return baos.toByteArray();
+      return ByteBuffer.wrap(baos.toByteArray());
     } catch (IOException ex) {
       throw new RuntimeException(ex);
     }
   }
 
   @Override
-  public Object fromBytes(byte[] bytes) {
-    if (bytes == null || bytes.length == 0) {
+  public Object fromByteBuffer(ByteBuffer bytes) {
+    if (bytes == null || !bytes.hasRemaining()) {
       return null;
     }
     try {
-      ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+      ByteArrayInputStream bais = new ByteArrayInputStream(bytes.array());
       ObjectInputStream ois = new ObjectInputStream(bais);
       Object obj = ois.readObject();
       ois.close();
