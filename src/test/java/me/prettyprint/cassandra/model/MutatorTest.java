@@ -1,12 +1,14 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.createSuperColumn;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
@@ -14,7 +16,7 @@ import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.cassandra.utils.StringUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -24,6 +26,7 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.ColumnPath;
 import org.junit.After;
@@ -114,10 +117,25 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     }
     MutationResult r = m.execute();
 
+    // Try to delete the row with key "k0" with a clock previous to the insertion.
+    // Cassandra will discard this operation.
+    m.addDeletion("k0", cf, null, se, (ClockResolution.MICROSECONDS.createClock() - 1000));
+
+    // Check that the delete was harmless
+    QueryResult<HColumn<String, String>> columnResult =
+    	createColumnQuery(keyspace, se, se, se).setColumnFamily(cf).setKey("k0").
+    		setName("name").execute();
+    assertEquals("value0", columnResult.get().getValue());
+
     for (int i = 0; i < 5; i++) {
       m.addDeletion("k" + i, cf, null, se);
     }
     m.execute();
+
+    // Check that the delete took place now
+    columnResult = createColumnQuery(keyspace, se, se, se).
+    	setColumnFamily(cf).setKey("k0").setName("name").execute();
+    assertNull(columnResult.get());
   }
 
   private void assertColumnExists(String keyspace, String cf, String key, String column) {

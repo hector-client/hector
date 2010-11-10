@@ -111,17 +111,24 @@ public final class MutatorImpl<K> implements Mutator<K> {
   }
 
   /**
-   * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null
-   * in which case Deletion is created with only the Clock, resulting in the whole row being deleted
+   * {@inheritDoc}
    */
   @Override
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer) {
-    SlicePredicate sp = new SlicePredicate();
-    sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
-    Deletion d = columnName != null ? new Deletion(keyspace.createClock()).setPredicate(sp)
-                                   : new Deletion(keyspace.createClock());
-    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    addDeletion(key, cf, columnName, nameSerializer, keyspace.createClock());
     return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer, long clock) {
+	SlicePredicate sp = new SlicePredicate();
+	sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
+	Deletion d = columnName != null ? new Deletion(clock).setPredicate(sp) : new Deletion(clock);
+	getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+	return this;
   }
 
   /**

@@ -47,7 +47,34 @@ public interface Mutator<K> {
    */
   <SN, N, V> Mutator<K> addInsertion(K key, String cf, HSuperColumn<SN, N, V> sc);
 
+  /**
+   * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null
+   * in which case Deletion is created with only the Clock, in this case user defined,
+   * resulting in the whole row being deleted.
+   *
+   * @param <N> column name type
+   * @param key row key
+   * @param cf column family
+   * @param columnName column family name
+   * @param nameSerializer a name serializer
+   * @return a mutator
+   */
   <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer);
+
+  /**
+   * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null
+   * in which case Deletion is created with only the Clock, in this case user defined,
+   * resulting in the whole row being deleted.
+   *
+   * @param <N> column name type
+   * @param key row key
+   * @param cf column family
+   * @param columnName column family name
+   * @param nameSerializer a name serializer
+   * @param clock custom clock to use in the deletion
+   * @return a mutator
+   */
+  <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer, long clock);
 
   /**
    * Batch executes all mutations scheduled to this Mutator instance by addInsertion, addDeletion etc.
