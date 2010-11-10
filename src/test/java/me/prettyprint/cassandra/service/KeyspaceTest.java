@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -58,7 +59,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
     
-    keyspace = new KeyspaceServiceImpl("Keyspace1", ConsistencyLevel.ONE, connectionManager);
+    keyspace = new KeyspaceServiceImpl("Keyspace1", new QuorumAllConsistencyLevelPolicy(), connectionManager);
   }
 
   @Test
@@ -827,7 +828,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testGetConsistencyLevel() {
-    assertEquals(ConsistencyLevel.ONE, keyspace.getConsistencyLevel());
+    assertEquals(ConsistencyLevel.QUORUM, keyspace.getConsistencyLevel(OperationType.READ));
   }
 
   @Test

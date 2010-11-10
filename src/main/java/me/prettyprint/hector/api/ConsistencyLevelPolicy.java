@@ -1,10 +1,10 @@
 package me.prettyprint.hector.api;
 
+import me.prettyprint.cassandra.service.OperationType;
+
 import org.apache.cassandra.thrift.ConsistencyLevel;
 
 public interface ConsistencyLevelPolicy {
-
-  enum OperationType{READ, WRITE};
   
   /**
    * Get the desired consistency level according to the operation type.

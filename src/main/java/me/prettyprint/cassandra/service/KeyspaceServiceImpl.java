@@ -10,6 +10,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.ddl.HCfDef;
 import me.prettyprint.hector.api.ddl.HKsDef;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -50,7 +51,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   //private final HKsDef keyspaceDesc;
 
-  private final ConsistencyLevel consistency;  
+  private final ConsistencyLevelPolicy consistency;  
 
   private final ExceptionsTranslator xtrans;
   
@@ -61,7 +62,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   
 
   public KeyspaceServiceImpl(String keyspaceName, 
-      ConsistencyLevel consistencyLevel,
+      ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager)
       throws HectorTransportException {
     this.consistency = consistencyLevel;
@@ -79,7 +80,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.batch_mutate(mutationMap, consistency);
+          cassandra.batch_mutate(mutationMap, consistency.get(OperationType.WRITE));
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -103,7 +104,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Integer execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.get_count(key, columnParent, predicate, consistency);
+          return cassandra.get_count(key, columnParent, predicate, consistency.get(OperationType.READ));
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -134,7 +135,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
-              predicate, keyRange, consistency);
+              predicate, keyRange, consistency.get(OperationType.READ));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<Column>>(0);
           }
@@ -167,7 +168,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
-              predicate, keyRange, consistency);
+              predicate, keyRange, consistency.get(OperationType.READ));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<SuperColumn>>();
           }
@@ -196,7 +197,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public List<Column> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
-              predicate, consistency);
+              predicate, consistency.get(OperationType.READ));
 
           if (cosclist == null) {
             return null;
@@ -230,7 +231,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(key, columnPath, consistency);
+          cosc = cassandra.get(key, columnPath, consistency.get(OperationType.READ));
         } catch (NotFoundException e) {
           setException(xtrans.translate(e));
           return null;
@@ -272,7 +273,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
         try {
           List<ColumnOrSuperColumn> cosc = cassandra.get_slice(key, clp, sp,
-              consistency);
+              consistency.get(OperationType.READ));
           if (cosc == null || cosc.isEmpty()) {
             return null;
           }
@@ -301,7 +302,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public List<SuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
-              predicate, consistency);
+              predicate, consistency.get(OperationType.READ));
           if (cosclist == null) {
             return null;
           }
@@ -328,7 +329,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.insert(key, columnParent, column, consistency);
+          cassandra.insert(key, columnParent, column, consistency.get(OperationType.WRITE));
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -371,7 +372,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public Map<ByteBuffer, List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
-              keys, columnParent, predicate, consistency);
+              keys, columnParent, predicate, consistency.get(OperationType.READ));
 
           Map<ByteBuffer, List<Column>> result = new HashMap<ByteBuffer, List<Column>>();
           for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
@@ -437,7 +438,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
-              keys, columnParent, predicate, consistency);
+              keys, columnParent, predicate, consistency.get(OperationType.READ));
           // if user not given super column name, the multiget_slice will return
           // List
           // filled with
@@ -484,7 +485,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_indexed_slices(columnParent, indexClause,
-              predicate, consistency);
+              predicate, consistency.get(OperationType.READ));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<Column>>(0);
           }
@@ -516,7 +517,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Map<ByteBuffer, Integer> execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.multiget_count(keys, columnParent, slicePredicate, consistency);
+          return cassandra.multiget_count(keys, columnParent, slicePredicate, consistency.get(OperationType.READ));
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -534,7 +535,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.remove(key, columnPath, timestamp, consistency);
+          cassandra.remove(key, columnPath, timestamp, consistency.get(OperationType.WRITE));
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -574,7 +575,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public Column execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(key, columnPath, consistency);
+          cosc = cassandra.get(key, columnPath, consistency.get(OperationType.READ));
         } catch (NotFoundException e) {
           setException(xtrans.translate(e));
           return null;
@@ -599,73 +600,10 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
 
   @Override
-  public ConsistencyLevel getConsistencyLevel() {
-    return consistency;
+  public ConsistencyLevel getConsistencyLevel(OperationType operationType) {
+    return consistency.get(operationType);
   }
 
-/*
-  private HCfDef getCfDef(String cf) {
-      List<HCfDef> cfDefs = keyspaceDesc.getCfDefs();
-      if (cfDefs != null) {
-          for (HCfDef cfDef: cfDefs) {
-              if (cf.equals(cfDef.getName())) {
-                  return cfDef;
-              }
-          }
-      }
-      return null;
-  }
-*/
-//  /**
-//   * Make sure that if the given column path was a Column. Throws an
-//   * InvalidRequestException if not.
-//   *
-//   * @param columnPath
-//   * @throws HInvalidRequestException
-//   *           if either the column family does not exist or that it's type does
-//   *           not match (super)..
-//   */
-//  private void valideColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
-//    String cf = columnPath.getColumn_family();
-//    CfDef cfdefine;
-//    String errorMsg;
-//    if ((cfdefine = getCfDef(cf)) != null) {
-//      if (cfdefine.getColumn_type().equals(CF_TYPE_STANDARD) && columnPath.getColumn() != null) {
-//        // if the column family is a standard column
-//        return;
-//      } else if (cfdefine.getColumn_type().equals(CF_TYPE_SUPER)
-//          && columnPath.getSuper_column() != null) {
-//        // if the column family is a super column and also give the super_column
-//        // name
-//        return;
-//      } else {
-//        errorMsg = "Invalid Request for column family " + cf
-//            + " Make sure you have the right type";
-//      }
-//    } else {
-//      errorMsg = "The specified column family does not exist: " + cf;
-//    }
-//    throw new HInvalidRequestException(errorMsg);
-//  }
-
-  /**
-   * Make sure that the given column path is a SuperColumn in the DB, Throws an
-   * exception if it's not.
-   *
-   * @throws HInvalidRequestException
-   */
-  /*
-  private void valideSuperColumnPath(ColumnPath columnPath) throws HInvalidRequestException {
-    String cf = columnPath.getColumn_family();
-    HCfDef cfdefine;
-    if ((cfdefine = getCfDef(cf)) != null && cfdefine.getColumnType().equals(CF_TYPE_SUPER)
-        && columnPath.getSuper_column() != null) {
-      return;
-    }
-    throw new HInvalidRequestException(
-        "Invalid super column name or super column family does not exist: " + cf);
-  }
-  */
 
   private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
     ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
