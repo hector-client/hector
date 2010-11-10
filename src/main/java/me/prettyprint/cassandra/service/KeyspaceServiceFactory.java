@@ -23,9 +23,10 @@ import org.apache.cassandra.thrift.KsDef;
 
   public KeyspaceService create(String keyspaceName,
       ConsistencyLevelPolicy consistencyLevel,
-      HConnectionManager connectionManager)
+      HConnectionManager connectionManager,
+      FailoverPolicy failoverPolicy)
       throws HectorTransportException {
     return new KeyspaceServiceImpl(keyspaceName, consistencyLevel,
-        connectionManager);
+        connectionManager, failoverPolicy);
   }
 }
