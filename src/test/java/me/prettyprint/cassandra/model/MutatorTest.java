@@ -119,12 +119,13 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
     // Try to delete the row with key "k0" with a clock previous to the insertion.
     // Cassandra will discard this operation.
-    m.addDeletion("k0", cf, null, se, (ClockResolution.MICROSECONDS.createClock() - 1000));
+    m.addDeletion("k0", cf, null, se, (keyspace.createClock() - 1));
+    m.execute();
 
     // Check that the delete was harmless
     QueryResult<HColumn<String, String>> columnResult =
-    	createColumnQuery(keyspace, se, se, se).setColumnFamily(cf).setKey("k0").
-    		setName("name").execute();
+        createColumnQuery(keyspace, se, se, se).setColumnFamily(cf).setKey("k0").
+            setName("name").execute();
     assertEquals("value0", columnResult.get().getValue());
 
     for (int i = 0; i < 5; i++) {
@@ -134,7 +135,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
 
     // Check that the delete took place now
     columnResult = createColumnQuery(keyspace, se, se, se).
-    	setColumnFamily(cf).setKey("k0").setName("name").execute();
+        setColumnFamily(cf).setKey("k0").setName("name").execute();
     assertNull(columnResult.get());
   }
 
