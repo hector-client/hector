@@ -3,7 +3,6 @@ package me.prettyprint.cassandra.connection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,36 +21,24 @@ import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CassandraHostRetryService {
+public class CassandraHostRetryService extends BackgroundCassandraHostService {
   
   private static Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
 
   public static final int DEF_QUEUE_SIZE = 3;
   public static final int DEF_RETRY_DELAY = 10;
-  private LinkedBlockingQueue<CassandraHost> downedHostQueue;
-  
-  private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-  
-  private final HConnectionManager connectionManager;
-  
-  private ScheduledFuture sf;
-  private int retryDelayInSeconds = DEF_RETRY_DELAY;
+  private LinkedBlockingQueue<CassandraHost> downedHostQueue;      
   
   public CassandraHostRetryService(HConnectionManager connectionManager,
-      CassandraHostConfigurator cassandraHostConfigurator) {    
-    this.connectionManager = connectionManager;
+      CassandraHostConfigurator cassandraHostConfigurator) {
+    super(connectionManager, cassandraHostConfigurator);
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize());
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      public void run() {
-        shutdown();        
-      }
-    });
+
     log.info("Downed Host Retry service started with queue size {} and retry delay {}s", 
         cassandraHostConfigurator.getRetryDownedHostsQueueSize(), 
-        retryDelayInSeconds);
-    
+        retryDelayInSeconds);    
   }
   
   void shutdown() {
@@ -87,16 +74,6 @@ public class CassandraHostRetryService {
     downedHostQueue.clear();
     log.error("Downed Host retry queue flushed.");
   }
-  
-  
-
-  public int getRetryDelayInSeconds() {
-    return retryDelayInSeconds;
-  }
-
-  public void setRetryDelayInSeconds(int retryDelayInSeconds) {
-    this.retryDelayInSeconds = retryDelayInSeconds;
-  }
 
 
 
@@ -124,8 +101,8 @@ public class CassandraHostRetryService {
     private boolean verifyConnection(CassandraHost cassandraHost) {
       if ( cassandraHost == null ) return false;
       TTransport tr = cassandraHost.getUseThriftFramedTransport() ? 
-          new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), retryDelayInSeconds / 2)) :
-            new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), retryDelayInSeconds / 2);
+          new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10)) :
+            new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10);
       
       TProtocol proto = new TBinaryProtocol(tr);
       Cassandra.Client client = new Cassandra.Client(proto);

@@ -18,7 +18,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConcurrentHClientPool {
+public class ConcurrentHClientPool implements PoolMetric {
   
   private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
