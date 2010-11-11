@@ -10,7 +10,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.hector.api.ConsistencyLevel;
+//import me.prettyprint.hector.api.ConsistencyLevel;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
@@ -22,6 +22,7 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
@@ -55,8 +56,6 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   private final HConnectionManager connectionManager;
   
   private CassandraHost cassandraHost;
-  
-  
 
   public KeyspaceServiceImpl(String keyspaceName, 
       ConsistencyLevel consistencyLevel,
@@ -601,10 +600,14 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       return me.prettyprint.hector.api.ConsistencyLevel.valueOf(consistency.name());
   }
 
+  /*
+
   @Override
   public long createClock() {
     return client.getClockResolution().createClock();
   }
+
+  */
 
   private ColumnFamilyDefinition getCfDef(String cf) {
       List<ColumnFamilyDefinition> cfDefs = keyspaceDesc.getCfDefs();
@@ -704,8 +707,6 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     }
     return list;
   }
-
-
 
   @Override
   public String toString() {

@@ -84,7 +84,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
   public String addColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, 
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, 
-        cfdef.getKeyspace()) {
+        cfdef.getKeyspaceName()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {

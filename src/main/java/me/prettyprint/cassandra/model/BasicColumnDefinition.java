@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.model;
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnIndexType;
 
+import java.nio.ByteBuffer;
+
 /**
  * Created by IntelliJ IDEA.
  * User: peter
@@ -12,13 +14,13 @@ import me.prettyprint.hector.api.ddl.ColumnIndexType;
  */
 public class BasicColumnDefinition implements ColumnDefinition {
 
-  private byte[] name;
+  private ByteBuffer name;
   private String validationClass;
   private ColumnIndexType indexType;
   private String indexName;
 
   @Override
-  public byte[] getName() {
+  public ByteBuffer getName() {
     return name;
   }
 
@@ -37,7 +39,7 @@ public class BasicColumnDefinition implements ColumnDefinition {
     return indexName;
   }
 
-  public void setName(byte[] name) {
+  public void setName(ByteBuffer name) {
     this.name = name;
   }
 

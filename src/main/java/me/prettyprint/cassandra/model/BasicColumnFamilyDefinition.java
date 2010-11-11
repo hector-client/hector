@@ -30,6 +30,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int id;
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
+  private int rowCacheSavePeriodInSeconds;
 
   private List<ColumnDefinition> columnDefinitions;
 
@@ -142,8 +143,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   }
 
   @Override
-  public boolean isPreloadRowCache() {
-    return this.preloadRowCache;
+  public int getRowCacheSavePeriodInSeconds() {
+    return this.rowCacheSavePeriodInSeconds;
   }
 
   @Override
