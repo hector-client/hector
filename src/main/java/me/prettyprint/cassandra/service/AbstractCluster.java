@@ -61,6 +61,8 @@ public abstract class AbstractCluster implements Cluster {
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
     xtrans = new ExceptionsTranslatorImpl();
+    // if auto discover, then new NodeAutoDiscoveryService
+    
   }
   
   public HConnectionManager getConnectionManager() {

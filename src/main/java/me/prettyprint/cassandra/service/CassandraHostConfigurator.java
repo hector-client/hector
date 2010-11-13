@@ -18,9 +18,9 @@ public final class CassandraHostConfigurator {
   private ClockResolution clockResolution = ClockResolution.MICROSECONDS;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean retryDownedHosts = false;
+  private boolean autoDiscoverHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
-  private PoolType poolType = PoolType.COMMONS;
   
 
   public CassandraHostConfigurator() {
@@ -184,20 +184,27 @@ public final class CassandraHostConfigurator {
     this.useThriftFramedTransport = useThriftFramedTransport;
   }
 
-  public PoolType getPoolType() {
-    return poolType;
-  }
-
-  public void setPoolType(PoolType poolType) {
-    this.poolType = poolType;
-  }
-
   public ClockResolution getClockResolution() {
     return clockResolution;
   }
 
   public void setClockResolution(ClockResolution clockResolution) {
     this.clockResolution = clockResolution;
+  }
+
+  /**
+   * @return the autoDiscoverHosts
+   */
+  public boolean isAutoDiscoverHosts() {
+    return autoDiscoverHosts;
+  }
+
+  /**
+   * @param autoDiscoverHosts the autoDiscoverHosts to set
+   */
+  public void setAutoDiscoverHosts(boolean autoDiscoverHosts) {
+    this.autoDiscoverHosts = autoDiscoverHosts;
   } 
+  
   
 }

@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.connection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.TokenRange;
@@ -14,6 +15,7 @@ import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import me.prettyprint.cassandra.connection.CassandraHostRetryService.RetryRunner;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
@@ -27,7 +29,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
-
+    sf = executor.scheduleWithFixedDelay(new QueryRing(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
   }
   
   void shutdown() {
@@ -63,35 +65,36 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
       }      
     }
     
-    private Set<CassandraHost> discoverNodes() {
-      Set<CassandraHost> existingHosts = connectionManager.getHosts();
-      Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
-      TTransport tr = cassandraHost.getUseThriftFramedTransport() ? 
-          new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10)) :
-            new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10);
-      
-      TProtocol proto = new TBinaryProtocol(tr);
-      Cassandra.Client client = new Cassandra.Client(proto);
-      try {
-        tr.open();
-        List<TokenRange> tokens = client.describe_ring("System");
-        for (TokenRange tokenRange : tokens) {
-          List<String> endpoints = tokenRange.getEndpoints();
-          for (String endpoint : endpoints) {
-            CassandraHost foundHost = new CassandraHost(endpoint,cassandraHostConfigurator.getPort());
-            if ( !existingHosts.contains(foundHost) ) {
-              foundHosts.add(foundHost);
-            }
+  }
+  
+  private Set<CassandraHost> discoverNodes() {
+    Set<CassandraHost> existingHosts = connectionManager.getHosts();
+    Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
+    TTransport tr = cassandraHost.getUseThriftFramedTransport() ? 
+        new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10)) :
+          new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10);
+    
+    TProtocol proto = new TBinaryProtocol(tr);
+    Cassandra.Client client = new Cassandra.Client(proto);
+    try {
+      tr.open();
+      List<TokenRange> tokens = client.describe_ring("System");
+      for (TokenRange tokenRange : tokens) {
+        List<String> endpoints = tokenRange.getEndpoints();
+        for (String endpoint : endpoints) {
+          CassandraHost foundHost = new CassandraHost(endpoint,cassandraHostConfigurator.getPort());
+          if ( !existingHosts.contains(foundHost) ) {
+            foundHosts.add(foundHost);
           }
-          
         }
-      } catch (Exception e) {
-        //log.error("Downed Host retry failed attempt to verify CassandraHost", e);
-      } finally {
-        tr.close();
-      }      
-      return foundHosts;
-    }
+        
+      }
+    } catch (Exception e) {
+      //log.error("Downed Host retry failed attempt to verify CassandraHost", e);
+    } finally {
+      tr.close();
+    }      
+    return foundHosts;
   }
 }
   
