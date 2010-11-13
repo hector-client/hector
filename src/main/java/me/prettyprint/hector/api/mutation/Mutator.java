@@ -55,7 +55,7 @@ public interface Mutator<K> {
    * @param <N> column name type
    * @param key row key
    * @param cf column family
-   * @param columnName column family name
+   * @param columnName column name. Use null to delete the whole row.
    * @param nameSerializer a name serializer
    * @return a mutator
    */
@@ -69,7 +69,7 @@ public interface Mutator<K> {
    * @param <N> column name type
    * @param key row key
    * @param cf column family
-   * @param columnName column family name
+   * @param columnName column name. Use null to delete the whole row.
    * @param nameSerializer a name serializer
    * @param clock custom clock to use in the deletion
    * @return a mutator

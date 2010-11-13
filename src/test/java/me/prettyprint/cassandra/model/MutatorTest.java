@@ -110,31 +110,33 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   @Test
   public void testRowDeletion() {
     String cf = "Standard1";
+    long initialTime = keyspace.createClock();
 
     Mutator<String> m = createMutator(keyspace, se);
     for (int i = 0; i < 5; i++) {
-      m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
+      m.addInsertion("key" + i, cf, createColumn("name", "value" + i, se, se));
     }
     MutationResult r = m.execute();
 
     // Try to delete the row with key "k0" with a clock previous to the insertion.
     // Cassandra will discard this operation.
-    m.addDeletion("k0", cf, null, se, (ClockResolution.MICROSECONDS.createClock() - 1000));
+    m.addDeletion("key0", cf, null, se, (initialTime - 100));
+    m.execute();
 
     // Check that the delete was harmless
     QueryResult<HColumn<String, String>> columnResult =
-    	createColumnQuery(keyspace, se, se, se).setColumnFamily(cf).setKey("k0").
-    		setName("name").execute();
+        createColumnQuery(keyspace, se, se, se).setColumnFamily(cf).setKey("key0").
+            setName("name").execute();
     assertEquals("value0", columnResult.get().getValue());
 
     for (int i = 0; i < 5; i++) {
-      m.addDeletion("k" + i, cf, null, se);
+      m.addDeletion("key" + i, cf, null, se);
     }
     m.execute();
 
     // Check that the delete took place now
     columnResult = createColumnQuery(keyspace, se, se, se).
-    	setColumnFamily(cf).setKey("k0").setName("name").execute();
+        setColumnFamily(cf).setKey("key0").setName("name").execute();
     assertNull(columnResult.get());
   }
 
