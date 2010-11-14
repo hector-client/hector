@@ -213,7 +213,12 @@ public class HConnectionManager {
   }
   
   public void shutdown() {
-    cassandraHostRetryService.shutdown();
+    log.info("Shutdown called on HConnectionManager");
+    if ( cassandraHostRetryService != null ) 
+      cassandraHostRetryService.shutdown();
+    if ( nodeAutoDiscoverService != null )
+      nodeAutoDiscoverService.shutdown();
+    
     for (ConcurrentHClientPool pool : hostPools.values()) {
       try {
         pool.shutdown();
