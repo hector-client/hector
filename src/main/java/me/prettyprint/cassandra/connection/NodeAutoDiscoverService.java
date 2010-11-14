@@ -6,7 +6,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
+import org.apache.cassandra.thrift.Cassandra.Client;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -18,6 +20,10 @@ import org.slf4j.LoggerFactory;
 import me.prettyprint.cassandra.connection.CassandraHostRetryService.RetryRunner;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.cassandra.service.OperationType;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 
 public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
@@ -27,10 +33,12 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
   private CassandraHost cassandraHost;
   public static final int DEF_AUTO_DISCOVERY_DELAY = 30;
   
+  
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    super(connectionManager, cassandraHostConfigurator);        
-    sf = executor.scheduleWithFixedDelay(new QueryRing(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
+    super(connectionManager, cassandraHostConfigurator);    
+    this.retryDelayInSeconds = cassandraHostConfigurator.getAutoDiscoveryDelayInSeconds();
+    sf = executor.scheduleWithFixedDelay(new QueryRing(), retryDelayInSeconds,retryDelayInSeconds, TimeUnit.SECONDS);
   }
   
   void shutdown() {
@@ -73,30 +81,32 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
     
     HThriftClient thriftClient = null;
-        
+    log.info("using existing hosts {}", existingHosts);
     try {
       thriftClient = connectionManager.borrowClient();
-      List<TokenRange> tokens = thriftClient.getCassandra().describe_ring("System");
-      for (TokenRange tokenRange : tokens) {
-        if ( log.isDebugEnabled() ) {
-          log.debug("Looking over TokenRange {} for new hosts", tokenRange);
-        }
-        List<String> endpoints = tokenRange.getEndpoints();
-        for (String endpoint : endpoints) {
-          CassandraHost foundHost = new CassandraHost(endpoint,cassandraHostConfigurator.getPort());
-          if ( !existingHosts.contains(foundHost) ) {
-            log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
-            foundHosts.add(foundHost);
+
+      for (KsDef keyspace : thriftClient.getCassandra().describe_keyspaces()) {
+        if (!keyspace.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
+          List<TokenRange> tokenRanges = thriftClient.getCassandra().describe_ring(keyspace.getName());
+          for (TokenRange tokenRange : tokenRanges) {
+            for (String host : tokenRange.getEndpoints()) {
+              CassandraHost foundHost = new CassandraHost(host,cassandraHostConfigurator.getPort());
+              if ( !existingHosts.contains(foundHost) ) {
+                log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
+                foundHosts.add(foundHost);
+              }
+            }
           }
+          break;
         }
-        
-      }
+      }      
     } catch (Exception e) {
-      //log.error("Downed Host retry failed attempt to verify CassandraHost", e);
+      log.error("Downed Host retry failed attempt to verify CassandraHost", e);
     } finally {
       connectionManager.releaseClient(thriftClient);
     }      
     return foundHosts;
   }
+     
 }
   

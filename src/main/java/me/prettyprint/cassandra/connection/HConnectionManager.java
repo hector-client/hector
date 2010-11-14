@@ -64,7 +64,7 @@ public class HConnectionManager {
   }
     
   public void addCassandraHost(CassandraHost cassandraHost) {
-    if ( !hostPools.containsKey(cassandraHost) ) {
+    if ( !getHosts().contains(cassandraHost) ) {
       hostPools.put(cassandraHost, new ConcurrentHClientPool(cassandraHost));
       log.info("Added host {} to pool", cassandraHost.getName());
     } else {
@@ -73,7 +73,7 @@ public class HConnectionManager {
   }
       
   public Set<CassandraHost> getHosts() {
-    return Collections.unmodifiableSet(hostPools.keySet());
+    return Collections.unmodifiableSet(new HashSet<CassandraHost>(hostPools.keySet()));
   }
   
   
