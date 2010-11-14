@@ -16,7 +16,7 @@ public abstract class BackgroundCassandraHostService {
   protected final CassandraHostConfigurator cassandraHostConfigurator;
   
   protected ScheduledFuture sf;
-  protected int retryDelayInSeconds = DEF_RETRY_DELAY;
+  protected int retryDelayInSeconds;
   
   public BackgroundCassandraHostService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
@@ -42,6 +42,5 @@ public abstract class BackgroundCassandraHostService {
   public void setRetryDelayInSeconds(int retryDelayInSeconds) {
     this.retryDelayInSeconds = retryDelayInSeconds;
   }
-  
-  public static final int DEF_RETRY_DELAY = 10;
+    
 }

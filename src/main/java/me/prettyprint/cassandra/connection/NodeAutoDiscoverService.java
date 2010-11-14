@@ -25,6 +25,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
   private static final Logger log = LoggerFactory.getLogger(NodeAutoDiscoverService.class);
   
   private CassandraHost cassandraHost;
+  public static final int DEF_AUTO_DISCOVERY_DELAY = 30;
   
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
