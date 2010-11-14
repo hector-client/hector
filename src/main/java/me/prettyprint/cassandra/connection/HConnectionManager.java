@@ -22,13 +22,11 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.cliffc.high_scale_lib.NonBlockingIdentityHashMap;
+import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.perf4j.StopWatch;
 import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import sun.security.action.GetLongAction;
 
 public class HConnectionManager {
   
@@ -36,7 +34,7 @@ public class HConnectionManager {
   private static final Logger perf4jLogger =
     LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
   
-  private final NonBlockingIdentityHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
+  private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
   private LoadBalancingPolicy loadBalancingPolicy = new LeastActiveBalancingPolicy();
@@ -49,7 +47,7 @@ public class HConnectionManager {
   
   public HConnectionManager(CassandraHostConfigurator cassandraHostConfigurator) {    
     clock = cassandraHostConfigurator.getClockResolution();
-    hostPools = new NonBlockingIdentityHashMap<CassandraHost, ConcurrentHClientPool>();
+    hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
     for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
       hostPools.put(host,new ConcurrentHClientPool(host));      
     }
@@ -73,7 +71,7 @@ public class HConnectionManager {
   }
       
   public Set<CassandraHost> getHosts() {
-    return Collections.unmodifiableSet(new HashSet<CassandraHost>(hostPools.keySet()));
+    return Collections.unmodifiableSet(hostPools.keySet());
   }
   
   
