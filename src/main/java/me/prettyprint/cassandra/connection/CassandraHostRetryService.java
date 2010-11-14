@@ -25,8 +25,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
   
   private static Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
 
-  public static final int DEF_QUEUE_SIZE = 3;
-  public static final int DEF_RETRY_DELAY = 10;
+  public static final int DEF_QUEUE_SIZE = 3;  
   private LinkedBlockingQueue<CassandraHost> downedHostQueue;      
   
   public CassandraHostRetryService(HConnectionManager connectionManager,
@@ -35,7 +34,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize());
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
-
+    
     log.info("Downed Host Retry service started with queue size {} and retry delay {}s", 
         cassandraHostConfigurator.getRetryDownedHostsQueueSize(), 
         retryDelayInSeconds);    
@@ -100,19 +99,14 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     
     private boolean verifyConnection(CassandraHost cassandraHost) {
       if ( cassandraHost == null ) return false;
-      TTransport tr = cassandraHost.getUseThriftFramedTransport() ? 
-          new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10)) :
-            new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10);
-      
-      TProtocol proto = new TBinaryProtocol(tr);
-      Cassandra.Client client = new Cassandra.Client(proto);
+      HThriftClient client = new HThriftClient(cassandraHost);
       try {
-        tr.open();
-        return client.describe_cluster_name() != null;
+        client.open();
+        return client.getCassandra().describe_cluster_name() != null;
       } catch (Exception e) {
         log.error("Downed Host retry failed attempt to verify CassandraHost", e);
       } finally {
-        tr.close();
+        client.close();
       }
       return false;
     }

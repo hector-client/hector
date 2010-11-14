@@ -28,7 +28,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
   
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    super(connectionManager, cassandraHostConfigurator);
+    super(connectionManager, cassandraHostConfigurator);        
     sf = executor.scheduleWithFixedDelay(new QueryRing(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
   }
   
@@ -42,7 +42,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
   }
   
   public void applyRetryDelay() {
-    
+    // no op for now
   }
   
   class QueryRing implements Runnable {
@@ -67,23 +67,24 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     
   }
   
-  private Set<CassandraHost> discoverNodes() {
+  public Set<CassandraHost> discoverNodes() {
     Set<CassandraHost> existingHosts = connectionManager.getHosts();
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
-    TTransport tr = cassandraHost.getUseThriftFramedTransport() ? 
-        new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10)) :
-          new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), 10);
     
-    TProtocol proto = new TBinaryProtocol(tr);
-    Cassandra.Client client = new Cassandra.Client(proto);
+    HThriftClient thriftClient = null;
+        
     try {
-      tr.open();
-      List<TokenRange> tokens = client.describe_ring("System");
+      thriftClient = connectionManager.borrowClient();
+      List<TokenRange> tokens = thriftClient.getCassandra().describe_ring("System");
       for (TokenRange tokenRange : tokens) {
+        if ( log.isDebugEnabled() ) {
+          log.debug("Looking over TokenRange {} for new hosts", tokenRange);
+        }
         List<String> endpoints = tokenRange.getEndpoints();
         for (String endpoint : endpoints) {
           CassandraHost foundHost = new CassandraHost(endpoint,cassandraHostConfigurator.getPort());
           if ( !existingHosts.contains(foundHost) ) {
+            log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
             foundHosts.add(foundHost);
           }
         }
@@ -92,7 +93,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     } catch (Exception e) {
       //log.error("Downed Host retry failed attempt to verify CassandraHost", e);
     } finally {
-      tr.close();
+      connectionManager.releaseClient(thriftClient);
     }      
     return foundHosts;
   }

@@ -17,7 +17,7 @@ public final class CassandraHostConfigurator {
   private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution = ClockResolution.MICROSECONDS;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
-  private boolean retryDownedHosts = false;
+  private boolean retryDownedHosts = true;
   private boolean autoDiscoverHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
@@ -195,7 +195,7 @@ public final class CassandraHostConfigurator {
   /**
    * @return the autoDiscoverHosts
    */
-  public boolean isAutoDiscoverHosts() {
+  public boolean getAutoDiscoverHosts() {
     return autoDiscoverHosts;
   }
 

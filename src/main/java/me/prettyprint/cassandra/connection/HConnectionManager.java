@@ -37,7 +37,8 @@ public class HConnectionManager {
     LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
   
   private final NonBlockingIdentityHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
-  private final CassandraHostRetryService cassandraHostRetryService;
+  private CassandraHostRetryService cassandraHostRetryService;
+  private NodeAutoDiscoverService nodeAutoDiscoverService;
   private LoadBalancingPolicy loadBalancingPolicy = new LeastActiveBalancingPolicy();
   
   private final ClockResolution clock;
@@ -51,8 +52,13 @@ public class HConnectionManager {
     hostPools = new NonBlockingIdentityHashMap<CassandraHost, ConcurrentHClientPool>();
     for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
       hostPools.put(host,new ConcurrentHClientPool(host));      
-    }    
-    cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
+    }
+    if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
+      cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
+    }
+    if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
+      nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
+    }
     monitor = JmxMonitor.getInstance(this).getCassandraMonitor();
     exceptionsTranslator = new ExceptionsTranslatorImpl();
   }
