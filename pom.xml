@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>bundle</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.7.0-19_11042010</version>
+  <version>0.7.0-19_11082010</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>

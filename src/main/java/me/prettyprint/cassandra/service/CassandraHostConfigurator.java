@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import me.prettyprint.cassandra.connection.CassandraHostRetryService;
+import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
 
 
 public final class CassandraHostConfigurator {
@@ -17,10 +18,11 @@ public final class CassandraHostConfigurator {
   private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution = ClockResolution.MICROSECONDS;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
-  private boolean retryDownedHosts = false;
+  private boolean retryDownedHosts = true;
+  private boolean autoDiscoverHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
-  private PoolType poolType = PoolType.COMMONS;
+  private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
   
 
   public CassandraHostConfigurator() {
@@ -184,20 +186,31 @@ public final class CassandraHostConfigurator {
     this.useThriftFramedTransport = useThriftFramedTransport;
   }
 
-  public PoolType getPoolType() {
-    return poolType;
-  }
-
-  public void setPoolType(PoolType poolType) {
-    this.poolType = poolType;
-  }
-
   public ClockResolution getClockResolution() {
     return clockResolution;
   }
 
   public void setClockResolution(ClockResolution clockResolution) {
     this.clockResolution = clockResolution;
+  }
+
+  public boolean getAutoDiscoverHosts() {
+    return autoDiscoverHosts;
+  }
+
+  public void setAutoDiscoverHosts(boolean autoDiscoverHosts) {
+    this.autoDiscoverHosts = autoDiscoverHosts;
+  }
+
+  public int getAutoDiscoveryDelayInSeconds() {
+    return autoDiscoveryDelayInSeconds;
+  }
+
+  public void setAutoDiscoveryDelayInSeconds(int autoDiscoveryDelayInSeconds) {
+    this.autoDiscoveryDelayInSeconds = autoDiscoveryDelayInSeconds;
   } 
+  
+  
+  
   
 }

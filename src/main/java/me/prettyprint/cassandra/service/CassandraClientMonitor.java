@@ -89,12 +89,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   public void updateKnownHosts() throws HectorTransportException {
    log.info("Updating all known cassandra hosts on all clients");
-   /*
-    TODO is this a noop given retry service?
-   for (ConcurrentHClientPool pool: pools) {
-     pool.updateKnownHosts();
-   }
-   */
+   
   }
 
 
@@ -105,7 +100,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   public Set<String> getExhaustedPoolNames() {
     Set<String> ret = new HashSet<String>();
-    // TODO connectionManager...
+    
     return ret;
   }
 
@@ -139,9 +134,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
 
   public int getNumPools() {
-    int ret = 0;
-    // TODO connectionManager....
-    return ret;
+    return connectionManager.getHosts().size();
   }
 
 
@@ -153,9 +146,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
 
   public Set<CassandraHost> getKnownHosts() {
-    Set<CassandraHost> ret = new HashSet<CassandraHost>();
-    // TODO connectionManager...
-    return ret;
+    return connectionManager.getHosts();
   }
 
 
@@ -167,13 +158,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   public long getRecoverableErrorCount() {
     return getRecoverableTimedOutCount() + getRecoverableTransportExceptionCount() +
         getRecoverableUnavailableCount() + getRecoverableLoadBalancedConnectErrors();
-  }
-
-  /*
-  public void addPool(CassandraClientPool pool) {
-    // TODO no longer germain?
-  }
-  */
+  }  
 
 
   public long getRecoverableLoadBalancedConnectErrors() {

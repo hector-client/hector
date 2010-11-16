@@ -36,33 +36,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-  @Override
-  protected Set<String> buildHostNames(Cassandra.Client cassandra) throws HectorException {
-    Operation<Set<String>> op = new Operation<Set<String>>(OperationType.META_READ) {      
-      @Override
-      public Set<String> execute(Client cassandra) throws HectorException {
-        try {
-          Set<String> hostnames = new HashSet<String>();
-          for (KsDef keyspace : cassandra.describe_keyspaces()) {
-            if (!keyspace.getName().equals(KEYSPACE_SYSTEM)) {
-              List<TokenRange> tokenRanges = cassandra.describe_ring(keyspace.getName());
-              for (TokenRange tokenRange : tokenRanges) {
-                for (String host : tokenRange.getEndpoints()) {
-                  hostnames.add(host);
-                }
-              }
-              break;
-            }
-          }
-          return hostnames;
-        } catch (Exception e) {
-          throw xtrans.translate(e);
-        }
-      }
-    };
-    connectionManager.operateWithFailover(op);
-    return op.getResult();
-  }
+
 
   @Override
   public String updateKeyspace(final HKsDef ksdef) throws HectorException {

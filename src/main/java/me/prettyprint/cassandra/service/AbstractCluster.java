@@ -40,9 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractCluster implements Cluster {
 
-  private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
-
-  protected static final String KEYSPACE_SYSTEM = "system";
+  private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);  
 
   protected final HConnectionManager connectionManager;
   private final String name;
@@ -60,7 +58,7 @@ public abstract class AbstractCluster implements Cluster {
     configurator = cassandraHostConfigurator;
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
-    xtrans = new ExceptionsTranslatorImpl();
+    xtrans = new ExceptionsTranslatorImpl();    
   }
   
   public HConnectionManager getConnectionManager() {
@@ -81,23 +79,7 @@ public abstract class AbstractCluster implements Cluster {
     return knownPoolHosts;
   }
 
-  @Override
-  public Set<String> getClusterHosts(boolean refresh) {
-    /* create an op
-    if (refresh || knownClusterHosts == null) {
-      CassandraClient client = borrowClient();
-      try {
-        knownClusterHosts = new HashSet<String>(buildHostNames(client.getCassandra()));
-      } finally {
-        releaseClient(client);
-      }
-    }
-    return knownClusterHosts;
-    */
-    return null;
-  }
 
-  protected abstract Set<String> buildHostNames(Client cassandra);
 
   /* (non-Javadoc)
    * @see me.prettyprint.cassandra.service.Cluster#addHost(me.prettyprint.cassandra.service.CassandraHost, boolean)
