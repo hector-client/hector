@@ -31,6 +31,10 @@ public interface Serializer<T> {
    */  
   public ByteBuffer toByteBuffer(T obj);  
 
+  public byte[] toBytes(T obj);
+  
+  public T fromBytes(byte[] bytes);
+  
   /**
    * Extract an object of type T from the bytes.
    * @param bytes
