@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -200,6 +201,10 @@ public class HConnectionManager {
 
   public Set<CassandraHost> getDownedHosts() {
     return cassandraHostRetryService.getDownedHosts();
+  }
+  
+  public Collection<ConcurrentHClientPool> getActivePools() {
+    return Collections.unmodifiableCollection(hostPools.values());
   }
   
   public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {

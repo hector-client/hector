@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -107,28 +108,35 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   public int getNumActive() {
     int ret = 0;
-    // TODO connectionmanager....
+    Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
+    for (ConcurrentHClientPool concurrentHClientPool : pools) {
+      ret += concurrentHClientPool.getNumActive();
+    }
     return ret;
   }
 
 
   public int getNumBlockedThreads() {
     int ret = 0;
-    // TODO connectionManager...
+    Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
+    for (ConcurrentHClientPool concurrentHClientPool : pools) {
+      ret += concurrentHClientPool.getNumBlockedThreads();
+    }
     return ret;
   }
 
 
   public int getNumExhaustedPools() {
-    int ret = 0;
-    // TODO connectionManager...
-    return ret;
+    return connectionManager.getDownedHosts().size();
   }
 
 
   public int getNumIdleConnections() {
     int ret = 0;
-    // TODO ?
+    Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
+    for (ConcurrentHClientPool concurrentHClientPool : pools) {
+      ret += concurrentHClientPool.getNumIdle();
+    }
     return ret;
   }
 
@@ -137,12 +145,6 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     return connectionManager.getHosts().size();
   }
 
-
-  public Set<String> getPoolNames() {
-    Set<String> ret = new HashSet<String>();
-    // TODO connectionManager...
-    return ret;
-  }
 
 
   public Set<CassandraHost> getKnownHosts() {
