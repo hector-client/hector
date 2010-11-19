@@ -23,7 +23,7 @@
 	</bean>
 
 	
-	<!-- Using a pool factory example and without embedded beans -->
+	<!-- Using a pool factory example without embedded beans -->
 	<!-- 
 	<bean id="cassandraClientPoolFactory" class="me.prettyprint.cassandra.service.CassandraClientPoolFactory" factory-method="getInstance" />
 
