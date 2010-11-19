@@ -16,6 +16,6 @@ public final class MutationResultImpl extends ExecutionResult<Void> implements M
 
   @Override
   public String toString() {
-    return "MutationResult(" + toStringInternal() + ")";
+    return "MutationResult(" + toString() + ")";
   }
 }
