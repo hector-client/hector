@@ -5,6 +5,7 @@ import java.util.List;
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
+import me.prettyprint.cassandra.serializers.BytesSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
@@ -37,6 +38,7 @@ import org.apache.commons.lang.Validate;
  * Implementation of the HectorTemplate
  * 
  * @author Bozhidar Bozhanov
+ * @author hadolphs
  * 
  */
 public class HectorTemplateImpl implements HectorTemplate {
@@ -170,14 +172,12 @@ public class HectorTemplateImpl implements HectorTemplate {
 
   @Override
   public SliceQuery<byte[], byte[]> createSliceQuery() {
-	// TODO Auto-generated method stub
-	return null;
+	return createSliceQuery(BytesSerializer.get(), BytesSerializer.get());  
   }
 
   @Override
   public SuperSliceQuery<byte[], byte[], byte[]> createSuperSliceQuery() {
-	// TODO Auto-generated method stub
-	return null;
+	return createSuperSliceQuery(BytesSerializer.get(), BytesSerializer.get(), BytesSerializer.get());
   }
 
   @Override
@@ -224,10 +224,30 @@ public class HectorTemplateImpl implements HectorTemplate {
 	return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createTimestamp();
   }
 
-  private ColumnPath createColumnPath(String columnFamilyName) {
-	Validate.notNull(columnFamilyName, "columnFamilyName cannot be null");
-	ColumnPath columnPath = new ColumnPath(columnFamilyName);
-	return columnPath;
+  <N> ColumnPath createColumnPath(String columnFamilyName, N columnName,
+      Serializer<N> nameSerializer) {
+    return createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
+  }
+  
+  private <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
+    Validate.notNull(columnFamilyName, "columnFamilyName cannot be null");
+    ColumnPath columnPath = new ColumnPath(columnFamilyName);
+    if (columnName != null) {
+      columnPath.setColumn(columnName);
+    }
+    return columnPath;
+  }
+
+  <N> ColumnPath createColumnPath(String columnFamilyName) {
+    return createColumnPath(columnFamilyName, null);
+  }
+  
+  <SN, N> ColumnPath createSuperColumnPath(String columnFamilyName, SN superColumnName,
+      N columnName, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
+    noNullElements(columnFamilyName, superColumnName, superNameSerializer, nameSerializer);
+    ColumnPath columnPath = createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
+    columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
+    return columnPath;
   }
 
   <SN> ColumnPath createSuperColumnPath(String columnFamilyName,
