@@ -83,17 +83,14 @@ public final class HFactory {
 
   public static Cluster getOrCreateCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    Cluster c = clusters.get(clusterName);
-    if (c == null) {
-      synchronized (clusters) {
-        c = clusters.get(clusterName);
-        if (c == null) {
-          c = createCluster(clusterName, cassandraHostConfigurator);
-          clusters.put(clusterName, c);
-        }
+    synchronized (clusters) {
+      Cluster c = clusters.get(clusterName);
+      if (c == null) {
+        c = createCluster(clusterName, cassandraHostConfigurator);
+        clusters.put(clusterName, c);
       }
+      return c;
     }
-    return c;
   }
 
   public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
