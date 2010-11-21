@@ -28,6 +28,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
@@ -86,17 +87,14 @@ public final class HFactory {
 
   public static Cluster getOrCreateCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    Cluster c = clusters.get(clusterName);
-    if (c == null) {
-      synchronized (clusters) {
-        c = clusters.get(clusterName);
-        if (c == null) {
-          c = createCluster(clusterName, cassandraHostConfigurator);
-          clusters.put(clusterName, c);
-        }
+    synchronized (clusters) {
+      Cluster c = clusters.get(clusterName);
+      if (c == null) {
+        c = createCluster(clusterName, cassandraHostConfigurator);
+        clusters.put(clusterName, c);
       }
+      return c;
     }
-    return c;
   }
 
   public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
@@ -110,12 +108,19 @@ public final class HFactory {
    * @return
    */
   public static Keyspace createKeyspace(String keyspace, Cluster cluster) {
-    return createKeyspace(keyspace, cluster, createDefaultConsistencyLevelPolicy());
+    return createKeyspace(keyspace, cluster,
+        createDefaultConsistencyLevelPolicy(), FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy);
+    return createKeyspace(keyspace, cluster,
+        consistencyLevelPolicy, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
+  }
+
+  public static Keyspace createKeyspace(String keyspace, Cluster cluster,
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
+    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy);
   }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {

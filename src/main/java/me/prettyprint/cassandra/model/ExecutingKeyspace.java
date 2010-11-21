@@ -1,11 +1,11 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
-import me.prettyprint.hector.api.ConsistencyLevelPolicy.OperationType;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
@@ -17,16 +17,18 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 public class ExecutingKeyspace implements Keyspace {
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
+  private FailoverPolicy failoverPolicy;
 
   private final HConnectionManager connectionManager;
   private final String keyspace;
 
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
-      ConsistencyLevelPolicy consistencyLevelPolicy) {
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
     Assert.noneNull(keyspace, consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
+    this.failoverPolicy = failoverPolicy;
   }
 
   @Override
@@ -47,7 +49,7 @@ public class ExecutingKeyspace implements Keyspace {
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     KeyspaceService ks = null;
     try {
-      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy.get(OperationType.READ), connectionManager);
+      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy);
       return koc.doInKeyspaceAndMeasure(ks);
     } finally {
       if (ks != null) {

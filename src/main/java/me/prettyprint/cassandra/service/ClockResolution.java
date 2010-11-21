@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Resolution used to create clocks.
@@ -42,7 +41,7 @@ public enum ClockResolution {
 	        	 // the time i got from the system is equals or less
 	        	 // (hope not - clock going backwards)
 	        	 // One more "microsecond"
-	        	 us = lastTime++;
+	        	 us = ++lastTime;
 	         }
 	      }
 	      return us;

@@ -15,12 +15,6 @@ public interface Cluster {
 
   HConnectionManager getConnectionManager();
   
-  /**
-   * These are all the hosts known to the cluster
-   * @param refresh
-   * @return
-   */
-  Set<String> getClusterHosts(boolean refresh);
 
   /**
    * Adds the host to this Cluster. Unless skipApplyConfig is set to true, the settings in

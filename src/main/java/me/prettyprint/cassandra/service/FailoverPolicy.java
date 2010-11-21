@@ -13,14 +13,14 @@ package me.prettyprint.cassandra.service;
  * up and returning the communication error to the user.
  *
  */
-public enum FailoverPolicy {
+public class FailoverPolicy {
 
   /** On communication failure, just return the error to the client and don't retry */
-  FAIL_FAST(0, 0),
+  public static FailoverPolicy FAIL_FAST = new FailoverPolicy(0, 0);
   /** On communication error try one more server before giving up */
-  ON_FAIL_TRY_ONE_NEXT_AVAILABLE(1, 0),
+  public static FailoverPolicy ON_FAIL_TRY_ONE_NEXT_AVAILABLE = new FailoverPolicy(1, 0);
   /** On communication error try all known servers before giving up */
-  ON_FAIL_TRY_ALL_AVAILABLE(Integer.MAX_VALUE - 1, 0);
+  public static FailoverPolicy ON_FAIL_TRY_ALL_AVAILABLE = new FailoverPolicy(Integer.MAX_VALUE - 1, 0);
 
   public final int numRetries;
 
