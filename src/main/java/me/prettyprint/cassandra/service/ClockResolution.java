@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Resolution used to create clocks.
