@@ -64,11 +64,7 @@ public interface CassandraClientMonitorMBean {
    */
   int getNumPools();
 
-  /**
-   * @return name of all exisging pools.
-   */
-  Set<String> getPoolNames();
-
+  
   /**
    * Total number of idle clients in all client pools
    */

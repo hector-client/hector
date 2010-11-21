@@ -56,7 +56,7 @@ public class HThriftClient {
         transport.flush();
           
       } catch (Exception e) {
-        log.error("Could not close transport in close for client" + toString(), e);
+        log.error("Could not flush transport (to be expected if the pool is shutting down) in close for client: " + toString(), e);
       } finally {
         try {
           transport.close();

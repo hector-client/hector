@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import me.prettyprint.cassandra.connection.CassandraHostRetryService;
+import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
 
 
 public final class CassandraHostConfigurator {
@@ -21,6 +22,7 @@ public final class CassandraHostConfigurator {
   private boolean autoDiscoverHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
+  private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
   
 
   public CassandraHostConfigurator() {
@@ -192,19 +194,23 @@ public final class CassandraHostConfigurator {
     this.clockResolution = clockResolution;
   }
 
-  /**
-   * @return the autoDiscoverHosts
-   */
   public boolean getAutoDiscoverHosts() {
     return autoDiscoverHosts;
   }
 
-  /**
-   * @param autoDiscoverHosts the autoDiscoverHosts to set
-   */
   public void setAutoDiscoverHosts(boolean autoDiscoverHosts) {
     this.autoDiscoverHosts = autoDiscoverHosts;
+  }
+
+  public int getAutoDiscoveryDelayInSeconds() {
+    return autoDiscoveryDelayInSeconds;
+  }
+
+  public void setAutoDiscoveryDelayInSeconds(int autoDiscoveryDelayInSeconds) {
+    this.autoDiscoveryDelayInSeconds = autoDiscoveryDelayInSeconds;
   } 
+  
+  
   
   
 }

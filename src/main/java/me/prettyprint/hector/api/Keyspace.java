@@ -8,6 +8,8 @@ package me.prettyprint.hector.api;
  */
 public interface Keyspace {
 
+  public static final String KEYSPACE_SYSTEM = "system";
+  
   void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp);
 
 
