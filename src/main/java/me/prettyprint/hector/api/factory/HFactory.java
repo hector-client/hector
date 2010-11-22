@@ -87,17 +87,14 @@ public final class HFactory {
 
   public static Cluster getOrCreateCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    Cluster c = clusters.get(clusterName);
-    if (c == null) {
-      synchronized (clusters) {
-        c = clusters.get(clusterName);
-        if (c == null) {
-          c = createCluster(clusterName, cassandraHostConfigurator);
-          clusters.put(clusterName, c);
-        }
+    synchronized (clusters) {
+      Cluster c = clusters.get(clusterName);
+      if (c == null) {
+        c = createCluster(clusterName, cassandraHostConfigurator);
+        clusters.put(clusterName, c);
       }
+      return c;
     }
-    return c;
   }
 
   public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
@@ -111,16 +108,16 @@ public final class HFactory {
    * @return
    */
   public static Keyspace createKeyspace(String keyspace, Cluster cluster) {
-    return createKeyspace(keyspace, cluster, 
+    return createKeyspace(keyspace, cluster,
         createDefaultConsistencyLevelPolicy(), FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return createKeyspace(keyspace, cluster, 
+    return createKeyspace(keyspace, cluster,
         consistencyLevelPolicy, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
-  
+
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
     return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy);
