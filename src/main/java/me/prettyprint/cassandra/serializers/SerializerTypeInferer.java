@@ -30,7 +30,7 @@ public class SerializerTypeInferer {
     } else if (value instanceof Boolean) {
       serializer = BooleanSerializer.get();
     } else if (value instanceof byte[]) {
-      serializer = ByteBufferSerializer.get();
+      serializer = BytesArraySerializer.get();
     } else if (value instanceof Date) {
       serializer = DateSerializer.get();
     } else {

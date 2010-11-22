@@ -10,6 +10,7 @@ import java.util.List;
 
 import me.prettyprint.hector.api.Serializer;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -27,6 +28,14 @@ public class TypeInferringSerializerTest {
     test(Long.MIN_VALUE);
     //test(null); nulls can't be tested, because the target type is unknown
   }
+
+  @Test
+  public void testByteConversions() {
+     TypeInferringSerializer ext = TypeInferringSerializer.get();
+     ByteBuffer byteBuffer = ext.toByteBuffer("bytes".getBytes());
+     Assert.assertTrue(byteBuffer != null);
+   }
+
 
   @SuppressWarnings("rawtypes")
   private void test(Object object) {
