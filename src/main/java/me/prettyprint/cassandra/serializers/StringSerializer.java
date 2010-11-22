@@ -10,6 +10,7 @@ import java.nio.ByteBuffer;
  */
 public final class StringSerializer extends AbstractSerializer<String> {
 
+  private static final String UTF_8 = "UTF-8";
   private static final StringSerializer instance = new StringSerializer();
 
   public static StringSerializer get() {
@@ -22,7 +23,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
       return null;
     }
     try {
-      return ByteBuffer.wrap(obj.getBytes("UTF-8"));
+      return ByteBuffer.wrap(obj.getBytes(UTF_8));
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
@@ -33,7 +34,13 @@ public final class StringSerializer extends AbstractSerializer<String> {
     if (byteBuffer == null) {
       return null;
     }
+    try {
     return new String(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(),
-        byteBuffer.remaining());
+        byteBuffer.remaining(), UTF_8);
+    } catch (UnsupportedEncodingException e) {
+      // not really possible
+      e.printStackTrace();
+    }
+    return null;
   }
 }
