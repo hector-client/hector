@@ -43,289 +43,295 @@ import org.apache.commons.lang.Validate;
  */
 public class HectorTemplateImpl implements HectorTemplate {
 
-  private String keyspaceName;
-  private Cluster cluster;
-  private Keyspace keyspace;
+	private String keyspaceName;
+	private Cluster cluster;
+	private Keyspace keyspace;
 
-  private ConfigurableConsistencyLevel configurableConsistencyLevelPolicy;
-  private String replicationStrategyClass;
-  private int replicationFactor;
+	private ConfigurableConsistencyLevel configurableConsistencyLevelPolicy;
+	private String replicationStrategyClass;
+	private int replicationFactor;
 
-  public HectorTemplateImpl() {
-  }
-
-  public HectorTemplateImpl(Cluster cluster, String keyspace,
-	  int replicationFactor, String replicationStrategyClass,
-	  ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
-	this.cluster = cluster;
-	this.keyspaceName = keyspace;
-	this.replicationFactor = replicationFactor;
-	this.replicationStrategyClass = replicationStrategyClass;
-	this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
-	initKeyspaceOperator();
-  }
-
-  public void init() {
-	initKeyspaceOperator();
-  }
-
-  private void initKeyspaceOperator() {
-	ConsistencyLevelPolicy clPolicy;
-	if (configurableConsistencyLevelPolicy == null) {
-	  clPolicy = HFactory.createDefaultConsistencyLevelPolicy();
-	} else {
-	  clPolicy = configurableConsistencyLevelPolicy;
+	public HectorTemplateImpl() {
 	}
-	keyspace = HFactory.createKeyspace(keyspaceName, cluster, clPolicy);
-  }
 
-  @Override
-  public <N, V> ColumnQuery<N, V> createColumnQuery(
-	  Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-	return new ThriftColumnQuery<N, V>(keyspace, nameSerializer,
-		valueSerializer);
-  }
-
-  @Override
-  public CountQuery createCountQuery() {
-	return HFactory.createCountQuery(keyspace);
-  }
-
-  @Override
-  public SuperCountQuery createSuperCountQuery() {
-	return HFactory.createSuperCountQuery(keyspace);
-  }
-
-  @Override
-  public <SN> SubCountQuery<SN> createSubCountQuery(
-	  Serializer<SN> superNameSerializer) {
-	return HFactory.createSubCountQuery(keyspace, superNameSerializer);
-  }
-
-  @Override
-  public <SN, N, V> SuperColumnQuery<SN, N, V> createSuperColumnQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createSuperColumnQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <N, V> MultigetSliceQuery<N, V> createMultigetSliceQuery(
-	  Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-	return HFactory.createMultigetSliceQuery(keyspace, nameSerializer,
-		valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> MultigetSuperSliceQuery<SN, N, V> createMultigetSuperSliceQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createMultigetSuperSliceQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> MultigetSubSliceQuery<SN, N, V> createMultigetSubSliceQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createMultigetSubSliceQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <N, V> RangeSlicesQuery<N, V> createRangeSlicesQuery(
-	  Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-	return HFactory.createRangeSlicesQuery(keyspace, nameSerializer,
-		valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> RangeSuperSlicesQuery<SN, N, V> createRangeSuperSlicesQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createRangeSuperSlicesQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> RangeSubSlicesQuery<SN, N, V> createRangeSubSlicesQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createRangeSubSlicesQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <N, V> SliceQuery<N, V> createSliceQuery(Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createSliceQuery(keyspace, nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> SubSliceQuery<SN, N, V> createSubSliceQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createSubSliceQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public SliceQuery<byte[], byte[]> createSliceQuery() {
-	return createSliceQuery(BytesSerializer.get(), BytesSerializer.get());  
-  }
-
-  @Override
-  public SuperSliceQuery<byte[], byte[], byte[]> createSuperSliceQuery() {
-	return createSuperSliceQuery(BytesSerializer.get(), BytesSerializer.get(), BytesSerializer.get());
-  }
-
-  @Override
-  public <SN, N, V> SuperSliceQuery<SN, N, V> createSuperSliceQuery(
-	  Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createSuperSliceQuery(keyspace, sNameSerializer,
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
-	  List<HColumn<N, V>> columns, Serializer<SN> superNameSerializer,
-	  Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-	return HFactory.createSuperColumn(name, columns, createTimestamp(),
-		superNameSerializer, nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
-	  List<HColumn<N, V>> columns, long clock,
-	  Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
-	  Serializer<V> valueSerializer) {
-	return HFactory.createSuperColumn(name, columns, clock,
-		superNameSerializer, nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
-	  Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-	return HFactory.createColumn(name, value, clock, nameSerializer,
-		valueSerializer);
-  }
-
-  @Override
-  public <N, V> HColumn<N, V> createColumn(N name, V value,
-	  Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
-	return HFactory.createColumn(name, value, createTimestamp(),
-		nameSerializer, valueSerializer);
-  }
-
-  @Override
-  public long createTimestamp() {
-	return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createTimestamp();
-  }
-
-  <N> ColumnPath createColumnPath(String columnFamilyName, N columnName,
-      Serializer<N> nameSerializer) {
-    return createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
-  }
-  
-  private <N> ColumnPath createColumnPath(String columnFamilyName, byte[] columnName) {
-    Validate.notNull(columnFamilyName, "columnFamilyName cannot be null");
-    ColumnPath columnPath = new ColumnPath(columnFamilyName);
-    if (columnName != null) {
-      columnPath.setColumn(columnName);
-    }
-    return columnPath;
-  }
-
-  <N> ColumnPath createColumnPath(String columnFamilyName) {
-    return createColumnPath(columnFamilyName, null);
-  }
-  
-  <SN, N> ColumnPath createSuperColumnPath(String columnFamilyName, SN superColumnName,
-      N columnName, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
-    noNullElements(columnFamilyName, superColumnName, superNameSerializer, nameSerializer);
-    ColumnPath columnPath = createColumnPath(columnFamilyName, nameSerializer.toBytes(columnName));
-    columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
-    return columnPath;
-  }
-
-  <SN> ColumnPath createSuperColumnPath(String columnFamilyName,
-	  SN superColumnName, Serializer<SN> superNameSerializer) {
-	noNullElements(columnFamilyName, superNameSerializer);
-	ColumnPath columnPath = createColumnPath(columnFamilyName);
-	if (superColumnName != null) {
-	  columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
+	public HectorTemplateImpl(Cluster cluster, String keyspace,
+			int replicationFactor, String replicationStrategyClass,
+			ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
+		this.cluster = cluster;
+		this.keyspaceName = keyspace;
+		this.replicationFactor = replicationFactor;
+		this.replicationStrategyClass = replicationStrategyClass;
+		this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
+		initKeyspaceOperator();
 	}
-	return columnPath;
-  }
 
-  private void noNullElements(Object... elements) {
-	Validate.noNullElements(elements);
-  }
+	public void init() {
+		initKeyspaceOperator();
+	}
 
-  @Override
-  public <N, V> Mutator createMutator() {
-	return new MutatorImpl(keyspace);
-  }
+	private void initKeyspaceOperator() {
+		ConsistencyLevelPolicy clPolicy;
+		if (configurableConsistencyLevelPolicy == null) {
+			clPolicy = HFactory.createDefaultConsistencyLevelPolicy();
+		} else {
+			clPolicy = configurableConsistencyLevelPolicy;
+		}
+		keyspace = HFactory.createKeyspace(keyspaceName, cluster, clPolicy);
+	}
 
-  @Override
-  public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
-	  List<HColumn<N, V>> columns) {
-	return createSuperColumn(name, columns, TypeInferringSerializer.<SN> get(),
-		TypeInferringSerializer.<N> get(), TypeInferringSerializer.<V> get());
-  }
+	@Override
+	public <N, V> ColumnQuery<N, V> createColumnQuery(
+			Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+		return new ThriftColumnQuery<N, V>(keyspace, nameSerializer,
+				valueSerializer);
+	}
 
-  @Override
-  public String getKeyspaceName() {
-	return keyspaceName;
-  }
+	@Override
+	public CountQuery createCountQuery() {
+		return HFactory.createCountQuery(keyspace);
+	}
 
-  public void setKeyspaceName(String keyspace) {
-	this.keyspaceName = keyspace;
-  }
+	@Override
+	public SuperCountQuery createSuperCountQuery() {
+		return HFactory.createSuperCountQuery(keyspace);
+	}
 
-  public Keyspace getKeyspace() {
-	return keyspace;
-  }
+	@Override
+	public <SN> SubCountQuery<SN> createSubCountQuery(
+			Serializer<SN> superNameSerializer) {
+		return HFactory.createSubCountQuery(keyspace, superNameSerializer);
+	}
 
-  public void setKeyspace(Keyspace keyspace) {
-	this.keyspace = keyspace;
-  }
+	@Override
+	public <SN, N, V> SuperColumnQuery<SN, N, V> createSuperColumnQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createSuperColumnQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
 
-  public ConfigurableConsistencyLevel getConfigurableConsistencyLevelPolicy() {
-	return configurableConsistencyLevelPolicy;
-  }
+	@Override
+	public <N, V> MultigetSliceQuery<N, V> createMultigetSliceQuery(
+			Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+		return HFactory.createMultigetSliceQuery(keyspace, nameSerializer,
+				valueSerializer);
+	}
 
-  public void setConfigurableConsistencyLevelPolicy(
-	  ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
-	this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
-  }
+	@Override
+	public <SN, N, V> MultigetSuperSliceQuery<SN, N, V> createMultigetSuperSliceQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createMultigetSuperSliceQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
 
-  @Override
-  public String getReplicationStrategyClass() {
-	return replicationStrategyClass;
-  }
+	@Override
+	public <SN, N, V> MultigetSubSliceQuery<SN, N, V> createMultigetSubSliceQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createMultigetSubSliceQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
 
-  public void setReplicationStrategyClass(String replicationStrategyClass) {
-	this.replicationStrategyClass = replicationStrategyClass;
-  }
+	@Override
+	public <N, V> RangeSlicesQuery<N, V> createRangeSlicesQuery(
+			Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+		return HFactory.createRangeSlicesQuery(keyspace, nameSerializer,
+				valueSerializer);
+	}
 
-  @Override
-  public int getReplicationFactor() {
-	return replicationFactor;
-  }
+	@Override
+	public <SN, N, V> RangeSuperSlicesQuery<SN, N, V> createRangeSuperSlicesQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createRangeSuperSlicesQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
 
-  public void setReplicationFactor(int replicationFactor) {
-	this.replicationFactor = replicationFactor;
-  }
+	@Override
+	public <SN, N, V> RangeSubSlicesQuery<SN, N, V> createRangeSubSlicesQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createRangeSubSlicesQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
 
-  @Override
-  public Cluster getCluster() {
-	return cluster;
-  }
+	@Override
+	public <N, V> SliceQuery<N, V> createSliceQuery(Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createSliceQuery(keyspace, nameSerializer, valueSerializer);
+	}
 
-  public void setCluster(Cluster cluster) {
-	this.cluster = cluster;
-  }
+	@Override
+	public <SN, N, V> SubSliceQuery<SN, N, V> createSubSliceQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createSubSliceQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
+
+	@Override
+	public SliceQuery<byte[], byte[]> createSliceQuery() {
+		return createSliceQuery(BytesSerializer.get(), BytesSerializer.get());
+	}
+
+	@Override
+	public SuperSliceQuery<byte[], byte[], byte[]> createSuperSliceQuery() {
+		return createSuperSliceQuery(BytesSerializer.get(), BytesSerializer.get(),
+				BytesSerializer.get());
+	}
+
+	@Override
+	public <SN, N, V> SuperSliceQuery<SN, N, V> createSuperSliceQuery(
+			Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createSuperSliceQuery(keyspace, sNameSerializer,
+				nameSerializer, valueSerializer);
+	}
+
+	@Override
+	public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
+			List<HColumn<N, V>> columns, Serializer<SN> superNameSerializer,
+			Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+		return HFactory.createSuperColumn(name, columns, createTimestamp(),
+				superNameSerializer, nameSerializer, valueSerializer);
+	}
+
+	@Override
+	public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
+			List<HColumn<N, V>> columns, long clock,
+			Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
+			Serializer<V> valueSerializer) {
+		return HFactory.createSuperColumn(name, columns, clock,
+				superNameSerializer, nameSerializer, valueSerializer);
+	}
+
+	@Override
+	public <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
+			Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+		return HFactory.createColumn(name, value, clock, nameSerializer,
+				valueSerializer);
+	}
+
+	@Override
+	public <N, V> HColumn<N, V> createColumn(N name, V value,
+			Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+		return HFactory.createColumn(name, value, createTimestamp(),
+				nameSerializer, valueSerializer);
+	}
+
+	@Override
+	public long createTimestamp() {
+		return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createTimestamp();
+	}
+
+	<N> ColumnPath createColumnPath(String columnFamilyName, N columnName,
+			Serializer<N> nameSerializer) {
+		return createColumnPath(columnFamilyName,
+				nameSerializer.toBytes(columnName));
+	}
+
+	private <N> ColumnPath createColumnPath(String columnFamilyName,
+			byte[] columnName) {
+		Validate.notNull(columnFamilyName, "columnFamilyName cannot be null");
+		ColumnPath columnPath = new ColumnPath(columnFamilyName);
+		if (columnName != null) {
+			columnPath.setColumn(columnName);
+		}
+		return columnPath;
+	}
+
+	<N> ColumnPath createColumnPath(String columnFamilyName) {
+		return createColumnPath(columnFamilyName, null);
+	}
+
+	<SN, N> ColumnPath createSuperColumnPath(String columnFamilyName,
+			SN superColumnName, N columnName, Serializer<SN> superNameSerializer,
+			Serializer<N> nameSerializer) {
+		noNullElements(columnFamilyName, superColumnName, superNameSerializer,
+				nameSerializer);
+		ColumnPath columnPath = createColumnPath(columnFamilyName,
+				nameSerializer.toBytes(columnName));
+		columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
+		return columnPath;
+	}
+
+	<SN> ColumnPath createSuperColumnPath(String columnFamilyName,
+			SN superColumnName, Serializer<SN> superNameSerializer) {
+		noNullElements(columnFamilyName, superNameSerializer);
+		ColumnPath columnPath = createColumnPath(columnFamilyName);
+		if (superColumnName != null) {
+			columnPath.setSuper_column(superNameSerializer.toBytes(superColumnName));
+		}
+		return columnPath;
+	}
+
+	private void noNullElements(Object... elements) {
+		Validate.noNullElements(elements);
+	}
+
+	@Override
+	public <N, V> Mutator createMutator() {
+		return new MutatorImpl(keyspace);
+	}
+
+	@Override
+	public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
+			List<HColumn<N, V>> columns) {
+		return createSuperColumn(name, columns, TypeInferringSerializer.<SN> get(),
+				TypeInferringSerializer.<N> get(), TypeInferringSerializer.<V> get());
+	}
+
+	@Override
+	public String getKeyspaceName() {
+		return keyspaceName;
+	}
+
+	public void setKeyspaceName(String keyspace) {
+		this.keyspaceName = keyspace;
+	}
+
+	public Keyspace getKeyspace() {
+		return keyspace;
+	}
+
+	public void setKeyspace(Keyspace keyspace) {
+		this.keyspace = keyspace;
+	}
+
+	public ConfigurableConsistencyLevel getConfigurableConsistencyLevelPolicy() {
+		return configurableConsistencyLevelPolicy;
+	}
+
+	public void setConfigurableConsistencyLevelPolicy(
+			ConfigurableConsistencyLevel configurableConsistencyLevelPolicy) {
+		this.configurableConsistencyLevelPolicy = configurableConsistencyLevelPolicy;
+	}
+
+	@Override
+	public String getReplicationStrategyClass() {
+		return replicationStrategyClass;
+	}
+
+	public void setReplicationStrategyClass(String replicationStrategyClass) {
+		this.replicationStrategyClass = replicationStrategyClass;
+	}
+
+	@Override
+	public int getReplicationFactor() {
+		return replicationFactor;
+	}
+
+	public void setReplicationFactor(int replicationFactor) {
+		this.replicationFactor = replicationFactor;
+	}
+
+	@Override
+	public Cluster getCluster() {
+		return cluster;
+	}
+
+	public void setCluster(Cluster cluster) {
+		this.cluster = cluster;
+	}
 }
