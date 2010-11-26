@@ -50,6 +50,8 @@ public interface Serializer<T> {
 
   public <V> Map<T, V> fromBytesMap(Map<ByteBuffer, V> map);
 
-  List<ByteBuffer> toBytesList(List<T> list);
+  public List<ByteBuffer> toBytesList(List<T> list);
+
+  public List<T> fromBytesList(List<ByteBuffer> list);
 
 }
