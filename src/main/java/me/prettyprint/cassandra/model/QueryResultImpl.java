@@ -28,6 +28,6 @@ public final class QueryResultImpl<T> extends ExecutionResult<T> implements Quer
 
   @Override
   public String toString() {
-    return  "Result(" + get() + "," + toStringInternal() + "," + query + ") from host: " + getHostUsed().getName();
+    return  "Result(" + get() + "," + toString() + "," + query + ") from host: " + getHostUsed().getName();
   }
 }

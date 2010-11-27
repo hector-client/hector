@@ -1,29 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	
+	<bean id="hectorTemplate" class="me.prettyprint.cassandra.service.spring.HectorTemplateImpl" init-method="init">
+		<property name="cluster">
+			<bean class="me.prettyprint.cassandra.service.Cluster">
+				<constructor-arg value="TestCluster" />
+				<constructor-arg>
+					<bean class="me.prettyprint.cassandra.service.CassandraHostConfigurator">
+						<constructor-arg value="localhost:9170" />
+					</bean>
+				</constructor-arg>
+			</bean>
+		</property>
+		<property name="keyspace" value="Keyspace1" />
+		<property name="replicationStrategyClass" value="org.apache.cassandra.locator.SimpleStrategy" />
+		<property name="replicationFactor" value="1" />
+	</bean>
 
-    <bean id="cassandraHostConfigurator" class="me.prettyprint.cassandra.service.CassandraHostConfigurator">
-        <constructor-arg value="localhost:9170"/>
-    </bean>
+	
+	<!-- Using a pool factory example without embedded beans -->
+	<!-- 
+	<bean id="cassandraClientPoolFactory" class="me.prettyprint.cassandra.service.CassandraClientPoolFactory" factory-method="getInstance" />
 
-    <bean id="cluster" class="me.prettyprint.cassandra.service.Cluster">
-        <constructor-arg value="TestCluster"/>
-        <constructor-arg ref="cassandraHostConfigurator"/>
-    </bean>
-    
-    <bean id="keyspaceOperator" class="me.prettyprint.cassandra.model.HFactory" factory-method="createKeyspaceOperator">
-        <constructor-arg value="Keyspace1"/>
-        <constructor-arg ref="cluster"/>
-    </bean>
+	<bean id="cassandraHostConfigurator" class="me.prettyprint.cassandra.service.CassandraHostConfigurator">
+		<constructor-arg value="${cassandra.client.pool}" />
+		<property name="maxActive" value="${cassandra.client.hosts.maxActive}" />
+		<property name="maxIdle" value="${cassandra.client.hosts.maxIdle}" />
+		<property name="maxWaitTimeWhenExhausted" value="${cassandra.client.hosts.maxWaitTimeWhenExhausted}" />
+		// you can also modify other properties like: lifo, minEvictableIdleTimeMillis, timeBetweenEvictionRunsMillis, cassandraThriftSocketTimeout and useThriftFramedTransport
+	</bean>
 
-    <bean id="simpleCassandraDao" class="me.prettyprint.cassandra.dao.SimpleCassandraDao">
-        <property name="keyspaceOperator" ref="keyspaceOperator"/>
-        <property name="keyspaceName" value="Keyspace1"/>
-        <property name="columnFamilyName" value="Standard1"/>
-    </bean>
+	<bean id="cassandraClientPool" factory-bean="cassandraClientPoolFactory" factory-method="createNew">
+		<constructor-arg>
+			<ref bean="cassandraHostConfigurator" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="cluster" class="me.prettyprint.cassandra.service.ThriftCluster">
+		<constructor-arg value="${cassandra.clusterName}" />
+		<constructor-arg ref="cassandraClientPool" />
+	</bean>
+
+	<bean id="hectorTemplate" class="me.prettyprint.cassandra.service.spring.HectorTemplateImpl" init-method="init">
+		<property name="cluster" ref="cluster" />
+		<property name="keyspaceName" value="${cassandra.keyspace}" />
+		<property name="replicationStrategyClass" value="${cassandra.replicationStrategyClass}" />
+		<property name="replicationFactor" value="${cassandra.replicationFactor}" />
+	</bean>
+	-->
+	<!--  Then your DAOs can utilize the hector template just injecting it -->
 
 </beans>
