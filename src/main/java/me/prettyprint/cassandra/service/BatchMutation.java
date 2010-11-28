@@ -28,15 +28,15 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public final class BatchMutation<K> {
 
-  private final Map<K,Map<String,List<Mutation>>> mutationMap;
+  private final Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap;
   private final Serializer<K> keySerializer;
 
   public BatchMutation(Serializer<K> serializer) {
     this.keySerializer = serializer;
-    mutationMap = new HashMap<K,Map<String,List<Mutation>>>();
+    mutationMap = new HashMap<ByteBuffer,Map<String,List<Mutation>>>();
   }
 
-  private BatchMutation(Serializer<K> serializer, Map<K,Map<String,List<Mutation>>> mutationMap) {
+  private BatchMutation(Serializer<K> serializer, Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap) {
     this.keySerializer = serializer;
     this.mutationMap = mutationMap;
   }
@@ -85,11 +85,11 @@ public final class BatchMutation<K> {
         innerMutationMap.put(columnFamily, mutations);
       }
     }
-    mutationMap.put(key, innerMutationMap);
+    mutationMap.put(keySerializer.toByteBuffer(key), innerMutationMap);
   }
 
   private Map<String, List<Mutation>> getInnerMutationMap(K key) {
-    Map<String, List<Mutation>> innerMutationMap = mutationMap.get(key);
+    Map<String, List<Mutation>> innerMutationMap = mutationMap.get(keySerializer.toByteBuffer(key));
     if (innerMutationMap == null) {
       innerMutationMap = new HashMap<String, List<Mutation>>();
     }
@@ -97,13 +97,8 @@ public final class BatchMutation<K> {
   }
 
   Map<ByteBuffer,Map<String,List<Mutation>>> getMutationMap() {
-    return keySerializer.toBytesMap(mutationMap);
-  }
-
-  Map<K,Map<String,List<Mutation>>> getRawMutationMap() {
     return mutationMap;
   }
-
 
 
   /**
