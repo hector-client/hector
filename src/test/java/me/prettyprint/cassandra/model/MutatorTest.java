@@ -16,7 +16,6 @@ import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.cassandra.utils.StringUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -116,7 +115,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 5; i++) {
       m.addInsertion("key" + i, cf, createColumn("name", "value" + i, se, se));
     }
-    MutationResult r = m.execute();
+     m.execute();
 
     // Try to delete the row with key "k0" with a clock previous to the insertion.
     // Cassandra will discard this operation.

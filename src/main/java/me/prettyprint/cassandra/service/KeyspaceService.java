@@ -4,13 +4,13 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
@@ -30,6 +30,10 @@ public interface KeyspaceService {
   public static String CF_TYPE_STANDARD = "Standard" ;
   public static String CF_TYPE_SUPER = "Super" ;
 
+//  /**
+//   * @return The cassandra client object used to obtain this KeySpace.
+//   */
+//  CassandraClient getClient();
 
   /**
    * Get the Column at the given columnPath.
@@ -199,7 +203,7 @@ public interface KeyspaceService {
   /**
    * @return The consistency level held by this keyspace instance.
    */
-  ConsistencyLevel getConsistencyLevel(OperationType operationType);
+  HConsistencyLevel getConsistencyLevel(OperationType operationType);
 
   String getName();
 

@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import static me.prettyprint.cassandra.utils.StringUtils.bytes;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -36,7 +35,7 @@ public class BatchMutationTest {
     batchMutate.addInsertion("key1", columnFamilies, column);
     // assert there is one outter map row with 'key' as the key
     Map<String, Map<String, List<Mutation>>> mutationMap = batchMutate.getRawMutationMap();
-    
+
     assertEquals(1, mutationMap.get("key1").size());
 
     // add again with a different column and verify there is one key and two mutations underneath

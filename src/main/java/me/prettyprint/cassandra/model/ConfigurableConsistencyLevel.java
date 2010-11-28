@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.prettyprint.cassandra.service.OperationType;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 
-import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,57 +15,57 @@ import org.slf4j.LoggerFactory;
  * @author zznate
  */
 public class ConfigurableConsistencyLevel implements ConsistencyLevelPolicy {
-  private Logger log = LoggerFactory.getLogger(ConfigurableConsistencyLevel.class);
-  
-  private Map<String, ConsistencyLevel> readCfConsistencyLevels = new HashMap<String, ConsistencyLevel>();
-  private Map<String, ConsistencyLevel> writeCfConsistencyLevels = new HashMap<String, ConsistencyLevel>();
-  private ConsistencyLevel defaultReadConsistencyLevel = ConsistencyLevel.QUORUM;
-  private ConsistencyLevel defaultWriteConsistencyLevel = ConsistencyLevel.QUORUM;
-  
+  private final Logger log = LoggerFactory.getLogger(ConfigurableConsistencyLevel.class);
+
+  private Map<String, HConsistencyLevel> readCfConsistencyLevels = new HashMap<String, HConsistencyLevel>();
+  private Map<String, HConsistencyLevel> writeCfConsistencyLevels = new HashMap<String, HConsistencyLevel>();
+  private HConsistencyLevel defaultReadConsistencyLevel = HConsistencyLevel.QUORUM;
+  private HConsistencyLevel defaultWriteConsistencyLevel = HConsistencyLevel.QUORUM;
+
   @Override
-  public ConsistencyLevel get(OperationType op) {
+  public HConsistencyLevel get(OperationType op) {
     return op.equals(OperationType.READ) ? defaultReadConsistencyLevel : defaultWriteConsistencyLevel;
   }
 
   @Override
-  public ConsistencyLevel get(OperationType op, String cfName) {
+  public HConsistencyLevel get(OperationType op, String cfName) {
     if (op.equals(OperationType.READ)) {
-      ConsistencyLevel rcf = readCfConsistencyLevels.get(cfName);
+      HConsistencyLevel rcf = readCfConsistencyLevels.get(cfName);
       return rcf != null ? rcf : defaultReadConsistencyLevel;
     } else {
-      ConsistencyLevel wcf = writeCfConsistencyLevels.get(cfName);
+      HConsistencyLevel wcf = writeCfConsistencyLevels.get(cfName);
       return wcf != null ? wcf : defaultWriteConsistencyLevel;
-    }    
+    }
   }
 
-  public void setReadCfConsistencyLevels(Map<String, ConsistencyLevel> columnFamilyConsistencyLevels) {
+  public void setReadCfConsistencyLevels(Map<String, HConsistencyLevel> columnFamilyConsistencyLevels) {
     this.readCfConsistencyLevels = columnFamilyConsistencyLevels;
   }
 
-  public void setWriteCfConsistencyLevels(Map<String, ConsistencyLevel> columnFamilyConsistencyLevels) {
+  public void setWriteCfConsistencyLevels(Map<String, HConsistencyLevel> columnFamilyConsistencyLevels) {
     this.writeCfConsistencyLevels = columnFamilyConsistencyLevels;
   }
 
-  public void setConsistencyLevelForCfOperation(ConsistencyLevel consistencyLevel,
-      String columnFamily,        
+  public void setConsistencyLevelForCfOperation(HConsistencyLevel consistencyLevel,
+      String columnFamily,
       OperationType operationType) {
     if ( operationType.equals(OperationType.READ)) {
-      readCfConsistencyLevels.put(columnFamily, consistencyLevel);      
+      readCfConsistencyLevels.put(columnFamily, consistencyLevel);
     } else {
       writeCfConsistencyLevels.put(columnFamily, consistencyLevel);
-    }    
-    log.info("{} ConsistencyLevel set to {} for ColumnFamily {}", 
+    }
+    log.info("{} ConsistencyLevel set to {} for ColumnFamily {}",
         new Object[]{operationType.toString(),consistencyLevel.toString(),columnFamily});
   }
 
-  public void setDefaultReadConsistencyLevel(ConsistencyLevel defaultReadConsistencyLevel) {
+  public void setDefaultReadConsistencyLevel(HConsistencyLevel defaultReadConsistencyLevel) {
     this.defaultReadConsistencyLevel = defaultReadConsistencyLevel;
   }
 
-  public void setDefaultWriteConsistencyLevel(ConsistencyLevel defaultWriteConsistencyLevel) {
+  public void setDefaultWriteConsistencyLevel(HConsistencyLevel defaultWriteConsistencyLevel) {
     this.defaultWriteConsistencyLevel = defaultWriteConsistencyLevel;
   }
-  
-  
-  
+
+
+
 }

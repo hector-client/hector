@@ -10,7 +10,6 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.query.Query;
 import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.Column;
@@ -76,23 +75,20 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
         IndexOperator.GT,
         valueSerializer.toByteBuffer(columnValue)));
     return this;
-  }  
+  }
 
-  @SuppressWarnings("unchecked")
   @Override
   public IndexedSlicesQuery<K, N, V> setColumnNames(Collection<N> columnNames) {
     super.setColumnNames(columnNames);
     return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public IndexedSlicesQuery<K, N, V> setColumnNames(N... columnNames) {
     super.setColumnNames(columnNames);
     return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public IndexedSlicesQuery<K, N, V> setRange(N start, N finish,
       boolean reversed, int count) {
@@ -100,7 +96,6 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
     return this;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public IndexedSlicesQuery<K, N, V> setReturnKeysOnly() {
     super.setReturnKeysOnly();
@@ -110,7 +105,7 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
   public IndexedSlicesQuery<K,N,V> setStartKey(K startKey) {
     indexClause.setStart_key(keySerializer.toByteBuffer(startKey));
     return this;
-  }    
+  }
 
   @Override
   public IndexedSlicesQuery<K,N,V> setColumnFamily(String cf) {

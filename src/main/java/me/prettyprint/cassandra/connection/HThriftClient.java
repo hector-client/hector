@@ -8,7 +8,6 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
@@ -18,27 +17,27 @@ import org.slf4j.LoggerFactory;
 
 
 public class HThriftClient {
-  
+
   private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
-  
+
   private static final AtomicLong serial = new AtomicLong(0);
-  
-  final CassandraHost cassandraHost;    
+
+  final CassandraHost cassandraHost;
 
   private final long mySerial;
   private final int timeout;
-  
+
   private TTransport transport;
-  
+
   HThriftClient(CassandraHost cassandraHost) {
-    this.cassandraHost = cassandraHost;    
+    this.cassandraHost = cassandraHost;
     this.timeout = getTimeout(cassandraHost);
-    mySerial = serial.incrementAndGet();    
+    mySerial = serial.incrementAndGet();
   }
 
   /**
    * Returns a new Cassandra.Client on each invocation using the underlying transport
-   * 
+   *
    */
   public Cassandra.Client getCassandra() {
     if ( !isOpen() ) {
@@ -46,15 +45,15 @@ public class HThriftClient {
     }
     return new Cassandra.Client(new TBinaryProtocol(transport));
   }
-    
+
   HThriftClient close() {
     if ( log.isDebugEnabled() ) {
       log.debug("Closing client {}", this);
-    }    
-    if (transport != null) {   
-      try {        
+    }
+    if (transport != null) {
+      try {
         transport.flush();
-          
+
       } catch (Exception e) {
         log.error("Could not flush transport (to be expected if the pool is shutting down) in close for client: " + toString(), e);
       } finally {
@@ -68,7 +67,7 @@ public class HThriftClient {
     return this;
   }
 
-  
+
   HThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
@@ -81,7 +80,7 @@ public class HThriftClient {
       transport = new TFramedTransport(new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout));
     } else {
       transport = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
-    }    
+    }
     try {
       transport.open();
     } catch (TTransportException e) {
@@ -94,8 +93,8 @@ public class HThriftClient {
     }
     return this;
   }
-  
-  
+
+
   boolean isOpen() {
     boolean open = false;
     if (transport != null) {
@@ -106,7 +105,7 @@ public class HThriftClient {
     }
     return open;
   }
-    
+
   /**
    * If CassandraHost was not null we use {@link CassandraHost#getCassandraThriftSocketTimeout()}
    * if it was greater than zero. Otherwise look for an environment
@@ -131,22 +130,22 @@ public class HThriftClient {
     }
     return timeoutVar;
   }
-  
-  
+
+
   @Override
   public String toString() {
-    return String.format(NAME_FORMAT, cassandraHost.getUrl(), mySerial);    
-  }    
-  
+    return String.format(NAME_FORMAT, cassandraHost.getUrl(), mySerial);
+  }
+
   /**
    * Compares the toString of these clients
    */
   @Override
-  public boolean equals(Object obj) {  
+  public boolean equals(Object obj) {
     return this.toString().equals(obj.toString());
   }
 
 
 
-  private static final String NAME_FORMAT = "CassandraClient<%s-%d>"; 
+  private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
 }
