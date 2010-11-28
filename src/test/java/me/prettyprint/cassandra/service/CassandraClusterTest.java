@@ -8,8 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.factory.HFactory;
 
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
@@ -34,7 +35,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testDescribeKeyspaces() throws Exception {
-    List<HKsDef> keyspaces = cassandraCluster.describeKeyspaces();
+    List<KeyspaceDefinition> keyspaces = cassandraCluster.describeKeyspaces();
     assertEquals(2,keyspaces.size());
   }
 
@@ -62,7 +63,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testDescribeKeyspace() throws Exception {
-    HKsDef keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
+    KeyspaceDefinition keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
     assertNotNull(keyspaceDetail);
     assertEquals(7, keyspaceDetail.getCfDefs().size());
   }
@@ -74,19 +75,19 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testAddDropColdropumnFamily() throws Exception {
-    HCfDef cfDef = new ThriftCfDef("Keyspace1", "DynCf");
-    String cfid = cassandraCluster.addColumnFamily(cfDef);
+  public void testAddDropColumnFamily() throws Exception {
+    ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition("Keyspace1", "DynCf");
+    cassandraCluster.addColumnFamily(cfDef);
     String cfid2 = cassandraCluster.dropColumnFamily("Keyspace1", "DynCf");
     assertNotNull(cfid2);
   }
 
   @Test
   public void testAddDropKeyspace() throws Exception {
-    HCfDef cfDef = new ThriftCfDef("DynKeyspace", "DynCf");
+    ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition("DynKeyspace", "DynCf");
     cassandraCluster.addKeyspace(
         new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)));
-    
+
     String ksid2 = cassandraCluster.dropKeyspace("DynKeyspace");
     assertNotNull(ksid2);
   }

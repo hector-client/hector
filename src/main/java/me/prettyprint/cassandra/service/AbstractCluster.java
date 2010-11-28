@@ -1,18 +1,14 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
-import me.prettyprint.cassandra.connection.HThriftClient;
 import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorPoolException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.Cassandra.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,12 +36,12 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractCluster implements Cluster {
 
-  private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);  
+  private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
 
   protected final HConnectionManager connectionManager;
   private final String name;
   private final CassandraHostConfigurator configurator;
-  private ClockResolution clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
+  private final ClockResolution clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
   private final FailoverPolicy failoverPolicy;
   private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
@@ -58,9 +54,10 @@ public abstract class AbstractCluster implements Cluster {
     configurator = cassandraHostConfigurator;
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
-    xtrans = new ExceptionsTranslatorImpl();    
+    xtrans = new ExceptionsTranslatorImpl();
   }
-  
+
+  @Override
   public HConnectionManager getConnectionManager() {
     return connectionManager;
   }
@@ -80,7 +77,6 @@ public abstract class AbstractCluster implements Cluster {
   }
 
 
-
   /* (non-Javadoc)
    * @see me.prettyprint.cassandra.service.Cluster#addHost(me.prettyprint.cassandra.service.CassandraHost, boolean)
    */
@@ -89,7 +85,7 @@ public abstract class AbstractCluster implements Cluster {
     if (!skipApplyConfig && configurator != null) {
       configurator.applyConfig(cassandraHost);
     }
-    connectionManager.addCassandraHost(cassandraHost);    
+    connectionManager.addCassandraHost(cassandraHost);
   }
 
 
@@ -100,19 +96,19 @@ public abstract class AbstractCluster implements Cluster {
   public String getName() {
     return name;
   }
-  
 
-  
+
+
 
 
   /* (non-Javadoc)
    * @see me.prettyprint.cassandra.service.Cluster#describeKeyspaces()
    */
   @Override
-  public List<HKsDef> describeKeyspaces() throws HectorException {
-    Operation<List<HKsDef>> op = new Operation<List<HKsDef>>(OperationType.META_READ) {
+  public List<KeyspaceDefinition> describeKeyspaces() throws HectorException {
+    Operation<List<KeyspaceDefinition>> op = new Operation<List<KeyspaceDefinition>>(OperationType.META_READ) {
       @Override
-      public List<HKsDef> execute(Cassandra.Client cassandra) throws HectorException {
+      public List<KeyspaceDefinition> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           return ThriftKsDef.fromThriftList(cassandra.describe_keyspaces());
         } catch (Exception e) {
@@ -166,12 +162,12 @@ public abstract class AbstractCluster implements Cluster {
    * @see me.prettyprint.cassandra.service.Cluster#describeKeyspace(java.lang.String)
    */
   @Override
-  public HKsDef describeKeyspace(final String keyspace)
+  public KeyspaceDefinition describeKeyspace(final String keyspace)
   throws HectorException {
-    Operation<HKsDef> op = new Operation<HKsDef>(
+    Operation<KeyspaceDefinition> op = new Operation<KeyspaceDefinition>(
         OperationType.META_READ) {
       @Override
-      public HKsDef execute(Cassandra.Client cassandra)
+      public KeyspaceDefinition execute(Cassandra.Client cassandra)
       throws HectorException {
         try {
           return new ThriftKsDef(cassandra.describe_keyspace(keyspace));
@@ -244,7 +240,7 @@ public abstract class AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-  
+
   @Override
   public String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE,FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
@@ -261,6 +257,6 @@ public abstract class AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-  
+
 
 }

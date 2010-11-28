@@ -2,11 +2,11 @@ package me.prettyprint.hector.api.ddl;
 
 import java.nio.ByteBuffer;
 
-public interface HColumnDef {
+public interface ColumnDefinition {
   // TODO(ran): should be typed
   ByteBuffer getName();
   String getValidationClass();
-  HIndexType getIndexType();
+  ColumnIndexType getIndexType();
   String getIndexName();
 
 }

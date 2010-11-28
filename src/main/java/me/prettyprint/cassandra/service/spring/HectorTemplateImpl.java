@@ -70,12 +70,6 @@ public class HectorTemplateImpl implements HectorTemplate {
     initKeyspaceOperator();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createKeyspaceOperator(java.lang.String,
-   * me.prettyprint.cassandra.service.Cluster)
-   */
   private void initKeyspaceOperator() {
     ConsistencyLevelPolicy clPolicy;
     if (configurableConsistencyLevelPolicy == null) {
@@ -86,27 +80,11 @@ public class HectorTemplateImpl implements HectorTemplate {
     keyspace = HFactory.createKeyspace(keyspaceName, cluster, clPolicy);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createMutator(me.prettyprint.cassandra.model.
-   * KeyspaceOperator, me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, N, V> Mutator<K> createMutator(Serializer<K> keySerializer) {
     return HFactory.createMutator(keyspace, keySerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createColumnQuery(me.prettyprint.cassandra.model
-   * .KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, N, V> ColumnQuery<K, N, V> createColumnQuery() {
     return new ThriftColumnQuery<K, N, V>(keyspace);
@@ -117,43 +95,18 @@ public class HectorTemplateImpl implements HectorTemplate {
     return new ThriftColumnQuery<K, N, V>(keyspace, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createCountQuery(me.prettyprint.cassandra.model
-   * .KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, N> CountQuery<K, N> createCountQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
     return HFactory.createCountQuery(keyspace, keySerializer, nameSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createSuperCountQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN> SuperCountQuery<K, SN> createSuperCountQuery(Serializer<K> keySerializer,
       Serializer<SN> superNameSerializer) {
     return HFactory.createSuperCountQuery(keyspace, keySerializer, superNameSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createSubCountQuery(me.prettyprint.cassandra.
-   * model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N> SubCountQuery<K, SN, N> createSubCountQuery(Serializer<K> keySerializer,
       Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
@@ -161,16 +114,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createSuperColumnQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> SuperColumnQuery<K, SN, N, V> createSuperColumnQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -179,15 +122,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createMultigetSliceQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, N, V> MultigetSliceQuery<K, N, V> createMultigetSliceQuery(
       Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -195,17 +129,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createMultigetSuperSliceQuery(me.prettyprint.
-   * cassandra.model.KeyspaceOperator,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> MultigetSuperSliceQuery<K, SN, N, V> createMultigetSuperSliceQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -214,16 +137,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createMultigetSubSliceQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> MultigetSubSliceQuery<K, SN, N, V> createMultigetSubSliceQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -232,15 +145,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createRangeSlicesQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, N, V> RangeSlicesQuery<K, N, V> createRangeSlicesQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -248,16 +152,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createRangeSuperSlicesQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> RangeSuperSlicesQuery<K, SN, N, V> createRangeSuperSlicesQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -266,16 +160,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createRangeSubSlicesQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> RangeSubSlicesQuery<K, SN, N, V> createRangeSubSlicesQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -284,15 +168,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createSliceQuery(me.prettyprint.cassandra.model
-   * .KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, N, V> SliceQuery<K, N, V> createSliceQuery(Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -300,16 +175,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createSubSliceQuery(me.prettyprint.cassandra.
-   * model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> SubSliceQuery<K, SN, N, V> createSubSliceQuery(Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -317,16 +182,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see
-   * org.helenus.HectorFactory#createSuperSliceQuery(me.prettyprint.cassandra
-   * .model.KeyspaceOperator, me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(
       Serializer<K> keySerializer, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -335,14 +190,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createSuperColumn(SN, java.util.List,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns,
       Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
@@ -351,15 +198,6 @@ public class HectorTemplateImpl implements HectorTemplate {
         nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createSuperColumn(SN, java.util.List,
-   * org.apache.cassandra.thrift.Clock,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name, List<HColumn<N, V>> columns,
       long clock, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer,
@@ -368,37 +206,17 @@ public class HectorTemplateImpl implements HectorTemplate {
         valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createColumn(N, V,
-   * org.apache.cassandra.thrift.Clock,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return HFactory.createColumn(name, value, clock, nameSerializer, valueSerializer);
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createColumn(N, V,
-   * me.prettyprint.cassandra.model.Serializer,
-   * me.prettyprint.cassandra.model.Serializer)
-   */
   @Override
   public <N, V> HColumn<N, V> createColumn(N name, V value) {
     return new HColumnImpl<N, V>(name, value, createClock());
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see org.helenus.HectorFactory#createClock()
-   */
   @Override
   public long createClock() {
     return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();

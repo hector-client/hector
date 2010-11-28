@@ -9,16 +9,14 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
-import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -27,7 +25,6 @@ import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SlicePredicate;
@@ -49,17 +46,17 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   private final String keyspaceName;
 
-  private final ConsistencyLevelPolicy consistency;  
+  private final ConsistencyLevelPolicy consistency;
 
   private final ExceptionsTranslator xtrans;
-  
-  private final HConnectionManager connectionManager;
-  
-  private CassandraHost cassandraHost;
-  
-  private FailoverPolicy failoverPolicy;
 
-  public KeyspaceServiceImpl(String keyspaceName, 
+  private final HConnectionManager connectionManager;
+
+  private CassandraHost cassandraHost;
+
+  private final FailoverPolicy failoverPolicy;
+
+  public KeyspaceServiceImpl(String keyspaceName,
       ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager,
       FailoverPolicy failoverPolicy)
@@ -80,7 +77,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.batch_mutate(mutationMap, consistency.get(OperationType.WRITE));
+          cassandra.batch_mutate(mutationMap, getThriftCl(OperationType.WRITE));
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -104,7 +101,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Integer execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.get_count(key, columnParent, predicate, consistency.get(OperationType.READ));
+          return cassandra.get_count(key, columnParent, predicate, getThriftCl(OperationType.READ));
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -114,11 +111,13 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     return op.getResult();
   }
 
-  private void operateWithFailover(Operation<?> op) throws HectorException {    
+
+  private void operateWithFailover(Operation<?> op) throws HectorException {
     connectionManager.operateWithFailover(op);
     this.cassandraHost = op.getCassandraHost();
   }
 
+  @Override
   public CassandraHost getCassandraHost() {
     return this.cassandraHost;
   }
@@ -135,7 +134,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
-              predicate, keyRange, consistency.get(OperationType.READ));
+              predicate, keyRange, getThriftCl(OperationType.READ));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<Column>>(0);
           }
@@ -168,7 +167,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
-              predicate, keyRange, consistency.get(OperationType.READ));
+              predicate, keyRange, getThriftCl(OperationType.READ));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<SuperColumn>>();
           }
@@ -197,7 +196,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public List<Column> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
-              predicate, consistency.get(OperationType.READ));
+              predicate, getThriftCl(OperationType.READ));
 
           if (cosclist == null) {
             return null;
@@ -231,7 +230,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(key, columnPath, consistency.get(OperationType.READ));
+          cosc = cassandra.get(key, columnPath, getThriftCl(OperationType.READ));
         } catch (NotFoundException e) {
           setException(xtrans.translate(e));
           return null;
@@ -260,8 +259,10 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public SuperColumn getSuperColumn(final ByteBuffer key, final ColumnPath columnPath,
       final boolean reversed, final int size) throws HectorException {
     //valideSuperColumnPath(columnPath);
-    final SliceRange sliceRange = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[0]), reversed, size);
-    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ, failoverPolicy, keyspaceName) {
+    final SliceRange sliceRange = new SliceRange(ByteBuffer.wrap(new byte[0]),
+        ByteBuffer.wrap(new byte[0]), reversed, size);
+    Operation<SuperColumn> op = new Operation<SuperColumn>(OperationType.READ, failoverPolicy,
+        keyspaceName) {
 
       @Override
       public SuperColumn execute(Cassandra.Client cassandra) throws HectorException {
@@ -273,7 +274,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
         try {
           List<ColumnOrSuperColumn> cosc = cassandra.get_slice(key, clp, sp,
-              consistency.get(OperationType.READ));
+              getThriftCl(OperationType.READ));
           if (cosc == null || cosc.isEmpty()) {
             return null;
           }
@@ -302,7 +303,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public List<SuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
-              predicate, consistency.get(OperationType.READ));
+              predicate, getThriftCl(OperationType.READ));
           if (cosclist == null) {
             return null;
           }
@@ -329,7 +330,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.insert(key, columnParent, column, consistency.get(OperationType.WRITE));
+          cassandra.insert(key, columnParent, column, getThriftCl(OperationType.WRITE));
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -372,7 +373,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public Map<ByteBuffer, List<Column>> execute(Cassandra.Client cassandra) throws HectorException {
         try {
           Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
-              keys, columnParent, predicate, consistency.get(OperationType.READ));
+              keys, columnParent, predicate, getThriftCl(OperationType.READ));
 
           Map<ByteBuffer, List<Column>> result = new HashMap<ByteBuffer, List<Column>>();
           for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
@@ -438,7 +439,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
-              keys, columnParent, predicate, consistency.get(OperationType.READ));
+              keys, columnParent, predicate, getThriftCl(OperationType.READ));
           // if user not given super column name, the multiget_slice will return
           // List
           // filled with
@@ -485,7 +486,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           throws HectorException {
         try {
           List<KeySlice> keySlices = cassandra.get_indexed_slices(columnParent, indexClause,
-              predicate, consistency.get(OperationType.READ));
+              predicate, getThriftCl(OperationType.READ));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<Column>>(0);
           }
@@ -517,7 +518,8 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Map<ByteBuffer, Integer> execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.multiget_count(keys, columnParent, slicePredicate, consistency.get(OperationType.READ));
+          return cassandra.multiget_count(keys, columnParent, slicePredicate,
+              getThriftCl(OperationType.READ));
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -535,7 +537,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          cassandra.remove(key, columnPath, timestamp, consistency.get(OperationType.WRITE));
+          cassandra.remove(key, columnPath, timestamp, getThriftCl(OperationType.WRITE));
           return null;
         } catch (Exception e) {
           throw xtrans.translate(e);
@@ -575,7 +577,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       public Column execute(Cassandra.Client cassandra) throws HectorException {
         ColumnOrSuperColumn cosc;
         try {
-          cosc = cassandra.get(key, columnPath, consistency.get(OperationType.READ));
+          cosc = cassandra.get(key, columnPath, getThriftCl(OperationType.READ));
         } catch (NotFoundException e) {
           setException(xtrans.translate(e));
           return null;
@@ -600,30 +602,34 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
 
   @Override
-  public ConsistencyLevel getConsistencyLevel(OperationType operationType) {
+  public HConsistencyLevel getConsistencyLevel(OperationType operationType) {
     return consistency.get(operationType);
   }
 
-
-  private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
-    ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
-    for (Column col : columns) {
-      ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
-      columnOrSuperColumn.setColumn(col);
-      list.add(columnOrSuperColumn);
-    }
-    return list;
+  private ConsistencyLevel getThriftCl(OperationType operationType) {
+    return ThriftConverter.consistencyLevel(consistency.get(operationType));
   }
 
-  private static List<ColumnOrSuperColumn> getSoscSuperList(List<SuperColumn> columns) {
-    ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
-    for (SuperColumn col : columns) {
-      ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
-      columnOrSuperColumn.setSuper_column(col);
-      list.add(columnOrSuperColumn);
-    }
-    return list;
-  }
+
+//  private static List<ColumnOrSuperColumn> getSoscList(List<Column> columns) {
+//    ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
+//    for (Column col : columns) {
+//      ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
+//      columnOrSuperColumn.setColumn(col);
+//      list.add(columnOrSuperColumn);
+//    }
+//    return list;
+//  }
+//
+//  private static List<ColumnOrSuperColumn> getSoscSuperList(List<SuperColumn> columns) {
+//    ArrayList<ColumnOrSuperColumn> list = new ArrayList<ColumnOrSuperColumn>(columns.size());
+//    for (SuperColumn col : columns) {
+//      ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
+//      columnOrSuperColumn.setSuper_column(col);
+//      list.add(columnOrSuperColumn);
+//    }
+//    return list;
+//  }
 
   private static List<Column> getColumnList(List<ColumnOrSuperColumn> columns) {
     ArrayList<Column> list = new ArrayList<Column>(columns.size());
@@ -640,8 +646,6 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     }
     return list;
   }
-
-
 
   @Override
   public String toString() {
