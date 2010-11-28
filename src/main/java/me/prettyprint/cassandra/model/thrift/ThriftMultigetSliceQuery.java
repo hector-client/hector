@@ -3,7 +3,6 @@ package me.prettyprint.cassandra.model.thrift;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -43,7 +42,7 @@ public final class ThriftMultigetSliceQuery<K, N, V> extends AbstractSliceQuery<
     this.keys = Arrays.asList(keys);
     return this;
   }
-  
+
   @Override
   public MultigetSliceQuery<K, N, V> setKeys(Iterable<K> keys) {
     this.keys = keys;

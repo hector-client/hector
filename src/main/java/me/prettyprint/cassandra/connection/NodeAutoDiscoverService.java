@@ -5,57 +5,50 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.cassandra.thrift.Cassandra;
+import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.hector.api.Keyspace;
+
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
-import org.apache.cassandra.thrift.Cassandra.Client;
-import org.apache.thrift.protocol.TBinaryProtocol;
-import org.apache.thrift.protocol.TProtocol;
-import org.apache.thrift.transport.TFramedTransport;
-import org.apache.thrift.transport.TSocket;
-import org.apache.thrift.transport.TTransport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import me.prettyprint.cassandra.connection.CassandraHostRetryService.RetryRunner;
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.Operation;
-import me.prettyprint.cassandra.service.OperationType;
-import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.exceptions.HectorException;
-
 
 public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
-  
+
   private static final Logger log = LoggerFactory.getLogger(NodeAutoDiscoverService.class);
-  
-  private CassandraHost cassandraHost;
+
   public static final int DEF_AUTO_DISCOVERY_DELAY = 30;
-  
-  
+
+
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    super(connectionManager, cassandraHostConfigurator);    
+    super(connectionManager, cassandraHostConfigurator);
     this.retryDelayInSeconds = cassandraHostConfigurator.getAutoDiscoveryDelayInSeconds();
     sf = executor.scheduleWithFixedDelay(new QueryRing(), retryDelayInSeconds,retryDelayInSeconds, TimeUnit.SECONDS);
   }
-  
+
+  @Override
   void shutdown() {
     log.error("Auto Discovery retry shutdown hook called");
-    if ( sf != null ) 
+    if ( sf != null ) {
       sf.cancel(true);
-    if ( executor != null ) 
-      executor.shutdownNow();     
-    log.error("AutoDiscovery retry shutdown complete");    
+    }
+    if ( executor != null ) {
+      executor.shutdownNow();
+    }
+    log.error("AutoDiscovery retry shutdown complete");
   }
-  
+
+  @Override
   public void applyRetryDelay() {
     // no op for now
   }
-  
+
   class QueryRing implements Runnable {
 
+    @Override
     public void run() {
       if ( log.isDebugEnabled() ) {
         log.debug("Auto discovery service running...");
@@ -71,15 +64,15 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
       }
       if ( log.isDebugEnabled() ) {
         log.debug("Auto discovery service run complete.");
-      }      
+      }
     }
-    
+
   }
-  
+
   public Set<CassandraHost> discoverNodes() {
     Set<CassandraHost> existingHosts = connectionManager.getHosts();
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
-    
+
     HThriftClient thriftClient = null;
     log.info("using existing hosts {}", existingHosts);
     try {
@@ -99,14 +92,14 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
           }
           break;
         }
-      }      
+      }
     } catch (Exception e) {
       log.error("Downed Host retry failed attempt to verify CassandraHost", e);
     } finally {
       connectionManager.releaseClient(thriftClient);
-    }      
+    }
     return foundHosts;
   }
-     
+
 }
-  
+

@@ -1,12 +1,10 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.connection.ConcurrentHClientPool;
@@ -59,6 +57,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
 
+  @Override
   public long getReadFail() {
     return counters.get(Counter.READ_FAIL).longValue();
   }
@@ -68,44 +67,52 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
 
+  @Override
   public long getSkipHostSuccess() {
     return counters.get(Counter.SKIP_HOST_SUCCESS).longValue();
   }
 
 
+  @Override
   public long getRecoverableTimedOutCount() {
     return counters.get(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS).longValue();
   }
 
 
+  @Override
   public long getRecoverableUnavailableCount() {
     return counters.get(Counter.RECOVERABLE_UNAVAILABLE_EXCEPTIONS).longValue();
   }
 
 
+  @Override
   public long getWriteFail() {
     return counters.get(Counter.WRITE_FAIL).longValue();
   }
 
 
+  @Override
   public void updateKnownHosts() throws HectorTransportException {
    log.info("Updating all known cassandra hosts on all clients");
-   
+
   }
 
 
+  @Override
   public long getNumPoolExhaustedEventCount() {
     return counters.get(Counter.POOL_EXHAUSTED).longValue();
   }
 
 
+  @Override
   public Set<String> getExhaustedPoolNames() {
     Set<String> ret = new HashSet<String>();
-    
+
     return ret;
   }
 
 
+  @Override
   public int getNumActive() {
     int ret = 0;
     Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
@@ -116,6 +123,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
 
+  @Override
   public int getNumBlockedThreads() {
     int ret = 0;
     Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
@@ -126,11 +134,13 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
 
+  @Override
   public int getNumExhaustedPools() {
     return connectionManager.getDownedHosts().size();
   }
 
 
+  @Override
   public int getNumIdleConnections() {
     int ret = 0;
     Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
@@ -141,33 +151,39 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
 
+  @Override
   public int getNumPools() {
     return connectionManager.getHosts().size();
   }
 
 
 
+  @Override
   public Set<CassandraHost> getKnownHosts() {
     return connectionManager.getHosts();
   }
 
 
+  @Override
   public long getRecoverableTransportExceptionCount() {
     return counters.get(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS).longValue();
   }
 
 
+  @Override
   public long getRecoverableErrorCount() {
     return getRecoverableTimedOutCount() + getRecoverableTransportExceptionCount() +
         getRecoverableUnavailableCount() + getRecoverableLoadBalancedConnectErrors();
-  }  
+  }
 
 
+  @Override
   public long getRecoverableLoadBalancedConnectErrors() {
     return counters.get(Counter.RECOVERABLE_LB_CONNECT_ERRORS).longValue();
   }
 
 
+  @Override
   public long getNumConnectionErrors() {
     return counters.get(Counter.CONNECT_ERROR).longValue();
   }

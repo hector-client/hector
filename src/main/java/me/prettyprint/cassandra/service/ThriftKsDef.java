@@ -6,18 +6,20 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.ddl.HCfDef;
-import me.prettyprint.hector.api.ddl.HKsDef;
+import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
-public class ThriftKsDef implements HKsDef {
+public class ThriftKsDef implements KeyspaceDefinition {
 
   private final String name;
   private String strategyClass;
   private Map<String, String> strategyOptions;
   private int replicationFactor;
-  private final List<HCfDef> cfDefs;
+  private final List<ColumnFamilyDefinition> cfDefs;
 
   public ThriftKsDef(KsDef k) {
     Assert.notNull(k, "KsDef is null");
@@ -29,18 +31,24 @@ public class ThriftKsDef implements HKsDef {
   }
 
   public ThriftKsDef(String keyspaceName, String strategyClass, int replicationFactor,
-      List<HCfDef> cfDefs) {
+      List<ColumnFamilyDefinition> cfDefs) {
     this.name = keyspaceName;
     this.strategyClass = strategyClass;
     this.replicationFactor = replicationFactor;
     this.cfDefs = cfDefs;
   }
 
-  public static List<HKsDef> fromThriftList(List<KsDef> ks) {
+  public ThriftKsDef(String keyspaceName) {
+    this.name = keyspaceName;
+    this.cfDefs = new ArrayList<ColumnFamilyDefinition>();
+    this.replicationFactor = 1;
+  }
+
+  public static List<KeyspaceDefinition> fromThriftList(List<KsDef> ks) {
     if (ks == null || ks.isEmpty()) {
       return Collections.emptyList();
     }
-    List<HKsDef> l = new ArrayList<HKsDef>(ks.size());
+    List<KeyspaceDefinition> l = new ArrayList<KeyspaceDefinition>(ks.size());
     for (KsDef k: ks) {
       l.add(new ThriftKsDef(k));
     }
@@ -68,7 +76,7 @@ public class ThriftKsDef implements HKsDef {
   }
 
   @Override
-  public List<HCfDef> getCfDefs() {
+  public List<ColumnFamilyDefinition> getCfDefs() {
     return Collections.unmodifiableList(cfDefs);
   }
 
@@ -86,6 +94,11 @@ public class ThriftKsDef implements HKsDef {
 
   public void setReplicationFactor(int replicationFactor) {
     this.replicationFactor = replicationFactor;
+  }
+
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 
 }

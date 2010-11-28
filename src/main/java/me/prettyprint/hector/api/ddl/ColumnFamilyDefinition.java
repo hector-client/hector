@@ -8,19 +8,19 @@ import java.util.List;
  * @author Ran Tavory
  *
  */
-public interface HCfDef {
+public interface ColumnFamilyDefinition {
 
-  String getKeyspace();
+  String getKeyspaceName();
   String getName();
-  String getColumnType();
-  String getComparatorType();
-  String getSubcomparatorType();
+  ColumnType getColumnType();
+  ComparatorType getComparatorType();
+  ComparatorType getSubComparatorType();
   String getComment();
   double getRowCacheSize();
   int getRowCacheSavePeriodInSeconds();
   double getKeyCacheSize();
   double getReadRepairChance();
-  List<HColumnDef> getColumnMetadata();
+  List<ColumnDefinition> getColumnMetadata();
   int getGcGraceSeconds();
   String getDefaultValidationClass();
   int getId();

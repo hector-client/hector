@@ -9,11 +9,11 @@ import java.util.Map;
  * @author Ran Tavory
  *
  */
-public interface HKsDef {
+public interface KeyspaceDefinition {
 
   String getName();
   String getStrategyClass();
   Map<String, String> getStrategyOptions();
   int getReplicationFactor();
-  List<HCfDef> getCfDefs();
+  List<ColumnFamilyDefinition> getCfDefs();
 }
