@@ -26,7 +26,7 @@ public class FailoverPolicy {
 
   public final int sleepBetweenHostsMilli;
 
-  FailoverPolicy(int numRetries, int sleepBwHostsMilli) {
+  public FailoverPolicy(int numRetries, int sleepBwHostsMilli) {
     this.numRetries = numRetries;
     sleepBetweenHostsMilli = sleepBwHostsMilli;
   }

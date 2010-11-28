@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  * you're interested in and then create mutations of queries
  * <code>
  * //get a cluster:
- * Cluster cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
+ * Cluster cluster = getOrCreateCluster("MyCluster", new CassandraHostConfigurator("127.0.0.1:9170"));
  * //get a keyspace from this cluster:
  * Keyspace ko = createKeyspace("Keyspace1", cluster);
  * //Create a mutator:

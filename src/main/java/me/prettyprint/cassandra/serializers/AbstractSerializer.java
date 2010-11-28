@@ -91,6 +91,15 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
   }
 
   @Override
+  public List<T> fromBytesList(List<ByteBuffer> list) {
+    List<T> objList = new ArrayList<T>();
+    for (ByteBuffer s : list) {
+      objList.add(fromByteBuffer(s));
+    }
+    return objList;
+  }
+
+  @Override
   public <V> Map<ByteBuffer, V> toBytesMap(Map<T, V> map) {
     Map<ByteBuffer, V> bytesMap = new LinkedHashMap<ByteBuffer, V>();
     for (Entry<T, V> entry : map.entrySet()) {

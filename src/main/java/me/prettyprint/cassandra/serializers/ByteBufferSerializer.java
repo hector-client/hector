@@ -38,6 +38,11 @@ public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer> i
   }
 
   @Override
+  public List<ByteBuffer> fromBytesList(List<ByteBuffer> list) {
+    return list;
+  }
+
+  @Override
   public <V> Map<ByteBuffer, V> toBytesMap(Map<ByteBuffer, V> map) {
     return map;
   }
