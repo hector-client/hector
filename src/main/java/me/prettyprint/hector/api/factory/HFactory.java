@@ -38,6 +38,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
@@ -284,11 +285,20 @@ public final class HFactory {
     return new ThriftKsDef(keyspace);
   }
 
+  public static KeyspaceDefinition createKeyspaceDefinition(String keyspaceName, String strategyClass, int replicationFactor,
+      List<ColumnFamilyDefinition> cfDefs) {
+    return new ThriftKsDef(keyspaceName, strategyClass, replicationFactor, cfDefs);
+  }
+
   public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName) {
     return new ThriftCfDef(keyspace, cfName);
   }
 
   public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName, ComparatorType comparatorType) {
     return new ThriftCfDef(keyspace, cfName, comparatorType);
+  }
+
+  public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName, ComparatorType comparatorType, List<ColumnDefinition> columnMetadata) {
+    return new ThriftCfDef(keyspace, cfName, comparatorType, columnMetadata);
   }
 }

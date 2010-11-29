@@ -70,6 +70,13 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     }
   }
 
+  public ThriftCfDef(String keyspace, String columnFamilyName, ComparatorType comparatorType, List<ColumnDefinition> columnMetadata) {
+    this(keyspace, columnFamilyName, comparatorType);
+    if (columnMetadata != null) {
+      this.columnMetadata = columnMetadata;
+    }
+  }
+
   public static List<ColumnFamilyDefinition> fromThriftList(List<CfDef> cfDefs) {
     if ((cfDefs == null) || cfDefs.isEmpty()) {
       return Collections.emptyList();
