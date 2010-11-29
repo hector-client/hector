@@ -186,18 +186,6 @@
             </configuration>
           </execution>
           <execution>
-            <id>install cassandra</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>org.apache.cassandra</groupId>
-              <artifactId>cassandra</artifactId>
-              <version>0.6.5</version>
-              <file>${basedir}/lib/apache-cassandra-0.6.5.jar</file>
-            </configuration>
-          </execution>
-          <execution>
             <id>install high-scale-lib</id>
             <phase>initialize</phase>
             <goals><goal>install-file</goal></goals>
@@ -221,18 +209,6 @@
               <file>${basedir}/lib/clhm-production.jar</file>
             </configuration>
           </execution>
-          <execution>
-            <id>install cassandra-javautils</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>org.apache.cassandra</groupId>
-              <artifactId>cassandra-javautils</artifactId>
-              <version>1.0.0</version>
-              <file>${basedir}/lib/cassandra-javautils.jar</file>
-            </configuration>
-          </execution>
         </executions>
       </plugin>
     </plugins>
@@ -252,11 +228,6 @@
       <groupId>libthrift</groupId>
       <artifactId>libthrift</artifactId>
       <version>917130</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra</artifactId>
-      <version>0.6.5</version>
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
@@ -312,8 +283,18 @@
       <scope>provided</scope>
       <optional>true</optional>
     </dependency>
-    
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>apache-cassandra</artifactId>
+      <version>0.6.5</version>
+    </dependency>
+
     <!-- Testing Dependencies -->
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-javautils</artifactId>
+      <version>0.6.5</version>     
+    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -354,11 +335,6 @@
       <groupId>org.codehaus.mojo</groupId>
       <artifactId>properties-maven-plugin</artifactId>
       <version>1.0-alpha-2</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-javautils</artifactId>
-      <version>1.0.0</version>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
