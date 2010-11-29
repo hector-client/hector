@@ -56,15 +56,22 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
     this.keyspace = keyspace;
-    this.name = columnFamilyName;
+    name = columnFamilyName;
     columnMetadata = Collections.emptyList();
 
-    this.columnType = ColumnType.STANDARD;
-    this.comparatorType = ComparatorType.BYTESTYPE;
+    columnType = ColumnType.STANDARD;
+    comparatorType = ComparatorType.BYTESTYPE;
+  }
+
+  public ThriftCfDef(String keyspace, String columnFamilyName, ComparatorType comparatorType) {
+    this(keyspace, columnFamilyName);
+    if (comparatorType != null) {
+      this.comparatorType = comparatorType;
+    }
   }
 
   public static List<ColumnFamilyDefinition> fromThriftList(List<CfDef> cfDefs) {
-    if (cfDefs == null || cfDefs.isEmpty()) {
+    if ((cfDefs == null) || cfDefs.isEmpty()) {
       return Collections.emptyList();
     }
     List<ColumnFamilyDefinition> l = new ArrayList<ColumnFamilyDefinition>(cfDefs.size());
@@ -136,7 +143,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   public static List<CfDef> toThriftList(List<ColumnFamilyDefinition> cfDefs) {
-    if (cfDefs == null || cfDefs.isEmpty()) {
+    if ((cfDefs == null) || cfDefs.isEmpty()) {
       return Collections.emptyList();
     }
     List<CfDef> l = new ArrayList<CfDef>(cfDefs.size());
