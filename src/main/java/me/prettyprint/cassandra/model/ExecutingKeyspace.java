@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.Map;
+
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
@@ -21,14 +23,17 @@ public class ExecutingKeyspace implements Keyspace {
 
   private final HConnectionManager connectionManager;
   private final String keyspace;
+  private final Map<String, String> credentials;
 
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
-      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
+      Map<String, String> credentials) {
     Assert.noneNull(keyspace, consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
     this.failoverPolicy = failoverPolicy;
+    this.credentials = credentials;
   }
 
   @Override
@@ -49,7 +54,7 @@ public class ExecutingKeyspace implements Keyspace {
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     KeyspaceService ks = null;
     try {
-      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy);
+      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy, credentials);
       return koc.doInKeyspaceAndMeasure(ks);
     } finally {
       if (ks != null) {

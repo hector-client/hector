@@ -105,6 +105,10 @@ public final class HFactory {
     return new ThriftCluster(clusterName, cassandraHostConfigurator);
   }
 
+  public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
+    return new ThriftCluster(clusterName, cassandraHostConfigurator, credentials);
+  }
+
   /**
    * Creates a Keyspace with the default consistency level policy.
    * @param keyspace
@@ -124,7 +128,13 @@ public final class HFactory {
 
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
-    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy);
+    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy, cluster.getCredentials());
+  }
+
+  public static Keyspace createKeyspace(String keyspace, Cluster cluster,
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy,
+      Map<String, String> credentials) {
+    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy, credentials);
   }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {
