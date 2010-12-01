@@ -26,6 +26,13 @@ public class ThriftColumnDef implements ColumnDefinition {
     indexType = indexTypeFromThrift(cd.index_type);
     indexName = cd.index_name;
   }
+  
+  public ThriftColumnDef(ColumnDefinition columnDefinition) {
+    name = columnDefinition.getName();
+    validationClass = columnDefinition.getValidationClass();
+    indexType = columnDefinition.getIndexType();
+    indexName = columnDefinition.getIndexName();
+  }
 
   private ColumnIndexType indexTypeFromThrift(IndexType tIndexType) {
     switch (tIndexType) {

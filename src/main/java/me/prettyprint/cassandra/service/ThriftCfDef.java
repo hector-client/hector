@@ -53,6 +53,25 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     maxCompactionThreshold = d.max_compaction_threshold;
 
   }
+  
+  public ThriftCfDef(ColumnFamilyDefinition columnFamilyDefinition) {
+    keyspace = columnFamilyDefinition.getKeyspaceName();
+    name = columnFamilyDefinition.getName();
+    columnType = columnFamilyDefinition.getColumnType();
+    comparatorType = columnFamilyDefinition.getComparatorType();
+    subComparatorType = columnFamilyDefinition.getSubComparatorType();
+    comment = columnFamilyDefinition.getComment();
+    rowCacheSize = columnFamilyDefinition.getRowCacheSize();
+    rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
+    keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
+    readRepairChance = columnFamilyDefinition.getReadRepairChance();
+    columnMetadata = columnFamilyDefinition.getColumnMetadata();
+    gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
+    defaultValidationClass = columnFamilyDefinition.getDefaultValidationClass();
+    id = columnFamilyDefinition.getId();
+    minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
+    maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
+  }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
     this.keyspace = keyspace;
