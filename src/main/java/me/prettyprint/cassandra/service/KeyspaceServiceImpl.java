@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class KeyspaceServiceImpl implements KeyspaceService {
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   @SuppressWarnings("unused")
   private static final Logger log = LoggerFactory.getLogger(KeyspaceServiceImpl.class);
@@ -61,6 +62,14 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   public KeyspaceServiceImpl(String keyspaceName,
       ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager,
+      FailoverPolicy failoverPolicy)
+      throws HectorTransportException {
+    this(keyspaceName, consistencyLevel, connectionManager, failoverPolicy, EMPTY_CREDENTIALS);
+  }
+
+  public KeyspaceServiceImpl(String keyspaceName,
+      ConsistencyLevelPolicy consistencyLevel,
+      HConnectionManager connectionManager,
       FailoverPolicy failoverPolicy,
       Map<String, String> credentials)
       throws HectorTransportException {
@@ -71,19 +80,6 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     this.credentials = Collections.unmodifiableMap(credentials);
     xtrans = new ExceptionsTranslatorImpl();
   }
-
-//  public KeyspaceServiceImpl(String keyspaceName,
-//      ConsistencyLevelPolicy consistencyLevel,
-//      HConnectionManager connectionManager,
-//      FailoverPolicy failoverPolicy)
-//      throws HectorTransportException {
-//    this.consistency = consistencyLevel;
-//    this.keyspaceName = keyspaceName;
-//    this.connectionManager = connectionManager;
-//    this.failoverPolicy = failoverPolicy;
-//    this.credentials = Collections.emptyMap();
-//    xtrans = new ExceptionsTranslatorImpl();
-//  }
 
 
   @Override

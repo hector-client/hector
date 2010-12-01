@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.Collections;
 import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
@@ -17,6 +18,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
  *
  */
 public class ExecutingKeyspace implements Keyspace {
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
   private FailoverPolicy failoverPolicy;
@@ -25,6 +27,11 @@ public class ExecutingKeyspace implements Keyspace {
   private final String keyspace;
   private final Map<String, String> credentials;
 
+  public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
+      this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy, EMPTY_CREDENTIALS);
+  }
+  
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
       Map<String, String> credentials) {

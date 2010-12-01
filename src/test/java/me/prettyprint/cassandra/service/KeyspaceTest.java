@@ -60,9 +60,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
     
-    Map<String, String> credentials = Collections.emptyMap();
     keyspace = new KeyspaceServiceImpl("Keyspace1", new QuorumAllConsistencyLevelPolicy(), 
-        connectionManager, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, credentials);
+        connectionManager, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
   @Test

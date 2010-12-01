@@ -23,6 +23,14 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
   public KeyspaceService create(String keyspaceName,
       ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager,
+      FailoverPolicy failoverPolicy)
+      throws HectorTransportException {
+    return new KeyspaceServiceImpl(keyspaceName, consistencyLevel,
+        connectionManager, failoverPolicy);
+  }
+  public KeyspaceService create(String keyspaceName,
+      ConsistencyLevelPolicy consistencyLevel,
+      HConnectionManager connectionManager,
       FailoverPolicy failoverPolicy,
       Map<String, String> credentials)
       throws HectorTransportException {
