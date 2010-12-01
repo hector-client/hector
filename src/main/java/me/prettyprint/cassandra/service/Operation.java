@@ -41,7 +41,7 @@ public abstract class Operation<T> {
    * @param operationType
    */
   public Operation(OperationType operationType) {
-      this(operationType, EMPTY_CREDENTIALS);
+    this(operationType, EMPTY_CREDENTIALS);
   }
 
   public Operation(OperationType operationType, Map<String, String> credentials) {
@@ -54,7 +54,7 @@ public abstract class Operation<T> {
   }
 
   public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName) {
-      this(operationType, failoverPolicy, keyspaceName, EMPTY_CREDENTIALS);
+    this(operationType, failoverPolicy, keyspaceName, EMPTY_CREDENTIALS);
   }
   
   public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
