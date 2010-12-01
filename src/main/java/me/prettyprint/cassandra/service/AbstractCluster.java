@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author zznate
  */
 public abstract class AbstractCluster implements Cluster {
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
 
@@ -52,13 +53,7 @@ public abstract class AbstractCluster implements Cluster {
   private final Map<String, String> credentials;
 
   public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
-    connectionManager = new HConnectionManager(cassandraHostConfigurator);
-    name = clusterName;
-    configurator = cassandraHostConfigurator;
-    failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
-    xtrans = new ExceptionsTranslatorImpl();
-    this.credentials = Collections.emptyMap();
+    this(clusterName, cassandraHostConfigurator, EMPTY_CREDENTIALS);
   }
 
   public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {

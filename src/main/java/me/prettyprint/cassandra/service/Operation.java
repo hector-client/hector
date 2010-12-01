@@ -18,6 +18,7 @@ import org.apache.cassandra.thrift.Cassandra;
  *          Oh closures, how I wish you were here...
  */
 public abstract class Operation<T> {
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   /** Counts failed attempts */
   public final Counter failCounter;
@@ -39,6 +40,10 @@ public abstract class Operation<T> {
    * Most commonly used for system_* calls as the keyspaceName is null
    * @param operationType
    */
+  public Operation(OperationType operationType) {
+      this(operationType, EMPTY_CREDENTIALS);
+  }
+
   public Operation(OperationType operationType, Map<String, String> credentials) {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
@@ -46,6 +51,10 @@ public abstract class Operation<T> {
     this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     this.keyspaceName = null;
     this.credentials = Collections.unmodifiableMap(credentials);
+  }
+
+  public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName) {
+      this(operationType, failoverPolicy, keyspaceName, EMPTY_CREDENTIALS);
   }
   
   public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
