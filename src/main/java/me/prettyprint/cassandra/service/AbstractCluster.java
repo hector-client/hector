@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
@@ -35,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author zznate
  */
 public abstract class AbstractCluster implements Cluster {
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
 
@@ -47,14 +50,20 @@ public abstract class AbstractCluster implements Cluster {
   private Set<String> knownClusterHosts;
   private Set<CassandraHost> knownPoolHosts;
   protected final ExceptionsTranslator xtrans;
+  private final Map<String, String> credentials;
 
   public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
+    this(clusterName, cassandraHostConfigurator, EMPTY_CREDENTIALS);
+  }
+
+  public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
     connectionManager = new HConnectionManager(cassandraHostConfigurator);
     name = clusterName;
     configurator = cassandraHostConfigurator;
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
     xtrans = new ExceptionsTranslatorImpl();
+    this.credentials = Collections.unmodifiableMap(credentials);
   }
 
   @Override
@@ -106,7 +115,7 @@ public abstract class AbstractCluster implements Cluster {
    */
   @Override
   public List<KeyspaceDefinition> describeKeyspaces() throws HectorException {
-    Operation<List<KeyspaceDefinition>> op = new Operation<List<KeyspaceDefinition>>(OperationType.META_READ) {
+    Operation<List<KeyspaceDefinition>> op = new Operation<List<KeyspaceDefinition>>(OperationType.META_READ, getCredentials()) {
       @Override
       public List<KeyspaceDefinition> execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -125,7 +134,7 @@ public abstract class AbstractCluster implements Cluster {
    */
   @Override
   public String describeClusterName() throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_READ) {
+    Operation<String> op = new Operation<String>(OperationType.META_READ, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -144,7 +153,7 @@ public abstract class AbstractCluster implements Cluster {
    */
   @Override
   public String describeThriftVersion() throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_READ) {
+    Operation<String> op = new Operation<String>(OperationType.META_READ, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -165,7 +174,7 @@ public abstract class AbstractCluster implements Cluster {
   public KeyspaceDefinition describeKeyspace(final String keyspace)
   throws HectorException {
     Operation<KeyspaceDefinition> op = new Operation<KeyspaceDefinition>(
-        OperationType.META_READ) {
+        OperationType.META_READ, getCredentials()) {
       @Override
       public KeyspaceDefinition execute(Cassandra.Client cassandra)
       throws HectorException {
@@ -189,7 +198,7 @@ public abstract class AbstractCluster implements Cluster {
   @Override
   public String getClusterName() throws HectorException {
     log.info("in execute with client");
-    Operation<String> op = new Operation<String>(OperationType.META_READ) {
+    Operation<String> op = new Operation<String>(OperationType.META_READ, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -206,7 +215,7 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public String dropKeyspace(final String keyspace) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE) {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -222,7 +231,7 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public String describePartitioner() throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_READ) {
+    Operation<String> op = new Operation<String>(OperationType.META_READ, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -243,7 +252,7 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE,FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName) {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -257,6 +266,10 @@ public abstract class AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-
+  @Override
+  public Map<String, String> getCredentials() {
+    return credentials;
+  }
+  
 
 }

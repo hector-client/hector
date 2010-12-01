@@ -1,5 +1,8 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.Collections;
+import java.util.Map;
+
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
@@ -15,20 +18,29 @@ import me.prettyprint.hector.api.exceptions.HectorException;
  *
  */
 public class ExecutingKeyspace implements Keyspace {
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   private ConsistencyLevelPolicy consistencyLevelPolicy;
   private FailoverPolicy failoverPolicy;
 
   private final HConnectionManager connectionManager;
   private final String keyspace;
+  private final Map<String, String> credentials;
 
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
+      this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy, EMPTY_CREDENTIALS);
+  }
+  
+  public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
+      Map<String, String> credentials) {
     Assert.noneNull(keyspace, consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
     this.failoverPolicy = failoverPolicy;
+    this.credentials = credentials;
   }
 
   @Override
@@ -49,7 +61,7 @@ public class ExecutingKeyspace implements Keyspace {
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
     KeyspaceService ks = null;
     try {
-      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy);
+      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy, credentials);
       return koc.doInKeyspaceAndMeasure(ks);
     } finally {
       if (ks != null) {

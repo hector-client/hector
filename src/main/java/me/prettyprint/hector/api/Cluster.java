@@ -1,6 +1,7 @@
 package me.prettyprint.hector.api;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
@@ -62,5 +63,5 @@ public interface Cluster {
 
   String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
 
-
+  Map<String, String> getCredentials();
 }
