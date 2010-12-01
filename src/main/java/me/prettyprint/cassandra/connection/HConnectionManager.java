@@ -22,6 +22,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
+import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.perf4j.StopWatch;
@@ -92,6 +93,9 @@ public class HConnectionManager {
         // Keyspace can be null for some system_* api calls
         if ( op.keyspaceName != null ) {
           c.set_keyspace(op.keyspaceName);
+        }
+        if ( !op.credentials.isEmpty() ) {
+          c.login(new AuthenticationRequest(op.credentials));
         }
 
         op.executeAndSetResult(c, client.cassandraHost);

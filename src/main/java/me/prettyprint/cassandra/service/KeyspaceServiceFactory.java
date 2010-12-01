@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.Map;
+
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -21,9 +23,10 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
   public KeyspaceService create(String keyspaceName,
       ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager,
-      FailoverPolicy failoverPolicy)
+      FailoverPolicy failoverPolicy,
+      Map<String, String> credentials)
       throws HectorTransportException {
     return new KeyspaceServiceImpl(keyspaceName, consistencyLevel,
-        connectionManager, failoverPolicy);
+        connectionManager, failoverPolicy, credentials);
   }
 }
