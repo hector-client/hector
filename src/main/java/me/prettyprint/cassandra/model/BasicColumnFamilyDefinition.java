@@ -16,8 +16,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   private String keyspaceName;
   private String name;
-  private ColumnType columnType;
-  private ComparatorType comparitorType;
+  private ColumnType columnType = ColumnType.STANDARD;
+  private ComparatorType comparitorType = ComparatorType.BYTESTYPE;
   private ComparatorType subComparitorType;
   private String comment;
   private double rowCacheSize;
