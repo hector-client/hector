@@ -11,6 +11,8 @@ import me.prettyprint.hector.api.ddl.ColumnIndexType;
 
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.IndexType;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 public class ThriftColumnDef implements ColumnDefinition {
 
@@ -25,6 +27,13 @@ public class ThriftColumnDef implements ColumnDefinition {
     validationClass = cd.validation_class;
     indexType = indexTypeFromThrift(cd.index_type);
     indexName = cd.index_name;
+  }
+  
+  public ThriftColumnDef(ColumnDefinition columnDefinition) {
+    name = columnDefinition.getName();
+    validationClass = columnDefinition.getValidationClass();
+    indexType = columnDefinition.getIndexType();
+    indexName = columnDefinition.getIndexName();
   }
 
   private ColumnIndexType indexTypeFromThrift(IndexType tIndexType) {
@@ -73,7 +82,7 @@ public class ThriftColumnDef implements ColumnDefinition {
     }
     List<ColumnDef> l = new ArrayList<ColumnDef>(columnDefs.size());
     for (ColumnDefinition d: columnDefs) {
-      l.add(((ThriftColumnDef) d).toThrift());
+      l.add((new ThriftColumnDef(d)).toThrift());
     }
     return l;
   }
@@ -94,5 +103,10 @@ public class ThriftColumnDef implements ColumnDefinition {
     default:
       throw new RuntimeException("Unknown ColumnIndexType value: " + indexType2);
     }
+  }
+  
+  @Override
+  public String toString() {
+    return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
   }
 }

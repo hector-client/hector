@@ -26,6 +26,14 @@ public class EmbeddedServerHelper {
   private static final String TMP = "tmp";
 
   private EmbeddedCassandraService cassandra;
+  private final String yamlFile;
+
+  public EmbeddedServerHelper() {
+    this("/cassandra.yaml");
+  }
+  public EmbeddedServerHelper(String yamlFile) {
+    this.yamlFile = yamlFile;
+  }
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -39,8 +47,8 @@ public class EmbeddedServerHelper {
     rmdir(TMP);
     // make a tmp dir and copy cassandra.yaml and log4j.properties to it
     copy("/log4j.properties", TMP);
-    copy("/cassandra.yaml", TMP);
-    System.setProperty("storage-config", TMP);
+    copy(yamlFile, TMP);
+    System.setProperty("cassandra.config", "file:"+ TMP + yamlFile);
 
     CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
     cleaner.prepare();

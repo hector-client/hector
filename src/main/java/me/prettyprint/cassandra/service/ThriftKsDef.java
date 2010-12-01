@@ -43,6 +43,14 @@ public class ThriftKsDef implements KeyspaceDefinition {
     this.cfDefs = new ArrayList<ColumnFamilyDefinition>();
     this.replicationFactor = 1;
   }
+  
+  public ThriftKsDef(KeyspaceDefinition keyspaceDefinition) {
+    name = keyspaceDefinition.getName();
+    strategyClass = keyspaceDefinition.getStrategyClass();
+    strategyOptions = keyspaceDefinition.getStrategyOptions();
+    replicationFactor = keyspaceDefinition.getReplicationFactor();
+    cfDefs = keyspaceDefinition.getCfDefs();
+  }
 
   public static List<KeyspaceDefinition> fromThriftList(List<KsDef> ks) {
     if (ks == null || ks.isEmpty()) {

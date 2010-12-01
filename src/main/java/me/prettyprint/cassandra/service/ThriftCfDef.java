@@ -53,18 +53,51 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     maxCompactionThreshold = d.max_compaction_threshold;
 
   }
+  
+  public ThriftCfDef(ColumnFamilyDefinition columnFamilyDefinition) {
+    keyspace = columnFamilyDefinition.getKeyspaceName();
+    name = columnFamilyDefinition.getName();
+    columnType = columnFamilyDefinition.getColumnType();
+    comparatorType = columnFamilyDefinition.getComparatorType();
+    subComparatorType = columnFamilyDefinition.getSubComparatorType();
+    comment = columnFamilyDefinition.getComment();
+    rowCacheSize = columnFamilyDefinition.getRowCacheSize();
+    rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
+    keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
+    readRepairChance = columnFamilyDefinition.getReadRepairChance();
+    columnMetadata = columnFamilyDefinition.getColumnMetadata();
+    gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
+    defaultValidationClass = columnFamilyDefinition.getDefaultValidationClass();
+    id = columnFamilyDefinition.getId();
+    minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
+    maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
+  }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
     this.keyspace = keyspace;
-    this.name = columnFamilyName;
+    name = columnFamilyName;
     columnMetadata = Collections.emptyList();
 
-    this.columnType = ColumnType.STANDARD;
-    this.comparatorType = ComparatorType.BYTESTYPE;
+    columnType = ColumnType.STANDARD;
+    comparatorType = ComparatorType.BYTESTYPE;
+  }
+
+  public ThriftCfDef(String keyspace, String columnFamilyName, ComparatorType comparatorType) {
+    this(keyspace, columnFamilyName);
+    if (comparatorType != null) {
+      this.comparatorType = comparatorType;
+    }
+  }
+
+  public ThriftCfDef(String keyspace, String columnFamilyName, ComparatorType comparatorType, List<ColumnDefinition> columnMetadata) {
+    this(keyspace, columnFamilyName, comparatorType);
+    if (columnMetadata != null) {
+      this.columnMetadata = columnMetadata;
+    }
   }
 
   public static List<ColumnFamilyDefinition> fromThriftList(List<CfDef> cfDefs) {
-    if (cfDefs == null || cfDefs.isEmpty()) {
+    if ((cfDefs == null) || cfDefs.isEmpty()) {
       return Collections.emptyList();
     }
     List<ColumnFamilyDefinition> l = new ArrayList<ColumnFamilyDefinition>(cfDefs.size());
@@ -136,7 +169,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   public static List<CfDef> toThriftList(List<ColumnFamilyDefinition> cfDefs) {
-    if (cfDefs == null || cfDefs.isEmpty()) {
+    if ((cfDefs == null) || cfDefs.isEmpty()) {
       return Collections.emptyList();
     }
     List<CfDef> l = new ArrayList<CfDef>(cfDefs.size());

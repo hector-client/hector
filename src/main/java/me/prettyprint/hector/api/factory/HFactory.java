@@ -38,7 +38,9 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
@@ -105,6 +107,10 @@ public final class HFactory {
     return new ThriftCluster(clusterName, cassandraHostConfigurator);
   }
 
+  public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
+    return new ThriftCluster(clusterName, cassandraHostConfigurator, credentials);
+  }
+
   /**
    * Creates a Keyspace with the default consistency level policy.
    * @param keyspace
@@ -124,7 +130,13 @@ public final class HFactory {
 
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
-    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy);
+    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy, cluster.getCredentials());
+  }
+
+  public static Keyspace createKeyspace(String keyspace, Cluster cluster,
+      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy,
+      Map<String, String> credentials) {
+    return new ExecutingKeyspace(keyspace, cluster.getConnectionManager(), consistencyLevelPolicy, failoverPolicy, credentials);
   }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {
@@ -283,7 +295,20 @@ public final class HFactory {
     return new ThriftKsDef(keyspace);
   }
 
+  public static KeyspaceDefinition createKeyspaceDefinition(String keyspaceName, String strategyClass, int replicationFactor,
+      List<ColumnFamilyDefinition> cfDefs) {
+    return new ThriftKsDef(keyspaceName, strategyClass, replicationFactor, cfDefs);
+  }
+
   public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName) {
     return new ThriftCfDef(keyspace, cfName);
+  }
+
+  public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName, ComparatorType comparatorType) {
+    return new ThriftCfDef(keyspace, cfName, comparatorType);
+  }
+
+  public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName, ComparatorType comparatorType, List<ColumnDefinition> columnMetadata) {
+    return new ThriftCfDef(keyspace, cfName, comparatorType, columnMetadata);
   }
 }

@@ -112,6 +112,11 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
     super.setColumnFamily(cf);
     return this;
   }
+  
+  public IndexedSlicesQuery<K,N,V> setRowCount(int rowCount) {
+    indexClause.setCount(rowCount);
+    return this;
+  }
 
   @Override
   public QueryResult<OrderedRows<K,N, V>> execute() {
