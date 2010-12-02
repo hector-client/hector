@@ -78,7 +78,9 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     public void run() {
       CassandraHost cassandraHost = downedHostQueue.poll();
       if ( cassandraHost == null ) {
-        log.info("Retry service fired... nothing to do.");
+        if ( log.isDebugEnabled() ) { 
+          log.debug("Retry service fired... nothing to do.");
+        }
         return;
       }
       boolean reconnected = verifyConnection(cassandraHost);
