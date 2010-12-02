@@ -1,10 +1,7 @@
 package me.prettyprint.cassandra.service;
 
-import java.io.Serializable;
 
-public final class CassandraHostConfigurator  implements Serializable {
-  // update this if you make changes
-  private static final long serialVersionUID = -5798876803582956262L;
+public final class CassandraHostConfigurator {
 
   private String hosts;
   private int port = CassandraHost.DEFAULT_PORT;
