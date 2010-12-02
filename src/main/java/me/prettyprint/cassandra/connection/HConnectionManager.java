@@ -15,6 +15,7 @@ import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
@@ -105,7 +106,7 @@ public class HConnectionManager {
 
       } catch (Exception ex) {        
         HectorException he = exceptionsTranslator.translate(ex);        
-        if ( he instanceof HInvalidRequestException ) {
+        if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException ) {
           throw he;
         } else if ( he instanceof HUnavailableException || he instanceof HectorTransportException) {
           --retries;
