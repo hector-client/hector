@@ -5,6 +5,10 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.6.0-20
+========
+CassandraHostConfigurator implements serializable (backported from 0.7.0-21)
+
 0.6.0-19
 ========
 Addresses issues with spring template and configuration described here: https://github.com/rantav/hector/issues/closed/#issue/93 (thanks to hadopls for the patches)
