@@ -5,6 +5,10 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.7.0-21
+========
+CassandraHostConfigurator is now serializable
+
 0.7.0-20
 ========
 Added authentication support (contributed by Jim Ancona)
