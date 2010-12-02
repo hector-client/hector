@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>bundle</packaging>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-  <version>0.6.0-19</version>
+  <version>0.6.0-20</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
@@ -400,11 +400,39 @@
       </plugin>
     </plugins>
   </reporting>
-  <distributionManagement>
+  <profiles>
+    <profile>
+      <id>outbrain</id>
+      <distributionManagement>
+        <repository>
+          <id>nexus</id>
+          <name>nexus</name>
+          <url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+    <profile>
+      <id>riptano</id>
+      <distributionManagement>
+        <repository>
+          <id>riptano</id>
+          <name>riptano</name>
+          <url>http://mvn.riptano.com/content/repositories/public/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+  <repositories>
     <repository>
-      <id>nexus</id>
-      <name>nexus</name>
-      <url>http://obweb.il.outbrain.com:8081/nexus/content/repositories/releases/</url>
+      <id>riptano</id>
+      <name>riptano</name>
+      <url>http://mvn.riptano.com/content/repositories/public/</url>
     </repository>
-  </distributionManagement>
+    <repository>
+      <id>codehaus</id>
+      <name>codehaus</name>
+      <url>http://repository.codehaus.org/</url>
+    </repository>
+  </repositories>
+              
 </project>
