@@ -1,4 +1,9 @@
 #!/bin/bash
+# 
+# providing the argument "tag" to this script will create and commit the tag 
+# for this release. Ie:
+#    ./release.sh tag
+#
 # Exit on error
 set -e
 # Require variable declaration
@@ -25,5 +30,11 @@ echo Zipping
 pushd releases
 zip -Tr hector-$version.zip hector-$version/
 popd
+if [ "$1" = "tag" ]; then
+	vstr="v$version"
+        echo "Dropping tag $vstr"
+	git tag -a $vstr -m "Tagged as $vstr from release script"
+	git push origin $vstr
+fi
 
 echo DONE
