@@ -51,12 +51,20 @@ public class HConnectionManager {
   public HConnectionManager(CassandraHostConfigurator cassandraHostConfigurator) {    
     clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
-    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
-      hostPools.put(host,new ConcurrentHClientPool(host));      
-    }
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
     }
+    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
+      try {
+        hostPools.put(host,new ConcurrentHClientPool(host));
+      } catch (HectorTransportException hte) {
+        log.error("Could not start connection pool for host {}", host);
+        if ( cassandraHostRetryService != null ) {
+          cassandraHostRetryService.add(host);
+        }
+      }
+    }
+
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
     }
