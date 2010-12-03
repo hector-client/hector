@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
 
@@ -43,12 +44,9 @@ public final class HKeyRange<K> {
    * @return The thrift representation of this object
    */
   public KeyRange toThrift() {
-    Assert.notNull(startKey, "start can't be null");
-    Assert.notNull(endKey, "end can't be null");
-
     KeyRange keyRange = new KeyRange(rowCount);
-    keyRange.setStart_key(keySerializer.toByteBuffer(startKey));
-    keyRange.setEnd_key(keySerializer.toByteBuffer(endKey));
+    keyRange.setStart_key(startKey == null ? StringSerializer.get().toByteBuffer("") : keySerializer.toByteBuffer(startKey));
+    keyRange.setEnd_key(endKey == null ? StringSerializer.get().toByteBuffer("") : keySerializer.toByteBuffer(endKey));
     return keyRange;
   }
 
