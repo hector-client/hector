@@ -44,7 +44,7 @@ public class HConnectionManager {
   
   private final ClockResolution clock;
   
-  private final ExceptionsTranslator exceptionsTranslator;
+  final ExceptionsTranslator exceptionsTranslator;
   private CassandraClientMonitor monitor;
 
   
@@ -56,7 +56,8 @@ public class HConnectionManager {
     }
     for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
       try {
-        hostPools.put(host,new ConcurrentHClientPool(host));
+        ConcurrentHClientPool chcp = new ConcurrentHClientPool(host);
+        hostPools.put(host,chcp);
       } catch (HectorTransportException hte) {
         log.error("Could not start connection pool for host {}", host);
         if ( cassandraHostRetryService != null ) {
@@ -246,10 +247,3 @@ public class HConnectionManager {
 
   
 }
-
-/*
- 
-- Make failoverPolicy a class
-  ~ add max time skipping parameter
-  ~ configurable and passed in via setter with default
-*/
