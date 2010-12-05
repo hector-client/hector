@@ -8,7 +8,12 @@ import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
+import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,10 +24,12 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
   public static final int DEF_QUEUE_SIZE = 3;
   public static final int DEF_RETRY_DELAY = 10;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
+  private final ExceptionsTranslator exceptionsTranslator;
 
   public CassandraHostRetryService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
+    this.exceptionsTranslator = connectionManager.exceptionsTranslator;
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize());
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
@@ -78,7 +85,9 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     public void run() {
       CassandraHost cassandraHost = downedHostQueue.poll();
       if ( cassandraHost == null ) {
-        log.info("Retry service fired... nothing to do.");
+        if ( log.isDebugEnabled() ) { 
+          log.debug("Retry service fired... nothing to do.");
+        }
         return;
       }
       boolean reconnected = verifyConnection(cassandraHost);
@@ -97,16 +106,24 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       if ( cassandraHost == null ) {
         return false;
       }
+      boolean found = false;
       HThriftClient client = new HThriftClient(cassandraHost);
       try {
         client.open();
-        return client.getCassandra().describe_cluster_name() != null;
+        found = client.getCassandra().describe_cluster_name() != null;
+        client.close();              
       } catch (Exception e) {
-        log.error("Downed Host retry failed attempt to verify CassandraHost", e);
-      } finally {
-        client.close();
-      }
-      return false;
+        HectorException he = exceptionsTranslator.translate(e);
+        if ( he instanceof HectorTransportException ) {
+          log.error("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
+        }
+        if ( he instanceof HCassandraInternalException ) {
+          log.error("Downed host retry service got a server-side error for {} - you should look into this on that node", cassandraHost);
+        } else {        
+          log.error("Downed Host retry failed attempt to verify CassandraHost", e);
+        }
+      } 
+      return found;
     }
 
   }

@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.NoSuchElementException;
 
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
@@ -11,6 +12,7 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.PoolIllegalStateException;
 
+import org.apache.thrift.TApplicationException;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TProtocolException;
 import org.apache.thrift.transport.TTransportException;
@@ -21,6 +23,8 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
   public HectorException translate(Throwable original) {
     if (original instanceof HectorException) {
       return (HectorException) original;
+    } else if (original instanceof TApplicationException) {
+      return new HCassandraInternalException(((TApplicationException)original).getType(), original.getMessage());
     } else if (original instanceof TException || original instanceof TTransportException) {
       return new HectorTransportException(original);
     } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {

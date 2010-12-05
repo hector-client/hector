@@ -15,6 +15,7 @@ import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
@@ -43,19 +44,28 @@ public class HConnectionManager {
   
   private final ClockResolution clock;
   
-  private final ExceptionsTranslator exceptionsTranslator;
+  final ExceptionsTranslator exceptionsTranslator;
   private CassandraClientMonitor monitor;
 
   
   public HConnectionManager(CassandraHostConfigurator cassandraHostConfigurator) {    
     clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
-    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
-      hostPools.put(host,new ConcurrentHClientPool(host));      
-    }
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
     }
+    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
+      try {
+        ConcurrentHClientPool chcp = new ConcurrentHClientPool(host);
+        hostPools.put(host,chcp);
+      } catch (HectorTransportException hte) {
+        log.error("Could not start connection pool for host {}", host);
+        if ( cassandraHostRetryService != null ) {
+          cassandraHostRetryService.add(host);
+        }
+      }
+    }
+
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
     }
@@ -105,7 +115,7 @@ public class HConnectionManager {
 
       } catch (Exception ex) {        
         HectorException he = exceptionsTranslator.translate(ex);        
-        if ( he instanceof HInvalidRequestException ) {
+        if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException ) {
           throw he;
         } else if ( he instanceof HUnavailableException || he instanceof HectorTransportException) {
           --retries;
@@ -237,10 +247,3 @@ public class HConnectionManager {
 
   
 }
-
-/*
- 
-- Make failoverPolicy a class
-  ~ add max time skipping parameter
-  ~ configurable and passed in via setter with default
-*/
