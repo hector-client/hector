@@ -101,6 +101,9 @@ public class ConcurrentHClientPool implements PoolMetric {
       }
 
     }
+    if ( cassandraClient == null ) {
+      throw new HectorException("HConnectionManager returned a null client after aquisition - are we shutting down?");
+    }
     activeClients.add(cassandraClient);
     numBlocked.decrementAndGet();
 
