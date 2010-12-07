@@ -174,18 +174,6 @@
         <version>2.3.1</version>
         <executions>
           <execution>
-            <id>install libthrift</id>
-            <phase>initialize</phase>
-            <goals><goal>install-file</goal></goals>
-            <configuration>
-              <packaging>jar</packaging>
-              <groupId>libthrift</groupId>
-              <artifactId>libthrift</artifactId>
-              <version>917130</version>
-              <file>${basedir}/lib/libthrift-r917130.jar</file>
-            </configuration>
-          </execution>
-          <execution>
             <id>install high-scale-lib</id>
             <phase>initialize</phase>
             <goals><goal>install-file</goal></goals>
