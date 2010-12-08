@@ -25,5 +25,7 @@ public interface RangeSlicesQuery<K, N, V> extends Query<OrderedRows<K, N,V>>{
   RangeSlicesQuery<K, N, V> setColumnFamily(String cf);
 
   RangeSlicesQuery<K, N, V> setRange(N start, N finish, boolean reversed, int count);
+  
+  RangeSlicesQuery<K, N, V> setReturnKeysOnly();
 
 }

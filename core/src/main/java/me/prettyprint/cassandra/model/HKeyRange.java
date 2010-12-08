@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
+
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
 
@@ -43,12 +45,11 @@ public final class HKeyRange<K> {
    * @return The thrift representation of this object
    */
   public KeyRange toThrift() {
-    Assert.notNull(startKey, "start can't be null");
-    Assert.notNull(endKey, "end can't be null");
-
     KeyRange keyRange = new KeyRange(rowCount);
-    keyRange.setStart_key(keySerializer.toByteBuffer(startKey));
-    keyRange.setEnd_key(keySerializer.toByteBuffer(endKey));
+    keyRange.setStart_key(startKey == null ? ByteBuffer.wrap(new byte[0]) :
+        keySerializer.toByteBuffer(startKey));
+    keyRange.setEnd_key(endKey == null ? ByteBuffer.wrap(new byte[0]) :
+        keySerializer.toByteBuffer(endKey));
     return keyRange;
   }
 

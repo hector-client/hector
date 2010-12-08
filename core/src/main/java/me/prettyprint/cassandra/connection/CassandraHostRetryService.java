@@ -90,6 +90,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
         }
         return;
       }
+      
       boolean reconnected = verifyConnection(cassandraHost);
       log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
       if ( reconnected ) {
@@ -109,19 +110,16 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       boolean found = false;
       HThriftClient client = new HThriftClient(cassandraHost);
       try {
+        
         client.open();
         found = client.getCassandra().describe_cluster_name() != null;
         client.close();              
-      } catch (Exception e) {
-        HectorException he = exceptionsTranslator.translate(e);
-        if ( he instanceof HectorTransportException ) {
-          log.error("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
-        }
-        if ( he instanceof HCassandraInternalException ) {
-          log.error("Downed host retry service got a server-side error for {} - you should look into this on that node", cassandraHost);
-        } else {        
-          log.error("Downed Host retry failed attempt to verify CassandraHost", e);
-        }
+      } catch (HectorTransportException he) {        
+        log.error("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
+      } catch (Exception ex) {
+                
+        log.error("Downed Host retry failed attempt to verify CassandraHost", ex);
+        
       } 
       return found;
     }
