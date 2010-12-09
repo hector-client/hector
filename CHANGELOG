@@ -8,6 +8,7 @@ Changes by version:
 0.7.0-21
 ========
 CassandraHostConfigurator is now serializable
+Split the project to hector-core
 
 0.7.0-20
 ========

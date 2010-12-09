@@ -10,7 +10,7 @@ set -e
 set -u
 
 # read the version from pom.xml
-version=$(sed -n "s/<version>\(.*\)<\/version>/\1/p" pom.xml | head -1)
+version=$(sed -n "s/<hector.version>\(.*\)<\/hector.version>/\1/p" pom.xml | head -1)
 # remove whitespace
 version=$(echo $version)
 echo Version is: $version
@@ -19,9 +19,9 @@ rm -rf $target*
 mkdir -p $target
 
 echo Running mvn install and copy-dependencies
-mvn clean install -DskipTests dependency:copy-dependencies -DincludeScope=runtime -DexcludeTransitive=true -DexcludeArtifactIds=properties-maven-plugin -DoutputDirectory=$target
+mvn clean install -DskipTests dependency:copy-dependencies -DincludeScope=runtime -DexcludeTransitive=true -DexcludeArtifactIds=properties-maven-plugin -DoutputDirectory=../$target
 
-cp target/hector-$version* $target
+cp core/target/hector-core-$version* $target
 
 echo Copying CHANGELOG
 cp CHANGELOG $target
@@ -31,10 +31,10 @@ pushd releases
 zip -Tr hector-$version.zip hector-$version/
 popd
 if [ "$1" = "tag" ]; then
-	vstr="v$version"
-        echo "Dropping tag $vstr"
-	git tag -a $vstr -m "Tagged as $vstr from release script"
-	git push origin $vstr
+  vstr="v$version"
+  echo "Dropping tag $vstr"
+  git tag -a $vstr -m "Tagged as $vstr from release script"
+  git push origin $vstr
 fi
 
 echo DONE
