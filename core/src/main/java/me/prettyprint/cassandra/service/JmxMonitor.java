@@ -101,7 +101,7 @@ public class JmxMonitor {
       } catch( IllegalAccessException e ) {
         log.error( "Could not invoke method DOMConfigurator.configure(URL)", e );
       } catch( InvocationTargetException e ) {
-        throw (RuntimeException) e.getCause();
+        throw new RuntimeException(e.getCause());
       }
     }
   }
