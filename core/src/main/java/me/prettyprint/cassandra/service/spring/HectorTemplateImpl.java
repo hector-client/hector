@@ -216,6 +216,11 @@ public class HectorTemplateImpl implements HectorTemplate {
   public <N, V> HColumn<N, V> createColumn(N name, V value) {
     return new HColumnImpl<N, V>(name, value, createClock());
   }
+  
+  @Override
+  public <N, V> HColumn<N, V> createColumn(N name, V value, long clock) {
+    return new HColumnImpl<N, V>(name, value, clock);
+  }
 
   @Override
   public long createClock() {
