@@ -81,6 +81,26 @@ public class HConnectionManager {
       log.info("Host already existed for pool {}", cassandraHost.getName());
     }    
   }
+  
+  /**
+   * Remove the {@link CassandraHost} from the pool, bypassing retry service. This
+   * would be called on a host that is known to be going away. Gracefully shuts down
+   * the underlying connections via {@link ConcurrentHClientPool#shutdown()}
+   * @param cassandraHost
+   */
+  public void removeCassandraHost(CassandraHost cassandraHost) {
+    boolean removed = getHosts().contains(cassandraHost);
+    if ( removed ) {      
+      ConcurrentHClientPool pool = hostPools.remove(cassandraHost);
+      if ( pool != null ) {
+        pool.shutdown();     
+      } else {
+        removed = false;
+        log.info("removeCassandraHost attempt miss for CassandraHost {} May have been beaten by another thread?", cassandraHost);
+      }
+    }
+    log.info("Remove status for CassandraHost pool {} was {}", cassandraHost, removed);
+  }
       
   public Set<CassandraHost> getHosts() {
     return Collections.unmodifiableSet(hostPools.keySet());
@@ -194,6 +214,7 @@ public class HConnectionManager {
     if ( pool != null ) {
       pool.releaseClient(client);
     } else {
+      log.info("Client {} released to inactive or dead pool. Closing.", client);
       client.close();
     }
   }
