@@ -41,14 +41,14 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   @Override
   void shutdown() {
-    log.error("Downed Host retry shutdown hook called");
+    log.info("Downed Host retry shutdown hook called");
     if ( sf != null ) {
       sf.cancel(true);
     }
     if ( executor != null ) {
       executor.shutdownNow();
     }
-    log.error("Downed Host retry shutdown complete");
+    log.info("Downed Host retry shutdown complete");
   }
 
   public void add(CassandraHost cassandraHost) {
@@ -74,7 +74,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   public void flushQueue() {
     downedHostQueue.clear();
-    log.error("Downed Host retry queue flushed.");
+    log.info("Downed Host retry queue flushed.");
   }
 
 
