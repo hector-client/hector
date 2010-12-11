@@ -30,7 +30,7 @@ echo Zipping
 pushd releases
 zip -Tr hector-$version.zip hector-$version/
 popd
-if [ "$1" = "tag" ]; then
+if [[ $1 && "$1" = "tag" ]]; then
   vstr="v$version"
   echo "Dropping tag $vstr"
   git tag -a $vstr -m "Tagged as $vstr from release script"
