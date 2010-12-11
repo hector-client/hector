@@ -42,7 +42,7 @@ public class HConnectionManager {
   private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
-  private LoadBalancingPolicy loadBalancingPolicy = new LeastActiveBalancingPolicy();
+  private LoadBalancingPolicy loadBalancingPolicy;
 
   private final ClockResolution clock;
 
@@ -51,6 +51,7 @@ public class HConnectionManager {
 
 
   public HConnectionManager(CassandraHostConfigurator cassandraHostConfigurator) {
+    loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
@@ -250,10 +251,6 @@ public class HConnectionManager {
 
   public Collection<ConcurrentHClientPool> getActivePools() {
     return Collections.unmodifiableCollection(hostPools.values());
-  }
-
-  public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
-    this.loadBalancingPolicy = loadBalancingPolicy;
   }
 
   public long createClock() {

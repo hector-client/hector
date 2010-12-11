@@ -3,7 +3,9 @@ package me.prettyprint.cassandra.service;
 import java.io.Serializable;
 
 import me.prettyprint.cassandra.connection.CassandraHostRetryService;
+import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
 import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
+import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
 
 
 public final class CassandraHostConfigurator implements Serializable {
@@ -27,6 +29,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
   private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
+  private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
   
 
   public CassandraHostConfigurator() {
@@ -212,7 +215,16 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setAutoDiscoveryDelayInSeconds(int autoDiscoveryDelayInSeconds) {
     this.autoDiscoveryDelayInSeconds = autoDiscoveryDelayInSeconds;
+  }
+
+  public LoadBalancingPolicy getLoadBalancingPolicy() {
+    return loadBalancingPolicy;
+  }
+
+  public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
+    this.loadBalancingPolicy = loadBalancingPolicy;
   } 
+  
   
   
   
