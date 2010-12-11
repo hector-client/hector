@@ -13,6 +13,8 @@ Added removeCassandraHost on HConnectionManager for graceful shutdown of a pool
 Configuration of load balancing policy is now done on CassandraHostConfigurator
 KnownHosts and per-pool stats are once again available via JMX
 Minor logging tweaks to make logging levels more appropriate
+Added overloaded version of createColumn (contributed by Michael Moores)
+
 
 0.7.0-20
 ========
