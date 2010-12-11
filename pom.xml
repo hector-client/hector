@@ -5,7 +5,7 @@
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
   <!-- this version number is not important. The version is at ${hector.version} -->
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
