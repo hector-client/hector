@@ -9,6 +9,10 @@ Changes by version:
 ========
 CassandraHostConfigurator is now serializable
 Split the project to hector-core
+Added removeCassandraHost on HConnectionManager for graceful shutdown of a pool
+Configuration of load balancing policy is now done on CassandraHostConfigurator
+KnownHosts and per-pool stats are once again available via JMX
+Minor logging tweaks to make logging levels more appropriate
 
 0.7.0-20
 ========
