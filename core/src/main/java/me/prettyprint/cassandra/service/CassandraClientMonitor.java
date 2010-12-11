@@ -1,8 +1,10 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
@@ -157,10 +159,19 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   }
 
 
+  @Override
+  public List<String> getKnownHosts() {
+    List<String> hosts = new ArrayList<String>();
+    for (CassandraHost cassandraHost : connectionManager.getHosts()) {
+        hosts.add(cassandraHost.toString());
+    }
+    return hosts;
+  }
+
 
   @Override
-  public Set<CassandraHost> getKnownHosts() {
-    return connectionManager.getHosts();
+  public List<String> getStatisticsPerPool() {
+    return connectionManager.getStatusPerPool();
   }
 
 
@@ -187,4 +198,5 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   public long getNumConnectionErrors() {
     return counters.get(Counter.CONNECT_ERROR).longValue();
   }
+
 }
