@@ -320,11 +320,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.codehaus.mojo</groupId>
-      <artifactId>properties-maven-plugin</artifactId>
-      <version>1.0-alpha-2</version>
-    </dependency>
-    <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
       <version>3.0.0.RELEASE</version>
