@@ -281,7 +281,8 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-javautils</artifactId>
-      <version>0.6.5</version>     
+      <version>0.6.5</version> 
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
