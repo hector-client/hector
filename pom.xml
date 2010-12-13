@@ -11,7 +11,7 @@
   <url>http://github.com/rantav/hector</url>
   <properties>
   <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
-    <hector.version>0.7.0-21</hector.version>
+    <hector.version>0.7.0-22</hector.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
     <slf4j.version>1.5.11</slf4j.version>
