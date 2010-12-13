@@ -5,6 +5,11 @@ Changes by version:
 
 0.6.0-* work well with cassandra's 0.6.*
 
+0.7.0-22
+========
+Fix issue with LeastActiveBalancingPolicy that favoured same host repeatedly
+
+
 0.7.0-21
 ========
 CassandraHostConfigurator is now serializable
