@@ -1,42 +1,18 @@
 package me.prettyprint.cassandra.connection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 
-import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 
-public class LeastActiveBalancingPolicyTest {
+public class LeastActiveBalancingPolicyTest extends BaseBalancingPolicyTest {
 
   private LeastActiveBalancingPolicy leastActiveBalancingPolicy;
-  private List<ConcurrentHClientPool> pools = new ArrayList<ConcurrentHClientPool>();
-  
-  private ConcurrentHClientPool poolWith5Active;
-  private ConcurrentHClientPool poolWith7Active;
-  private ConcurrentHClientPool poolWith10Active;
-  
-  
-  @Before
-  public void setup() {
-    poolWith5Active = Mockito.mock(ConcurrentHClientPool.class);    
-    Mockito.when(poolWith5Active.getNumActive()).thenReturn(5);
-    poolWith7Active = Mockito.mock(ConcurrentHClientPool.class);
-    Mockito.when(poolWith7Active.getNumActive()).thenReturn(7);
-    poolWith10Active = Mockito.mock(ConcurrentHClientPool.class);
-    Mockito.when(poolWith10Active.getNumActive()).thenReturn(10);
-    
-    pools.add(poolWith5Active);
-    pools.add(poolWith7Active);
-    pools.add(poolWith10Active);
-  }
   
   @Test
   public void testGetPoolOk() {
