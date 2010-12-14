@@ -92,6 +92,10 @@ public final class CassandraHostConfigurator implements Serializable {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
   }
 
+  /**
+   * The value (in milliseconds) which gets passed down to {@link java.net.Socket#setSoTimeout(int)} 
+   * used by the underlying Thrift transport.
+   */
   public void setCassandraThriftSocketTimeout(int cassandraThriftSocketTimeout) {
     this.cassandraThriftSocketTimeout = cassandraThriftSocketTimeout;
   }
