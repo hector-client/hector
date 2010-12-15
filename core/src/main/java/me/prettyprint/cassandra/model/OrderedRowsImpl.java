@@ -28,10 +28,7 @@ public final class OrderedRowsImpl<K,N,V> extends RowsImpl<K,N,V> implements Ord
   public OrderedRowsImpl(LinkedHashMap<K, List<Column>> thriftRet, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(thriftRet, nameSerializer, valueSerializer);
-    rowsList = new ArrayDeque<Row<K,N,V>>(thriftRet.size());
-    for (Map.Entry<K, List<Column>> entry: thriftRet.entrySet()) {
-      rowsList.add(new RowImpl<K,N,V>(entry.getKey(), entry.getValue(), nameSerializer, valueSerializer));
-    }
+    rowsList = new ArrayDeque<Row<K,N,V>>(rows.values());    
   }
 
   /**
