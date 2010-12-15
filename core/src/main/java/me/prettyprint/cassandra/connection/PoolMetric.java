@@ -6,5 +6,6 @@ public interface PoolMetric {
   int getNumIdle();
   int getNumBlockedThreads();
   String getName();
+  boolean getIsActive();
   
 }

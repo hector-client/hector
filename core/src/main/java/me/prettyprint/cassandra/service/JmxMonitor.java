@@ -56,7 +56,7 @@ public class JmxMonitor {
     return monitorInstance;
   }
 
-  
+
   public void registerMonitor(String name, String monitorType, Object monitoringInterface)
       throws MalformedObjectNameException, InstanceAlreadyExistsException,
       MBeanRegistrationException, NotCompliantMBeanException {
@@ -101,7 +101,7 @@ public class JmxMonitor {
       } catch( IllegalAccessException e ) {
         log.error( "Could not invoke method DOMConfigurator.configure(URL)", e );
       } catch( InvocationTargetException e ) {
-        throw (RuntimeException) e.getCause();
+        throw new RuntimeException(e.getCause());
       }
     }
   }

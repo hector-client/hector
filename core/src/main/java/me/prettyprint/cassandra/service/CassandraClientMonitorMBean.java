@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.List;
 import java.util.Set;
 
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -64,7 +65,7 @@ public interface CassandraClientMonitorMBean {
    */
   int getNumPools();
 
-  
+
   /**
    * Total number of idle clients in all client pools
    */
@@ -102,7 +103,7 @@ public interface CassandraClientMonitorMBean {
    */
   long getNumConnectionErrors();
 
-  public Set<CassandraHost> getKnownHosts();
+  public List<String> getKnownHosts();
 
   /**
    * Tells all pulls to update their list of known hosts.
@@ -110,4 +111,10 @@ public interface CassandraClientMonitorMBean {
    * update asap.
    */
   public void updateKnownHosts() throws HectorTransportException;
+
+  /**
+   * Retrieves stats per pool.
+   *
+   */
+  public List<String> getStatisticsPerPool();
 }

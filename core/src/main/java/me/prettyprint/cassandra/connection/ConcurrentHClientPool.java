@@ -111,6 +111,14 @@ public class ConcurrentHClientPool implements PoolMetric {
     return cassandraClient;
   }
 
+  /**
+   * Controlled shutdown of pool. Go through the list of available clients
+   * in the queue and call {@link HThriftClient#close()} on each. Toggles
+   * a flag to indicate we are going into shutdown mode. Any subsequent calls
+   * will throw an IllegalArgumentException.
+   *
+   *
+   */
   void shutdown() {
     if (!active.compareAndSet(true, false) ) {
       throw new IllegalArgumentException("shutdown() called for inactive pool: " + getName());
@@ -132,7 +140,7 @@ public class ConcurrentHClientPool implements PoolMetric {
 
   @Override
   public String getName() {
-    return String.format("<ConcurrentCassandraClientPoolByHost>:{}", cassandraHost.getName());
+    return String.format("<ConcurrentCassandraClientPoolByHost>:{%s}", cassandraHost.getName());
   }
 
 
@@ -167,9 +175,13 @@ public class ConcurrentHClientPool implements PoolMetric {
     return cassandraHost.getMaxActive();
   }
 
+  public boolean getIsActive() {
+    return active.get();
+  }
+
   public String getStatusAsString() {
-    return String.format("%s; Active: %d; Blocked: %d; Idle: %d; NumBeforeExhausted: %d",
-        getName(), getNumActive(), getNumBlockedThreads(), getNumIdle(), getNumBeforeExhausted());
+    return String.format("%s; IsActive?: %s; Active: %d; Blocked: %d; Idle: %d; NumBeforeExhausted: %d",
+        getName(), getIsActive(), getNumActive(), getNumBlockedThreads(), getNumIdle(), getNumBeforeExhausted());
   }
 
   public void releaseClient(HThriftClient client) throws HectorException {
@@ -177,7 +189,12 @@ public class ConcurrentHClientPool implements PoolMetric {
     numActive.decrementAndGet();
     boolean open = client.isOpen();
     if ( open ) {
+      if ( active.get() ) {
         addClientToPoolGently(client);
+      } else {
+        log.info("Open client {} released to in-active pool for host {}. Closing.", client, cassandraHost);
+        client.close();
+      }
     } else {
       if ( activeClients.size() < getMaxActive() && numBlocked.get() > 0) {
         addClientToPoolGently(new HThriftClient(cassandraHost).open());

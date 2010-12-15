@@ -7,8 +7,8 @@
 # Exit on error
 set -e
 # Require variable declaration
+tagarg=$1
 set -u
-
 # read the version from pom.xml
 version=$(sed -n "s/<hector.version>\(.*\)<\/hector.version>/\1/p" pom.xml | head -1)
 # remove whitespace
@@ -30,7 +30,7 @@ echo Zipping
 pushd releases
 zip -Tr hector-$version.zip hector-$version/
 popd
-if [ "$1" = "tag" ]; then
+if [[ $tagarg && "$tagarg" = "tag" ]]; then
   vstr="v$version"
   echo "Dropping tag $vstr"
   git tag -a $vstr -m "Tagged as $vstr from release script"
