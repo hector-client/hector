@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
-import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
@@ -110,10 +110,10 @@ public class HConnectionManager {
   }
 
   public List<String> getStatusPerPool() {
-	List<String> stats = new ArrayList<String>();
-	for (ConcurrentHClientPool clientPool : hostPools.values()) {
-	    stats.add(clientPool.getStatusAsString());
-	}
+    List<String> stats = new ArrayList<String>();
+    for (ConcurrentHClientPool clientPool : hostPools.values()) {
+        stats.add(clientPool.getStatusAsString());
+    }
     return stats;
   }
 

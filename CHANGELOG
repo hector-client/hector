@@ -8,6 +8,7 @@ Changes by version:
 0.7.0-22
 ========
 Fix issue with LeastActiveBalancingPolicy that favoured same host repeatedly
+Define ClockResolution as an Interface to allow client to define their own implementations
 
 
 0.7.0-21
