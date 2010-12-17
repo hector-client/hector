@@ -60,6 +60,8 @@ public interface Cluster {
 
   String dropColumnFamily(final String keyspaceName, final String columnFamily)
       throws HectorException;
+  
+  String updateColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException;
 
   String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
 
