@@ -6,6 +6,8 @@ import me.prettyprint.cassandra.connection.CassandraHostRetryService;
 import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
 import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
 import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
+import me.prettyprint.hector.api.ClockResolution;
+import me.prettyprint.hector.api.factory.HFactory;
 
 
 public final class CassandraHostConfigurator implements Serializable {
@@ -22,7 +24,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
-  private ClockResolution clockResolution = ClockResolution.MICROSECONDS;
+  private ClockResolution clockResolution = HFactory.createClockResolution(ClockResolution.MICROSECONDS);
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean retryDownedHosts = true;
   private boolean autoDiscoverHosts = false;
@@ -30,7 +32,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
   private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
   private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
-  
+
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -93,7 +95,7 @@ public final class CassandraHostConfigurator implements Serializable {
   }
 
   /**
-   * The value (in milliseconds) which gets passed down to {@link java.net.Socket#setSoTimeout(int)} 
+   * The value (in milliseconds) which gets passed down to {@link java.net.Socket#setSoTimeout(int)}
    * used by the underlying Thrift transport.
    */
   public void setCassandraThriftSocketTimeout(int cassandraThriftSocketTimeout) {
@@ -102,12 +104,12 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
     this.exhaustedPolicy = exhaustedPolicy;
-  }  
-  
+  }
+
   public boolean getRetryDownedHosts() {
     return this.retryDownedHosts;
   }
-  
+
   public void setRetryDownedHosts(boolean retryDownedHosts) {
     this.retryDownedHosts = retryDownedHosts;
   }
@@ -122,17 +124,17 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setRetryDownedHostsDelayInSeconds(int retryDownedHostsDelayInSeconds) {
     this.retryDownedHostsDelayInSeconds = retryDownedHostsDelayInSeconds;
-  }  
-  
+  }
+
   public int getRetryDownedHostsDelayInSeconds() {
     return retryDownedHostsDelayInSeconds;
   }
 
   /**
-   * @param resolutionString one of "SECONDS", "MILLISECONDS" or "MICROSECONDS"
+   * @param resolutionString one of "SECONDS", "MILLISECONDS", "MICROSECONDS" or "MICROSECONDS_SYNC"
    */
   public void setClockResolution(String resolutionString) {
-    clockResolution = ClockResolution.valueOf(resolutionString);
+    clockResolution = HFactory.createClockResolution(resolutionString);
   }
 
   @Override
@@ -227,10 +229,10 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setLoadBalancingPolicy(LoadBalancingPolicy loadBalancingPolicy) {
     this.loadBalancingPolicy = loadBalancingPolicy;
-  } 
-  
-  
-  
-  
-  
+  }
+
+
+
+
+
 }

@@ -32,6 +32,11 @@ import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.ThriftCfDef;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.cassandra.service.ThriftKsDef;
+import me.prettyprint.cassandra.service.clock.MicrosecondsClockResolution;
+import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
+import me.prettyprint.cassandra.service.clock.MillisecondsClockResolution;
+import me.prettyprint.cassandra.service.clock.SecondsClockResolution;
+import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
@@ -311,4 +316,24 @@ public final class HFactory {
   public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName, ComparatorType comparatorType, List<ColumnDefinition> columnMetadata) {
     return new ThriftCfDef(keyspace, cfName, comparatorType, columnMetadata);
   }
+
+  /**
+   * Create a clock resolution based on <code>clockResolutionName</code> which has to match any of the constants defined
+   * at {@link ClockResolution}
+   * @param clockResolutionName type of clock resolution to create
+   * @return a ClockResolution
+   */
+  public static ClockResolution createClockResolution(String clockResolutionName) {
+      if (clockResolutionName.equals(ClockResolution.SECONDS)) {
+          return new SecondsClockResolution();
+      } else if (clockResolutionName.equals(ClockResolution.MILLISECONDS)) {
+          return new MillisecondsClockResolution();
+      } else if (clockResolutionName.equals(ClockResolution.MICROSECONDS)) {
+          return new MicrosecondsClockResolution();
+      } else if (clockResolutionName.equals(ClockResolution.MICROSECONDS_SYNC)) {
+          return new MicrosecondsSyncClockResolution();
+      }
+      throw new RuntimeException(String.format("Unsupported clock resolution: %s", clockResolutionName));
+  }
+
 }

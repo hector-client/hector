@@ -3,6 +3,9 @@ package me.prettyprint.cassandra.service;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import me.prettyprint.hector.api.ClockResolution;
+import me.prettyprint.hector.api.factory.HFactory;
+
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +49,7 @@ public final class CassandraHost {
   public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = GenericObjectPool.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
   public static final ClockResolution DEFAULT_TIMESTAMP_RESOLUTION =
-      ClockResolution.MICROSECONDS;
+      HFactory.createClockResolution(ClockResolution.MICROSECONDS);
 
   private final String host, ip, url;
   private final int port;

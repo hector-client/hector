@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -270,6 +271,5 @@ public abstract class AbstractCluster implements Cluster {
   public Map<String, String> getCredentials() {
     return credentials;
   }
-  
 
 }
