@@ -4,7 +4,7 @@
   <groupId>me.prettyprint</groupId>
   <artifactId>hector-core</artifactId>
   <packaging>bundle</packaging>
-  <version>0.7.0-22</version>
+  <version>0.7.0-23</version>
   <name>hector-core</name>
   <parent>
     <groupId>me.prettyprint</groupId>
