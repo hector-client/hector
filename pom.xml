@@ -56,6 +56,7 @@
   <!-- Hector submodules -->
   <modules>
     <module>core</module>
+    <module>object-mapper</module>
   </modules>
 
   <build>
