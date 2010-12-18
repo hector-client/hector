@@ -4,12 +4,12 @@
   <groupId>me.prettyprint</groupId>
   <artifactId>hector-core</artifactId>
   <packaging>bundle</packaging>
-  <version>${hector.version}</version>
+  <version>0.7.0-22</version>
   <name>hector-core</name>
   <parent>
     <groupId>me.prettyprint</groupId>
     <artifactId>hector</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
   </parent>
   <properties>
     <!-- OSGi bundle properties -->
