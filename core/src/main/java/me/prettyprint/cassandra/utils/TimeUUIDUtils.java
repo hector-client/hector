@@ -3,6 +3,11 @@ package me.prettyprint.cassandra.utils;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import com.eaio.uuid.UUIDGen;
+
+import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
+import me.prettyprint.hector.api.ClockResolution;
+
 /**
  * Utilitary class to generate TimeUUID (type 1)
  *
@@ -12,12 +17,54 @@ import java.util.UUID;
 public final class TimeUUIDUtils {
 
   /**
-   * Gets a new time uuid. It is useful to use in a TimeUUIDType sorted column family.
+   * Gets a new and unique time uuid in milliseconds. It is useful to use in a TimeUUIDType sorted column family.
    *
    * @return the time uuid
    */
-  public static java.util.UUID getTimeUUID() {
+  public static java.util.UUID getUniqueTimeUUIDinMillis() {
     return java.util.UUID.fromString(new com.eaio.uuid.UUID().toString());
+  }
+
+  /**
+   * Gets a new time uuid using {@link ClockResolution#createClock()} as a time generator.
+   * It is useful to use in a TimeUUIDType sorted column family.
+   *
+   * @param clock a ClockResolution
+   * @return the time uuid
+   */
+  public static java.util.UUID getTimeUUID(ClockResolution clock) {
+    return getTimeUUID(clock.createClock());
+  }
+
+  /**
+   * Gets a new time uuid based on <code>time<code>.
+   * NOTE: this algorithm does not resolve duplicates. To avoid duplicates use
+   * {@link getTimeUUID(ClockResolution clock)} with an implementaion that provides unique timestamp resolution, like
+   * {@link MicrosecondsSyncClockResolution}
+   * It is useful to use in a TimeUUIDType sorted column family.
+   *
+   * @param clock a ClockResolution
+   * @return the time uuid
+   */
+  public static java.util.UUID getTimeUUID(long time) {
+    return new java.util.UUID(createTime(time), UUIDGen.getClockSeqAndNode());
+  }
+
+  private static long createTime(long currentTime) {
+    long time;
+
+    // UTC time
+    long timeToUse = (currentTime * 10000) + 0x01B21DD213814000L;
+
+    // time low
+    time = timeToUse << 32;
+
+    // time mid
+    time |= (timeToUse & 0xFFFF00000000L) >> 16;
+
+    // time hi and version
+    time |= 0x1000 | ((timeToUse >> 48) & 0x0FFF); // version 1
+    return time;
   }
 
 
