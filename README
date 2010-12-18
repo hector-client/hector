@@ -1,9 +1,8 @@
-This is a fork of the latest release of Hector (as of 8/10/2010) to work with Cassandra 0.7.  This should be considered an experimental version.
-
+The current master and 0.7.0 branches will work with Apache Cassandra 0.7.0-x. Current releases on the downloads section should be cosidered production ready. You should always choose the most recent release. 
 ----------------------------------------------------------------------------------------------------
 
-A high level cassandra java client.
-Cassandra is a highly available column oriented database: http://incubator.apache.org/cassandra/
+Hector is a high level Java client for Apache Cassandra.
+Apache Cassandra is a highly available column oriented database: http://cassandra.apache.org
 Hector is the greatest warrior in the greek mythology, Troy's builder and brother of Cassandra
 http://en.wikipedia.org/wiki/Hector
 http://en.wikipedia.org/wiki/Cassandra
@@ -15,9 +14,12 @@ This client provides:
  o failover behavior on the client side
  o connection pooling for improved performance and scalability
  o JMX conters for monitoring and management
- o load balancing
+ o configurable and extensible load balancing
+ o complete encapsulation of the underlying Thrift API and structs
+ o automatic retry of downed hosts
+ o a type-safe approach to dealing with Apache Cassandra's data model
 
-Detailed documentation of Hector features and usage can be found in PDF hosted by Riptano: http://www.riptano.com/sites/default/files/hector-v2-client-doc.pdf
+Detailed documentation of Hector features and usage can be found in PDF form hosted by Riptano: http://www.riptano.com/sites/default/files/hector-v2-client-doc.pdf
 
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 

@@ -74,6 +74,25 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
   }
 
   @Override
+  public String updateColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE,
+        FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE,
+        cfdef.getKeyspaceName(), 
+        getCredentials()) {
+      @Override
+      public String execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.system_update_column_family(((ThriftCfDef) cfdef).toThrift());
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    connectionManager.operateWithFailover(op);
+    return op.getResult();
+  }
+  
+  @Override
   public String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
       @Override

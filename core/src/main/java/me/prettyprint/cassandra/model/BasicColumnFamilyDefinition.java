@@ -17,8 +17,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private String keyspaceName;
   private String name;
   private ColumnType columnType = ColumnType.STANDARD;
-  private ComparatorType comparitorType = ComparatorType.BYTESTYPE;
-  private ComparatorType subComparitorType;
+  private ComparatorType comparatorType = ComparatorType.BYTESTYPE;
+  private ComparatorType subComparatorType;
   private String comment;
   private double rowCacheSize;
   private double keyCacheSize;
@@ -36,6 +36,30 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   public BasicColumnFamilyDefinition() {
     this.columnDefinitions = new ArrayList<ColumnDefinition>();
   }
+  
+  /**
+   * Builds a {@link BasicColumnFamilyDefinition} based off the interface
+   */
+  public BasicColumnFamilyDefinition(ColumnFamilyDefinition columnFamilyDefinition) {
+    keyspaceName = columnFamilyDefinition.getKeyspaceName();
+    name = columnFamilyDefinition.getName();
+    columnType = columnFamilyDefinition.getColumnType();
+    comparatorType = columnFamilyDefinition.getComparatorType();
+    subComparatorType = columnFamilyDefinition.getSubComparatorType();
+    comment = columnFamilyDefinition.getComment();
+    rowCacheSize = columnFamilyDefinition.getRowCacheSize();
+    rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
+    keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
+    readRepairChance = columnFamilyDefinition.getReadRepairChance();
+    columnDefinitions = columnFamilyDefinition.getColumnMetadata() != null 
+    ? new ArrayList<ColumnDefinition>(columnFamilyDefinition.getColumnMetadata()) 
+        : new ArrayList<ColumnDefinition>();
+    gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
+    defaultValidationClass = columnFamilyDefinition.getDefaultValidationClass();
+    id = columnFamilyDefinition.getId();
+    minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
+    maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
+  }
 
   public void setKeyspaceName(String keyspaceName) {
     this.keyspaceName = keyspaceName;
@@ -49,12 +73,12 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.columnType = columnType;
   }
 
-  public void setComparitorType(ComparatorType comparitorType) {
-    this.comparitorType = comparitorType;
+  public void setComparatorType(ComparatorType comparitorType) {
+    this.comparatorType = comparitorType;
   }
 
-  public void setSubComparitorType(ComparatorType subComparitorType) {
-    this.subComparitorType = subComparitorType;
+  public void setSubComparatorType(ComparatorType subComparitorType) {
+    this.subComparatorType = subComparitorType;
   }
 
   public void setComment(String comment) {
@@ -118,12 +142,12 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   @Override
   public ComparatorType getComparatorType() {
-    return this.comparitorType;
+    return this.comparatorType;
   }
 
   @Override
   public ComparatorType getSubComparatorType() {
-    return this.subComparitorType;
+    return this.subComparatorType;
   }
 
   @Override

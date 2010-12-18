@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Before;
 import org.mockito.Mockito;
 
-public class BaseBalancingPolicyTest {
+public abstract class BaseBalancingPolicyTest {
   protected List<ConcurrentHClientPool> pools = new ArrayList<ConcurrentHClientPool>();
   
   protected ConcurrentHClientPool poolWith5Active;
