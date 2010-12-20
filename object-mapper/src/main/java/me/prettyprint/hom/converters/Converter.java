@@ -11,20 +11,20 @@ package me.prettyprint.hom.converters;
  */
 public interface Converter<T> {
 
-    /**
-     * Convert Cassandra byte[] to Java type.
-     *
-     * @param clazz
-     * @param value
-     * @return
-     */
-    T convertCassTypeToObjType(Class<T> clazz, byte[] value);
+  /**
+   * Convert Cassandra byte[] to Java type.
+   *
+   * @param clazz
+   * @param value
+   * @return
+   */
+  T convertCassTypeToObjType(Class<T> clazz, byte[] value);
 
-    /**
-     * Convert Java type to byte[].
-     *
-     * @param value
-     * @return
-     */
-    byte[] convertObjTypeToCassType(T value);
+  /**
+   * Convert Java type to byte[].
+   *
+   * @param value
+   * @return
+   */
+  byte[] convertObjTypeToCassType(T value);
 }

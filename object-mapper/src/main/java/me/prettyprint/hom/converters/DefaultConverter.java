@@ -13,17 +13,17 @@ import me.prettyprint.hom.annotations.Column;
  */
 public class DefaultConverter implements Converter<Object> {
 
-    @Override
-    public Object convertCassTypeToObjType(Class<Object> clazz, byte[] value) {
-        Serializer<?> s = (Serializer<?>) HectorObjectMapper.determineSerializer(clazz);
-        return s.fromBytes(value);
-    }
+  @Override
+  public Object convertCassTypeToObjType(Class<Object> clazz, byte[] value) {
+    Serializer<?> s = (Serializer<?>) HectorObjectMapper.determineSerializer(clazz);
+    return s.fromBytes(value);
+  }
 
-    @Override
-    public byte[] convertObjTypeToCassType(Object value) {
-        @SuppressWarnings("unchecked")
-        Serializer<Object> s = (Serializer<Object>) HectorObjectMapper.determineSerializer(value.getClass());
-        return s.toBytes(value);
-    }
+  @Override
+  public byte[] convertObjTypeToCassType(Object value) {
+    @SuppressWarnings("unchecked")
+    Serializer<Object> s = (Serializer<Object>) HectorObjectMapper.determineSerializer(value.getClass());
+    return s.toBytes(value);
+  }
 
 }

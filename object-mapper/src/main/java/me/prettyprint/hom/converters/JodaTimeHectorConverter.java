@@ -6,14 +6,14 @@ import org.joda.time.DateTime;
 
 public class JodaTimeHectorConverter implements Converter<DateTime> {
 
-    @Override
-    public DateTime convertCassTypeToObjType(Class<DateTime> clazz, byte[] value) {
-        return new DateTime(LongSerializer.get().fromBytes(value));
-    }
+  @Override
+  public DateTime convertCassTypeToObjType(Class<DateTime> clazz, byte[] value) {
+    return new DateTime(LongSerializer.get().fromBytes(value));
+  }
 
-    @Override
-    public byte[] convertObjTypeToCassType(DateTime value) {
-        return LongSerializer.get().toBytes(value.getMillis());
-    }
+  @Override
+  public byte[] convertObjTypeToCassType(DateTime value) {
+    return LongSerializer.get().toBytes(value.getMillis());
+  }
 
 }
