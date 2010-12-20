@@ -22,7 +22,7 @@ public final class TimeUUIDUtils {
    * @return the time uuid
    */
   public static java.util.UUID getUniqueTimeUUIDinMillis() {
-    return java.util.UUID.fromString(new com.eaio.uuid.UUID().toString());
+    return new java.util.UUID(UUIDGen.newTime(), UUIDGen.getClockSeqAndNode());
   }
 
   /**
