@@ -11,26 +11,26 @@ import me.prettyprint.hom.annotations.Table;
 @Entity
 @Table("CustomIdColumnFamily")
 public class MyCustomIdBean {
-    @Id( converter=ColorConverter.class)
-    private Colors id;
+  @Id( converter=ColorConverter.class)
+  private Colors id;
 
-    @Column("lp1")
-    private long longProp1;
+  @Column("lp1")
+  private long longProp1;
 
-    public Colors getId() {
-        return id;
-    }
+  public Colors getId() {
+    return id;
+  }
 
-    public void setId(Colors id) {
-        this.id = id;
-    }
+  public void setId(Colors id) {
+    this.id = id;
+  }
 
-    public long getLongProp1() {
-        return longProp1;
-    }
+  public long getLongProp1() {
+    return longProp1;
+  }
 
-    public void setLongProp1(long longProp1) {
-        this.longProp1 = longProp1;
-    }
+  public void setLongProp1(long longProp1) {
+    this.longProp1 = longProp1;
+  }
 
 }
