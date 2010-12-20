@@ -19,52 +19,52 @@ import me.prettyprint.hom.annotations.Table;
 @Entity
 @Table("TestColumnFamily")
 class MyPojo {
-    @Id
-    private UUID id;
+  @Id
+  private UUID id;
 
-    @Column("lp1")
-    private long longProp1;
+  @Column("lp1")
+  private long longProp1;
 
-    @Column(value = "color", converter = ColorConverter.class)
-    private Colors color;
+  @Column(value = "color", converter = ColorConverter.class)
+  private Colors color;
 
-    private Map<String, String> anonymousProps = new HashMap<String, String>();
+  private Map<String, String> anonymousProps = new HashMap<String, String>();
 
-    @AnonymousPropertyAddHandler
-    public void addAnonymousProp(String name, String value) {
-        anonymousProps.put(name, value);
-    }
+  @AnonymousPropertyAddHandler
+  public void addAnonymousProp(String name, String value) {
+    anonymousProps.put(name, value);
+  }
 
-    @AnonymousPropertyCollectionGetter
-    public Collection<Entry<String, String>> getAnonymousProps() {
-        return anonymousProps.entrySet();
-    }
+  @AnonymousPropertyCollectionGetter
+  public Collection<Entry<String, String>> getAnonymousProps() {
+    return anonymousProps.entrySet();
+  }
 
-    public String getAnonymousProp(String name) {
-        return anonymousProps.get(name);
-    }
+  public String getAnonymousProp(String name) {
+    return anonymousProps.get(name);
+  }
 
-    public UUID getId() {
-        return id;
-    }
+  public UUID getId() {
+    return id;
+  }
 
-    public void setId(UUID id) {
-        this.id = id;
-    }
+  public void setId(UUID id) {
+    this.id = id;
+  }
 
-    public long getLongProp1() {
-        return longProp1;
-    }
+  public long getLongProp1() {
+    return longProp1;
+  }
 
-    public void setLongProp1(long longProp1) {
-        this.longProp1 = longProp1;
-    }
+  public void setLongProp1(long longProp1) {
+    this.longProp1 = longProp1;
+  }
 
-    public Colors getColor() {
-        return color;
-    }
+  public Colors getColor() {
+    return color;
+  }
 
-    public void setColor(Colors color) {
-        this.color = color;
-    }
+  public void setColor(Colors color) {
+    this.color = color;
+  }
 }

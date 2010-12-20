@@ -11,25 +11,25 @@ import me.prettyprint.hom.EntityManager;
 
 public class MainProg {
 
-    public static void main(String[] args) {
-        Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9160");
-        Keyspace keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
+  public static void main(String[] args) {
+    Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9160");
+    Keyspace keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
 
-        EntityManager em = new EntityManager(keyspace, "com.mycompany");
+    EntityManager em = new EntityManager(keyspace, "com.mycompany");
 
-        MyPojo pojo1 = new MyPojo();
-        pojo1.setId(UUID.randomUUID());
-        pojo1.setLongProp1(123L);
-        pojo1.setColor(Colors.RED);
+    MyPojo pojo1 = new MyPojo();
+    pojo1.setId(UUID.randomUUID());
+    pojo1.setLongProp1(123L);
+    pojo1.setColor(Colors.RED);
 
-        em.save(pojo1);
+    em.save(pojo1);
 
-        // do some stuff
+    // do some stuff
 
-        MyPojo pojo2 = em.load(MyPojo.class, pojo1.getId());
-        
-        // do some more stuff
-        
-        System.out.println( "Color = " + pojo2.getColor() );
-    }
+    MyPojo pojo2 = em.load(MyPojo.class, pojo1.getId());
+
+    // do some more stuff
+
+    System.out.println( "Color = " + pojo2.getColor() );
+  }
 }
