@@ -178,20 +178,5 @@
       <name>codehaus</name>
       <url>http://repository.codehaus.org/</url>
     </repository>
-    <repository>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>interval:30</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>daily</updatePolicy>
-        <checksumPolicy>fail</checksumPolicy>
-      </snapshots>
-      <id>eaio.com</id>
-      <name>eaio.com repository</name>
-       <url>http://eaio.com/maven2</url>
-    </repository>   
   </repositories>
 </project>
