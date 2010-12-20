@@ -15,29 +15,29 @@ import me.prettyprint.hector.api.beans.HColumn;
  * @author Todd Burruss
  */
 public class ColumnSliceMockImpl implements ColumnSlice<String, byte[]> {
-    private List<HColumn<String, byte[]>> colList = new LinkedList<HColumn<String, byte[]>>();
+  private List<HColumn<String, byte[]>> colList = new LinkedList<HColumn<String, byte[]>>();
 
-    @Override
-    public HColumn<String, byte[]> getColumnByName(String columnName) {
-        for ( HColumn<String, byte[]> col : colList ) {
-            if ( col.getName().equals(columnName)) {
-                return col;
-            }
-        }
-        
-        return null;
+  @Override
+  public HColumn<String, byte[]> getColumnByName(String columnName) {
+    for ( HColumn<String, byte[]> col : colList ) {
+      if ( col.getName().equals(columnName)) {
+        return col;
+      }
     }
 
-    @Override
-    public List<HColumn<String, byte[]>> getColumns() {
-        return colList;
-    }
+    return null;
+  }
 
-    public ColumnSliceMockImpl add( String name, byte[] value ) {
-        HColumnImpl<String, byte[]> col = new HColumnImpl<String, byte[]>(StringSerializer.get(), BytesArraySerializer.get());
-        col.setName(name);
-        col.setValue(value);
-        colList.add(col);
-        return this;
-    }
+  @Override
+  public List<HColumn<String, byte[]>> getColumns() {
+    return colList;
+  }
+
+  public ColumnSliceMockImpl add( String name, byte[] value ) {
+    HColumnImpl<String, byte[]> col = new HColumnImpl<String, byte[]>(StringSerializer.get(), BytesArraySerializer.get());
+    col.setName(name);
+    col.setValue(value);
+    colList.add(col);
+    return this;
+  }
 }
