@@ -3,94 +3,13 @@
     <groupId>me.prettyprint</groupId>
     <artifactId>hector-object-mapper</artifactId>
     <packaging>jar</packaging>
-    <version>0.3.0</version>
+    <version>0.7.0-23</version>
     <name>hector-object-mapper</name>
     <parent>
       <groupId>me.prettyprint</groupId>
       <artifactId>hector</artifactId>
       <version>1.0</version>
     </parent>
-
-    <properties>
-        <username>${env.USER}</username>
-        <project.build.sourceEncoding>
-            UTF-8
-        </project.build.sourceEncoding>
-        <project.reporting.outputEncoding>
-            UTF-8
-        </project.reporting.outputEncoding>
-    </properties>
-
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
-                </configuration>
-            </plugin>
-
-            <!-- create source jars just prior to repo install-->
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-source-plugin</artifactId>
-              <executions>
-                <execution>
-                  <id>attach-sources</id>
-                  <phase>verify</phase>
-                  <goals>
-                    <goal>jar</goal>
-                  </goals>
-                </execution>
-              </executions>
-            </plugin>
-            
-            <plugin>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.3</version>
-            </plugin>
-        </plugins>
-    </build>
-
-    <reporting>
-        <plugins>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <links>
-                        <link>
-                            http://java.sun.com/javase/6/docs/api/
-                        </link>
-                        <link>
-                            http://platform.real.com/mavencaps/hector-object-mapper/apidocs/
-                        </link>
-                    </links>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-surefire-report-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jxr-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-changes-plugin</artifactId>
-            </plugin>
-
-        </plugins>
-    </reporting>
 
     <dependencies>
         <dependency>
