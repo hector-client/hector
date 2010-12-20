@@ -11,12 +11,12 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DiscriminatorColumn {
 
-    String name() default "DTYPE";
+  String name() default "DTYPE";
 
-    DiscriminatorType discriminatorType() default DiscriminatorType.STRING;
+  DiscriminatorType discriminatorType() default DiscriminatorType.STRING;
 
-    String columnDefinition() default "";
+  String columnDefinition() default "";
 
-    int length() default 31;
+  int length() default 31;
 
 }

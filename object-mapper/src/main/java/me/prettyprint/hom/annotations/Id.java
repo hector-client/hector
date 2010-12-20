@@ -17,12 +17,12 @@ import me.prettyprint.hom.converters.DefaultConverter;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Id {
 
-    /**
-     * The optional converter to use when converting POJO property value to/from
-     * byte[]. If not specified, {@link DefaultConverter} is used.
-     * 
-     * @return
-     */
-    Class<? extends Converter<?>> converter() default DefaultConverter.class;
+  /**
+   * The optional converter to use when converting POJO property value to/from
+   * byte[]. If not specified, {@link DefaultConverter} is used.
+   * 
+   * @return
+   */
+  Class<? extends Converter<?>> converter() default DefaultConverter.class;
 
 }

@@ -19,19 +19,19 @@ import me.prettyprint.hom.converters.DefaultConverter;
 @Target(ElementType.FIELD)
 public @interface Column {
 
-    /**
-     * The Cassandra column name.
-     * 
-     * @return
-     */
-    String value();
+  /**
+   * The Cassandra column name.
+   * 
+   * @return
+   */
+  String value();
 
-    /**
-     * The optional converter to use when converting POJO property value to/from
-     * byte[]. If not specified, {@link DefaultConverter} is used.
-     * 
-     * @return
-     */
-    Class<? extends Converter<?>> converter() default DefaultConverter.class;
+  /**
+   * The optional converter to use when converting POJO property value to/from
+   * byte[]. If not specified, {@link DefaultConverter} is used.
+   * 
+   * @return
+   */
+  Class<? extends Converter<?>> converter() default DefaultConverter.class;
 
 }

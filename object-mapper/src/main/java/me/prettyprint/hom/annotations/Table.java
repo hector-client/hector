@@ -14,11 +14,11 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Table {
 
-    /**
-     * The Cassandra ColumnFamily.
-     * 
-     * @return
-     */
-    String value();
+  /**
+   * The Cassandra ColumnFamily.
+   * 
+   * @return
+   */
+  String value();
 
 }

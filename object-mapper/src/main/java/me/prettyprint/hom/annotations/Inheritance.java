@@ -14,12 +14,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 public @interface Inheritance {
 
-    /**
-     * The strategy for inheritance.
-     * 
-     * @see InheritanceType
-     * @return
-     */
-    InheritanceType strategy() default InheritanceType.SINGLE_TABLE;
+  /**
+   * The strategy for inheritance.
+   * 
+   * @see InheritanceType
+   * @return
+   */
+  InheritanceType strategy() default InheritanceType.SINGLE_TABLE;
 
 }

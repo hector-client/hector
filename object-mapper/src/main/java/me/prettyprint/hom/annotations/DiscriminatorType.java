@@ -1,9 +1,9 @@
 package me.prettyprint.hom.annotations;
 
 public enum DiscriminatorType {
-    STRING,
+  STRING,
 
-    CHAR,
+  CHAR,
 
-    INTEGER
+  INTEGER
 }

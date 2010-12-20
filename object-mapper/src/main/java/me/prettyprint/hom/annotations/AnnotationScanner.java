@@ -17,32 +17,32 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  * @author Todd Burruss
  */
 public class AnnotationScanner {
-    private static Logger logger = LoggerFactory.getLogger(AnnotationScanner.class);
+  private static Logger logger = LoggerFactory.getLogger(AnnotationScanner.class);
 
-    public Set<Class<?>> scan(String packageRoot, Class<? extends Annotation> anno) {
-        ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+  public Set<Class<?>> scan(String packageRoot, Class<? extends Annotation> anno) {
+    ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 
-        AnnotationTypeFilter filter = new AnnotationTypeFilter(anno);
-        scanner.addIncludeFilter(filter);
-        Set<BeanDefinition> beanSet = scanner.findCandidateComponents(packageRoot);
+    AnnotationTypeFilter filter = new AnnotationTypeFilter(anno);
+    scanner.addIncludeFilter(filter);
+    Set<BeanDefinition> beanSet = scanner.findCandidateComponents(packageRoot);
 
-        Set<Class<?>> classSet = new HashSet<Class<?>>();
-        for (BeanDefinition beanDef : beanSet) {
-            logger.debug("found candidate bean = " + beanDef.getBeanClassName());
+    Set<Class<?>> classSet = new HashSet<Class<?>>();
+    for (BeanDefinition beanDef : beanSet) {
+      logger.debug("found candidate bean = " + beanDef.getBeanClassName());
 
-            Class<?> clazz;
-            try {
-                clazz = Class.forName(beanDef.getBeanClassName());
-                if (clazz.isAnnotationPresent(anno)) {
-                    logger.debug( "found annotated class, " + clazz.getName());
-                    classSet.add(clazz);
-                }
-            }
-            catch (ClassNotFoundException e) {
-                logger.error("exception while scanning classpath for annotated classes", e);
-            }
+      Class<?> clazz;
+      try {
+        clazz = Class.forName(beanDef.getBeanClassName());
+        if (clazz.isAnnotationPresent(anno)) {
+          logger.debug( "found annotated class, " + clazz.getName());
+          classSet.add(clazz);
         }
-
-        return classSet;
+      }
+      catch (ClassNotFoundException e) {
+        logger.error("exception while scanning classpath for annotated classes", e);
+      }
     }
+
+    return classSet;
+  }
 }
