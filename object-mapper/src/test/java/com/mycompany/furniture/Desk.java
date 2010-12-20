@@ -8,14 +8,14 @@ import me.prettyprint.hom.annotations.Entity;
 @DiscriminatorValue("table_desk")
 public class Desk extends Table {
 
-    @Column("numDrawers")
-    private int numDrawers;
+  @Column("numDrawers")
+  private int numDrawers;
 
-    public int getNumDrawers() {
-        return numDrawers;
-    }
+  public int getNumDrawers() {
+    return numDrawers;
+  }
 
-    public void setNumDrawers(int numDrawers) {
-        this.numDrawers = numDrawers;
-    }
+  public void setNumDrawers(int numDrawers) {
+    this.numDrawers = numDrawers;
+  }
 }

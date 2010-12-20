@@ -8,26 +8,26 @@ import me.prettyprint.hom.annotations.Entity;
 @DiscriminatorValue("table")
 public class Table extends Furniture {
 
-    @Column("extendable")
-    private boolean extendable;
-    
-    @Column("shape")
-    private String shape;
+  @Column("extendable")
+  private boolean extendable;
 
-    public boolean isExtendable() {
-        return extendable;
-    }
+  @Column("shape")
+  private String shape;
 
-    public void setExtendable(boolean extendable) {
-        this.extendable = extendable;
-    }
+  public boolean isExtendable() {
+    return extendable;
+  }
 
-    public String getShape() {
-        return shape;
-    }
+  public void setExtendable(boolean extendable) {
+    this.extendable = extendable;
+  }
 
-    public void setShape(String shape) {
-        this.shape = shape;
-    }
-    
+  public String getShape() {
+    return shape;
+  }
+
+  public void setShape(String shape) {
+    this.shape = shape;
+  }
+
 }

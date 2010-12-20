@@ -16,37 +16,37 @@ import me.prettyprint.hom.annotations.Table;
 @DiscriminatorValue("") // means catch all derivatives that don't specify a 'type'
 public class Furniture {
 
-    @Id
-    private int id;
+  @Id
+  private int id;
 
-    @Column("material")
-    private String material;
+  @Column("material")
+  private String material;
 
-    @Column("color")
-    private String color;
+  @Column("color")
+  private String color;
 
-    public String getMaterial() {
-        return material;
-    }
+  public String getMaterial() {
+    return material;
+  }
 
-    public void setMaterial(String material) {
-        this.material = material;
-    }
+  public void setMaterial(String material) {
+    this.material = material;
+  }
 
-    public int getId() {
-        return id;
-    }
+  public int getId() {
+    return id;
+  }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+  public void setId(int id) {
+    this.id = id;
+  }
 
-    public String getColor() {
-        return color;
-    }
+  public String getColor() {
+    return color;
+  }
 
-    public void setColor(String color) {
-        this.color = color;
-    }
+  public void setColor(String color) {
+    this.color = color;
+  }
 
 }

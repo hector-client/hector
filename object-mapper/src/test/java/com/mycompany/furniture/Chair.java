@@ -8,25 +8,25 @@ import me.prettyprint.hom.annotations.Entity;
 @DiscriminatorValue("chair")
 public class Chair extends Furniture {
 
-    @Column("recliner")
-    private boolean recliner;
-    
-    @Column("arms")
-    private boolean arms;
+  @Column("recliner")
+  private boolean recliner;
 
-    public boolean isRecliner() {
-        return recliner;
-    }
+  @Column("arms")
+  private boolean arms;
 
-    public void setRecliner(boolean recliner) {
-        this.recliner = recliner;
-    }
+  public boolean isRecliner() {
+    return recliner;
+  }
 
-    public boolean isArms() {
-        return arms;
-    }
+  public void setRecliner(boolean recliner) {
+    this.recliner = recliner;
+  }
 
-    public void setArms(boolean arms) {
-        this.arms = arms;
-    }
+  public boolean isArms() {
+    return arms;
+  }
+
+  public void setArms(boolean arms) {
+    this.arms = arms;
+  }
 }
