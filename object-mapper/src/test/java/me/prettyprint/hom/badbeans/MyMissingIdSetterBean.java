@@ -8,18 +8,18 @@ import me.prettyprint.hom.annotations.Table;
 @Entity
 @Table("MyMissingIdSetterBean")
 public class MyMissingIdSetterBean {
-    @Id
-    private String id;
-    
-    @Column("lp1")
-    private long longProp1;
+  @Id
+  private String id;
 
-    public long getLongProp1() {
-        return longProp1;
-    }
+  @Column("lp1")
+  private long longProp1;
 
-    public void setLongProp1(long longProp1) {
-        this.longProp1 = longProp1;
-    }
+  public long getLongProp1() {
+    return longProp1;
+  }
+
+  public void setLongProp1(long longProp1) {
+    this.longProp1 = longProp1;
+  }
 
 }
