@@ -76,13 +76,29 @@ public class HConnectionManager {
     exceptionsTranslator = new ExceptionsTranslatorImpl();
   }
 
-  public void addCassandraHost(CassandraHost cassandraHost) {
+  /**
+   * Returns true if the host was successfully added. In any sort of failure exceptions are 
+   * caught and logged, returning false.
+   * @param cassandraHost
+   * @return
+   */
+  public boolean addCassandraHost(CassandraHost cassandraHost) {
     if ( !getHosts().contains(cassandraHost) ) {
-      hostPools.put(cassandraHost, new ConcurrentHClientPool(cassandraHost));
-      log.info("Added host {} to pool", cassandraHost.getName());
+      ConcurrentHClientPool pool = null;
+      try {
+        pool = new ConcurrentHClientPool(cassandraHost);
+        hostPools.put(cassandraHost, pool);
+        log.info("Added host {} to pool", cassandraHost.getName());
+        return true;
+      } catch (HectorTransportException hte) {
+        log.error("Transport exception host to HConnectionManager: " + cassandraHost, hte);
+      } catch (Exception ex) {
+        log.error("General exception host to HConnectionManager: " + cassandraHost, ex);
+      }
     } else {
       log.info("Host already existed for pool {}", cassandraHost.getName());
     }
+    return false;
   }
 
   /**

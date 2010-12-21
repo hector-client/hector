@@ -8,6 +8,7 @@ import org.junit.Test;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
 
@@ -22,7 +23,13 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);
     connectionManager.removeCassandraHost(cassandraHost);
     assertEquals(0,connectionManager.getActivePools().size());
-    connectionManager.addCassandraHost(cassandraHost);
+    assertTrue(connectionManager.addCassandraHost(cassandraHost));
     assertEquals(1,connectionManager.getActivePools().size());
+  }
+  
+  @Test 
+  public void testAddCassandraHostFail() {
+    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9180);
+    assertFalse(connectionManager.addCassandraHost(cassandraHost));
   }
 }
