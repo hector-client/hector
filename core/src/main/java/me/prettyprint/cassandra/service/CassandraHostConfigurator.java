@@ -24,7 +24,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
-  private ClockResolution clockResolution = HFactory.createClockResolution(ClockResolution.MICROSECONDS);
+  private ClockResolution clockResolution = DEF_CLOCK_RESOLUTION;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean retryDownedHosts = true;
   private boolean autoDiscoverHosts = false;
@@ -32,6 +32,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
   private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
   private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
+  public static final ClockResolution DEF_CLOCK_RESOLUTION = HFactory.createClockResolution(ClockResolution.MICROSECONDS_SYNC);
 
 
   public CassandraHostConfigurator() {
@@ -72,9 +73,6 @@ public final class CassandraHostConfigurator implements Serializable {
     }
     if (exhaustedPolicy != null) {
       cassandraHost.setExhaustedPolicy(exhaustedPolicy);
-    }
-    if (clockResolution != null) {
-      cassandraHost.setClockResolution(clockResolution);
     }
   }
 

@@ -11,6 +11,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
@@ -224,7 +225,7 @@ public class HectorTemplateImpl implements HectorTemplate {
 
   @Override
   public long createClock() {
-    return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();
+    return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
   }
 
   // probably should be typed for thrift vs. avro

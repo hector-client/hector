@@ -87,12 +87,7 @@ public final class HFactory {
    * @param hostIp host:ip format string
    * @return
    */
-  public static Cluster getOrCreateCluster(String clusterName, String hostIp) {
-    /*
-     I would like to move off of string literals for hosts, perhaps
-     providing them for convinience, and used specific types
-
-     */
+  public static Cluster getOrCreateCluster(String clusterName, String hostIp) {    
     return getOrCreateCluster(clusterName, new CassandraHostConfigurator(hostIp));
   }
 
@@ -108,12 +103,12 @@ public final class HFactory {
     }
   }
 
-  public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
-    return new ThriftCluster(clusterName, cassandraHostConfigurator);
+  public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {    
+    return clusters.get(clusterName) == null ? new ThriftCluster(clusterName, cassandraHostConfigurator) : clusters.get(clusterName);
   }
 
   public static Cluster createCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
-    return new ThriftCluster(clusterName, cassandraHostConfigurator, credentials);
+    return clusters.get(clusterName) == null ? new ThriftCluster(clusterName, cassandraHostConfigurator, credentials) : clusters.get(clusterName);    
   }
 
   /**
@@ -290,10 +285,10 @@ public final class HFactory {
 
   /**
    * Creates a clock of now with the default clock resolution (micorosec) as defined in
-   * {@link CassandraHost}
+   * {@link CassandraHostConfigurator}
    */
   public static long createClock() {
-    return CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION.createClock();
+    return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
   }
 
   public static KeyspaceDefinition createKeyspaceDefinition(String keyspace) {
