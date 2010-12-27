@@ -87,7 +87,30 @@ public final class MutatorImpl<K> implements Mutator<K> {
       }
     }));
   }
-
+  
+  /**
+   * Deletes the columns defined in the HSuperColumn. If there are no HColumns attached,
+   * we delete the whole thing. 
+   * 
+   */
+  public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc) {
+    return addSubDelete(key, cf, sc, keyspace.createClock());
+  }
+  
+  public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock) {
+    SlicePredicate pred = new SlicePredicate();
+    Deletion d = new Deletion(clock);
+    if ( sc.getColumns() != null ) {      
+      for (HColumn<N, V> col : sc.getColumns()) {
+        pred.addToColumn_names(col.getNameSerializer().toByteBuffer(col.getName()));
+      }
+      d.setPredicate(pred);
+    }    
+    d.setSuper_column(sc.getNameByteBuffer());
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);        
+    return this;
+  }
+  
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an
   // indeterminant state if we dont validate against LIVE (but cached of course)
