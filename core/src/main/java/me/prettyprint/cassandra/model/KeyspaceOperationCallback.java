@@ -11,7 +11,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
  * @param <T>
  */
 public abstract class KeyspaceOperationCallback<T> {
-
+  // TODO remove
   public abstract T doInKeyspace(final KeyspaceService ks) throws HectorException;
 
   public ExecutionResult<T> doInKeyspaceAndMeasure(final KeyspaceService ks) {

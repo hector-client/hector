@@ -7,6 +7,7 @@ import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
+import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
@@ -30,12 +31,14 @@ public class ExecutingKeyspace implements Keyspace {
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
       this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy, EMPTY_CREDENTIALS);
+      // TODO add exceptionTranslator w/ default
   }
   
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
       Map<String, String> credentials) {
-    Assert.noneNull(keyspace, consistencyLevelPolicy, connectionManager);
+    // TODO allow null keyspace for meta ops
+    Assert.noneNull(consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
@@ -45,6 +48,7 @@ public class ExecutingKeyspace implements Keyspace {
 
   @Override
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
+    // TODO remove this method
     this.consistencyLevelPolicy = cp;
   }
 
@@ -59,6 +63,8 @@ public class ExecutingKeyspace implements Keyspace {
   }
 
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
+    // doExecute(Operation<T> op) {
+    // connectionManager.operateWithFailover(op)
     KeyspaceService ks = null;
     try {
       ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy, credentials);
@@ -68,5 +74,12 @@ public class ExecutingKeyspace implements Keyspace {
         //connectionManager.releaseClient(ks.getClient());
       }
     }
+  }
+ 
+  @Override
+  public <T> ExecutionResult<T> doExecuteOperation(Operation<T> operation) throws HectorException {
+    operation.applyConnectionParams(keyspace,consistencyLevelPolicy,failoverPolicy,credentials);
+    connectionManager.operateWithFailover(operation);
+    return operation.getExecutionResult();
   }
 }

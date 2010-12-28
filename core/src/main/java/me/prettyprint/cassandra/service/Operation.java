@@ -3,13 +3,15 @@ package me.prettyprint.cassandra.service;
 import java.util.Collections;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Cassandra;
 
 /**
- * Defines the interface of an operation performed on cassandra
+ * Defines an operation performed on cassandra
  *
  * @param <T>
  *          The result type of the operation (if it has a result), such as the
@@ -26,44 +28,48 @@ public abstract class Operation<T> {
   /** The stopwatch used to measure operation performance */
   public final String stopWatchTagName;
 
-  public final FailoverPolicy failoverPolicy;
+  public FailoverPolicy failoverPolicy;
+  public ConsistencyLevelPolicy consistencyLevelPolicy;
   
-  public final String keyspaceName;
+  public String keyspaceName;
 
-  public final Map<String, String> credentials;
+  public Map<String, String> credentials;
   
   protected T result;
   private HectorException exception;
   private CassandraHost cassandraHost;
-
-  /**
-   * Most commonly used for system_* calls as the keyspaceName is null
-   * @param operationType
-   */
+  private long execTime;
+  public final OperationType operationType;
+  
   public Operation(OperationType operationType) {
-    this(operationType, EMPTY_CREDENTIALS);
+    this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
+      Counter.WRITE_FAIL;
+    this.operationType = operationType;
+    this.stopWatchTagName = operationType.name();
   }
 
   public Operation(OperationType operationType, Map<String, String> credentials) {
-    this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
-      Counter.WRITE_FAIL;
-    this.stopWatchTagName = operationType.name();
-    this.failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    this.keyspaceName = null;
-    this.credentials = Collections.unmodifiableMap(credentials);
-  }
-
-  public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName) {
-    this(operationType, failoverPolicy, keyspaceName, EMPTY_CREDENTIALS);
+    this(operationType, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, null, credentials);
   }
   
   public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
+    this.operationType = operationType;
     this.stopWatchTagName = operationType.name();
     this.failoverPolicy = failoverPolicy;
     this.keyspaceName = keyspaceName;
     this.credentials = Collections.unmodifiableMap(credentials);
+  }
+  
+  
+  public void applyConnectionParams(String keyspace, ConsistencyLevelPolicy consistencyLevelPolicy,
+      FailoverPolicy failoverPolicy, Map<String,String> credentials) {
+    // TODO this is a first step. must be cleaned up.
+    this.keyspaceName = keyspace;
+    this.consistencyLevelPolicy = consistencyLevelPolicy;
+    this.failoverPolicy = failoverPolicy;
+    this.credentials = credentials;
   }
 
   public void setResult(T executionResult) {
@@ -76,7 +82,12 @@ public abstract class Operation<T> {
    *         result (such as getColumn etc.
    */
   public T getResult() {
+    // TODO remove in favor of getExecutionResult
     return result;
+  }
+  
+  public ExecutionResult<T> getExecutionResult() {
+    return new ExecutionResult<T>(result, execTime, cassandraHost);
   }
 
   /**
@@ -86,7 +97,9 @@ public abstract class Operation<T> {
 
   public void executeAndSetResult(Cassandra.Client cassandra, CassandraHost cassandraHost) throws HectorException {
     this.cassandraHost = cassandraHost;
+    long startTime = System.nanoTime();
     setResult(execute(cassandra));
+    execTime = System.nanoTime() - startTime;
   }
 
   public void setException(HectorException e) {

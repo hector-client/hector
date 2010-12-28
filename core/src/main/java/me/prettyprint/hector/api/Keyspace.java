@@ -1,5 +1,9 @@
 package me.prettyprint.hector.api;
 
+import me.prettyprint.cassandra.model.ExecutionResult;
+import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.hector.api.exceptions.HectorException;
+
 
 /**
  *
@@ -14,5 +18,7 @@ public interface Keyspace {
 
 
   long createClock();
+  
+  <T> ExecutionResult<T> doExecuteOperation(Operation<T> operation) throws HectorException;
 
 }
