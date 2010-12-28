@@ -15,6 +15,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 public class ThriftKsDef implements KeyspaceDefinition {
 
+  public static final String DEF_STRATEGY_CLASS = "org.apache.cassandra.locator.SimpleStrategy";
   private final String name;
   private String strategyClass;
   private Map<String, String> strategyOptions;
@@ -42,6 +43,7 @@ public class ThriftKsDef implements KeyspaceDefinition {
     this.name = keyspaceName;
     this.cfDefs = new ArrayList<ColumnFamilyDefinition>();
     this.replicationFactor = 1;
+    this.strategyClass = DEF_STRATEGY_CLASS;
   }
   
   public ThriftKsDef(KeyspaceDefinition keyspaceDefinition) {

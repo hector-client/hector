@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.Set;
 
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.ClockResolution;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.JmxMonitor;
 import me.prettyprint.cassandra.service.Operation;
-import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
@@ -76,13 +76,29 @@ public class HConnectionManager {
     exceptionsTranslator = new ExceptionsTranslatorImpl();
   }
 
-  public void addCassandraHost(CassandraHost cassandraHost) {
+  /**
+   * Returns true if the host was successfully added. In any sort of failure exceptions are 
+   * caught and logged, returning false.
+   * @param cassandraHost
+   * @return
+   */
+  public boolean addCassandraHost(CassandraHost cassandraHost) {
     if ( !getHosts().contains(cassandraHost) ) {
-      hostPools.put(cassandraHost, new ConcurrentHClientPool(cassandraHost));
-      log.info("Added host {} to pool", cassandraHost.getName());
+      ConcurrentHClientPool pool = null;
+      try {
+        pool = new ConcurrentHClientPool(cassandraHost);
+        hostPools.put(cassandraHost, pool);
+        log.info("Added host {} to pool", cassandraHost.getName());
+        return true;
+      } catch (HectorTransportException hte) {
+        log.error("Transport exception host to HConnectionManager: " + cassandraHost, hte);
+      } catch (Exception ex) {
+        log.error("General exception host to HConnectionManager: " + cassandraHost, ex);
+      }
     } else {
       log.info("Host already existed for pool {}", cassandraHost.getName());
     }
+    return false;
   }
 
   /**
@@ -110,10 +126,10 @@ public class HConnectionManager {
   }
 
   public List<String> getStatusPerPool() {
-	List<String> stats = new ArrayList<String>();
-	for (ConcurrentHClientPool clientPool : hostPools.values()) {
-	    stats.add(clientPool.getStatusAsString());
-	}
+    List<String> stats = new ArrayList<String>();
+    for (ConcurrentHClientPool clientPool : hostPools.values()) {
+        stats.add(clientPool.getStatusAsString());
+    }
     return stats;
   }
 

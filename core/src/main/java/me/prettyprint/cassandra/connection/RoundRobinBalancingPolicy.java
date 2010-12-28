@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.cliffc.high_scale_lib.Counter;
 
@@ -9,11 +10,10 @@ import me.prettyprint.cassandra.service.CassandraHost;
 
 public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
 
-  private final Counter counter;
+  private AtomicLong counter;
   
   public RoundRobinBalancingPolicy() {
-    counter = new Counter();
-    counter.set(0);
+    counter = new AtomicLong(Long.MIN_VALUE);
   }
   
   @Override
@@ -24,16 +24,14 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
     ConcurrentHClientPool pool = pa[location];
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while ( excludeHosts.contains(pool.getCassandraHost()) ) {
-        pool = pa[++location == pa.length ? 0 : location]; 
+        pool = pa[getAndIncrement(pa.length)]; 
       }
     }
     return pool;
   }
-  
+    
   private int getAndIncrement(int size) {
-    int val = (int)(counter.get() % size); 
-    counter.increment();
-    return val;
+    return (int)counter.getAndIncrement() % size;    
   }
 
 }

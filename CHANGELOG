@@ -1,9 +1,22 @@
 Changes by version:
 ===================
-0.6.0 stands for cassandra's 0.6.0 version.
--12 stands for hector's version
+0.7.0 stands for cassandra's 0.7.0 version.
+-22 stands for hector's version
 
-0.6.0-* work well with cassandra's 0.6.*
+Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
+
+0.7.0-23
+========
+Initial import of BToddB's hector-object-mapper as object-mapper module
+
+0.7.0-22
+========
+Fix issue with LeastActiveBalancingPolicy that favoured same host repeatedly
+Define ClockResolution as an Interface to allow client to define their own implementations
+Added TimeUUID support (me.prettyprint.cassandra.utils.TimeUUIDUtils)
+Added updateColumnFamily to Cluster 
+Shorterm fix for catching InvalidRequestException and handling it correctly for a bootstraping node
+
 
 0.7.0-21
 ========

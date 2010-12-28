@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +28,7 @@ public class RowsImpl<K, N, V> implements Rows<K, N, V> {
   public RowsImpl(Map<K, List<Column>> thriftRet, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     Assert.noneNull(thriftRet, nameSerializer, valueSerializer);
-    rows = new HashMap<K, Row<K, N, V>>(thriftRet.size());
+    rows = new LinkedHashMap<K, Row<K, N, V>>(thriftRet.size());
     for (Map.Entry<K, List<Column>> entry : thriftRet.entrySet()) {
       rows.put(entry.getKey(), new RowImpl<K, N, V>(entry.getKey(), entry.getValue(), nameSerializer,
           valueSerializer));

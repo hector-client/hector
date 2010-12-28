@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
+import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -44,7 +46,7 @@ public abstract class AbstractCluster implements Cluster {
   protected final HConnectionManager connectionManager;
   private final String name;
   private final CassandraHostConfigurator configurator;
-  private final ClockResolution clockResolution = CassandraHost.DEFAULT_TIMESTAMP_RESOLUTION;
+  private final ClockResolution clockResolution;
   private final FailoverPolicy failoverPolicy;
   private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
@@ -63,6 +65,7 @@ public abstract class AbstractCluster implements Cluster {
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
     cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
     xtrans = new ExceptionsTranslatorImpl();
+    clockResolution = cassandraHostConfigurator.getClockResolution();
     this.credentials = Collections.unmodifiableMap(credentials);
   }
 
@@ -270,6 +273,7 @@ public abstract class AbstractCluster implements Cluster {
   public Map<String, String> getCredentials() {
     return credentials;
   }
-  
+
+    
 
 }

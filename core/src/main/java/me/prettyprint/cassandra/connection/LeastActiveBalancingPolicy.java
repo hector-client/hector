@@ -18,9 +18,9 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
       Collections.sort(vals, new Comparator<ConcurrentHClientPool>() {      
         public int compare(ConcurrentHClientPool o1, ConcurrentHClientPool o2) {
           if ( o1.getNumActive() < o2.getNumActive() ) {
-            return 1;
-          } else if ( o1.getNumActive() > o2.getNumActive() ) {
             return -1;
+          } else if ( o1.getNumActive() > o2.getNumActive() ) {
+            return 1;
           }
           return 0;
       }            

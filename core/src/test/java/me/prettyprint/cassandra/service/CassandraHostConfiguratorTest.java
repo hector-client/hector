@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
+import me.prettyprint.hector.api.ClockResolution;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -77,5 +79,21 @@ public class CassandraHostConfiguratorTest {
     cassandraHostConfigurator.setPort(9177);
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
     assertEquals(9177,cassandraHosts[0].getPort());
+  }
+
+  @Test
+  public void testConfiguratorClockResolution() {
+    // Define my own clock resolution.
+    class SequentialClockResolution implements ClockResolution {
+        @Override
+        public long createClock() {
+            return System.currentTimeMillis() * -1;
+        }
+    }
+
+    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost");
+    cassandraHostConfigurator.setClockResolution(new SequentialClockResolution());
+    
+    assertNotSame(CassandraHostConfigurator.DEF_CLOCK_RESOLUTION, cassandraHostConfigurator.getClockResolution());
   }
 }

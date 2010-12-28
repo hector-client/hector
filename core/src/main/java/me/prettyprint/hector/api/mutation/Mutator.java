@@ -76,6 +76,12 @@ public interface Mutator<K> {
    */
   <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer, long clock);
 
+  
+  <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc);
+
+  <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock);
+  
+  
   /**
    * Batch executes all mutations scheduled to this Mutator instance by addInsertion, addDeletion etc.
    * May throw a HectorException which is a RuntimeException.
