@@ -18,7 +18,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 /**
  * Thread Safe
  * @author Ran Tavory
- *
+ * @author zznate
  */
 public class ExecutingKeyspace implements Keyspace {
   private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
@@ -34,19 +34,18 @@ public class ExecutingKeyspace implements Keyspace {
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
       this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy, EMPTY_CREDENTIALS);
-      // TODO add exceptionTranslator w/ default
   }
   
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
       Map<String, String> credentials) {
-    // TODO allow null keyspace for meta ops
     Assert.noneNull(consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
     this.failoverPolicy = failoverPolicy;
     this.credentials = credentials;
+    // TODO make this plug-able
     this.exceptionTranslator = new ExceptionsTranslatorImpl();
   }
 
@@ -67,8 +66,6 @@ public class ExecutingKeyspace implements Keyspace {
   }
 
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
-    // doExecute(Operation<T> op) {
-    // connectionManager.operateWithFailover(op)
     KeyspaceService ks = null;
     try {
       ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy, credentials);
