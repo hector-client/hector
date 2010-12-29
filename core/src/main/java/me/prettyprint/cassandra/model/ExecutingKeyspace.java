@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
@@ -27,6 +29,7 @@ public class ExecutingKeyspace implements Keyspace {
   private final HConnectionManager connectionManager;
   private final String keyspace;
   private final Map<String, String> credentials;
+  private final ExceptionsTranslator exceptionTranslator;
 
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
@@ -44,6 +47,7 @@ public class ExecutingKeyspace implements Keyspace {
     this.consistencyLevelPolicy = consistencyLevelPolicy;
     this.failoverPolicy = failoverPolicy;
     this.credentials = credentials;
+    this.exceptionTranslator = new ExceptionsTranslatorImpl();
   }
 
   @Override
@@ -81,5 +85,9 @@ public class ExecutingKeyspace implements Keyspace {
     operation.applyConnectionParams(keyspace,consistencyLevelPolicy,failoverPolicy,credentials);
     connectionManager.operateWithFailover(operation);
     return operation.getExecutionResult();
+  }
+  
+  public ExceptionsTranslator getExceptionsTranslator() {
+    return exceptionTranslator;
   }
 }

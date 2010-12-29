@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.model;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -10,7 +9,6 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
-import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.hector.api.Keyspace;
@@ -21,7 +19,6 @@ import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.IndexExpression;
@@ -148,10 +145,12 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
                 new LinkedHashMap<ByteBuffer, List<Column>>(
                     keySlices.size());
               for (KeySlice keySlice : keySlices) {
-                ret.put(ByteBuffer.wrap(keySlice.getKey()), getColumnList(keySlice.getColumns()));
+                ret.put(ByteBuffer.wrap(keySlice.getKey()), ThriftConverter.getColumnList(keySlice.getColumns()));
               }
             } catch (Exception e) {
-              throw xtrans.translate(e);
+              HectorException he = keyspace.getExceptionsTranslator().translate(e);
+              setException(he);
+              throw he;
             }
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ret);
             return new OrderedRowsImpl<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
@@ -159,15 +158,5 @@ public class IndexedSlicesQuery<K,N,V> extends AbstractSliceQuery<K,N,V,OrderedR
         }), this);
   }
   
-  // proof of concept - move out to thrift utils
-  private static List<Column> getColumnList(List<ColumnOrSuperColumn> columns) {
-    ArrayList<Column> list = new ArrayList<Column>(columns.size());
-    for (ColumnOrSuperColumn col : columns) {
-      list.add(col.getColumn());
-    }
-    return list;
-  }
   
-  // eewww. should come from executingKeyspace? injected onto operation as well?
-  ExceptionsTranslator xtrans = new ExceptionsTranslatorImpl();
 }
