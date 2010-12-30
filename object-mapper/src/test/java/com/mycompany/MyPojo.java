@@ -6,26 +6,28 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.Id;
-import me.prettyprint.hom.annotations.Table;
 
 
 @Entity
-@Table("TestColumnFamily")
+@Table(name="TestColumnFamily")
 class MyPojo {
   @Id
   private UUID id;
 
-  @Column("lp1")
+  @Column(name="lp1")
   private long longProp1;
 
-  @Column(value = "color", converter = ColorConverter.class)
+  //@Column(value = "color", converter = ColorConverter.class)
+  @Column(name="color")
   private Colors color;
 
   private Map<String, String> anonymousProps = new HashMap<String, String>();
