@@ -1,16 +1,15 @@
 package com.mycompany.furniture;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorColumn;
-import me.prettyprint.hom.annotations.DiscriminatorType;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.Id;
-import me.prettyprint.hom.annotations.Inheritance;
-import me.prettyprint.hom.annotations.Table;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
 
 @Entity
-@Table("Furniture")
+@javax.persistence.Table(name="Furniture")
 @Inheritance
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("") // means catch all derivatives that don't specify a 'type'
@@ -19,10 +18,10 @@ public class Furniture {
   @Id
   private int id;
 
-  @Column("material")
+  @Column(name="material")
   private String material;
 
-  @Column("color")
+  @Column(name="color")
   private String color;
 
   public String getMaterial() {

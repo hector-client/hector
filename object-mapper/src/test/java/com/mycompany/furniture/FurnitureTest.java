@@ -10,7 +10,7 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hom.CassandraTestBase;
-import me.prettyprint.hom.EntityManager;
+import me.prettyprint.hom.EntityManagerImpl;
 
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.CfDef;
@@ -21,7 +21,7 @@ import org.junit.Test;
 
 public class FurnitureTest extends CassandraTestBase {
   static Keyspace keyspace;
-  static EntityManager entityMgr;
+  static EntityManagerImpl entityMgr;
 
   @Test
   public void testFurniture() {
@@ -83,7 +83,7 @@ public class FurnitureTest extends CassandraTestBase {
     createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
     keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
 
-    entityMgr = new EntityManager(keyspace, "com.mycompany.furniture");
+    entityMgr = new EntityManagerImpl(keyspace, "com.mycompany.furniture");
   }
 
 }

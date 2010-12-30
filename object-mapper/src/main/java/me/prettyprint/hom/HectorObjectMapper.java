@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 
+import javax.persistence.DiscriminatorType;
+
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
@@ -30,8 +32,6 @@ import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

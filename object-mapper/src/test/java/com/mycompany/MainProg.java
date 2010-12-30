@@ -6,7 +6,7 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hom.Colors;
-import me.prettyprint.hom.EntityManager;
+import me.prettyprint.hom.EntityManagerImpl;
 
 
 public class MainProg {
@@ -15,7 +15,7 @@ public class MainProg {
     Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9160");
     Keyspace keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
 
-    EntityManager em = new EntityManager(keyspace, "com.mycompany");
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "com.mycompany");
 
     MyPojo pojo1 = new MyPojo();
     pojo1.setId(UUID.randomUUID());

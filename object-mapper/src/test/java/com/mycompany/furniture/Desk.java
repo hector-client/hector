@@ -1,14 +1,15 @@
 package com.mycompany.furniture;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
 
 @Entity
 @DiscriminatorValue("table_desk")
 public class Desk extends Table {
 
-  @Column("numDrawers")
+  @Column(name="numDrawers")
   private int numDrawers;
 
   public int getNumDrawers() {

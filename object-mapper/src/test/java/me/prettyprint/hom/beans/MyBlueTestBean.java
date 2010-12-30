@@ -1,7 +1,8 @@
 package me.prettyprint.hom.beans;
 
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
 
 @Entity
 @DiscriminatorValue("Blue")
