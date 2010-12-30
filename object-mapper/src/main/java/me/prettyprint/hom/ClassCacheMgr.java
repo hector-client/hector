@@ -134,6 +134,7 @@ public class ClassCacheMgr {
         cfMapDef.addPropertyDefinition(md);
       }
 
+      // TODO lookup JPA 2 spec for class-level ids
       Id idAnno = f.getAnnotation(Id.class);
       if (null != idAnno) {
         @SuppressWarnings("unchecked")

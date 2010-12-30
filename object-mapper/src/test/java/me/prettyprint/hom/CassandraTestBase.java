@@ -3,21 +3,27 @@ package me.prettyprint.hom;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 
 import me.prettyprint.cassandra.service.ThriftCfDef;
 import me.prettyprint.cassandra.service.ThriftKsDef;
 import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.factory.HFactory;
 
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
+import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.thrift.transport.TTransportException;
+import org.junit.BeforeClass;
 
 public class CassandraTestBase {
-  private static boolean cassandraStarted = false;
+  protected static boolean cassandraStarted = false;
+  protected static Keyspace keyspace;
 
   public static void startCassandraInstance(String pathToDataDir) throws TTransportException, IOException,
   InterruptedException, SecurityException, IllegalArgumentException, NoSuchMethodException,
@@ -77,4 +83,22 @@ public class CassandraTestBase {
       }
     }
   }
+
+  @BeforeClass
+  public static void setupKeyspace() throws TTransportException,
+      SecurityException, IllegalArgumentException, IOException,
+      InterruptedException, NoSuchMethodException, IllegalAccessException,
+      InvocationTargetException {
+        startCassandraInstance("target/cassandra-data");
+      
+        ArrayList<CfDef> cfDefList = new ArrayList<CfDef>(2);
+        cfDefList.add(new CfDef("TestKeyspace", "TestBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())
+            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
+        cfDefList.add(new CfDef("TestKeyspace", "CustomIdColumnFamily").setComparator_type(BytesType.class.getSimpleName())
+            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
+      
+        Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9161");
+        createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
+        keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
+      }
 }
