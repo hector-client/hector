@@ -104,9 +104,9 @@ public class HectorObjectMapperTest {
     // TODO fixme
     //assertEquals(11 + 2, colMap.size());
     assertNull("id should not have been added to column collection", colMap.get("id"));
-    assertEquals(obj.getLongProp1(), LongSerializer.get().fromBytes(colMap.get("lp1").getValue()));
+    assertEquals(obj.getLongProp1(), (long)LongSerializer.get().fromBytes(colMap.get("lp1").getValue()));
     assertEquals(obj.getLongProp2(), LongSerializer.get().fromBytes(colMap.get("lp2").getValue()));
-    assertEquals(obj.getIntProp1(), IntegerSerializer.get().fromBytes(colMap.get("ip1").getValue()));
+    assertEquals(obj.getIntProp1(), (int)IntegerSerializer.get().fromBytes(colMap.get("ip1").getValue()));
     assertEquals(obj.getIntProp2(), IntegerSerializer.get().fromBytes(colMap.get("ip2").getValue()));
     assertEquals(obj.isBoolProp1(), BooleanSerializer.get().fromBytes(colMap.get("bp1").getValue()));
     assertEquals(obj.getBoolProp2(), BooleanSerializer.get().fromBytes(colMap.get("bp2").getValue()));
