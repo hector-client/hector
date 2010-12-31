@@ -22,4 +22,12 @@ public class EntityManagerFactoryTest extends CassandraTestBase {
     assertTrue(entityManagerFactory.isOpen());    
   }
 
+  @Test
+  public void testCloseEntityManagerFactory() {
+    entityManagerFactory = new EntityManagerFactoryImpl("TestPool", "TestKeyspace", 
+        "me.prettyprint.hom.beans", new CassandraHostConfigurator("localhost:9161"));
+    assertTrue(entityManagerFactory.isOpen());
+    entityManagerFactory.close();
+    assertFalse(entityManagerFactory.isOpen());
+  }
 }
