@@ -17,7 +17,5 @@ public interface Keyspace {
 
 
   long createClock();
-  
-  <T> Result<T> doExecuteOperation(Operation<T> operation) throws HectorException;
 
 }

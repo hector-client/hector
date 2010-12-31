@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.hector.api.Result;
 
 
 /**
@@ -12,7 +11,7 @@ import me.prettyprint.hector.api.Result;
  * @author Ran
  *
  */
-public class ExecutionResult<T> implements Result<T> {
+public class ExecutionResult<T> {
 
   private final T value;
   private final long execTime;

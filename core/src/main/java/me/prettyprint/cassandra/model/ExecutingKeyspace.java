@@ -77,7 +77,6 @@ public class ExecutingKeyspace implements Keyspace {
     }
   }
  
-  @Override
   public <T> ExecutionResult<T> doExecuteOperation(Operation<T> operation) throws HectorException {
     operation.applyConnectionParams(keyspace,consistencyLevelPolicy,failoverPolicy,credentials);
     connectionManager.operateWithFailover(operation);
