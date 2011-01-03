@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,14 +12,14 @@ import java.util.UUID;
 
 import javax.persistence.DiscriminatorType;
 
-import me.prettyprint.hom.CFMappingDef;
-import me.prettyprint.hom.ClassCacheMgr;
 import me.prettyprint.hom.badbeans.MyBadTestBean;
 import me.prettyprint.hom.badbeans.MyMissingIdSetterBean;
 import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyPurpleTestBean;
 import me.prettyprint.hom.beans.MyRedTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
+import me.prettyprint.hom.dupebean.MyDupeCF1;
+import me.prettyprint.hom.dupebean.MyDupeCF2;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -164,6 +163,13 @@ public class ClassCacheMgrTest {
   public void testBadIdGetterSetter() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
     cacheMgr.initializeCacheForClass(MyMissingIdSetterBean.class);
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void testDupeEntityColumnFamilyMapping() {
+    ClassCacheMgr cacheMgr = new ClassCacheMgr();
+    cacheMgr.initializeCacheForClass(MyDupeCF1.class);
+    cacheMgr.initializeCacheForClass(MyDupeCF2.class);
   }
 }
 
