@@ -79,7 +79,7 @@ public class FurnitureTest extends CassandraTestBase {
     cfDefList.add(new CfDef("TestKeyspace", "Furniture").setComparator_type(BytesType.class.getSimpleName())
         .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
 
-    Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9161");
+    Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9170");
     createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
     keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
 

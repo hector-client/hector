@@ -22,54 +22,50 @@ import me.prettyprint.hom.Colors;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
 
-
-
 @Entity
-@Inheritance( strategy = InheritanceType.SINGLE_TABLE) // no other type supported
-@DiscriminatorColumn(
-    name="myType",
-    discriminatorType=DiscriminatorType.STRING
-)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+// no other type supported
+@DiscriminatorColumn(name = "myType", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("NoColor")
-@Table(name="TestBeanColumnFamily")
+@Table(name = "TestBeanColumnFamily")
 public class MyTestBean {
   @Id
   private UUID baseId;
 
-  @Column(name="myType")
+  @Column(name = "myType")
   private String myType;
 
-  @Column(name="lp1")
+  @Column(name = "lp1")
   private long longProp1;
 
-  @Column(name="lp2")
+  @Column(name = "lp2")
   private Long longProp2;
 
-  @Column(name="ip1")
+  @Column(name = "ip1")
   private int intProp1;
 
-  @Column(name="ip2")
+  @Column(name = "ip2")
   private Integer intProp2;
 
-  @Column(name="bp1")
+  @Column(name = "bp1")
   private boolean boolProp1;
 
-  @Column(name="bp2")
+  @Column(name = "bp2")
   private Boolean boolProp2;
 
-  @Column(name="sp")
+  @Column(name = "sp")
   private String strProp;
 
-  @Column(name="up")
+  @Column(name = "up")
   private UUID uuidProp;
 
-  @Column(name="dp")
+  @Column(name = "dp")
   private Date dateProp;
 
-  @Column(name="bytes")
+  @Column(name = "bytes")
   private byte[] bytesProp;
 
-  //@Column(value = "color", converter = ColorConverter.class)  
+  // @Column(value = "color", converter = ColorConverter.class)
   private Colors color;
 
   private Map<String, String> anonymousProps = new HashMap<String, String>();

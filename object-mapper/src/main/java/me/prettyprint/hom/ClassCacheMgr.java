@@ -202,7 +202,7 @@ public class ClassCacheMgr {
         // make sure the column family is not already used
         CFMappingDef<?, ?> tmpDef;
         if ( null != (tmpDef=getCfMapDef(tbl.name(), false))) {
-          throw new IllegalStateException("classes, " + clazz.getName() + " and " + tmpDef.getClazz().getName() + ", are both mapped to ColumnFamily, " + tbl.name() + ".  Can only have one class/ColumnFamily mapping - if multiple classes can be derived from a single ColumnFamily, use @Inheritance" );
+          throw new IllegalStateException("classes, " + clazz.getName() + " and " + tmpDef.getClazz().getName() + ", are both mapped to ColumnFamily, " + tbl.name() + ".  Can only have one class/ColumnFamily mapping - if multiple classes can be derived from a single ColumnFamily, use @"+Inheritance.class.getSimpleName() );
         }
         cfMapDef.setColFamName(tbl.name());
       }
