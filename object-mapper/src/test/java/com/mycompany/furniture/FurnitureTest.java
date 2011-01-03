@@ -31,7 +31,7 @@ public class FurnitureTest extends CassandraTestBase {
     chair.setColor("brown");
     chair.setArms(true);
     chair.setRecliner(false);
-    entityMgr.save(chair);
+    entityMgr.persist(chair);
 
     Couch couch = new Couch();
     couch.setId( 2 );
@@ -39,7 +39,7 @@ public class FurnitureTest extends CassandraTestBase {
     couch.setColor("brown");
     couch.setFoldOutBed(false);
     couch.setNumCushions(3);
-    entityMgr.save(couch);
+    entityMgr.persist(couch);
 
     Table table = new Table();
     table.setId( 3 );
@@ -47,7 +47,7 @@ public class FurnitureTest extends CassandraTestBase {
     table.setColor("blue");
     table.setExtendable(true);
     table.setShape("circle");
-    entityMgr.save(table);
+    entityMgr.persist(table);
 
     Desk desk = new Desk();
     desk.setId( 4);
@@ -56,12 +56,12 @@ public class FurnitureTest extends CassandraTestBase {
     desk.setExtendable(false);
     desk.setShape("rectangle");
     desk.setNumDrawers(2);
-    entityMgr.save(desk);
+    entityMgr.persist(desk);
 
-    Furniture f1 = entityMgr.load(Furniture.class, 1);
-    Furniture f2 = entityMgr.load(Furniture.class, 2);
-    Furniture f3 = entityMgr.load(Furniture.class, 3);
-    Furniture f4 = entityMgr.load(Furniture.class, 4);
+    Furniture f1 = entityMgr.find(Furniture.class, 1);
+    Furniture f2 = entityMgr.find(Furniture.class, 2);
+    Furniture f3 = entityMgr.find(Furniture.class, 3);
+    Furniture f4 = entityMgr.find(Furniture.class, 4);
 
     assertEquals( Chair.class, f1.getClass() );
     assertEquals( Couch.class, f2.getClass() );
