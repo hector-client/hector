@@ -79,11 +79,11 @@ public abstract class Command<OUTPUT> {
   public final OUTPUT execute(CassandraClientPool pool, String[] hosts, String keyspace,
       ConsistencyLevel consistency) throws HectorException {
     CassandraClient c = pool.borrowClient(hosts);
-    KeyspaceService ks = c.getKeyspace(keyspace, consistency);
     try {
+      KeyspaceService ks = c.getKeyspace(keyspace, consistency);
       return execute(ks);
     } finally {
-      pool.releaseClient(ks.getClient());
+      pool.releaseClient(c);
     }
   }
 
@@ -97,11 +97,11 @@ public abstract class Command<OUTPUT> {
 
   protected OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency,
       FailoverPolicy failoverPolicy) throws HectorException {
-    KeyspaceService ks = c.getKeyspace(keyspace, consistency, failoverPolicy);
     try {
+      KeyspaceService ks = c.getKeyspace(keyspace, consistency, failoverPolicy);
       return execute(ks);
     } finally {
-      getPool().releaseClient(ks.getClient());
+      getPool().releaseClient(c);
     }
   }
 
@@ -111,11 +111,11 @@ public abstract class Command<OUTPUT> {
    */
   protected final OUTPUT execute(CassandraClient c, String keyspace, ConsistencyLevel consistency)
       throws HectorException {
-    KeyspaceService ks = c.getKeyspace(keyspace, consistency);
     try {
+      KeyspaceService ks = c.getKeyspace(keyspace, consistency);
       return execute(ks);
     } finally {
-      getPool().releaseClient(ks.getClient());
+      getPool().releaseClient(c);
     }
   }
 
