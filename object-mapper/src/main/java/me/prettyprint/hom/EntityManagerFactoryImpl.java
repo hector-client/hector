@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,36 +17,26 @@ import me.prettyprint.hector.api.factory.HFactory;
 public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
   private Logger log = LoggerFactory.getLogger(EntityManagerFactoryImpl.class);
-  
-  private Map<String, Object> properties;
-  private final Cluster cluster;
-  private final String keyspaceName;
-  private final String classpathPrefix;
+
+  private EntityManagerConfigurator entityManagerConfigurator;
+  private Cluster cluster;
   
   public EntityManagerFactoryImpl(Map<String, Object> properties) {
-    this.properties = properties;
-    this.cluster = HFactory.getOrCreateCluster("ormcluster", new CassandraHostConfigurator());
-    this.keyspaceName = "Keyspace1";
-    this.classpathPrefix = properties.get(EntityManagerConfigurator.CLASSPATH_PREFIX_PROP).toString();
-    // hector.hom.keyspace
-    // hector.hom.clusterName
-    // hector.hom.classpathPrefix
-    // 
+    this(new EntityManagerConfigurator(properties));
+
     // cassandraHostConfigurator properties
     // Steps:
     // 1. initialize Hector 
     // 2. aquire keyspace
-    // 3. build the cache mgr
-    // 4. build the objectMapper
+    // 3. build the cache mgr (internal to EntityManager)
+    // 4. build the objectMapper (internal to EntityManger)
   }
   
-  public EntityManagerFactoryImpl(String clusterName,
-      String keyspaceName,
-      String classpathPrefix,
-      CassandraHostConfigurator cassandraHostConfigurator) {
-    this.cluster = HFactory.getOrCreateCluster(clusterName, cassandraHostConfigurator);
-    this.keyspaceName = keyspaceName;
-    this.classpathPrefix = classpathPrefix;
+  public EntityManagerFactoryImpl(EntityManagerConfigurator entityManagerConfigurator) {
+    this.entityManagerConfigurator = entityManagerConfigurator;
+    this.cluster = HFactory.getOrCreateCluster(entityManagerConfigurator.getClusterName(), 
+        entityManagerConfigurator.getCassandraHostConfigurator());
+
   }
   
   @Override
@@ -55,15 +46,31 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
   @Override
   public EntityManager createEntityManager() {
-    EntityManagerImpl entityManager = new EntityManagerImpl(HFactory.createKeyspace(keyspaceName, cluster), classpathPrefix);
+    return buildEntityManager(entityManagerConfigurator.getKeyspace());
+  }
+  
+  private EntityManagerImpl buildEntityManager(String keyspace) {
+    EntityManagerImpl entityManager = new EntityManagerImpl(HFactory.
+        createKeyspace(keyspace, cluster), 
+        entityManagerConfigurator.getClasspathPrefix());
     log.debug("Built entityManager {}", entityManager);
-    return entityManager;
+    return entityManager; 
   }
 
+  /**
+   * Looks for the {@link EntityManagerConfigurator#KEYSPACE_PROP} using the 
+   * keyspace already present on the internal EntityManagerConfigurator if already found
+   * @param map
+   * @return
+   */
+  @SuppressWarnings("unchecked")
   @Override
   public EntityManager createEntityManager(Map map) {
-    // TODO Auto-generated method stub
-    return null;
+    String keyspaceStr = EntityManagerConfigurator.getPropertyGently(map, EntityManagerConfigurator.KEYSPACE_PROP, false);
+    if ( StringUtils.isBlank(keyspaceStr) ) {
+      keyspaceStr = entityManagerConfigurator.getKeyspace();
+    }            
+    return buildEntityManager(keyspaceStr);
   }
 
   @Override

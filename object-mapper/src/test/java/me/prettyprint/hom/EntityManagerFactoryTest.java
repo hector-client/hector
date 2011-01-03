@@ -2,6 +2,9 @@ package me.prettyprint.hom;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
@@ -30,7 +33,11 @@ public class EntityManagerFactoryTest extends CassandraTestBase {
   
   @Before
   public void initFactory() {
-    entityManagerFactory = new EntityManagerFactoryImpl("TestPool", "TestKeyspace", 
-        "me.prettyprint.hom.beans", new CassandraHostConfigurator("localhost:9161"));
+    Map<String, Object> properties = new HashMap<String, Object>();
+    properties.put(EntityManagerConfigurator.CLASSPATH_PREFIX_PROP, "me.prettyprint.hom.beans");
+    properties.put(EntityManagerConfigurator.CLUSTER_NAME_PROP, "TestPool");
+    properties.put(EntityManagerConfigurator.KEYSPACE_PROP, "TestKeyspace");
+    EntityManagerConfigurator emc = new EntityManagerConfigurator(properties);
+    entityManagerFactory = new EntityManagerFactoryImpl(properties);
   }
 }
