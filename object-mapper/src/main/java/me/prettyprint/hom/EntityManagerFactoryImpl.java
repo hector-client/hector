@@ -46,6 +46,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
 
   @Override
   public EntityManager createEntityManager() {
+    log.debug("building EMF");
     return buildEntityManager(entityManagerConfigurator.getKeyspace());
   }
   
@@ -66,6 +67,7 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
   @SuppressWarnings("unchecked")
   @Override
   public EntityManager createEntityManager(Map map) {
+    log.debug("building EMF with props");
     String keyspaceStr = EntityManagerConfigurator.getPropertyGently(map, EntityManagerConfigurator.KEYSPACE_PROP, false);
     if ( StringUtils.isBlank(keyspaceStr) ) {
       keyspaceStr = entityManagerConfigurator.getKeyspace();

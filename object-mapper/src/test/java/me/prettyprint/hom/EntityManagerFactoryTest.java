@@ -1,6 +1,8 @@
 package me.prettyprint.hom;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,14 +10,13 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-
 import org.junit.Before;
 import org.junit.Test;
 
 public class EntityManagerFactoryTest extends CassandraTestBase {
   
   private EntityManagerFactory entityManagerFactory;
+
   
   @Test
   public void testCreateEntityManager() {
@@ -29,6 +30,7 @@ public class EntityManagerFactoryTest extends CassandraTestBase {
     assertTrue(entityManagerFactory.isOpen());
     entityManagerFactory.close();
     assertFalse(entityManagerFactory.isOpen());
+    
   }
   
   @Before

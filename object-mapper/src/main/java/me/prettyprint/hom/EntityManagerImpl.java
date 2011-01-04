@@ -11,6 +11,7 @@ import javax.persistence.Query;
 
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hom.annotations.AnnotationScanner;
 
 import org.slf4j.Logger;
@@ -263,7 +264,7 @@ public class EntityManagerImpl implements EntityManager {
 
   @Override
   public boolean isOpen() {
-    // TODO Auto-generated method stub
+    
     return false;
   }
 
