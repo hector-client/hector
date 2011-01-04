@@ -19,6 +19,7 @@ public class EntityManagerConfigurator {
   public static final String CLASSPATH_PREFIX_PROP = PROP_PREFIX + "classpathPrefix";
   public static final String CLUSTER_NAME_PROP = PROP_PREFIX + "clusterName";
   public static final String KEYSPACE_PROP = PROP_PREFIX + "keyspace";
+  public static final String HOST_LIST_PROP = PROP_PREFIX + "hostList";
   
   private final String classpathPrefix;
   private final String clusterName;
@@ -48,7 +49,7 @@ public class EntityManagerConfigurator {
     clusterName = getPropertyGently(properties, CLUSTER_NAME_PROP,true);
     keyspace = getPropertyGently(properties, KEYSPACE_PROP,true);
     if ( cassandraHostConfigurator == null ) {
-      String hostList = getPropertyGently(properties, "", false);
+      String hostList = getPropertyGently(properties, HOST_LIST_PROP, false);
       if ( StringUtils.isNotBlank(hostList) ) {
         cassandraHostConfigurator = new CassandraHostConfigurator(hostList);
       } else {
