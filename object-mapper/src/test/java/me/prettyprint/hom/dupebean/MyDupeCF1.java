@@ -1,7 +1,5 @@
 package me.prettyprint.hom.dupebean;
 
-import java.util.UUID;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -16,17 +14,17 @@ import javax.persistence.Table;
 @Table(name = "TestDupeColumnFamily")
 public class MyDupeCF1 {
   @Id
-  private UUID baseId;
+  private String baseId;
 
   @Column(name = "myType")
   private String myType;
 
-  public UUID getBaseId() {
+  public String getBaseId() {
     return baseId;
   }
 
-  public void setBaseId(UUID id) {
-    this.baseId = id;
+  public void setBaseId(String baseId) {
+    this.baseId = baseId;
   }
 
   public String getMyType() {
