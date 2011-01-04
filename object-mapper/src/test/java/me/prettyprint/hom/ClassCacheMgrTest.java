@@ -107,8 +107,8 @@ public class ClassCacheMgrTest {
 
     // 13 is valid when custom conversion of enumerations works again
     // don't like hard coding numbers into JUnits, but took easy way for now
-    // assertEquals( 13, cfMapDef.getAllProperties().size() );
-    assertEquals(12, cfMapDef.getAllProperties().size());
+    assertEquals( 13, cfMapDef.getAllProperties().size() );
+    
     assertNotNull(cfMapDef.getCfBaseMapDef());
     assertEquals(MyRedTestBean.class, cfMapDef.getClazz());
     assertEquals("TestBeanColumnFamily", cfMapDef.getColFamName());
