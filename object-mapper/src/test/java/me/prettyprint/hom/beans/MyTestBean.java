@@ -17,6 +17,8 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
+import com.mycompany.MySerial;
+
 import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
@@ -64,6 +66,9 @@ public class MyTestBean {
 
   @Column(name = "bytes")
   private byte[] bytesProp;
+  
+  @Column(name = "serialProp")
+  private MySerial serialProp;
 
   // @Column(value = "color", converter = ColorConverter.class)
   private Colors color;
@@ -186,6 +191,14 @@ public class MyTestBean {
 
   public void setMyType(String myType) {
     this.myType = myType;
+  }
+
+  public MySerial getSerialProp() {
+    return serialProp;
+  }
+
+  public void setSerialProp(MySerial serialProp) {
+    this.serialProp = serialProp;
   }
 
 }

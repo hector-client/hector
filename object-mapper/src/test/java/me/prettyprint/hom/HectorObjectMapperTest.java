@@ -14,6 +14,7 @@ import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -25,6 +26,8 @@ import me.prettyprint.hom.beans.MyTestBean;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import com.mycompany.MySerial;
 
 
 public class HectorObjectMapperTest {
@@ -45,6 +48,7 @@ public class HectorObjectMapperTest {
     byte[] bytesProp = "somebytes".getBytes();
     String extraProp = "extra extra";
     Colors color = Colors.RED;
+    MySerial serialProp = new MySerial(1, 2L);
 
     ColumnSliceMockImpl slice = new ColumnSliceMockImpl();
     slice.add("lp1", LongSerializer.get().toBytes(longProp1));
@@ -58,6 +62,7 @@ public class HectorObjectMapperTest {
     slice.add("dp", DateSerializer.get().toBytes(dateProp));
     slice.add("bytes", BytesArraySerializer.get().toBytes(bytesProp));
     slice.add("color", StringSerializer.get().toBytes(color.getName()));
+    slice.add("serialProp", ObjectSerializer.get().toBytes(serialProp));
     slice.add("extra", StringSerializer.get().toBytes(extraProp));
 
     CFMappingDef<MyTestBean, UUID> cfMapDef = cacheMgr.getCfMapDef(MyTestBean.class, true);
@@ -76,6 +81,7 @@ public class HectorObjectMapperTest {
     // TODO fixme
     //assertEquals(color, obj.getColor());
     assertEquals(dateProp.getTime(), obj.getDateProp().getTime());
+    assertEquals(serialProp, obj.getSerialProp());
     // TODO fixme
     //assertEquals(1, obj.getAnonymousProps().size());
     assertEquals(extraProp, obj.getAnonymousProp("extra"));
@@ -96,6 +102,7 @@ public class HectorObjectMapperTest {
     obj.setDateProp(new Date());
     obj.setBytesProp("somebytes".getBytes());
     obj.setColor(Colors.BLUE);
+    obj.setSerialProp(new MySerial(1, 2L));
     obj.addAnonymousProp("foo", "bar");
     obj.addAnonymousProp("rice", "beans");
 
@@ -117,6 +124,7 @@ public class HectorObjectMapperTest {
     // TODO fixme
     //assertEquals(obj.getColor().getName(), new String(StringSerializer.get().fromBytes(
       //  colMap.get("color").getValue())));
+    assertEquals(obj.getSerialProp(), ObjectSerializer.get().fromBytes(colMap.get("serialProp").getValue()));
 
     assertEquals(2, obj.getAnonymousProps().size());
     assertEquals(obj.getAnonymousProp("foo"), StringSerializer.get().fromBytes(colMap.get("foo").getValue()));
@@ -136,6 +144,16 @@ public class HectorObjectMapperTest {
 
     assertEquals(id, obj.getId());
     assertEquals(longProp1, obj.getLongProp1());
+  }
+  
+  @Test
+  public void testIsSerializable() {
+    assertTrue(HectorObjectMapper.isSerializable(UUID.class));
+  }
+  
+  @Test
+  public void testIsNotSerializable() {
+    assertFalse(HectorObjectMapper.isSerializable(HectorObjectMapper.class));
   }
 
   // --------------------
