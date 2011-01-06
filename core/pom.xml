@@ -2,11 +2,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.github.stephenc.hector</groupId>
+   <groupId>me.prettyprint.hector<groupId>
     <artifactId>hector</artifactId>
     <version>0.7.0-rc5-1-SNAPSHOT</version>
   </parent>
-    <artifactId>hector-core</artifactId>
+  <artifactId>hector-core</artifactId>
   <packaging>bundle</packaging>
   <name>hector-core</name>
 

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>com.github.stephenc.hector</groupId>
+        <groupId>me.prettyprint.hector</groupId>
         <artifactId>hector</artifactId>
         <version>0.7.0-rc4-1-SNAPSHOT</version>
     </parent>
@@ -17,7 +17,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.stephenc.hector</groupId>
+            <groupId>me.prettyprint.hector</groupId>
             <artifactId>hector-core</artifactId>
             <version>0.7.0-rc4-1-SNAPSHOT</version>
             <exclusions>

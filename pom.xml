@@ -7,29 +7,29 @@
     <version>5</version>
   </parent>
 
-  <groupId>com.github.stephenc.hector</groupId>
+  <groupId>me.prettyprint.hector</groupId>
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
   <version>0.7.0-rc5-1-SNAPSHOT</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
-  <url>http://github.com/stephenc/hector</url>
+  <url>http://github.com/rantav/hector</url>
 
   <scm>
-    <connection>scm:git:git://github.com/stephenc/hector.git</connection>
-    <developerConnection>scm:git:git@github.com:stephenc/hector.git</developerConnection>
-    <url>http://github.com/stephenc/hector/tree/master/</url>
+    <connection>scm:git:git://github.com/rantav/hector.git</connection>
+    <developerConnection>scm:git:git@github.com:rantav/hector.git</developerConnection>
+    <url>http://github.com/rantav/hector/tree/master/</url>
   </scm>
 
   <issueManagement>
     <system>github</system>
-    <url>http://github.com/stephenc/hector/issues</url>
+    <url>http://github.com/rantav/hector/issues</url>
   </issueManagement>
 
   <distributionManagement>
     <site>
       <id>github.com</id>
-      <url>gitsite:git@github.com/stephenc/hector.git</url>
+      <url>gitsite:git@github.com/rantav/hector.git</url>
     </site>
   </distributionManagement>
 
