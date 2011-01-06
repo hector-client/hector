@@ -4,19 +4,15 @@
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
-  <!-- this version number is not important. The version is at ${hector.version} -->
-  <version>1.0</version>
+  <version>0.7.0-rc4-1-SNAPSHOT</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
   <properties>
-  <!-- The version follows Cassandra's major version changes, e.g. 0.5.1 goes with the 0.5.1 cassandra release-->
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
     <slf4j.version>1.5.11</slf4j.version>
-    <hector.version>0.7.0-23</hector.version>
-    <username>${env.USER}</username>
   </properties>
   <issueManagement>
     <system>github</system>
@@ -61,11 +57,55 @@
     <module>object-mapper</module>
   </modules>
 
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.apache.cassandra</groupId>
+        <artifactId>cassandra-all</artifactId>
+        <version>0.7.0-rc4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cassandra</groupId>
+        <artifactId>cassandra-javautils</artifactId>
+        <version>0.7.0-rc4</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cassandra.deps</groupId>
+        <artifactId>libthrift</artifactId>
+        <version>0.5.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.stephenc.high-scale-lib</groupId>
+        <artifactId>high-scale-lib</artifactId>
+        <version>1.1.1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <build>
     <plugins>
       <!-- Setup the build for JAVA 1.6  -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <source>1.6</source>
@@ -78,7 +118,6 @@
 
       <!-- Configure the JUnit Env -->
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <systemProperties>
@@ -100,7 +139,6 @@
         </configuration>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-source-plugin</artifactId>
         <executions>
           <execution>
@@ -116,15 +154,12 @@
   <reporting>
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jxr-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-report-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-pmd-plugin</artifactId>
       </plugin>
       <plugin>
@@ -132,7 +167,6 @@
         <artifactId>taglist-maven-plugin</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
           <links>
@@ -154,31 +188,7 @@
             <format>xml</format>
           </formats>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </reporting>
-  <profiles>
-    <profile>
-      <id>riptano</id>
-      <distributionManagement>
-        <repository>
-          <id>riptano</id>
-          <name>riptano</name>
-          <url>http://mvn.riptano.com/content/repositories/public/</url>
-        </repository>
-      </distributionManagement>
-    </profile>
-  </profiles>
-  <repositories>
-    <repository>
-      <id>riptano</id>
-      <name>riptano</name>
-      <url>http://mvn.riptano.com/content/repositories/public/</url>
-    </repository>
-    <repository>
-      <id>codehaus</id>
-      <name>codehaus</name>
-      <url>http://repository.codehaus.org/</url>
-    </repository>
-  </repositories>
 </project>
