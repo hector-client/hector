@@ -29,7 +29,7 @@
   <distributionManagement>
     <site>
       <id>github.com</id>
-      <url>gitsite:git@github.com/stephenc/eaio-uuid.git</url>
+      <url>gitsite:git@github.com/stephenc/hector.git</url>
     </site>
   </distributionManagement>
 
