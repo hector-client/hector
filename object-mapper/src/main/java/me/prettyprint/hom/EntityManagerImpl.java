@@ -11,7 +11,6 @@ import javax.persistence.Query;
 
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
-import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hom.annotations.AnnotationScanner;
 
 import org.slf4j.Logger;
@@ -30,6 +29,7 @@ public class EntityManagerImpl implements EntityManager {
   private Keyspace keyspace;
   private HectorObjectMapper objMapper;
   private ClassCacheMgr cacheMgr;
+  private boolean open;
 
   public EntityManagerImpl(Keyspace keyspace, String classpathPrefix) {
     this(keyspace, new String[] {
@@ -70,17 +70,16 @@ public class EntityManagerImpl implements EntityManager {
    * @param classpathPrefixArr
    */
   public void initialize(String[] classpathPrefixArr) {
-    if (null != classpathPrefixArr && 0 < classpathPrefixArr.length) {
-      logger.debug("classpath array has " + classpathPrefixArr.length + " packages");
-      for (String classpathPrefix : classpathPrefixArr) {
-        logger.debug("classpath array : " + classpathPrefix);
+    if (null != classpathPrefixArr && 0 < classpathPrefixArr.length) {      
+      for (String classpathPrefix : classpathPrefixArr) {        
         initializeClasspath(classpathPrefix);
       }
     }
-    else {
-      logger.debug("classpath array is null or empty : "
-          + (null != classpathPrefixArr ? classpathPrefixArr.length : "null"));
+    if ( logger.isDebugEnabled()) {
+      logger.debug("classpath array has {} items : {}",
+           (null != classpathPrefixArr ? classpathPrefixArr.length : "0"), classpathPrefixArr);
     }
+    open = true;
   }
 
   private void initializeClasspath(String classpathPrefix) {
@@ -263,9 +262,8 @@ public class EntityManagerImpl implements EntityManager {
   }
 
   @Override
-  public boolean isOpen() {
-    
-    return false;
+  public boolean isOpen() {    
+    return open;
   }
 
   @Override
