@@ -186,7 +186,7 @@ public class HConnectionManager {
           monitor.incCounter(Counter.POOL_EXHAUSTED);
           excludeHosts.add(client.cassandraHost);
         }
-        if ( retries == 0 || retryable == false) throw he;
+        if ( retries <= 0 || retryable == false) throw he;
         log.error("Could not fullfill request on this host {}", client);
         log.error("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
