@@ -71,7 +71,7 @@
   <!-- Hector submodules -->
   <modules>
     <module>core</module>
-    <module>object-mapper</module>
+    <!--module>object-mapper</module-->
   </modules>
 
   <dependencyManagement>
