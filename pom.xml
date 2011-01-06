@@ -1,24 +1,41 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>me.prettyprint</groupId>
+
+  <groupId>com.github.stephenc.hector</groupId>
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
   <version>0.7.0-rc4-1-SNAPSHOT</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
-  <url>http://github.com/rantav/hector</url>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
-    <slf4j.version>1.5.11</slf4j.version>
-  </properties>
+  <url>http://github.com/stephenc/hector</url>
+
+  <scm>
+    <connection>scm:git:git://github.com/stephenc/hector.git</connection>
+    <developerConnection>scm:git:git@github.com:stephenc/hector.git</developerConnection>
+    <url>http://github.com/stephenc/hector/tree/master/</url>
+  </scm>
+
   <issueManagement>
     <system>github</system>
-    <url>http://github.com/rantav/hector/issues</url>
+    <url>http://github.com/stephenc/hector/issues</url>
   </issueManagement>
+
+  <distributionManagement>
+    <site>
+      <id>github.com</id>
+      <url>gitsite:git@github.com/stephenc/eaio-uuid.git</url>
+    </site>
+  </distributionManagement>
+
   <developers>
+    <developer>
+      <id>stephenc</id>
+      <name>Stephen Connolly</name>
+      <roles>
+        <role>packager</role>
+      </roles>
+    </developer>
     <developer>
       <name>Ran Tavory</name>
       <id>rantav</id>
@@ -103,71 +120,114 @@
   </dependencyManagement>
 
   <build>
-    <plugins>
-      <!-- Setup the build for JAVA 1.6  -->
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
-          <optimize>true</optimize>
-          <showDeprecation>true</showDeprecation>
-          <showWarnings>true</showWarnings>
-        </configuration>
-      </plugin>
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-provider-gitexe</artifactId>
+        <version>1.3</version>
+      </extension>
+      <extension>
+        <groupId>org.apache.maven.scm</groupId>
+        <artifactId>maven-scm-manager-plexus</artifactId>
+        <version>1.3</version>
+      </extension>
+      <extension>
+        <groupId>org.kathrynhuxtable.maven.wagon</groupId>
+        <artifactId>wagon-gitsite</artifactId>
+        <version>0.3.1</version>
+      </extension>
+    </extensions>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>2.3</version>
+          <configuration>
+            <source>1.6</source>
+            <target>1.6</target>
+            <optimize>true</optimize>
+            <showDeprecation>true</showDeprecation>
+            <showWarnings>true</showWarnings>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.5</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.3</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>2.7</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-release-plugin</artifactId>
+          <version>2.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>2.4.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>2.1</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>2.7.1</version>
+          <configuration>
+            <systemProperties>
+              <property>
+                <name>storage-config</name>
+                <value>${basedir}/src/test/conf</value>
+              </property>
+            </systemProperties>
+            <forkMode>always</forkMode>
+          </configuration>
+        </plugin>
 
-      <!-- Configure the JUnit Env -->
-      <plugin>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <configuration>
-          <systemProperties>
-            <property>
-              <name>storage-config</name>
-              <value>${basedir}/src/test/conf</value>
-            </property>
-          </systemProperties>
-          <forkMode>always</forkMode>
-        </configuration>
-      </plugin>
-
-      <!-- cobertura code coverage reports -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.0</version>
-        <configuration>
-        </configuration>
-      </plugin>
-      <plugin>
-        <artifactId>maven-source-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-    </plugins>
+        <!-- cobertura code coverage reports -->
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>cobertura-maven-plugin</artifactId>
+          <version>2.4</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <reporting>
     <plugins>
       <plugin>
         <artifactId>maven-jxr-plugin</artifactId>
+        <version>2.1</version>
       </plugin>
       <plugin>
         <artifactId>maven-surefire-report-plugin</artifactId>
+        <version>2.7.1</version>
       </plugin>
       <plugin>
         <artifactId>maven-pmd-plugin</artifactId>
+        <version>2.5</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>taglist-maven-plugin</artifactId>
+        <version>2.4</version>
       </plugin>
       <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <version>2.7</version>
         <configuration>
           <links>
             <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
@@ -181,7 +241,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>cobertura-maven-plugin</artifactId>
-        <version>2.2</version>
+        <version>2.4</version>
         <configuration>
           <formats>
             <format>html</format>
@@ -191,4 +251,13 @@
       </plugin>
     </plugins>
   </reporting>
+
+  <properties>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
+    <slf4j.version>1.6.1</slf4j.version>
+  </properties>
+
 </project>
