@@ -38,9 +38,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
     return new String(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(),
         byteBuffer.remaining(), UTF_8);
     } catch (UnsupportedEncodingException e) {
-      // not really possible
-      e.printStackTrace();
+    	throw new RuntimeException(e);
     }
-    return null;
   }
 }

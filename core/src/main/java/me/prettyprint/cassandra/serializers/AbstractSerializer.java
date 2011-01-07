@@ -65,7 +65,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public Set<ByteBuffer> toBytesSet(List<T> list) {
-    Set<ByteBuffer> bytesList = new HashSet<ByteBuffer>();
+    Set<ByteBuffer> bytesList = new HashSet<ByteBuffer>(computeInitialHashSize(list.size()));
     for (T s : list) {
       bytesList.add(toByteBuffer(s));
     }
@@ -74,7 +74,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public List<T> fromBytesSet(Set<ByteBuffer> set) {
-    List<T> objList = new ArrayList<T>();
+    List<T> objList = new ArrayList<T>(set.size());
     for (ByteBuffer b : set) {
       objList.add(fromByteBuffer(b));
     }
@@ -83,7 +83,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public List<ByteBuffer> toBytesList(List<T> list) {
-    List<ByteBuffer> bytesList = new ArrayList<ByteBuffer>();
+    List<ByteBuffer> bytesList = new ArrayList<ByteBuffer>(list.size());
     for (T s : list) {
       bytesList.add(toByteBuffer(s));
     }
@@ -92,7 +92,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public List<T> fromBytesList(List<ByteBuffer> list) {
-    List<T> objList = new ArrayList<T>();
+    List<T> objList = new ArrayList<T>(list.size());
     for (ByteBuffer s : list) {
       objList.add(fromByteBuffer(s));
     }
@@ -101,7 +101,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public <V> Map<ByteBuffer, V> toBytesMap(Map<T, V> map) {
-    Map<ByteBuffer, V> bytesMap = new LinkedHashMap<ByteBuffer, V>();
+    Map<ByteBuffer, V> bytesMap = new LinkedHashMap<ByteBuffer, V>(computeInitialHashSize(map.size()));
     for (Entry<T, V> entry : map.entrySet()) {
       bytesMap.put(toByteBuffer(entry.getKey()), entry.getValue());
     }
@@ -110,11 +110,14 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public <V> Map<T, V> fromBytesMap(Map<ByteBuffer, V> map) {
-    Map<T, V> objMap = new LinkedHashMap<T, V>();
+    Map<T, V> objMap = new LinkedHashMap<T, V>(computeInitialHashSize(map.size()));
     for (Entry<ByteBuffer, V> entry : map.entrySet()) {
       objMap.put(fromByteBuffer(entry.getKey()), entry.getValue());
     }
     return objMap;
   }
 
+  private int computeInitialHashSize(int initialSize) {
+	  return Double.valueOf(Math.floor(initialSize / 0.75)).intValue() + 1;
+  }
 }
