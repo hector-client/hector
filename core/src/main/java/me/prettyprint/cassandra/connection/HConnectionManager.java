@@ -87,7 +87,7 @@ public class HConnectionManager {
       ConcurrentHClientPool pool = null;
       try {
         pool = new ConcurrentHClientPool(cassandraHost);
-        hostPools.put(cassandraHost, pool);
+        hostPools.putIfAbsent(cassandraHost, pool);
         log.info("Added host {} to pool", cassandraHost.getName());
         return true;
       } catch (HectorTransportException hte) {
@@ -221,7 +221,7 @@ public class HConnectionManager {
 
   private HThriftClient getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     HThriftClient client;
-    if ( hostPools.size() == 0 ) {
+    if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
     }
     try {
