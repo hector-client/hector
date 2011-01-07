@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-   <groupId>me.prettyprint.hector</groupId>
+   <groupId>me.prettyprint</groupId>
     <artifactId>hector</artifactId>
     <version>0.7.0-rc5-1-SNAPSHOT</version>
   </parent>
