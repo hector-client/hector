@@ -13,6 +13,7 @@ Fix issue with createKeyspace requiring additional column info
 Massive changes to pom structure courtesy of Stephen Connolly to facilitate inclusion into maven central repository. 
 Small tweaks to HConnectionManager courtesy of Benoit Perroud
 Collection conversions in AbstractSerializer use the size of the provided collection for initialization. Patch courtesy of Benoit Perroud. 
+Treat HUnavailableException the same as HTimeoutException
 
 0.7.0-22
 ========
