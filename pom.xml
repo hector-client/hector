@@ -23,7 +23,7 @@
   </licenses>
   <scm>
     <connection>scm:git:git://github.com/rantav/hector.git</connection>
-    <developerConnection>scm:git:git@github.com:rantav/hector.git</developerConnection>
+    <developerConnection>scm:git:git@github.com:/rantav/hector.git</developerConnection>
     <url>http://github.com/rantav/hector/tree/master/</url>
   </scm>
 
