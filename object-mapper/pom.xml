@@ -1,11 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.7.0-rc5-1-SNAPSHOT</version>
+        <version>0.7.0-1</version>
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
@@ -19,7 +18,7 @@
         <dependency>
             <groupId>me.prettyprint</groupId>
             <artifactId>hector-core</artifactId>
-            <version>0.7.0-rc5-1-SNAPSHOT</version>
+            <version>0.7.0-1</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
