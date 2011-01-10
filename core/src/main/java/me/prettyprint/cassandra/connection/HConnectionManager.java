@@ -161,7 +161,7 @@ public class HConnectionManager {
         HectorException he = exceptionsTranslator.translate(ex);
         if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException ) {
           throw he;
-        } else if ( he instanceof HUnavailableException || he instanceof HectorTransportException) {
+        } else if ( he instanceof HectorTransportException) {
           --retries;
           client.close();
           markHostAsDown(client);
@@ -170,7 +170,7 @@ public class HConnectionManager {
           if ( retries > 0 ) {
             monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
           }
-        } else if ( he instanceof HTimedOutException ) {
+        } else if (he instanceof HTimedOutException || he instanceof HUnavailableException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
           retryable = true;
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
