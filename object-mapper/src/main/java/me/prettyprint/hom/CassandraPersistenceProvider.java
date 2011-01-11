@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.ProviderUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +41,12 @@ public class CassandraPersistenceProvider implements PersistenceProvider {
       return new EntityManagerFactoryImpl(defProperties);
     }
     return new EntityManagerFactoryImpl(map);
+  }
+
+  @Override
+  public ProviderUtil getProviderUtil() {
+    // TODO Auto-generated method stub
+    return null;
   }
 
 }
