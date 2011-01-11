@@ -148,7 +148,7 @@ public class HConnectionManager {
         client =  getClientFromLBPolicy(excludeHosts);
         Cassandra.Client c = client.getCassandra(op.keyspaceName);
         // Keyspace can be null for some system_* api calls
-        if ( !op.credentials.isEmpty() ) {
+        if ( op.credentials != null && !op.credentials.isEmpty() ) {
           c.login(new AuthenticationRequest(op.credentials));
         }
 
