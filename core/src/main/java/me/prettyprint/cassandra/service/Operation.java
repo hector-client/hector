@@ -28,7 +28,7 @@ public abstract class Operation<T> {
   /** The stopwatch used to measure operation performance */
   public final String stopWatchTagName;
 
-  public FailoverPolicy failoverPolicy;
+  public FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
   public ConsistencyLevelPolicy consistencyLevelPolicy;
   
   public String keyspaceName;
