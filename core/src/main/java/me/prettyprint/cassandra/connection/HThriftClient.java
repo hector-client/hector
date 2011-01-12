@@ -54,20 +54,21 @@ public class HThriftClient {
     }
     return cassandraClient;
   }
-  
+
   public Cassandra.Client getCassandra(String keyspaceNameArg) {
-    getCassandra();
-    if ( !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
+    getCassandra();     
+    if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
       keyspaceName = keyspaceNameArg;
       try {
         cassandraClient.set_keyspace(keyspaceName);
         if ( log.isDebugEnabled() )
-            log.debug("keyspace reset from {} to {}", keyspaceName, keyspaceNameArg);
+          log.debug("keyspace reset from {} to {}", keyspaceName, keyspaceNameArg);
       } catch (InvalidRequestException ire) {
         throw new HInvalidRequestException(ire);
       } catch (TException e) {
         throw new HectorTransportException(e);
       }
+
     }
     return cassandraClient;
   }
