@@ -16,7 +16,7 @@
     <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
 
     <class>me.prettyprint.hom.beans.MyTestBean</class>
-    <class>me.prettyprint.hom.beans.MyCustomIdBean</class>
+    <!-- <class>me.prettyprint.hom.beans.MyCustomIdBean</class> -->
     <class>me.prettyprint.hom.beans.MyBlueTestBean</class>
     <class>me.prettyprint.hom.beans.MyRedTestBean</class>
     <class>me.prettyprint.hom.beans.MyPurpleTestBean</class>
@@ -26,6 +26,13 @@
 		<property name="me.prettyprint.hom.keyspace" value="TestPool"/>
 		<property name="me.prettyprint.hom.clusterName" value="TestCluster"/>
 		<property name="me.prettyprint.hom.hostList" value="localhost:9161"/>
+        <property name="openjpa.BrokerFactory" value="abstractstore" />		
+		<property name="openjpa.abstractstore.AbstractStoreManager" value="me.prettyprint.hom.CassandraStoreManager"/>
+		<property name="openjpa.Optimistic" value="false"/>
+		<property name="openjpa.LockManager" value="none"/>
+            <property name="openjpa.ConnectionURL"
+                      value="localhost:9161" />		
+<property name="openjpa.RuntimeUnenhancedClasses" value="supported"/>                      
     </properties>
   </persistence-unit>
 
