@@ -11,6 +11,7 @@ import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyPurpleTestBean;
 import me.prettyprint.hom.beans.MyRedTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
+import me.prettyprint.hom.beans.SimpleTestBean;
 
 import org.junit.Test;
 
@@ -32,6 +33,8 @@ public class AnnotationScannerTest {
     assertTrue(classSet.contains(MyPurpleTestBean.class));
     count++;
     assertTrue(classSet.contains(MyCustomIdBean.class));
+    count++;
+    assertTrue(classSet.contains(SimpleTestBean.class));
     count++;
 
     assertEquals(count, classSet.size());

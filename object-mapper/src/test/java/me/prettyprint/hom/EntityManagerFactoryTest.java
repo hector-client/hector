@@ -11,8 +11,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class EntityManagerFactoryTest extends CassandraTestBase {
   
   private EntityManagerFactory entityManagerFactory;

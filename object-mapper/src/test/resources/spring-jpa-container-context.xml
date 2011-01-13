@@ -8,6 +8,18 @@
 
 	<context:annotation-config />
 
+	
+	<bean id="myEmf" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+
+  		<property name="persistenceUnitName" value="openjpa"/>
+	</bean>
+<!-- 
+	<bean id="cassandraEntityManagerFactory"
+		class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="openjpa" />
+		<property name="persistenceProvider" ref="cassandraProvider" /> 
+	</bean>
+	
 	<bean id="cassandraProvider" class="me.prettyprint.hom.CassandraPersistenceProvider">
 		<constructor-arg>
 			<map>
@@ -17,11 +29,6 @@
 			</map>
 		</constructor-arg>
 	</bean>
-
-	<bean id="cassandraEntityManagerFactory"
-		class="org.springframework.orm.jpa.LocalEntityManagerFactoryBean">
-		<property name="persistenceUnitName" value="cassandraPersistenceUnit" />
-		<property name="persistenceProvider" ref="cassandraProvider" />
-	</bean>
-
+	
+-->
 </beans>

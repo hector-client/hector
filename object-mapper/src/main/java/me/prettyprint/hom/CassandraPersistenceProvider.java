@@ -16,6 +16,7 @@ public class CassandraPersistenceProvider implements PersistenceProvider {
   private Map<String, Object> defProperties;
   
   public CassandraPersistenceProvider() {    
+    
   }
   
   public CassandraPersistenceProvider(Map<String, Object> map) {

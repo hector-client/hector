@@ -10,6 +10,7 @@ import javax.persistence.Persistence;
 import javax.persistence.PersistenceUnit;
 
 import me.prettyprint.hom.beans.MyTestBean;
+import me.prettyprint.hom.beans.SimpleTestBean;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,7 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations="/spring-jpa-container-context.xml")
-public class ContainerInitalizationTest extends CassandraTestBase {
+public class SpringContainerInitalizationTest extends CassandraTestBase {
 
   @PersistenceUnit
   private EntityManagerFactory entityManagerFactory;
@@ -40,9 +41,9 @@ public class ContainerInitalizationTest extends CassandraTestBase {
   @Test
   public void testStandaloneOpenJpaProviderConfig() {
     //PersistenceProviderImpl ppi = new PersistenceProviderImpl();
-    entityManagerFactory = Persistence.createEntityManagerFactory("openjpa", buildProps());
+    entityManagerFactory = Persistence.createEntityManagerFactory("openjpa");
     EntityManager entityManager = entityManagerFactory.createEntityManager();
-    //assertTrue(entityManager.contains(new MyTestBean()));
+    //assertTrue(entityManager.contains(new SimpleTestBean()));
     
     //EntityManager entityManager = entityManagerFactory.createEntityManager();
 

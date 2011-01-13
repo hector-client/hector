@@ -25,6 +25,10 @@ public class EntityManagerFactoryImpl implements EntityManagerFactory {
   private EntityManagerConfigurator entityManagerConfigurator;
   private Cluster cluster;
   
+  public EntityManagerFactoryImpl() {
+    
+  }
+  
   public EntityManagerFactoryImpl(Map<String, Object> properties) {
     this(new EntityManagerConfigurator(properties));
 

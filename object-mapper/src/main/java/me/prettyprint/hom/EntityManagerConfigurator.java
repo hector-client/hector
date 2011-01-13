@@ -84,5 +84,17 @@ public class EntityManagerConfigurator {
   public CassandraHostConfigurator getCassandraHostConfigurator() {
     return cassandraHostConfigurator;
   }
+
+  @Override
+  public String toString() {
+    return new StringBuilder(512).append(CLASSPATH_PREFIX_PROP).append(":")
+    .append(classpathPrefix).append(", ")
+    .append(CLUSTER_NAME_PROP).append(":")
+    .append(clusterName).append(", ")
+    .append(KEYSPACE_PROP).append(":")
+    .append(keyspace).toString();
+  }
+  
+  
     
 }
