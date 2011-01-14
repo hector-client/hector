@@ -69,6 +69,14 @@ public final class MutatorImpl<K> implements Mutator<K> {
     addDeletion(key, cf, columnName, nameSerializer);
     return execute();
   }
+  
+  @Override
+  public <N> MutationResult delete(K key, String cf, N columnName,
+      Serializer<N> nameSerializer, long clock) {   
+    addDeletion(key, cf, columnName, nameSerializer, clock);
+    return execute();
+  }
+
 
 /**
  * Deletes a subcolumn of a supercolumn
@@ -86,7 +94,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
         return null;
       }
     }));
-  }
+  }  
   
   /**
    * Deletes the columns defined in the HSuperColumn. If there are no HColumns attached,
