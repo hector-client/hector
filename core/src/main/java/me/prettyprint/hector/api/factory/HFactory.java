@@ -373,10 +373,45 @@ public final class HFactory {
     return new ThriftKsDef(keyspaceName, strategyClass, replicationFactor, cfDefs);
   }
 
+  /**
+   * Create a column family for a given keyspace without comparator type.
+   * Example:
+   * String keyspace = "testKeyspace";
+   * String column1 = "testcolumn";
+   * ColumnFamilyDefinition columnFamily1 = HFactory.createColumnFamilyDefinition(keyspace, column1);
+   * List<ColumnFamilyDefinition> columns = new ArrayList<ColumnFamilyDefinition>();
+   * columns.add(columnFamily1);
+   * KeyspaceDefinition testKeyspace = HFactory.createKeyspaceDefinition(keyspace, 
+	 *     org.apache.cassandra.locator.SimpleStrategy.class.getName(),
+	 *     1, 
+	 *     columns);
+	 * cluster.addKeyspace(testKeyspace);
+   * 
+   * @param keyspace
+   * @param columnFamilyName
+   */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName) {
     return new ThriftCfDef(keyspace, cfName);
   }
 
+  /**
+   * Create a column family for a given keyspace without comparator type.
+   * Example:
+   * String keyspace = "testKeyspace";
+   * String column1 = "testcolumn";
+   * ColumnFamilyDefinition columnFamily1 = HFactory.createColumnFamilyDefinition(keyspace, column1, ComparatorType.UTF8TYPE);
+   * List<ColumnFamilyDefinition> columns = new ArrayList<ColumnFamilyDefinition>();
+   * columns.add(columnFamily1);
+   * KeyspaceDefinition testKeyspace = HFactory.createKeyspaceDefinition(keyspace, 
+	 *     org.apache.cassandra.locator.SimpleStrategy.class.getName(),
+	 *     1, 
+	 *     columns);
+	 * cluster.addKeyspace(testKeyspace);
+   * 
+   * @param keyspace
+   * @param columnFamilyName
+   * @param comparatorType
+   */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(String keyspace, String cfName, ComparatorType comparatorType) {
     return new ThriftCfDef(keyspace, cfName, comparatorType);
   }
