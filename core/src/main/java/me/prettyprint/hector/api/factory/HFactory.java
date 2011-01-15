@@ -342,10 +342,32 @@ public final class HFactory {
     return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
   }
 
+  /**
+   * Use createKeyspaceDefinition to add a new Keyspace to cluster.
+   * Example:
+   *
+   * String testKeyspace = "testKeyspace";
+   * KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(testKeyspace);
+   * cluster.addKeyspace(newKeyspace);
+   * 
+   * @param keyspace
+   */
   public static KeyspaceDefinition createKeyspaceDefinition(String keyspace) {
     return new ThriftKsDef(keyspace);
   }
 
+  /**
+   * Use createKeyspaceDefinition to add a new Keyspace to cluster.
+   * Example:
+   *
+   * String testKeyspace = "testKeyspace";
+   * KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(testKeyspace);
+   * cluster.addKeyspace(newKeyspace);
+   * 
+   * @param keyspace
+   * @param strategyClass - example: org.apache.cassandra.locator.SimpleStrategy.class.getName()
+   * @param replicationFactor - http://wiki.apache.org/cassandra/Operations
+   */
   public static KeyspaceDefinition createKeyspaceDefinition(String keyspaceName, String strategyClass, int replicationFactor,
       List<ColumnFamilyDefinition> cfDefs) {
     return new ThriftKsDef(keyspaceName, strategyClass, replicationFactor, cfDefs);
