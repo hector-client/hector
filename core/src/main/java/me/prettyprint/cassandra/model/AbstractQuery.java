@@ -12,6 +12,7 @@ public abstract class AbstractQuery<K, N, V, T> implements Query<T> {
   protected Serializer<K> keySerializer;
   protected Serializer<N> columnNameSerializer;
   protected Serializer<V> valueSerializer;
+  // add: FailoverPolicy, ConsistencyLevelPolicy, Credentials?
 
   /*package*/ AbstractQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {

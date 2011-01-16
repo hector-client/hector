@@ -1,22 +1,24 @@
 package me.prettyprint.hom.badbeans;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.Id;
-import me.prettyprint.hom.annotations.Table;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 import me.prettyprint.hom.beans.MyNonEntityTestBean;
 
 
 @Entity
-@Table("PurpleColumnFamily")
+@Table(name="PurpleColumnFamily")
 public class MyBadTestBean extends MyNonEntityTestBean {
   @Id
   private String id;
 
-  @Column("lp1")
+  @Column(name="lp1")
   private long longProp1;
 
-  @Column("lp2")
+  @Column(name="lp2")
   private long longProp2;
 
   public void setId(String id) {

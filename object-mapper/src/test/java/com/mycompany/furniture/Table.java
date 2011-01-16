@@ -1,17 +1,18 @@
 package com.mycompany.furniture;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+
 
 @Entity
 @DiscriminatorValue("table")
 public class Table extends Furniture {
 
-  @Column("extendable")
+  @Column(name="extendable")
   private boolean extendable;
 
-  @Column("shape")
+  @Column(name="shape")
   private String shape;
 
   public boolean isExtendable() {

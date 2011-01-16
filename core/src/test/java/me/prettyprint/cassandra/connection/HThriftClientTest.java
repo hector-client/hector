@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.CassandraHost;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,6 +18,11 @@ public class HThriftClientTest extends BaseEmbededServerSetupTest {
   public void doSetup() {
     cassandraHost = new CassandraHost("127.0.0.1:9170");
     hThriftClient = new HThriftClient(cassandraHost);
+  }
+  
+  @After
+  public void doTeardown() {
+    hThriftClient.close();
   }
   
   @Test
@@ -33,6 +39,21 @@ public class HThriftClientTest extends BaseEmbededServerSetupTest {
   @Test(expected=IllegalStateException.class)
   public void testGetCassandraNotOpen() {
     hThriftClient.getCassandra();
+  }
+  
+  @Test
+  public void testGetCassandraWithKeyspace() {
+    hThriftClient.open();
+    hThriftClient.getCassandra("Keyspace1");
+    assertTrue(hThriftClient.isOpen());
+  }
+  
+  @Test
+  public void testGetCassandraWithNullKeyspace() {
+    hThriftClient.open();
+    hThriftClient.getCassandra("Keyspace1");
+    hThriftClient.getCassandra(null);
+    assertTrue(hThriftClient.isOpen());
   }
   
 }

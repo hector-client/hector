@@ -4,9 +4,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.SystemProperties;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.commons.lang.StringUtils;
+import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
@@ -26,8 +30,10 @@ public class HThriftClient {
 
   private final long mySerial;
   private final int timeout;
+  private String keyspaceName;
 
   private TTransport transport;
+  private Cassandra.Client cassandraClient;
 
   HThriftClient(CassandraHost cassandraHost) {
     this.cassandraHost = cassandraHost;
@@ -43,7 +49,28 @@ public class HThriftClient {
     if ( !isOpen() ) {
       throw new IllegalStateException("getCassandra called on client that was not open. You should not have gotten here.");
     }
-    return new Cassandra.Client(new TBinaryProtocol(transport));
+    if ( cassandraClient == null ) {
+      cassandraClient = new Cassandra.Client(new TBinaryProtocol(transport));
+    }
+    return cassandraClient;
+  }
+
+  public Cassandra.Client getCassandra(String keyspaceNameArg) {
+    getCassandra();     
+    if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
+      keyspaceName = keyspaceNameArg;
+      try {
+        cassandraClient.set_keyspace(keyspaceName);
+        if ( log.isDebugEnabled() )
+          log.debug("keyspace reset from {} to {}", keyspaceName, keyspaceNameArg);
+      } catch (InvalidRequestException ire) {
+        throw new HInvalidRequestException(ire);
+      } catch (TException e) {
+        throw new HectorTransportException(e);
+      }
+
+    }
+    return cassandraClient;
   }
 
   HThriftClient close() {

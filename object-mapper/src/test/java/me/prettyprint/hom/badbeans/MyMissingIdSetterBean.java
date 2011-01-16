@@ -1,17 +1,18 @@
 package me.prettyprint.hom.badbeans;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.Id;
-import me.prettyprint.hom.annotations.Table;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 
 @Entity
-@Table("MyMissingIdSetterBean")
+@Table(name="MyMissingIdSetterBean")
 public class MyMissingIdSetterBean {
   @Id
   private String id;
 
-  @Column("lp1")
+  @Column(name="lp1")
   private long longProp1;
 
   public long getLongProp1() {

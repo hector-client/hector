@@ -1,7 +1,12 @@
 package me.prettyprint.cassandra.model.thrift;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import me.prettyprint.hector.api.HConsistencyLevel;
 
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 
 /**
@@ -28,4 +33,18 @@ public class ThriftConverter {
       throw new RuntimeException("Unregornized consistency level " + c);
     }
   }
+  
+  /**
+   * Converts a list of ColumnOrSuperColumn to Column
+   * @param columns
+   * @return
+   */
+  public static List<Column> getColumnList(List<ColumnOrSuperColumn> columns) {
+    ArrayList<Column> list = new ArrayList<Column>(columns.size());
+    for (ColumnOrSuperColumn col : columns) {
+      list.add(col.getColumn());
+    }
+    return list;
+  }
+  
 }

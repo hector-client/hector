@@ -7,15 +7,19 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorColumn;
-import me.prettyprint.hom.annotations.DiscriminatorType;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.Id;
-import me.prettyprint.hom.annotations.Inheritance;
-import me.prettyprint.hom.annotations.Table;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
+
+
 import me.prettyprint.hom.converters.Converter;
+import me.prettyprint.hom.converters.DefaultConverter;
 
 
 /**
@@ -116,7 +120,7 @@ public class ClassCacheMgr {
     // do {
     Field[] fieldArr = theType.getDeclaredFields();
     for (Field f : fieldArr) {
-      Column colAnno = f.getAnnotation(Column.class);
+      Column colAnno = f.getAnnotation(javax.persistence.Column.class);
       if (null != colAnno) {
         PropertyDescriptor pd = pdMap.get(f.getName());
         if (null == pd) {
@@ -126,16 +130,16 @@ public class ClassCacheMgr {
 
         @SuppressWarnings("unchecked")
         PropertyMappingDefinition md =
-          new PropertyMappingDefinition(pd, colAnno.value(), (Class<Converter<?>>) colAnno.converter());
+          new PropertyMappingDefinition(pd, colAnno.name(), DefaultConverter.class);
         cfMapDef.addPropertyDefinition(md);
       }
 
+      // TODO lookup JPA 2 spec for class-level ids
       Id idAnno = f.getAnnotation(Id.class);
       if (null != idAnno) {
         @SuppressWarnings("unchecked")
-        PropertyMappingDefinition<I> md =
-          new PropertyMappingDefinition<I>(pdMap.get(f.getName()), null, (Class<Converter<I>>) idAnno
-              .converter());
+        PropertyMappingDefinition md =
+          new PropertyMappingDefinition(pdMap.get(f.getName()), null, DefaultConverter.class);
         if (null != md) {
           if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
               || null == md.getPropDesc().getWriteMethod()) {
@@ -195,7 +199,12 @@ public class ClassCacheMgr {
     Table tbl = theType.getAnnotation(Table.class);
     if (null == cfBaseMapDef) {
       if (null != tbl) {
-        cfMapDef.setColFamName(tbl.value());
+        // make sure the column family is not already used
+        CFMappingDef<?, ?> tmpDef;
+        if ( null != (tmpDef=getCfMapDef(tbl.name(), false))) {
+          throw new IllegalStateException("classes, " + clazz.getName() + " and " + tmpDef.getClazz().getName() + ", are both mapped to ColumnFamily, " + tbl.name() + ".  Can only have one class/ColumnFamily mapping - if multiple classes can be derived from a single ColumnFamily, use @"+Inheritance.class.getSimpleName() );
+        }
+        cfMapDef.setColFamName(tbl.name());
       }
       else {
         cfMapDef.setColFamName(theType.getSimpleName());
@@ -237,7 +246,8 @@ public class ClassCacheMgr {
     if (null == inheritance) {
       return;
     }
-    cfMapDef.setInheritanceType(inheritance.strategy());
+    // TODO not hard-coded
+    cfMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
 
     DiscriminatorColumn discriminatorCol = clazz.getAnnotation(DiscriminatorColumn.class);
     if (null != discriminatorCol) {

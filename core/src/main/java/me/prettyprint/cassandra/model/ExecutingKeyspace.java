@@ -4,9 +4,12 @@ import java.util.Collections;
 import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
+import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
@@ -15,7 +18,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 /**
  * Thread Safe
  * @author Ran Tavory
- *
+ * @author zznate
  */
 public class ExecutingKeyspace implements Keyspace {
   private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
@@ -26,6 +29,7 @@ public class ExecutingKeyspace implements Keyspace {
   private final HConnectionManager connectionManager;
   private final String keyspace;
   private final Map<String, String> credentials;
+  private final ExceptionsTranslator exceptionTranslator;
 
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
@@ -35,16 +39,19 @@ public class ExecutingKeyspace implements Keyspace {
   public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
       Map<String, String> credentials) {
-    Assert.noneNull(keyspace, consistencyLevelPolicy, connectionManager);
+    Assert.noneNull(consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
     this.consistencyLevelPolicy = consistencyLevelPolicy;
     this.failoverPolicy = failoverPolicy;
     this.credentials = credentials;
+    // TODO make this plug-able
+    this.exceptionTranslator = new ExceptionsTranslatorImpl();
   }
 
   @Override
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
+    // TODO remove this method
     this.consistencyLevelPolicy = cp;
   }
 
@@ -68,5 +75,15 @@ public class ExecutingKeyspace implements Keyspace {
         //connectionManager.releaseClient(ks.getClient());
       }
     }
+  }
+ 
+  public <T> ExecutionResult<T> doExecuteOperation(Operation<T> operation) throws HectorException {
+    operation.applyConnectionParams(keyspace,consistencyLevelPolicy,failoverPolicy,credentials);
+    connectionManager.operateWithFailover(operation);
+    return operation.getExecutionResult();
+  }
+  
+  public ExceptionsTranslator getExceptionsTranslator() {
+    return exceptionTranslator;
   }
 }

@@ -8,6 +8,12 @@ Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 0.7.0-23
 ========
 Initial import of BToddB's hector-object-mapper as object-mapper module
+Object mapper ported over to JPA annotations and EntityManager (very redimentary support)
+Fix issue with createKeyspace requiring additional column info
+Massive changes to pom structure courtesy of Stephen Connolly to facilitate inclusion into maven central repository. 
+Small tweaks to HConnectionManager courtesy of Benoit Perroud
+Collection conversions in AbstractSerializer use the size of the provided collection for initialization. Patch courtesy of Benoit Perroud. 
+Treat HUnavailableException the same as HTimeoutException
 
 0.7.0-22
 ========

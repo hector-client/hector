@@ -1,17 +1,17 @@
 package com.mycompany.furniture;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("chair")
 public class Chair extends Furniture {
 
-  @Column("recliner")
+  @Column(name="recliner")
   private boolean recliner;
 
-  @Column("arms")
+  @Column(name="arms")
   private boolean arms;
 
   public boolean isRecliner() {

@@ -87,7 +87,7 @@ public class HConnectionManager {
       ConcurrentHClientPool pool = null;
       try {
         pool = new ConcurrentHClientPool(cassandraHost);
-        hostPools.put(cassandraHost, pool);
+        hostPools.putIfAbsent(cassandraHost, pool);
         log.info("Added host {} to pool", cassandraHost.getName());
         return true;
       } catch (HectorTransportException hte) {
@@ -146,12 +146,9 @@ public class HConnectionManager {
       try {
         // TODO how to 'timeout' on this op when underlying pool is exhausted
         client =  getClientFromLBPolicy(excludeHosts);
-        Cassandra.Client c = client.getCassandra();
+        Cassandra.Client c = client.getCassandra(op.keyspaceName);
         // Keyspace can be null for some system_* api calls
-        if ( op.keyspaceName != null ) {
-          c.set_keyspace(op.keyspaceName);
-        }
-        if ( !op.credentials.isEmpty() ) {
+        if ( op.credentials != null && !op.credentials.isEmpty() ) {
           c.login(new AuthenticationRequest(op.credentials));
         }
 
@@ -164,7 +161,7 @@ public class HConnectionManager {
         HectorException he = exceptionsTranslator.translate(ex);
         if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException ) {
           throw he;
-        } else if ( he instanceof HUnavailableException || he instanceof HectorTransportException) {
+        } else if ( he instanceof HectorTransportException) {
           --retries;
           client.close();
           markHostAsDown(client);
@@ -173,7 +170,7 @@ public class HConnectionManager {
           if ( retries > 0 ) {
             monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
           }
-        } else if ( he instanceof HTimedOutException ) {
+        } else if (he instanceof HTimedOutException || he instanceof HUnavailableException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
           retryable = true;
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
@@ -189,7 +186,7 @@ public class HConnectionManager {
           monitor.incCounter(Counter.POOL_EXHAUSTED);
           excludeHosts.add(client.cassandraHost);
         }
-        if ( retries == 0 || retryable == false) throw he;
+        if ( retries <= 0 || retryable == false) throw he;
         log.error("Could not fullfill request on this host {}", client);
         log.error("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
@@ -224,7 +221,7 @@ public class HConnectionManager {
 
   private HThriftClient getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     HThriftClient client;
-    if ( hostPools.size() == 0 ) {
+    if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
     }
     try {

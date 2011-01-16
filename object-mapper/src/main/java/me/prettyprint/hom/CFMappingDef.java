@@ -6,9 +6,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import me.prettyprint.hom.annotations.DiscriminatorType;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.InheritanceType;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.InheritanceType;
 
 import org.apache.commons.collections.collection.CompositeCollection;
 

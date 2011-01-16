@@ -1,14 +1,14 @@
 package me.prettyprint.hom.beans;
 
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("Red")
 public class MyRedTestBean extends MyTestBean {
 
-  @Column("myCol1")
+  @Column(name="myCol1")
   private int c1;
 
   public int getC1() {

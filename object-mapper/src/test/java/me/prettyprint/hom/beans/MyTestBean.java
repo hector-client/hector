@@ -7,67 +7,70 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
 
+import javax.persistence.Column;
+import javax.persistence.DiscriminatorColumn;
+import javax.persistence.DiscriminatorType;
+import javax.persistence.DiscriminatorValue;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.Table;
+
+import com.mycompany.MySerial;
+
 import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
-import me.prettyprint.hom.annotations.Column;
-import me.prettyprint.hom.annotations.DiscriminatorColumn;
-import me.prettyprint.hom.annotations.DiscriminatorType;
-import me.prettyprint.hom.annotations.DiscriminatorValue;
-import me.prettyprint.hom.annotations.Entity;
-import me.prettyprint.hom.annotations.Id;
-import me.prettyprint.hom.annotations.Inheritance;
-import me.prettyprint.hom.annotations.InheritanceType;
-import me.prettyprint.hom.annotations.Table;
-
 
 @Entity
-@Inheritance( strategy = InheritanceType.SINGLE_TABLE) // no other type supported
-@DiscriminatorColumn(
-    name="myType",
-    discriminatorType=DiscriminatorType.STRING
-)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+// no other type supported
+@DiscriminatorColumn(name = "myType", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("NoColor")
-@Table("TestBeanColumnFamily")
+@Table(name = "TestBeanColumnFamily")
 public class MyTestBean {
   @Id
   private UUID baseId;
 
-  @Column("myType")
+  @Column(name = "myType")
   private String myType;
 
-  @Column("lp1")
+  @Column(name = "lp1")
   private long longProp1;
 
-  @Column("lp2")
+  @Column(name = "lp2")
   private Long longProp2;
 
-  @Column("ip1")
+  @Column(name = "ip1")
   private int intProp1;
 
-  @Column("ip2")
+  @Column(name = "ip2")
   private Integer intProp2;
 
-  @Column("bp1")
+  @Column(name = "bp1")
   private boolean boolProp1;
 
-  @Column("bp2")
+  @Column(name = "bp2")
   private Boolean boolProp2;
 
-  @Column("sp")
+  @Column(name = "sp")
   private String strProp;
 
-  @Column("up")
+  @Column(name = "up")
   private UUID uuidProp;
 
-  @Column("dp")
+  @Column(name = "dp")
   private Date dateProp;
 
-  @Column("bytes")
+  @Column(name = "bytes")
   private byte[] bytesProp;
+  
+  @Column(name = "serialProp")
+  private MySerial serialProp;
 
-  @Column(value = "color", converter = ColorConverter.class)
+  // @Column(value = "color", converter = ColorConverter.class)
   private Colors color;
 
   private Map<String, String> anonymousProps = new HashMap<String, String>();
@@ -188,6 +191,14 @@ public class MyTestBean {
 
   public void setMyType(String myType) {
     this.myType = myType;
+  }
+
+  public MySerial getSerialProp() {
+    return serialProp;
+  }
+
+  public void setSerialProp(MySerial serialProp) {
+    this.serialProp = serialProp;
   }
 
 }

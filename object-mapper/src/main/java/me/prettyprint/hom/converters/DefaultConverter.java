@@ -2,7 +2,6 @@ package me.prettyprint.hom.converters;
 
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hom.HectorObjectMapper;
-import me.prettyprint.hom.annotations.Column;
 
 
 /**

@@ -11,7 +11,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
  * @author Ran
  *
  */
-/*package*/public class ExecutionResult<T> {
+public class ExecutionResult<T> {
 
   private final T value;
   private final long execTime;
