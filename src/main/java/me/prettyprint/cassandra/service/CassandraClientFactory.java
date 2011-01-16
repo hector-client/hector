@@ -95,10 +95,9 @@ import org.slf4j.LoggerFactory;
     try {
       tr.open();
     } catch (TTransportException e) {
+      clientMonitor.incCounter(Counter.CONNECT_ERROR);
       // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
       // add details to it.
-      log.error("Unable to open transport to " + cassandraHost.getName(), e);
-      clientMonitor.incCounter(Counter.CONNECT_ERROR);
       throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
           e.getLocalizedMessage(), e);
     }
