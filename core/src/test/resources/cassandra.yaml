@@ -95,8 +95,8 @@ disk_access_mode: auto
 # concurrent reads per processor core.  Increase ConcurrentWrites to
 # the number of clients writing at once if you enable CommitLogSync +
 # CommitLogSyncDelay. -->
-concurrent_reads: 8
-concurrent_writes: 32
+concurrent_reads: 2
+concurrent_writes: 4
 
 # This sets the amount of memtable flush writer threads.  These will
 # be blocked by disk io, and each one will hold a memtable in memory
@@ -371,35 +371,28 @@ keyspaces:
       column_families:
         - name: Standard1
           compare_with: BytesType
-
-        - name: Standard2
-          compare_with: UTF8Type
-          read_repair_chance: 0.1
-          keys_cached: 100
-          gc_grace_seconds: 0
+          memtable_throughput_in_mb: 24
+          key_cache_save_period_in_seconds: 0
+          keys_cached: 0
 
         - name: StandardByUUID1
-          compare_with: TimeUUIDType
-          
+          compare_with: TimeUUIDType   
+          memtable_throughput_in_mb: 24       
+          key_cache_save_period_in_seconds: 0
+          keys_cached: 0
 
         - name: Super1
           column_type: Super
           compare_with: BytesType
           compare_subcolumns_with: BytesType
-
-        - name: Super2
-          column_type: Super
-          compare_subcolumns_with: UTF8Type
-          rows_cached: 10000
-          keys_cached: 50
-          comment: 'A column family with supercolumns, whose column and subcolumn names are UTF8 strings'
-
-        - name: Super3
-          column_type: Super
-          compare_with: LongType
-          comment: 'A column family with supercolumns, whose column names are Longs (8 bytes)'
+          memtable_throughput_in_mb: 24
+          key_cache_save_period_in_seconds: 0
+          keys_cached: 0          
           
         - name: Indexed1
+          memtable_throughput_in_mb: 24
+          key_cache_save_period_in_seconds: 0
+          keys_cached: 0          
           column_metadata:
             - name: birthyear
               validator_class: LongType
