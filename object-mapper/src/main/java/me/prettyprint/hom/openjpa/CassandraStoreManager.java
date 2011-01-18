@@ -126,19 +126,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
     cassandraStore.open();
     stateManager.initialize(stateManager.getMetaData().getDescribedType(), pcState);
     cassandraStore.getObject(stateManager, stateManager.getId());
-    // sm.initialize(data.getMetaData().getDescribedType(), state);
-    /*
-     * From javadoc:
-     * 
-     * The StoreManager.initialize method is responsible for creating new instances of objects freshly loaded from the database. 
-     * The method will be invoked with a OpenJPAStateManager that the newly-loaded object should be associated with. 
-     * To create the new object and set up this association correctly, the implementation should use the 
-     * OpenJPAStateManager.initialize(java.lang.Class, org.apache.openjpa.kernel.PCState) method.
-     */
-    
-    // return false if we dont find anything
-    
-    
+    // TODO need to add the not-found case
     return true;
   }
 
