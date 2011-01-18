@@ -5,6 +5,8 @@ import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
 import me.prettyprint.cassandra.service.clock.MillisecondsClockResolution;
 import me.prettyprint.cassandra.service.clock.SecondsClockResolution;
 
+import java.io.Serializable;
+
 
 /**
  *	Clock interface to allow client define their own behavior for Clock Resolution.
@@ -16,7 +18,7 @@ import me.prettyprint.cassandra.service.clock.SecondsClockResolution;
  *
  * @author Patricio Echague (pechague@gmail.com)
  */
-public interface ClockResolution {
+public interface ClockResolution extends Serializable {
 
   /**
    * Provides a clock resolution with seconds granularity.

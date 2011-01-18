@@ -1,15 +1,14 @@
 package me.prettyprint.cassandra.connection;
 
+import me.prettyprint.cassandra.service.CassandraHost;
+
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.cliffc.high_scale_lib.Counter;
-
-import me.prettyprint.cassandra.service.CassandraHost;
-
 public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
 
+  private static final long serialVersionUID = 1107204068032227079L;
   private AtomicLong counter;
   
   public RoundRobinBalancingPolicy() {

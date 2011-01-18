@@ -1,11 +1,16 @@
 package me.prettyprint.cassandra.service;
 
-import static org.junit.Assert.*;
-
 import me.prettyprint.hector.api.ClockResolution;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 public class CassandraHostConfiguratorTest {
 
@@ -95,5 +100,24 @@ public class CassandraHostConfiguratorTest {
     cassandraHostConfigurator.setClockResolution(new SequentialClockResolution());
     
     assertNotSame(CassandraHostConfigurator.DEF_CLOCK_RESOLUTION, cassandraHostConfigurator.getClockResolution());
+  }
+
+  @Test
+  public void testSerialization() throws Exception {
+      CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9876");
+
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      ObjectOutputStream out = new ObjectOutputStream(bos);
+      out.writeObject(cassandraHostConfigurator);
+      out.close();
+
+      byte[] serializedByteArray = bos.toByteArray();
+
+      ByteArrayInputStream bin = new ByteArrayInputStream(serializedByteArray);
+      ObjectInputStream in = new ObjectInputStream(bin);
+      CassandraHostConfigurator cassandraHostConfiguratorDeserialized = (CassandraHostConfigurator) in.readObject();
+
+      //TODO: define equality for CassandraHostConfigurator
+      //assertSame(cassandraHostConfigurator, cassandraHostConfiguratorDeserialized);
   }
 }

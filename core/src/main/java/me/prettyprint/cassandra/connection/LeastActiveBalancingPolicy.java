@@ -1,18 +1,14 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
 import me.prettyprint.cassandra.service.CassandraHost;
+
+import java.util.*;
 
 public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
 
-  @Override
+  private static final long serialVersionUID = 329849818218657061L;
+
+    @Override
   public ConcurrentHClientPool getPool(Collection<ConcurrentHClientPool> pools, Set<CassandraHost> excludeHosts) {
     List<ConcurrentHClientPool> vals = new ArrayList<ConcurrentHClientPool>(pools); 
       Collections.sort(vals, new Comparator<ConcurrentHClientPool>() {      
