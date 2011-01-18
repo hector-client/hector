@@ -7,10 +7,12 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.DiscriminatorType;
+import javax.persistence.Entity;
 import javax.persistence.InheritanceType;
 
-import org.apache.commons.collections.collection.CompositeCollection;
+import me.prettyprint.hom.cache.HectorObjectMapperException;
 
+import org.apache.commons.collections.collection.CompositeCollection;
 
 /**
  * Holder for the mapping between a Class annotated with {@link Entity} and the
@@ -19,7 +21,8 @@ import org.apache.commons.collections.collection.CompositeCollection;
  * @author Todd Burruss
  */
 public class CFMappingDef<T, I> {
-  private Class<T> clazz;
+  private Class<T> realClass;
+  private Class<T> effectiveClass;
   private CFMappingDef<? super T, I> cfBaseMapDef;
   private CFMappingDef<? super T, I> cfSuperMapDef;
   private String colFamName;
@@ -27,21 +30,47 @@ public class CFMappingDef<T, I> {
   private String discColumn;
   private DiscriminatorType discType;
   private Object discValue; // this can be a variety of types
-  private PropertyMappingDefinition<I> idPropertyMap;
+  private Set<PropertyMappingDefinition<I>> idPropertySet = new HashSet<PropertyMappingDefinition<I>>();
 
   private Map<Object, CFMappingDef<? extends T, I>> derivedClassMap = new HashMap<Object, CFMappingDef<? extends T, I>>();
   private Collection<PropertyMappingDefinition<?>> allMappedProps;
 
   // provide caching by class object for the class' mapping definition
-  private Map<String, PropertyMappingDefinition<?>> propertyCacheByPropName =
-    new HashMap<String, PropertyMappingDefinition<?>>();
+  private Map<String, PropertyMappingDefinition<?>> propertyCacheByPropName = new HashMap<String, PropertyMappingDefinition<?>>();
 
   // provide caching by class object for the class' mapping definition
-  private Map<String, PropertyMappingDefinition<?>> propertyCacheByColName =
-    new HashMap<String, PropertyMappingDefinition<?>>();
+  private Map<String, PropertyMappingDefinition<?>> propertyCacheByColName = new HashMap<String, PropertyMappingDefinition<?>>();
 
   public CFMappingDef(Class<T> clazz) {
-    this.clazz = clazz;
+    setDefaults(clazz);
+  }
+
+  /**
+   * Setup mapping with defaults for the given class. Does not parse all
+   * annotations.
+   * 
+   * @param realClass
+   */
+  public void setDefaults(Class<T> realClass) {
+    this.realClass = realClass;
+
+    // find the "effective" class - skipping up the hierarchy over inner classes
+    effectiveClass = realClass;
+    boolean entityFound;
+    while (!(entityFound = (null != effectiveClass.getAnnotation(Entity.class)))) {
+      // TODO:BTB this might should be isSynthetic
+      if (!effectiveClass.isAnonymousClass()) {
+        break;
+      } else {
+        effectiveClass = (Class<T>) effectiveClass.getSuperclass();
+      }
+    }
+
+    // if class is missing @Entity, then proceed no further
+    if (!entityFound) {
+      throw new HectorObjectMapperException("class, " + realClass.getName() + ", not annotated with @"
+          + Entity.class.getSimpleName());
+    }
   }
 
   public void addDerivedClassMap(CFMappingDef<? extends T, I> cfDerivedMapDef) {
@@ -54,13 +83,11 @@ public class CFMappingDef<T, I> {
 
   public PropertyMappingDefinition<?> getPropMapByColumnName(String colName) {
     PropertyMappingDefinition<?> md = propertyCacheByColName.get(colName);
-    if ( null != md ) {
+    if (null != md) {
       return md;
-    }
-    else if ( null != cfSuperMapDef ) {
+    } else if (null != cfSuperMapDef) {
       return cfSuperMapDef.getPropMapByColumnName(colName);
-    }
-    else {
+    } else {
       return null;
     }
   }
@@ -73,9 +100,21 @@ public class CFMappingDef<T, I> {
   public String getColFamName() {
     return colFamName;
   }
+  
+  public String getEffectiveColFamName() {
+    if ( null != colFamName ) {
+      return colFamName;
+    }
+    else if ( null != cfBaseMapDef ) {
+      return cfBaseMapDef.getColFamName();
+    }
+    else {
+      throw new HectorObjectMapperException("trying to get ColumnFamily name, but is missing for mapping, " + this.toString());
+    }
+  }
 
-  public Class<T> getClazz() {
-    return clazz;
+  public Class<T> getEffectiveClass() {
+    return effectiveClass;
   }
 
   public InheritanceType getInheritanceType() {
@@ -89,8 +128,7 @@ public class CFMappingDef<T, I> {
   public String getDiscColumn() {
     if (null == cfBaseMapDef) {
       return discColumn;
-    }
-    else {
+    } else {
       return cfBaseMapDef.getDiscColumn();
     }
   }
@@ -102,8 +140,7 @@ public class CFMappingDef<T, I> {
   public DiscriminatorType getDiscType() {
     if (null == cfBaseMapDef) {
       return discType;
-    }
-    else {
+    } else {
       return cfBaseMapDef.getDiscType();
     }
   }
@@ -120,17 +157,16 @@ public class CFMappingDef<T, I> {
     this.discValue = discValue;
   }
 
-  public PropertyMappingDefinition<I> getIdPropertyDef() {
+  public Set<PropertyMappingDefinition<I>> getIdPropertySet() {
     if (null == cfBaseMapDef) {
-      return idPropertyMap;
-    }
-    else {
-      return cfBaseMapDef.getIdPropertyDef();
+      return idPropertySet;
+    } else {
+      return cfBaseMapDef.getIdPropertySet();
     }
   }
 
-  public void setIdPropertyMap(PropertyMappingDefinition<I> idPropertyMap) {
-    this.idPropertyMap = idPropertyMap;
+  public void addIdPropertyMap(PropertyMappingDefinition<I> idProperty) {
+    idPropertySet.add(idProperty);
   }
 
   @SuppressWarnings("unchecked")
@@ -143,10 +179,9 @@ public class CFMappingDef<T, I> {
 
       if (null == cfSuperMapDef) {
         allMappedProps = propSet;
-      }
-      else {
-        allMappedProps = new CompositeCollection(new Collection[] {
-            propSet, cfSuperMapDef.getAllProperties() });
+      } else {
+        allMappedProps = new CompositeCollection(
+            new Collection[] { propSet, cfSuperMapDef.getAllProperties() });
       }
     }
 
@@ -157,8 +192,8 @@ public class CFMappingDef<T, I> {
     return cfBaseMapDef;
   }
 
-  public void setCfBaseMapDef(CFMappingDef<? super T, I> cfSuperMapDef) {
-    this.cfBaseMapDef = cfSuperMapDef;
+  public void setCfBaseMapDef(CFMappingDef<? super T, I> cfBaseMapDef) {
+    this.cfBaseMapDef = cfBaseMapDef;
   }
 
   public void setColFamName(String colFamName) {
@@ -175,5 +210,27 @@ public class CFMappingDef<T, I> {
 
   public void setCfSuperMapDef(CFMappingDef<? super T, I> cfSuperMapDef) {
     this.cfSuperMapDef = cfSuperMapDef;
+  }
+
+  public Class<T> getRealClass() {
+    return realClass;
+  }
+
+  @Override
+  public String toString() {
+    return "CFMappingDef [colFamName=" + colFamName + ", realClass=" + realClass
+        + ", effectiveClass=" + effectiveClass + "]";
+  }
+
+  public boolean isBaseInheritanceClass() {
+    return null != inheritanceType;
+  }
+
+  public boolean isDerivedClassInheritance() {
+    return !isBaseInheritanceClass() && null != getDiscValue();
+  }
+
+  public boolean isStandaloneClass() {
+    return !isBaseInheritanceClass() && !isDerivedClassInheritance();
   }
 }

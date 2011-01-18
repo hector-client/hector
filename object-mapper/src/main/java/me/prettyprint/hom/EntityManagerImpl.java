@@ -18,6 +18,7 @@ import javax.persistence.metamodel.Metamodel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hom.annotations.AnnotationScanner;
+import me.prettyprint.hom.cache.HectorObjectMapperException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -120,10 +121,10 @@ public class EntityManagerImpl implements EntityManager {
 
     CFMappingDef<T, I> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
     if (null == cfMapDef) {
-      throw new IllegalStateException("No class annotated with @Entity for type, " + clazz.getName());
+      throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
-    return objMapper.getObject(keyspace, cfMapDef.getColFamName(), clazz, id);
+    return objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), clazz, id);
   }
 
   /**
@@ -154,7 +155,7 @@ public class EntityManagerImpl implements EntityManager {
 
     CFMappingDef<T, I> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
     if (null == cfMapDef) {
-      throw new IllegalStateException("No class annotated with @Entity for type, " + clazz.getName());
+      throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
     T obj = objMapper.createObject(cfMapDef, id, colSlice);

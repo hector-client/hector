@@ -33,7 +33,6 @@ public class EntityManagerTest extends CassandraTestBase {
   }
 
   @Test
-  @Ignore
   public void testInitializeSaveLoadCustomId() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
     MyCustomIdBean o1 = new MyCustomIdBean();
