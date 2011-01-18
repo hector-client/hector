@@ -120,7 +120,20 @@
         <artifactId>jcl-over-slf4j</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
-    </dependencies>
+      <!-- common test dependencies -->
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.8.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.8.2</version>
+        <scope>test</scope>
+      </dependency>            
+    </dependencies>            
   </dependencyManagement>
 
   <build>
