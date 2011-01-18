@@ -1,4 +1,4 @@
-package me.prettyprint.hom;
+package me.prettyprint.hom.openjpa;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
+import me.prettyprint.hom.CassandraTestBase;
 import me.prettyprint.hom.beans.SimpleTestBean;
 
 import org.junit.Test;
@@ -21,9 +22,14 @@ public class StandaloneEntityManagerFactoryTest extends CassandraTestBase {
     em.getTransaction().begin();
     em.persist(new SimpleTestBean(1, "foo"));
     em.getTransaction().commit();
-    SimpleTestBean stb = em.find(SimpleTestBean.class, 1);
+    em.close();
     
-    assertNotNull(stb);
+    //em.getTransaction().begin();
+    
+    EntityManager em2 = entityManagerFactory.createEntityManager();
+    SimpleTestBean stb = em2.find(SimpleTestBean.class, 1);
+    //em.getTransaction().commit();
+    assertEquals("foo",stb.getName());
   }
 
 }

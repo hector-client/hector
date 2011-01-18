@@ -1,4 +1,4 @@
-package me.prettyprint.hom;
+package me.prettyprint.hom.openjpa;
 
 import java.util.Map;
 
