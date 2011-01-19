@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="TestBeanColumnFamily")
+@Table(name="SimpleColumnFamily")
 public class SimpleTestBean {
   
   private long id;

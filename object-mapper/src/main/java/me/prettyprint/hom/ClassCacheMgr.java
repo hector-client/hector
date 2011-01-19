@@ -19,6 +19,7 @@ import javax.persistence.Table;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.cache.InheritanceParserValidator;
 import me.prettyprint.hom.cache.TableParserValidator;
+import me.prettyprint.hom.converters.Converter;
 import me.prettyprint.hom.converters.DefaultConverter;
 
 /**
@@ -42,7 +43,7 @@ public class ClassCacheMgr {
    * @param <T>
    * @param <I>
    * @param cfMapDef
-   * @return
+   * @return returns the base in the ColumnFamily mapping hierarchy
    */
   public <T, I> CFMappingDef<? super T, I> findBaseClassViaMappings(CFMappingDef<T, I> cfMapDef) {
     CFMappingDef<T, I> tmpDef = cfMapDef;
@@ -155,8 +156,13 @@ public class ClassCacheMgr {
       for (Annotation anno : annoArr) {
         if (anno instanceof Column) {
           processColumnAnnotation(f, (Column) anno, cfMapDef, pdMap);
+        } else if (anno instanceof me.prettyprint.hom.annotations.Column) {
+          processColumnCustomAnnotation(f, (me.prettyprint.hom.annotations.Column) anno, cfMapDef,
+              pdMap);
         } else if (anno instanceof Id) {
           processIdAnnotation(f, (Id) anno, cfMapDef, pdMap);
+        } else if (anno instanceof me.prettyprint.hom.annotations.Id) {
+          processIdCustomAnnotation(f, (me.prettyprint.hom.annotations.Id)anno, cfMapDef, pdMap);
         }
       }
     }
@@ -171,9 +177,24 @@ public class ClassCacheMgr {
           + ", does not have proper setter/getter");
     }
 
-    @SuppressWarnings("unchecked")
     PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
         DefaultConverter.class);
+    cfMapDef.addPropertyDefinition(md);
+  }
+
+  private <T, I> void processColumnCustomAnnotation(Field f,
+      me.prettyprint.hom.annotations.Column anno, CFMappingDef<T, I> cfMapDef,
+      Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
+    PropertyDescriptor pd = pdMap.get(f.getName());
+    if (null == pd) {
+      throw new HectorObjectMapperException("Property, "
+          + cfMapDef.getEffectiveClass().getSimpleName() + "." + f.getName()
+          + ", does not have proper setter/getter");
+    }
+
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
+        (Class<Converter<?>>) anno.converter());
+    cfMapDef.addPropertyDefinition(md);
     cfMapDef.addPropertyDefinition(md);
   }
 
@@ -193,6 +214,38 @@ public class ClassCacheMgr {
     cfMapDef.addIdPropertyMap(md);
   }
 
+  private <T, I> void processIdCustomAnnotation(Field f, me.prettyprint.hom.annotations.Id anno,
+      CFMappingDef<T, I> cfMapDef, Map<String, PropertyDescriptor> pdMap)
+      throws InstantiationException, IllegalAccessException {
+    // TODO lookup JPA 2 spec for class-level ids
+    PropertyMappingDefinition<I> md = new PropertyMappingDefinition<I>(pdMap.get(f.getName()),
+        null, (Class<Converter<I>>) anno.converter());
+    if (null != md) {
+      if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
+          || null == md.getPropDesc().getWriteMethod()) {
+        throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
+            + " is defined on property, " + f.getName() + ", but its missing proper setter/getter");
+      }
+    }
+    cfMapDef.addIdPropertyMap(md);
+
+    // @SuppressWarnings("unchecked")
+    // PropertyMappingDefinition<I> md =
+    // new PropertyMappingDefinition<I>(pdMap.get(f.getName()), null,
+    // (Class<Converter<I>>) idAnno
+    // .converter());
+    // if (null != md) {
+    // if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
+    // || null == md.getPropDesc().getWriteMethod()) {
+    // throw new IllegalStateException("@" + Id.class.getSimpleName() +
+    // " is defined on property, "
+    // + f.getName() + ", but its missing proper setter/getter");
+    // }
+    // }
+    // cfMapDef.setIdPropertyMap(md);
+
+  }
+
   private <T, I> CFMappingDef<T, I> initializeColumnFamilyMapDef(Class<T> realClass) {
     // if already init'd don't do it again - could have happened because of
     // inheritance - causes recursive processing for class hierarchy
@@ -201,7 +254,14 @@ public class ClassCacheMgr {
       return cfMapDef;
     }
 
+    // try {
     cfMapDef = new CFMappingDef<T, I>(realClass);
+    // }
+    // catch ( HectorObjectMapperException e ) {
+    // // ok, becuase may not have a super class that's an entity
+    // return null;
+    // }
+
     Class<T> effectiveType = cfMapDef.getEffectiveClass();
     CFMappingDef<? super T, I> cfSuperMapDef = null;
 
@@ -211,7 +271,7 @@ public class ClassCacheMgr {
         cfSuperMapDef = initializeCacheForClass(effectiveType.getSuperclass());
         cfMapDef.setCfSuperMapDef(cfSuperMapDef);
       } catch (HectorObjectMapperException e) {
-        // this is ok, super class might not be an enitity
+        // ok, becuase may not have a super class that's an entity
       }
     }
 
@@ -245,8 +305,8 @@ public class ClassCacheMgr {
     if (!cfMapDef.isDerivedClassInheritance()) {
       cfMapByColFamName.put(cfMapDef.getEffectiveColFamName(), cfMapDef);
     }
-    
-    // always map the parsed class to its ColumnFamily map definition 
+
+    // always map the parsed class to its ColumnFamily map definition
     cfMapByClazz.put(realClass, cfMapDef);
 
     return cfMapDef;

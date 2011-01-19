@@ -16,7 +16,7 @@ public interface Converter<T> {
    *
    * @param clazz
    * @param value
-   * @return
+   * @return Type of object
    */
   T convertCassTypeToObjType(Class<T> clazz, byte[] value);
 
@@ -24,7 +24,7 @@ public interface Converter<T> {
    * Convert Java type to byte[].
    *
    * @param value
-   * @return
+   * @return Type of object converted to byte[]
    */
   byte[] convertObjTypeToCassType(T value);
 }

@@ -1,20 +1,31 @@
 package me.prettyprint.hom.openjpa;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
+import me.prettyprint.cassandra.serializers.DateSerializer;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.SliceQuery;
 
+import org.apache.openjpa.kernel.OpenJPAStateManager;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.meta.JavaTypes;
+import org.apache.openjpa.util.LongId;
 import org.apache.openjpa.util.OpenJPAId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,47 +86,69 @@ public class MappingUtils {
     FieldMetaData[] fmds = metaData.getFields();
     List<String> cols = new ArrayList<String>(fmds.length);
     for (int i = 0; i < fmds.length; i++) {
-        if (fmds[i].getManagement() != fmds[i].MANAGE_PERSISTENT || fmds[i].isPrimaryKey())
-            continue;
+      if (fmds[i].getManagement() != fmds[i].MANAGE_PERSISTENT || fmds[i].isPrimaryKey())
+        continue;
 
-        log.debug("fmd.name: {}",fmds[i].getName());
-        cols.add(fmds[i].getName());
-        
-        // write out the field data depending upon type
-        switch (fmds[i].getTypeCode()) {
-            case JavaTypes.COLLECTION:
-            case JavaTypes.ARRAY:
-                
-                // write out each of the elements
-                int elemType = fmds[i].getElement().getTypeCode();
-                log.debug("(Collection|Array)typeCode: {}", elemType);
-                /*
-                for (Iterator ci = c.iterator(); ci.hasNext();) {
-                    ...elemType, ci.next());
-                }
-                */
-                break;
-
-            case JavaTypes.MAP:
-                
-              int keyType = fmds[i].getKey().getTypeCode();
-                int valueType = fmds[i].getElement().getTypeCode();
-                log.debug("(Map) value typeCode: {}, key typeCode: {}",valueType,keyType );
-                /*
-                for (Iterator ei = entries.iterator(); ei.hasNext();) {
-                    Map.Entry e = (Map.Entry) ei.next();
-                    ...keyType, e.getKey());
-                    ...valueType, e.getValue());
-                }
-                */
-                break;
-
-            default:
-                log.debug("default typeCode: {}",fmds[i].getTypeCode());
-                    
-        }
-
+      log.debug("fmd.name: {}",fmds[i].getName());
+      cols.add(fmds[i].getName());
     }
     return cols;
+  }
+  
+  /**
+   * Map the column names to their respective serializers
+   * TODO cache this
+   * @param metaData
+   * @return
+   */
+  Map<String, Serializer> buildColumnSerializerMap(ClassMetaData metaData) {
+    Map<String, Serializer> serMap = new HashMap<String, Serializer>();
+    
+    FieldMetaData[] fmds = metaData.getFields();
+    for (int i = 0; i < fmds.length; i++) {
+      if (fmds[i].getManagement() != fmds[i].MANAGE_PERSISTENT || fmds[i].isPrimaryKey())
+        continue;
+      switch (fmds[i].getTypeCode()) {
+      case JavaTypes.STRING:
+        serMap.put(fmds[i].getName(), StringSerializer.get());
+        break;
+      case JavaTypes.INT:
+        serMap.put(fmds[i].getName(), IntegerSerializer.get());
+        break;
+      case JavaTypes.INT_OBJ:
+        serMap.put(fmds[i].getName(), IntegerSerializer.get());
+        break;
+      case JavaTypes.DATE:
+        serMap.put(fmds[i].getName(), DateSerializer.get());
+        break;
+      case JavaTypes.LONG:
+        serMap.put(fmds[i].getName(), LongSerializer.get());
+        break;
+      case JavaTypes.LONG_OBJ:
+        serMap.put(fmds[i].getName(), LongSerializer.get());
+        break;
+      case JavaTypes.DOUBLE:
+        serMap.put(fmds[i].getName(), DoubleSerializer.get());
+        break;
+      case JavaTypes.DOUBLE_OBJ:
+        serMap.put(fmds[i].getName(), DoubleSerializer.get());
+        break;        
+      default:
+        serMap.put(fmds[i].getName(), ObjectSerializer.get());
+        break;
+      }
+    }    
+    return serMap;
+  }
+
+  public Mutator addMutation(Mutator mutator, Object idObj, OpenJPAStateManager stateManager, Keyspace keyspace) {
+    ClassMetaData metaData = stateManager.getMetaData();    
+    Map<String,Serializer> serMap = buildColumnSerializerMap(metaData);
+    for (Map.Entry<String, Serializer> entry : serMap.entrySet()) {
+      mutator.addInsertion(getKeyBytes(idObj), "TestBeanColumnFamily", 
+          HFactory.createColumn(entry.getKey(), stateManager.fetch(metaData.getField(entry.getKey()).getIndex()), 
+              StringSerializer.get(), entry.getValue()));
+    }
+    return mutator;
   }
 }
