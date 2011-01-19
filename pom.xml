@@ -154,6 +154,35 @@
         <version>0.3.1</version>
       </extension>
     </extensions>
+    <plugins>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>2.3</version>
+          <executions>
+          <!--
+          The following plugin definition will create a test-jar for any
+          project at compile time. This is useful for reusing test code b/w
+          project. Taken from:
+          http://www.waltercedric.com/java-j2ee-mainmenu-53/361-maven-build-system/1307-maven2-unit-test-code-reuse-and-dependencies.html
+
+          For example, if project A reuses test code from project core, in
+          A/pom.xml you should have:
+          <dependency>
+            <groupId>me.prettyprint</groupId>
+            <artifactId>hector-core</artifactId>
+            <version>hector-version-here</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+          </dependency>
+          -->
+            <execution>
+              <goals>
+                <goal>test-jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -186,10 +215,6 @@
         </plugin>
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
-          <version>2.3</version>
-        </plugin>
-        <plugin>
-          <artifactId>maven-jar-plugin</artifactId>
           <version>2.3</version>
         </plugin>
         <plugin>
