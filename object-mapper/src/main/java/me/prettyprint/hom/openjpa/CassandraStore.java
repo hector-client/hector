@@ -13,6 +13,7 @@ import org.apache.openjpa.util.OpenJPAId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -21,6 +22,7 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.EntityManagerConfigurator;
@@ -61,11 +63,21 @@ public class CassandraStore {
     SliceQuery<byte[], String, byte[]> sliceQuery = mappingUtils.buildSliceQuery(idObj, metaData, keyspace);
     
     QueryResult<ColumnSlice<String, byte[]>> result = sliceQuery.execute();
-    log.debug("sliceResult: {}",new String(result.get().getColumnByName("name").getValue()));
+    
     stateManager.storeString(1, StringUtils.string(result.get().getColumnByName("name").getValue()));
     stateManager.storeObject(0, idObj);
-    // similarly handoff to hectorObjectMapper.createObject(CFMappingDef<T, I> cfMapDef, I id, ColumnSlice<String, byte[]> slice)
+    
     return true;
+  }
+  
+  public Mutator storeObject(Mutator mutator, OpenJPAStateManager stateManager, Object idObj) {
+    if ( mutator == null )
+      mutator = new MutatorImpl(keyspace, BytesArraySerializer.get());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Adding mutation for class {}", stateManager.getManagedInstance().getClass().getName());
+    }
+    mappingUtils.addMutation(mutator, idObj, stateManager, keyspace);
+    return mutator;
   }
   
   

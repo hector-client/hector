@@ -12,10 +12,12 @@ import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.beans.SimpleTestBean;
 import me.prettyprint.hom.openjpa.MappingUtils;
 
+import org.apache.openjpa.kernel.Broker;
 import org.apache.openjpa.meta.ClassMetaData;
 import org.apache.openjpa.persistence.JPAFacadeHelper;
 import org.apache.openjpa.util.LongId;
@@ -29,6 +31,7 @@ public class MappingUtilsTest {
   
   private MappingUtils mappingUtils;
   private static EntityManagerFactory entityManagerFactory;
+  private Keyspace keyspace = Mockito.mock(ExecutingKeyspace.class);
     
   @Test
   public void testConvertClassToSlice() {
@@ -51,11 +54,19 @@ public class MappingUtilsTest {
   @Test
   public void testBuildSliceQuery() {
     mappingUtils = new MappingUtils();
-    LongId id = new LongId(SimpleTestBean.class, 1L);
-    Keyspace keyspace = Mockito.mock(ExecutingKeyspace.class);
+    LongId id = new LongId(SimpleTestBean.class, 1L);    
     SliceQuery sliceQuery = mappingUtils.buildSliceQuery(id, JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleTestBean.class), keyspace);
     assertTrue(((ThriftSliceQuery)sliceQuery).getColumnNames().contains("name"));
     assertEquals(1,((ThriftSliceQuery)sliceQuery).getColumnNames().size());
+  }
+  
+  @Test
+  public void testBuildMutation() {
+    mappingUtils = new MappingUtils();
+    LongId id = new LongId(SimpleTestBean.class, 1L);
+    Broker broker = JPAFacadeHelper.toBroker(entityManagerFactory.createEntityManager());
+    
+    //Mutator mutator = mappingUtils.buildMutator(id, broker., keyspace);
   }
   
   @BeforeClass

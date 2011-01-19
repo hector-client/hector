@@ -92,25 +92,13 @@ public class CassandraStoreManager extends AbstractStoreManager {
     //_deletes = new ArrayList(pDeleted.size());
     cassandraStore.open();
     OpenJPAConfiguration conf = ctx.getConfiguration();
-    Mutator<Long> mutator = HFactory.createMutator(cassandraStore.getKeyspace(), LongSerializer.get());
+    Mutator mutator = null;
     for (Iterator itr = pNew.iterator(); itr.hasNext();) {
+      
       // create new object data for instance
       OpenJPAStateManager sm = (OpenJPAStateManager) itr.next();
       Object oid = sm.getObjectId();
-      ClassMetaData cmd = sm.getMetaData();
-      // sm.getManagedInstance returns the actual object
-      // TODO throw this ^ at ClassCacheMgr?
-      log.debug("oid: {}, cmd: {}",oid.getClass().getName(), cmd);
-      FieldMetaData[] fields = cmd.getFields();
-      for (FieldMetaData fieldMetaData : fields) {
-        log.debug("found field with name: {} and index: {}", fieldMetaData.getName(), fieldMetaData.getIndex());
-      }
-      
-      
-      // here is where we pull in ClassCacheMgr innards
-      // need to port it over to OpenJPAStateManager.field* methods 
-      
-      mutator.addInsertion(Long.valueOf(1), "TestBeanColumnFamily", HFactory.createStringColumn("name",sm.fetchStringField(1)));
+      mutator = cassandraStore.storeObject(mutator, sm, oid);
       
     }
     mutator.execute();
