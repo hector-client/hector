@@ -1,4 +1,4 @@
-package me.prettyprint.hom;
+package me.prettyprint.hom.openjpa;
 
 import java.util.ArrayList;
 import java.util.BitSet;
@@ -22,6 +22,8 @@ import org.apache.openjpa.kernel.PCState;
 import org.apache.openjpa.lib.rop.ListResultObjectProvider;
 import org.apache.openjpa.lib.rop.ResultObjectProvider;
 import org.apache.openjpa.meta.ClassMetaData;
+import org.apache.openjpa.meta.FieldMetaData;
+import org.apache.openjpa.util.OpenJPAId;
 import org.apache.openjpa.util.StoreException;
 import org.apache.openjpa.xmlstore.ObjectData;
 import org.slf4j.Logger;
@@ -31,12 +33,13 @@ public class CassandraStoreManager extends AbstractStoreManager {
 
   private static Logger log = LoggerFactory.getLogger(CassandraStoreManager.class);
   
-  private Keyspace keyspace;  
-  private Cluster cluster;
+  private CassandraStore cassandraStore;
   
   @Override
   public ResultObjectProvider executeExtent(ClassMetaData cMetaData, boolean useSubClasses,
       FetchConfiguration fetchConfiguration) {
+    // cMetaData is essentially the query construct
+    // the ResultObjectProvider runs the query
     if ( log.isDebugEnabled() ) {
       log.debug("in executeExtent with ClassMetaData {}: useSubClasses: {} and fetchConfiguration: {}",
           new Object[]{cMetaData, useSubClasses, fetchConfiguration});
@@ -87,13 +90,25 @@ public class CassandraStoreManager extends AbstractStoreManager {
      */
     //_updates = new ArrayList(pNew.size() + pDirty.size());
     //_deletes = new ArrayList(pDeleted.size());
+    cassandraStore.open();
     OpenJPAConfiguration conf = ctx.getConfiguration();
-    Mutator<Long> mutator = HFactory.createMutator(keyspace, LongSerializer.get());
+    Mutator<Long> mutator = HFactory.createMutator(cassandraStore.getKeyspace(), LongSerializer.get());
     for (Iterator itr = pNew.iterator(); itr.hasNext();) {
       // create new object data for instance
       OpenJPAStateManager sm = (OpenJPAStateManager) itr.next();
       Object oid = sm.getObjectId();
-      log.debug("oid: {}, managedInstance: {}",oid.getClass().getName(), sm.getManagedInstance());
+      ClassMetaData cmd = sm.getMetaData();
+      // sm.getManagedInstance returns the actual object
+      // TODO throw this ^ at ClassCacheMgr?
+      log.debug("oid: {}, cmd: {}",oid.getClass().getName(), cmd);
+      FieldMetaData[] fields = cmd.getFields();
+      for (FieldMetaData fieldMetaData : fields) {
+        log.debug("found field with name: {} and index: {}", fieldMetaData.getName(), fieldMetaData.getIndex());
+      }
+      
+      
+      // here is where we pull in ClassCacheMgr innards
+      // need to port it over to OpenJPAStateManager.field* methods 
       
       mutator.addInsertion(Long.valueOf(1), "TestBeanColumnFamily", HFactory.createStringColumn("name",sm.fetchStringField(1)));
       
@@ -107,27 +122,37 @@ public class CassandraStoreManager extends AbstractStoreManager {
   @Override
   public boolean initialize(OpenJPAStateManager stateManager, PCState pcState,
       FetchConfiguration fetchConfiguration, Object obj) {
-    stateManager.getObjectId();
-    
-    return false;
+    log.debug("In initialize operation...");
+    cassandraStore.open();
+    stateManager.initialize(stateManager.getMetaData().getDescribedType(), pcState);
+    cassandraStore.getObject(stateManager, stateManager.getId());
+    // TODO need to add the not-found case
+    return true;
   }
 
   @Override
-  public boolean load(OpenJPAStateManager arg0, BitSet arg1,
+  public boolean load(OpenJPAStateManager stateManager, BitSet arg1,
       FetchConfiguration arg2, int arg3, Object arg4) {
-    // TODO Auto-generated method stub
+    log.debug("In load operation...");
+    cassandraStore.getObject(stateManager, stateManager.getId());
+    // TODO 
+    // this is a misnomer. load is called to fill in additional information not retrieved from 
+    // initialize call above
     return false;
   }
 
   @Override
   public boolean exists(OpenJPAStateManager arg0, Object arg1) {
-    // TODO Auto-generated method stub
+    // TODO 
+    // hit cassandra to see if the object exists
+    log.debug("In CSM.exists()");
     return false;
   }
 
 
   @Override
   public boolean isCached(List<Object> arg0, BitSet arg1) {
+    log.debug("In CSM.isCached()");
     // TODO Auto-generated method stub
     return false;
   }
@@ -135,10 +160,28 @@ public class CassandraStoreManager extends AbstractStoreManager {
   
   
   @Override
+  public int compareVersion(OpenJPAStateManager state, Object v1, Object v2) {
+    log.debug("in CSM.compareVersion");
+    return super.compareVersion(state, v1, v2);
+  }
+
+  @Override
+  public boolean syncVersion(OpenJPAStateManager sm, Object edata) {
+    // TODO Auto-generated method stub
+    log.debug("in CSM.syncVersion");
+    return super.syncVersion(sm, edata);
+  }
+
+  @Override
   protected void open() {
     OpenJPAConfiguration conf = ctx.getConfiguration();
-    cluster = HFactory.getCluster(conf.getValue("me.prettyprint.hom.clusterName").getOriginalValue());
-    keyspace = HFactory.createKeyspace(conf.getValue("me.prettyprint.hom.keyspace").getOriginalValue(), cluster);    
+    // TODO
+    // encapsulate into CassandraStore or similar (should take CassandraStoreConfig as an argg
+    //cluster = HFactory.getCluster(conf.getValue("me.prettyprint.hom.clusterName").getOriginalValue());
+    //keyspace = HFactory.createKeyspace(conf.getValue("me.prettyprint.hom.keyspace").getOriginalValue(), cluster);    
+    
+    cassandraStore = new CassandraStore((CassandraStoreConfiguration)conf);
+    log.debug("in CSM.open()");
   }
 
   protected Collection getUnsupportedOptions() {
@@ -149,10 +192,11 @@ public class CassandraStoreManager extends AbstractStoreManager {
     //c.remove(OpenJPAConfiguration.OPTION_OPTIMISTIC);
 
     // and add some that we don't support but the abstract store does
+    // TODO take these out one by one 
     c.add(OpenJPAConfiguration.OPTION_EMBEDDED_RELATION);
     c.add(OpenJPAConfiguration.OPTION_EMBEDDED_COLLECTION_RELATION);
     c.add(OpenJPAConfiguration.OPTION_EMBEDDED_MAP_RELATION);
-    c.add(OpenJPAConfiguration.OPTION_OPTIMISTIC);
+    //c.add(OpenJPAConfiguration.OPTION_OPTIMISTIC);
     return c;
   }
 
@@ -171,3 +215,18 @@ public class CassandraStoreManager extends AbstractStoreManager {
   
 
 }
+
+/*
+ * NOTES
+ - OpenJPAStateManager holds the 'state' of an Entity instance
+ - ClassMetaData holds the details of the persistable Class
+ 
+ Consider using ClassCacheMgr as a MetaDataFactory
+ http://openjpa.apache.org/builds/2.0.1/apache-openjpa-2.0.1/docs/manual/ref_guide_meta.html
+  
+ Consider rolling a custom FetchPlan (or FetchConfiguration?) for CL 
+ 
+ Returns the OpenJPAId.getType() returns Entity class:
+ log.debug("OID class name: {}",((OpenJPAId)idObj).getType().getName());
+ 
+ */

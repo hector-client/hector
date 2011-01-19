@@ -27,7 +27,7 @@
 		<property name="me.prettyprint.hom.clusterName" value="TestPool"/>
 		<property name="me.prettyprint.hom.hostList" value="localhost:9161"/>
         <property name="openjpa.BrokerFactory" value="abstractstore" />		
-		<property name="openjpa.abstractstore.AbstractStoreManager" value="me.prettyprint.hom.CassandraStoreManager"/>
+		<property name="openjpa.abstractstore.AbstractStoreManager" value="me.prettyprint.hom.openjpa.CassandraStoreManager"/>
 		<property name="openjpa.Optimistic" value="false"/>
 		<property name="openjpa.LockManager" value="none"/>
         <property name="openjpa.ConnectionURL" value="localhost:9161" />        		

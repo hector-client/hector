@@ -56,6 +56,8 @@ public class SerializerTypeInferer {
       serializer = BooleanSerializer.get();
     } else if (valueClass.equals(byte[].class)) {
       serializer = ByteBufferSerializer.get();
+    } else if (valueClass.equals(Date.class)) {
+      serializer = DateSerializer.get();
     } else {
       serializer = ObjectSerializer.get();
     }

@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
@@ -17,12 +17,11 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
-import com.mycompany.MySerial;
-
-import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
+
+import com.mycompany.MySerial;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)

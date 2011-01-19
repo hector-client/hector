@@ -49,6 +49,8 @@ public class CassandraTestBase {
       cassandra.init();
     }
     catch (TTransportException e) {
+      System.out.println( "Could not initialize Cassandra");
+      e.printStackTrace();
       throw e;
     }
 
@@ -58,7 +60,8 @@ public class CassandraTestBase {
     t.setName(cassandra.getClass().getSimpleName());
     t.setDaemon(true);
     t.start();
-    // Thread.sleep(1000);
+
+    System.out.println( "Successfully started Cassandra");
   }
 
   public static void createKeyspace(Cluster cluster, String name, String strategy, int replicationFactor,
@@ -89,7 +92,7 @@ public class CassandraTestBase {
       SecurityException, IllegalArgumentException, IOException,
       InterruptedException, NoSuchMethodException, IllegalAccessException,
       InvocationTargetException {
-        startCassandraInstance("target/cassandra-data");
+        startCassandraInstance("tmp/var/lib/cassandra");
       
         ArrayList<CfDef> cfDefList = new ArrayList<CfDef>(2);
         cfDefList.add(new CfDef("TestKeyspace", "TestBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())

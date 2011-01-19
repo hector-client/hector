@@ -1,4 +1,4 @@
-package me.prettyprint.hom;
+package me.prettyprint.hom.openjpa;
 
 import org.apache.openjpa.conf.OpenJPAConfigurationImpl;
 import org.apache.openjpa.lib.conf.ProductDerivations;

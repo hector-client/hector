@@ -3,16 +3,16 @@ package me.prettyprint.hom.beans;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.IdClass;
 import javax.persistence.Table;
 
-import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
 
 
 @Entity
 @Table(name="CustomIdColumnFamily")
+@IdClass(ColorEmbedded.class)
 public class MyCustomIdBean {
-  //@Id( converter=ColorConverter.class)
   @Id
   private Colors id;
 

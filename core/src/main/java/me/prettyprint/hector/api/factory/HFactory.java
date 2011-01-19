@@ -336,7 +336,11 @@ public final class HFactory {
 
   /**
    * Creates a clock of now with the default clock resolution (micorosec) as defined in
-   * {@link CassandraHostConfigurator}
+   * {@link CassandraHostConfigurator}.
+   * Notice that this is a convenient method.
+   * Be aware that there might be multiple {@link CassandraHostConfigurator} each of them with
+   * different clock resolutions, in which case the result of {@link HFactory.createClock} will not be
+   * consistent. {@link Keyspace.createClock()} should be used instead.
    */
   public static long createClock() {
     return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();

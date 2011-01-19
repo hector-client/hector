@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.Map.Entry;
 
 import javax.persistence.DiscriminatorType;
+import javax.persistence.Id;
 
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
@@ -35,6 +36,7 @@ import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
+import me.prettyprint.hom.cache.HectorObjectMapperException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,10 +80,10 @@ public class HectorObjectMapper {
     }
 
     CFMappingDef<T, I> cfMapDef = cacheMgr.getCfMapDef(colFamName, true);
-    PropertyMappingDefinition<I> md = cfMapDef.getIdPropertyDef();
+    PropertyMappingDefinition<I> md = cfMapDef.getIdPropertySet().iterator().next();
     if (null == md) {
-      throw new IllegalStateException(
-          "Trying to build new object but haven't annotated a field with @Id");
+      throw new HectorObjectMapperException(
+          "Trying to build new object but haven't annotated a field with @" + Id.class.getSimpleName());
     }
 
     byte[] idAsBytes = md.getConverter().convertObjTypeToCassType(id);
@@ -107,10 +109,10 @@ public class HectorObjectMapper {
 
     @SuppressWarnings("unchecked")
     CFMappingDef<T, I> cfMapDef = (CFMappingDef<T, I>) cacheMgr.getCfMapDef(obj.getClass(), true);
-    PropertyMappingDefinition<I> md = cfMapDef.getIdPropertyDef();
+    PropertyMappingDefinition<I> md = cfMapDef.getIdPropertySet().iterator().next();
     if (null == md) {
-      throw new IllegalStateException(
-          "Trying to save object but haven't annotated a field with @Id");
+      throw new HectorObjectMapperException(
+          "Trying to save object but haven't annotated a field with @" + Id.class.getSimpleName());
     }
 
     Method meth = md.getPropDesc().getReadMethod();
@@ -122,7 +124,7 @@ public class HectorObjectMapper {
     byte[] bytes;
     try {
       @SuppressWarnings("unchecked")
-      I retVal = (I) meth.invoke(obj, (Object[]) null);
+      I retVal = (I)meth.invoke(obj, (Object[]) null);
       bytes = md.getConverter().convertObjTypeToCassType(retVal);
     } catch (IllegalArgumentException e) {
       throw new RuntimeException(e);
@@ -138,7 +140,7 @@ public class HectorObjectMapper {
 
     Collection<HColumn<String, byte[]>> colColl = createColumnSet(obj);
 
-    String colFamName = cfMapDef.getColFamName();
+    String colFamName = cfMapDef.getEffectiveColFamName();
     Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
     for (HColumn<String, byte[]> col : colColl) {
       m.addInsertion(bytes, colFamName, col);
@@ -177,7 +179,7 @@ public class HectorObjectMapper {
     CFMappingDef<? extends T, I> cfMapDefInstance = determineClassType(cfMapDef, slice);
 
     try {
-      T obj = cfMapDefInstance.getClazz().newInstance();
+      T obj = cfMapDefInstance.getEffectiveClass().newInstance();
 
       setIdIfCan(cfMapDef, obj, id);
 
@@ -368,7 +370,7 @@ public class HectorObjectMapper {
     Object discValue = convertColValueToDiscType(discType, discCol.getValue());
     CFMappingDef<? extends T, I> derivedCfMapDef = derivedClasses.get(discValue);
     if (null == derivedCfMapDef) {
-      throw new RuntimeException("Cannot find derived class of " + cfMapDef.getClazz().getName()
+      throw new RuntimeException("Cannot find derived class of " + cfMapDef.getEffectiveClass().getName()
           + " with discriminator value of " + discValue);
     }
 
@@ -405,10 +407,10 @@ public class HectorObjectMapper {
 
   private <T, I> void setIdIfCan(CFMappingDef<T, I> cfMapDef, T obj, I id)
       throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-    PropertyMappingDefinition<I> md = cfMapDef.getIdPropertyDef();
+    PropertyMappingDefinition<I> md = cfMapDef.getIdPropertySet().iterator().next();
     if (null == md) {
-      throw new IllegalStateException(
-          "Trying to build new object but haven't annotated a field with @Id");
+      throw new HectorObjectMapperException(
+          "Trying to build new object but haven't annotated a field with @" + Id.class.getSimpleName());
     }
 
     Method meth = md.getPropDesc().getWriteMethod();
