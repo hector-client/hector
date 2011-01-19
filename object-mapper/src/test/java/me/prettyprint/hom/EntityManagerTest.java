@@ -12,7 +12,6 @@ import me.prettyprint.hom.beans.MyTestBean;
 import org.junit.Ignore;
 import org.junit.Test;
 
-@Ignore // fix inheretence error from JPA
 public class EntityManagerTest extends CassandraTestBase {
 
   @Test
@@ -33,6 +32,7 @@ public class EntityManagerTest extends CassandraTestBase {
   }
 
   @Test
+  @Ignore( "CustomIdBean class requires the \"old\" @Id annotation so the Colors converter can be used")
   public void testInitializeSaveLoadCustomId() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
     MyCustomIdBean o1 = new MyCustomIdBean();

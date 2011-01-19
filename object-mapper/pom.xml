@@ -4,10 +4,11 @@
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.7.0-24-SNAPSHOT</version>
+        <version>0.7.0-23</version>
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
+    <version>0.7.0-hom-1</version>
 
     <dependencies>
         <dependency>
@@ -18,7 +19,7 @@
         <dependency>
             <groupId>me.prettyprint</groupId>
             <artifactId>hector-core</artifactId>
-            <version>0.7.0-24-SNAPSHOT</version>
+            <version>0.7.0-23</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -50,16 +51,18 @@
             <version>1.2.16</version>
             <scope>test</scope>
         </dependency>
-    	<dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>   
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.8.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.mockito</groupId>
+        <artifactId>mockito-all</artifactId>
+        <version>1.8.2</version>
+        <scope>test</scope>
+      </dependency>            
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -118,6 +121,13 @@
             <scope>test</scope>
         </dependency>        
 
+        <dependency>
+        	<groupId>me.prettyprint</groupId>
+        	<artifactId>hector-core</artifactId>
+        	<version>0.7.0-23</version>
+        	<type>bundle</type>
+        	<scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>
