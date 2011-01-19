@@ -15,11 +15,11 @@
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
   <licenses>
-  	<license>
-  		<name>MIT License</name>
-  		<distribution>repo</distribution>
-  		<url>https://github.com/rantav/hector/wiki/License</url>
-  	</license>
+    <license>
+      <name>MIT License</name>
+      <distribution>repo</distribution>
+      <url>https://github.com/rantav/hector/wiki/License</url>
+    </license>
   </licenses>
   <scm>
     <connection>scm:git:git://github.com/rantav/hector.git</connection>
