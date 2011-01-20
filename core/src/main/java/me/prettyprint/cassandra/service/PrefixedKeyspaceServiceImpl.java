@@ -68,8 +68,7 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
     unprefixed.end_token = prefixed.end_token;
     unprefixed.end_key = ps.fromByteBuffer(prefixed.end_key);
     unprefixed.start_token = prefixed.start_token;
-    unprefixed.start_key = ps
-        .fromByteBuffer(prefixed.start_key);
+    unprefixed.start_key = ps.fromByteBuffer(prefixed.start_key);
     return unprefixed;
   }
 
@@ -153,23 +152,6 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
-  public Map<ByteBuffer, SuperColumn> multigetSuperColumn(
-      List<ByteBuffer> keys, ColumnPath columnPath) throws HectorException {
-
-    return ps.fromBytesMap(super.multigetSuperColumn(ps.toBytesList(keys),
-        columnPath));
-  }
-
-  @Override
-  public Map<ByteBuffer, SuperColumn> multigetSuperColumn(
-      List<ByteBuffer> keys, ColumnPath columnPath, boolean reversed, int size)
-      throws HectorException {
-
-    return ps.fromBytesMap(super.multigetSuperColumn(ps.toBytesList(keys),
-        columnPath, reversed, size));
-  }
-
-  @Override
   public Map<ByteBuffer, List<SuperColumn>> multigetSuperSlice(
       List<ByteBuffer> keys, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException {
@@ -185,12 +167,6 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
     return ps.fromBytesMap(super.getIndexedSlices(columnParent, indexClause,
         predicate));
-  }
-
-  @Override
-  public void remove(ByteBuffer key, ColumnPath columnPath) {
-
-    super.remove(ps.toByteBuffer(key), columnPath);
   }
 
   @Override

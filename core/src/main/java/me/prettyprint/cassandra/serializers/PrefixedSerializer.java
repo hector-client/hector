@@ -10,7 +10,12 @@ import java.util.Map.Entry;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorSerializationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
+
+  private static Logger log = LoggerFactory.getLogger(PrefixedSerializer.class);
 
   P prefix;
   Serializer<P> prefixSerializer;
@@ -42,6 +47,7 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     bb.put(prefixBytes.slice());
     bb.put(sb);
 
+    bb.rewind();
     return bb;
   }
 
@@ -57,6 +63,7 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     if (compareByteArrays(prefixBytes.array(), prefixBytes.arrayOffset()
         + prefixBytes.position(), prefixBytes.remaining(), bytes.array(),
         bytes.arrayOffset() + bytes.position(), prefixBytes.remaining()) != 0) {
+      log.error("Unprefixed value received, throwing exception...");
       throw new HectorSerializationException("Unexpected prefix value");
     }
     bytes.position(prefixBytes.remaining());
@@ -70,9 +77,11 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     List<S> objList = new ArrayList<S>(list.size());
     for (ByteBuffer s : list) {
       try {
-        objList.add(fromByteBuffer(s));
+        ByteBuffer bb = s.slice();
+        objList.add(fromByteBuffer(bb));
       } catch (HectorSerializationException e) {
         // not a prefixed key, discard
+        log.warn("Unprefixed value received, discarding...");
       }
     }
     return objList;
@@ -84,9 +93,11 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
         computeInitialHashSize(map.size()));
     for (Entry<ByteBuffer, V> entry : map.entrySet()) {
       try {
-        objMap.put(fromByteBuffer(entry.getKey()), entry.getValue());
+        ByteBuffer bb = entry.getKey().slice();
+        objMap.put(fromByteBuffer(bb), entry.getValue());
       } catch (HectorSerializationException e) {
         // not a prefixed key, discard
+        log.warn("Unprefixed value received, discarding...");
       }
     }
     return objMap;
