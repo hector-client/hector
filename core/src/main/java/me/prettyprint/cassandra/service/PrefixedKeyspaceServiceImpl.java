@@ -9,7 +9,6 @@ import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.PrefixedSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
-import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -82,22 +81,10 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
-  public void batchMutate(BatchMutation batchMutate) throws HectorException {
-
-    super.batchMutate(batchMutate);
-  }
-
-  @Override
   public int getCount(ByteBuffer key, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException {
 
     return super.getCount(ps.toByteBuffer(key), columnParent, predicate);
-  }
-
-  @Override
-  public CassandraHost getCassandraHost() {
-
-    return super.getCassandraHost();
   }
 
   @Override
@@ -160,14 +147,16 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException {
 
-    return super.multigetSlice(ps.toBytesList(keys), columnParent, predicate);
+    return ps.fromBytesMap(super.multigetSlice(ps.toBytesList(keys),
+        columnParent, predicate));
   }
 
   @Override
   public Map<ByteBuffer, SuperColumn> multigetSuperColumn(
       List<ByteBuffer> keys, ColumnPath columnPath) throws HectorException {
 
-    return super.multigetSuperColumn(ps.toBytesList(keys), columnPath);
+    return ps.fromBytesMap(super.multigetSuperColumn(ps.toBytesList(keys),
+        columnPath));
   }
 
   @Override
@@ -175,8 +164,8 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       List<ByteBuffer> keys, ColumnPath columnPath, boolean reversed, int size)
       throws HectorException {
 
-    return super.multigetSuperColumn(ps.toBytesList(keys), columnPath,
-        reversed, size);
+    return ps.fromBytesMap(super.multigetSuperColumn(ps.toBytesList(keys),
+        columnPath, reversed, size));
   }
 
   @Override
@@ -184,8 +173,8 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       List<ByteBuffer> keys, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException {
 
-    return super.multigetSuperSlice(ps.toBytesList(keys), columnParent,
-        predicate);
+    return ps.fromBytesMap(super.multigetSuperSlice(ps.toBytesList(keys),
+        columnParent, predicate));
   }
 
   @Override
@@ -193,7 +182,8 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       ColumnParent columnParent, IndexClause indexClause,
       SlicePredicate predicate) throws HectorException {
 
-    return super.getIndexedSlices(columnParent, indexClause, predicate);
+    return ps.fromBytesMap(super.getIndexedSlices(columnParent, indexClause,
+        predicate));
   }
 
   @Override
@@ -207,8 +197,8 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       ColumnParent columnParent, SlicePredicate slicePredicate)
       throws HectorException {
 
-    return super.multigetCount(ps.toBytesList(keys), columnParent,
-        slicePredicate);
+    return ps.fromBytesMap(super.multigetCount(ps.toBytesList(keys),
+        columnParent, slicePredicate));
   }
 
   @Override
@@ -219,28 +209,10 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
-  public String getName() {
-
-    return super.getName();
-  }
-
-  @Override
   public Column getColumn(ByteBuffer key, ColumnPath columnPath)
       throws HectorException {
 
     return super.getColumn(ps.toByteBuffer(key), columnPath);
-  }
-
-  @Override
-  public HConsistencyLevel getConsistencyLevel(OperationType operationType) {
-
-    return super.getConsistencyLevel(operationType);
-  }
-
-  @Override
-  public String toString() {
-
-    return super.toString();
   }
 
 }

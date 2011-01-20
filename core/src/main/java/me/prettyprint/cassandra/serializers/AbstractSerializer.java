@@ -11,14 +11,13 @@ import java.util.Set;
 
 import me.prettyprint.hector.api.Serializer;
 
-
 /**
- * A base class for serializer implementations.
- * Takes care of the default implementations of to/fromBytesList and to/fromBytesMap. Extenders of
- * this class only need to implement the toBytes and fromBytes.
- *
+ * A base class for serializer implementations. Takes care of the default
+ * implementations of to/fromBytesList and to/fromBytesMap. Extenders of this
+ * class only need to implement the toBytes and fromBytes.
+ * 
  * @author Ed Anuff
- *
+ * 
  * @param <T>
  */
 public abstract class AbstractSerializer<T> implements Serializer<T> {
@@ -33,39 +32,36 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
     bb.get(bytes, 0, bytes.length);
     return bytes;
   }
-  
-  @Override 
+
+  @Override
   public T fromBytes(byte[] bytes) {
     return fromByteBuffer(ByteBuffer.wrap(bytes));
   }
-  
-  /*
-  public ByteBuffer toByteBuffer(T obj) {
-    return ByteBuffer.wrap(toBytes(obj));
-  }
 
-  public ByteBuffer toByteBuffer(T obj, ByteBuffer byteBuffer, int offset, int length) {
-    byteBuffer.put(toBytes(obj), offset, length);
-    return byteBuffer;
-  }
-  */
+  /*
+   * public ByteBuffer toByteBuffer(T obj) { return
+   * ByteBuffer.wrap(toBytes(obj)); }
+   * 
+   * public ByteBuffer toByteBuffer(T obj, ByteBuffer byteBuffer, int offset,
+   * int length) { byteBuffer.put(toBytes(obj), offset, length); return
+   * byteBuffer; }
+   */
 
   @Override
   public abstract T fromByteBuffer(ByteBuffer byteBuffer);
 
   /*
-  public T fromByteBuffer(ByteBuffer byteBuffer) {
-    return fromBytes(byteBuffer.array());
-  }
-
-  public T fromByteBuffer(ByteBuffer byteBuffer, int offset, int length) {
-    return fromBytes(Arrays.copyOfRange(byteBuffer.array(), offset, length));
-  }
-  */
+   * public T fromByteBuffer(ByteBuffer byteBuffer) { return
+   * fromBytes(byteBuffer.array()); }
+   * 
+   * public T fromByteBuffer(ByteBuffer byteBuffer, int offset, int length) {
+   * return fromBytes(Arrays.copyOfRange(byteBuffer.array(), offset, length)); }
+   */
 
   @Override
   public Set<ByteBuffer> toBytesSet(List<T> list) {
-    Set<ByteBuffer> bytesList = new HashSet<ByteBuffer>(computeInitialHashSize(list.size()));
+    Set<ByteBuffer> bytesList = new HashSet<ByteBuffer>(
+        computeInitialHashSize(list.size()));
     for (T s : list) {
       bytesList.add(toByteBuffer(s));
     }
@@ -101,7 +97,8 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public <V> Map<ByteBuffer, V> toBytesMap(Map<T, V> map) {
-    Map<ByteBuffer, V> bytesMap = new LinkedHashMap<ByteBuffer, V>(computeInitialHashSize(map.size()));
+    Map<ByteBuffer, V> bytesMap = new LinkedHashMap<ByteBuffer, V>(
+        computeInitialHashSize(map.size()));
     for (Entry<T, V> entry : map.entrySet()) {
       bytesMap.put(toByteBuffer(entry.getKey()), entry.getValue());
     }
@@ -110,14 +107,15 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   @Override
   public <V> Map<T, V> fromBytesMap(Map<ByteBuffer, V> map) {
-    Map<T, V> objMap = new LinkedHashMap<T, V>(computeInitialHashSize(map.size()));
+    Map<T, V> objMap = new LinkedHashMap<T, V>(
+        computeInitialHashSize(map.size()));
     for (Entry<ByteBuffer, V> entry : map.entrySet()) {
       objMap.put(fromByteBuffer(entry.getKey()), entry.getValue());
     }
     return objMap;
   }
 
-  private int computeInitialHashSize(int initialSize) {
-	  return Double.valueOf(Math.floor(initialSize / 0.75)).intValue() + 1;
+  public int computeInitialHashSize(int initialSize) {
+    return Double.valueOf(Math.floor(initialSize / 0.75)).intValue() + 1;
   }
 }

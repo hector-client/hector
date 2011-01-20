@@ -1,6 +1,11 @@
 package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorSerializationException;
@@ -58,6 +63,33 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
 
     S s = suffixSerializer.fromByteBuffer(bytes);
     return s;
+  }
+
+  @Override
+  public List<S> fromBytesList(List<ByteBuffer> list) {
+    List<S> objList = new ArrayList<S>(list.size());
+    for (ByteBuffer s : list) {
+      try {
+        objList.add(fromByteBuffer(s));
+      } catch (HectorSerializationException e) {
+        // not a prefixed key, discard
+      }
+    }
+    return objList;
+  }
+
+  @Override
+  public <V> Map<S, V> fromBytesMap(Map<ByteBuffer, V> map) {
+    Map<S, V> objMap = new LinkedHashMap<S, V>(
+        computeInitialHashSize(map.size()));
+    for (Entry<ByteBuffer, V> entry : map.entrySet()) {
+      try {
+        objMap.put(fromByteBuffer(entry.getKey()), entry.getValue());
+      } catch (HectorSerializationException e) {
+        // not a prefixed key, discard
+      }
+    }
+    return objMap;
   }
 
   private static int compareByteArrays(byte[] bytes1, int offset1, int len1,
