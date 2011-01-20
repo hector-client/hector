@@ -7,47 +7,48 @@ import me.prettyprint.hector.api.exceptions.HectorSerializationException;
 
 public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
 
-	P prefix;
-	Serializer<P> prefixSerializer;
-	ByteBuffer prefixBytes;
-	Serializer<S> suffixSerializer;
+  P prefix;
+  Serializer<P> prefixSerializer;
+  ByteBuffer prefixBytes;
+  Serializer<S> suffixSerializer;
 
-	public PrefixedSerializer(P prefix, Serializer<P> prefixSerializer, Serializer<S> suffixSerializer) {
-		this.prefix = prefix;
-		this.prefixSerializer = prefixSerializer;
-		this.suffixSerializer = suffixSerializer;
+  public PrefixedSerializer(P prefix, Serializer<P> prefixSerializer,
+      Serializer<S> suffixSerializer) {
+    this.prefix = prefix;
+    this.prefixSerializer = prefixSerializer;
+    this.suffixSerializer = suffixSerializer;
 
-		prefixBytes = prefixSerializer.toByteBuffer(prefix);
-		prefixBytes.rewind();
-	}
+    prefixBytes = prefixSerializer.toByteBuffer(prefix);
+    prefixBytes.rewind();
+  }
 
-	@Override
-	public ByteBuffer toByteBuffer(S s) {
+  @Override
+  public ByteBuffer toByteBuffer(S s) {
 
-		ByteBuffer sb = suffixSerializer.toByteBuffer(s);
-		sb.rewind();
+    ByteBuffer sb = suffixSerializer.toByteBuffer(s);
+    sb.rewind();
 
-		ByteBuffer bb = ByteBuffer.allocate(prefixBytes.remaining()
-				+ sb.remaining());
+    ByteBuffer bb = ByteBuffer.allocate(prefixBytes.remaining()
+        + sb.remaining());
 
-		bb.put(prefixBytes.slice());
-		bb.put(sb);
+    bb.put(prefixBytes.slice());
+    bb.put(sb);
 
-		return bb;
-	}
+    return bb;
+  }
 
-	@Override
-	public S fromByteBuffer(ByteBuffer bytes) {
-		bytes = bytes.duplicate();
-		bytes.rewind();
+  @Override
+  public S fromByteBuffer(ByteBuffer bytes) {
+    bytes = bytes.duplicate();
+    bytes.rewind();
 
-		P p = prefixSerializer.fromByteBuffer(bytes);
-		if (!prefix.equals(p)) {
-			throw new HectorSerializationException("Unexpected prefix value");
-		}
-		bytes.position(prefixBytes.remaining());
+    P p = prefixSerializer.fromByteBuffer(bytes);
+    if (!prefix.equals(p)) {
+      throw new HectorSerializationException("Unexpected prefix value");
+    }
+    bytes.position(prefixBytes.remaining());
 
-		S s = suffixSerializer.fromByteBuffer(bytes);
-		return s;
-	}
+    S s = suffixSerializer.fromByteBuffer(bytes);
+    return s;
+  }
 }

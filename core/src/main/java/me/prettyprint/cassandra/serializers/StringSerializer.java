@@ -4,9 +4,11 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
- * A StringSerializer translates the byte[] to and from string using utf-8 encoding.
+ * A StringSerializer translates the byte[] to and from string using utf-8
+ * encoding.
+ * 
  * @author Ran Tavory
- *
+ * 
  */
 public final class StringSerializer extends AbstractSerializer<String> {
 
@@ -35,10 +37,12 @@ public final class StringSerializer extends AbstractSerializer<String> {
       return null;
     }
     try {
-    return new String(byteBuffer.array(), byteBuffer.arrayOffset() + byteBuffer.position(),
-        byteBuffer.remaining(), UTF_8);
+      String s = new String(byteBuffer.array(), byteBuffer.arrayOffset()
+          + byteBuffer.position(), byteBuffer.remaining(), UTF_8);
+      byteBuffer.position(byteBuffer.position() + byteBuffer.remaining());
+      return s;
     } catch (UnsupportedEncodingException e) {
-    	throw new RuntimeException(e);
+      throw new RuntimeException(e);
     }
   }
 }

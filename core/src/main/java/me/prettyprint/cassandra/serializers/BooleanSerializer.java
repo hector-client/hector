@@ -2,12 +2,11 @@ package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
 
-
 /**
  * Converts bytes to Boolean and vice versa
- *
+ * 
  * @author Bozhidar Bozhanov
- *
+ * 
  */
 public final class BooleanSerializer extends AbstractSerializer<Boolean> {
 
@@ -31,10 +30,11 @@ public final class BooleanSerializer extends AbstractSerializer<Boolean> {
 
   @Override
   public Boolean fromByteBuffer(ByteBuffer bytes) {
-    if (bytes == null || !bytes.hasArray()) {
+    if ((bytes == null) || (bytes.remaining() < 1)) {
       return null;
     }
-    return bytes.array()[0] == (byte) 1;
+    byte b = bytes.get();
+    return b == (byte) 1;
   }
 
 }

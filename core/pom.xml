@@ -85,8 +85,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <forkMode>always</forkMode>
-          <argLine>-Xmx512M</argLine>
-          <argLine>-Xms512M</argLine>
+          <argLine>-Xmx512M -Xms512M</argLine>
         </configuration>
       </plugin>
     </plugins>

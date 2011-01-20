@@ -2,12 +2,11 @@ package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
 
-
 /**
  * Converts bytes to Long and vise a versa
- *
+ * 
  * @author Ran Tavory
- *
+ * 
  */
 public final class LongSerializer extends AbstractSerializer<Long> {
 
@@ -22,25 +21,18 @@ public final class LongSerializer extends AbstractSerializer<Long> {
     if (obj == null) {
       return null;
     }
-    long l = obj;
-    int size = 8;
-    ByteBuffer b = ByteBuffer.allocate(size);
-    for (int i = 0; i < size; ++i) {
-      b.put(i,(byte) (l >> (size - i - 1 << 3)));
-    }
+    ByteBuffer b = ByteBuffer.allocate(8);
+    b.putLong(obj);
+    b.rewind();
     return b;
   }
 
   @Override
   public Long fromByteBuffer(ByteBuffer byteBuffer) {
-    if (byteBuffer == null || !byteBuffer.hasArray()) {
+    if ((byteBuffer == null) || (byteBuffer.remaining() < 8)) {
       return null;
     }
-    long l = 0;
-    int size = byteBuffer.capacity();
-    for (int i = 0; i < size; ++i) {
-      l |= ((long) byteBuffer.get(i) & 0xff) << (size - i - 1 << 3);
-    }
+    long l = byteBuffer.getLong();
     return l;
   }
 
