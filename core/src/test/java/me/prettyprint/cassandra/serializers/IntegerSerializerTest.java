@@ -2,14 +2,14 @@ package me.prettyprint.cassandra.serializers;
 
 import static org.junit.Assert.assertEquals;
 
-import me.prettyprint.cassandra.serializers.LongSerializer;
+import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
 /**
- *
+ * 
  * @author Bozhidar Bozhanov
- *
+ * 
  */
 public class IntegerSerializerTest {
 
@@ -26,5 +26,13 @@ public class IntegerSerializerTest {
   private void test(Integer number) {
     IntegerSerializer ext = IntegerSerializer.get();
     assertEquals(number, ext.fromByteBuffer(ext.toByteBuffer(number)));
+
+    // test compatibility with ByteBuffer default byte order
+    if (number != null) {
+      ByteBuffer b = ByteBuffer.allocate(4);
+      b.putInt(number);
+      b.rewind();
+      assertEquals(number, ext.fromByteBuffer(b));
+    }
   }
 }

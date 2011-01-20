@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.serializers;
 
 import static org.junit.Assert.assertEquals;
 
-import me.prettyprint.cassandra.serializers.LongSerializer;
+import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
@@ -21,5 +21,13 @@ public class LongSerializerTest {
   private void test(Long number) {
     LongSerializer ext = new LongSerializer();
     assertEquals(number, ext.fromByteBuffer(ext.toByteBuffer(number)));
+
+    // test compatibility with ByteBuffer default byte order
+    if (number != null) {
+      ByteBuffer b = ByteBuffer.allocate(8);
+      b.putLong(number);
+      b.rewind();
+      assertEquals(number, ext.fromByteBuffer(b));
+    }
   }
 }

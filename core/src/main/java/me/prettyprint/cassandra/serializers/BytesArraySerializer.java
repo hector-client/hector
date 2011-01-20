@@ -6,12 +6,12 @@ import me.prettyprint.hector.api.Serializer;
 
 /**
  * A BytesArraySerializer translates the byte[] to and from ByteBuffer.
- *
+ * 
  * @author Patricio Echague
- *
+ * 
  */
-public final class BytesArraySerializer extends AbstractSerializer<byte[]> implements
-    Serializer<byte[]> {
+public final class BytesArraySerializer extends AbstractSerializer<byte[]>
+    implements Serializer<byte[]> {
 
   private static final BytesArraySerializer instance = new BytesArraySerializer();
 
