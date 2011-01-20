@@ -1,17 +1,19 @@
 package me.prettyprint.hom.beans;
 
+import java.io.Serializable;
+
 import me.prettyprint.hom.Colors;
 
-public class ColorEmbedded {
+public class ColorEmbedded implements Serializable {
 
   private Colors color;
-
-  public ColorEmbedded(Colors color) {
-    this.color = color;
-  }
   
-  public String getId() {
-    return color.getName();
+  public Colors getColor() {
+    return color;
+  }
+
+  public void setColor(Colors color) {
+    this.color = color;
   }
   
 }

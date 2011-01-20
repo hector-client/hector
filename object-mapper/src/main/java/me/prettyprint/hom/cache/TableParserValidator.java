@@ -15,6 +15,7 @@ import me.prettyprint.hom.ClassCacheMgr;
  */
 public class TableParserValidator implements ParserValidator {
 
+  @Override
   public <T, I> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T, I> cfMapDef) {
     if (anno instanceof Table) {
       parseTableAnnotation(cacheMgr, (Table) anno, cfMapDef);
@@ -43,6 +44,7 @@ public class TableParserValidator implements ParserValidator {
     cfMapDef.setColFamName(anno.name());
   }
 
+  @Override
   public <T, I> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
     if (cfMapDef.isStandaloneClass()) {
       validateStandaloneClass(cacheMgr, cfMapDef);
