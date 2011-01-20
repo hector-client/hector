@@ -24,6 +24,9 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
 
   @Override
   public ByteBuffer toByteBuffer(S s) {
+    if (s == null) {
+      return null;
+    }
 
     ByteBuffer sb = suffixSerializer.toByteBuffer(s);
     sb.rewind();
@@ -39,11 +42,16 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
 
   @Override
   public S fromByteBuffer(ByteBuffer bytes) {
+    if ((bytes == null) || !bytes.hasArray()) {
+      return null;
+    }
+
     bytes = bytes.duplicate();
     bytes.rewind();
 
-    P p = prefixSerializer.fromByteBuffer(bytes);
-    if (!prefix.equals(p)) {
+    if (compareByteArrays(prefixBytes.array(), prefixBytes.arrayOffset()
+        + prefixBytes.position(), prefixBytes.remaining(), bytes.array(),
+        bytes.arrayOffset() + bytes.position(), prefixBytes.remaining()) != 0) {
       throw new HectorSerializationException("Unexpected prefix value");
     }
     bytes.position(prefixBytes.remaining());
@@ -51,4 +59,42 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     S s = suffixSerializer.fromByteBuffer(bytes);
     return s;
   }
+
+  private static int compareByteArrays(byte[] bytes1, int offset1, int len1,
+      byte[] bytes2, int offset2, int len2) {
+    if (null == bytes1) {
+      if (null == bytes2) {
+        return 0;
+      } else {
+        return -1;
+      }
+    }
+    if (null == bytes2) {
+      return 1;
+    }
+
+    if (len1 < 0) {
+      len1 = bytes1.length - offset1;
+    }
+    if (len2 < 0) {
+      len2 = bytes2.length - offset2;
+    }
+
+    int minLength = Math.min(len1, len2);
+    for (int i = 0; i < minLength; i++) {
+      int i1 = offset1 + i;
+      int i2 = offset2 + i;
+      if (bytes1[i1] == bytes2[i2]) {
+        continue;
+      }
+      // compare non-equal bytes as unsigned
+      return (bytes1[i1] & 0xFF) < (bytes2[i2] & 0xFF) ? -1 : 1;
+    }
+    if (len1 == len2) {
+      return 0;
+    } else {
+      return (len1 < len2) ? -1 : 1;
+    }
+  }
+
 }

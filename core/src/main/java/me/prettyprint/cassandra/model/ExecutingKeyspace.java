@@ -17,28 +17,34 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 
 /**
  * Thread Safe
+ * 
  * @author Ran Tavory
  * @author zznate
  */
 public class ExecutingKeyspace implements Keyspace {
-  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
+  private static final Map<String, String> EMPTY_CREDENTIALS = Collections
+      .emptyMap();
 
-  private ConsistencyLevelPolicy consistencyLevelPolicy;
-  private FailoverPolicy failoverPolicy;
+  protected ConsistencyLevelPolicy consistencyLevelPolicy;
+  protected FailoverPolicy failoverPolicy;
 
-  private final HConnectionManager connectionManager;
-  private final String keyspace;
-  private final Map<String, String> credentials;
+  protected final HConnectionManager connectionManager;
+  protected final String keyspace;
+  protected final Map<String, String> credentials;
   private final ExceptionsTranslator exceptionTranslator;
 
-  public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
-      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy) {
-      this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy, EMPTY_CREDENTIALS);
+  public ExecutingKeyspace(String keyspace,
+      HConnectionManager connectionManager,
+      ConsistencyLevelPolicy consistencyLevelPolicy,
+      FailoverPolicy failoverPolicy) {
+    this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy,
+        EMPTY_CREDENTIALS);
   }
-  
-  public ExecutingKeyspace(String keyspace, HConnectionManager connectionManager,
-      ConsistencyLevelPolicy consistencyLevelPolicy, FailoverPolicy failoverPolicy, 
-      Map<String, String> credentials) {
+
+  public ExecutingKeyspace(String keyspace,
+      HConnectionManager connectionManager,
+      ConsistencyLevelPolicy consistencyLevelPolicy,
+      FailoverPolicy failoverPolicy, Map<String, String> credentials) {
     Assert.noneNull(consistencyLevelPolicy, connectionManager);
     this.keyspace = keyspace;
     this.connectionManager = connectionManager;
@@ -46,18 +52,18 @@ public class ExecutingKeyspace implements Keyspace {
     this.failoverPolicy = failoverPolicy;
     this.credentials = credentials;
     // TODO make this plug-able
-    this.exceptionTranslator = new ExceptionsTranslatorImpl();
+    exceptionTranslator = new ExceptionsTranslatorImpl();
   }
 
   @Override
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
     // TODO remove this method
-    this.consistencyLevelPolicy = cp;
+    consistencyLevelPolicy = cp;
   }
 
   @Override
   public String toString() {
-    return "ExecutingKeyspace(" + keyspace +"," + connectionManager + ")";
+    return "ExecutingKeyspace(" + keyspace + "," + connectionManager + ")";
   }
 
   @Override
@@ -65,24 +71,28 @@ public class ExecutingKeyspace implements Keyspace {
     return connectionManager.createClock();
   }
 
-  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc) throws HectorException {
+  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc)
+      throws HectorException {
     KeyspaceService ks = null;
     try {
-      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy, connectionManager, failoverPolicy, credentials);
+      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy,
+          connectionManager, failoverPolicy, credentials);
       return koc.doInKeyspaceAndMeasure(ks);
     } finally {
       if (ks != null) {
-        //connectionManager.releaseClient(ks.getClient());
+        // connectionManager.releaseClient(ks.getClient());
       }
     }
   }
- 
-  public <T> ExecutionResult<T> doExecuteOperation(Operation<T> operation) throws HectorException {
-    operation.applyConnectionParams(keyspace,consistencyLevelPolicy,failoverPolicy,credentials);
+
+  public <T> ExecutionResult<T> doExecuteOperation(Operation<T> operation)
+      throws HectorException {
+    operation.applyConnectionParams(keyspace, consistencyLevelPolicy,
+        failoverPolicy, credentials);
     connectionManager.operateWithFailover(operation);
     return operation.getExecutionResult();
   }
-  
+
   public ExceptionsTranslator getExceptionsTranslator() {
     return exceptionTranslator;
   }
