@@ -5,6 +5,15 @@ Changes by version:
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 
+0.7.0-24
+========
+Fixed issue with null keyspaces and credentials in HConnectionManager (via Michael Moores)
+Added class-level default for failoverPolicy 
+Rudimentary (very much so) JPA 2.0 support for save and load via openjpa
+Ligthweight ORM for JPA 1.0 annotations (additional improvements to BTodd's hector-object-mapper merged in)
+Some cleanup of bytebuffer handling in serializers
+Initial cut at virtual keyspaces (aka client-level multi-tennancy) 
+
 0.7.0-23
 ========
 Initial import of BToddB's hector-object-mapper as object-mapper module
