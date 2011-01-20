@@ -123,7 +123,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
       FetchConfiguration arg2, int arg3, Object arg4) {
     log.debug("In load operation...");
     cassandraStore.getObject(stateManager, stateManager.getId());
-    // TODO 
+    // TODO implement the loading of properties marked as lazy (is this correct?)
     // this is a misnomer. load is called to fill in additional information not retrieved from 
     // initialize call above
     return false;
