@@ -17,6 +17,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.Table;
 
 import me.prettyprint.hom.cache.HectorObjectMapperException;
+import me.prettyprint.hom.cache.IdClassParserValidator;
 import me.prettyprint.hom.cache.InheritanceParserValidator;
 import me.prettyprint.hom.cache.TableParserValidator;
 import me.prettyprint.hom.converters.Converter;
@@ -105,6 +106,9 @@ public class ClassCacheMgr {
    * For each class that should be managed, this method must be called to parse
    * its annotations and derive its meta-data.
    * 
+   * @param <T> 
+   * @param <I> 
+   * 
    * @param clazz
    * @return
    */
@@ -119,28 +123,53 @@ public class ClassCacheMgr {
     } catch (IllegalAccessException e) {
       throw new HectorObjectMapperException(e);
     }
+    
+    // by the time we get here, all super classes and their annotations have
+    // been processed and validated, and all annotations for this class have
+    // been processed. what's left to do is validate this class, set super
+    // classes, and and set any defaults
+    checkMappingAndSetDefaults(cfMapDef);
+
+    // if this class is not a derived class, then map the ColumnFamily name
+    if (!cfMapDef.isDerivedClassInheritance()) {
+      cfMapByColFamName.put(cfMapDef.getEffectiveColFamName(), cfMapDef);
+    }
+
+    // always map the parsed class to its ColumnFamily map definition
+    cfMapByClazz.put(cfMapDef.getRealClass(), cfMapDef);
+    
     return cfMapDef;
+  }
+
+  public Map<String, PropertyDescriptor> getFieldPropertyDescriptorMap(Class<?> clazz) throws IntrospectionException {
+    Map<String, PropertyDescriptor> pdMap = new HashMap<String, PropertyDescriptor>();
+
+    // get descriptors for all properties in POJO
+    PropertyDescriptor[] pdArr = Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors();
+
+    // if no property descriptors then return leaving empty annotation map
+    if (null == pdArr || 0 == pdArr.length ) {
+      return pdMap;
+    }
+
+    // create tmp map for easy field -> descriptor mapping
+    for (PropertyDescriptor pd : pdArr) {
+      pdMap.put(pd.getName(), pd);
+    }
+    
+    return pdMap;
   }
 
   private <T, I> void initializePropertiesMapDef(CFMappingDef<T, I> cfMapDef)
       throws IntrospectionException, InstantiationException, IllegalAccessException {
-
-    // get descriptors for all properties in POJO
-    PropertyDescriptor[] pdArr = Introspector.getBeanInfo(cfMapDef.getEffectiveClass(),
-        cfMapDef.getEffectiveClass().getSuperclass()).getPropertyDescriptors();
-    // if no property descriptors then return leaving empty annotation map
-    if (null == pdArr || 0 == pdArr.length && null == cfMapDef.getCfBaseMapDef()) {
+    Class<T> theType = cfMapDef.getEffectiveClass();
+    
+    Map<String, PropertyDescriptor> pdMap = getFieldPropertyDescriptorMap( theType );
+    if ( pdMap.isEmpty() && !cfMapDef.isDerivedClassInheritance() ) {
       throw new HectorObjectMapperException("could not find any properties annotated with @"
           + Column.class.getSimpleName());
     }
-
-    // create tmp map for easy field -> descriptor mapping
-    Map<String, PropertyDescriptor> pdMap = new HashMap<String, PropertyDescriptor>();
-    for (PropertyDescriptor pd : pdArr) {
-      pdMap.put(pd.getName(), pd);
-    }
-
-    Class<T> theType = cfMapDef.getEffectiveClass();
+    
     Field[] fieldArr = theType.getDeclaredFields();
 
     // iterate over all declared fields (for this class only, no inherited
@@ -162,7 +191,7 @@ public class ClassCacheMgr {
         } else if (anno instanceof Id) {
           processIdAnnotation(f, (Id) anno, cfMapDef, pdMap);
         } else if (anno instanceof me.prettyprint.hom.annotations.Id) {
-          processIdCustomAnnotation(f, (me.prettyprint.hom.annotations.Id)anno, cfMapDef, pdMap);
+          processIdCustomAnnotation(f, (me.prettyprint.hom.annotations.Id) anno, cfMapDef, pdMap);
         }
       }
     }
@@ -294,20 +323,6 @@ public class ClassCacheMgr {
         inheritanceParVal.parse(this, anno, cfMapDef);
       }
     }
-
-    // by the time we get here, all super classes and their annotations have
-    // been processed and validated, and all annotations for this class have
-    // been processed. what's left to do is validate this class, set super
-    // classes, and and set any defaults
-    checkMappingAndSetDefaults(cfMapDef);
-
-    // if this class is not a derived class, then map the ColumnFamily name
-    if (!cfMapDef.isDerivedClassInheritance()) {
-      cfMapByColFamName.put(cfMapDef.getEffectiveColFamName(), cfMapDef);
-    }
-
-    // always map the parsed class to its ColumnFamily map definition
-    cfMapByClazz.put(realClass, cfMapDef);
 
     return cfMapDef;
   }

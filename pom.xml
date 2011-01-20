@@ -70,6 +70,11 @@
       <id>Glamdring</id>
       <email>bozhidar.bozhanov@gmail.com</email>
     </developer>
+    <developer>
+      <name>B. Todd Burruss</name>
+      <id>btoddb</id>
+      <email>btoddb@gmail.com</email>
+    </developer>
   </developers>
 
   <!-- Hector submodules -->
