@@ -176,7 +176,7 @@ column_index_size_in_kb: 64
 # Size limit for rows being compacted in memory.  Larger rows will spill
 # over to disk and use a slower two-pass compaction process.  A message
 # will be logged specifying the row key.
-in_memory_compaction_limit_in_mb: 64
+in_memory_compaction_limit_in_mb: 16
 
 # Time to wait for a reply from other nodes before failing the command 
 rpc_timeout_in_ms: 10000
@@ -373,7 +373,7 @@ keyspaces:
           compare_with: BytesType
           memtable_throughput_in_mb: 24
           key_cache_save_period_in_seconds: 0
-          keys_cached: 0
+          keys_cached: 0                                                      
 
         - name: StandardByUUID1
           compare_with: TimeUUIDType   
