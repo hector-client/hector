@@ -52,24 +52,25 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
     ps = new PrefixedSerializer<ByteBuffer, ByteBuffer>(prefixBytes, be, be);
   }
 
-  public KeyRange toCassandra(KeyRange from) {
-    KeyRange to = new KeyRange();
-    to.count = from.count;
-    to.end_token = from.end_token;
-    to.end_key = ps.toByteBuffer(from.end_key);
-    to.start_token = from.start_token;
-    to.start_key = ps.toByteBuffer(from.start_key);
-    return to;
+  public KeyRange prefixKeyRange(KeyRange unprefixed) {
+    KeyRange prefixed = new KeyRange();
+    prefixed.count = unprefixed.count;
+    prefixed.end_token = unprefixed.end_token;
+    prefixed.end_key = ps.toByteBuffer(unprefixed.end_key);
+    prefixed.start_token = unprefixed.start_token;
+    prefixed.start_key = ps.toByteBuffer(unprefixed.start_key);
+    return prefixed;
   }
 
-  public KeyRange fromCassandra(KeyRange from) {
-    KeyRange to = new KeyRange();
-    to.count = from.count;
-    to.end_token = from.end_token;
-    to.end_key = ps.fromByteBuffer(from.end_key);
-    to.start_token = from.start_token;
-    to.start_key = ps.fromByteBuffer(from.start_key);
-    return to;
+  public KeyRange unprefixKeyRange(KeyRange prefixed) {
+    KeyRange unprefixed = new KeyRange();
+    unprefixed.count = prefixed.count;
+    unprefixed.end_token = prefixed.end_token;
+    unprefixed.end_key = ps.fromByteBuffer(prefixed.end_key);
+    unprefixed.start_token = prefixed.start_token;
+    unprefixed.start_key = ps
+        .fromByteBuffer(prefixed.start_key);
+    return unprefixed;
   }
 
   @Override
@@ -93,7 +94,7 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       throws HectorException {
 
     return ps.fromBytesMap(super.getRangeSlices(columnParent, predicate,
-        toCassandra(keyRange)));
+        prefixKeyRange(keyRange)));
   }
 
   @Override
@@ -102,7 +103,7 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
       throws HectorException {
 
     return ps.fromBytesMap(super.getSuperRangeSlices(columnParent, predicate,
-        toCassandra(keyRange)));
+        prefixKeyRange(keyRange)));
   }
 
   @Override
