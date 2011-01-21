@@ -10,11 +10,12 @@ import me.prettyprint.hector.api.ClockResolution;
  */
 public class MicrosecondsSyncClockResolution extends AbstractClockResolution implements ClockResolution {
 
+  private static final long serialVersionUID = -4671061000963496156L;
   private static final long ONE_THOUSAND = 1000L;
 
-    /**
-     * The last time value issued. Used to try to prevent duplicates.
-     */
+  /**
+   * The last time value issued. Used to try to prevent duplicates.
+   */
   private static long lastTime = -1;
 
   @Override
