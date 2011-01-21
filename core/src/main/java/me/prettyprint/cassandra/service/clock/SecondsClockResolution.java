@@ -9,6 +9,8 @@ import me.prettyprint.hector.api.ClockResolution;
  */
 public class SecondsClockResolution extends AbstractClockResolution implements ClockResolution {
 
+  private static final long serialVersionUID = -371806723621204991L;
+
   @Override
   public long createClock() {
     return getSystemMilliseconds() / 1000;

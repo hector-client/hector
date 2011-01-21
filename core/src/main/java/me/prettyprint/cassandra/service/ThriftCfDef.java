@@ -10,6 +10,7 @@ import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ColumnType;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 
+import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -32,6 +33,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private int id;
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
+  private double memtableOperationsInMillions;
+  private int memtableThroughputInMb;
+  private int memtableFlushAfterMins;
 
   public ThriftCfDef(CfDef d) {
     Assert.notNull(d, "CfDef is null");
@@ -51,6 +55,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     id = d.id;
     minCompactionThreshold = d.min_compaction_threshold;
     maxCompactionThreshold = d.max_compaction_threshold;
+    memtableOperationsInMillions = d.memtable_operations_in_millions == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : d.memtable_operations_in_millions;
+    memtableFlushAfterMins = d.memtable_flush_after_mins == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : d.memtable_flush_after_mins;
+    memtableThroughputInMb = d.memtable_throughput_in_mb == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : d.memtable_throughput_in_mb;
 
   }
   
@@ -71,6 +81,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     id = columnFamilyDefinition.getId();
     minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
     maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
+    memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins() == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : columnFamilyDefinition.getMemtableFlushAfterMins();     
+    memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb() == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : columnFamilyDefinition.getMemtableThroughputInMb();    
+    memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions() == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : columnFamilyDefinition.getMemtableOperationsInMillions();
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
@@ -80,6 +96,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 
     columnType = ColumnType.STANDARD;
     comparatorType = ComparatorType.BYTESTYPE;
+    
+    memtableFlushAfterMins = CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS;     
+    memtableThroughputInMb = CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB;    
+    memtableOperationsInMillions = CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS;
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName, ComparatorType comparatorType) {
@@ -193,6 +213,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setMin_compaction_threshold(minCompactionThreshold);
     d.setRead_repair_chance(readRepairChance);
     d.setRow_cache_size(rowCacheSize);
+    d.setMemtable_operations_in_millions(memtableOperationsInMillions);
+    d.setMemtable_throughput_in_mb(memtableThroughputInMb);
+    d.setMemtable_flush_after_mins(memtableFlushAfterMins);        
+    
     if (subComparatorType != null) {
       d.setSubcomparator_type(subComparatorType.getClassName());
     }
@@ -278,5 +302,20 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+  }
+
+  @Override
+  public int getMemtableFlushAfterMins() {
+    return memtableFlushAfterMins;
+  }
+
+  @Override
+  public double getMemtableOperationsInMillions() {
+    return memtableOperationsInMillions;
+  }
+
+  @Override
+  public int getMemtableThroughputInMb() {
+    return memtableThroughputInMb;
   }
 }

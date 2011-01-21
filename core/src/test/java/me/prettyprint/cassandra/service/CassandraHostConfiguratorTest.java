@@ -1,11 +1,16 @@
 package me.prettyprint.cassandra.service;
 
-import static org.junit.Assert.*;
-
 import me.prettyprint.hector.api.ClockResolution;
-
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
 
 public class CassandraHostConfiguratorTest {
 
@@ -18,15 +23,15 @@ public class CassandraHostConfiguratorTest {
   public void testSimpleCassandraHostSetup() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
-    assertEquals(1,cassandraHosts.length);
+    assertEquals(1, cassandraHosts.length);
   }
 
   @Test
   public void testCassandraHostSetupSplit() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170,localhost:9171,localhost:9172");
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
-    assertEquals(3,cassandraHosts.length);
-    assertEquals(9172,cassandraHosts[2].getPort());
+    assertEquals(3, cassandraHosts.length);
+    assertEquals(9172, cassandraHosts[2].getPort());
   }
 
   @Test
@@ -61,7 +66,7 @@ public class CassandraHostConfiguratorTest {
   public void testHostnameOnlyDefaultPort() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost");
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
-    assertEquals(CassandraHost.DEFAULT_PORT,cassandraHosts[0].getPort());
+    assertEquals(CassandraHost.DEFAULT_PORT, cassandraHosts[0].getPort());
   }
 
   @Test
@@ -78,22 +83,41 @@ public class CassandraHostConfiguratorTest {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost");
     cassandraHostConfigurator.setPort(9177);
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
-    assertEquals(9177,cassandraHosts[0].getPort());
+    assertEquals(9177, cassandraHosts[0].getPort());
   }
 
   @Test
   public void testConfiguratorClockResolution() {
     // Define my own clock resolution.
     class SequentialClockResolution implements ClockResolution {
-        @Override
-        public long createClock() {
-            return System.currentTimeMillis() * -1;
-        }
+      @Override
+      public long createClock() {
+        return System.currentTimeMillis() * -1;
+      }
     }
 
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost");
     cassandraHostConfigurator.setClockResolution(new SequentialClockResolution());
-    
+
     assertNotSame(CassandraHostConfigurator.DEF_CLOCK_RESOLUTION, cassandraHostConfigurator.getClockResolution());
+  }
+
+  @Test
+  public void testSerialization() throws Exception {
+    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9876");
+
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    ObjectOutputStream out = new ObjectOutputStream(bos);
+    out.writeObject(cassandraHostConfigurator);
+    out.close();
+
+    byte[] serializedByteArray = bos.toByteArray();
+
+    ByteArrayInputStream bin = new ByteArrayInputStream(serializedByteArray);
+    ObjectInputStream in = new ObjectInputStream(bin);
+    CassandraHostConfigurator cassandraHostConfiguratorDeserialized = (CassandraHostConfigurator) in.readObject();
+
+    //TODO: define equality for CassandraHostConfigurator
+    //assertSame(cassandraHostConfigurator, cassandraHostConfiguratorDeserialized);
   }
 }
