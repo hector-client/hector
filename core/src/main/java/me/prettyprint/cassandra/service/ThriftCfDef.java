@@ -53,8 +53,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     gcGraceSeconds = d.gc_grace_seconds;
     defaultValidationClass = d.default_validation_class;
     id = d.id;
-    minCompactionThreshold = d.min_compaction_threshold;
-    maxCompactionThreshold = d.max_compaction_threshold;
+    minCompactionThreshold = d.min_compaction_threshold == 0 ? 
+        CFMetaData.DEFAULT_MIN_COMPACTION_THRESHOLD : d.min_compaction_threshold;
+    maxCompactionThreshold = d.max_compaction_threshold == 0 ?
+        CFMetaData.DEFAULT_MAX_COMPACTION_THRESHOLD : d.max_compaction_threshold;
     memtableOperationsInMillions = d.memtable_operations_in_millions == 0 ? 
         CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : d.memtable_operations_in_millions;
     memtableFlushAfterMins = d.memtable_flush_after_mins == 0 ? 
@@ -79,8 +81,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
     defaultValidationClass = columnFamilyDefinition.getDefaultValidationClass();
     id = columnFamilyDefinition.getId();
-    minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
-    maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
+    minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold() == 0 ?
+        CFMetaData.DEFAULT_MIN_COMPACTION_THRESHOLD : columnFamilyDefinition.getMinCompactionThreshold();
+    maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold() == 0 ? 
+        CFMetaData.DEFAULT_MAX_COMPACTION_THRESHOLD : columnFamilyDefinition.getMaxCompactionThreshold();
     memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins() == 0 ? 
         CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : columnFamilyDefinition.getMemtableFlushAfterMins();     
     memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb() == 0 ? 
@@ -96,7 +100,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 
     columnType = ColumnType.STANDARD;
     comparatorType = ComparatorType.BYTESTYPE;
-    
+    readRepairChance = CFMetaData.DEFAULT_READ_REPAIR_CHANCE;
+    keyCacheSize = CFMetaData.DEFAULT_KEY_CACHE_SIZE;
+    gcGraceSeconds = CFMetaData.DEFAULT_GC_GRACE_SECONDS;
+    minCompactionThreshold = CFMetaData.DEFAULT_MIN_COMPACTION_THRESHOLD;
+    maxCompactionThreshold = CFMetaData.DEFAULT_MAX_COMPACTION_THRESHOLD;
     memtableFlushAfterMins = CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS;     
     memtableThroughputInMb = CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB;    
     memtableOperationsInMillions = CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS;
