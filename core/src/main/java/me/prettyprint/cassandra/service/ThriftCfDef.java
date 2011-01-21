@@ -55,9 +55,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     id = d.id;
     minCompactionThreshold = d.min_compaction_threshold;
     maxCompactionThreshold = d.max_compaction_threshold;
-    memtableOperationsInMillions = d.memtable_operations_in_millions;
-    memtableFlushAfterMins = d.memtable_flush_after_mins;
-    memtableThroughputInMb = d.memtable_throughput_in_mb;
+    memtableOperationsInMillions = d.memtable_operations_in_millions == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : d.memtable_operations_in_millions;
+    memtableFlushAfterMins = d.memtable_flush_after_mins == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : d.memtable_flush_after_mins;
+    memtableThroughputInMb = d.memtable_throughput_in_mb == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : d.memtable_throughput_in_mb;
 
   }
   
@@ -78,12 +81,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     id = columnFamilyDefinition.getId();
     minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
     maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
-    memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins() == 0 
-      ? CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : columnFamilyDefinition.getMemtableFlushAfterMins();     
-    memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb() == 0 
-      ? CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : columnFamilyDefinition.getMemtableThroughputInMb();    
-    memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions() == 0 
-      ? CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : columnFamilyDefinition.getMemtableOperationsInMillions();
+    memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins() == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : columnFamilyDefinition.getMemtableFlushAfterMins();     
+    memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb() == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : columnFamilyDefinition.getMemtableThroughputInMb();    
+    memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions() == 0 ? 
+        CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : columnFamilyDefinition.getMemtableOperationsInMillions();
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
