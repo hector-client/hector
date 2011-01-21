@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
-import me.prettyprint.cassandra.model.ExecutingPrefixedKeyspace;
+import me.prettyprint.cassandra.model.ExecutingVirtualKeyspace;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
@@ -206,35 +206,35 @@ public final class HFactory {
         consistencyLevelPolicy, failoverPolicy, credentials);
   }
 
-  public static <E> Keyspace createPrefixedKeyspace(String keyspace,
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
       E keyPrefix, Serializer<E> keyPrefixSerializer, Cluster cluster) {
-    return createPrefixedKeyspace(keyspace, keyPrefix, keyPrefixSerializer,
+    return createVirtualKeyspace(keyspace, keyPrefix, keyPrefixSerializer,
         cluster, createDefaultConsistencyLevelPolicy(),
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
-  public static <E> Keyspace createPrefixedKeyspace(String keyspace,
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
       E keyPrefix, Serializer<E> keyPrefixSerializer, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
-    return createPrefixedKeyspace(keyspace, keyPrefix, keyPrefixSerializer,
+    return createVirtualKeyspace(keyspace, keyPrefix, keyPrefixSerializer,
         cluster, consistencyLevelPolicy,
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
-  public static <E> Keyspace createPrefixedKeyspace(String keyspace,
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
       E keyPrefix, Serializer<E> keyPrefixSerializer, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy) {
-    return new ExecutingPrefixedKeyspace<E>(keyspace, keyPrefix,
+    return new ExecutingVirtualKeyspace<E>(keyspace, keyPrefix,
         keyPrefixSerializer, cluster.getConnectionManager(),
         consistencyLevelPolicy, failoverPolicy, cluster.getCredentials());
   }
 
-  public static <E> Keyspace createPrefixedKeyspace(String keyspace,
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
       E keyPrefix, Serializer<E> keyPrefixSerializer, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy, Map<String, String> credentials) {
-    return new ExecutingPrefixedKeyspace<E>(keyspace, keyPrefix,
+    return new ExecutingVirtualKeyspace<E>(keyspace, keyPrefix,
         keyPrefixSerializer, cluster.getConnectionManager(),
         consistencyLevelPolicy, failoverPolicy, credentials);
   }

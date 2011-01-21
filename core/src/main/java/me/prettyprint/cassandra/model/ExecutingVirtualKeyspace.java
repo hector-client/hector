@@ -5,17 +5,17 @@ import java.util.Map;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
-import me.prettyprint.cassandra.service.PrefixedKeyspaceServiceImpl;
+import me.prettyprint.cassandra.service.VirtualKeyspaceServiceImpl;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-public class ExecutingPrefixedKeyspace<E> extends ExecutingKeyspace {
+public class ExecutingVirtualKeyspace<E> extends ExecutingKeyspace {
 
   E keyPrefix;
   Serializer<E> keyPrefixSerializer;
 
-  public ExecutingPrefixedKeyspace(String keyspace, E keyPrefix,
+  public ExecutingVirtualKeyspace(String keyspace, E keyPrefix,
       Serializer<E> keyPrefixSerializer, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy) {
@@ -25,7 +25,7 @@ public class ExecutingPrefixedKeyspace<E> extends ExecutingKeyspace {
     this.keyPrefixSerializer = keyPrefixSerializer;
   }
 
-  public ExecutingPrefixedKeyspace(String keyspace, E keyPrefix,
+  public ExecutingVirtualKeyspace(String keyspace, E keyPrefix,
       Serializer<E> keyPrefixSerializer, HConnectionManager connectionManager,
       ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy, Map<String, String> credentials) {
@@ -41,7 +41,7 @@ public class ExecutingPrefixedKeyspace<E> extends ExecutingKeyspace {
       throws HectorException {
     KeyspaceService ks = null;
     try {
-      ks = new PrefixedKeyspaceServiceImpl(keyspace, keyPrefix,
+      ks = new VirtualKeyspaceServiceImpl(keyspace, keyPrefix,
           keyPrefixSerializer, consistencyLevelPolicy, connectionManager,
           failoverPolicy, credentials);
       return koc.doInKeyspaceAndMeasure(ks);

@@ -22,14 +22,14 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SuperColumn;
 
-public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
+public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
   ByteBuffer prefixBytes;
   PrefixedSerializer<ByteBuffer, ByteBuffer> ps;
   ByteBufferSerializer be = new ByteBufferSerializer();
   StringSerializer se = new StringSerializer();
 
-  public <E> PrefixedKeyspaceServiceImpl(String keyspaceName, E keyPrefix,
+  public <E> VirtualKeyspaceServiceImpl(String keyspaceName, E keyPrefix,
       Serializer<E> keyPrefixSerializer,
       ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager, FailoverPolicy failoverPolicy)
@@ -40,7 +40,7 @@ public class PrefixedKeyspaceServiceImpl extends KeyspaceServiceImpl {
     ps = new PrefixedSerializer<ByteBuffer, ByteBuffer>(prefixBytes, be, be);
   }
 
-  public <E> PrefixedKeyspaceServiceImpl(String keyspaceName, E keyPrefix,
+  public <E> VirtualKeyspaceServiceImpl(String keyspaceName, E keyPrefix,
       Serializer<E> keyPrefixSerializer,
       ConsistencyLevelPolicy consistencyLevel,
       HConnectionManager connectionManager, FailoverPolicy failoverPolicy,
