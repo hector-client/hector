@@ -26,6 +26,9 @@ public interface ColumnFamilyDefinition {
   int getId();
   int getMaxCompactionThreshold();
   int getMinCompactionThreshold();
+  double getMemtableOperationsInMillions();
+  int getMemtableThroughputInMb();
+  int getMemtableFlushAfterMins();
 
 
 }

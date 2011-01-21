@@ -29,6 +29,9 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
   private int rowCacheSavePeriodInSeconds;
+  private double memtableOperationsInMillions;
+  private int memtableThroughputInMb;
+  private int memtableFlushAfterMins;
 
   private final List<ColumnDefinition> columnDefinitions;
 
@@ -59,6 +62,9 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     id = columnFamilyDefinition.getId();
     minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
     maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
+    memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions();
+    memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb();
+    memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins();
   }
 
   public void setKeyspaceName(String keyspaceName) {
@@ -115,6 +121,22 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   public void setMinCompactionThreshold(int minCompactionThreshold) {
     this.minCompactionThreshold = minCompactionThreshold;
+  }    
+
+  public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
+    this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
+  }
+
+  public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
+    this.memtableOperationsInMillions = memtableOperationsInMillions;
+  }
+
+  public void setMemtableThroughputInMb(int memtableThroughputInMb) {
+    this.memtableThroughputInMb = memtableThroughputInMb;
+  }
+
+  public void setMemtableFlushAfterMins(int memtableFlushAfterMins) {
+    this.memtableFlushAfterMins = memtableFlushAfterMins;
   }
 
   public void addColumnDefinition( ColumnDefinition columnDefinition){
@@ -203,6 +225,21 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   @Override
   public int getMinCompactionThreshold() {
     return this.minCompactionThreshold;
+  }
+
+  @Override
+  public int getMemtableFlushAfterMins() {
+    return this.memtableFlushAfterMins;
+  }
+
+  @Override
+  public double getMemtableOperationsInMillions() {
+    return this.memtableOperationsInMillions;
+  }
+
+  @Override
+  public int getMemtableThroughputInMb() {
+    return this.memtableThroughputInMb;
   }
 
 
