@@ -12,7 +12,7 @@ Added class-level default for failoverPolicy
 Rudimentary (very much so) JPA 2.0 support for save and load via openjpa
 Ligthweight ORM for JPA 1.0 annotations (additional improvements to BTodd's hector-object-mapper merged in)
 Some cleanup of bytebuffer handling in serializers
-Initial cut at virtual keyspaces (aka client-level multi-tennancy) 
+Initial cut at virtual keyspaces (aka client-level multi-tenancy), see https://github.com/rantav/hector/wiki/Virtual-Keyspaces
 CassandraHostConfigurator and related are now all correctly serializable (patch by Thor Carpenter)
 
 0.7.0-23
