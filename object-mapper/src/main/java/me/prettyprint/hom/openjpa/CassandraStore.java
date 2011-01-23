@@ -79,7 +79,7 @@ public class CassandraStore {
     if ( mutator == null )
       mutator = new MutatorImpl(keyspace, BytesArraySerializer.get());
     if ( log.isDebugEnabled() ) {
-      log.debug("Adding mutation for class {}", stateManager.getManagedInstance().getClass().getName());
+      log.debug("Adding mutation (insertion) for class {}", stateManager.getManagedInstance().getClass().getName());
     }
     ClassMetaData metaData = stateManager.getMetaData();       
     EntityFacade entityFacade = new EntityFacade(metaData);
@@ -92,7 +92,18 @@ public class CassandraStore {
     }    
     return mutator;
   }
-  
+    
+  public Mutator removeObject(Mutator mutator, OpenJPAStateManager stateManager, Object idObj) {
+    if ( mutator == null )
+      mutator = new MutatorImpl(keyspace, BytesArraySerializer.get());
+    if ( log.isDebugEnabled() ) {
+      log.debug("Adding mutation (deletion) for class {}", stateManager.getManagedInstance().getClass().getName());
+    }
+    ClassMetaData metaData = stateManager.getMetaData();       
+    EntityFacade entityFacade = new EntityFacade(metaData);
+    mutator.addDeletion(mappingUtils.getKeyBytes(idObj), entityFacade.getColumnFamilyName(),null,StringSerializer.get());                  
+    return mutator;
+  }
   
 
   public Cluster getCluster() {

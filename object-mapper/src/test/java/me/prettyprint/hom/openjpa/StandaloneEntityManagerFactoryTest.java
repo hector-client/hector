@@ -30,6 +30,12 @@ public class StandaloneEntityManagerFactoryTest extends CassandraTestBase {
     SimpleTestBean stb = em2.find(SimpleTestBean.class, 1);
     //em.getTransaction().commit();
     assertEquals("foo",stb.getName());
+    
+
+    em2.getTransaction().begin();
+    em2.remove(stb);
+    em2.getTransaction().commit();
+    em2.close();
   }
 
 }

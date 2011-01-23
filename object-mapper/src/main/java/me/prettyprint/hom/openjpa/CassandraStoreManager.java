@@ -43,7 +43,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
     if ( log.isDebugEnabled() ) {
       log.debug("in executeExtent with ClassMetaData {}: useSubClasses: {} and fetchConfiguration: {}",
           new Object[]{cMetaData, useSubClasses, fetchConfiguration});
-    }
+    }    
     
       // ask the store for all ObjectDatas for the given type; this
       // actually gives us all instances of the base class of the type
@@ -77,6 +77,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
       return null;
     }
 
+  @SuppressWarnings("unchecked")
   @Override
   protected Collection flush(Collection pNew, Collection pNewUpdated, Collection pNewFlushedDeleted,
       Collection pDirty, Collection pDeleted) {
@@ -93,13 +94,29 @@ public class CassandraStoreManager extends AbstractStoreManager {
     cassandraStore.open();
     OpenJPAConfiguration conf = ctx.getConfiguration();
     Mutator mutator = null;
-    for (Iterator itr = pNew.iterator(); itr.hasNext();) {
-      
+    for (Iterator itr = pNew.iterator(); itr.hasNext();) {      
       // create new object data for instance
       OpenJPAStateManager sm = (OpenJPAStateManager) itr.next();
       Object oid = sm.getObjectId();
-      mutator = cassandraStore.storeObject(mutator, sm, oid);
-      
+      mutator = cassandraStore.storeObject(mutator, sm, oid);           
+    }
+    // TODO combine pNewUpdated and pDirty and use sm.getDirty for bitmask of field
+    //
+    //for (int i = 0; i < fmds.length; i++)
+    //if (fields.get(i))
+    //      sm.store(i, toLoadable(sm, fmds[i], _data[i], fetch));    
+    //
+    // combine pNewFlushDelete and pDeleted into the mutator
+    if ( !pDeleted.isEmpty() || !pNewFlushedDeleted.isEmpty() ) {
+      List deletes = new ArrayList(pDeleted.size() + pNewFlushedDeleted.size());
+      deletes.addAll(pDeleted);
+      deletes.addAll(pNewFlushedDeleted);
+      for (Iterator itr = deletes.iterator(); itr.hasNext();) {      
+        // create new object data for instance
+        OpenJPAStateManager sm = (OpenJPAStateManager) itr.next();
+        Object oid = sm.getObjectId();
+        mutator = cassandraStore.removeObject(mutator, sm, oid);
+      }
     }
     mutator.execute();
     
