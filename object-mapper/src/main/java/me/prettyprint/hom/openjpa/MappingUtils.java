@@ -39,12 +39,28 @@ import org.slf4j.LoggerFactory;
 public class MappingUtils {
   private static final Logger log = LoggerFactory.getLogger(MappingUtils.class);
   
-  public SliceQuery<byte[], String, byte[]> buildSliceQuery(Object idObj, ClassMetaData classMetaData, Keyspace keyspace) {
-    List<String> columns = buildColumnList(classMetaData);
+  private static final Map<Integer, Serializer<?>> typeSerializerMap = new HashMap<Integer, Serializer<?>>();
+  
+  static {
+    typeSerializerMap.put(JavaTypes.STRING, StringSerializer.get());
+    typeSerializerMap.put(JavaTypes.INT, IntegerSerializer.get());
+    typeSerializerMap.put(JavaTypes.INT_OBJ, IntegerSerializer.get());
+    typeSerializerMap.put(JavaTypes.DATE, DateSerializer.get());
+    typeSerializerMap.put(JavaTypes.LONG, LongSerializer.get());
+    typeSerializerMap.put(JavaTypes.LONG_OBJ, LongSerializer.get());
+    typeSerializerMap.put(JavaTypes.DOUBLE, DoubleSerializer.get());
+    typeSerializerMap.put(JavaTypes.DOUBLE_OBJ, DoubleSerializer.get());
+  }
+  
+  public static Serializer<?> getSerializer(int javaType) {
+    return typeSerializerMap.get(javaType) != null ? typeSerializerMap.get(javaType) : ObjectSerializer.get(); 
+  }
+  
+  public SliceQuery<byte[], String, byte[]> buildSliceQuery(Object idObj, EntityFacade entityFacade, Keyspace keyspace) {
     SliceQuery<byte[], String, byte[]> query = new ThriftSliceQuery(keyspace, BytesArraySerializer.get(), StringSerializer.get(), BytesArraySerializer.get());
-    query.setColumnNames(columns.toArray(new String[]{}));
+    query.setColumnNames(entityFacade.getColumnNames());
     query.setKey(getKeyBytes(idObj));
-    query.setColumnFamily("TestBeanColumnFamily");
+    query.setColumnFamily(entityFacade.getColumnFamilyName());
     return query;
   }
   
@@ -140,9 +156,11 @@ public class MappingUtils {
     }    
     return serMap;
   }
+  
+  
 
   public Mutator addMutation(Mutator mutator, Object idObj, OpenJPAStateManager stateManager, Keyspace keyspace) {
-    ClassMetaData metaData = stateManager.getMetaData();    
+    ClassMetaData metaData = stateManager.getMetaData();       
     Map<String,Serializer> serMap = buildColumnSerializerMap(metaData);
     for (Map.Entry<String, Serializer> entry : serMap.entrySet()) {
       mutator.addInsertion(getKeyBytes(idObj), "TestBeanColumnFamily", 

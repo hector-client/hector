@@ -54,8 +54,9 @@ public class MappingUtilsTest {
   @Test
   public void testBuildSliceQuery() {
     mappingUtils = new MappingUtils();
-    LongId id = new LongId(SimpleTestBean.class, 1L);    
-    SliceQuery sliceQuery = mappingUtils.buildSliceQuery(id, JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleTestBean.class), keyspace);
+    LongId id = new LongId(SimpleTestBean.class, 1L);
+    EntityFacade entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleTestBean.class));
+    SliceQuery sliceQuery = mappingUtils.buildSliceQuery(id, entityFacade, keyspace);
     assertTrue(((ThriftSliceQuery)sliceQuery).getColumnNames().contains("name"));
     assertEquals(1,((ThriftSliceQuery)sliceQuery).getColumnNames().size());
   }
@@ -65,7 +66,6 @@ public class MappingUtilsTest {
     mappingUtils = new MappingUtils();
     LongId id = new LongId(SimpleTestBean.class, 1L);
     Broker broker = JPAFacadeHelper.toBroker(entityManagerFactory.createEntityManager());
-    
     //Mutator mutator = mappingUtils.buildMutator(id, broker., keyspace);
   }
   

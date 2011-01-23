@@ -19,5 +19,6 @@ public class CassandraStoreConfiguration extends OpenJPAConfigurationImpl {
 
     ProductDerivations.beforeConfigurationLoad(this);
     loadGlobals();
+    
   }
 }

@@ -12,7 +12,9 @@ import org.apache.openjpa.meta.JavaTypes;
 import org.apache.openjpa.util.OpenJPAId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.ColumnMapRowMapper;
 
+import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
@@ -20,12 +22,14 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.utils.StringUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.EntityManagerConfigurator;
+import me.prettyprint.hom.openjpa.EntityFacade.ColumnMeta;
 
 
 /**
@@ -60,7 +64,8 @@ public class CassandraStore {
   public <I> boolean getObject(OpenJPAStateManager stateManager, I idObj) {
     // build CFMappingDef
     ClassMetaData metaData = stateManager.getMetaData();
-    SliceQuery<byte[], String, byte[]> sliceQuery = mappingUtils.buildSliceQuery(idObj, metaData, keyspace);
+    EntityFacade entityFacade = new EntityFacade(metaData);
+    SliceQuery<byte[], String, byte[]> sliceQuery = mappingUtils.buildSliceQuery(idObj, entityFacade, keyspace);
     
     QueryResult<ColumnSlice<String, byte[]>> result = sliceQuery.execute();
     
@@ -76,7 +81,15 @@ public class CassandraStore {
     if ( log.isDebugEnabled() ) {
       log.debug("Adding mutation for class {}", stateManager.getManagedInstance().getClass().getName());
     }
-    mappingUtils.addMutation(mutator, idObj, stateManager, keyspace);
+    ClassMetaData metaData = stateManager.getMetaData();       
+    EntityFacade entityFacade = new EntityFacade(metaData);
+    for (Map.Entry<String,ColumnMeta<?>> entry : entityFacade.getColumnMeta().entrySet()) {
+      mutator.addInsertion(mappingUtils.getKeyBytes(idObj), entityFacade.getColumnFamilyName(), 
+          new HColumnImpl(entry.getKey(), stateManager.fetch(entry.getValue().fieldId), 
+              keyspace.createClock(), StringSerializer.get(),
+              entry.getValue().serializer));
+          
+    }    
     return mutator;
   }
   
