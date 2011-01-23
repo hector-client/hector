@@ -78,7 +78,9 @@ public final class HFactory {
   private static final ConsistencyLevelPolicy DEFAULT_CONSISTENCY_LEVEL_POLICY = new QuorumAllConsistencyLevelPolicy();
 
   public static Cluster getCluster(String clusterName) {
-    return clusters.get(clusterName);
+    synchronized (clusters) {
+      return clusters.get(clusterName);
+    }
   }
 
   /**
@@ -151,8 +153,10 @@ public final class HFactory {
    */
   public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-        cassandraHostConfigurator) : clusters.get(clusterName);
+    synchronized (clusters) {
+      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
+          cassandraHostConfigurator) : clusters.get(clusterName);
+    }
   }
 
   /**
@@ -169,8 +173,10 @@ public final class HFactory {
   public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator,
       Map<String, String> credentials) {
-    return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-        cassandraHostConfigurator, credentials) : clusters.get(clusterName);
+    synchronized (clusters) {
+      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
+          cassandraHostConfigurator, credentials) : clusters.get(clusterName);
+    }
   }
 
   /**
