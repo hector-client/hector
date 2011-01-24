@@ -59,6 +59,11 @@ public class ExecutingKeyspace implements Keyspace {
   public void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp) {
     // TODO remove this method
     consistencyLevelPolicy = cp;
+  }  
+  
+  @Override
+  public String getKeyspaceName() {
+    return keyspace;
   }
 
   @Override

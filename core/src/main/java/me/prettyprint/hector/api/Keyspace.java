@@ -15,7 +15,8 @@ public interface Keyspace {
   
   void setConsistencyLevelPolicy(ConsistencyLevelPolicy cp);
 
-
+  String getKeyspaceName();
+  
   long createClock();
 
 }
