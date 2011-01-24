@@ -24,6 +24,7 @@ import org.junit.BeforeClass;
 public class CassandraTestBase {
   protected static boolean cassandraStarted = false;
   protected static Keyspace keyspace;
+  protected static Cluster cluster;
 
   public static void startCassandraInstance(String pathToDataDir) throws TTransportException, IOException,
   InterruptedException, SecurityException, IllegalArgumentException, NoSuchMethodException,
@@ -101,7 +102,7 @@ public class CassandraTestBase {
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "SimpleTestBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
-        Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9161");
+        cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9161");
         createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
         keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
       }

@@ -16,6 +16,7 @@
     <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider> 
 
     <class>me.prettyprint.hom.beans.SimpleTestBean</class>
+    <class>me.prettyprint.hom.beans.SimpleRelationshipBean</class>    
     <!-- <class>me.prettyprint.hom.beans.MyCustomIdBean</class>
     <class>me.prettyprint.hom.beans.MyBlueTestBean</class>
     <class>me.prettyprint.hom.beans.MyRedTestBean</class>

@@ -1,6 +1,7 @@
 package me.prettyprint.hom.openjpa;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,7 +74,15 @@ public class EntityFacade implements Serializable {
     ColumnMeta(int fieldId, Serializer<V> serializer) {
       this.fieldId = fieldId;
       this.serializer = serializer;
-    }
-        
+    }        
   }
+
+  @Override
+  public String toString() {
+    return String.format("EntityFacade[class: %s, columnFamily: %s, columnNames: %s]", 
+        clazz.getName(), 
+        columnFamilyName, Arrays.toString(getColumnNames()));
+  }
+  
+  
 }
