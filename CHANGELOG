@@ -14,6 +14,7 @@ Ligthweight ORM for JPA 1.0 annotations (additional improvements to BTodd's hect
 Some cleanup of bytebuffer handling in serializers
 Initial cut at virtual keyspaces (aka client-level multi-tenancy), see https://github.com/rantav/hector/wiki/Virtual-Keyspaces
 CassandraHostConfigurator and related are now all correctly serializable (patch by Thor Carpenter)
+Added add/remove CassandraHost capability to CassandraClientMonitor (thanks to David Boxenhorn for poiting out it was missing)
 
 0.7.0-23
 ========

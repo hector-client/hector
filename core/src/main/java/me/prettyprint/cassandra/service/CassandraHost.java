@@ -128,6 +128,9 @@ public final class CassandraHost {
     return name;
   }
 
+  /**
+   * Returns true if the ip and port are equal
+   */
   @Override
   public boolean equals(Object obj) {
     if (! (obj instanceof CassandraHost)) {

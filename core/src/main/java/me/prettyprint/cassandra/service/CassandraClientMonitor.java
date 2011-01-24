@@ -199,4 +199,18 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     return counters.get(Counter.CONNECT_ERROR).longValue();
   }
 
+  @Override
+  public boolean addCassandraHost(String hostStr) {    
+    return connectionManager.addCassandraHost(new CassandraHost(hostStr));
+  }
+
+  @Override
+  public boolean removeCassandraHost(String hostStr) {  
+    return connectionManager.removeCassandraHost(new CassandraHost(hostStr));
+  }
+  
+  
+  
+  
+
 }

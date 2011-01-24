@@ -117,4 +117,21 @@ public interface CassandraClientMonitorMBean {
    *
    */
   public List<String> getStatisticsPerPool();
+  
+  /**
+   * Add a host in the format of "[hostname]:[port]"
+   * 
+   * @param hostStr
+   * @return
+   */
+  boolean addCassandraHost(String hostStr);
+  
+  /**
+   * Remove a host in the format of "[hostname]:[port]"
+   * @see {@link CassandraHost#equals(Object)} for how hosts are compared
+   * 
+   * @param hostStr
+   * @return
+   */
+  boolean removeCassandraHost(String hostStr);
 }

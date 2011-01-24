@@ -43,6 +43,7 @@ public class HConnectionManager {
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
   private LoadBalancingPolicy loadBalancingPolicy;
+  private CassandraHostConfigurator cassandraHostConfigurator;
 
   private final ClockResolution clock;
 
@@ -71,9 +72,10 @@ public class HConnectionManager {
 
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
-    }
+    }    
     monitor = JmxMonitor.getInstance(this).getCassandraMonitor();
     exceptionsTranslator = new ExceptionsTranslatorImpl();
+    this.cassandraHostConfigurator = cassandraHostConfigurator;
   }
 
   /**
@@ -86,6 +88,7 @@ public class HConnectionManager {
     if ( !getHosts().contains(cassandraHost) ) {
       ConcurrentHClientPool pool = null;
       try {
+        cassandraHostConfigurator.applyConfig(cassandraHost);
         pool = new ConcurrentHClientPool(cassandraHost);
         hostPools.putIfAbsent(cassandraHost, pool);
         log.info("Added host {} to pool", cassandraHost.getName());
@@ -107,7 +110,7 @@ public class HConnectionManager {
    * the underlying connections via {@link ConcurrentHClientPool#shutdown()}
    * @param cassandraHost
    */
-  public void removeCassandraHost(CassandraHost cassandraHost) {
+  public boolean removeCassandraHost(CassandraHost cassandraHost) {
     boolean removed = getHosts().contains(cassandraHost);
     if ( removed ) {
       ConcurrentHClientPool pool = hostPools.remove(cassandraHost);
@@ -119,6 +122,7 @@ public class HConnectionManager {
       }
     }
     log.info("Remove status for CassandraHost pool {} was {}", cassandraHost, removed);
+    return removed;
   }
 
   public Set<CassandraHost> getHosts() {
