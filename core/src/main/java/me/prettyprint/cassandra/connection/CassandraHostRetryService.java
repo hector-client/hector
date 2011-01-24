@@ -21,7 +21,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   private static Logger log = LoggerFactory.getLogger(CassandraHostRetryService.class);
 
-  public static final int DEF_QUEUE_SIZE = 3;
+  public static final int DEF_QUEUE_SIZE = -1;
   public static final int DEF_RETRY_DELAY = 10;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
   private final ExceptionsTranslator exceptionsTranslator;
@@ -31,7 +31,9 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     super(connectionManager, cassandraHostConfigurator);
     this.exceptionsTranslator = connectionManager.exceptionsTranslator;
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
-    downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize());
+    downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1 
+        ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());
+          
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
 
     log.info("Downed Host Retry service started with queue size {} and retry delay {}s",

@@ -15,6 +15,7 @@ Some cleanup of bytebuffer handling in serializers
 Initial cut at virtual keyspaces (aka client-level multi-tenancy), see https://github.com/rantav/hector/wiki/Virtual-Keyspaces
 CassandraHostConfigurator and related are now all correctly serializable (patch by Thor Carpenter)
 Added add/remove CassandraHost capability to CassandraClientMonitor (thanks to David Boxenhorn for poiting out it was missing)
+CassandraHostRetryService default queue size now defaults unbounded
 
 0.7.0-23
 ========
