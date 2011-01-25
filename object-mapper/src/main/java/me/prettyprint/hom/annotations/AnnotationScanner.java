@@ -32,7 +32,7 @@ public class AnnotationScanner {
 
       Class<?> clazz;
       try {
-        clazz = Class.forName(beanDef.getBeanClassName());
+        clazz = Class.forName(beanDef.getBeanClassName(), true, Thread.currentThread().getContextClassLoader());
         if (clazz.isAnnotationPresent(anno)) {
           logger.debug( "found annotated class, " + clazz.getName());
           classSet.add(clazz);

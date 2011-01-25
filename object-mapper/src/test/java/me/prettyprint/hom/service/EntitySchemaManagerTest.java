@@ -6,7 +6,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 
 import me.prettyprint.hom.CassandraTestBase;
-import me.prettyprint.hom.SimpleRelationshipBean;
+import me.prettyprint.hom.beans.SimpleRelationshipBean;
 import me.prettyprint.hom.openjpa.EntityFacade;
 import me.prettyprint.hom.service.EntitySchemaStatus.SchemaResult;
 
