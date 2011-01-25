@@ -1,3 +1,6 @@
 me.prettyprint.hom
 me.prettyprint.hom.annotations
+me.prettyprint.hom.cache
 me.prettyprint.hom.converters
+me.prettyprint.hom.openjpa
+me.prettyprint.hom.service
