@@ -182,6 +182,14 @@ public final class HFactory {
   /**
    * Creates a Keyspace with the default consistency level policy.
    * 
+   * Example usage.
+   *
+   * String clusterName = "Test Cluster";
+   * String host = "localhost:9160";
+   * Cluster cluster = HFactory.getOrCreateCluster(clusterName, host);
+   * String keyspaceName = "testKeyspace";
+   * Keyspace myKeyspace = HFactory.createKeyspace(keyspaceName, cluster);
+   * 
    * @param keyspace
    * @param cluster
    * @return
@@ -192,12 +200,31 @@ public final class HFactory {
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
+  /**
+   * Creates a Keyspace with the given consistency level. For a reference
+   * to the consistency level, please refer to http://wiki.apache.org/cassandra/API.
+   *
+   * @param keyspace
+   * @param cluster
+   * @param consistencyLevelPolicy
+   * @return
+   */
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy) {
     return createKeyspace(keyspace, cluster, consistencyLevelPolicy,
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
+  /**
+   * Creates a Keyspace with the given consistency level. For a reference
+   * to the consistency level, please refer to http://wiki.apache.org/cassandra/API.
+   *
+   * @param keyspace
+   * @param cluster
+   * @param consistencyLevelPolicy
+   * @param failoverPolicy
+   * @return
+   */
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy) {
@@ -205,6 +232,17 @@ public final class HFactory {
         consistencyLevelPolicy, failoverPolicy, cluster.getCredentials());
   }
 
+  /**
+   * Creates a Keyspace with the given consistency level, fail over policy
+   * and user credentials. For a reference to the consistency level, please
+   * refer to http://wiki.apache.org/cassandra/API.
+   *
+   * @param keyspace
+   * @param cluster
+   * @param consistencyLevelPolicy
+   * @param credentials
+   * @return
+   */
   public static Keyspace createKeyspace(String keyspace, Cluster cluster,
       ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy, Map<String, String> credentials) {
@@ -249,6 +287,12 @@ public final class HFactory {
     return DEFAULT_CONSISTENCY_LEVEL_POLICY;
   }
 
+  /**
+   * Creates a mutator for updating records in a keyspace.
+   *
+   * @param keyspace
+   * @param keySerializer
+   */
   public static <K, N, V> Mutator<K> createMutator(Keyspace keyspace,
       Serializer<K> keySerializer) {
     return new MutatorImpl<K>(keyspace, keySerializer);
