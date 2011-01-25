@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.7.0-24-SNAPSHOT</version>
+        <version>0.7.0-24</version>
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>me.prettyprint</groupId>
             <artifactId>hector-core</artifactId>
-            <version>0.7.0-24-SNAPSHOT</version>
+            <version>0.7.0-24</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
