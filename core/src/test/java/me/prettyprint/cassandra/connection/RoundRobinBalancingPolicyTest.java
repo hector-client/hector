@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 
@@ -18,15 +20,19 @@ public class RoundRobinBalancingPolicyTest extends BaseBalancingPolicyTest {
   @Test
   public void testGetPoolOk() {
     roundRobinBalancingPolicy = new RoundRobinBalancingPolicy();
-    assertEquals(poolWith5Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith7Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith10Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith5Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith7Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith10Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith5Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith7Active, roundRobinBalancingPolicy.getPool(pools, null));
-    assertEquals(poolWith10Active, roundRobinBalancingPolicy.getPool(pools, null));    
+    assertEquals(poolWith5Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith7Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith10Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith5Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith7Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith10Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith5Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith7Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    assertEquals(poolWith10Active.getNumActive(), roundRobinBalancingPolicy.getPool(pools, null).getNumActive());
+    // go to 65k to roll the counter a couple of times
+    for (int x=0; x<(256*256); x++) {
+      assert roundRobinBalancingPolicy.getPool(pools, null).getNumActive() >= 5;      
+    }
   }
   
   @Test
