@@ -26,7 +26,7 @@ public class ThriftColumnDef implements ColumnDefinition {
     name = cd.name;
     validationClass = cd.validation_class;
     indexType = indexTypeFromThrift(cd.index_type);
-    indexName = cd.index_name;
+    indexName = cd.index_name;    
   }
   
   public ThriftColumnDef(ColumnDefinition columnDefinition) {
@@ -37,6 +37,7 @@ public class ThriftColumnDef implements ColumnDefinition {
   }
 
   private ColumnIndexType indexTypeFromThrift(IndexType tIndexType) {
+    if ( tIndexType == null ) return null;
     switch (tIndexType) {
     case KEYS:
       return ColumnIndexType.KEYS;
@@ -89,8 +90,10 @@ public class ThriftColumnDef implements ColumnDefinition {
 
   private ColumnDef toThrift() {
     ColumnDef d = new ColumnDef();
-    d.setIndex_name(indexName);
-    d.setIndex_type(indexTypeToThrift(indexType));
+    if ( indexName != null ) {
+      d.setIndex_name(indexName);
+      d.setIndex_type(indexTypeToThrift(indexType));
+    }
     d.setName(name);
     d.setValidation_class(validationClass);
     return d;

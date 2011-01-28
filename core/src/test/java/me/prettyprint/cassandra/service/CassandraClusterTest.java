@@ -147,11 +147,16 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     columnDefinition.setValidationClass(ComparatorType.LONGTYPE.getClassName());
     columnFamilyDefinition.addColumnDefinition(columnDefinition);
     
+    columnDefinition = new BasicColumnDefinition();
+    columnDefinition.setName(StringSerializer.get().toByteBuffer("nonindexed_field"));    
+    columnDefinition.setValidationClass(ComparatorType.LONGTYPE.getClassName());
+    columnFamilyDefinition.addColumnDefinition(columnDefinition);    
     
     cassandraCluster.updateColumnFamily(new ThriftCfDef(columnFamilyDefinition));
     
     fromCluster = cassandraCluster.describeKeyspace("DynKeyspace3");
     
     assertEquals("birthdate",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(0).getName()));
+    assertEquals("nonindexed_field",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(1).getName()));
   }
 }
