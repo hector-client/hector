@@ -77,11 +77,11 @@ public class InheritanceParserValidator implements ParserValidator {
 
   private <T, I> void validateSingleTableInheritance(CFMappingDef<T, I> cfMapDef) {
     if (null == cfMapDef.getDiscColumn()) {
-      throw new HectorObjectMapperException("Class " + cfMapDef.getClass().getName()
+      throw new HectorObjectMapperException("Class " + cfMapDef.getRealClass().getName()
           + " requested single table inheritance, but you did not specify a "
           + DiscriminatorColumn.class.getSimpleName() + " annotation");
     } else if (null == cfMapDef.getDiscValue()) {
-      throw new HectorObjectMapperException("Class " + cfMapDef.getClass().getName()
+      throw new HectorObjectMapperException("Class " + cfMapDef.getRealClass().getName()
           + " requested single table inheritance, but you did specify a "
           + DiscriminatorValue.class.getSimpleName() + " annotation");
     }
@@ -91,7 +91,7 @@ public class InheritanceParserValidator implements ParserValidator {
     if (null == cfMapDef.getDiscValue()) {
       throw new HectorObjectMapperException("Base class "
           + cfMapDef.getCfBaseMapDef().getClass().getName()
-          + " requested single table inheritance, but this class, " + cfMapDef.getClass().getName()
+          + " requested single table inheritance, but this class, " + cfMapDef.getRealClass().getName()
           + ", did not specify a " + DiscriminatorValue.class.getSimpleName() + " annotation");
     }
   }
