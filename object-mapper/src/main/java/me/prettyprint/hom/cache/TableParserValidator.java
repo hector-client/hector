@@ -100,30 +100,5 @@ public class TableParserValidator implements ParserValidator {
     }
 
     cfMapDef.setCfBaseMapDef(cfBaseMapDef);
-
-    // Class<T> derClazz = cfMapDef.getEffectiveClass();
-    // Class<? super T> superClazz = (Class<T>) derClazz.getSuperclass();
-    // if (null == superClazz) {
-    // return;
-    // }
-    //
-    // CFMappingDef<T, I> superCfMapDef = getCfMapDef(superClazz, false);
-    // if (null == superCfMapDef) {
-    // return;
-    // }
-    //
-    // while (null != superCfMapDef && null ==
-    // superCfMapDef.getInheritanceType()) {
-    // superCfMapDef = (CFMappingDef<T, I>) superCfMapDef.getCfBaseMapDef();
-    // }
-    //
-    // if (null == superCfMapDef) {
-    // throw new HectorObjectMapperException(derClazz.getName() +
-    // " has mapped super class, but "
-    // + superClazz.getName() + " isn't marked with @" +
-    // Inheritance.class.getSimpleName()
-    // + " - cannot continue");
-    // }
-
   }
 }
