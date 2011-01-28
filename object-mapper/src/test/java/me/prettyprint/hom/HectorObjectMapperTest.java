@@ -23,6 +23,7 @@ import me.prettyprint.hom.ClassCacheMgr;
 import me.prettyprint.hom.HectorObjectMapper;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
+import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -155,7 +156,7 @@ public class HectorObjectMapperTest {
   public void testIsNotSerializable() {
     assertFalse(HectorObjectMapper.isSerializable(HectorObjectMapper.class));
   }
-
+  
   // --------------------
 
   @Before

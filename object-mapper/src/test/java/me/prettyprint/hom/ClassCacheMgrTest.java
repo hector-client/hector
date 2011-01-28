@@ -18,6 +18,7 @@ import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyPurpleTestBean;
 import me.prettyprint.hom.beans.MyRedTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
+import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.dupebean.MyDupeCF1;
 import me.prettyprint.hom.dupebean.MyDupeCF2;
@@ -25,6 +26,7 @@ import me.prettyprint.hom.dupebean.MyDupeCF2;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.mycompany.furniture.Chair;
 import com.mycompany.furniture.Desk;
 import com.mycompany.furniture.Furniture;
 
@@ -176,6 +178,30 @@ public class ClassCacheMgrTest {
     cacheMgr.initializeCacheForClass(MyDupeCF1.class);
     cacheMgr.initializeCacheForClass(MyDupeCF2.class);
   }
+
+  @Test
+  public void testParsingEntityWithoutAnonymousAddHandler() {
+    ClassCacheMgr cacheMgr = new ClassCacheMgr();
+    CFMappingDef<MyTestBeanNoAnonymous, String> cfMapDef = cacheMgr.initializeCacheForClass(MyTestBeanNoAnonymous.class);
+
+    assertFalse("mapping should not indicate there is an anonymous handler", cfMapDef.isAnonymousHandlerAvailable());
+    assertNotNull( "should have set the slice column array", cfMapDef.getSliceColumnNameArr() );
+    assertEquals( 1, cfMapDef.getSliceColumnNameArr().length);
+    assertEquals( "lp1", cfMapDef.getSliceColumnNameArr()[0]);
+  }
+
+  @Test
+  public void testParsingInheritedEntityWithoutAnonymousAddHandler() {
+    ClassCacheMgr cacheMgr = new ClassCacheMgr();
+    CFMappingDef<Chair, String> cfMapDef = cacheMgr.initializeCacheForClass(Chair.class);
+
+    assertFalse("mapping should not indicate there is an anonymous handler", cfMapDef.isAnonymousHandlerAvailable());
+    assertNotNull( "should have set the slice column array", cfMapDef.getSliceColumnNameArr() );
+    assertEquals( 5, cfMapDef.getSliceColumnNameArr().length);
+    assertEquals( "type", cfMapDef.getSliceColumnNameArr()[4]);
+  }
+
+
 }
 
 // --------------

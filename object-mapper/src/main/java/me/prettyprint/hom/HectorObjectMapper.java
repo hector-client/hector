@@ -1,9 +1,7 @@
 package me.prettyprint.hom;
 
-import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
@@ -34,7 +32,6 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
-import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 
@@ -74,7 +71,7 @@ public class HectorObjectMapper {
    * @param id
    * @return
    */
-  public <T, I> T getObject(Keyspace keyspace, String colFamName, Class<T> clazz, I id) {
+  public <T, I> T getObject(Keyspace keyspace, String colFamName, I id) {
     if (null == id) {
       throw new IllegalArgumentException("object ID cannot be null or empty");
     }
@@ -92,7 +89,15 @@ public class HectorObjectMapper {
         BytesArraySerializer.get(), StringSerializer.get(), BytesArraySerializer.get());
     q.setColumnFamily(colFamName);
     q.setKey(idAsBytes);
-    q.setRange("", "", false, maxNumColumns);
+    
+    // if no anonymous handler then use specific columns
+    if ( cfMapDef.isSliceColumnArrayRequired() ) {
+      q.setColumnNames(cfMapDef.getSliceColumnNameArr());
+    }
+    else {
+      q.setRange("", "", false, maxNumColumns);
+    }
+    
     QueryResult<ColumnSlice<String, byte[]>> result = q.execute();
     if (null == result || null == result.get()) {
       return null;
@@ -194,7 +199,7 @@ public class HectorObjectMapper {
         else if (null != cfMapDef.getDiscColumn() && colName.equals(cfMapDef.getDiscColumn())) {
           continue;
         } else {
-          addToExtraIfCan(obj, col);
+          addToExtraIfCan(obj, cfMapDef, col);
         }
       }
 
@@ -208,8 +213,6 @@ public class HectorObjectMapper {
     } catch (InvocationTargetException e) {
       throw new RuntimeException(e);
     } catch (SecurityException e) {
-      throw new RuntimeException(e);
-    } catch (NoSuchMethodException e) {
       throw new RuntimeException(e);
     }
   }
@@ -280,7 +283,7 @@ public class HectorObjectMapper {
 
   private void addAnonymousProperties(Object obj, Map<String, HColumn<String, byte[]>> colSet)
       throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-    Method meth = findAnnotatedMethod(obj.getClass(), AnonymousPropertyCollectionGetter.class);
+    Method meth = cacheMgr.findAnnotatedMethod(obj.getClass(), AnonymousPropertyCollectionGetter.class);
     if (null == meth) {
       return;
     }
@@ -490,10 +493,10 @@ public class HectorObjectMapper {
     return false;
   }
 
-  private void addToExtraIfCan(Object obj, HColumn<String, byte[]> col) throws SecurityException,
-      NoSuchMethodException, IllegalArgumentException, IllegalAccessException,
+  private <T, I> void addToExtraIfCan(Object obj, CFMappingDef<T, I> cfMapDef, HColumn<String, byte[]> col) throws SecurityException,
+      IllegalArgumentException, IllegalAccessException,
       InvocationTargetException {
-    Method meth = findAnnotatedMethod(obj.getClass(), AnonymousPropertyAddHandler.class);
+    Method meth = cfMapDef.getAnonymousPropertyAddHandler();
     if (null == meth) {
       throw new IllegalArgumentException(
           "Object type, "
@@ -504,15 +507,6 @@ public class HectorObjectMapper {
     }
 
     meth.invoke(obj, col.getName(), StringSerializer.get().fromBytes(col.getValue()));
-  }
-
-  private Method findAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> anno) {
-    for (Method meth : clazz.getMethods()) {
-      if (meth.isAnnotationPresent(anno)) {
-        return meth;
-      }
-    }
-    return null;
   }
 
 }

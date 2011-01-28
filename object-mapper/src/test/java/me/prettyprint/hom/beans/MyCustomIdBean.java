@@ -2,7 +2,6 @@ package me.prettyprint.hom.beans;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 
@@ -13,7 +12,7 @@ import me.prettyprint.hom.Colors;
 @Table(name="CustomIdColumnFamily")
 @IdClass(ColorEmbedded.class)
 public class MyCustomIdBean {
-  @Id
+  @me.prettyprint.hom.annotations.Id
   private Colors id;
 
   @Column(name="lp1")
