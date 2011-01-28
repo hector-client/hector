@@ -1,5 +1,6 @@
 package me.prettyprint.hom;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,6 +20,9 @@ import org.apache.commons.collections.collection.CompositeCollection;
  * Cassandra column family name.
  * 
  * @author Todd Burruss
+ * 
+ * @param <T> 
+ * @param <I> 
  */
 public class CFMappingDef<T, I> {
   private Class<T> realClass;
@@ -31,6 +35,8 @@ public class CFMappingDef<T, I> {
   private DiscriminatorType discType;
   private Object discValue; // this can be a variety of types
   private Set<PropertyMappingDefinition<I>> idPropertySet = new HashSet<PropertyMappingDefinition<I>>();
+  private String[] sliceColumnNameArr;
+  private Method anonymousPropertyAddHandler;
 
   private Map<Object, CFMappingDef<? extends T, I>> derivedClassMap = new HashMap<Object, CFMappingDef<? extends T, I>>();
   private Collection<PropertyMappingDefinition<?>> allMappedProps;
@@ -232,5 +238,29 @@ public class CFMappingDef<T, I> {
 
   public boolean isStandaloneClass() {
     return !isBaseInheritanceClass() && !isDerivedClassInheritance();
+  }
+
+  public String[] getSliceColumnNameArr() {
+    return sliceColumnNameArr;
+  }
+
+  public void setSliceColumnNameArr(String[] sliceColumnNameArr) {
+    this.sliceColumnNameArr = sliceColumnNameArr;
+  }
+
+  public Method getAnonymousPropertyAddHandler() {
+    return anonymousPropertyAddHandler;
+  }
+
+  public void setAnonymousPropertyAddHandler(Method anonymousPropertyAddHandler) {
+    this.anonymousPropertyAddHandler = anonymousPropertyAddHandler;
+  }
+
+  public boolean isAnonymousHandlerAvailable() {
+    return null != getAnonymousPropertyAddHandler();
+  }
+
+  public boolean isSliceColumnArrayRequired() {
+    return null != sliceColumnNameArr && 0 < sliceColumnNameArr.length;
   }
 }

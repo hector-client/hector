@@ -5,7 +5,10 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -16,6 +19,11 @@ import javax.persistence.IdClass;
 import javax.persistence.Inheritance;
 import javax.persistence.Table;
 
+import me.prettyprint.cassandra.serializers.BytesArraySerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.query.SliceQuery;
+import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.cache.IdClassParserValidator;
 import me.prettyprint.hom.cache.InheritanceParserValidator;
@@ -106,8 +114,8 @@ public class ClassCacheMgr {
    * For each class that should be managed, this method must be called to parse
    * its annotations and derive its meta-data.
    * 
-   * @param <T> 
-   * @param <I> 
+   * @param <T>
+   * @param <I>
    * 
    * @param clazz
    * @return
@@ -123,7 +131,7 @@ public class ClassCacheMgr {
     } catch (IllegalAccessException e) {
       throw new HectorObjectMapperException(e);
     }
-    
+
     // by the time we get here, all super classes and their annotations have
     // been processed and validated, and all annotations for this class have
     // been processed. what's left to do is validate this class, set super
@@ -137,18 +145,20 @@ public class ClassCacheMgr {
 
     // always map the parsed class to its ColumnFamily map definition
     cfMapByClazz.put(cfMapDef.getRealClass(), cfMapDef);
-    
+
     return cfMapDef;
   }
 
-  public Map<String, PropertyDescriptor> getFieldPropertyDescriptorMap(Class<?> clazz) throws IntrospectionException {
+  public Map<String, PropertyDescriptor> getFieldPropertyDescriptorMap(Class<?> clazz)
+      throws IntrospectionException {
     Map<String, PropertyDescriptor> pdMap = new HashMap<String, PropertyDescriptor>();
 
     // get descriptors for all properties in POJO
-    PropertyDescriptor[] pdArr = Introspector.getBeanInfo(clazz, clazz.getSuperclass()).getPropertyDescriptors();
+    PropertyDescriptor[] pdArr = Introspector.getBeanInfo(clazz, clazz.getSuperclass())
+                                             .getPropertyDescriptors();
 
     // if no property descriptors then return leaving empty annotation map
-    if (null == pdArr || 0 == pdArr.length ) {
+    if (null == pdArr || 0 == pdArr.length) {
       return pdMap;
     }
 
@@ -156,20 +166,20 @@ public class ClassCacheMgr {
     for (PropertyDescriptor pd : pdArr) {
       pdMap.put(pd.getName(), pd);
     }
-    
+
     return pdMap;
   }
 
   private <T, I> void initializePropertiesMapDef(CFMappingDef<T, I> cfMapDef)
       throws IntrospectionException, InstantiationException, IllegalAccessException {
     Class<T> theType = cfMapDef.getEffectiveClass();
-    
-    Map<String, PropertyDescriptor> pdMap = getFieldPropertyDescriptorMap( theType );
-    if ( pdMap.isEmpty() && !cfMapDef.isDerivedClassInheritance() ) {
+
+    Map<String, PropertyDescriptor> pdMap = getFieldPropertyDescriptorMap(theType);
+    if (pdMap.isEmpty() && !cfMapDef.isDerivedClassInheritance()) {
       throw new HectorObjectMapperException("could not find any properties annotated with @"
           + Column.class.getSimpleName());
     }
-    
+
     Field[] fieldArr = theType.getDeclaredFields();
 
     // iterate over all declared fields (for this class only, no inherited
@@ -331,5 +341,51 @@ public class ClassCacheMgr {
     inheritanceParVal.validateAndSetDefaults(this, cfMapDef);
     tableParVal.validateAndSetDefaults(this, cfMapDef);
     idClassParVal.validateAndSetDefaults(this, cfMapDef);
+
+    checkForAnonymousHandler(cfMapDef);
+
+    generateColumnSliceIfNeeded(cfMapDef);
   }
+
+  private <T, I> void checkForAnonymousHandler(CFMappingDef<T, I> cfMapDef) {
+    CFMappingDef<? super T, I> tmpDef = cfMapDef;
+    while (null != tmpDef) {
+      Method meth = findAnnotatedMethod(cfMapDef.getEffectiveClass(),
+          AnonymousPropertyAddHandler.class);
+      if (null != meth) {
+        cfMapDef.setAnonymousPropertyAddHandler(meth);
+        return;
+      }
+      tmpDef = tmpDef.getCfSuperMapDef();
+    }
+  }
+
+  private <T, I> void generateColumnSliceIfNeeded(CFMappingDef<T, I> cfMapDef) {
+    if (!cfMapDef.isAnonymousHandlerAvailable()) {
+      Collection<PropertyMappingDefinition<?>> coll = cfMapDef.getAllProperties();
+
+      String[] daNames = new String[cfMapDef.isStandaloneClass() ? coll.size() : coll.size()+1];
+      Iterator<PropertyMappingDefinition<?>> iter = coll.iterator();
+      int pos = 0;
+      while ( iter.hasNext() ) {
+        daNames[pos++] = iter.next().getColName();
+      }
+      
+      // if an inheritance hierarchy exists we need to add in the discriminator column
+      if ( !cfMapDef.isStandaloneClass() ) {
+        daNames[pos] = cfMapDef.getDiscColumn();
+      }
+      cfMapDef.setSliceColumnNameArr(daNames);
+    }
+  }
+
+  public Method findAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> anno) {
+    for (Method meth : clazz.getMethods()) {
+      if (meth.isAnnotationPresent(anno)) {
+        return meth;
+      }
+    }
+    return null;
+  }
+
 }
