@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles entity management by scanning classpath for classes annotated with
  * {@link Entity} and providing basic load and save methods.
- * 
+ *
  * @author
  */
 public class EntityManagerImpl implements EntityManager {
@@ -73,12 +73,12 @@ public class EntityManagerImpl implements EntityManager {
    * <code>classpathPrefix</code>, looking for classes annotated with
    * {@link Entity}. If an Entity class is found, it looks for the
    * {@link Table} annotation to determine the Cassandra column family name.
-   * 
+   *
    * @param classpathPrefixArr
    */
   public void initialize(String[] classpathPrefixArr) {
-    if (null != classpathPrefixArr && 0 < classpathPrefixArr.length) {      
-      for (String classpathPrefix : classpathPrefixArr) {        
+    if (null != classpathPrefixArr && 0 < classpathPrefixArr.length) {
+      for (String classpathPrefix : classpathPrefixArr) {
         initializeClasspath(classpathPrefix);
       }
     }
@@ -100,7 +100,7 @@ public class EntityManagerImpl implements EntityManager {
   /**
    * Load an entity instance. If the ID does not map to a persisted entity,
    * then null is returned.
-   * 
+   *
    * @param <T>
    *            The type of entity to load for compile time type checking
    * @param <I>
@@ -131,7 +131,7 @@ public class EntityManagerImpl implements EntityManager {
    * Load an entity instance given the raw column slice. This is a stop gap
    * solution for instanting objects using entity manager while iterating over
    * rows.
-   * 
+   *
    * @param <T>
    *            The type of entity to load for compile time type checking
    * @param <I>
@@ -164,7 +164,7 @@ public class EntityManagerImpl implements EntityManager {
 
   /**
    * Save the entity instance.
-   * 
+   *
    * @param <T>
    * @param obj
    * @return
@@ -175,13 +175,13 @@ public class EntityManagerImpl implements EntityManager {
     }
     return objMapper.saveObj(keyspace, obj);
   }
-  
+
   @Override
   public void persist(Object entity) {
-    save(entity);    
+    save(entity);
   }
 
-  
+
   @Override
   public <T> T find(Class<T> entityClass, Object primaryKey) {
     return load(entityClass, primaryKey);
@@ -190,232 +190,232 @@ public class EntityManagerImpl implements EntityManager {
 
   @Override
   public void clear() {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void close() {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public boolean contains(Object entity) {
-    // TODO Auto-generated method stub
-    return false;
+    throw new RuntimeException("Method is not implemented");
+//    return false;
   }
 
   @Override
   public Query createNamedQuery(String name) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public Query createNativeQuery(String sqlString) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public Query createNativeQuery(String sqlString, Class resultClass) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public Query createNativeQuery(String sqlString, String resultSetMapping) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public Query createQuery(String qlString) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
 
   @Override
   public void flush() {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public Object getDelegate() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public FlushModeType getFlushMode() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public <T> T getReference(Class<T> entityClass, Object primaryKey) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public EntityTransaction getTransaction() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
-  public boolean isOpen() {    
+  public boolean isOpen() {
     return open;
   }
 
   @Override
   public void joinTransaction() {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void lock(Object entity, LockModeType lockMode) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public <T> T merge(T entity) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
-  
+
   @Override
   public void refresh(Object entity) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void remove(Object entity) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void setFlushMode(FlushModeType flushMode) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public <T> TypedQuery<T> createNamedQuery(String arg0, Class<T> arg1) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public <T> TypedQuery<T> createQuery(CriteriaQuery<T> arg0) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public <T> TypedQuery<T> createQuery(String arg0, Class<T> arg1) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public void detach(Object arg0) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public <T> T find(Class<T> arg0, Object arg1, Map<String, Object> arg2) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2,
       Map<String, Object> arg3) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public CriteriaBuilder getCriteriaBuilder() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public EntityManagerFactory getEntityManagerFactory() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public LockModeType getLockMode(Object arg0) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public Metamodel getMetamodel() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public Map<String, Object> getProperties() {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 
   @Override
   public void lock(Object arg0, LockModeType arg1, Map<String, Object> arg2) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void refresh(Object arg0, Map<String, Object> arg1) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void refresh(Object arg0, LockModeType arg1) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void refresh(Object arg0, LockModeType arg1, Map<String, Object> arg2) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public void setProperty(String arg0, Object arg1) {
-    // TODO Auto-generated method stub
-    
+    throw new RuntimeException("Method is not implemented");
+
   }
 
   @Override
   public <T> T unwrap(Class<T> arg0) {
-    // TODO Auto-generated method stub
-    return null;
+    throw new RuntimeException("Method is not implemented");
+//    return null;
   }
 }
