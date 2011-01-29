@@ -124,7 +124,7 @@ public class EntityManagerImpl implements EntityManager {
       throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
-    return objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
+    return (T)objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
   }
 
   /**
