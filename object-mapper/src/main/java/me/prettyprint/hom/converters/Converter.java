@@ -5,11 +5,9 @@ package me.prettyprint.hom.converters;
  * Interface defining a custom object mapper conversion. For instance, from an
  * enum to a string.
  * 
- * @param <T> Type of object to convert
- * 
  * @author Todd Burruss
  */
-public interface Converter<T> {
+public interface Converter {
 
   /**
    * Convert Cassandra byte[] to Java type.
@@ -18,7 +16,7 @@ public interface Converter<T> {
    * @param value
    * @return Type of object
    */
-  T convertCassTypeToObjType(Class<T> clazz, byte[] value);
+  Object convertCassTypeToObjType(Class<?> clazz, byte[] value);
 
   /**
    * Convert Java type to byte[].
@@ -26,5 +24,5 @@ public interface Converter<T> {
    * @param value
    * @return Type of object converted to byte[]
    */
-  byte[] convertObjTypeToCassType(T value);
+  byte[] convertObjTypeToCassType(Object value);
 }

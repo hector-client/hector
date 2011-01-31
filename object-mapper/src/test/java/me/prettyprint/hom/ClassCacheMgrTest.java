@@ -57,7 +57,7 @@ public class ClassCacheMgrTest {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
     cacheMgr.initializeCacheForClass(MyTestBean.class);
 
-    CFMappingDef<?, Long> cfMapDef = cacheMgr.getCfMapDef(MyTestBean.class, false);
+    CFMappingDef<?> cfMapDef = cacheMgr.getCfMapDef(MyTestBean.class, false);
 
     assertNotNull(cfMapDef);
     assertEquals(MyTestBean.class, cfMapDef.getEffectiveClass());
@@ -74,7 +74,7 @@ public class ClassCacheMgrTest {
 
     assertTrue(tmplMap.get(1L).getClass().isAnonymousClass());
 
-    CFMappingDef<?, Long> cfMapDef = cacheMgr.getCfMapDef(tmplMap.get(1L).getClass(), false);
+    CFMappingDef<?> cfMapDef = cacheMgr.getCfMapDef(tmplMap.get(1L).getClass(), false);
 
     assertNotNull(cfMapDef);
     assertEquals(MyTestBean.class, cfMapDef.getEffectiveClass());
@@ -105,7 +105,7 @@ public class ClassCacheMgrTest {
   @Test
   public void testInheritanceOfEntity() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<MyRedTestBean, String> cfMapDef = cacheMgr
+    CFMappingDef<MyRedTestBean> cfMapDef = cacheMgr
                                                            .initializeCacheForClass(MyRedTestBean.class);
 
     // 13 is valid when custom conversion of enumerations works again
@@ -123,8 +123,8 @@ public class ClassCacheMgrTest {
   @Test
   public void testInheritanceWithMultiLevels() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<Desk, String> cfMapDef = cacheMgr.initializeCacheForClass(Desk.class);
-    CFMappingDef<Furniture, String> cfBaseMapDef = cacheMgr.getCfMapDef(Furniture.class, true);
+    CFMappingDef<Desk> cfMapDef = cacheMgr.initializeCacheForClass(Desk.class);
+    CFMappingDef<Furniture> cfBaseMapDef = cacheMgr.getCfMapDef(Furniture.class, true);
 
     assertEquals(5, cfMapDef.getAllProperties().size());
     assertNotNull(cfMapDef.getCfSuperMapDef());
@@ -142,7 +142,7 @@ public class ClassCacheMgrTest {
   @Test
   public void testInheritanceOfNonEntity() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<MyPurpleTestBean, String> cfMapDef = cacheMgr
+    CFMappingDef<MyPurpleTestBean> cfMapDef = cacheMgr
                                                               .initializeCacheForClass(MyPurpleTestBean.class);
 
     assertEquals(2, cfMapDef.getAllProperties().size());
@@ -182,7 +182,7 @@ public class ClassCacheMgrTest {
   @Test
   public void testParsingEntityWithoutAnonymousAddHandler() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<MyTestBeanNoAnonymous, String> cfMapDef = cacheMgr.initializeCacheForClass(MyTestBeanNoAnonymous.class);
+    CFMappingDef<MyTestBeanNoAnonymous> cfMapDef = cacheMgr.initializeCacheForClass(MyTestBeanNoAnonymous.class);
 
     assertFalse("mapping should not indicate there is an anonymous handler", cfMapDef.isAnonymousHandlerAvailable());
     assertNotNull( "should have set the slice column array", cfMapDef.getSliceColumnNameArr() );
@@ -193,7 +193,7 @@ public class ClassCacheMgrTest {
   @Test
   public void testParsingInheritedEntityWithoutAnonymousAddHandler() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<Chair, String> cfMapDef = cacheMgr.initializeCacheForClass(Chair.class);
+    CFMappingDef<Chair> cfMapDef = cacheMgr.initializeCacheForClass(Chair.class);
 
     assertFalse("mapping should not indicate there is an anonymous handler", cfMapDef.isAnonymousHandlerAvailable());
     assertNotNull( "should have set the slice column array", cfMapDef.getSliceColumnNameArr() );

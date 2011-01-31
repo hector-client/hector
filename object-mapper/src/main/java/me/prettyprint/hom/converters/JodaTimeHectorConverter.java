@@ -4,16 +4,16 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 
 import org.joda.time.DateTime;
 
-public class JodaTimeHectorConverter implements Converter<DateTime> {
+public class JodaTimeHectorConverter implements Converter {
 
   @Override
-  public DateTime convertCassTypeToObjType(Class<DateTime> clazz, byte[] value) {
+  public DateTime convertCassTypeToObjType(Class<?> clazz, byte[] value) {
     return new DateTime(LongSerializer.get().fromBytes(value));
   }
 
   @Override
-  public byte[] convertObjTypeToCassType(DateTime value) {
-    return LongSerializer.get().toBytes(value.getMillis());
+  public byte[] convertObjTypeToCassType(Object value) {
+    return LongSerializer.get().toBytes(((DateTime)value).getMillis());
   }
 
 }

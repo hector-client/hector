@@ -15,7 +15,7 @@ public class InheritanceParserValidatorTest {
 
   @Test
   public void testValidate() {
-    CFMappingDef<MyTestBean, ?> cfMapDef = new CFMappingDef<MyTestBean, Object>(MyTestBean.class);
+    CFMappingDef<MyTestBean> cfMapDef = new CFMappingDef<MyTestBean>(MyTestBean.class);
     cfMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
     cfMapDef.setDiscColumn("myType");
     cfMapDef.setDiscValue("blue");
@@ -30,7 +30,7 @@ public class InheritanceParserValidatorTest {
 
   @Test(expected = HectorObjectMapperException.class)
   public void testValidateInvalidInheritanceType() {
-    CFMappingDef<MyTestBean, ?> cfMapDef = new CFMappingDef<MyTestBean, Object>(MyTestBean.class);
+    CFMappingDef<MyTestBean> cfMapDef = new CFMappingDef<MyTestBean>(MyTestBean.class);
     cfMapDef.setInheritanceType(InheritanceType.JOINED);
 
     InheritanceParserValidator val = new InheritanceParserValidator();
@@ -40,7 +40,7 @@ public class InheritanceParserValidatorTest {
 
   @Test(expected = HectorObjectMapperException.class)
   public void testValidateMissingDiscriminatorColumn() {
-    CFMappingDef<MyTestBean, ?> cfMapDef = new CFMappingDef<MyTestBean, Object>(MyTestBean.class);
+    CFMappingDef<MyTestBean> cfMapDef = new CFMappingDef<MyTestBean>(MyTestBean.class);
     cfMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
 
     InheritanceParserValidator val = new InheritanceParserValidator();
@@ -50,7 +50,7 @@ public class InheritanceParserValidatorTest {
 
   @Test(expected = HectorObjectMapperException.class)
   public void testValidateMissingDiscriminatorValue() {
-    CFMappingDef<MyTestBean, ?> cfMapDef = new CFMappingDef<MyTestBean, Object>(MyTestBean.class);
+    CFMappingDef<MyTestBean> cfMapDef = new CFMappingDef<MyTestBean>(MyTestBean.class);
     cfMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
     cfMapDef.setDiscColumn("myType");
 
@@ -60,12 +60,12 @@ public class InheritanceParserValidatorTest {
   }
 
   public void testValidateDerivedClass() {
-    CFMappingDef<MyTestBean, Object> cfBaseMapDef = new CFMappingDef<MyTestBean, Object>(
+    CFMappingDef<MyTestBean> cfBaseMapDef = new CFMappingDef<MyTestBean>(
         MyTestBean.class);
     cfBaseMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
     cfBaseMapDef.setDiscColumn("myType");
 
-    CFMappingDef<MyBlueTestBean, Object> cfMapDef = new CFMappingDef<MyBlueTestBean, Object>(
+    CFMappingDef<MyBlueTestBean> cfMapDef = new CFMappingDef<MyBlueTestBean>(
         MyBlueTestBean.class);
     cfMapDef.setCfBaseMapDef(cfBaseMapDef);
     cfMapDef.setDiscValue("blue");
@@ -81,12 +81,12 @@ public class InheritanceParserValidatorTest {
   @Test(expected = HectorObjectMapperException.class)
   public void testValidateDerivedClassMissingDiscriminatorValue() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<MyTestBean, Object> cfBaseMapDef = new CFMappingDef<MyTestBean, Object>(
+    CFMappingDef<MyTestBean> cfBaseMapDef = new CFMappingDef<MyTestBean>(
         MyTestBean.class);
     cfBaseMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
     cfBaseMapDef.setDiscColumn("myType");
 
-    CFMappingDef<MyBlueTestBean, Object> cfMapDef = new CFMappingDef<MyBlueTestBean, Object>(
+    CFMappingDef<MyBlueTestBean> cfMapDef = new CFMappingDef<MyBlueTestBean>(
         MyBlueTestBean.class);
     cfMapDef.setCfSuperMapDef(cfBaseMapDef);
     cfMapDef.setCfBaseMapDef(cfBaseMapDef);

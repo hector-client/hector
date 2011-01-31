@@ -5,16 +5,16 @@ import java.beans.PropertyDescriptor;
 import me.prettyprint.hom.converters.Converter;
 
 
-public class PropertyMappingDefinition<T> {
+public class PropertyMappingDefinition {
   private PropertyDescriptor propDesc;
   private String colName;
-  private Converter<T> converter;
+  private Converter converter;
 
-  public PropertyMappingDefinition(PropertyDescriptor propDesc, String colName, Class<Converter<T>> converter)
+  public PropertyMappingDefinition(PropertyDescriptor propDesc, String colName, Class<? extends Converter> converter)
   throws InstantiationException, IllegalAccessException {
     this.propDesc = propDesc;
     this.colName = colName;
-    this.converter = (Converter<T>) converter.newInstance();
+    this.converter = converter.newInstance();
   }
 
   @Override
@@ -31,7 +31,7 @@ public class PropertyMappingDefinition<T> {
     return colName;
   }
 
-  public Converter<T> getConverter() {
+  public Converter getConverter() {
     return converter;
   }
 }

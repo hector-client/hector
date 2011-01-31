@@ -16,7 +16,7 @@ import me.prettyprint.hom.ClassCacheMgr;
 public class TableParserValidator implements ParserValidator {
 
   @Override
-  public <T, I> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T, I> cfMapDef) {
+  public <T> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T> cfMapDef) {
     if (anno instanceof Table) {
       parseTableAnnotation(cacheMgr, (Table) anno, cfMapDef);
     } else {
@@ -25,9 +25,9 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void parseTableAnnotation(ClassCacheMgr cacheMgr, Table anno,
-      CFMappingDef<T, I> cfMapDef) {
-    CFMappingDef<?, ?> tmpDef;
+  private <T> void parseTableAnnotation(ClassCacheMgr cacheMgr, Table anno,
+      CFMappingDef<T> cfMapDef) {
+    CFMappingDef<?> tmpDef;
 
     // column family can only be mapped to one class (base class)
     if (null != (tmpDef = cacheMgr.getCfMapDef(anno.name(), false))) {
@@ -45,7 +45,7 @@ public class TableParserValidator implements ParserValidator {
   }
 
   @Override
-  public <T, I> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
+  public <T> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     if (cfMapDef.isStandaloneClass()) {
       validateStandaloneClass(cacheMgr, cfMapDef);
     } else if (cfMapDef.isBaseInheritanceClass()) {
@@ -55,8 +55,8 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void validateStandaloneClass(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
-    CFMappingDef<? super T, I> cfSuperDef;
+  private <T> void validateStandaloneClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+    CFMappingDef<? super T> cfSuperDef;
 
     if (null == cfMapDef.getEffectiveColFamName()) {
       throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass().getName()
@@ -69,7 +69,7 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void validateBaseClass(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
+  private <T> void validateBaseClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     if (null == cfMapDef.getColFamName()) {
       throw new HectorObjectMapperException(cfMapDef.getRealClass()
           + " is recognized as a base class, but doesn't specify @" + Table.class.getSimpleName()
@@ -77,7 +77,7 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void validateDerivedClass(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
+  private <T> void validateDerivedClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     findAndSetBaseClassViaMappings(cacheMgr, cfMapDef);
     if (null == cfMapDef.getCfBaseMapDef()) {
       throw new HectorObjectMapperException("@" + Table.class.getSimpleName() + " used by class, "
@@ -90,8 +90,8 @@ public class TableParserValidator implements ParserValidator {
     cfMapDef.getCfBaseMapDef().addDerivedClassMap(cfMapDef);
   }
 
-  private <T, I> void findAndSetBaseClassViaMappings(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
-    CFMappingDef<? super T, I> cfBaseMapDef = cacheMgr.findBaseClassViaMappings(cfMapDef);
+  private <T> void findAndSetBaseClassViaMappings(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+    CFMappingDef<? super T> cfBaseMapDef = cacheMgr.findBaseClassViaMappings(cfMapDef);
 
     if (null == cfBaseMapDef) {
       throw new HectorObjectMapperException(cfMapDef.getRealClass()
