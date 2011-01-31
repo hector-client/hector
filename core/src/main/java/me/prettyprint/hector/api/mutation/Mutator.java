@@ -64,6 +64,24 @@ public interface Mutator<K> {
    * @return a mutator
    */
   <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer);
+  
+  /**
+   * Alternate form for easy deletion of the whole row.
+   * 
+   * @param <N>
+   * @param key
+   * @return
+   */
+  <N> Mutator<K> addDeletion(K key, String cf);
+  
+  /**
+   * Same as above accept we add the clock
+   * 
+   * @param <N>
+   * @param key
+   * @return
+   */
+  <N> Mutator<K> addDeletion(K key, String cf, long clock);
 
   /**
    * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null

@@ -149,6 +149,24 @@ public final class MutatorImpl<K> implements Mutator<K> {
     addDeletion(key, cf, columnName, nameSerializer, keyspace.createClock());
     return this;
   }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf) {
+    addDeletion(key, cf, null, null, keyspace.createClock());
+    return this;
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf, long clock) {
+    addDeletion(key, cf, null, null, clock);
+    return this;
+  }
 
   /**
    * {@inheritDoc}
@@ -156,8 +174,13 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer, long clock) {
     SlicePredicate sp = new SlicePredicate();
-    sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
-    Deletion d = columnName != null ? new Deletion(clock).setPredicate(sp) : new Deletion(clock);
+    Deletion d;
+    if ( columnName != null ) {
+      sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
+      d = new Deletion(clock).setPredicate(sp);
+    } else { 
+      d = new Deletion(clock);
+    }
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
