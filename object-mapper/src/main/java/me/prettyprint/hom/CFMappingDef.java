@@ -22,30 +22,29 @@ import org.apache.commons.collections.collection.CompositeCollection;
  * @author Todd Burruss
  * 
  * @param <T> 
- * @param <I> 
  */
-public class CFMappingDef<T, I> {
+public class CFMappingDef<T> {
   private Class<T> realClass;
   private Class<T> effectiveClass;
-  private CFMappingDef<? super T, I> cfBaseMapDef;
-  private CFMappingDef<? super T, I> cfSuperMapDef;
+  private CFMappingDef<? super T> cfBaseMapDef;
+  private CFMappingDef<? super T> cfSuperMapDef;
   private String colFamName;
   private InheritanceType inheritanceType;
   private String discColumn;
   private DiscriminatorType discType;
   private Object discValue; // this can be a variety of types
-  private Set<PropertyMappingDefinition<I>> idPropertySet = new HashSet<PropertyMappingDefinition<I>>();
+  private Set<PropertyMappingDefinition> idPropertySet = new HashSet<PropertyMappingDefinition>();
   private String[] sliceColumnNameArr;
   private Method anonymousPropertyAddHandler;
 
-  private Map<Object, CFMappingDef<? extends T, I>> derivedClassMap = new HashMap<Object, CFMappingDef<? extends T, I>>();
-  private Collection<PropertyMappingDefinition<?>> allMappedProps;
+  private Map<Object, CFMappingDef<? extends T>> derivedClassMap = new HashMap<Object, CFMappingDef<? extends T>>();
+  private Collection<PropertyMappingDefinition> allMappedProps;
 
   // provide caching by class object for the class' mapping definition
-  private Map<String, PropertyMappingDefinition<?>> propertyCacheByPropName = new HashMap<String, PropertyMappingDefinition<?>>();
+  private Map<String, PropertyMappingDefinition> propertyCacheByPropName = new HashMap<String, PropertyMappingDefinition>();
 
   // provide caching by class object for the class' mapping definition
-  private Map<String, PropertyMappingDefinition<?>> propertyCacheByColName = new HashMap<String, PropertyMappingDefinition<?>>();
+  private Map<String, PropertyMappingDefinition> propertyCacheByColName = new HashMap<String, PropertyMappingDefinition>();
 
   public CFMappingDef(Class<T> clazz) {
     setDefaults(clazz);
@@ -79,16 +78,16 @@ public class CFMappingDef<T, I> {
     }
   }
 
-  public void addDerivedClassMap(CFMappingDef<? extends T, I> cfDerivedMapDef) {
+  public void addDerivedClassMap(CFMappingDef<? extends T> cfDerivedMapDef) {
     derivedClassMap.put(cfDerivedMapDef.getDiscValue(), cfDerivedMapDef);
   }
 
-  public PropertyMappingDefinition<?> getPropMapByPropName(String propName) {
+  public PropertyMappingDefinition getPropMapByPropName(String propName) {
     return propertyCacheByPropName.get(propName);
   }
 
-  public PropertyMappingDefinition<?> getPropMapByColumnName(String colName) {
-    PropertyMappingDefinition<?> md = propertyCacheByColName.get(colName);
+  public PropertyMappingDefinition getPropMapByColumnName(String colName) {
+    PropertyMappingDefinition md = propertyCacheByColName.get(colName);
     if (null != md) {
       return md;
     } else if (null != cfSuperMapDef) {
@@ -98,7 +97,7 @@ public class CFMappingDef<T, I> {
     }
   }
 
-  public void addPropertyDefinition(PropertyMappingDefinition<?> propDef) {
+  public void addPropertyDefinition(PropertyMappingDefinition propDef) {
     propertyCacheByColName.put(propDef.getColName(), propDef);
     propertyCacheByPropName.put(propDef.getPropDesc().getName(), propDef);
   }
@@ -163,7 +162,7 @@ public class CFMappingDef<T, I> {
     this.discValue = discValue;
   }
 
-  public Set<PropertyMappingDefinition<I>> getIdPropertySet() {
+  public Set<PropertyMappingDefinition> getIdPropertySet() {
     if (null == cfBaseMapDef) {
       return idPropertySet;
     } else {
@@ -171,15 +170,15 @@ public class CFMappingDef<T, I> {
     }
   }
 
-  public void addIdPropertyMap(PropertyMappingDefinition<I> idProperty) {
+  public void addIdPropertyMap(PropertyMappingDefinition idProperty) {
     idPropertySet.add(idProperty);
   }
 
   @SuppressWarnings("unchecked")
-  public Collection<PropertyMappingDefinition<?>> getAllProperties() {
+  public Collection<PropertyMappingDefinition> getAllProperties() {
     if (null == allMappedProps) {
-      Set<PropertyMappingDefinition<?>> propSet = new HashSet<PropertyMappingDefinition<?>>();
-      for (PropertyMappingDefinition<?> propMapDef : propertyCacheByColName.values()) {
+      Set<PropertyMappingDefinition> propSet = new HashSet<PropertyMappingDefinition>();
+      for (PropertyMappingDefinition propMapDef : propertyCacheByColName.values()) {
         propSet.add(propMapDef);
       }
 
@@ -194,11 +193,11 @@ public class CFMappingDef<T, I> {
     return allMappedProps;
   }
 
-  public CFMappingDef<? super T, I> getCfBaseMapDef() {
+  public CFMappingDef<? super T> getCfBaseMapDef() {
     return cfBaseMapDef;
   }
 
-  public void setCfBaseMapDef(CFMappingDef<? super T, I> cfBaseMapDef) {
+  public void setCfBaseMapDef(CFMappingDef<? super T> cfBaseMapDef) {
     this.cfBaseMapDef = cfBaseMapDef;
   }
 
@@ -206,15 +205,15 @@ public class CFMappingDef<T, I> {
     this.colFamName = colFamName;
   }
 
-  public Map<Object, CFMappingDef<? extends T, I>> getDerivedClassMap() {
+  public Map<Object, CFMappingDef<? extends T>> getDerivedClassMap() {
     return derivedClassMap;
   }
 
-  public CFMappingDef<? super T, I> getCfSuperMapDef() {
+  public CFMappingDef<? super T> getCfSuperMapDef() {
     return cfSuperMapDef;
   }
 
-  public void setCfSuperMapDef(CFMappingDef<? super T, I> cfSuperMapDef) {
+  public void setCfSuperMapDef(CFMappingDef<? super T> cfSuperMapDef) {
     this.cfSuperMapDef = cfSuperMapDef;
   }
 

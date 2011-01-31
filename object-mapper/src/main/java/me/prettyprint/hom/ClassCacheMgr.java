@@ -37,8 +37,8 @@ import me.prettyprint.hom.converters.DefaultConverter;
  * @author
  */
 public class ClassCacheMgr {
-  private Map<String, CFMappingDef<?, ?>> cfMapByColFamName = new HashMap<String, CFMappingDef<?, ?>>();
-  private Map<Class<?>, CFMappingDef<?, ?>> cfMapByClazz = new HashMap<Class<?>, CFMappingDef<?, ?>>();
+  private Map<String, CFMappingDef<?>> cfMapByColFamName = new HashMap<String, CFMappingDef<?>>();
+  private Map<Class<?>, CFMappingDef<?>> cfMapByClazz = new HashMap<Class<?>, CFMappingDef<?>>();
 
   private InheritanceParserValidator inheritanceParVal = new InheritanceParserValidator();
   private TableParserValidator tableParVal = new TableParserValidator();
@@ -50,18 +50,17 @@ public class ClassCacheMgr {
    * determined by {@link CFMappingDef#isBaseInheritanceClass()}
    * 
    * @param <T>
-   * @param <I>
    * @param cfMapDef
    * @return returns the base in the ColumnFamily mapping hierarchy
    */
-  public <T, I> CFMappingDef<? super T, I> findBaseClassViaMappings(CFMappingDef<T, I> cfMapDef) {
-    CFMappingDef<T, I> tmpDef = cfMapDef;
-    CFMappingDef<? super T, I> cfSuperDef;
+  public <T> CFMappingDef<? super T> findBaseClassViaMappings(CFMappingDef<T> cfMapDef) {
+    CFMappingDef<T> tmpDef = cfMapDef;
+    CFMappingDef<? super T> cfSuperDef;
     while (null != (cfSuperDef = tmpDef.getCfSuperMapDef())) {
       if (cfSuperDef.isBaseInheritanceClass()) {
         return cfSuperDef;
       }
-      tmpDef = (CFMappingDef<T, I>) cfSuperDef;
+      tmpDef = (CFMappingDef<T>) cfSuperDef;
     }
     return null;
   }
@@ -70,14 +69,13 @@ public class ClassCacheMgr {
    * Retrieve class mapping meta-data by <code>Class</code> object.
    * 
    * @param <T>
-   * @param <I>
    * @param clazz
    * @param throwException
    * @return
    */
-  public <T, I> CFMappingDef<T, I> getCfMapDef(Class<T> clazz, boolean throwException) {
+  public <T> CFMappingDef<T> getCfMapDef(Class<T> clazz, boolean throwException) {
     @SuppressWarnings("unchecked")
-    CFMappingDef<T, I> cfMapDef = (CFMappingDef<T, I>) cfMapByClazz.get(clazz);
+    CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cfMapByClazz.get(clazz);
     if (null == cfMapDef && throwException) {
       throw new HectorObjectMapperException(
           "could not find property definitions for class, "
@@ -92,14 +90,13 @@ public class ClassCacheMgr {
    * Retrieve class mapping meta-data by ColumnFamily name.
    * 
    * @param <T>
-   * @param <I>
    * @param colFamName
    * @param throwException
    * @return
    */
-  public <T, I> CFMappingDef<T, I> getCfMapDef(String colFamName, boolean throwException) {
+  public <T> CFMappingDef<T> getCfMapDef(String colFamName, boolean throwException) {
     @SuppressWarnings("unchecked")
-    CFMappingDef<T, I> cfMapDef = (CFMappingDef<T, I>) cfMapByColFamName.get(colFamName);
+    CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cfMapByColFamName.get(colFamName);
     if (null == cfMapDef && throwException) {
       throw new HectorObjectMapperException(
           "could not find property definitions for column family, "
@@ -115,13 +112,12 @@ public class ClassCacheMgr {
    * its annotations and derive its meta-data.
    * 
    * @param <T>
-   * @param <I>
    * 
    * @param clazz
    * @return
    */
-  public <T, I> CFMappingDef<T, I> initializeCacheForClass(Class<T> clazz) {
-    CFMappingDef<T, I> cfMapDef = initializeColumnFamilyMapDef(clazz);
+  public <T> CFMappingDef<T> initializeCacheForClass(Class<T> clazz) {
+    CFMappingDef<T> cfMapDef = initializeColumnFamilyMapDef(clazz);
     try {
       initializePropertiesMapDef(cfMapDef);
     } catch (IntrospectionException e) {
@@ -170,7 +166,7 @@ public class ClassCacheMgr {
     return pdMap;
   }
 
-  private <T, I> void initializePropertiesMapDef(CFMappingDef<T, I> cfMapDef)
+  private <T> void initializePropertiesMapDef(CFMappingDef<T> cfMapDef)
       throws IntrospectionException, InstantiationException, IllegalAccessException {
     Class<T> theType = cfMapDef.getEffectiveClass();
 
@@ -207,7 +203,21 @@ public class ClassCacheMgr {
     }
   }
 
-  private <T, I> void processColumnAnnotation(Field f, Column anno, CFMappingDef<T, I> cfMapDef,
+  private <T> void processColumnAnnotation(Field f, Column anno, CFMappingDef<T> cfMapDef,
+      Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
+    PropertyDescriptor pd = pdMap.get(f.getName());
+    if (null == pd) {
+      throw new HectorObjectMapperException("Property, "
+          + cfMapDef.getEffectiveClass().getSimpleName() + "." + f.getName()
+          + ", does not have proper setter/getter");
+    }
+
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), DefaultConverter.class);
+    cfMapDef.addPropertyDefinition(md);
+  }
+
+  private <T> void processColumnCustomAnnotation(Field f,
+      me.prettyprint.hom.annotations.Column anno, CFMappingDef<T> cfMapDef,
       Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
     PropertyDescriptor pd = pdMap.get(f.getName());
     if (null == pd) {
@@ -217,31 +227,16 @@ public class ClassCacheMgr {
     }
 
     PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
-        DefaultConverter.class);
-    cfMapDef.addPropertyDefinition(md);
-  }
-
-  private <T, I> void processColumnCustomAnnotation(Field f,
-      me.prettyprint.hom.annotations.Column anno, CFMappingDef<T, I> cfMapDef,
-      Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
-    PropertyDescriptor pd = pdMap.get(f.getName());
-    if (null == pd) {
-      throw new HectorObjectMapperException("Property, "
-          + cfMapDef.getEffectiveClass().getSimpleName() + "." + f.getName()
-          + ", does not have proper setter/getter");
-    }
-
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
-        (Class<Converter<?>>) anno.converter());
+        (Class<Converter>) anno.converter());
     cfMapDef.addPropertyDefinition(md);
     cfMapDef.addPropertyDefinition(md);
   }
 
-  private <T, I> void processIdAnnotation(Field f, Id anno, CFMappingDef<T, I> cfMapDef,
+  private <T> void processIdAnnotation(Field f, Id anno, CFMappingDef<T> cfMapDef,
       Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
     @SuppressWarnings("unchecked")
-    PropertyMappingDefinition<I> md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
         DefaultConverter.class);
     if (null != md) {
       if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
@@ -253,12 +248,12 @@ public class ClassCacheMgr {
     cfMapDef.addIdPropertyMap(md);
   }
 
-  private <T, I> void processIdCustomAnnotation(Field f, me.prettyprint.hom.annotations.Id anno,
-      CFMappingDef<T, I> cfMapDef, Map<String, PropertyDescriptor> pdMap)
+  private <T> void processIdCustomAnnotation(Field f, me.prettyprint.hom.annotations.Id anno,
+      CFMappingDef<T> cfMapDef, Map<String, PropertyDescriptor> pdMap)
       throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    PropertyMappingDefinition<I> md = new PropertyMappingDefinition<I>(pdMap.get(f.getName()),
-        null, (Class<Converter<I>>) anno.converter());
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()),
+        null, (Class<Converter>) anno.converter());
     if (null != md) {
       if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
           || null == md.getPropDesc().getWriteMethod()) {
@@ -269,9 +264,9 @@ public class ClassCacheMgr {
     cfMapDef.addIdPropertyMap(md);
 
     // @SuppressWarnings("unchecked")
-    // PropertyMappingDefinition<I> md =
-    // new PropertyMappingDefinition<I>(pdMap.get(f.getName()), null,
-    // (Class<Converter<I>>) idAnno
+    // PropertyMappingDefinition md =
+    // new PropertyMappingDefinition(pdMap.get(f.getName()), null,
+    // (Class<Converter>) idAnno
     // .converter());
     // if (null != md) {
     // if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
@@ -285,16 +280,16 @@ public class ClassCacheMgr {
 
   }
 
-  private <T, I> CFMappingDef<T, I> initializeColumnFamilyMapDef(Class<T> realClass) {
+  private <T> CFMappingDef<T> initializeColumnFamilyMapDef(Class<T> realClass) {
     // if already init'd don't do it again - could have happened because of
     // inheritance - causes recursive processing for class hierarchy
-    CFMappingDef<T, I> cfMapDef = getCfMapDef(realClass, false);
+    CFMappingDef<T> cfMapDef = getCfMapDef(realClass, false);
     if (null != cfMapDef) {
       return cfMapDef;
     }
 
     // try {
-    cfMapDef = new CFMappingDef<T, I>(realClass);
+    cfMapDef = new CFMappingDef<T>(realClass);
     // }
     // catch ( HectorObjectMapperException e ) {
     // // ok, becuase may not have a super class that's an entity
@@ -302,7 +297,7 @@ public class ClassCacheMgr {
     // }
 
     Class<T> effectiveType = cfMapDef.getEffectiveClass();
-    CFMappingDef<? super T, I> cfSuperMapDef = null;
+    CFMappingDef<? super T> cfSuperMapDef = null;
 
     // if this class extends a super, then process it first
     if (null != effectiveType.getSuperclass()) {
@@ -337,7 +332,7 @@ public class ClassCacheMgr {
     return cfMapDef;
   }
 
-  private <T, I> void checkMappingAndSetDefaults(CFMappingDef<T, I> cfMapDef) {
+  private <T> void checkMappingAndSetDefaults(CFMappingDef<T> cfMapDef) {
     inheritanceParVal.validateAndSetDefaults(this, cfMapDef);
     tableParVal.validateAndSetDefaults(this, cfMapDef);
     idClassParVal.validateAndSetDefaults(this, cfMapDef);
@@ -347,8 +342,8 @@ public class ClassCacheMgr {
     generateColumnSliceIfNeeded(cfMapDef);
   }
 
-  private <T, I> void checkForAnonymousHandler(CFMappingDef<T, I> cfMapDef) {
-    CFMappingDef<? super T, I> tmpDef = cfMapDef;
+  private <T> void checkForAnonymousHandler(CFMappingDef<T> cfMapDef) {
+    CFMappingDef<? super T> tmpDef = cfMapDef;
     while (null != tmpDef) {
       Method meth = findAnnotatedMethod(cfMapDef.getEffectiveClass(),
           AnonymousPropertyAddHandler.class);
@@ -360,12 +355,12 @@ public class ClassCacheMgr {
     }
   }
 
-  private <T, I> void generateColumnSliceIfNeeded(CFMappingDef<T, I> cfMapDef) {
+  private <T> void generateColumnSliceIfNeeded(CFMappingDef<T> cfMapDef) {
     if (!cfMapDef.isAnonymousHandlerAvailable()) {
-      Collection<PropertyMappingDefinition<?>> coll = cfMapDef.getAllProperties();
+      Collection<PropertyMappingDefinition> coll = cfMapDef.getAllProperties();
 
       String[] daNames = new String[cfMapDef.isStandaloneClass() ? coll.size() : coll.size()+1];
-      Iterator<PropertyMappingDefinition<?>> iter = coll.iterator();
+      Iterator<PropertyMappingDefinition> iter = coll.iterator();
       int pos = 0;
       while ( iter.hasNext() ) {
         daNames[pos++] = iter.next().getColName();

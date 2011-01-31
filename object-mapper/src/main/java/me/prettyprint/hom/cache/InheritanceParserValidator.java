@@ -19,7 +19,8 @@ import org.apache.openjpa.util.UnsupportedException;
  */
 public class InheritanceParserValidator implements ParserValidator {
 
-  public <T, I> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T, I> cfMapDef) {
+  @Override
+  public <T> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T> cfMapDef) {
     if (anno instanceof Inheritance) {
       parseInheritanceAnnotation((Inheritance) anno, cfMapDef);
     } else if (anno instanceof DiscriminatorColumn) {
@@ -32,7 +33,7 @@ public class InheritanceParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void parseInheritanceAnnotation(Inheritance anno, CFMappingDef<T, I> cfMapDef) {
+  private <T> void parseInheritanceAnnotation(Inheritance anno, CFMappingDef<T> cfMapDef) {
     if (InheritanceType.SINGLE_TABLE == anno.strategy()) {
       cfMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
     } else {
@@ -41,18 +42,19 @@ public class InheritanceParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void parseDiscriminatorColumnAnnotation(DiscriminatorColumn anno,
-      CFMappingDef<T, I> cfMapDef) {
+  private <T> void parseDiscriminatorColumnAnnotation(DiscriminatorColumn anno,
+      CFMappingDef<T> cfMapDef) {
     cfMapDef.setDiscColumn(anno.name());
     cfMapDef.setDiscType(anno.discriminatorType());
   }
 
-  private <T, I> void parseDiscriminatorValueAnnotation(DiscriminatorValue anno,
-      CFMappingDef<T, I> cfMapDef) {
+  private <T> void parseDiscriminatorValueAnnotation(DiscriminatorValue anno,
+      CFMappingDef<T> cfMapDef) {
     cfMapDef.setDiscValue(anno.value());
   }
 
-  public <T, I> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
+  @Override
+  public <T> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     if (cfMapDef.isBaseInheritanceClass()) {
       validateBaseClassInheritance(cfMapDef);
     } else if (cfMapDef.isDerivedClassInheritance()) {
@@ -65,7 +67,7 @@ public class InheritanceParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void validateBaseClassInheritance(CFMappingDef<T, I> cfMapDef) {
+  private <T> void validateBaseClassInheritance(CFMappingDef<T> cfMapDef) {
     if (InheritanceType.SINGLE_TABLE.equals(cfMapDef.getInheritanceType())) {
       validateSingleTableInheritance(cfMapDef);
     } else {
@@ -75,7 +77,7 @@ public class InheritanceParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void validateSingleTableInheritance(CFMappingDef<T, I> cfMapDef) {
+  private <T> void validateSingleTableInheritance(CFMappingDef<T> cfMapDef) {
     if (null == cfMapDef.getDiscColumn()) {
       throw new HectorObjectMapperException("Class " + cfMapDef.getRealClass().getName()
           + " requested single table inheritance, but you did not specify a "
@@ -87,7 +89,7 @@ public class InheritanceParserValidator implements ParserValidator {
     }
   }
 
-  private <T, I> void validateDerivedClassInheritance(CFMappingDef<T, I> cfMapDef) {
+  private <T> void validateDerivedClassInheritance(CFMappingDef<T> cfMapDef) {
     if (null == cfMapDef.getDiscValue()) {
       throw new HectorObjectMapperException("Base class "
           + cfMapDef.getCfBaseMapDef().getClass().getName()

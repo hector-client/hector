@@ -18,7 +18,7 @@ public class IdClassParserValidatorTest {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
     IdClassParserValidator parVal = new IdClassParserValidator();
 
-    CFMappingDef<MyTestBean, Object> cfMapDef = new CFMappingDef<MyTestBean, Object>(MyTestBean.class);
+    CFMappingDef<MyTestBean> cfMapDef = new CFMappingDef<MyTestBean>(MyTestBean.class);
     
     IdClass anno = new IdClass() {
       @Override

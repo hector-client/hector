@@ -15,7 +15,7 @@ import me.prettyprint.hom.ClassCacheMgr;
 public class IdClassParserValidator implements ParserValidator {
 
   @Override
-  public <T, I> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T, I> cfMapDef) {
+  public <T> void parse(ClassCacheMgr cacheMgr, Annotation anno, CFMappingDef<T> cfMapDef) {
     if (anno instanceof IdClass) {
       parseIdClassAnnotation(cacheMgr, (IdClass) anno, cfMapDef);
     } else {
@@ -25,12 +25,12 @@ public class IdClassParserValidator implements ParserValidator {
   }
 
   @Override
-  public <T, I> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T, I> cfMapDef) {
+  public <T> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     // nothing to do
   }
 
-  private <T, I> void parseIdClassAnnotation(ClassCacheMgr cacheMgr, IdClass anno,
-      CFMappingDef<T, I> cfMapDef) {
+  private <T> void parseIdClassAnnotation(ClassCacheMgr cacheMgr, IdClass anno,
+      CFMappingDef<T> cfMapDef) {
     Class<?> pkClazz = anno.value();
 
     verifyClassConformsToJpaSpec(pkClazz);

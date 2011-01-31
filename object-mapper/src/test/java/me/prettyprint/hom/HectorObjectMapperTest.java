@@ -18,12 +18,8 @@ import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hom.CFMappingDef;
-import me.prettyprint.hom.ClassCacheMgr;
-import me.prettyprint.hom.HectorObjectMapper;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
-import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -66,7 +62,7 @@ public class HectorObjectMapperTest {
     slice.add("serialProp", ObjectSerializer.get().toBytes(serialProp));
     slice.add("extra", StringSerializer.get().toBytes(extraProp));
 
-    CFMappingDef<MyTestBean, UUID> cfMapDef = cacheMgr.getCfMapDef(MyTestBean.class, true);
+    CFMappingDef<MyTestBean> cfMapDef = cacheMgr.getCfMapDef(MyTestBean.class, true);
     MyTestBean obj = new HectorObjectMapper(cacheMgr).createObject(cfMapDef, id, slice);
 
     assertEquals(id, obj.getBaseId());
@@ -140,7 +136,7 @@ public class HectorObjectMapperTest {
     ColumnSliceMockImpl slice = new ColumnSliceMockImpl();
     slice.add("lp1", LongSerializer.get().toBytes(longProp1));
 
-    CFMappingDef<MyCustomIdBean, Colors> cfMapDef = cacheMgr.getCfMapDef(MyCustomIdBean.class, true);
+    CFMappingDef<MyCustomIdBean> cfMapDef = cacheMgr.getCfMapDef(MyCustomIdBean.class, true);
     MyCustomIdBean obj = new HectorObjectMapper(cacheMgr).createObject(cfMapDef, id, slice);
 
     assertEquals(id, obj.getId());

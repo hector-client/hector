@@ -119,7 +119,7 @@ public class EntityManagerImpl implements EntityManager {
       throw new IllegalArgumentException("id cannot be null");
     }
 
-    CFMappingDef<T, I> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
+    CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
     if (null == cfMapDef) {
       throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
@@ -134,18 +134,16 @@ public class EntityManagerImpl implements EntityManager {
    *
    * @param <T>
    *            The type of entity to load for compile time type checking
-   * @param <I>
-   *            Type of the entity's ID
    * @param clazz
    *            The type of entity to load for runtime instance creation
    * @param id
    *            ID of the instance to load
-   * @param rowSlice
+   * @param colSlice
    *            Raw row slice as returned from Hector API, of the type
    *            <code>ColumnSlice<String, byte[]></code>
-   * @return
+   * @return Completely instantiated persisted object
    */
-  public <T, I> T load(Class<T> clazz, I id, ColumnSlice<String, byte[]> colSlice) {
+  public <T> T load(Class<T> clazz, Object id, ColumnSlice<String, byte[]> colSlice) {
     if (null == clazz) {
       throw new IllegalArgumentException("clazz cannot be null");
     }
@@ -153,7 +151,7 @@ public class EntityManagerImpl implements EntityManager {
       throw new IllegalArgumentException("id cannot be null");
     }
 
-    CFMappingDef<T, I> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
+    CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
     if (null == cfMapDef) {
       throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
