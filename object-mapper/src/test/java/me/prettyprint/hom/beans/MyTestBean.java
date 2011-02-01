@@ -17,6 +17,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
+import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
@@ -25,7 +26,7 @@ import com.mycompany.MySerial;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-// no other type supported
+// no type other than SINGLE_TABLE supported
 @DiscriminatorColumn(name = "myType", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("NoColor")
 @Table(name = "TestBeanColumnFamily")
@@ -65,11 +66,11 @@ public class MyTestBean {
 
   @Column(name = "bytes")
   private byte[] bytesProp;
-  
+
   @Column(name = "serialProp")
   private MySerial serialProp;
 
-  // @Column(value = "color", converter = ColorConverter.class)
+  @me.prettyprint.hom.annotations.Column(name = "color", converter = ColorConverter.class)
   private Colors color;
 
   private Map<String, String> anonymousProps = new HashMap<String, String>();

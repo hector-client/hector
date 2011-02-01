@@ -1,4 +1,4 @@
-package me.prettyprint.hom.beans;
+package me.prettyprint.hom.badbeans;
 
 import java.io.Serializable;
 

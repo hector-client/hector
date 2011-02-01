@@ -3,6 +3,7 @@ package me.prettyprint.hom.annotations;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
+import me.prettyprint.hom.converters.Converter;
 import me.prettyprint.hom.converters.DefaultConverter;
 
 
@@ -22,6 +23,6 @@ public @interface Id {
    * 
    * @return Class of converter
    */
-  Class<?> converter() default DefaultConverter.class;
+  Class<? extends Converter> converter() default DefaultConverter.class;
 
 }

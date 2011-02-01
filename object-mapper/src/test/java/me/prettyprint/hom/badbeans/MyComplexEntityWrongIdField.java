@@ -1,4 +1,4 @@
-package me.prettyprint.hom.beans;
+package me.prettyprint.hom.badbeans;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,26 +7,18 @@ import javax.persistence.IdClass;
 import javax.persistence.Table;
 
 @Entity
-@IdClass( MyCompositePK.class )
-@Table(name="ComplexColumnFamily")
-public class MyComplexEntity {
+@IdClass(MyCompositePK.class)
+@Table(name = "ComplexColumnFamily")
+public class MyComplexEntityWrongIdField {
 
-  @Id
-  private int intProp1;
-  
   @Id
   private String strProp1;
-  
-  @Column( name ="strProp2")
+
+  @Id
+  private String wrongField;
+
+  @Column(name = "strProp2")
   private String strProp2;
-
-  public int getIntProp1() {
-    return intProp1;
-  }
-
-  public void setIntProp1(int intProp1) {
-    this.intProp1 = intProp1;
-  }
 
   public String getStrProp1() {
     return strProp1;
@@ -42,6 +34,14 @@ public class MyComplexEntity {
 
   public void setStrProp2(String strProp2) {
     this.strProp2 = strProp2;
+  }
+
+  public String getWrongField() {
+    return wrongField;
+  }
+
+  public void setWrongField(String wrongField) {
+    this.wrongField = wrongField;
   }
 
 }

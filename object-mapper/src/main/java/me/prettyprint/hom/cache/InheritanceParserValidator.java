@@ -28,7 +28,7 @@ public class InheritanceParserValidator implements ParserValidator {
     } else if (anno instanceof DiscriminatorValue) {
       parseDiscriminatorValueAnnotation((DiscriminatorValue) anno, cfMapDef);
     } else {
-      throw new HectorObjectMapperException("This class cannot parse annotation "
+      throw new HectorObjectMapperException("This class cannot parse annotation, "
           + anno.getClass().getSimpleName());
     }
   }

@@ -5,9 +5,11 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.Map.Entry;
@@ -34,6 +36,8 @@ import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
+import me.prettyprint.hom.converters.Converter;
+import me.prettyprint.hom.converters.DefaultConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +61,7 @@ public class HectorObjectMapper {
 
   private int maxNumColumns = MAX_NUM_COLUMNS;
   private ClassCacheMgr cacheMgr;
+  private KeyConcatenationStrategy keyConcatStrategy = new KeyConcatenationDelimiterStrategyImpl();
 
   public HectorObjectMapper(ClassCacheMgr cacheMgr) {
     this.cacheMgr = cacheMgr;
@@ -66,44 +71,40 @@ public class HectorObjectMapper {
    * Retrieve columns from cassandra keyspace and column family, instantiate a
    * new object of required type, and then map them to the object's properties.
    * 
+   * @param <T> 
+   * 
    * @param keyspace
    * @param colFamName
-   * @param id
+   * @param pkObj
    * @return
    */
-  public <T> T getObject(Keyspace keyspace, String colFamName, Object id) {
-    if (null == id) {
+  public <T> T getObject(Keyspace keyspace, String colFamName, Object pkObj) {
+    if (null == pkObj) {
       throw new IllegalArgumentException("object ID cannot be null or empty");
     }
 
     CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(colFamName, true);
-    PropertyMappingDefinition md = cfMapDef.getIdPropertySet().iterator().next();
-    if (null == md) {
-      throw new HectorObjectMapperException(
-          "Trying to build new object but haven't annotated a field with @" + Id.class.getSimpleName());
-    }
 
-    byte[] idAsBytes = md.getConverter().convertObjTypeToCassType(id);
+    byte[] colFamKey = generateColumnFamilyKeyFromPkObj(cfMapDef, pkObj);
 
     SliceQuery<byte[], String, byte[]> q = HFactory.createSliceQuery(keyspace,
         BytesArraySerializer.get(), StringSerializer.get(), BytesArraySerializer.get());
     q.setColumnFamily(colFamName);
-    q.setKey(idAsBytes);
-    
+    q.setKey(colFamKey);
+
     // if no anonymous handler then use specific columns
-    if ( cfMapDef.isSliceColumnArrayRequired() ) {
+    if (cfMapDef.isSliceColumnArrayRequired()) {
       q.setColumnNames(cfMapDef.getSliceColumnNameArr());
-    }
-    else {
+    } else {
       q.setRange("", "", false, maxNumColumns);
     }
-    
+
     QueryResult<ColumnSlice<String, byte[]>> result = q.execute();
     if (null == result || null == result.get()) {
       return null;
     }
 
-    T obj = createObject(cfMapDef, id, result.get());
+    T obj = createObject(cfMapDef, pkObj, result.get());
     return obj;
   }
 
@@ -114,23 +115,54 @@ public class HectorObjectMapper {
 
     @SuppressWarnings("unchecked")
     CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cacheMgr.getCfMapDef(obj.getClass(), true);
-    PropertyMappingDefinition md = cfMapDef.getIdPropertySet().iterator().next();
-    if (null == md) {
-      throw new HectorObjectMapperException(
-          "Trying to save object but haven't annotated a field with @" + Id.class.getSimpleName());
+
+    byte[] colFamKey = generateColumnFamilyKeyFromPojo(obj, cfMapDef);
+
+    Collection<HColumn<String, byte[]>> colColl = createColumnSet(obj);
+
+    String colFamName = cfMapDef.getEffectiveColFamName();
+    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
+    for (HColumn<String, byte[]> col : colColl) {
+      m.addInsertion(colFamKey, colFamName, col);
     }
 
-    Method meth = md.getPropDesc().getReadMethod();
-    if (null == meth) {
-      logger.debug("@Id annotation found - but can't find getter for property, "
-          + md.getPropDesc().getName());
+    m.execute();
+
+    return obj;
+  }
+
+  private byte[] generateColumnFamilyKeyFromPkObj(CFMappingDef<?> cfMapDef, Object pkObj) {
+    List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
+
+    if (cfMapDef.getKeyDef().isComplexKey()) {
+      for (PropertyDescriptor pd : cfMapDef.getKeyDef().getPropertyDescriptorMap().values()) {
+        segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(),
+            new DefaultConverter()));
+      }
+    }
+    else {
+      PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator().next();
+      segmentList.add(md.getConverter().convertObjTypeToCassType(pkObj));
     }
 
-    byte[] bytes;
+    return keyConcatStrategy.concat(segmentList);
+  }
+
+  private byte[] generateColumnFamilyKeyFromPojo(Object obj, CFMappingDef<?> cfMapDef) {
+    List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
+
+    for (PropertyMappingDefinition md : cfMapDef.getKeyDef().getIdPropertyMap().values()) {
+      Method meth = md.getPropDesc().getReadMethod();
+      segmentList.add(callMethodAndConvertToCassandraType(obj, meth, md.getConverter()));
+    }
+
+    return keyConcatStrategy.concat(segmentList);
+  }
+
+  private byte[] callMethodAndConvertToCassandraType(Object obj, Method meth, Converter converter) {
     try {
-      @SuppressWarnings("unchecked")
       Object retVal = meth.invoke(obj, (Object[]) null);
-      bytes = md.getConverter().convertObjTypeToCassType(retVal);
+      return converter.convertObjTypeToCassType(retVal);
     } catch (IllegalArgumentException e) {
       throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
@@ -138,22 +170,6 @@ public class HectorObjectMapper {
     } catch (InvocationTargetException e) {
       throw new RuntimeException(e);
     }
-
-    if (null == bytes) {
-      throw new IllegalArgumentException("object ID cannot be null or empty");
-    }
-
-    Collection<HColumn<String, byte[]>> colColl = createColumnSet(obj);
-
-    String colFamName = cfMapDef.getEffectiveColFamName();
-    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
-    for (HColumn<String, byte[]> col : colColl) {
-      m.addInsertion(bytes, colFamName, col);
-    }
-
-    m.execute();
-
-    return obj;
   }
 
   /**
@@ -176,7 +192,7 @@ public class HectorObjectMapper {
    * @return instantiated object if success, null if slice is empty,
    *         RuntimeException otherwise
    */
-  <T> T createObject(CFMappingDef<T> cfMapDef, Object id, ColumnSlice<String, byte[]> slice) {
+  <T> T createObject(CFMappingDef<T> cfMapDef, Object pkObj, ColumnSlice<String, byte[]> slice) {
     if (slice.getColumns().isEmpty()) {
       return null;
     }
@@ -186,7 +202,7 @@ public class HectorObjectMapper {
     try {
       T obj = cfMapDefInstance.getEffectiveClass().newInstance();
 
-      setIdIfCan(cfMapDef, obj, id);
+      setIdIfCan(cfMapDef, obj, pkObj);
 
       for (HColumn<String, byte[]> col : slice.getColumns()) {
         String colName = col.getName();
@@ -245,8 +261,8 @@ public class HectorObjectMapper {
     }
 
     @SuppressWarnings("unchecked")
-    CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cacheMgr.getCfMapDef(
-        (Class<T>) obj.getClass(), true);
+    CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cacheMgr.getCfMapDef((Class<T>) obj.getClass(),
+        true);
     try {
       Map<String, HColumn<String, byte[]>> colSet = new HashMap<String, HColumn<String, byte[]>>();
       Collection<PropertyMappingDefinition> coll = cfMapDef.getAllProperties();
@@ -262,8 +278,9 @@ public class HectorObjectMapper {
         String discColName = cfSuperMapDef.getDiscColumn();
         DiscriminatorType discType = cfSuperMapDef.getDiscType();
 
-        colSet.put(discColName, createHColumn(discColName, convertDiscTypeToColValue(discType,
-            cfMapDef.getDiscValue())));
+        colSet.put(
+            discColName,
+            createHColumn(discColName, convertDiscTypeToColValue(discType, cfMapDef.getDiscValue())));
       }
 
       addAnonymousProperties(obj, colSet);
@@ -283,7 +300,8 @@ public class HectorObjectMapper {
 
   private void addAnonymousProperties(Object obj, Map<String, HColumn<String, byte[]>> colSet)
       throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-    Method meth = cacheMgr.findAnnotatedMethod(obj.getClass(), AnonymousPropertyCollectionGetter.class);
+    Method meth = cacheMgr.findAnnotatedMethod(obj.getClass(),
+        AnonymousPropertyCollectionGetter.class);
     if (null == meth) {
       return;
     }
@@ -301,9 +319,9 @@ public class HectorObjectMapper {
     }
   }
 
-  private <T> HColumn<String, byte[]> createColumnFromProperty(T obj,
-      PropertyMappingDefinition md) throws SecurityException, NoSuchFieldException,
-      IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+  private <T> HColumn<String, byte[]> createColumnFromProperty(T obj, PropertyMappingDefinition md)
+      throws SecurityException, NoSuchFieldException, IllegalArgumentException,
+      IllegalAccessException, InvocationTargetException {
     byte[] colValue = createBytesFromPropertyValue(obj, md);
     if (null == colValue) {
       return null;
@@ -373,8 +391,8 @@ public class HectorObjectMapper {
     Object discValue = convertColValueToDiscType(discType, discCol.getValue());
     CFMappingDef<? extends T> derivedCfMapDef = derivedClasses.get(discValue);
     if (null == derivedCfMapDef) {
-      throw new RuntimeException("Cannot find derived class of " + cfMapDef.getEffectiveClass().getName()
-          + " with discriminator value of " + discValue);
+      throw new RuntimeException("Cannot find derived class of "
+          + cfMapDef.getEffectiveClass().getName() + " with discriminator value of " + discValue);
     }
 
     return derivedCfMapDef;
@@ -408,12 +426,23 @@ public class HectorObjectMapper {
         + ", because don't know how to convert db value - cannot continue");
   }
 
-  private <T> void setIdIfCan(CFMappingDef<T> cfMapDef, T obj, Object id)
+  private <T> void setIdIfCan(CFMappingDef<T> cfMapDef, T obj, Object pkObj)
       throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-    PropertyMappingDefinition md = cfMapDef.getIdPropertySet().iterator().next();
+    if (cfMapDef.getKeyDef().isComplexKey()) {
+      setComplexId(cfMapDef, obj, pkObj);
+    } else {
+      setSimpleId(cfMapDef, obj, pkObj);
+    }
+  }
+
+  private <T> void setSimpleId(CFMappingDef<T> cfMapDef, T obj, Object pkObj)
+      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator()
+                                           .next();
     if (null == md) {
       throw new HectorObjectMapperException(
-          "Trying to build new object but haven't annotated a field with @" + Id.class.getSimpleName());
+          "Trying to build new object but haven't annotated a field with @"
+              + Id.class.getSimpleName());
     }
 
     Method meth = md.getPropDesc().getWriteMethod();
@@ -422,7 +451,34 @@ public class HectorObjectMapper {
           + md.getPropDesc().getName());
     }
 
-    meth.invoke(obj, id);
+    meth.invoke(obj, pkObj);
+  }
+
+  private <T> void setComplexId(CFMappingDef<T> cfMapDef, T obj, Object pkObj)
+      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+
+    KeyDefinition keyDef = cfMapDef.getKeyDef();
+    if (!pkObj.getClass().equals(keyDef.getPkClazz())) {
+      throw new HectorObjectMapperException("primary key object, " + pkObj.getClass().getName()
+          + ", must be of type " + keyDef.getPkClazz().getName());
+    }
+
+    for (PropertyDescriptor pd : keyDef.getPropertyDescriptorMap().values()) {
+      PropertyMappingDefinition md = keyDef.getIdPropertyMap().get(pd.getName());
+      if (null == md) {
+        throw new HectorObjectMapperException("Trying to set complex key type, but field, "
+            + pd.getName() + ", is not annotated with @" + Id.class.getSimpleName() + " in POJO, "
+            + cfMapDef.getRealClass().getName());
+      }
+
+      Method meth = md.getPropDesc().getWriteMethod();
+      if (null == meth) {
+        logger.debug("@Id annotation found - but can't find setter for property, "
+            + md.getPropDesc().getName());
+      }
+
+      meth.invoke(obj, pd.getReadMethod().invoke(pkObj, null));
+    }
   }
 
   private <T> void setPropertyUsingColumn(T obj, HColumn<String, byte[]> col,
@@ -486,15 +542,15 @@ public class HectorObjectMapper {
     }
 
     for (Class<?> interfa : interArr) {
-      if ( interfa.equals(target)) {
+      if (interfa.equals(target)) {
         return true;
       }
     }
     return false;
   }
 
-  private <T> void addToExtraIfCan(Object obj, CFMappingDef<T> cfMapDef, HColumn<String, byte[]> col) throws SecurityException,
-      IllegalArgumentException, IllegalAccessException,
+  private <T> void addToExtraIfCan(Object obj, CFMappingDef<T> cfMapDef, HColumn<String, byte[]> col)
+      throws SecurityException, IllegalArgumentException, IllegalAccessException,
       InvocationTargetException {
     Method meth = cfMapDef.getAnonymousPropertyAddHandler();
     if (null == meth) {
@@ -507,6 +563,10 @@ public class HectorObjectMapper {
     }
 
     meth.invoke(obj, col.getName(), StringSerializer.get().fromBytes(col.getValue()));
+  }
+
+  public void setKeyConcatStrategy(KeyConcatenationStrategy keyConcatStrategy) {
+    this.keyConcatStrategy = keyConcatStrategy;
   }
 
 }

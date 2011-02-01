@@ -19,16 +19,11 @@ import javax.persistence.IdClass;
 import javax.persistence.Inheritance;
 import javax.persistence.Table;
 
-import me.prettyprint.cassandra.serializers.BytesArraySerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.hector.api.factory.HFactory;
-import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.cache.IdClassParserValidator;
 import me.prettyprint.hom.cache.InheritanceParserValidator;
 import me.prettyprint.hom.cache.TableParserValidator;
-import me.prettyprint.hom.converters.Converter;
 import me.prettyprint.hom.converters.DefaultConverter;
 
 /**
@@ -50,17 +45,18 @@ public class ClassCacheMgr {
    * determined by {@link CFMappingDef#isBaseInheritanceClass()}
    * 
    * @param <T>
+   * 
    * @param cfMapDef
    * @return returns the base in the ColumnFamily mapping hierarchy
    */
   public <T> CFMappingDef<? super T> findBaseClassViaMappings(CFMappingDef<T> cfMapDef) {
-    CFMappingDef<T> tmpDef = cfMapDef;
+    CFMappingDef<? super T> tmpDef = cfMapDef;
     CFMappingDef<? super T> cfSuperDef;
     while (null != (cfSuperDef = tmpDef.getCfSuperMapDef())) {
       if (cfSuperDef.isBaseInheritanceClass()) {
         return cfSuperDef;
       }
-      tmpDef = (CFMappingDef<T>) cfSuperDef;
+      tmpDef = cfSuperDef;
     }
     return null;
   }
@@ -71,7 +67,8 @@ public class ClassCacheMgr {
    * @param <T>
    * @param clazz
    * @param throwException
-   * @return
+   * @return CFMappingDef if found, exception if throwException = true, and null
+   *         otherwise
    */
   public <T> CFMappingDef<T> getCfMapDef(Class<T> clazz, boolean throwException) {
     @SuppressWarnings("unchecked")
@@ -92,7 +89,8 @@ public class ClassCacheMgr {
    * @param <T>
    * @param colFamName
    * @param throwException
-   * @return
+   * @return CFMappingDef if found, exception if throwException = true, and null
+   *         otherwise
    */
   public <T> CFMappingDef<T> getCfMapDef(String colFamName, boolean throwException) {
     @SuppressWarnings("unchecked")
@@ -114,7 +112,7 @@ public class ClassCacheMgr {
    * @param <T>
    * 
    * @param clazz
-   * @return
+   * @return CFMapping describing the initialized class.
    */
   public <T> CFMappingDef<T> initializeCacheForClass(Class<T> clazz) {
     CFMappingDef<T> cfMapDef = initializeColumnFamilyMapDef(clazz);
@@ -212,13 +210,14 @@ public class ClassCacheMgr {
           + ", does not have proper setter/getter");
     }
 
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), DefaultConverter.class);
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
+        DefaultConverter.class);
     cfMapDef.addPropertyDefinition(md);
   }
 
-  private <T> void processColumnCustomAnnotation(Field f,
-      me.prettyprint.hom.annotations.Column anno, CFMappingDef<T> cfMapDef,
-      Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
+  private void processColumnCustomAnnotation(Field f, me.prettyprint.hom.annotations.Column anno,
+      CFMappingDef<?> cfMapDef, Map<String, PropertyDescriptor> pdMap)
+      throws InstantiationException, IllegalAccessException {
     PropertyDescriptor pd = pdMap.get(f.getName());
     if (null == pd) {
       throw new HectorObjectMapperException("Property, "
@@ -226,8 +225,7 @@ public class ClassCacheMgr {
           + ", does not have proper setter/getter");
     }
 
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
-        (Class<Converter>) anno.converter());
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), anno.converter());
     cfMapDef.addPropertyDefinition(md);
     cfMapDef.addPropertyDefinition(md);
   }
@@ -235,49 +233,29 @@ public class ClassCacheMgr {
   private <T> void processIdAnnotation(Field f, Id anno, CFMappingDef<T> cfMapDef,
       Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    @SuppressWarnings("unchecked")
     PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
         DefaultConverter.class);
-    if (null != md) {
-      if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
-          || null == md.getPropDesc().getWriteMethod()) {
-        throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
-            + " is defined on property, " + f.getName() + ", but its missing proper setter/getter");
-      }
+    if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
+        || null == md.getPropDesc().getWriteMethod()) {
+      throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
+          + " is defined on property, " + f.getName() + ", but its missing proper setter/getter");
     }
-    cfMapDef.addIdPropertyMap(md);
+    cfMapDef.getKeyDef().addIdPropertyMap(md);
   }
 
   private <T> void processIdCustomAnnotation(Field f, me.prettyprint.hom.annotations.Id anno,
       CFMappingDef<T> cfMapDef, Map<String, PropertyDescriptor> pdMap)
       throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()),
-        null, (Class<Converter>) anno.converter());
-    if (null != md) {
-      if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
-          || null == md.getPropDesc().getWriteMethod()) {
-        throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
-            + " is defined on property, " + f.getName() + ", but its missing proper setter/getter");
-      }
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
+        anno.converter());
+    if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
+        || null == md.getPropDesc().getWriteMethod()) {
+      throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
+          + " is defined on property, " + f.getName() + ", but its missing proper setter/getter");
     }
-    cfMapDef.addIdPropertyMap(md);
 
-    // @SuppressWarnings("unchecked")
-    // PropertyMappingDefinition md =
-    // new PropertyMappingDefinition(pdMap.get(f.getName()), null,
-    // (Class<Converter>) idAnno
-    // .converter());
-    // if (null != md) {
-    // if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
-    // || null == md.getPropDesc().getWriteMethod()) {
-    // throw new IllegalStateException("@" + Id.class.getSimpleName() +
-    // " is defined on property, "
-    // + f.getName() + ", but its missing proper setter/getter");
-    // }
-    // }
-    // cfMapDef.setIdPropertyMap(md);
-
+    cfMapDef.getKeyDef().addIdPropertyMap(md);
   }
 
   private <T> CFMappingDef<T> initializeColumnFamilyMapDef(Class<T> realClass) {
@@ -288,13 +266,7 @@ public class ClassCacheMgr {
       return cfMapDef;
     }
 
-    // try {
     cfMapDef = new CFMappingDef<T>(realClass);
-    // }
-    // catch ( HectorObjectMapperException e ) {
-    // // ok, becuase may not have a super class that's an entity
-    // return null;
-    // }
 
     Class<T> effectiveType = cfMapDef.getEffectiveClass();
     CFMappingDef<? super T> cfSuperMapDef = null;
@@ -337,9 +309,28 @@ public class ClassCacheMgr {
     tableParVal.validateAndSetDefaults(this, cfMapDef);
     idClassParVal.validateAndSetDefaults(this, cfMapDef);
 
+    // must do this after tabeParVal validate
+    checkForPojoPrimaryKey(cfMapDef);
+
     checkForAnonymousHandler(cfMapDef);
 
     generateColumnSliceIfNeeded(cfMapDef);
+  }
+
+  private void checkForPojoPrimaryKey(CFMappingDef<?> cfMapDef) {
+    // if we know it's a complex key then it must be present so we only check
+    // case for simple one field key
+    
+    // SimpleTestBean breaks this check right now because it uses method
+    // annotations which isn't supported by the ClassCacheMgr at this time
+    // if (!cfMapDef.getKeyDef().isComplexKey()) {
+    // if (!cfMapDef.getKeyDef().isSimpleIdPresent()) {
+    // throw new HectorObjectMapperException("Entity, " +
+    // cfMapDef.getRealClass().getName()
+    // + ", is missing a primary key.  Must annotate at least one field with @"
+    // + Id.class.getSimpleName() + " or use a complex primary key");
+    // }
+    // }
   }
 
   private <T> void checkForAnonymousHandler(CFMappingDef<T> cfMapDef) {
@@ -355,25 +346,33 @@ public class ClassCacheMgr {
     }
   }
 
-  private <T> void generateColumnSliceIfNeeded(CFMappingDef<T> cfMapDef) {
+  private void generateColumnSliceIfNeeded(CFMappingDef<?> cfMapDef) {
     if (!cfMapDef.isAnonymousHandlerAvailable()) {
       Collection<PropertyMappingDefinition> coll = cfMapDef.getAllProperties();
 
-      String[] daNames = new String[cfMapDef.isStandaloneClass() ? coll.size() : coll.size()+1];
+      String[] daNames = new String[cfMapDef.isStandaloneClass() ? coll.size() : coll.size() + 1];
       Iterator<PropertyMappingDefinition> iter = coll.iterator();
       int pos = 0;
-      while ( iter.hasNext() ) {
+      while (iter.hasNext()) {
         daNames[pos++] = iter.next().getColName();
       }
-      
-      // if an inheritance hierarchy exists we need to add in the discriminator column
-      if ( !cfMapDef.isStandaloneClass() ) {
+
+      // if an inheritance hierarchy exists we need to add in the discriminator
+      // column
+      if (!cfMapDef.isStandaloneClass()) {
         daNames[pos] = cfMapDef.getDiscColumn();
       }
       cfMapDef.setSliceColumnNameArr(daNames);
     }
   }
 
+  /**
+   * Find method annotated with the given annotation.
+   * 
+   * @param clazz
+   * @param anno
+   * @return returns Method if found, null otherwise
+   */
   public Method findAnnotatedMethod(Class<?> clazz, Class<? extends Annotation> anno) {
     for (Method meth : clazz.getMethods()) {
       if (meth.isAnnotationPresent(anno)) {

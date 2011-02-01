@@ -4,6 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,9 +34,9 @@ public class CFMappingDef<T> {
   private String discColumn;
   private DiscriminatorType discType;
   private Object discValue; // this can be a variety of types
-  private Set<PropertyMappingDefinition> idPropertySet = new HashSet<PropertyMappingDefinition>();
   private String[] sliceColumnNameArr;
   private Method anonymousPropertyAddHandler;
+  private KeyDefinition keyDef;
 
   private Map<Object, CFMappingDef<? extends T>> derivedClassMap = new HashMap<Object, CFMappingDef<? extends T>>();
   private Collection<PropertyMappingDefinition> allMappedProps;
@@ -58,6 +59,7 @@ public class CFMappingDef<T> {
    */
   public void setDefaults(Class<T> realClass) {
     this.realClass = realClass;
+    this.keyDef = new KeyDefinition();
 
     // find the "effective" class - skipping up the hierarchy over inner classes
     effectiveClass = realClass;
@@ -162,16 +164,12 @@ public class CFMappingDef<T> {
     this.discValue = discValue;
   }
 
-  public Set<PropertyMappingDefinition> getIdPropertySet() {
+  public KeyDefinition getKeyDef() {
     if (null == cfBaseMapDef) {
-      return idPropertySet;
+      return keyDef;
     } else {
-      return cfBaseMapDef.getIdPropertySet();
+      return cfBaseMapDef.getKeyDef();
     }
-  }
-
-  public void addIdPropertyMap(PropertyMappingDefinition idProperty) {
-    idPropertySet.add(idProperty);
   }
 
   @SuppressWarnings("unchecked")
