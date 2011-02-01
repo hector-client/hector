@@ -20,7 +20,7 @@ public class TableParserValidator implements ParserValidator {
     if (anno instanceof Table) {
       parseTableAnnotation(cacheMgr, (Table) anno, cfMapDef);
     } else {
-      throw new HectorObjectMapperException("This class cannot parse annotation "
+      throw new HectorObjectMapperException("This class cannot parse annotation, "
           + anno.getClass().getSimpleName());
     }
   }

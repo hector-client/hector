@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.Date;
 import java.util.Map;
@@ -18,6 +19,7 @@ import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
 
@@ -159,5 +161,6 @@ public class HectorObjectMapperTest {
   public void setupTest() {
     cacheMgr.initializeCacheForClass(MyTestBean.class);
     cacheMgr.initializeCacheForClass(MyCustomIdBean.class);
+    cacheMgr.initializeCacheForClass(MyComplexEntity.class);
   }
 }

@@ -32,6 +32,6 @@ public @interface Column {
    * 
    * @return Class of converter
    */
-  Class<?> converter() default DefaultConverter.class;
+  Class<? extends Converter> converter() default DefaultConverter.class;
 
 }

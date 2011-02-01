@@ -11,6 +11,8 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hom.EntityManagerImpl;
+import me.prettyprint.hom.beans.MyComplexEntity;
+import me.prettyprint.hom.beans.MyCompositePK;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
 import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
@@ -38,7 +40,6 @@ public class EntityManagerTest extends CassandraTestBase {
   }
 
   @Test
-  @Ignore("CustomIdBean class requires the \"old\" @Id annotation so the Colors converter can be used")
   public void testInitializeSaveLoadCustomId() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
     MyCustomIdBean o1 = new MyCustomIdBean();
@@ -71,6 +72,24 @@ public class EntityManagerTest extends CassandraTestBase {
 
     assertNotNull("Could not load bean from cassandra", bean2);
     assertEquals(bean1.getLongProp1(), bean2.getLongProp1());
+  }
+
+  @Test
+  public void testPersistAndFindComplexType() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyCompositePK pkKey = new MyCompositePK(1, "str-prop");
+    MyComplexEntity entity1 = new MyComplexEntity();
+    entity1.setIntProp1(pkKey.getIntProp1());
+    entity1.setStrProp1(pkKey.getStrProp1());
+    entity1.setStrProp2("str-prop-two");
+
+    em.persist(entity1);
+    
+    MyComplexEntity entity2 = em.find(MyComplexEntity.class, pkKey);
+    
+    assertEquals( entity1.getIntProp1(), entity2.getIntProp1() );
+    assertEquals( entity1.getStrProp1(), entity2.getStrProp1() );
+    assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
   }
 
 }
