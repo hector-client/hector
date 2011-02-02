@@ -4,6 +4,7 @@ hector.iml
 releases
 target
 tmp
+bin
 .classpath
 .project
 .settings
