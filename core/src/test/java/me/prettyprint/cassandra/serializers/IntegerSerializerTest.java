@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.nio.ByteBuffer;
 
+import org.apache.cassandra.utils.ByteBufferUtil;
+import org.apache.cassandra.utils.FBUtilities;
 import org.junit.Test;
 
 /**
@@ -13,6 +15,8 @@ import org.junit.Test;
  */
 public class IntegerSerializerTest {
 
+  static IntegerSerializer ext = IntegerSerializer.get();
+  
   @Test
   public void testConversions() {
     test(0);
@@ -23,8 +27,27 @@ public class IntegerSerializerTest {
     test(null);
   }
 
+  @Test
+  public void testFromCassandra() {
+    assertEquals(new Integer(1), ext.fromByteBuffer(FBUtilities.toByteBuffer(1)));
+    assertEquals(new Integer(-1), ext.fromByteBuffer(FBUtilities.toByteBuffer(-1)));
+    assertEquals(new Integer(0), ext.fromByteBuffer(FBUtilities.toByteBuffer(0)));
+    assertEquals(new Integer(Integer.MAX_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Integer.MAX_VALUE)));
+    assertEquals(new Integer(Integer.MIN_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Integer.MIN_VALUE)));
+  }
+  
+  @Test
+  public void testFromCassandraAsBytes() {
+    assertEquals(new Integer(1), ext.fromBytes(FBUtilities.toByteBuffer(1).array()));
+    assertEquals(new Integer(-1), ext.fromBytes(FBUtilities.toByteBuffer(-1).array()));
+    assertEquals(new Integer(0), ext.fromBytes(FBUtilities.toByteBuffer(0).array()));
+    assertEquals(new Integer(Integer.MAX_VALUE), ext.fromBytes(FBUtilities.toByteBuffer(Integer.MAX_VALUE).array()));
+    assertEquals(new Integer(Integer.MIN_VALUE), ext.fromBytes(FBUtilities.toByteBuffer(Integer.MIN_VALUE).array()));
+  }
+  
+  
   private void test(Integer number) {
-    IntegerSerializer ext = IntegerSerializer.get();
+    
     assertEquals(number, ext.fromByteBuffer(ext.toByteBuffer(number)));
 
     // test compatibility with ByteBuffer default byte order

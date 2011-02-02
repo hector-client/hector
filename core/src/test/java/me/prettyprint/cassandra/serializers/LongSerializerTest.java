@@ -4,10 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.nio.ByteBuffer;
 
+import org.apache.cassandra.utils.FBUtilities;
 import org.junit.Test;
 
 public class LongSerializerTest {
 
+  static LongSerializer ext = LongSerializer.get();
+  
   @Test
   public void testConversions() {
     test(0l);
@@ -18,8 +21,17 @@ public class LongSerializerTest {
     test(null);
   }
 
+  @Test
+  public void testFromCassandra() {
+    assertEquals(new Long(1), ext.fromByteBuffer(FBUtilities.toByteBuffer(1L)));
+    assertEquals(new Long(0), ext.fromByteBuffer(FBUtilities.toByteBuffer(0L)));
+    assertEquals(new Long(-1), ext.fromByteBuffer(FBUtilities.toByteBuffer(-1L)));
+    assertEquals(new Long(Long.MIN_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Long.MIN_VALUE)));
+    assertEquals(new Long(Long.MAX_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Long.MAX_VALUE)));
+  }
+  
   private void test(Long number) {
-    LongSerializer ext = new LongSerializer();
+    
     assertEquals(number, ext.fromByteBuffer(ext.toByteBuffer(number)));
 
     // test compatibility with ByteBuffer default byte order

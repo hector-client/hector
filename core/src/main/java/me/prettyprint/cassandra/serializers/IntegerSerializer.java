@@ -38,7 +38,7 @@ public final class IntegerSerializer extends AbstractSerializer<Integer> {
   
   @Override
   public Integer fromBytes(byte[] bytes) {
-    ByteBuffer bb = ByteBuffer.allocate(4).put(bytes);
+    ByteBuffer bb = ByteBuffer.allocate(4).put(bytes, 0, 4);
     bb.rewind();
     return bb.getInt();
   }
