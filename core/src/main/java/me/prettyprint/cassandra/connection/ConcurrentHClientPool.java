@@ -65,8 +65,8 @@ public class ConcurrentHClientPool implements PoolMetric {
     if ( cassandraClient == null ) {
       if ( tillExhausted > 0 ) {
         // if we start with #of threads == getMaxActive, we could trigger this condition
-        addClientToPoolGently(new HThriftClient(cassandraHost).open());
-        log.debug("created new client. NumActive:{} untilExhausted: {}", currentActive, tillExhausted);
+        // replace addClientToPoolGently(new HThriftClient(cassandraHost).open()) with immediate acquisition
+        return greedyCreate();        
       }
       // blocked take on the queue if we are configured to wait forever
       if ( log.isDebugEnabled() ) {
@@ -109,6 +109,22 @@ public class ConcurrentHClientPool implements PoolMetric {
 
 
     return cassandraClient;
+  }
+  
+  /**
+   * Used when we still have room to grow. Return an HThriftClient without
+   * having to wait on polling logic. (But still increment all the counters)
+   * @return
+   */
+  private HThriftClient greedyCreate() {
+    if ( log.isDebugEnabled() ) {
+      log.debug("Greedy creation of new client");
+    }
+    HThriftClient client = new HThriftClient(cassandraHost).open();
+    activeClients.add(client);
+    numActive.incrementAndGet();
+    numBlocked.decrementAndGet();
+    return client;
   }
 
   /**
