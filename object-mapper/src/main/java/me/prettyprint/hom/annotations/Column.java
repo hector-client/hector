@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import me.prettyprint.hom.converters.Converter;
-import me.prettyprint.hom.converters.DefaultConverter;
 
 
 /**
@@ -28,10 +27,10 @@ public @interface Column {
 
   /**
    * The optional converter to use when converting POJO property value to/from
-   * byte[]. If not specified, {@link DefaultConverter} is used.
+   * byte[]. If not specified, {@link me.prettyprint.hom.converters.DefaultConverter} is used.
    * 
    * @return Class of converter
    */
-  Class<? extends Converter> converter() default DefaultConverter.class;
+  Class<? extends Converter> converter() default me.prettyprint.hom.converters.DefaultConverter.class;
 
 }

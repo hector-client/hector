@@ -210,8 +210,7 @@ public class ClassCacheMgr {
           + ", does not have proper setter/getter");
     }
 
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(),
-        DefaultConverter.class);
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), DefaultConverter.class);
     cfMapDef.addPropertyDefinition(md);
   }
 
@@ -233,8 +232,7 @@ public class ClassCacheMgr {
   private <T> void processIdAnnotation(Field f, Id anno, CFMappingDef<T> cfMapDef,
       Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
-        DefaultConverter.class);
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null, DefaultConverter.class);
     if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
         || null == md.getPropDesc().getWriteMethod()) {
       throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
@@ -247,8 +245,7 @@ public class ClassCacheMgr {
       CFMappingDef<T> cfMapDef, Map<String, PropertyDescriptor> pdMap)
       throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
-        anno.converter());
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null, anno.converter());
     if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
         || null == md.getPropDesc().getWriteMethod()) {
       throw new HectorObjectMapperException("@" + Id.class.getSimpleName()

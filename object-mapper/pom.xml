@@ -8,7 +8,7 @@
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
-    <version>1.0-03</version>
+    <version>1.0-04-SNAPSHOT</version>
 
 	<build>
 		<extensions>

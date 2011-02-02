@@ -16,7 +16,7 @@ public interface Converter {
    * @param value
    * @return Type of object
    */
-  Object convertCassTypeToObjType(Class<?> clazz, byte[] value);
+  abstract Object convertCassTypeToObjType(Class<?> clazz, byte[] value);
 
   /**
    * Convert Java type to byte[].
@@ -24,5 +24,5 @@ public interface Converter {
    * @param value
    * @return Type of object converted to byte[]
    */
-  byte[] convertObjTypeToCassType(Object value);
+  abstract byte[] convertObjTypeToCassType(Object value);
 }
