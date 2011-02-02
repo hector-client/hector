@@ -10,6 +10,7 @@ Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 Fix issue with NPE in ThriftColumnDef when a column name was declared with no index type (thanks to Steve Willcox for the heads up)
 Mutator has easier row level deletion methods
 Fix potential race condition in ConcurrentHClientPool with large number of threads. https://github.com/rantav/hector/issues#issue/136 (Thanks to @masseyke for the test case)
+LeastActive policy updated to shuffle before selection. This spreads load out better among pools in low to moderate traffic environments (ie. when ConcurrentHClientPool#getNumActive are all equal). 
 
 0.7.0-25
 ========
