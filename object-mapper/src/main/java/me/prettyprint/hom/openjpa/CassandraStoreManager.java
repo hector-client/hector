@@ -130,7 +130,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
     log.debug("In initialize operation...");
     cassandraStore.open();
     stateManager.initialize(stateManager.getMetaData().getDescribedType(), pcState);
-    cassandraStore.getObject(stateManager, stateManager.getId());
+    cassandraStore.getObject(stateManager);
     // TODO need to add the not-found case
     return true;
   }
@@ -139,7 +139,7 @@ public class CassandraStoreManager extends AbstractStoreManager {
   public boolean load(OpenJPAStateManager stateManager, BitSet arg1,
       FetchConfiguration arg2, int arg3, Object arg4) {
     log.debug("In load operation...");
-    cassandraStore.getObject(stateManager, stateManager.getId());
+    cassandraStore.getObject(stateManager);
     // TODO implement the loading of properties marked as lazy (is this correct?)
     // this is a misnomer. load is called to fill in additional information not retrieved from 
     // initialize call above

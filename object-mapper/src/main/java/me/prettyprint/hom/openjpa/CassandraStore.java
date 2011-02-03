@@ -62,25 +62,23 @@ public class CassandraStore {
     return this;
   }
   
-  public <I> boolean getObject(OpenJPAStateManager stateManager, I idObj) {
-    // build CFMappingDef
+  public boolean getObject(OpenJPAStateManager stateManager) {
+
     ClassMetaData metaData = stateManager.getMetaData();
     EntityFacade entityFacade = new EntityFacade(metaData);
-    SliceQuery<byte[], String, byte[]> sliceQuery = mappingUtils.buildSliceQuery(idObj, entityFacade, keyspace);
+    Object idObj = stateManager.getId();
     
-    stateManager.storeObject(0, idObj);
+    SliceQuery<byte[], String, byte[]> sliceQuery = mappingUtils.buildSliceQuery(idObj, entityFacade, keyspace);   
+
+    //stateManager.storeObject(0, idObj);
     
     QueryResult<ColumnSlice<String, byte[]>> result = sliceQuery.execute();
-    // TODO iterate values, loading object
-    for (Map.Entry<String, ColumnMeta<?>> entry : entityFacade.getColumnMeta().entrySet()) {
-      
+
+    for (Map.Entry<String, ColumnMeta<?>> entry : entityFacade.getColumnMeta().entrySet()) {      
       HColumn<String, byte[]> column = result.get().getColumnByName(entry.getKey());
       if ( column != null )
         stateManager.storeObject(entry.getValue().fieldId, entry.getValue().serializer.fromBytes(column.getValue()));  
-    }
-    
-    
-    
+    }            
     return true;
   }
   
