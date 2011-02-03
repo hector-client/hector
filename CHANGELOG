@@ -11,6 +11,8 @@ Fix issue with NPE in ThriftColumnDef when a column name was declared with no in
 Mutator has easier row level deletion methods
 Fix potential race condition in ConcurrentHClientPool with large number of threads. https://github.com/rantav/hector/issues#issue/136 (Thanks to @masseyke for the test case)
 LeastActive policy updated to shuffle before selection. This spreads load out better among pools in low to moderate traffic environments (ie. when ConcurrentHClientPool#getNumActive are all equal). 
+Fix NPE in checking that cassandraHostRetryService is turned when host is being marked down (thanks to ML poster Shimi for bug report)
+
 
 0.7.0-25
 ========
