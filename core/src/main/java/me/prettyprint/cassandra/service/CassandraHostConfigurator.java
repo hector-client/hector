@@ -45,7 +45,7 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public CassandraHost[] buildCassandraHosts() {
     if (this.hosts == null) {
-      return null;
+      throw new IllegalArgumentException("Need to define at least one host in order to apply configuration.");
     }
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];

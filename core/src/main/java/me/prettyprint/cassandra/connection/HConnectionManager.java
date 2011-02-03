@@ -57,8 +57,8 @@ public class HConnectionManager {
     hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
-    }
-    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts() ) {
+    }    
+    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts()) {
       try {
         ConcurrentHClientPool chcp = new ConcurrentHClientPool(host);
         hostPools.put(host,chcp);
@@ -257,7 +257,8 @@ public class HConnectionManager {
     if ( pool != null ) {
       log.error("Pool state on shutdown: {}", pool.getStatusAsString());
       pool.shutdown();
-      cassandraHostRetryService.add(client.cassandraHost);
+      if ( cassandraHostRetryService != null ) 
+        cassandraHostRetryService.add(client.cassandraHost);
     }
     client.close();
   }

@@ -13,13 +13,11 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
 
   
-  @Before
-  public void setupTest() {
-    setupClient();
-  }
+ 
   
   @Test
   public void testRemoveHost() {
+    setupClient();
     CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);
     connectionManager.removeCassandraHost(cassandraHost);
     assertEquals(0,connectionManager.getActivePools().size());
@@ -29,7 +27,24 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
   
   @Test 
   public void testAddCassandraHostFail() {
+    setupClient();
     CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9180);
     assertFalse(connectionManager.addCassandraHost(cassandraHost));
+  }
+  
+  @Test(expected=IllegalArgumentException.class)
+  public void testNullHostList() {
+    HConnectionManager hcm = new HConnectionManager(new CassandraHostConfigurator());
+  }
+  
+  @Test
+  public void testMarkHostDownWithNoRetry() {
+    cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
+    cassandraHostConfigurator.setRetryDownedHosts(false);
+    connectionManager = new HConnectionManager(cassandraHostConfigurator);
+    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);    
+    HThriftClient client = connectionManager.borrowClient();
+    connectionManager.markHostAsDown(client);
+    assertEquals(0,connectionManager.getActivePools().size());
   }
 }
