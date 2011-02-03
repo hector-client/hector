@@ -1,5 +1,7 @@
 package me.prettyprint.hom.beans;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -7,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name="SimpleTestBeanColumnFamily")
-public class SimpleTestBean {
+public class SimpleTestBean implements Serializable {
   
   private long id;
   private String name;

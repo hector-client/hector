@@ -1,12 +1,15 @@
 package me.prettyprint.hom.openjpa;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
@@ -15,6 +18,7 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -40,7 +44,9 @@ public class MappingUtils {
   private static final Logger log = LoggerFactory.getLogger(MappingUtils.class);
   
   private static final Map<Integer, Serializer<?>> typeSerializerMap = new HashMap<Integer, Serializer<?>>();
+  private static final Map<Class<?>, Serializer<?>> classSerializerMap = new HashMap<Class<?>, Serializer<?>>();
   
+  // TODO need to figure out UUID
   static {
     typeSerializerMap.put(JavaTypes.STRING, StringSerializer.get());
     typeSerializerMap.put(JavaTypes.INT, IntegerSerializer.get());
@@ -50,10 +56,26 @@ public class MappingUtils {
     typeSerializerMap.put(JavaTypes.LONG_OBJ, LongSerializer.get());
     typeSerializerMap.put(JavaTypes.DOUBLE, DoubleSerializer.get());
     typeSerializerMap.put(JavaTypes.DOUBLE_OBJ, DoubleSerializer.get());
+    
+    classSerializerMap.put(UUID.class, UUIDSerializer.get());
+    classSerializerMap.put(byte[].class, BytesArraySerializer.get());
+    classSerializerMap.put(ByteBuffer.class, ByteBufferSerializer.get());
+    
   }
   
   public static Serializer<?> getSerializer(int javaType) {
     return typeSerializerMap.get(javaType) != null ? typeSerializerMap.get(javaType) : ObjectSerializer.get(); 
+  }
+  
+  public static Serializer<?> getSerializer(FieldMetaData fieldMetaData) {
+    Serializer serializer = getSerializer(fieldMetaData.getTypeCode());
+    if ( serializer instanceof ObjectSerializer ) {
+      Class<?> clazz = fieldMetaData.getType();
+      if ( classSerializerMap.get(clazz) != null ) {
+        serializer = classSerializerMap.get(clazz);
+      }
+    }
+    return serializer;
   }
   
   public SliceQuery<byte[], String, byte[]> buildSliceQuery(Object idObj, EntityFacade entityFacade, Keyspace keyspace) {

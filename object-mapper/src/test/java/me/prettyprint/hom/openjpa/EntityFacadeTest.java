@@ -7,10 +7,14 @@ import javax.persistence.Persistence;
 
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.hector.api.query.SliceQuery;
+import me.prettyprint.hom.beans.SimpleRelationshipBean;
 import me.prettyprint.hom.beans.SimpleTestBean;
 
 import org.apache.openjpa.persistence.JPAFacadeHelper;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class EntityFacadeTest {
@@ -23,6 +27,18 @@ public class EntityFacadeTest {
     assertEquals("SimpleTestBeanColumnFamily", entityFacade.getColumnFamilyName());
     assertEquals(LongSerializer.get(), entityFacade.getKeySerializer()); 
     assertEquals(StringSerializer.get(), entityFacade.getSerializer("name"));
+  }
+  
+  @Test
+  public void testOneToManyFacadeValues() {
+    EntityFacade entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleRelationshipBean.class));
+    assertEquals(UUIDSerializer.get(), entityFacade.getKeySerializer());
+  }
+  
+  @Ignore  
+  public void testBuildSliceQuery() {
+    EntityFacade entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleTestBean.class));
+    // ColumnFamily wrapper would work really well here
   }
   
   @BeforeClass

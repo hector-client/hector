@@ -24,6 +24,7 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
@@ -67,10 +68,18 @@ public class CassandraStore {
     EntityFacade entityFacade = new EntityFacade(metaData);
     SliceQuery<byte[], String, byte[]> sliceQuery = mappingUtils.buildSliceQuery(idObj, entityFacade, keyspace);
     
-    QueryResult<ColumnSlice<String, byte[]>> result = sliceQuery.execute();
-    
-    stateManager.storeString(1, StringUtils.string(result.get().getColumnByName("name").getValue()));
     stateManager.storeObject(0, idObj);
+    
+    QueryResult<ColumnSlice<String, byte[]>> result = sliceQuery.execute();
+    // TODO iterate values, loading object
+    for (Map.Entry<String, ColumnMeta<?>> entry : entityFacade.getColumnMeta().entrySet()) {
+      
+      HColumn<String, byte[]> column = result.get().getColumnByName(entry.getKey());
+      if ( column != null )
+        stateManager.storeObject(entry.getValue().fieldId, entry.getValue().serializer.fromBytes(column.getValue()));  
+    }
+    
+    
     
     return true;
   }
@@ -83,11 +92,15 @@ public class CassandraStore {
     }
     ClassMetaData metaData = stateManager.getMetaData();       
     EntityFacade entityFacade = new EntityFacade(metaData);
+    Object field;
     for (Map.Entry<String,ColumnMeta<?>> entry : entityFacade.getColumnMeta().entrySet()) {
-      mutator.addInsertion(mappingUtils.getKeyBytes(idObj), entityFacade.getColumnFamilyName(), 
-          new HColumnImpl(entry.getKey(), stateManager.fetch(entry.getValue().fieldId), 
-              keyspace.createClock(), StringSerializer.get(),
-              entry.getValue().serializer));
+      field = stateManager.fetch(entry.getValue().fieldId);
+      if ( field != null ) {
+        mutator.addInsertion(mappingUtils.getKeyBytes(idObj), entityFacade.getColumnFamilyName(), 
+            new HColumnImpl(entry.getKey(), field, 
+                keyspace.createClock(), StringSerializer.get(),
+                entry.getValue().serializer));
+      }
           
     }    
     return mutator;

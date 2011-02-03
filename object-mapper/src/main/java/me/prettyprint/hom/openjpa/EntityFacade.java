@@ -26,8 +26,13 @@ public class EntityFacade implements Serializable {
   
   public EntityFacade(ClassMetaData classMetaData) {
     clazz = classMetaData.getDescribedType();
-    this.columnFamilyName = clazz.getAnnotation(Table.class) != null ? clazz.getAnnotation(Table.class).name() : clazz.getSimpleName();    
-    this.keySerializer = MappingUtils.getSerializer(classMetaData.getPrimaryKeyFields()[0].getObjectIdFieldTypeCode());
+    this.columnFamilyName = clazz.getAnnotation(Table.class) != null ? clazz.getAnnotation(Table.class).name() : clazz.getSimpleName();
+    if ( log.isDebugEnabled() ) {
+      log.debug("PK field name: {} and typeCode: {}", 
+          classMetaData.getPrimaryKeyFields()[0].getType(), 
+          classMetaData.getPrimaryKeyFields()[0].getObjectIdFieldTypeCode());
+    }
+    this.keySerializer = MappingUtils.getSerializer(classMetaData.getPrimaryKeyFields()[0]);
     columnMetas = new HashMap<String, ColumnMeta<?>>();
     FieldMetaData[] fmds = classMetaData.getFields();
     for (int i = 0; i < fmds.length; i++) {
@@ -37,7 +42,7 @@ public class EntityFacade implements Serializable {
         log.debug("field name {} typeCode {}", fmds[i].getName(), fmds[i].getTypeCode());
       columnMetas.put(fmds[i].getName(), new ColumnMeta(fmds[i].getIndex(), MappingUtils.getSerializer(fmds[i].getTypeCode())));
     }
-  }
+  }  
   
   public String[] getColumnNames() {
     return columnMetas.keySet().toArray(new String[]{});

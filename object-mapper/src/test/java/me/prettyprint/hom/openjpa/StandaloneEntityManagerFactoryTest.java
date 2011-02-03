@@ -9,15 +9,14 @@ import javax.persistence.Persistence;
 import me.prettyprint.hom.CassandraTestBase;
 import me.prettyprint.hom.beans.SimpleTestBean;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-public class StandaloneEntityManagerFactoryTest extends CassandraTestBase {
-  
-  private EntityManagerFactory entityManagerFactory;
+public class StandaloneEntityManagerFactoryTest extends ManagedEntityTestBase {
   
   @Test
   public void testBuildEntityManagerFactory() {
-    entityManagerFactory = Persistence.createEntityManagerFactory("openjpa");  
+    
     EntityManager em = entityManagerFactory.createEntityManager();
     em.getTransaction().begin();
     em.persist(new SimpleTestBean(1, "foo"));
@@ -36,6 +35,6 @@ public class StandaloneEntityManagerFactoryTest extends CassandraTestBase {
     em2.remove(stb);
     em2.getTransaction().commit();
     em2.close();
-  }
+  }  
 
 }
