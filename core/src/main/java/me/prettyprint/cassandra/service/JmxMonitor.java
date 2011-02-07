@@ -145,10 +145,10 @@ public class JmxMonitor {
     CassandraClientMonitor cassandraClientMonitor = monitors.get(connectionManager.getClusterName());
     if ( cassandraClientMonitor == null ) {
       try {
-        CassandraClientMonitor ccm = new CassandraClientMonitor(connectionManager);
+        cassandraClientMonitor = new CassandraClientMonitor(connectionManager);
         registerMonitor("me.prettyprint.cassandra.service_"+connectionManager.getClusterName(), "hector",
-            ccm);
-        monitors.put(connectionManager.getClusterName(), ccm);
+            cassandraClientMonitor);
+        monitors.put(connectionManager.getClusterName(), cassandraClientMonitor);
       } catch (MalformedObjectNameException e) {
         log.error("Unable to register JMX monitor", e);
       } catch (InstanceAlreadyExistsException e) {
