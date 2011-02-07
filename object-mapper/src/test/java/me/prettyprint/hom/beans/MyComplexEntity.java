@@ -19,6 +19,9 @@ public class MyComplexEntity {
   
   @Column( name ="strProp2")
   private String strProp2;
+  
+  @Column( name ="strProp3")
+  private String strProp3;
 
   public int getIntProp1() {
     return intProp1;
@@ -42,6 +45,14 @@ public class MyComplexEntity {
 
   public void setStrProp2(String strProp2) {
     this.strProp2 = strProp2;
+  }
+
+  public String getStrProp3() {
+    return strProp3;
+  }
+
+  public void setStrProp3(String strProp3) {
+    this.strProp3 = strProp3;
   }
 
 }

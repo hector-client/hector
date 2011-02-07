@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
@@ -20,6 +21,7 @@ import javax.persistence.Inheritance;
 import javax.persistence.Table;
 
 import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
+import me.prettyprint.hom.cache.ColumnParser;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.cache.IdClassParserValidator;
 import me.prettyprint.hom.cache.InheritanceParserValidator;
@@ -38,6 +40,7 @@ public class ClassCacheMgr {
   private InheritanceParserValidator inheritanceParVal = new InheritanceParserValidator();
   private TableParserValidator tableParVal = new TableParserValidator();
   private IdClassParserValidator idClassParVal = new IdClassParserValidator();
+  private ColumnParser columnPar = new ColumnParser();
 
   /**
    * Examine class hierarchy using {@link CFMappingDef} objects to discover the
@@ -182,16 +185,23 @@ public class ClassCacheMgr {
       Annotation[] annoArr = f.getAnnotations();
       if (null == annoArr) {
         // TODO BTB:assume @Basic - fields are not required to be annotated to
-        // be persisted
+        // be persisted if they are a "basic type" - see 2.8 and 11.1.6
+        // @Transient to ignore a field
         continue;
       }
 
       for (Annotation anno : annoArr) {
-        if (anno instanceof Column) {
-          processColumnAnnotation(f, (Column) anno, cfMapDef, pdMap);
-        } else if (anno instanceof me.prettyprint.hom.annotations.Column) {
-          processColumnCustomAnnotation(f, (me.prettyprint.hom.annotations.Column) anno, cfMapDef,
-              pdMap);
+        PropertyDescriptor pd = pdMap.get(f.getName());
+        if (null == pd) {
+          throw new HectorObjectMapperException("Property, "
+              + cfMapDef.getEffectiveClass().getSimpleName() + "." + f.getName()
+              + ", does not have proper setter/getter");
+        }
+
+        if (anno instanceof Column || anno instanceof me.prettyprint.hom.annotations.Column) {
+          columnPar.parse(f, anno, pd, cfMapDef);
+        } else if (anno instanceof Basic) {
+//          basicPar.parse(f, anno, pd, cfMapDef);
         } else if (anno instanceof Id) {
           processIdAnnotation(f, (Id) anno, cfMapDef, pdMap);
         } else if (anno instanceof me.prettyprint.hom.annotations.Id) {
@@ -201,38 +211,11 @@ public class ClassCacheMgr {
     }
   }
 
-  private <T> void processColumnAnnotation(Field f, Column anno, CFMappingDef<T> cfMapDef,
-      Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
-    PropertyDescriptor pd = pdMap.get(f.getName());
-    if (null == pd) {
-      throw new HectorObjectMapperException("Property, "
-          + cfMapDef.getEffectiveClass().getSimpleName() + "." + f.getName()
-          + ", does not have proper setter/getter");
-    }
-
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), DefaultConverter.class);
-    cfMapDef.addPropertyDefinition(md);
-  }
-
-  private void processColumnCustomAnnotation(Field f, me.prettyprint.hom.annotations.Column anno,
-      CFMappingDef<?> cfMapDef, Map<String, PropertyDescriptor> pdMap)
-      throws InstantiationException, IllegalAccessException {
-    PropertyDescriptor pd = pdMap.get(f.getName());
-    if (null == pd) {
-      throw new HectorObjectMapperException("Property, "
-          + cfMapDef.getEffectiveClass().getSimpleName() + "." + f.getName()
-          + ", does not have proper setter/getter");
-    }
-
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), anno.converter());
-    cfMapDef.addPropertyDefinition(md);
-    cfMapDef.addPropertyDefinition(md);
-  }
-
   private <T> void processIdAnnotation(Field f, Id anno, CFMappingDef<T> cfMapDef,
       Map<String, PropertyDescriptor> pdMap) throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null, DefaultConverter.class);
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
+        DefaultConverter.class);
     if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
         || null == md.getPropDesc().getWriteMethod()) {
       throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
@@ -245,7 +228,8 @@ public class ClassCacheMgr {
       CFMappingDef<T> cfMapDef, Map<String, PropertyDescriptor> pdMap)
       throws InstantiationException, IllegalAccessException {
     // TODO lookup JPA 2 spec for class-level ids
-    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null, anno.converter());
+    PropertyMappingDefinition md = new PropertyMappingDefinition(pdMap.get(f.getName()), null,
+        anno.converter());
     if (null == md.getPropDesc() || null == md.getPropDesc().getReadMethod()
         || null == md.getPropDesc().getWriteMethod()) {
       throw new HectorObjectMapperException("@" + Id.class.getSimpleName()
@@ -317,7 +301,7 @@ public class ClassCacheMgr {
   private void checkForPojoPrimaryKey(CFMappingDef<?> cfMapDef) {
     // if we know it's a complex key then it must be present so we only check
     // case for simple one field key
-    
+
     // SimpleTestBean breaks this check right now because it uses method
     // annotations which isn't supported by the ClassCacheMgr at this time
     // if (!cfMapDef.getKeyDef().isComplexKey()) {

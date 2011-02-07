@@ -123,6 +123,9 @@ public class HectorObjectMapper {
     String colFamName = cfMapDef.getEffectiveColFamName();
     Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
     for (HColumn<String, byte[]> col : colColl) {
+      if ( null == col.getName() || col.getName().isEmpty() ) {
+        throw new HectorObjectMapperException("Column name cannot be null or empty - trying to persist to ColumnFamily, " + colFamName);
+      }
       m.addInsertion(colFamKey, colFamName, col);
     }
 

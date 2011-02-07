@@ -2,9 +2,11 @@ package me.prettyprint.hom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.UUID;
 
+import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -92,4 +94,24 @@ public class EntityManagerTest extends CassandraTestBase {
     assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
   }
 
+  @Test
+  public void testMissingColumnsForPojoProps() {
+//  Mutator<Long> m = HFactory.createMutator(keyspace, LongSerializer.get());
+//  m.insert(1, "SimpleTestBeanColumnFamily", HFactory.createColumn(name, value, nameSerializer, valueSerializer))
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyCompositePK pkKey = new MyCompositePK(1, "str-prop");
+    MyComplexEntity entity1 = new MyComplexEntity();
+    entity1.setIntProp1(pkKey.getIntProp1());
+    entity1.setStrProp1(pkKey.getStrProp1());
+    entity1.setStrProp2("str-prop-two");
+
+    em.persist(entity1);
+    
+    MyComplexEntity entity2 = em.find(MyComplexEntity.class, pkKey);
+    
+    assertEquals( entity1.getIntProp1(), entity2.getIntProp1() );
+    assertEquals( entity1.getStrProp1(), entity2.getStrProp1() );
+    assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
+    assertNull( entity2.getStrProp3() );
+  }
 }
