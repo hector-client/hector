@@ -29,11 +29,9 @@ public abstract class BaseBalancingPolicyTest {
     Mockito.when(poolWith7Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.2:9161"));
     Mockito.when(poolWith10Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.3:9162"));
     
-    
-    pools.add(poolWith10Active);
-    pools.add(poolWith5Active);
+    pools.add(poolWith5Active);        
     pools.add(poolWith7Active);
-    
+    pools.add(poolWith10Active);
   }
   
 }

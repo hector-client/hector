@@ -59,11 +59,11 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
-    connectionManager = new HConnectionManager(cassandraHostConfigurator);
+    connectionManager = new HConnectionManager(clusterName, cassandraHostConfigurator);
     name = clusterName;
     configurator = cassandraHostConfigurator;
     failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
-    cassandraClientMonitor = JmxMonitor.getInstance(connectionManager).getCassandraMonitor();
+    cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
     xtrans = new ExceptionsTranslatorImpl();
     clockResolution = cassandraHostConfigurator.getClockResolution();
     this.credentials = Collections.unmodifiableMap(credentials);

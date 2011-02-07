@@ -12,6 +12,7 @@ Mutator has easier row level deletion methods
 Fix potential race condition in ConcurrentHClientPool with large number of threads. https://github.com/rantav/hector/issues#issue/136 (Thanks to @masseyke for the test case)
 LeastActive policy updated to shuffle before selection. This spreads load out better among pools in low to moderate traffic environments (ie. when ConcurrentHClientPool#getNumActive are all equal). 
 Fix NPE in checking that cassandraHostRetryService is turned when host is being marked down (thanks to ML poster Shimi for bug report)
+A CassandraClientMonitor instance is now created per cluster to make JMX integration with multi-cluster setups much easier. (https://github.com/rantav/hector/issues/issue/137)
 
 
 0.7.0-25
