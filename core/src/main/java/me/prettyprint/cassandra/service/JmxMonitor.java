@@ -4,6 +4,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
@@ -28,30 +30,17 @@ public class JmxMonitor {
   private final Logger log = LoggerFactory.getLogger(getClass());
 
   private MBeanServer mbs;
-  private CassandraClientMonitor cassandraClientMonitor;
   private static JmxMonitor monitorInstance;
+  private Map<String,CassandraClientMonitor> monitors;
 
-  private JmxMonitor(HConnectionManager connectionManager) {
-    CassandraClientMonitor cassandraClientMonitor = new CassandraClientMonitor(connectionManager);
+  private JmxMonitor() {
     mbs = ManagementFactory.getPlatformMBeanServer();
-    this.cassandraClientMonitor = cassandraClientMonitor;
-    try {
-      registerMonitor("me.prettyprint.cassandra.service", "hector",
-          cassandraClientMonitor);
-    } catch (MalformedObjectNameException e) {
-      log.error("Unable to register JMX monitor", e);
-    } catch (InstanceAlreadyExistsException e) {
-      log.error("Unable to register JMX monitor", e);
-    } catch (MBeanRegistrationException e) {
-      log.error("Unable to register JMX monitor", e);
-    } catch (NotCompliantMBeanException e) {
-      log.error("Unable to register JMX monitor", e);
-    }
+    monitors = new HashMap<String, CassandraClientMonitor>();    
   }
 
-  public static JmxMonitor getInstance(HConnectionManager connectionManager) {
+  public static JmxMonitor getInstance() {
     if ( monitorInstance == null ) {
-      monitorInstance = new JmxMonitor(connectionManager);
+      monitorInstance = new JmxMonitor();
     }
     return monitorInstance;
   }
@@ -152,7 +141,24 @@ public class JmxMonitor {
     return null;
   }
 
-  public CassandraClientMonitor getCassandraMonitor() {
+  public CassandraClientMonitor getCassandraMonitor(HConnectionManager connectionManager) {
+    CassandraClientMonitor cassandraClientMonitor = monitors.get(connectionManager.getClusterName());
+    if ( cassandraClientMonitor == null ) {
+      try {
+        CassandraClientMonitor ccm = new CassandraClientMonitor(connectionManager);
+        registerMonitor("me.prettyprint.cassandra.service_"+connectionManager.getClusterName(), "hector",
+            ccm);
+        monitors.put(connectionManager.getClusterName(), ccm);
+      } catch (MalformedObjectNameException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (InstanceAlreadyExistsException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (MBeanRegistrationException e) {
+        log.error("Unable to register JMX monitor", e);
+      } catch (NotCompliantMBeanException e) {
+        log.error("Unable to register JMX monitor", e);
+      }
+    }
     return cassandraClientMonitor;
   }
 

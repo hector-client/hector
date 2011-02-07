@@ -53,6 +53,8 @@ public class CassandraAuthTest {
 
   private CassandraHostConfigurator cassandraHostConfigurator;
   private HConnectionManager connectionManager;
+  private String clusterName = "TestCluster";
+  
   /**
    * Set embedded cassandra up and spawn it in a new thread.
    */
@@ -84,7 +86,7 @@ public class CassandraAuthTest {
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
           NotFoundException, UnknownHostException, Exception {
     cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
-    connectionManager = new HConnectionManager(cassandraHostConfigurator);
+    connectionManager = new HConnectionManager(clusterName,cassandraHostConfigurator);
   }
 
   @Test
