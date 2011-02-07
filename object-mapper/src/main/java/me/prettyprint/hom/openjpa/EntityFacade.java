@@ -38,8 +38,16 @@ public class EntityFacade implements Serializable {
     for (int i = 0; i < fmds.length; i++) {
       if ( fmds[i].getManagement() == FieldMetaData.MANAGE_NONE || fmds[i].isPrimaryKey())
         continue;
-      if ( log.isDebugEnabled())
-        log.debug("field name {} typeCode {}", fmds[i].getName(), fmds[i].getTypeCode());
+      if ( log.isDebugEnabled()) {
+        log.debug("field name {} typeCode {} associationType: {} declaredType: {} embeddedMetaData: {}", 
+            new Object[]{fmds[i].getName(), 
+            fmds[i].getTypeCode(), 
+            fmds[i].getAssociationType(), 
+            fmds[i].getDeclaredType().getName(), 
+            fmds[i].getElement().getDeclaredTypeMetaData() 
+            });
+      }
+      // TODO if fmds[i].getAssociationType() > 0 .. we found an attached entity and need to find it's entityFacade
       columnMetas.put(fmds[i].getName(), new ColumnMeta(fmds[i].getIndex(), MappingUtils.getSerializer(fmds[i].getTypeCode())));
     }
   }  
