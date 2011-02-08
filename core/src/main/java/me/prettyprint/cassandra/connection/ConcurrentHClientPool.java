@@ -212,9 +212,7 @@ public class ConcurrentHClientPool implements PoolMetric {
         client.close();
       }
     } else {
-      if ( activeClients.size() < getMaxActive() && numBlocked.get() > 0) {
-        addClientToPoolGently(new HThriftClient(cassandraHost).open());
-      }
+      addClientToPoolGently(new HThriftClient(cassandraHost).open());
     }
 
     if ( log.isDebugEnabled() ) {
