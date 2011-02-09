@@ -17,6 +17,8 @@ import me.prettyprint.hector.api.mutation.Mutator;
  * to own column which will have the chunk number (starting at 0) as column key
  * (Long).
  * 
+ * This implementation is not thread-safe!
+ * 
  */
 public class ChunkOutputStream<T> extends OutputStream {
   private byte[] chunk;
@@ -38,7 +40,7 @@ public class ChunkOutputStream<T> extends OutputStream {
    * 
    * @see java.io.OutputStream#write(int)
    */
-  public synchronized void write(int b) throws IOException {
+  public void write(int b) throws IOException {
     if (chunk.length - 1 == pos) {
       flush();
     }
@@ -66,7 +68,7 @@ public class ChunkOutputStream<T> extends OutputStream {
    * @param close
    * @throws IOException
    */
-  private synchronized void writeData(boolean close) throws IOException {
+  private void writeData(boolean close) throws IOException {
     if (pos != 0 && (close || pos == chunk.length - 1)) {
       byte[] data;
       if (pos != chunk.length - 1) {

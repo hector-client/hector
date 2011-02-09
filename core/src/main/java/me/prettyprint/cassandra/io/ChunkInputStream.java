@@ -17,6 +17,8 @@ import me.prettyprint.hector.api.query.QueryResult;
  * Return an InputStream which retrieve columns from a row which stores chunk of
  * data. See also {@link ChunkOutputStream}
  * 
+ * This implementation is not thread-safe!
+ * 
  * @param <T>
  */
 public class ChunkInputStream<T> extends InputStream {
@@ -56,7 +58,7 @@ public class ChunkInputStream<T> extends InputStream {
    * @return exists if there was a chunk to fetch.
    * @throws IOException
    */
-  private synchronized boolean fetchChunk() throws IOException {
+  private boolean fetchChunk() throws IOException {
     try {
       ColumnQuery<T, Long, byte[]> query = HFactory.createColumnQuery(keyspace, rowKeySerializer, LongSerializer.get(), BytesArraySerializer.get());
       QueryResult<HColumn<Long, byte[]>> result = query.setColumnFamily(cf).setKey(key).setName(chunkPos).execute();
