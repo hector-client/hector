@@ -7,7 +7,7 @@ package me.prettyprint.hom.converters;
  * 
  * @author Todd Burruss
  */
-public interface Converter {
+public interface Converter<T> {
 
   /**
    * Convert Cassandra byte[] to Java type.

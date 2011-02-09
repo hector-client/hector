@@ -11,10 +11,10 @@ import me.prettyprint.hom.annotations.Column;
  * 
  * @author Todd Burruss
  */
-public class DefaultConverter implements Converter {
+public class DefaultConverter implements Converter<Object> {
 
   @Override
-  public Object convertCassTypeToObjType(Class<?> clazz, byte[] value) {
+  public Object convertCassTypeToObjType(Class<Object> clazz, byte[] value) {
     Serializer<?> s = HectorObjectMapper.determineSerializer(clazz);
     return s.fromBytes(value);
   }
