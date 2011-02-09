@@ -2,7 +2,10 @@ package me.prettyprint.hom.service;
 
 import static org.junit.Assert.assertEquals;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.Id;
 import javax.persistence.Persistence;
 
 import me.prettyprint.hom.CassandraTestBase;
@@ -28,15 +31,37 @@ public class EntitySchemaManagerTest extends CassandraTestBase {
   
   @Test
   public void testCreateSchemaFromEntity() {
-    entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleRelationshipBean.class));
+    entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, ReallySimpleBean.class));
     EntitySchemaStatus ecs = entitySchemaManager.createSchema(entityFacade);
     assertEquals(SchemaResult.CREATED, ecs.getSchemaResult());    
   }
   
   @Test
   public void testCreateSchemaFailExisting() {
-    entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleRelationshipBean.class));
+    entityFacade = new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, ReallySimpleBean.class));
     EntitySchemaStatus ecs = entitySchemaManager.createSchema(entityFacade);
     assertEquals(SchemaResult.NOT_MODIFIED, ecs.getSchemaResult());    
+  }
+  
+  @Entity
+  class ReallySimpleBean {
+    int id;
+    String val;
+    @Id
+    public int getId() {
+      return id;
+    }
+    public void setId(int id) {
+      this.id = id;
+    }
+    @Column
+    public String getVal() {
+      return val;
+    }
+    public void setVal(String val) {
+      this.val = val;
+    }
+    
+    
   }
 }

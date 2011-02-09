@@ -18,12 +18,6 @@ import org.junit.Test;
 
 
 public class OneToManyRelationshipTest extends ManagedEntityTestBase {
-
-  @Before
-  public void setupSchema() {
-    EntitySchemaManager entitySchemaManager = new EntitySchemaManager(cluster, keyspace);
-    EntitySchemaStatus ecs = entitySchemaManager.createSchema(new EntityFacade(JPAFacadeHelper.getMetaData(entityManagerFactory, SimpleRelationshipBean.class)));
-  }
   
   @Test
   public void testManyToOneSaveAndLoad() {
