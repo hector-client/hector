@@ -22,94 +22,89 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class StreamTest extends BaseEmbededServerSetupTest {
-    public final static String POOL_NAME = "TestPool";
-    public final static String KEYSPACE = "TestKeyspace";
+  public final static String POOL_NAME = "TestPool";
+  public final static String KEYSPACE = "TestKeyspace";
 
-    public final static String BLOB_CF = "Blob";
-    public final static CfDef BLOB_CF_DEF = new CfDef(KEYSPACE, BLOB_CF);
-    static {
-        BLOB_CF_DEF.comparator_type = "IntegerType";
+  public final static String BLOB_CF = "Blob";
+  public final static CfDef BLOB_CF_DEF = new CfDef(KEYSPACE, BLOB_CF);
+  static {
+    BLOB_CF_DEF.comparator_type = "IntegerType";
+  }
+
+  public final static KeyspaceDefinition KEYSPACE_DEV = new ThriftKsDef(new KsDef(KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(new CfDef[] { BLOB_CF_DEF })));
+
+  private Keyspace keyspace;
+  private ThriftCluster cassandraCluster;
+  private CassandraHostConfigurator cassandraHostConfigurator;
+
+  @Before
+  public void setUp() throws Exception {
+    super.setupClient();
+
+    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+    cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
+
+    keyspace = HFactory.createKeyspace(KEYSPACE, cassandraCluster);
+    try {
+      cassandraCluster.dropKeyspace(KEYSPACE);
+    } catch (Exception e) {
+    }
+    cassandraCluster.addKeyspace(KEYSPACE_DEV);
+
+  }
+
+  @Test
+  public void testStreaming() throws IOException {
+    String key1 = UUID.randomUUID().toString();
+    String key2 = UUID.randomUUID().toString();
+    check(key1, 10);
+    check(key2, 10000);
+
+  }
+
+  private void check(String key, int chunksize) throws IOException {
+    String testData = "This is a testdata, we should be able to read it again via the Inpustream";
+    ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), 10);
+    out.write(testData.getBytes());
+    out.close();
+
+    ChunkInputStream<String> in = new ChunkInputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get());
+    int i = -1;
+    int written = 0;
+
+    while ((i = in.read()) != -1) {
+      assertSame(testData.charAt(written++), (char) i);
+
     }
 
-    public final static KeyspaceDefinition KEYSPACE_DEV = new ThriftKsDef(new KsDef(KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(new CfDef[] { BLOB_CF_DEF })));
+    assertEquals(testData.length(), written);
+    in.close();
+  }
 
-    private Keyspace keyspace;
-    private ThriftCluster cassandraCluster;
-    private CassandraHostConfigurator cassandraHostConfigurator;
+  @Test
+  public void testSkip() throws IOException {
+    String key = UUID.randomUUID().toString();
+    String testData = "This is a testdata, we should be able to read it again via the Inpustream";
+    ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), 10);
+    out.write(testData.getBytes());
+    out.close();
 
-   
-    
+    ChunkInputStream<String> in = new ChunkInputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get());
 
+    int skip = 5;
+    in.skip(skip);
+    int i = -1;
 
-    @Before
-    public void setUp() throws Exception {
-    	  super.setupClient();
+    int written = skip;
 
-        cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
-        cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
-
-        keyspace = HFactory.createKeyspace(KEYSPACE, cassandraCluster);
-        try {
-            cassandraCluster.dropKeyspace(KEYSPACE);
-        } catch (Exception e) {
-        }
-        cassandraCluster.addKeyspace(KEYSPACE_DEV);
-
-    }
-    
-    @Test
-    public void testStreaming() throws IOException {
-        String key1 = UUID.randomUUID().toString();
-        String key2 = UUID.randomUUID().toString();
-        check(key1, 10);
-        check(key2, 10000);
+    while ((i = in.read()) != -1) {
+      assertSame(testData.charAt(written++), (char) i);
 
     }
-    
-    private void check(String key, int chunksize) throws IOException {
-        String testData = "This is a testdata, we should be able to read it again via the Inpustream";
-        ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), 10);
-        out.write(testData.getBytes());
-        out.close();
 
-        ChunkInputStream<String> in = new ChunkInputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get());
-        int i = -1;
-        int written = 0;
-        
-        while ((i = in.read()) != -1) {
-            assertSame(testData.charAt(written++), (char)i);
-            
-        }
-        
-        assertEquals(testData.length(), written);
-        in.close();
-    }
-    
-    @Test
-    public void testSkip() throws IOException {
-        String key = UUID.randomUUID().toString();
-        String testData = "This is a testdata, we should be able to read it again via the Inpustream";
-        ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), 10);
-        out.write(testData.getBytes());
-        out.close();
+    assertEquals(testData.length(), written);
+    in.close();
 
-        ChunkInputStream<String> in = new ChunkInputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get());
+  }
 
-        int skip = 5;
-        in.skip(skip);
-        int i = -1;
-        
-        
-        int written = skip;
-
-        while ((i = in.read()) != -1) {
-            assertSame(testData.charAt(written++), (char)i);
-            
-        }
-        
-        assertEquals(testData.length(), written);
-        in.close();
-
-    }
-    
 }
