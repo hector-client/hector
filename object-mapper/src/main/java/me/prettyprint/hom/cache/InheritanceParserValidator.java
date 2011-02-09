@@ -1,6 +1,7 @@
 package me.prettyprint.hom.cache;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Modifier;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
@@ -78,14 +79,29 @@ public class InheritanceParserValidator implements ParserValidator {
   }
 
   private <T> void validateSingleTableInheritance(CFMappingDef<T> cfMapDef) {
+    // validating the base class in an inheritance hierarchy. must have a
+    // discriminator column defined
     if (null == cfMapDef.getDiscColumn()) {
-      throw new HectorObjectMapperException("Class " + cfMapDef.getRealClass().getName()
-          + " requested single table inheritance, but you did not specify a "
+      throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass().getName()
+          + ", requested single table inheritance, but you did not specify a "
           + DiscriminatorColumn.class.getSimpleName() + " annotation");
-    } else if (null == cfMapDef.getDiscValue()) {
-      throw new HectorObjectMapperException("Class " + cfMapDef.getRealClass().getName()
-          + " requested single table inheritance, but you did specify a "
-          + DiscriminatorValue.class.getSimpleName() + " annotation");
+    }
+
+    // if it is abstract, cannot be instantiated and therefore should not have a
+    // discriminator value defined
+    if (Modifier.isAbstract(cfMapDef.getEffectiveClass().getModifiers())
+        && null != cfMapDef.getDiscValue()) {
+      throw new HectorObjectMapperException("Abstract class, " + cfMapDef.getRealClass().getName()
+          + ", has an @" + DiscriminatorValue.class.getSimpleName()
+          + " annotation, but cannot be instantiated");
+    }
+
+    // since abstract, must have a discriminator column defined
+    if (!Modifier.isAbstract(cfMapDef.getEffectiveClass().getModifiers())
+        && null == cfMapDef.getDiscValue()) {
+      throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass().getName()
+          + ", is not abstract, so it must have an @" + DiscriminatorValue.class.getSimpleName()
+          + " annotation");
     }
   }
 
@@ -93,8 +109,9 @@ public class InheritanceParserValidator implements ParserValidator {
     if (null == cfMapDef.getDiscValue()) {
       throw new HectorObjectMapperException("Base class "
           + cfMapDef.getCfBaseMapDef().getClass().getName()
-          + " requested single table inheritance, but this class, " + cfMapDef.getRealClass().getName()
-          + ", did not specify a " + DiscriminatorValue.class.getSimpleName() + " annotation");
+          + " requested single table inheritance, but this class, "
+          + cfMapDef.getRealClass().getName() + ", did not specify a "
+          + DiscriminatorValue.class.getSimpleName() + " annotation");
     }
   }
 

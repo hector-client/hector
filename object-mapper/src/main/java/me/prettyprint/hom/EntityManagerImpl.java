@@ -72,7 +72,7 @@ public class EntityManagerImpl implements EntityManager {
    * Initialize the manager by scanning the classpath starting with the
    * <code>classpathPrefix</code>, looking for classes annotated with
    * {@link Entity}. If an Entity class is found, it looks for the
-   * {@link Table} annotation to determine the Cassandra column family name.
+   * {@link BasicTable} annotation to determine the Cassandra column family name.
    *
    * @param classpathPrefixArr
    */

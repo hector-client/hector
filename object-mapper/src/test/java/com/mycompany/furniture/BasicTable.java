@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("table")
-public class Table extends Furniture {
+public class BasicTable extends Furniture {
 
   @Column(name="extendable")
   private boolean extendable;

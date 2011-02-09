@@ -7,7 +7,7 @@ import javax.persistence.Entity;
 
 @Entity
 @DiscriminatorValue("table_desk")
-public class Desk extends Table {
+public class Desk extends BasicTable {
 
   @Column(name="numDrawers")
   private int numDrawers;

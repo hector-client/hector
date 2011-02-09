@@ -3,8 +3,8 @@ package com.mycompany;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,15 +19,14 @@ import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
 
 @Entity
 @Table(name="TestColumnFamily")
-class MyPojo {
+public class MyPojo {
   @Id
   private UUID id;
 
   @Column(name="lp1")
   private long longProp1;
 
-  //@Column(value = "color", converter = ColorConverter.class)
-  @Column(name="color")
+  @me.prettyprint.hom.annotations.Column(name = "color", converter = ColorConverter.class)
   private Colors color;
 
   private Map<String, String> anonymousProps = new HashMap<String, String>();

@@ -3,18 +3,16 @@ package com.mycompany.furniture;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorType;
-import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Inheritance;
+import javax.persistence.Table;
 
 @Entity
-@javax.persistence.Table(name="Furniture")
+@Table(name="Furniture")
 @Inheritance
 @DiscriminatorColumn(name = "type", discriminatorType = DiscriminatorType.STRING)
-@DiscriminatorValue("") // means catch all derivatives that don't specify a 'type'
-public class Furniture {
-
+public abstract class Furniture {
   @Id
   private int id;
 
@@ -47,5 +45,4 @@ public class Furniture {
   public void setColor(String color) {
     this.color = color;
   }
-
 }

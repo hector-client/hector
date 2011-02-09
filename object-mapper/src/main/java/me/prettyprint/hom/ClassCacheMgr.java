@@ -257,7 +257,7 @@ public class ClassCacheMgr {
       try {
         cfSuperMapDef = initializeCacheForClass(effectiveType.getSuperclass());
         cfMapDef.setCfSuperMapDef(cfSuperMapDef);
-      } catch (HectorObjectMapperException e) {
+      } catch (HomMissingEntityAnnotationException e) {
         // ok, becuase may not have a super class that's an entity
       }
     }

@@ -75,7 +75,7 @@ public class CFMappingDef<T> {
 
     // if class is missing @Entity, then proceed no further
     if (!entityFound) {
-      throw new HectorObjectMapperException("class, " + realClass.getName() + ", not annotated with @"
+      throw new HomMissingEntityAnnotationException("class, " + realClass.getName() + ", not annotated with @"
           + Entity.class.getSimpleName());
     }
   }

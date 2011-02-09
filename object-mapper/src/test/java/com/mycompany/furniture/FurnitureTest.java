@@ -41,7 +41,7 @@ public class FurnitureTest extends CassandraTestBase {
     couch.setNumCushions(3);
     entityMgr.persist(couch);
 
-    Table table = new Table();
+    BasicTable table = new BasicTable();
     table.setId( 3 );
     table.setMaterial("formica");
     table.setColor("blue");
@@ -65,7 +65,7 @@ public class FurnitureTest extends CassandraTestBase {
 
     assertEquals( Chair.class, f1.getClass() );
     assertEquals( Couch.class, f2.getClass() );
-    assertEquals( Table.class, f3.getClass() );
+    assertEquals( BasicTable.class, f3.getClass() );
     assertEquals( Desk.class, f4.getClass() );
   }
 
