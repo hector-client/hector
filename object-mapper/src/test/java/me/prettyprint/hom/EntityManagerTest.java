@@ -114,4 +114,5 @@ public class EntityManagerTest extends CassandraTestBase {
     assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
     assertNull( entity2.getStrProp3() );
   }
+
 }

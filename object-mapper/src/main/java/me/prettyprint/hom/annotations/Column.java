@@ -31,6 +31,7 @@ public @interface Column {
    * 
    * @return Class of converter
    */
+
   Class<? extends Converter> converter() default me.prettyprint.hom.converters.DefaultConverter.class;
 
 }

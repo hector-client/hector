@@ -296,6 +296,7 @@ public class ClassCacheMgr {
     checkForAnonymousHandler(cfMapDef);
 
     generateColumnSliceIfNeeded(cfMapDef);
+
   }
 
   private void checkForPojoPrimaryKey(CFMappingDef<?> cfMapDef) {

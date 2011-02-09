@@ -106,6 +106,7 @@ public class CassandraTestBase {
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));          
         cfDefList.add(new CfDef("TestKeyspace", "NoAnonymousColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
+
         cfDefList.add(new CfDef("TestKeyspace", "ComplexColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9161");
