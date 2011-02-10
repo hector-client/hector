@@ -45,7 +45,7 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
     
     public int compare(ConcurrentHClientPool o1, ConcurrentHClientPool o2) {
       if ( log.isDebugEnabled() ) {
-        log.info("comparing 1: {} and count {} with 2: {} and count {}",
+        log.debug("comparing 1: {} and count {} with 2: {} and count {}",
           new Object[]{o1.getCassandraHost(), o1.getNumActive(), o2.getCassandraHost(), o2.getNumActive()});
       }
       return o1.getNumActive() - o2.getNumActive();      
