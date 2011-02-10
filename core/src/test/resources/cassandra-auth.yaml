@@ -234,6 +234,13 @@ dynamic_snitch_badness_threshold: 0.0
 # request_scheduler_options as described below.
 request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 
+encryption_options:
+    internode_encryption: none
+    keystore: conf/.keystore
+    keystore_password: cassandra
+    truststore: conf/.truststore
+    truststore_password: cassandra
+
 # Scheduler Options vary based on the type of scheduler
 # NoScheduler - Has no options
 # RoundRobin
