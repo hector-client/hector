@@ -9,7 +9,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
  * which actual host was connected etc.
  *
  * @author Ran
- *
+ * @author zznate
  */
 public class ExecutionResult<T> {
 
@@ -18,6 +18,7 @@ public class ExecutionResult<T> {
   private final CassandraHost cassandraHost;
   
   protected static final String BASE_MSG_FORMAT = "%s took (%dus) for query (%s) on host: %s";
+  private static final int MICRO_DENOM = 1000;
 
   public ExecutionResult(T value, long execTime, CassandraHost cassandraHost) {
     this.value = value;
@@ -33,8 +34,13 @@ public class ExecutionResult<T> {
     return value;
   }
 
+  /**
+   * Execution time is actually recorded in nanos, so we divide this by 1000 
+   * make the number more sensible
+   * @return
+   */
   public long getExecutionTimeMicro() {
-    return execTime;
+    return execTime / MICRO_DENOM;
   }
 
   @Override
@@ -43,7 +49,7 @@ public class ExecutionResult<T> {
   }
   
   protected String formatMessage(String resultName, String query) {
-    return String.format(BASE_MSG_FORMAT, resultName, execTime, query, (cassandraHost != null ? cassandraHost.getName() : "[none]"));
+    return String.format(BASE_MSG_FORMAT, resultName, getExecutionTimeMicro(), query, (cassandraHost != null ? cassandraHost.getName() : "[none]"));
   }
 
   /** The cassandra host that was actually used to execute the operation */
