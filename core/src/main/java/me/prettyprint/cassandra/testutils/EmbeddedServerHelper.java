@@ -41,7 +41,7 @@ public class EmbeddedServerHelper {
     this.yamlFile = yamlFile;
   }
   
-  static ExecutorService executor = Executors.newSingleThreadExecutor();
+  static ExecutorService executor; 
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -63,7 +63,7 @@ public class EmbeddedServerHelper {
     cleanupAndLeaveDirs();
     loadSchemaFromYaml();
     //loadYamlTables();
-
+    executor = Executors.newSingleThreadExecutor();
     executor.execute(new CassandraRunner());
     try
     {
