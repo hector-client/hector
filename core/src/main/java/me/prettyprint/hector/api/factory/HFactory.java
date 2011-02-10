@@ -178,6 +178,20 @@ public final class HFactory {
           cassandraHostConfigurator, credentials) : clusters.get(clusterName);
     }
   }
+  
+  /**
+   * Shutdown this cluster, removing it from the Map. This operation is
+   * extremely expensive and should not be done lightly.
+   * @param cluster
+   */
+  public static void shutdownCluster(Cluster cluster) {
+    synchronized (clusters) {
+      if (clusters.get(cluster.getClusterName()) != null ) {
+        cluster.getConnectionManager().shutdown();
+        clusters.remove(cluster.getClusterName());
+      }
+    }
+  }
 
   /**
    * Creates a Keyspace with the default consistency level policy.
