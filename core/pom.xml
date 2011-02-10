@@ -16,6 +16,25 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-install-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>install cassandra trunk</id>
+            <phase>initialize</phase>
+            <goals><goal>install-file</goal></goals>
+            <configuration>
+              <packaging>jar</packaging>
+              <groupId>org.apache.cassandra</groupId>
+              <artifactId>cassandra-all</artifactId>
+              <version>20110209</version>
+              <file>${basedir}/../lib/cassandra-all-20110209.jar</file>
+            </configuration>
+          </execution>
+	</executions>
+      </plugin>
+
       <!--
         run examples thusly: mvn exec:java
         -Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
@@ -104,10 +123,59 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-all</artifactId>
+      <version>20110209</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra.deps</groupId>
       <artifactId>libthrift</artifactId>
+    </dependency>
+    <dependency> 
+      <groupId>org.yaml</groupId> 
+      <artifactId>snakeyaml</artifactId> 
+      <version>1.6</version> 
+      <scope>test</scope>
+    </dependency> 
+    <dependency> 
+      <groupId>com.google.guava</groupId> 
+      <artifactId>guava</artifactId> 
+      <version>r05</version> 
+      <scope>test</scope>
+    </dependency> 
+    <dependency> 
+      <groupId>commons-collections</groupId> 
+      <artifactId>commons-collections</artifactId> 
+      <version>3.2.1</version> 
+      <scope>test</scope>
+    </dependency> 
+    <dependency> 
+      <groupId>org.apache.cassandra.deps</groupId> 
+      <artifactId>avro</artifactId> 
+      <version>1.4.0-cassandra-1</version> 
+      <scope>test</scope>
+      <exclusions> 
+        <exclusion> 
+          <artifactId>netty</artifactId> 
+          <groupId>org.jboss.netty</groupId> 
+        </exclusion> 
+        <exclusion> 
+          <artifactId>paranamer</artifactId> 
+          <groupId>com.thoughtworks.paranamer</groupId> 
+        </exclusion> 
+        <exclusion> 
+          <artifactId>paranamer-ant</artifactId> 
+          <groupId>com.thoughtworks.paranamer</groupId> 
+        </exclusion> 
+        <exclusion> 
+          <artifactId>velocity</artifactId> 
+          <groupId>org.apache.velocity</groupId> 
+        </exclusion> 
+      </exclusions> 
+    </dependency> 
+    <dependency> 
+      <groupId>com.googlecode.concurrentlinkedhashmap</groupId> 
+      <artifactId>concurrentlinkedhashmap-lru</artifactId> 
+      <version>1.1</version> 
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.github.stephenc.high-scale-lib</groupId>
