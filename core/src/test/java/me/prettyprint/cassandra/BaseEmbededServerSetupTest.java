@@ -10,6 +10,8 @@ import org.apache.cassandra.config.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Base class for test cases that need access to EmbeddedServerHelper
@@ -18,7 +20,7 @@ import org.junit.BeforeClass;
  *
  */
 public abstract class BaseEmbededServerSetupTest {
-
+  private static Logger log = LoggerFactory.getLogger(BaseEmbededServerSetupTest.class);
   private static EmbeddedServerHelper embedded;
 
   protected HConnectionManager connectionManager;
@@ -34,6 +36,7 @@ public abstract class BaseEmbededServerSetupTest {
    */
   @BeforeClass
   public static void setup() throws TTransportException, IOException, InterruptedException, ConfigurationException {
+    log.info("in setup of BaseEmbedded.Test");
     embedded = new EmbeddedServerHelper();
     embedded.setup();
   }

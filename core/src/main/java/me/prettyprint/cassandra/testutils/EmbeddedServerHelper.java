@@ -19,6 +19,8 @@ import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -26,6 +28,7 @@ import org.apache.thrift.transport.TTransportException;
  * 
  */
 public class EmbeddedServerHelper {
+  private static Logger log = LoggerFactory.getLogger(EmbeddedServerHelper.class);
 
   private static final String TMP = "tmp";
 
@@ -59,15 +62,19 @@ public class EmbeddedServerHelper {
     copy(yamlFile, TMP);
     System.setProperty("cassandra.config", "file:" + TMP + yamlFile);
     System.setProperty("log4j.configuration", "file:" + TMP + "/log4j.properties");
+    System.setProperty("cassandra-foreground","true");
 
     cleanupAndLeaveDirs();
     loadSchemaFromYaml();
     //loadYamlTables();
+    log.info("Starting executor");
     executor = Executors.newSingleThreadExecutor();
     executor.execute(new CassandraRunner());
+    log.info("Started executor");
     try
     {
         TimeUnit.SECONDS.sleep(3);
+        log.info("Done sleeping");
     }
     catch (InterruptedException e)
     {
@@ -95,7 +102,7 @@ public class EmbeddedServerHelper {
       cassandraDaemon.deactivate();
     executor.shutdown();
     executor.shutdownNow();
-
+    log.info("Teardown complete");
   }
 
   private static void rmdir(String dir) throws IOException {
