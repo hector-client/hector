@@ -44,8 +44,10 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   private final class ShufflingCompare implements Comparator<ConcurrentHClientPool> {
     
     public int compare(ConcurrentHClientPool o1, ConcurrentHClientPool o2) {
-      log.info("comparing 1: {} and count {} with 2: {} and count {}",
+      if ( log.isDebugEnabled() ) {
+        log.info("comparing 1: {} and count {} with 2: {} and count {}",
           new Object[]{o1.getCassandraHost(), o1.getNumActive(), o2.getCassandraHost(), o2.getNumActive()});
+      }
       return o1.getNumActive() - o2.getNumActive();      
     }
   }
