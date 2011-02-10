@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.nio.ByteBuffer;
 
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.FBUtilities;
 import org.junit.Test;
 
@@ -23,11 +24,11 @@ public class LongSerializerTest {
 
   @Test
   public void testFromCassandra() {
-    assertEquals(new Long(1), ext.fromByteBuffer(FBUtilities.toByteBuffer(1L)));
-    assertEquals(new Long(0), ext.fromByteBuffer(FBUtilities.toByteBuffer(0L)));
-    assertEquals(new Long(-1), ext.fromByteBuffer(FBUtilities.toByteBuffer(-1L)));
-    assertEquals(new Long(Long.MIN_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Long.MIN_VALUE)));
-    assertEquals(new Long(Long.MAX_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Long.MAX_VALUE)));
+    assertEquals(new Long(1), ext.fromByteBuffer(ByteBufferUtil.bytes(1L)));
+    assertEquals(new Long(0), ext.fromByteBuffer(ByteBufferUtil.bytes(0L)));
+    assertEquals(new Long(-1), ext.fromByteBuffer(ByteBufferUtil.bytes(-1L)));
+    assertEquals(new Long(Long.MIN_VALUE), ext.fromByteBuffer(ByteBufferUtil.bytes(Long.MIN_VALUE)));
+    assertEquals(new Long(Long.MAX_VALUE), ext.fromByteBuffer(ByteBufferUtil.bytes(Long.MAX_VALUE)));
   }
   
   private void test(Long number) {
