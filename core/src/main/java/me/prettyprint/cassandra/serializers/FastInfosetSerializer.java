@@ -21,30 +21,32 @@ import com.sun.xml.fastinfoset.stax.StAXDocumentSerializer;
  * 
  */
 public class FastInfosetSerializer extends JaxbSerializer {
-    /**
-     * Constructor.
-     * 
-     * @param serializableClasses
-     *            List of classes which can be serialized by this instance. Note
-     *            that concrete classes directly referenced by any class in the
-     *            list will also be serializable through this instance.
-     */
-    public FastInfosetSerializer(final Class... serializableClasses) {
-        super(serializableClasses);
-    }
+  /**
+   * Constructor.
+   * 
+   * @param serializableClasses
+   *          List of classes which can be serialized by this instance. Note
+   *          that concrete classes directly referenced by any class in the list
+   *          will also be serializable through this instance.
+   */
+  public FastInfosetSerializer(final Class... serializableClasses) {
+    super(serializableClasses);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected XMLStreamWriter createStreamWriter(OutputStream output) throws XMLStreamException {
-        return new StAXDocumentSerializer(output);
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected XMLStreamWriter createStreamWriter(OutputStream output)
+      throws XMLStreamException {
+    return new StAXDocumentSerializer(output);
+  }
 
-    /** {@inheritDoc} */
-    @Override
-    protected XMLStreamReader createStreamReader(InputStream input) throws XMLStreamException {
-        StAXDocumentParser parser = new StAXDocumentParser(input);
-        parser.setStringInterning(true);
-        parser.setParseFragments(true);
-        return parser;
-    }
+  /** {@inheritDoc} */
+  @Override
+  protected XMLStreamReader createStreamReader(InputStream input)
+      throws XMLStreamException {
+    StAXDocumentParser parser = new StAXDocumentParser(input);
+    parser.setStringInterning(true);
+    parser.setParseFragments(true);
+    return parser;
+  }
 }

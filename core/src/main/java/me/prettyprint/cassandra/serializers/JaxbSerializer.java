@@ -21,136 +21,145 @@ import me.prettyprint.hector.api.exceptions.HectorSerializationException;
 
 /**
  * Serializes Objects using Jaxb. An instance of this class may only serialize
- * JAXB compatible objects of classes known to its configured context. 
+ * JAXB compatible objects of classes known to its configured context.
  * 
  * @author shuzhang0@gmail.com
  */
 public class JaxbSerializer extends AbstractSerializer<Object> {
 
-    /** The cached per-thread marshaller. */
-    private ThreadLocal<Marshaller> m_marshaller;
-    /** The cached per-thread unmarshaller. */
-    private ThreadLocal<Unmarshaller> m_unmarshaller;
+  /** The cached per-thread marshaller. */
+  private ThreadLocal<Marshaller> marshaller;
+  /** The cached per-thread unmarshaller. */
+  private ThreadLocal<Unmarshaller> unmarshaller;
 
-    /** Lazily initialized singleton factory for producing default XMLStreamWriters. */
-    private static XMLOutputFactory s_outputFactory;
-    /** Lazily initialized singleton factory for producing default XMLStreamReaders. */
-    private static XMLInputFactory s_inputFactory;
+  /**
+   * Lazily initialized singleton factory for producing default
+   * XMLStreamWriters.
+   */
+  private static XMLOutputFactory outputFactory;
+  /**
+   * Lazily initialized singleton factory for producing default
+   * XMLStreamReaders.
+   */
+  private static XMLInputFactory inputFactory;
 
-    /**
-     * Constructor.
-     * 
-     * @param serializableClasses
-     *            List of classes which can be serialized by this instance. Note
-     *            that concrete classes directly referenced by any class in the
-     *            list will also be serializable through this instance.
-     */
-    public JaxbSerializer(final Class... serializableClasses) {
-        m_marshaller = new ThreadLocal<Marshaller>() {
-            @Override
-            protected Marshaller initialValue() {
-                try {
-                    return JAXBContext.newInstance(serializableClasses).createMarshaller();
-                }
-                catch (JAXBException e) {
-                    throw new IllegalArgumentException("Classes to serialize are not JAXB compatible.", e);
-                }
-            }
-        };
-
-        m_unmarshaller = new ThreadLocal<Unmarshaller>() {
-            @Override
-            protected Unmarshaller initialValue() {
-                try {
-                    return JAXBContext.newInstance(serializableClasses).createUnmarshaller();
-                }
-                catch (JAXBException e) {
-                    throw new IllegalArgumentException("Classes to serialize are not JAXB compatible.", e);
-                }
-            }
-        };
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public ByteBuffer toByteBuffer(Object obj) {
-        if (obj == null) {
-            return null;
-        }
-
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+  /**
+   * Constructor.
+   * 
+   * @param serializableClasses
+   *          List of classes which can be serialized by this instance. Note
+   *          that concrete classes directly referenced by any class in the list
+   *          will also be serializable through this instance.
+   */
+  public JaxbSerializer(final Class... serializableClasses) {
+    marshaller = new ThreadLocal<Marshaller>() {
+      @Override
+      protected Marshaller initialValue() {
         try {
-            XMLStreamWriter writer = createStreamWriter(buffer);
-            m_marshaller.get().marshal(obj, writer);
-            writer.flush();
-            writer.close();
+          return JAXBContext.newInstance(serializableClasses)
+              .createMarshaller();
+        } catch (JAXBException e) {
+          throw new IllegalArgumentException(
+              "Classes to serialize are not JAXB compatible.", e);
         }
-        catch (JAXBException e) {
-            throw new HectorSerializationException("Object to serialize " + obj
-                    + " does not seem compatible with the configured JaxbContext;"
-                    + " note this Serializer works only with JAXBable objects.", e);
-        }
-        catch (XMLStreamException e) {
-            throw new HectorSerializationException("Exception occurred writing XML stream.", e);
-        }
-        return ByteBuffer.wrap(buffer.toByteArray());
-    }
+      }
+    };
 
-    /** {@inheritDoc} */
-    @Override
-    public Object fromByteBuffer(ByteBuffer bytes) {
-        if (bytes == null || !bytes.hasRemaining()) {
-            return null;
-        }
-
-        ByteArrayInputStream bais = new ByteArrayInputStream(bytes.array());
+    unmarshaller = new ThreadLocal<Unmarshaller>() {
+      @Override
+      protected Unmarshaller initialValue() {
         try {
-            XMLStreamReader reader = createStreamReader(bais);
-            Object ret = m_unmarshaller.get().unmarshal(reader);
-            reader.close();
-            return ret;
+          return JAXBContext.newInstance(serializableClasses)
+              .createUnmarshaller();
+        } catch (JAXBException e) {
+          throw new IllegalArgumentException(
+              "Classes to serialize are not JAXB compatible.", e);
         }
-        catch (JAXBException e) {
-            throw new HectorSerializationException("Jaxb exception occurred during deserialization.", e);
-        }
-        catch (XMLStreamException e) {
-            throw new HectorSerializationException("Exception reading XML stream.", e);
-        }
+      }
+    };
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public ByteBuffer toByteBuffer(Object obj) {
+    if (obj == null) {
+      return null;
     }
 
-    /**
-     * Get a new XML stream writer.
-     * 
-     * @param output
-     *            An underlying OutputStream to write to.
-     * @return a new {@link XMLStreamWriter} which writes to the specified
-     *         OutputStream. The output written by this XMLStreamWriter is
-     *         understandable by XMLStreamReaders produced by
-     *         {@link #createStreamReader(InputStream)}.
-     * @throws XMLStreamException
-     */
-    // Provides hook for subclasses to override how marshalling results are serialized (ex. encoding).
-    protected XMLStreamWriter createStreamWriter(OutputStream output) throws XMLStreamException {
-        if (s_outputFactory == null) {
-            s_outputFactory = XMLOutputFactory.newInstance();
-        }
-        return s_outputFactory.createXMLStreamWriter(output);
+    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+    try {
+      XMLStreamWriter writer = createStreamWriter(buffer);
+      marshaller.get().marshal(obj, writer);
+      writer.flush();
+      writer.close();
+    } catch (JAXBException e) {
+      throw new HectorSerializationException("Object to serialize " + obj
+          + " does not seem compatible with the configured JaxbContext;"
+          + " note this Serializer works only with JAXBable objects.", e);
+    } catch (XMLStreamException e) {
+      throw new HectorSerializationException(
+          "Exception occurred writing XML stream.", e);
+    }
+    return ByteBuffer.wrap(buffer.toByteArray());
+  }
+
+  /** {@inheritDoc} */
+  @Override
+  public Object fromByteBuffer(ByteBuffer bytes) {
+    if (bytes == null || !bytes.hasRemaining()) {
+      return null;
     }
 
-    /**
-     * Get a new XML stream reader.
-     * 
-     * @param input
-     *            the underlying InputStream to read from.
-     * @return a new {@link XmlStreamReader} which reads from the specified
-     *         InputStream. The reader can read anything written by
-     *         {@link #createStreamWriter(OutputStream)}.
-     * @throws XMLStreamException
-     */
-    protected XMLStreamReader createStreamReader(InputStream input) throws XMLStreamException {
-        if (s_inputFactory == null) {
-            s_inputFactory = XMLInputFactory.newInstance();
-        }
-        return s_inputFactory.createXMLStreamReader(input);
+    ByteArrayInputStream bais = new ByteArrayInputStream(bytes.array());
+    try {
+      XMLStreamReader reader = createStreamReader(bais);
+      Object ret = unmarshaller.get().unmarshal(reader);
+      reader.close();
+      return ret;
+    } catch (JAXBException e) {
+      throw new HectorSerializationException(
+          "Jaxb exception occurred during deserialization.", e);
+    } catch (XMLStreamException e) {
+      throw new HectorSerializationException("Exception reading XML stream.", e);
     }
+  }
+
+  /**
+   * Get a new XML stream writer.
+   * 
+   * @param output
+   *          An underlying OutputStream to write to.
+   * @return a new {@link XMLStreamWriter} which writes to the specified
+   *         OutputStream. The output written by this XMLStreamWriter is
+   *         understandable by XMLStreamReaders produced by
+   *         {@link #createStreamReader(InputStream)}.
+   * @throws XMLStreamException
+   */
+  // Provides hook for subclasses to override how marshalling results are
+  // serialized (ex. encoding).
+  protected XMLStreamWriter createStreamWriter(OutputStream output)
+      throws XMLStreamException {
+    if (outputFactory == null) {
+      outputFactory = XMLOutputFactory.newInstance();
+    }
+    return outputFactory.createXMLStreamWriter(output);
+  }
+
+  /**
+   * Get a new XML stream reader.
+   * 
+   * @param input
+   *          the underlying InputStream to read from.
+   * @return a new {@link XmlStreamReader} which reads from the specified
+   *         InputStream. The reader can read anything written by
+   *         {@link #createStreamWriter(OutputStream)}.
+   * @throws XMLStreamException
+   */
+  protected XMLStreamReader createStreamReader(InputStream input)
+      throws XMLStreamException {
+    if (inputFactory == null) {
+      inputFactory = XMLInputFactory.newInstance();
+    }
+    return inputFactory.createXMLStreamReader(input);
+  }
 }
