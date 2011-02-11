@@ -207,6 +207,12 @@
       <version>0.9.12</version>
     </dependency>
 
+    <dependency>
+      <artifactId>FastInfoset</artifactId>
+      <groupId>com.sun.xml.fastinfoset</groupId>
+      <version>1.2.2</version>
+    </dependency>
+
     <!-- OSGi deps -->
     <dependency>
       <groupId>org.osgi</groupId>
