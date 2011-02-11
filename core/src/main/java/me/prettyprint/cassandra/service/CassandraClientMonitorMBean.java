@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.util.List;
 import java.util.Set;
 
+import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 /**
@@ -134,4 +135,21 @@ public interface CassandraClientMonitorMBean {
    * @return
    */
   boolean removeCassandraHost(String hostStr);
+  
+  /**
+   * @see {@link #removeCassandraHost(String)} above for semantics of the host string. 
+   * @see {@link HConnectionManager#removeCassandraHost(CassandraHost)} for details of this operation.
+   * @param hostStr
+   * @return
+   */
+  boolean suspendCassandraHost(String hostStr);
+  
+  /**
+   * @see {@link #suspendCassandraHost(String)} above. This is the opposite.
+   * @param hostStr
+   * @return
+   */
+  boolean unsuspendCassandraHost(String hostStr);
+  
+  Set<String> getSuspendedCassandraHosts(); 
 }

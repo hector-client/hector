@@ -208,6 +208,26 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   public boolean removeCassandraHost(String hostStr) {  
     return connectionManager.removeCassandraHost(new CassandraHost(hostStr));
   }
+
+  @Override
+  public Set<String> getSuspendedCassandraHosts() {
+    Set<CassandraHost> hosts = connectionManager.getSuspendedCassandraHosts();
+    Set<String> hostsStr = new HashSet<String>();
+    for (CassandraHost host : hosts) {
+        hostsStr.add(host.getName());    
+    }
+    return hostsStr;
+  }
+
+  @Override
+  public boolean suspendCassandraHost(String hostStr) {    
+    return connectionManager.suspendCassandraHost(new CassandraHost(hostStr));
+  }
+
+  @Override
+  public boolean unsuspendCassandraHost(String hostStr) {
+    return connectionManager.unsuspendCassandraHost(new CassandraHost(hostStr));
+  }
   
   
   
