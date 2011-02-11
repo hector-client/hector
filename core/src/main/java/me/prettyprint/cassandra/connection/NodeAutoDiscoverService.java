@@ -94,7 +94,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
         }
       }
     } catch (Exception e) {
-      log.error("Downed Host retry failed attempt to verify CassandraHost", e);
+      log.error("Discovery Service failed attempt to connect CassandraHost", e);
     } finally {
       connectionManager.releaseClient(thriftClient);
     }
