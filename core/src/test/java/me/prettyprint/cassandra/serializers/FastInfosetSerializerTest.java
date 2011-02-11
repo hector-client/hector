@@ -1,7 +1,3 @@
-/*
- * Copyright 2011 Medio All rights reserved.
- * 
- */
 package me.prettyprint.cassandra.serializers;
 
 import me.prettyprint.hector.api.Serializer;
