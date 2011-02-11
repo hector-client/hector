@@ -40,6 +40,7 @@ public class HConnectionManager {
     LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
 
   private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
+  private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> suspendedHostPools;
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
@@ -56,6 +57,7 @@ public class HConnectionManager {
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
+    suspendedHostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
     this.clusterName = clusterName;
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
@@ -109,13 +111,19 @@ public class HConnectionManager {
   /**
    * Remove the {@link CassandraHost} from the pool, bypassing retry service. This
    * would be called on a host that is known to be going away. Gracefully shuts down
-   * the underlying connections via {@link ConcurrentHClientPool#shutdown()}
+   * the underlying connections via {@link ConcurrentHClientPool#shutdown()}. This method
+   * will also shutdown pools in the suspended state, removing them from the underlying
+   * suspended map.
    * @param cassandraHost
    */
   public boolean removeCassandraHost(CassandraHost cassandraHost) {
     boolean removed = getHosts().contains(cassandraHost);
     if ( removed ) {
       ConcurrentHClientPool pool = hostPools.remove(cassandraHost);
+      if ( pool == null ) {
+        log.info("removeCassandraHost looking for host {} in suspendedHostPools", cassandraHost);
+        pool = suspendedHostPools.remove(cassandraHost);
+      }
       if ( pool != null ) {
         pool.shutdown();
       } else {
@@ -126,7 +134,51 @@ public class HConnectionManager {
     log.info("Remove status for CassandraHost pool {} was {}", cassandraHost, removed);
     return removed;
   }
+  
+  /**
+   * Remove the {@link ConcurrentHClientPool} referenced by the {@link CassandraHost} from 
+   * the active host pools. This does not shut down the pool, only removes it as a candidate from
+   * future operations.
+   * @param cassandraHost
+   * @return true if the operation was successful.
+   */
+  public boolean suspendCassandraHost(CassandraHost cassandraHost) {
+    ConcurrentHClientPool pool = hostPools.remove(cassandraHost);
+    boolean removed = pool != null;
+    if ( removed ) {      
+      suspendedHostPools.put(cassandraHost, pool);
+    }
+    log.info("Suspend operation status was {} for CassandraHost {}", removed, cassandraHost);
+    return removed;
+  }
 
+  /** 
+   * The opposite of suspendCassandraHost, places the pool back into selection
+   * @param cassandraHost
+   * @return true if this operation was successful. A no-op returning false 
+   * if there was no such host in the underlying suspendedHostPool map.
+   */
+  public boolean unsuspendCassandraHost(CassandraHost cassandraHost) {
+    ConcurrentHClientPool pool = suspendedHostPools.remove(cassandraHost);
+    boolean readded = pool != null;
+    if ( readded ) {      
+      boolean alreadyThere = hostPools.putIfAbsent(cassandraHost, pool) != null;
+      if ( alreadyThere ) {
+        log.error("Unsuspend called on a pool that was already active for CassandraHost {}", cassandraHost);
+      }
+    }
+    log.info("UN-Suspend operation status was {} for CassandraHost {}", readded, cassandraHost);
+    return readded;
+  }
+  
+  /**
+   * Returns a Set of {@link CassandraHost} which are in the suspended status
+   * @return
+   */
+  public Set<CassandraHost> getSuspendedCassandraHosts() {
+    return suspendedHostPools.keySet();
+  }
+  
   public Set<CassandraHost> getHosts() {
     return Collections.unmodifiableSet(hostPools.keySet());
   }

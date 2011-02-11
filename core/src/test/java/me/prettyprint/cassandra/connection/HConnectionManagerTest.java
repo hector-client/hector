@@ -47,4 +47,13 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     connectionManager.markHostAsDown(client);
     assertEquals(0,connectionManager.getActivePools().size());
   }
+  
+  @Test
+  public void testSuspendCassandraHost() {
+    setupClient();
+    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);
+    assertTrue(connectionManager.suspendCassandraHost(cassandraHost));
+    assertEquals(1,connectionManager.getSuspendedCassandraHosts().size());
+    assertTrue(connectionManager.unsuspendCassandraHost(cassandraHost));
+  }
 }
