@@ -24,7 +24,7 @@ public class ConcurrentHClientPool implements PoolMetric {
 
   private final CassandraHost cassandraHost;
   //private final CassandraClientMonitor monitor;
-  private final AtomicInteger numActive, numBlocked;
+  private final AtomicInteger numBlocked;
   private final AtomicBoolean active;
 
   private final long maxWaitTimeWhenExhausted;
@@ -34,7 +34,6 @@ public class ConcurrentHClientPool implements PoolMetric {
 
     availableClientQueue = new ArrayBlockingQueue<HThriftClient>(cassandraHost.getMaxActive(), true);
     activeClients = new NonBlockingHashSet<HThriftClient>();
-    numActive = new AtomicInteger();
     numBlocked = new AtomicInteger();
     active = new AtomicBoolean(true);
 
@@ -57,7 +56,7 @@ public class ConcurrentHClientPool implements PoolMetric {
       throw new HectorException("Attempt to borrow on in-active pool: " + getName());
     }
     HThriftClient cassandraClient;
-    int currentActive = numActive.incrementAndGet();
+    int currentActive = activeClients.size();
     int tillExhausted = cassandraHost.getMaxActive() - currentActive;
 
     numBlocked.incrementAndGet();
@@ -96,7 +95,7 @@ public class ConcurrentHClientPool implements PoolMetric {
           }
         } catch (InterruptedException ie) {
           //monitor.incCounter(Counter.POOL_EXHAUSTED);
-          numActive.decrementAndGet();
+          log.error("Cassandra client acquisition interrupted",ie);
         }
       }
 
@@ -122,7 +121,6 @@ public class ConcurrentHClientPool implements PoolMetric {
     }
     HThriftClient client = new HThriftClient(cassandraHost).open();
     activeClients.add(client);
-    numActive.incrementAndGet();
     numBlocked.decrementAndGet();
     return client;
   }
@@ -162,12 +160,12 @@ public class ConcurrentHClientPool implements PoolMetric {
 
   @Override
   public int getNumActive() {
-    return numActive.intValue();
+    return activeClients.size();
   }
 
 
   public int getNumBeforeExhausted() {
-    return cassandraHost.getMaxActive() - numActive.intValue();
+    return cassandraHost.getMaxActive() - activeClients.size();
   }
 
 
@@ -202,7 +200,6 @@ public class ConcurrentHClientPool implements PoolMetric {
 
   public void releaseClient(HThriftClient client) throws HectorException {
     activeClients.remove(client);
-    numActive.decrementAndGet();
     boolean open = client.isOpen();
     if ( open ) {
       if ( active.get() ) {
