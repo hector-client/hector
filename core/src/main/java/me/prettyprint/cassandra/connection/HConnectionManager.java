@@ -278,16 +278,10 @@ public class HConnectionManager {
     }
 
   private HThriftClient getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
-    HThriftClient client;
     if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
-    }
-    try {
-      client = loadBalancingPolicy.getPool(hostPools.values(), excludeHosts).borrowClient();
-    } catch (Exception e) {
-      throw new HectorException("General exception in getClientFromLBPolicy",e);
-    }
-    return client;
+    }    
+    return loadBalancingPolicy.getPool(hostPools.values(), excludeHosts).borrowClient();    
   }
 
   void releaseClient(HThriftClient client) {
