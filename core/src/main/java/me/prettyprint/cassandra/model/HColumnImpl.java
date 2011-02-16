@@ -48,6 +48,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     name = nameSerializer.fromBytes(thriftColumn.getName());
     value = valueSerializer.fromBytes(thriftColumn.getValue());
     clock = thriftColumn.timestamp;
+    ttl = thriftColumn.ttl;
   }
 
   public HColumnImpl(Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
