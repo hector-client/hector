@@ -196,6 +196,7 @@ public class HConnectionManager {
     final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HThriftClient client = null;
+    ConcurrentHClientPool pool = null;
     boolean success = false;
     boolean retryable = false;
     Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>();
@@ -203,14 +204,15 @@ public class HConnectionManager {
     while ( !success ) {
       try {
         // TODO how to 'timeout' on this op when underlying pool is exhausted
-        client =  getClientFromLBPolicy(excludeHosts);
+        pool = getClientFromLBPolicy(excludeHosts);
+        client = pool.borrowClient();
         Cassandra.Client c = client.getCassandra(op.keyspaceName);
         // Keyspace can be null for some system_* api calls
         if ( op.credentials != null && !op.credentials.isEmpty() ) {
           c.login(new AuthenticationRequest(op.credentials));
         }
 
-        op.executeAndSetResult(c, client.cassandraHost);
+        op.executeAndSetResult(c, pool.getCassandraHost());
         success = true;
         stopWatch.stop(op.stopWatchTagName + ".success_");
         break;
@@ -223,7 +225,7 @@ public class HConnectionManager {
           --retries;
           client.close();
           markHostAsDown(client);
-          excludeHosts.add(client.cassandraHost);
+          excludeHosts.add(pool.getCassandraHost());
           retryable = true;
           if ( retries > 0 ) {
             monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
@@ -242,7 +244,7 @@ public class HConnectionManager {
             throw he;
           }
           monitor.incCounter(Counter.POOL_EXHAUSTED);
-          excludeHosts.add(client.cassandraHost);
+          excludeHosts.add(pool.getCassandraHost());
         }
         if ( retries <= 0 || retryable == false) throw he;
         log.error("Could not fullfill request on this host {}", client);
@@ -277,11 +279,11 @@ public class HConnectionManager {
       }
     }
 
-  private HThriftClient getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
+  private ConcurrentHClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
     }    
-    return loadBalancingPolicy.getPool(hostPools.values(), excludeHosts).borrowClient();    
+    return loadBalancingPolicy.getPool(hostPools.values(), excludeHosts);    
   }
 
   void releaseClient(HThriftClient client) {
@@ -296,7 +298,11 @@ public class HConnectionManager {
   }
 
   HThriftClient borrowClient() {
-    return getClientFromLBPolicy(null);
+    ConcurrentHClientPool pool = getClientFromLBPolicy(null);
+    if ( pool != null ) {
+      return pool.borrowClient();
+    }
+    return null;
   }
 
   void markHostAsDown(HThriftClient client) {
