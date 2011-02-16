@@ -5,6 +5,16 @@ Changes by version:
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 
+0.7.0-27
+========
+Execution time is now actually in micro seconds. Thanks to several folks for pointing this out. 
+Added IO stream mutators. Thanks to Norman Maurer for the pull request.
+Added method to HFactory for safe shutdown of cluster
+Added suspend/unsuspend operations to HConnectionManager, operations for suh in JMX
+Cleanup of numActive counter on ConcurrentHClientPool. Could cause negative results under some high-load situations. Thanks to Yang Yang for the tip.
+fix NPE with poolExhaustedException. Thanks to Yang Yang for the tip
+Fixed issue with ttl not being set on result columns. Thanks to ML user Kallin for the heads up. 
+
 0.7.0-26
 ========
 Fix issue with NPE in ThriftColumnDef when a column name was declared with no index type (thanks to Steve Willcox for the heads up)
