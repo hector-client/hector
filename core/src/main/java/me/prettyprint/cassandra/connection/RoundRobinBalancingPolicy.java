@@ -18,12 +18,12 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   @Override
   public ConcurrentHClientPool getPool(Collection<ConcurrentHClientPool> pools,
       Set<CassandraHost> excludeHosts) {
-    ConcurrentHClientPool[] pa = pools.toArray(new ConcurrentHClientPool[pools.size()]);
+    Object[] pa = pools.toArray();
     int location = getAndIncrement(pa.length);    
-    ConcurrentHClientPool pool = pa[location];
+    ConcurrentHClientPool pool = (ConcurrentHClientPool)pa[location];    
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while ( excludeHosts.contains(pool.getCassandraHost()) ) {
-        pool = pa[getAndIncrement(pa.length)]; 
+        pool = (ConcurrentHClientPool)pa[getAndIncrement(pa.length)]; 
       }
     }    
     return pool;
