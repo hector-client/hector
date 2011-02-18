@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.serializers;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 /**
  * A StringSerializer translates the byte[] to and from string using utf-8
@@ -14,6 +15,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
 
   private static final String UTF_8 = "UTF-8";
   private static final StringSerializer instance = new StringSerializer();
+  private static final Charset charset = Charset.defaultCharset();
 
   public static StringSerializer get() {
     return instance;
@@ -35,14 +37,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
   public String fromByteBuffer(ByteBuffer byteBuffer) {
     if (byteBuffer == null) {
       return null;
-    }
-    try {
-      String s = new String(byteBuffer.array(), byteBuffer.arrayOffset()
-          + byteBuffer.position(), byteBuffer.remaining(), UTF_8);
-      byteBuffer.position(byteBuffer.position() + byteBuffer.remaining());
-      return s;
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
+    }    
+    return charset.decode(byteBuffer.duplicate()).toString();    
   }
 }
