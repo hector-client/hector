@@ -40,7 +40,8 @@ public class HConnectionManager {
     LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
 
   private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
-  private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> suspendedHostPools;
+  private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> suspendedHostPools;  
+  private final Collection<ConcurrentHClientPool> hostPoolValues;
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
@@ -80,6 +81,7 @@ public class HConnectionManager {
     monitor = JmxMonitor.getInstance().getCassandraMonitor(this);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
     this.cassandraHostConfigurator = cassandraHostConfigurator;
+    hostPoolValues = hostPools.values();
   }
 
   /**
@@ -283,8 +285,8 @@ public class HConnectionManager {
   private ConcurrentHClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
-    }    
-    return loadBalancingPolicy.getPool(hostPools.values(), excludeHosts);    
+    }        
+    return loadBalancingPolicy.getPool(hostPoolValues, excludeHosts);    
   }
 
   void releaseClient(HThriftClient client) {

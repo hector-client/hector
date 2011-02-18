@@ -197,11 +197,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
         }
-        /*ArrayList<Column> result = new ArrayList<Column>(cosclist.size());
-        for (ColumnOrSuperColumn cosc : cosclist) {
-          result.add(cosc.getColumn());
-        }
-        */
+
         return null;
       }
     });
