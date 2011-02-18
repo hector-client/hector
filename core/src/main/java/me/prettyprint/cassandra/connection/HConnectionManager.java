@@ -199,7 +199,7 @@ public class HConnectionManager {
     ConcurrentHClientPool pool = null;
     boolean success = false;
     boolean retryable = false;
-    Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>();
+    Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>(); // HLT.getExcludedHosts() (will be empty most times)
     // TODO start timer for limiting retry time spent
     while ( !success ) {
       try {
@@ -232,6 +232,7 @@ public class HConnectionManager {
           }
         } else if (he instanceof HTimedOutException || he instanceof HUnavailableException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
+          // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);  
           retryable = true;
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
           client.close();
