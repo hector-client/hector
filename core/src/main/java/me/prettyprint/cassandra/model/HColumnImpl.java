@@ -136,7 +136,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
 
   @Override
   public String toString() {
-    return "HColumn(" + name + "=" + value + ")";
+    return String.format("HColumn(%s=%s)",name, value);
   }
 
   @Override

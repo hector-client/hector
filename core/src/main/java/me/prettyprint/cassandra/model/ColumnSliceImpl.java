@@ -47,6 +47,6 @@ public final class ColumnSliceImpl<N,V> implements ColumnSlice<N, V> {
 
   @Override
   public String toString() {
-    return "ColumnSlice(" + columnsList + ")";
+    return String.format("ColumnSlice(%s)", columnsList.toString());
   }
 }

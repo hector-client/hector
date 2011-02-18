@@ -16,6 +16,7 @@ import org.junit.runners.Parameterized.Parameters;
 public class StringSerializerTest {
 
   private final String str;
+  private static final StringSerializer s = StringSerializer.get();
 
   public StringSerializerTest(String str) {
     this.str = str;
@@ -36,8 +37,7 @@ public class StringSerializerTest {
   }
 
   @Test
-  public void test() {
-    StringSerializer e = new StringSerializer();
-    Assert.assertEquals(str, e.fromByteBuffer(e.toByteBuffer(str))) ;
+  public void test() {    
+    Assert.assertEquals(str, s.fromByteBuffer(s.toByteBuffer(str))) ;
   }
 }
