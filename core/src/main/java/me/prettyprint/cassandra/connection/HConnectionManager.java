@@ -221,7 +221,8 @@ public class HConnectionManager {
 
       } catch (Exception ex) {
         HectorException he = exceptionsTranslator.translate(ex);
-        if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException ) {
+        if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException || he instanceof HUnavailableException) {
+          // break out on HUnavailableException as well since we can no longer satisfy the CL
           throw he;
         } else if ( he instanceof HectorTransportException) {
           --retries;
@@ -231,10 +232,13 @@ public class HConnectionManager {
           retryable = true;
           if ( retries > 0 ) {
             monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
-          }
-        } else if (he instanceof HTimedOutException || he instanceof HUnavailableException ) {
+          }        
+        } else if (he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
-          retryable = true;
+          // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);
+          if ( hostPools.size() > 1) {
+            retryable = true;
+          }
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
           client.close();
           // TODO timecheck on how long we've been waiting on timeouts here
