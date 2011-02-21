@@ -42,6 +42,8 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
       HInvalidRequestException e = new HInvalidRequestException(original);
       e.setWhy(why);
       return e;
+    } else if (original instanceof PoolExhaustedException ) {
+      return (PoolExhaustedException)original;
     } else if (original instanceof TProtocolException) {
       return new HInvalidRequestException(original);
     } else if (original instanceof org.apache.cassandra.thrift.NotFoundException) {
