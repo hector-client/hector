@@ -106,7 +106,8 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
   @Override
   public V getValue() {
     return value;
-  }
+  }  
+  
 
   @Override
   public long getClock() {
@@ -137,6 +138,17 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     return valueSerializer;
   }
 
+  
+  /**
+   * Clear value, timestamp and ttl (the latter two set to '0') leaving only the column name
+   */
+  @Override
+  public HColumn<N,V> clear() {
+    this.clock = 0;
+    this.ttl = 0;
+    this.value = null;
+    return this;
+  }
 
   @Override
   public String toString() {

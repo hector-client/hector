@@ -28,6 +28,8 @@ public interface HColumn<N, V> {
   int getTtl();
 
   HColumn<N,V> setTtl(int ttl);
+  
+  HColumn<N,V> clear();
 
   Serializer<N> getNameSerializer();
 
