@@ -105,6 +105,7 @@ public final class HSlicePredicate<N> {
    */
   public HSlicePredicate<N> setCount(int count) {
     this.count = count;
+    countSet = true;
     predicateType = PredicateType.Range;
     return this;
   }
@@ -196,8 +197,13 @@ public final class HSlicePredicate<N> {
 
   @Override
   public String toString() {
-    return "HSlicePredicate("
-        + (predicateType == PredicateType.ColumnNames ? columnNames :
-          "cStart:" + start + ",cFinish:" + finish) + ")";
+    return String.format("HSlicePredicate(%s)", predicateType == PredicateType.ColumnNames ? columnNames : formatPredicate());    
+  }
+  
+  private String formatPredicate() {
+    return String.format("start:[%s],end:[%s],count:%d,reversed:%b", 
+        start != null ? start.toString() : "''",
+            finish != null ? finish.toString() : "''",
+                count, reversed);
   }
 }
