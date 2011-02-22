@@ -64,6 +64,8 @@ public interface Cluster {
   String updateColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException;
 
   String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
+  
+  void truncate(final String keyspaceName, final String columnFamily) throws HectorException;
 
   Map<String, String> getCredentials();
 }

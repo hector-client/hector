@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -11,11 +12,14 @@ import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ColumnIndexType;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.ColumnQuery;
 
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
@@ -86,6 +90,20 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     cassandraCluster.addColumnFamily(cfDef);
     String cfid2 = cassandraCluster.dropColumnFamily("Keyspace1", "DynCf");
     assertNotNull(cfid2);
+  }
+  
+  @Test
+  public void testTruncateColumnFamily() throws Exception {
+    ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition("Keyspace1", "TruncateableCf");
+    cassandraCluster.addColumnFamily(cfDef);
+    Keyspace workingKeyspace = HFactory.createKeyspace("Keyspace1", cassandraCluster);
+    Mutator<String> mutator = HFactory.createMutator(workingKeyspace, StringSerializer.get());
+    mutator.insert("mykey", "TruncateableCf", HFactory.createStringColumn("mycolname", "myval"));
+    ColumnQuery<String,String,String> q = HFactory.createColumnQuery(workingKeyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get());
+    q.setKey("mykey").setName("mycolname").setColumnFamily("TruncateableCf");
+    assertEquals("myval",q.execute().get().getValue());
+    cassandraCluster.truncate("Keyspace1", "TruncateableCf");
+    assertNull(q.execute().get());
   }
 
   @Test
