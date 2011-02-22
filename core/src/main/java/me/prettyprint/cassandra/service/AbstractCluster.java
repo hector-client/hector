@@ -274,6 +274,24 @@ public abstract class AbstractCluster implements Cluster {
     return credentials;
   }
 
+  @Override
+  public void truncate(final String keyspaceName, final String columnFamily) throws HectorException {
+    Operation<Void> op = new Operation<Void>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
+      @Override
+      public Void execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          cassandra.truncate(columnFamily);
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+        return null;
+      }      
+    };
+    connectionManager.operateWithFailover(op);
+  }
+  
+  
+
     
 
 }
