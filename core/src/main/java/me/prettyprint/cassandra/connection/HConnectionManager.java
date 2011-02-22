@@ -47,6 +47,7 @@ public class HConnectionManager {
   private NodeAutoDiscoverService nodeAutoDiscoverService;
   private LoadBalancingPolicy loadBalancingPolicy;
   private CassandraHostConfigurator cassandraHostConfigurator;
+  private HostTimeoutTracker hostTimeoutTracker;
 
   private final ClockResolution clock;
 
@@ -77,7 +78,10 @@ public class HConnectionManager {
 
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
-    }    
+    }   
+    if ( cassandraHostConfigurator.getUseHostTimeoutTracker() ) {
+      hostTimeoutTracker = new HostTimeoutTracker(this, cassandraHostConfigurator);
+    }
     monitor = JmxMonitor.getInstance().getCassandraMonitor(this);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
     this.cassandraHostConfigurator = cassandraHostConfigurator;
@@ -235,7 +239,8 @@ public class HConnectionManager {
           }        
         } else if (he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
-          // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);
+          // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);          
+          doTimeoutCheck(pool.getCassandraHost());
           if ( hostPools.size() > 1) {
             retryable = true;
           }
@@ -263,6 +268,19 @@ public class HConnectionManager {
           stopWatch.stop(op.stopWatchTagName + ".fail_");
         }
         releaseClient(client);
+      }
+    }
+  }
+  
+  /**
+   * Use the HostTimeoutCheck and initiate a suspend if and only if
+   * we are configured for such AND there is more than one operating host pool
+   * @param cassandraHost
+   */
+  private void doTimeoutCheck(CassandraHost cassandraHost) {
+    if ( hostTimeoutTracker != null && hostPools.size() > 1) {
+      if (hostTimeoutTracker.checkTimeout(cassandraHost) ) {
+        suspendCassandraHost(cassandraHost);
       }
     }
   }

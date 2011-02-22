@@ -38,6 +38,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int hostTimeoutWindow = HostTimeoutTracker.DEF_TIMEOUT_WINDOW;
   private int hostTimeoutSuspensionDurationInSeconds = HostTimeoutTracker.DEF_NODE_SUSPENSION_DURATION_IN_SECONDS;
   private int hostTimeoutUnsuspendCheckDelay = HostTimeoutTracker.DEF_NODE_UNSUSPEND_CHECK_DELAY_IN_SECONDS;
+  private boolean useHostTimeoutTracker = false;
 
 
   public CassandraHostConfigurator() {
@@ -266,8 +267,13 @@ public final class CassandraHostConfigurator implements Serializable {
     this.hostTimeoutUnsuspendCheckDelay = hostTimeoutUnsuspendCheckDelay;
   }
 
+  public boolean getUseHostTimeoutTracker() {
+    return useHostTimeoutTracker;
+  }
 
-
+  public void setUseHostTimeoutTracker(boolean useHostTimeoutTracker) {
+    this.useHostTimeoutTracker = useHostTimeoutTracker;
+  }
 
 
 }
