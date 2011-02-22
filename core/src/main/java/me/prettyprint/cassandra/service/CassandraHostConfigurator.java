@@ -33,7 +33,11 @@ public final class CassandraHostConfigurator implements Serializable {
   private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
   private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
   public static final ClockResolution DEF_CLOCK_RESOLUTION = HFactory.createClockResolution(ClockResolution.MICROSECONDS_SYNC);
-
+  private int hostTimeoutCounter = HostTimeoutTracker.DEF_TIMEOUT_COUNTER;
+  private int hostTimeoutWindow = HostTimeoutTracker.DEF_TIMEOUT_WINDOW;
+  private int hostTimeoutSuspensionDurationInSeconds = HostTimeoutTracker.DEF_NODE_SUSPENSION_DURATION_IN_SECONDS;
+  private int hostTimeoutUnsuspendCheckDelay = HostTimeoutTracker.DEF_NODE_UNSUSPEND_CHECK_DELAY_IN_SECONDS;
+  private boolean useHostTimeoutTracker = false;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -229,8 +233,45 @@ public final class CassandraHostConfigurator implements Serializable {
     this.loadBalancingPolicy = loadBalancingPolicy;
   }
 
+  public int getHostTimeoutCounter() {
+    return hostTimeoutCounter;
+  }
 
+  public void setHostTimeoutCounter(int hostTimeoutCounter) {
+    this.hostTimeoutCounter = hostTimeoutCounter;
+  }
 
+  public int getHostTimeoutWindow() {
+    return hostTimeoutWindow;
+  }
+
+  public void setHostTimeoutWindow(int hostTimeoutWindow) {
+    this.hostTimeoutWindow = hostTimeoutWindow;
+  }
+
+  public int getHostTimeoutSuspensionDurationInSeconds() {
+    return hostTimeoutSuspensionDurationInSeconds;
+  }
+
+  public void setHostTimeoutSuspensionDurationInSeconds(int hostTimeoutSuspensionDurationInSeconds) {
+    this.hostTimeoutSuspensionDurationInSeconds = hostTimeoutSuspensionDurationInSeconds;
+  }
+
+  public int getHostTimeoutUnsuspendCheckDelay() {
+    return hostTimeoutUnsuspendCheckDelay;
+  }
+
+  public void setHostTimeoutUnsuspendCheckDelay(int hostTimeoutUnsuspendCheckDelay) {
+    this.hostTimeoutUnsuspendCheckDelay = hostTimeoutUnsuspendCheckDelay;
+  }
+
+  public boolean getUseHostTimeoutTracker() {
+    return useHostTimeoutTracker;
+  }
+
+  public void setUseHostTimeoutTracker(boolean useHostTimeoutTracker) {
+    this.useHostTimeoutTracker = useHostTimeoutTracker;
+  }
 
 
 }

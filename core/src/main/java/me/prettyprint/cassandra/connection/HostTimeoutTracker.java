@@ -6,6 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
@@ -22,6 +25,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
  * @author zznate
  */
 public class HostTimeoutTracker extends BackgroundCassandraHostService {
+  private static final Logger log = LoggerFactory.getLogger(HostTimeoutTracker.class);
 
   private ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> timeouts;
   private ConcurrentHashMap<CassandraHost, Long> suspended;
@@ -87,9 +91,12 @@ public class HostTimeoutTracker extends BackgroundCassandraHostService {
 
   @Override
   void shutdown() {
-    // TODO probably a noop, as HConnectionManager will handle teardown of suspended on shutdown. 
-    // - anything here actually might cause a race condition(?)
-
+    log.info("Shutting down HostTimeoutTracker");
+    if ( sf != null )
+      sf.cancel(true);
+    if ( executor != null ) 
+      executor.shutdownNow();
+    log.info("HostTimeTracker shutdown complete.");
   }
 
 }
