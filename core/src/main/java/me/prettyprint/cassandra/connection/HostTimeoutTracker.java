@@ -11,12 +11,13 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
 /**
  * Keep track of how often a node replies with a HTimeoutException. If we go 
- * past the threshold of [timeoutCounter] timeouts within [timeWindow] seconds,
- * then we mark the node as suspended. 
+ * past the threshold of [timeoutCounter] timeouts within [timeWindow] milliseconds,
+ * then we mark the node as suspended. (10 timeouts within 500ms by default)
  * 
  * Periodically check the suspended nodes list every retryDelayInSeconds. If 
  * the node has been suspended longer than nodeSuspensionDurationInSeconds,
- * then we unsuspend,  placing it back in the available pool 
+ * then we unsuspend,  placing it back in the available pool. (10 second 
+ * suspension retried every 10 seconds by default). 
  *
  * @author zznate
  */
