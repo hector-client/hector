@@ -18,7 +18,7 @@ import org.apache.cassandra.thrift.SliceRange;
  * Hector's version of cassandra SlicePredicate
  *
  * @author Ran Tavory
- *
+ * @author zznate
  */
 public final class HSlicePredicate<N> {
 
@@ -48,6 +48,14 @@ public final class HSlicePredicate<N> {
     return setColumnNames(Arrays.asList(columnNames));
   }
   
+  public HSlicePredicate<N> addColumnName(N columnName) {
+    if ( columnNames == null )
+      columnNames = new ArrayList<N>();
+    columnNames.add(columnName);
+    predicateType = PredicateType.ColumnNames;
+    return this;
+  }
+  
   /**
    * Same as varargs signature, except we take a collection
    *
@@ -71,6 +79,50 @@ public final class HSlicePredicate<N> {
     return this;
   }
 
+  /**
+   * Set the columnName on which we will start. 
+   * Switches to {@link PredicateType#Range} 
+   */
+  public HSlicePredicate<N> setStartOn(N start) {
+    this.start = start;
+    predicateType = PredicateType.Range;
+    return this;
+  }
+  
+  /**
+   * Set the columnName on which we will end. 
+   * Switches to {@link PredicateType#Range} 
+   */
+  public HSlicePredicate<N> setEndOn(N finish) {
+    this.finish = finish;
+    predicateType = PredicateType.Range;
+    return this;
+  }
+  
+  /**
+   * Set the number of columns to return for this slice
+   * Switches to {@link PredicateType#Range} 
+   */
+  public HSlicePredicate<N> setCount(int count) {
+    this.count = count;
+    predicateType = PredicateType.Range;
+    return this;
+  }
+
+  /**
+   * Sets the return order of the columns to be reversed. 
+   * NOTE: this is slightly less efficient than reading in comparator order. 
+   * Switches to {@link PredicateType#Range} 
+   */
+  public HSlicePredicate<N> setReversed(boolean reversed) {
+    this.reversed = reversed;
+    predicateType = PredicateType.Range;
+    return this;
+  }
+  
+  
+  
+  
   /**
    * Set a predicate of start/finish to retrieve a list of columns in this range.
    * Either start and or finish can be null which will toggle the underlying predicate to
