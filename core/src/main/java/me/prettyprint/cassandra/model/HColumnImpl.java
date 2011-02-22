@@ -19,7 +19,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
  * @param <V> The type of the column value
  *
  * @author Ran Tavory (rantav@gmail.com)
- *
+ * @author zznate
  */
 public final class HColumnImpl<N,V> implements HColumn<N, V> {
 
@@ -83,6 +83,10 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     return this;
   }
 
+  /**
+   * Set the time-to-live value for this column in seconds. 
+   * The server will mark this column as deleted once the number of seconds has elapsed.
+   */
   @Override
   public HColumn<N,V> setTtl(int ttl) {
     this.ttl = ttl;
