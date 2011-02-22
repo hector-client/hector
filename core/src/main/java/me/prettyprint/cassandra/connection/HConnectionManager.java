@@ -363,6 +363,8 @@ public class HConnectionManager {
       cassandraHostRetryService.shutdown();
     if ( nodeAutoDiscoverService != null )
       nodeAutoDiscoverService.shutdown();
+    if ( hostTimeoutTracker != null ) 
+      hostTimeoutTracker.shutdown();
 
     for (ConcurrentHClientPool pool : hostPools.values()) {
       try {
