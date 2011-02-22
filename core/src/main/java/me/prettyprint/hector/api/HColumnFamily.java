@@ -1,16 +1,18 @@
 package me.prettyprint.hector.api;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.hector.api.beans.HColumn;
 
 public interface HColumnFamily<K, N>  {
 
-  HColumnFamily<K, N> setConsistencyLevelPolicy(ConsistencyLevelPolicy policy);
+  HColumnFamily<K, N> setReadConsistencyLevel(HConsistencyLevel readLevel);
+  
+  HColumnFamily<K, N> setWriteConsistencyLevel(HConsistencyLevel writeLevel);
   
   HColumnFamily<K, N> addKey(K key);
   
@@ -28,7 +30,7 @@ public interface HColumnFamily<K, N>  {
   
   HColumnFamily<K, N> addColumnName(N columnName);
       
-  List<HColumn<N, ?>> getColumns();
+  Collection<HColumn<N, ByteBuffer>> getColumns();
   
   HColumn<N,?> getColumn(N name);
   
@@ -43,5 +45,7 @@ public interface HColumnFamily<K, N>  {
   Date getDate(N name);
   
   double getDouble(N name);
+  
+  <V> V getValue(N name, Serializer<V> valueSerializer);
   
 }

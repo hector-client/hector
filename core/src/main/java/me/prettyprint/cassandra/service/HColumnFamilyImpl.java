@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -17,10 +18,16 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.Cassandra.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
+import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
+import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
@@ -30,6 +37,7 @@ import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.HColumnFamily;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -37,6 +45,8 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 
 public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
+  private final Logger queryLogger = LoggerFactory.getLogger("HColumnFamilyLogger");
+  
   private final ExecutingKeyspace keyspace;
   private final String columnFamilyName;
   private Collection<K> _keys;
@@ -44,8 +54,8 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   private HSlicePredicate<N> lastAppliedPredicate;
   private Serializer<K> keySerializer;
   private Serializer<N> columnNameSerializer;
-  private ConsistencyLevelPolicy consistencyLevelPolicy;
-  private Map<N, Column> columns;
+  private ConfigurableConsistencyLevel consistencyLevelPolicy;
+  private Map<N, HColumn<N,ByteBuffer>> columns;
   private ColumnParent columnParent;
   private ExceptionsTranslator exceptionsTranslator;
   // TODO consider a bounds on this
@@ -61,6 +71,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     this.activeSlicePredicate = new HSlicePredicate<N>(columnNameSerializer);
     this.columnParent = new ColumnParent(columnFamilyName);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
+    this.consistencyLevelPolicy = new ConfigurableConsistencyLevel();
   }
   
   @Override
@@ -77,32 +88,31 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   @Override
   public HColumnFamily<K, N> setCount(int count) {
-    // TODO Auto-generated method stub
+    activeSlicePredicate.setCount(count);
     return this;
   }
 
   @Override
   public HColumnFamily<K, N> setFinish(N name) {
-    // TODO Auto-generated method stub
+    activeSlicePredicate.setEndOn(name);
     return this;
   }
 
   @Override
   public HColumnFamily<K, N> setReversed(boolean reversed) {
-    // TODO Auto-generated method stub
+    activeSlicePredicate.setReversed(reversed);
     return this;
   }
 
   @Override
   public HColumnFamily<K, N> setStart(N name) {
-    // TODO Auto-generated method stub
+    activeSlicePredicate.setStartOn(name);
     return this;
   }   
 
   @Override
   public HColumnFamily<K, N> addColumnName(N columnName) {
-    // TODO fixme
-    activeSlicePredicate.setColumnNames(columnName);
+    activeSlicePredicate.addColumnName(columnName);
     return this;
   }
 
@@ -119,9 +129,14 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   }
 
   @Override
-  public List<HColumn<N, ?>> getColumns() {
-    // TODO Auto-generated method stub
-    return null;
+  public Collection<HColumn<N, ByteBuffer>> getColumns() {
+    if ( columns == null ) {
+      columns = new HashMap<N, HColumn<N,ByteBuffer>>();
+      doExecuteSlice();
+    }
+    
+    
+    return columns.values();
   }
 
   @Override
@@ -154,18 +169,30 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     return extractColumnValue(name, UUIDSerializer.get());
   }
 
+  
+  /**
+   * Extract a value for the specified name and serializer
+   */
   @Override
-  public HColumnFamily<K, N> setConsistencyLevelPolicy(ConsistencyLevelPolicy policy) {
+  public <V> V getValue(N name, Serializer<V> valueSerializer) {    
+    return extractColumnValue(name, valueSerializer);
+  }
 
+  @Override
+  public HColumnFamily<K, N> setReadConsistencyLevel(HConsistencyLevel readLevel) {
+    consistencyLevelPolicy.setDefaultReadConsistencyLevel(readLevel);
     return this;
   }
-  
+
+  @Override
+  public HColumnFamily<K, N> setWriteConsistencyLevel(HConsistencyLevel writeLevel) {
+    consistencyLevelPolicy.setDefaultWriteConsistencyLevel(writeLevel);
+    return this;
+  }
+
   private <V> V extractColumnValue(N columnName, Serializer<V> valueSerializer) {
-    maybeExecuteSlice(columnName);
-    Column column = columns.get(columnName);
-    if ( column != null )
-      return valueSerializer.fromByteBuffer(column.value);
-    return null;
+    maybeExecuteSlice(columnName);        
+    return columns.get(columnName) != null ? valueSerializer.fromByteBuffer(columns.get(columnName).getValue()) : null;    
   }
   
   private void maybeExecuteSlice(N columnName) {
@@ -173,7 +200,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
       columnNames = new HashSet<N>();
     }
     if ( columns == null ) {
-      columns = new HashMap<N, Column>();
+      columns = new HashMap<N, HColumn<N,ByteBuffer>>();
     }
     if ( columns.get(columnName) == null ) {
       columnNames.add(columnName);
@@ -187,12 +214,21 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
       @Override
       public Column execute(Cassandra.Client cassandra) throws HectorException {
         
-        try {
+        try {          
+          if ( queryLogger.isDebugEnabled() ) {
+            queryLogger.debug("---------\nColumnFamily: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
+          }
+          long startTime = System.nanoTime();
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keySerializer.toByteBuffer(_keys.iterator().next()), columnParent,
             activeSlicePredicate.toThrift(),
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
+          long duration = System.nanoTime() - startTime;
           for (ColumnOrSuperColumn cosc : cosclist) {
-            columns.put(columnNameSerializer.fromByteBuffer(cosc.getColumn().name), cosc.column);
+            columns.put(columnNameSerializer.fromByteBuffer(cosc.getColumn().name), 
+                new HColumnImpl<N, ByteBuffer>(cosc.getColumn(), columnNameSerializer, ByteBufferSerializer.get()));
+          }
+          if ( queryLogger.isDebugEnabled() ) {
+            queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
           }
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
@@ -203,6 +239,9 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     });
   }
   
+  // TODO toggle to multiget when keys > 1
+  // - how will this change the structure of the columns? 
+  // - rely on Iterable and .next() being called to advance to row?
   private void doExecuteMultigetSlice() {
     keyspace.doExecuteOperation(new Operation<Column>(OperationType.READ) {
       @Override

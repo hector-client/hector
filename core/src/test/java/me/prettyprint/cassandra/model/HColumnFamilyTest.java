@@ -53,21 +53,18 @@ public class HColumnFamilyTest extends BaseEmbededServerSetupTest {
     assertEquals(1L, columnFamily.getLong("long"));
     assertEquals(timeUUID, columnFamily.getUUID("uuid"));
 
-    //HColumnFamily<String,String> columnFamily = keyspace.getColumnFamily("Standard1", se, se);
-    // injected w/ hconnectionManager reference
-    // - can thus call operateWithFailover internally
-    // - call describe_keyspace to get CFMetaData to build typing information??
-    // 
-    
-    // automatic slicing based on default predicate "first 100 cols in comparator order"
-    //columnFamily.addKey("zznate");    
-    // HColumnFamily extends iterable, but automatically calls next() for per-row operations getColumns()/getColumn
-    //List<HColumn<String, ?>> cols = columnFamily.getColumns();
-    // OR - we are already at the first result
-    //String str = columnFamily.getString("name"); // getInt, getLong, getDate, getDouble, getTime, getUUID
-    // also/or V v columnFamily.get(N n, Serializer<V> s);
-    // but what happens when i try to getColumns on a multiget_slice? IAE?
-    
+  }
+  
+  @Test
+  public void testColumnFamilyReadahead() {
+    HColumnFamily<String, String> columnFamily = new HColumnFamilyImpl<String,String>(keyspace, "Standard1",StringSerializer.get(), StringSerializer.get());
+    columnFamily.addKey("zznate").setCount(10);
+    assertEquals(4,columnFamily.getColumns().size());
+    // columnFamily.loadSlice(15); columnFamily.addKey().loadSlice() ~ def. 100
+    assertEquals(1,columnFamily.getInt("int"));
+    assertEquals("nate@datastax.com",columnFamily.getString("email"));
+    assertEquals(1L, columnFamily.getLong("long"));
+    assertEquals(timeUUID, columnFamily.getUUID("uuid"));
 
   }
 }
