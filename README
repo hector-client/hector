@@ -1,4 +1,6 @@
 The current 0.7.0 branch will work with Apache Cassandra 0.7.x. The master has been switched to tracking Apache Cassandra 0.8.0. Current releases on the downloads section should be cosidered production ready. You should always choose the most recent release for your version of Apache Cassandra.
+
+As of version 0.7.0-23, Hector artificats are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
 ----------------------------------------------------------------------------------------------------
 
 Hector is a high level Java client for Apache Cassandra.
@@ -7,8 +9,9 @@ Hector is the greatest warrior in the greek mythology, Troy's builder and brothe
 http://en.wikipedia.org/wiki/Hector
 http://en.wikipedia.org/wiki/Cassandra
 
+Hector is currently in use on a number of production systems some of which have node counts into the hundreds. Issues generally are fixed as quickly as possbile and releases done frequently.
 
-This client provides:
+Some features provided by this client:
 
  o high level, simple object oriented interface to cassandra
  o failover behavior on the client side
@@ -29,6 +32,12 @@ Some interesting pages from the wiki:
  o SLF4J fun and hijinks: https://github.com/rantav/hector/wiki/SLF4J-in-Hector-
  o Mailing Lists: https://github.com/rantav/hector/wiki/Mailing-Lists
  o Maven Central location (includes javadoc): http://repo2.maven.org/maven2/me/prettyprint/
+
+Example projects using Hector:
+
+ o https://github.com/zznate/cassandra-tutorial
+ o https://github.com/zznate/hector-examples
+ o https://github.com/riptano/twissjava
 
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 
