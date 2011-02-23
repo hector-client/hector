@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,13 +32,15 @@ public class StringSerializerTest {
                                       {"QWER"},
                                       {"!@#$#$^%&^*fdghdfghdfgh%^&*"},
                                       {new String("\u05E9".getBytes(), "utf-8")},
-                                      {RandomStringUtils.random(256*256)}
+                                      {RandomStringUtils.randomAlphanumeric(256*256)}
                                       };
     return Arrays.asList(data);
   }
 
   @Test
-  public void test() {    
+  public void test() throws Exception {    
     Assert.assertEquals(str, s.fromByteBuffer(s.toByteBuffer(str))) ;
+    if ( str != null)
+      Assert.assertEquals(str, ByteBufferUtil.string(ByteBufferUtil.bytes(str)));
   }
 }
