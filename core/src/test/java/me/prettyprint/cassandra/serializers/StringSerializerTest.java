@@ -32,7 +32,7 @@ public class StringSerializerTest {
                                       {"QWER"},
                                       {"!@#$#$^%&^*fdghdfghdfgh%^&*"},
                                       {new String("\u05E9".getBytes(), "utf-8")},
-                                      {RandomStringUtils.randomAlphanumeric(256*256)}
+                                      {RandomStringUtils.random(256*256)}
                                       };
     return Arrays.asList(data);
   }

@@ -27,7 +27,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
       return null;
     }
     try {
-      return ByteBuffer.wrap(obj.getBytes(UTF_8));
+      return ByteBuffer.wrap(obj.getBytes(charset.name()));
     } catch (UnsupportedEncodingException e) {
       throw new RuntimeException(e);
     }
