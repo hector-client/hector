@@ -112,7 +112,7 @@ public class HThriftClient {
     } catch (TTransportException e) {
       // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
       // add details to it.
-      log.error("Unable to open transport to " + cassandraHost.getName(), e);
+      log.debug("Unable to open transport to " + cassandraHost.getName());
       //clientMonitor.incCounter(Counter.CONNECT_ERROR);
       throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
           e.getLocalizedMessage(), e);
