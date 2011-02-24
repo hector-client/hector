@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.service;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -11,37 +10,31 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.apache.cassandra.cli.CliParser.keyspace_return;
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.Cassandra.Client;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import me.prettyprint.cassandra.model.ConfigurableConsistencyLevel;
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
-import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.HColumnFamily;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
+
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
@@ -85,6 +78,14 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     _keys.addAll(keys);
     return this;
   }  
+  
+  
+
+  @Override
+  public HColumnFamily<K, N> removeKeys() {
+    _keys.clear();
+    return this;
+  }
 
   @Override
   public HColumnFamily<K, N> setCount(int count) {
@@ -137,6 +138,14 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     
     
     return columns.values();
+  }
+
+  
+  
+  @Override
+  public HColumnFamily<K, N> clear() {
+    columns.clear();
+    return this;
   }
 
   @Override

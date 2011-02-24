@@ -18,6 +18,10 @@ public interface HColumnFamily<K, N>  {
   
   HColumnFamily<K, N> addKeys(Collection<K> keys);
   
+  HColumnFamily<K, N> removeKeys();  
+  
+  HColumnFamily<K, N> clear();
+  
   HColumnFamily<K, N> setStart(N name);
   
   HColumnFamily<K, N> setFinish(N name);
