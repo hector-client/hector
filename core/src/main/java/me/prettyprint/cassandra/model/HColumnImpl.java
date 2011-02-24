@@ -45,8 +45,8 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);
     notNull(thriftColumn, "thriftColumn is null");
-    name = nameSerializer.fromByteBuffer(thriftColumn.name);
-    value = valueSerializer.fromByteBuffer(thriftColumn.value);
+    name = nameSerializer.fromByteBuffer(thriftColumn.name.duplicate());
+    value = valueSerializer.fromByteBuffer(thriftColumn.value.duplicate());
     clock = thriftColumn.timestamp;
     ttl = thriftColumn.ttl;
   }
