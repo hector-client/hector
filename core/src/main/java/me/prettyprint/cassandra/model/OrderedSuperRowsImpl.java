@@ -35,6 +35,6 @@ public final class OrderedSuperRowsImpl<K,SN,N,V> extends SuperRowsImpl<K,SN,N,V
    */
   @Override
   public List<SuperRow<K,SN,N,V>> getList() {
-    return rowsList;
+    return Collections.unmodifiableList(rowsList);
   }
 }
