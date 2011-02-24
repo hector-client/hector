@@ -5,6 +5,17 @@ Changes by version:
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 
+0.7.0-28
+========
+Rethrow on HUnavailableException since we cannot satisfy the requested CL and never will be able to (hence futility of retrying) 
+ExceptionTranslator did not correctly handle poolExhausted exception 
+Cleanup of NonBlockingHashMap semantics and extraneous string creation after profiling sessio
+Added the jul-to-slf4j bridge for catching dumb jmx logger leak 
+Initial cut of HColumnFamily wrapper added. Comments welcome. 
+First pass at HostTimeoutTracker: when configured, if a node throws a TimeoutException N times within X interval, suspend connections to the host for Y seconds (all configurable via CassandraHostConfigurator). This feature has not been heavily tested and is here to gather feedback. Use at your own risk. 
+Cleanup of some logging level stuff to generate less-scary (or no) log messages under standard operating procedure.
+HSlicePredicate exposes some additional convinience methods for easier use
+
 0.7.0-27
 ========
 Execution time is now actually in micro seconds. Thanks to several folks for pointing this out. 
