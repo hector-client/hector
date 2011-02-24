@@ -117,7 +117,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
         found = client.getCassandra().describe_cluster_name() != null;
         client.close();              
       } catch (HectorTransportException he) {        
-        log.error("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
+        log.warn("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
       } catch (Exception ex) {
                 
         log.error("Downed Host retry failed attempt to verify CassandraHost", ex);
