@@ -38,6 +38,6 @@ public final class StringSerializer extends AbstractSerializer<String> {
     if (byteBuffer == null) {
       return null;
     }    
-    return charset.decode(byteBuffer.duplicate()).toString();    
+    return charset.decode(byteBuffer).toString();    
   }
 }
