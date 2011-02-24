@@ -16,6 +16,7 @@ import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
@@ -48,6 +49,12 @@ public final class ThriftRangeSubSlicesQuery<K,SN,N,V> extends AbstractSliceQuer
     keyRange.setKeys(start, end);
     return this;
   }
+
+   @Override
+   public RangeSubSlicesQuery<K, SN, N, V> setTokens(String start, String end) {
+     keyRange.setTokens(start, end);
+     return this;
+   }
 
   @Override
   public RangeSubSlicesQuery<K,SN,N,V> setRowCount(int rowCount) {

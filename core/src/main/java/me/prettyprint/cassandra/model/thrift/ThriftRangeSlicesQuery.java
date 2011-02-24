@@ -50,6 +50,12 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
   }
 
   @Override
+  public RangeSlicesQuery<K, N, V> setTokens(String start, String end) {
+    keyRange.setTokens(start, end);
+    return this;
+  }
+
+  @Override
   public RangeSlicesQuery<K, N, V> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
     return this;

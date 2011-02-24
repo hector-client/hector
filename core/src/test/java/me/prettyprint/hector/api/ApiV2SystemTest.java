@@ -623,7 +623,32 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("value12", slice
         .getColumnByName("testRangeSlicesQueryColumn2").getValue());
     assertNull(slice.getColumnByName("testRangeSlicesQueryColumn3"));
-    // Test slice.getColumns
+
+     // Test start/end tokens
+     q.setTokens("testRangeSlicesQuery1", "testRangeSlicesQuery3");
+     // try with column name first
+     q.setColumnNames("testRangeSlicesQueryColumn1", "testRangeSlicesQueryColumn2");
+     r = q.execute();
+
+     assertNotNull(r);
+     rows = r.get();
+     assertNotNull(rows);
+
+     assertEquals(2, rows.getCount()); // tokens are start-exclusive
+     row = rows.getList().get(0);
+     assertNotNull(row);
+     assertEquals("testRangeSlicesQuery2", row.getKey());
+     slice = row.getColumnSlice();
+     assertNotNull(slice);
+     // Test slice.getColumnByName
+     assertEquals("value21", slice
+           .getColumnByName("testRangeSlicesQueryColumn1").getValue());
+     assertEquals("value22", slice
+           .getColumnByName("testRangeSlicesQueryColumn2").getValue());
+     assertNull(slice.getColumnByName("testRangeSlicesQueryColumn3"));
+
+
+     // Test slice.getColumns
     List<HColumn<String, String>> columns = slice.getColumns();
     assertNotNull(columns);
     assertEquals(2, columns.size());
