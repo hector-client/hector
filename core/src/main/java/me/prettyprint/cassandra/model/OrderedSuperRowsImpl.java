@@ -26,19 +26,15 @@ public final class OrderedSuperRowsImpl<K,SN,N,V> extends SuperRowsImpl<K,SN,N,V
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(thriftRet, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
-    rowsList = new ArrayList<SuperRow<K,SN,N,V>>(thriftRet.size());
-    for (Map.Entry<K, List<SuperColumn>> entry: thriftRet.entrySet()) {
-      rowsList.add(new SuperRowImpl<K,SN,N,V>(entry.getKey(), entry.getValue(), sNameSerializer,
-          nameSerializer, valueSerializer));
-    }
+    rowsList = new ArrayList<SuperRow<K,SN,N,V>>(rows.values());
   }
 
   /**
    * Preserves rows order
-   * @return an unmodifiable list of Rows
+   * @return a list of Rows
    */
   @Override
   public List<SuperRow<K,SN,N,V>> getList() {
-    return Collections.unmodifiableList(rowsList);
+    return rowsList;
   }
 }
