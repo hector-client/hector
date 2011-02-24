@@ -6,6 +6,7 @@ import me.prettyprint.cassandra.connection.CassandraHostRetryService;
 import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
 import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
 import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
+import me.prettyprint.cassandra.connection.HostTimeoutTracker;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.factory.HFactory;
 
