@@ -1,9 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
@@ -22,7 +19,7 @@ import org.apache.cassandra.thrift.SuperColumn;
  */
 public class SuperRowsImpl<K, SN, N, V> implements SuperRows<K, SN, N, V> {
 
-  private final Map<K, SuperRow<K, SN, N, V>> rows;
+  protected final Map<K, SuperRow<K, SN, N, V>> rows;
 
   Serializer<K> keySerializer;
 
@@ -30,7 +27,7 @@ public class SuperRowsImpl<K, SN, N, V> implements SuperRows<K, SN, N, V> {
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(thriftRet, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
     this.keySerializer = keySerializer;
-    rows = new HashMap<K, SuperRow<K, SN, N, V>>(thriftRet.size());
+    rows = new LinkedHashMap<K, SuperRow<K, SN, N, V>>(thriftRet.size());
     for (Map.Entry<K, List<SuperColumn>> entry : thriftRet.entrySet()) {
       rows.put(entry.getKey(), new SuperRowImpl<K, SN, N, V>(entry.getKey(), entry.getValue(),
           sNameSerializer, nameSerializer, valueSerializer));
