@@ -32,14 +32,17 @@ public interface Cluster {
    */
   String getName();
 
+   /**
+    *
+    * @deprecated use {@link #describeClusterName()}
+    */
+  String getClusterName() throws HectorException;
 
   String describeClusterName() throws HectorException;
 
   String describeThriftVersion() throws HectorException;
 
   KeyspaceDefinition describeKeyspace(final String keyspace) throws HectorException;
-
-  String getClusterName() throws HectorException;
 
   List<KeyspaceDefinition> describeKeyspaces() throws HectorException;
 
