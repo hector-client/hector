@@ -15,6 +15,10 @@ Initial cut of HColumnFamily wrapper added. Comments welcome.
 First pass at HostTimeoutTracker: when configured, if a node throws a TimeoutException N times within X interval, suspend connections to the host for Y seconds (all configurable via CassandraHostConfigurator). This feature has not been heavily tested and is here to gather feedback. Use at your own risk. 
 Cleanup of some logging level stuff to generate less-scary (or no) log messages under standard operating procedure.
 HSlicePredicate exposes some additional convinience methods for easier use
+Added JAXB serializers thanks to GH user shuzang
+Cleanup of OrderedSuperRows thanks to GH user alexism
+Removed unmutability constraint on slice and orderedRow implementations. Thanks to GH user alexism
+HColumnImpl now loosely wraps the underlying Thrift Column. Most applications should see a substantial reduction in GC overhead due to this
 
 0.7.0-27
 ========
