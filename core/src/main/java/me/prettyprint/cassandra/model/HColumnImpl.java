@@ -92,7 +92,10 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
   }
 
   @Override
-  public N getName() { 
+  public N getName() {
+    if ( column.name == null ) {
+      return null;
+    }
     column.name.mark();
     N n = nameSerializer.fromByteBuffer(column.name);
     column.name.reset();
@@ -100,7 +103,10 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
   }
 
   @Override
-  public V getValue() {    
+  public V getValue() {   
+    if ( column.value == null ) {
+      return null;
+    }
     column.value.mark();  
     V v = valueSerializer.fromByteBuffer(column.value);
     column.value.reset();
@@ -152,8 +158,8 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
   @Override
   public HColumn<N, V> apply(V value, long clock, int ttl) {
     column.value = valueSerializer.toByteBuffer(value);
-    column.timestamp = clock;
-    column.ttl = ttl;
+    column.setTimestamp(clock);
+    column.setTtl(ttl);
     return this;
   }
 

@@ -51,6 +51,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   private Map<N, HColumn<N,ByteBuffer>> columns;
   private ColumnParent columnParent;
   private ExceptionsTranslator exceptionsTranslator;
+  private boolean hasValues;
   // TODO consider a bounds on this
   private Set<N> columnNames;
   
@@ -131,11 +132,11 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   @Override
   public Collection<HColumn<N, ByteBuffer>> getColumns() {
-    if ( columns == null ) {
-      columns = new HashMap<N, HColumn<N,ByteBuffer>>();
-      doExecuteSlice();
-    }
+    if ( columns == null )
+      columns = new HashMap<N, HColumn<N,ByteBuffer>>();      
     
+    if ( !hasValues )
+      doExecuteSlice();
     
     return columns.values();
   }
@@ -148,6 +149,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
       // could probably do something fancier hear calling clear() on the underlying BB
       col.clear();
     }
+    hasValues = false;
     return this;
   }
 
@@ -204,7 +206,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   private <V> V extractColumnValue(N columnName, Serializer<V> valueSerializer) {
     maybeExecuteSlice(columnName);        
-    return columns.get(columnName) != null ? valueSerializer.fromByteBuffer(columns.get(columnName).getValue()) : null;    
+    return columns.get(columnName) != null && columns.get(columnName).getValue() != null ? valueSerializer.fromByteBuffer(columns.get(columnName).getValue()) : null;    
   }
   
   private void maybeExecuteSlice(N columnName) {
@@ -246,7 +248,6 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
               ((HColumnImpl<N, ByteBuffer>)column).apply(cosc.getColumn());
             }
             columns.put(colName, column); 
-            
           }
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
@@ -254,6 +255,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
         }
+        hasValues = true;
 
         return null;
       }
