@@ -193,6 +193,14 @@
       <version>0.9.12</version>
     </dependency>
 
+	<!-- Note the optional tag. If you need to use fastinfoset serialization, you must include this dependency in your project! -->
+    <dependency>
+      <artifactId>FastInfoset</artifactId>
+      <groupId>com.sun.xml.fastinfoset</groupId>
+      <version>1.2.2</version>
+      <optional>true</optional>
+    </dependency>
+
     <!-- OSGi deps -->
     <dependency>
       <groupId>org.osgi</groupId>
