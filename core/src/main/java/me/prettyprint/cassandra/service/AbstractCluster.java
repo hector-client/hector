@@ -200,20 +200,7 @@ public abstract class AbstractCluster implements Cluster {
    */
   @Override
   public String getClusterName() throws HectorException {
-    log.info("in execute with client");
-    Operation<String> op = new Operation<String>(OperationType.META_READ, getCredentials()) {
-      @Override
-      public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {
-          log.info("in execute with client {}", cassandra);
-          return cassandra.describe_cluster_name();
-        } catch (Exception e) {
-          throw xtrans.translate(e);
-        }
-      }
-    };
-    connectionManager.operateWithFailover(op);
-    return op.getResult();
+   return describeClusterName();
   }
 
   @Override
