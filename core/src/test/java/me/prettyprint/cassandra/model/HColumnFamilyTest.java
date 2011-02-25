@@ -60,11 +60,25 @@ public class HColumnFamilyTest extends BaseEmbededServerSetupTest {
     HColumnFamily<String, String> columnFamily = new HColumnFamilyImpl<String,String>(keyspace, "Standard1",StringSerializer.get(), StringSerializer.get());
     columnFamily.addKey("zznate").setCount(10);
     assertEquals(4,columnFamily.getColumns().size());
-    // columnFamily.loadSlice(15); columnFamily.addKey().loadSlice() ~ def. 100
     assertEquals(1,columnFamily.getInt("int"));
     assertEquals("nate@datastax.com",columnFamily.getString("email"));
     assertEquals(1L, columnFamily.getLong("long"));
     assertEquals(timeUUID, columnFamily.getUUID("uuid"));
 
+  }
+  
+  @Test
+  public void testClearAndRecall() {
+    HColumnFamily<String, String> columnFamily = new HColumnFamilyImpl<String,String>(keyspace, "Standard1",StringSerializer.get(), StringSerializer.get());
+    columnFamily.addKey("zznate").setCount(10);
+    assertEquals(4,columnFamily.getColumns().size());
+    assertEquals(1,columnFamily.getInt("int"));
+    assertEquals("nate@datastax.com",columnFamily.getString("email"));
+    assertEquals(1L, columnFamily.getLong("long"));
+    assertEquals(timeUUID, columnFamily.getUUID("uuid"));
+    columnFamily.clear();
+    assertNull(columnFamily.getUUID("uuid"));
+    assertEquals(4,columnFamily.getColumns().size());
+    assertEquals(timeUUID, columnFamily.getUUID("uuid"));
   }
 }
