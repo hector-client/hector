@@ -72,7 +72,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
 
   @Override
   public HColumn<N,V> setClock(long clock) {
-    this.column.timestamp = clock;
+    this.column.setTimestamp(clock);
     return this;
   }
 
@@ -82,7 +82,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
    */
   @Override
   public HColumn<N,V> setTtl(int ttl) {
-    this.column.ttl = ttl;
+    this.column.setTtl(ttl);
     return this;
   }
 
@@ -97,7 +97,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
       return null;
     }
     column.name.mark();
-    N n = nameSerializer.fromByteBuffer(column.name);
+    N n = nameSerializer.fromByteBuffer(column.name.duplicate());
     column.name.reset();
     return n;
   }
@@ -108,7 +108,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
       return null;
     }
     column.value.mark();  
-    V v = valueSerializer.fromByteBuffer(column.value);
+    V v = valueSerializer.fromByteBuffer(column.value.duplicate());
     column.value.reset();
     return v;
   }  
