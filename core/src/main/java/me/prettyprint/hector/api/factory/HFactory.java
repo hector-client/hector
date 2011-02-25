@@ -186,7 +186,7 @@ public final class HFactory {
    */
   public static void shutdownCluster(Cluster cluster) {
     synchronized (clusters) {
-      String clusterName = cluster.describeClusterName();
+      String clusterName = cluster.getName();
       if (clusters.get(clusterName) != null ) {
         cluster.getConnectionManager().shutdown();
         clusters.remove(clusterName);
