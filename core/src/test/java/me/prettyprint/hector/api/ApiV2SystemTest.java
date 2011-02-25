@@ -27,6 +27,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
@@ -147,7 +148,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
               se, se));
     }
     m.execute();
-
+    
     // get value
     ColumnQuery<String, String, String> q = createColumnQuery(ko, se, se, se);
     q.setName("testInsertGetRemove").setColumnFamily(cf);
@@ -213,13 +214,13 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("name2", c2.getName());
     assertEquals("value2", c2.getValue());
 
-     {
-        Iterator<HColumn<String, String>> it = sc.getColumns().iterator();
-        while(it.hasNext()){
-           it.next();
-           it.remove();
-        }
-        assertEquals("The list of columns should be mutable", 0, sc.getColumns().size());
+    {
+      Iterator<HColumn<String, String>> it = sc.getColumns().iterator();
+      while(it.hasNext()){
+        it.next();
+        it.remove();
+      }
+      assertEquals("The list of columns should be mutable", 0, sc.getColumns().size());
      }
 
     // remove value
@@ -718,15 +719,15 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
         }
       }
     }
-     {
-        Iterator<SuperRow<String, String, String, String>> it = rows.getList().iterator();
-        while(it.hasNext()){
-           it.next();
-           it.remove();
-        }
-        assertEquals("The list of super rows should be mutable", 0, rows.getList().size());
+    {
+      Iterator<SuperRow<String, String, String, String>> it = rows.getList().iterator();
+      while(it.hasNext()){
+        it.next();
+        it.remove();
+      }
+      assertEquals("The list of super rows should be mutable", 0, rows.getList().size());
 
-     }
+    }
     // Delete values
     deleteColumns(cleanup);
   }
