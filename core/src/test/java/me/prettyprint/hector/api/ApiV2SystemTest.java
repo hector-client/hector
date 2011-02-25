@@ -213,6 +213,15 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("name2", c2.getName());
     assertEquals("value2", c2.getValue());
 
+     {
+        Iterator<HColumn<String, String>> it = sc.getColumns().iterator();
+        while(it.hasNext()){
+           it.next();
+           it.remove();
+        }
+        assertEquals("The list of columns should be mutable", 0, sc.getColumns().size());
+     }
+
     // remove value
     m = createMutator(ko, se);
     m.subDelete("testSuperInsertGetRemove", cf, "testSuperInsertGetRemove",
@@ -709,7 +718,15 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
         }
       }
     }
+     {
+        Iterator<SuperRow<String, String, String, String>> it = rows.getList().iterator();
+        while(it.hasNext()){
+           it.next();
+           it.remove();
+        }
+        assertEquals("The list of super rows should be mutable", 0, rows.getList().size());
 
+     }
     // Delete values
     deleteColumns(cleanup);
   }

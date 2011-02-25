@@ -1,11 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
@@ -23,12 +18,12 @@ import org.apache.cassandra.thrift.Column;
  */
 public final class OrderedRowsImpl<K,N,V> extends RowsImpl<K,N,V> implements OrderedRows<K, N, V> {
 
-  private final ArrayDeque<Row<K,N,V>> rowsList;
+  private final List<Row<K,N,V>> rowsList;
 
   public OrderedRowsImpl(LinkedHashMap<K, List<Column>> thriftRet, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(thriftRet, nameSerializer, valueSerializer);
-    rowsList = new ArrayDeque<Row<K,N,V>>(rows.values());    
+    rowsList = new ArrayList<Row<K,N,V>>(rows.values());
   }
 
   /**
@@ -37,7 +32,7 @@ public final class OrderedRowsImpl<K,N,V> extends RowsImpl<K,N,V> implements Ord
    */
   @Override
   public List<Row<K,N,V>> getList() {
-    return Collections.unmodifiableList(new ArrayList<Row<K, N, V>>(rowsList));
+    return rowsList;
   }
 
   /**
@@ -46,6 +41,6 @@ public final class OrderedRowsImpl<K,N,V> extends RowsImpl<K,N,V> implements Ord
    */
   @Override
   public Row<K, N, V> peekLast() {
-    return rowsList != null && rowsList.size() > 0 ? rowsList.peekLast() : null;
+    return rowsList != null && rowsList.size() > 0 ? rowsList.get(rowsList.size()-1) : null;
   }
 }
