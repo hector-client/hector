@@ -49,6 +49,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     notNull(valueSerializer, "valueSerializer is null");
     this.nameSerializer = nameSerializer;
     this.valueSerializer = valueSerializer;
+    this.column = new Column();
   }
 
   public HColumnImpl(N name, V value, long clock) {
