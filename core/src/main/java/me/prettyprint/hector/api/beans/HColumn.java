@@ -30,6 +30,8 @@ public interface HColumn<N, V> {
   HColumn<N,V> setTtl(int ttl);
   
   HColumn<N,V> clear();
+  
+  HColumn<N,V> apply(V value, long clock, int ttl);
 
   Serializer<N> getNameSerializer();
 

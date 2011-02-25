@@ -144,7 +144,10 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   
   @Override
   public HColumnFamily<K, N> clear() {
-    columns.clear();
+    for (HColumn<N,ByteBuffer> col : columns.values() ) {
+      // could probably do something fancier hear calling clear() on the underlying BB
+      col.clear();
+    }
     return this;
   }
 
@@ -232,9 +235,18 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
             activeSlicePredicate.toThrift(),
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
           long duration = System.nanoTime() - startTime;
+          HColumn<N,ByteBuffer> column;
+          N colName;
           for (ColumnOrSuperColumn cosc : cosclist) {
-            columns.put(columnNameSerializer.fromByteBuffer(cosc.getColumn().name), 
-                new HColumnImpl<N, ByteBuffer>(cosc.getColumn(), columnNameSerializer, ByteBufferSerializer.get()));
+            colName = columnNameSerializer.fromByteBuffer(cosc.getColumn().name.duplicate());
+            column = columns.get(colName);
+            if ( column == null ) {
+              column = new HColumnImpl<N, ByteBuffer>(cosc.getColumn(), columnNameSerializer, ByteBufferSerializer.get());
+            } else {
+              ((HColumnImpl<N, ByteBuffer>)column).apply(cosc.getColumn());
+            }
+            columns.put(colName, column); 
+            
           }
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
