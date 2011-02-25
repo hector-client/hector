@@ -96,10 +96,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     if ( column.name == null ) {
       return null;
     }
-    column.name.mark();
-    N n = nameSerializer.fromByteBuffer(column.name.duplicate());
-    column.name.reset();
-    return n;
+    return nameSerializer.fromByteBuffer(column.name.duplicate());
   }
 
   @Override
@@ -107,10 +104,7 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     if ( column.value == null ) {
       return null;
     }
-    column.value.mark();  
-    V v = valueSerializer.fromByteBuffer(column.value.duplicate());
-    column.value.reset();
-    return v;
+    return valueSerializer.fromByteBuffer(column.value.duplicate());
   }  
   
 
