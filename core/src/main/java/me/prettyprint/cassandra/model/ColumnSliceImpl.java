@@ -28,7 +28,7 @@ public final class ColumnSliceImpl<N,V> implements ColumnSlice<N, V> {
       columnsMap.put(column.getName(), column);
       list.add(column);
     }
-    columnsList = Collections.unmodifiableList(list);
+    columnsList = list;
   }
 
   /**

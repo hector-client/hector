@@ -30,7 +30,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
 
   private SN superName;
-  private List<? extends HColumn<N,V>> columns;
+  private List<HColumn<N,V>> columns;
   private long clock;
   private final Serializer<SN> superNameSerializer;
   private final Serializer<N> nameSerializer;
@@ -109,7 +109,7 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
    */
   @Override
   public List<HColumn<N,V>> getColumns() {
-    return Collections.unmodifiableList(columns);
+    return columns;
   }
 
   @Override

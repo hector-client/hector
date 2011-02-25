@@ -44,7 +44,7 @@ public final class SuperSliceImpl<SN,N,V> implements SuperSlice<SN, N, V> {
    */
   @Override
   public List<HSuperColumn<SN,N,V>> getSuperColumns() {
-    return Collections.unmodifiableList(columnsList);
+    return columnsList;
 
   }
 
