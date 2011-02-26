@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.7.0-27-SNAPSHOT</version>
+        <version>0.8.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
