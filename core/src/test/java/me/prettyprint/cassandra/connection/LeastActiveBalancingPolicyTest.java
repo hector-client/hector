@@ -56,7 +56,7 @@ public class LeastActiveBalancingPolicyTest extends BaseBalancingPolicyTest {
     // should hit all three equal hosts over the course of 50 runs
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>(3);
     for (int i = 0; i < 50; i++) {
-      ConcurrentHClientPool foundPool = leastActiveBalancingPolicy.getPool(pools, null);
+      HClientPool foundPool = leastActiveBalancingPolicy.getPool(pools, null);
       foundHosts.add(foundPool.getCassandraHost());
       assert 5 == foundPool.getNumActive();        
     }

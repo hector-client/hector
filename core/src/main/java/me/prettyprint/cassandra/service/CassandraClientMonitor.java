@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.connection.ConcurrentHClientPool;
+import me.prettyprint.cassandra.connection.HClientPool;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
@@ -117,8 +118,8 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public int getNumActive() {
     int ret = 0;
-    Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
-    for (ConcurrentHClientPool concurrentHClientPool : pools) {
+    Collection<HClientPool> pools = connectionManager.getActivePools();
+    for (HClientPool concurrentHClientPool : pools) {
       ret += concurrentHClientPool.getNumActive();
     }
     return ret;
@@ -128,8 +129,8 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public int getNumBlockedThreads() {
     int ret = 0;
-    Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
-    for (ConcurrentHClientPool concurrentHClientPool : pools) {
+    Collection<HClientPool> pools = connectionManager.getActivePools();
+    for (HClientPool concurrentHClientPool : pools) {
       ret += concurrentHClientPool.getNumBlockedThreads();
     }
     return ret;
@@ -145,8 +146,8 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public int getNumIdleConnections() {
     int ret = 0;
-    Collection<ConcurrentHClientPool> pools = connectionManager.getActivePools();
-    for (ConcurrentHClientPool concurrentHClientPool : pools) {
+    Collection<HClientPool> pools = connectionManager.getActivePools();
+    for (HClientPool concurrentHClientPool : pools) {
       ret += concurrentHClientPool.getNumIdle();
     }
     return ret;

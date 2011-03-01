@@ -39,9 +39,9 @@ public class HConnectionManager {
   private static final Logger perf4jLogger =
     LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
 
-  private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> hostPools;
-  private final NonBlockingHashMap<CassandraHost,ConcurrentHClientPool> suspendedHostPools;  
-  private final Collection<ConcurrentHClientPool> hostPoolValues;
+  private final NonBlockingHashMap<CassandraHost,HClientPool> hostPools;
+  private final NonBlockingHashMap<CassandraHost,HClientPool> suspendedHostPools;  
+  private final Collection<HClientPool> hostPoolValues;
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
@@ -58,16 +58,16 @@ public class HConnectionManager {
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
-    hostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
-    suspendedHostPools = new NonBlockingHashMap<CassandraHost, ConcurrentHClientPool>();
+    hostPools = new NonBlockingHashMap<CassandraHost, HClientPool>();
+    suspendedHostPools = new NonBlockingHashMap<CassandraHost, HClientPool>();
     this.clusterName = clusterName;
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
     }    
     for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts()) {
       try {
-        ConcurrentHClientPool chcp = new ConcurrentHClientPool(host);
-        hostPools.put(host,chcp);
+        HClientPool hcp = loadBalancingPolicy.createConnection(host);
+        hostPools.put(host,hcp);
       } catch (HectorTransportException hte) {
         log.error("Could not start connection pool for host {}", host);
         if ( cassandraHostRetryService != null ) {
@@ -96,10 +96,10 @@ public class HConnectionManager {
    */
   public boolean addCassandraHost(CassandraHost cassandraHost) {
     if ( !getHosts().contains(cassandraHost) ) {
-      ConcurrentHClientPool pool = null;
+      HClientPool pool = null;
       try {
         cassandraHostConfigurator.applyConfig(cassandraHost);
-        pool = new ConcurrentHClientPool(cassandraHost);
+        pool = cassandraHostConfigurator.getLoadBalancingPolicy().createConnection(cassandraHost);
         hostPools.putIfAbsent(cassandraHost, pool);
         log.info("Added host {} to pool", cassandraHost.getName());
         return true;
@@ -117,7 +117,7 @@ public class HConnectionManager {
   /**
    * Remove the {@link CassandraHost} from the pool, bypassing retry service. This
    * would be called on a host that is known to be going away. Gracefully shuts down
-   * the underlying connections via {@link ConcurrentHClientPool#shutdown()}. This method
+   * the underlying connections via {@link HClientPool#shutdown()}. This method
    * will also shutdown pools in the suspended state, removing them from the underlying
    * suspended map.
    * @param cassandraHost
@@ -125,7 +125,7 @@ public class HConnectionManager {
   public boolean removeCassandraHost(CassandraHost cassandraHost) {
     boolean removed = getHosts().contains(cassandraHost);
     if ( removed ) {
-      ConcurrentHClientPool pool = hostPools.remove(cassandraHost);
+    	HClientPool pool = hostPools.remove(cassandraHost);
       if ( pool == null ) {
         log.info("removeCassandraHost looking for host {} in suspendedHostPools", cassandraHost);
         pool = suspendedHostPools.remove(cassandraHost);
@@ -142,14 +142,14 @@ public class HConnectionManager {
   }
   
   /**
-   * Remove the {@link ConcurrentHClientPool} referenced by the {@link CassandraHost} from 
+   * Remove the {@link HClientPool} referenced by the {@link CassandraHost} from 
    * the active host pools. This does not shut down the pool, only removes it as a candidate from
    * future operations.
    * @param cassandraHost
    * @return true if the operation was successful.
    */
   public boolean suspendCassandraHost(CassandraHost cassandraHost) {
-    ConcurrentHClientPool pool = hostPools.remove(cassandraHost);
+    HClientPool pool = hostPools.remove(cassandraHost);
     boolean removed = pool != null;
     if ( removed ) {      
       suspendedHostPools.put(cassandraHost, pool);
@@ -165,7 +165,7 @@ public class HConnectionManager {
    * if there was no such host in the underlying suspendedHostPool map.
    */
   public boolean unsuspendCassandraHost(CassandraHost cassandraHost) {
-    ConcurrentHClientPool pool = suspendedHostPools.remove(cassandraHost);
+    HClientPool pool = suspendedHostPools.remove(cassandraHost);
     boolean readded = pool != null;
     if ( readded ) {      
       boolean alreadyThere = hostPools.putIfAbsent(cassandraHost, pool) != null;
@@ -191,7 +191,7 @@ public class HConnectionManager {
 
   public List<String> getStatusPerPool() {
     List<String> stats = new ArrayList<String>();
-    for (ConcurrentHClientPool clientPool : hostPools.values()) {
+    for (HClientPool clientPool : hostPools.values()) {
         stats.add(clientPool.getStatusAsString());
     }
     return stats;
@@ -202,7 +202,7 @@ public class HConnectionManager {
     final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HThriftClient client = null;
-    ConcurrentHClientPool pool = null;
+    HClientPool pool = null;
     boolean success = false;
     boolean retryable = false;
     Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>(); // HLT.getExcludedHosts() (will be empty most times)
@@ -303,7 +303,7 @@ public class HConnectionManager {
       }
     }
 
-  private ConcurrentHClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
+  private HClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
     }        
@@ -312,7 +312,7 @@ public class HConnectionManager {
 
   void releaseClient(HThriftClient client) {
     if ( client == null ) return;
-    ConcurrentHClientPool pool = hostPools.get(client.cassandraHost);
+    HClientPool pool = hostPools.get(client.cassandraHost);
     if ( pool != null ) {
       pool.releaseClient(client);
     } else {
@@ -322,7 +322,7 @@ public class HConnectionManager {
   }
 
   HThriftClient borrowClient() {
-    ConcurrentHClientPool pool = getClientFromLBPolicy(null);
+    HClientPool pool = getClientFromLBPolicy(null);
     if ( pool != null ) {
       return pool.borrowClient();
     }
@@ -331,7 +331,7 @@ public class HConnectionManager {
 
   void markHostAsDown(HThriftClient client) {
     log.error("MARK HOST AS DOWN TRIGGERED for host {}", client.cassandraHost.getName());
-    ConcurrentHClientPool pool = hostPools.remove(client.cassandraHost);
+    HClientPool pool = hostPools.remove(client.cassandraHost);
     if ( pool != null ) {
       log.error("Pool state on shutdown: {}", pool.getStatusAsString());
       pool.shutdown();
@@ -345,7 +345,7 @@ public class HConnectionManager {
     return cassandraHostRetryService.getDownedHosts();
   }
 
-  public Collection<ConcurrentHClientPool> getActivePools() {
+  public Collection<HClientPool> getActivePools() {
     return Collections.unmodifiableCollection(hostPools.values());
   }
 
@@ -366,7 +366,7 @@ public class HConnectionManager {
     if ( hostTimeoutTracker != null ) 
       hostTimeoutTracker.shutdown();
 
-    for (ConcurrentHClientPool pool : hostPools.values()) {
+    for (HClientPool pool : hostPools.values()) {
       try {
         pool.shutdown();
       } catch (IllegalArgumentException iae) {

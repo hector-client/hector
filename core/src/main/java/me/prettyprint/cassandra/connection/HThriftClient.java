@@ -31,6 +31,7 @@ public class HThriftClient {
   private final long mySerial;
   private final int timeout;
   private String keyspaceName;
+  private long useageStartTime;
 
   private TTransport transport;
   private Cassandra.Client cassandraClient;
@@ -157,6 +158,16 @@ public class HThriftClient {
     return timeoutVar;
   }
 
+  public void startToUse() {
+      useageStartTime = System.currentTimeMillis();
+  }
+  
+  /**
+   * @return Time in MS since it was used.
+   */
+  public long getSinceLastUsed() {
+	  return System.currentTimeMillis() - useageStartTime;
+  }
 
   @Override
   public String toString() {
