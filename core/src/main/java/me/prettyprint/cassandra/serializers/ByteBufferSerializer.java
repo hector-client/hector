@@ -14,8 +14,7 @@ import me.prettyprint.hector.api.Serializer;
  * @author Ran Tavory
  * 
  */
-public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>
-    implements Serializer<ByteBuffer> {
+public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>{
 
   private static ByteBufferSerializer instance = new ByteBufferSerializer();
 
