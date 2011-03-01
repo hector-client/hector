@@ -37,7 +37,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
     private List<LatencyAwareHClientPool> allPools = new CopyOnWriteArrayList<LatencyAwareHClientPool>();
 
     // default values this can be changed by the Client.
-    private int UPDATE_INTERVAL = 10000;
+    private int UPDATE_INTERVAL = 100;
     private int RESET_INTERVAL = 20000;
     private double DYNAMIC_BADNESS_THRESHOLD = 0.10;
 
@@ -130,6 +130,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
         return pool;
     }
 
+    // This is helper class for the test cases. TODO: cleanup.
     void add(LatencyAwareHClientPool pool)
     {
         allPools.add(pool);
@@ -137,7 +138,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
         scores.put(pool, 0.0);
     }
 
-    void updateScores() // this is expensive
+    // This will be a expensive call.
+    void updateScores()
     {
         for (LatencyAwareHClientPool pool : allPools)
         {
@@ -151,6 +153,12 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
         return UPDATE_INTERVAL;
     }
 
+    /**
+     * Set the configured interval for the stats to be recalculated (until this time it is been cached.
+     * 
+     * @param updateInterval
+     *            In ms.
+     */
     public void setUpdateInterval(int updateInterval)
     {
         UPDATE_INTERVAL = updateInterval;
@@ -161,6 +169,13 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
         return RESET_INTERVAL;
     }
 
+    /**
+     * Set the configured interval for the stats to be reset so that the new stats are allowed and we can get rid of bad
+     * nodes value. This is under the assumption that the bad nodes will eventually get better....
+     * 
+     * @param resetInterval
+     *            in ms
+     */
     public void setResetInterval(int resetInterval)
     {
         RESET_INTERVAL = resetInterval;
@@ -171,6 +186,14 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
         return DYNAMIC_BADNESS_THRESHOLD;
     }
 
+    /**
+     * This is the percentage of badness which is acceptable... 
+     * 
+     * Example: A should be 0.20 (20%) bad than B before B is choosen rathar than A.
+     * 
+     * @param badness
+     *            in %
+     */
     public void setBadnessThreshold(double badness)
     {
         DYNAMIC_BADNESS_THRESHOLD = badness;
