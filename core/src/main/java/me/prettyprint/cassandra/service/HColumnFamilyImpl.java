@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -234,20 +235,25 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
           }
           long startTime = System.nanoTime();
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keySerializer.toByteBuffer(_keys.iterator().next()), columnParent,
-            activeSlicePredicate.toThrift(),
+            activeSlicePredicate.toThrift(), 
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
           long duration = System.nanoTime() - startTime;
           HColumn<N,ByteBuffer> column;
           N colName;
-          for (ColumnOrSuperColumn cosc : cosclist) {
+          for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
+            ColumnOrSuperColumn cosc = iterator.next();            
+          
+            // profile against coscList.iterator.remove
+            // step 2. try w/o .duplicate()
             colName = columnNameSerializer.fromByteBuffer(cosc.getColumn().name.duplicate());
             column = columns.get(colName);
             if ( column == null ) {
-              column = new HColumnImpl<N, ByteBuffer>(cosc.getColumn(), columnNameSerializer, ByteBufferSerializer.get());
+              column = new HColumnImpl<N, ByteBuffer>(columnNameSerializer, ByteBufferSerializer.get()).setName(colName);              
             } else {
               ((HColumnImpl<N, ByteBuffer>)column).apply(cosc.getColumn());
             }
             columns.put(colName, column); 
+            iterator.remove();
           }
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
