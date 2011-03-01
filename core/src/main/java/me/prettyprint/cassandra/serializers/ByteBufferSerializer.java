@@ -24,6 +24,9 @@ public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>{
 
   @Override
   public ByteBuffer fromByteBuffer(ByteBuffer bytes) {
+    if(bytes==null) {
+      return null;
+    }
     ByteBuffer b = bytes.slice();
     bytes.position(bytes.position() + b.remaining());
     return b;
@@ -31,6 +34,9 @@ public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>{
 
   @Override
   public ByteBuffer toByteBuffer(ByteBuffer obj) {
+    if(obj==null) {
+      return null;
+    }
     return obj.slice();
   }
 
