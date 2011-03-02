@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,7 +44,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   
   private final ExecutingKeyspace keyspace;
   private final String columnFamilyName;
-  private Collection<K> _keys;
+  private List<K> _keys;
   private HSlicePredicate<N> activeSlicePredicate;
   private HSlicePredicate<N> lastAppliedPredicate;
   private Serializer<K> keySerializer;
@@ -60,7 +61,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   public HColumnFamilyImpl(Keyspace keyspace, String columnFamilyName, Serializer<K> keySerializer, Serializer<N> columnNameSerializer) {
     this.keyspace = (ExecutingKeyspace)keyspace;
     this.columnFamilyName = columnFamilyName;
-    this._keys = new HashSet<K>();
+    this._keys = new ArrayList<K>();
     this.keySerializer = keySerializer;
     this.columnNameSerializer = columnNameSerializer;
     this.activeSlicePredicate = new HSlicePredicate<N>(columnNameSerializer);
@@ -275,6 +276,24 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     keyspace.doExecuteOperation(new Operation<Column>(OperationType.READ) {
       @Override
       public Column execute(Cassandra.Client cassandra) throws HectorException {
+        try {          
+          if ( queryLogger.isDebugEnabled() ) {
+            queryLogger.debug("---------\nColumnFamily: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
+          }
+          long startTime = System.nanoTime();
+          Map<ByteBuffer, List<ColumnOrSuperColumn>> rows = cassandra.multiget_slice(keySerializer.toBytesList(_keys), columnParent, activeSlicePredicate.toThrift(), 
+              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
+          long duration = System.nanoTime() - startTime;
+
+
+          if ( queryLogger.isDebugEnabled() ) {
+            queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
+          }
+        } catch (Exception e) {
+          throw exceptionsTranslator.translate(e);
+        }
+        hasValues = true;
+
         return null;
       }
     });
