@@ -121,7 +121,6 @@
       <groupId>com.google.guava</groupId> 
       <artifactId>guava</artifactId> 
       <version>r05</version> 
-      <scope>test</scope>
     </dependency> 
     <dependency> 
       <groupId>commons-collections</groupId> 
