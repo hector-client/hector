@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
+import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import static org.junit.Assert.*;
 
 import java.util.List;
@@ -31,9 +33,10 @@ public class HColumnFamilyTest extends BaseEmbededServerSetupTest {
   private UUID timeUUID;
   @Before
   public void setupLocal() {
-    setupClient();
-    Cluster cluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
-    keyspace = HFactory.createKeyspace("Keyspace1", cluster);
+    //setupClient();
+    Cluster cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
+    keyspace = createKeyspace("Keyspace1", cluster);
+    
     Mutator<String> mutator = HFactory.createMutator(keyspace, StringSerializer.get());
     mutator.addInsertion("zznate", "Standard1", HFactory.createStringColumn("email", "nate@datastax.com"));
     mutator.addInsertion("zznate", "Standard1", HFactory.createColumn("int", 1, StringSerializer.get(), IntegerSerializer.get()));
@@ -82,15 +85,20 @@ public class HColumnFamilyTest extends BaseEmbededServerSetupTest {
     assertEquals(timeUUID, columnFamily.getUUID("uuid"));
   }
   
+  @Test
   public void testToggleMultiget() {
     Mutator<String> mutator = HFactory.createMutator(keyspace, StringSerializer.get());
-    mutator.addInsertion("zznate", "Standard1", HFactory.createStringColumn("email", "nate@datastax.com"));
-    mutator.addInsertion("zznate", "Standard1", HFactory.createColumn("int", 1, StringSerializer.get(), IntegerSerializer.get()));
-    mutator.addInsertion("zznate", "Standard1", HFactory.createColumn("long", 1L, StringSerializer.get(), LongSerializer.get()));
+    mutator.addInsertion("patricioe", "Standard1", HFactory.createStringColumn("email", "patricioe@datastax.com"));
+    mutator.addInsertion("patricioe", "Standard1", HFactory.createColumn("int", 2, StringSerializer.get(), IntegerSerializer.get()));
+    mutator.addInsertion("patricioe", "Standard1", HFactory.createColumn("long", 2L, StringSerializer.get(), LongSerializer.get()));
     timeUUID = TimeUUIDUtils.getTimeUUID(System.currentTimeMillis());
-    mutator.addInsertion("zznate", "Standard1", HFactory.createColumn("uuid", timeUUID, StringSerializer.get(), UUIDSerializer.get()));
+    mutator.addInsertion("patricioe", "Standard1", HFactory.createColumn("uuid", timeUUID, StringSerializer.get(), UUIDSerializer.get()));
     mutator.execute();
-    HColumnFamily<String, String> columnFamily = new HColumnFamilyImpl<String,String>(keyspace, "Standard1",StringSerializer.get(), StringSerializer.get());
+    
+    HColumnFamilyImpl<String, String> columnFamily = new HColumnFamilyImpl<String,String>(keyspace, "Standard1",StringSerializer.get(), StringSerializer.get());
     columnFamily.addKey("zznate").addKey("patricioe").setCount(10);
+    assertEquals("nate@datastax.com",columnFamily.getString("email"));
+    columnFamily.next();
+    assertEquals("patricioe@datastax.com",columnFamily.getString("email"));
   }
 }
