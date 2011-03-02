@@ -25,8 +25,7 @@ import com.google.common.collect.Maps;
  * 
  * @author Vijay Parthasarathy
  */
-public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
-{
+public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
   private static final long serialVersionUID = -1044985880174118325L;
   private static final Logger log = LoggerFactory.getLogger(DynamicLoadBalancingPolicy.class);
@@ -41,25 +40,19 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
   private int RESET_INTERVAL = 20000;
   private double DYNAMIC_BADNESS_THRESHOLD = 0.10;
 
-  public DynamicLoadBalancingPolicy()
-  {
+  public DynamicLoadBalancingPolicy() {
 
     // Pre-calculate the scores so as we can compare it fast.
-    Runnable updateThread = new Runnable()
-    {
-      public void run()
-      {
+    Runnable updateThread = new Runnable() {
+      public void run() {
         updateScores();
       }
     };
 
     // Clear Stats.
-    Runnable resetThread = new Runnable()
-    {
-      public void run()
-      {
-        for (LatencyAwareHClientPool pool : allPools)
-        {
+    Runnable resetThread = new Runnable() {
+      public void run() {
+        for (LatencyAwareHClientPool pool : allPools) {
           pool.clear();
         }
       }
@@ -69,25 +62,21 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
   }
 
   @Override
-  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts)
-  {
+  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {
     List<HClientPool> poolList = Lists.newArrayList(pools);
 
     // remove the hosts from the list.
-    if (excludeHosts != null)
-    {
+    if (excludeHosts != null) {
       filter(poolList, excludeHosts);
     }
 
     Collections.shuffle(poolList);
     HClientPool fp = poolList.get(0);
     Double first = scores.get(fp);
-    for (int i = 1; i < poolList.size(); i++)
-    {
+    for (int i = 1; i < poolList.size(); i++) {
       HClientPool np = poolList.get(i);
       Double next = scores.get(np);
-      if ((first - next) / first > DYNAMIC_BADNESS_THRESHOLD)
-      {
+      if ((first - next) / first > DYNAMIC_BADNESS_THRESHOLD) {
         Collections.sort(poolList, new SortByScoreComparator());
         if (log.isDebugEnabled())
           log.debug(String.format("According to score we have chosen {} vs first {}", poolList.get(0), fp));
@@ -97,59 +86,49 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
     return poolList.get(0);
   }
 
-  private void filter(List<HClientPool> from, Set<CassandraHost> subList)
-  {
+  private void filter(List<HClientPool> from, Set<CassandraHost> subList) {
     Iterator<HClientPool> it = from.iterator();
-    while (it.hasNext())
-    {
+    while (it.hasNext()) {
       if (subList.contains(it.next().getCassandraHost()))
         it.remove();
     }
   }
 
-  private class SortByScoreComparator implements Comparator<HClientPool>
-  {
-    public int compare(HClientPool p1, HClientPool p2)
-    {
+  private class SortByScoreComparator implements Comparator<HClientPool> {
+    public int compare(HClientPool p1, HClientPool p2) {
       Double scored1 = scores.get(p1);
       Double scored2 = scores.get(p2);
       if (scored1.equals(scored2))
         return 0;
       if (scored1 < scored2)
         return -1;
-      else
-        return 1;
+      else return 1;
     }
   }
 
   @Override
-  public HClientPool createConnection(CassandraHost host)
-  {
+  public HClientPool createConnection(CassandraHost host) {
     LatencyAwareHClientPool pool = new LatencyAwareHClientPool(host);
     add(pool);
     return pool;
   }
 
   // This is helper class for the test cases. TODO: cleanup.
-  void add(LatencyAwareHClientPool pool)
-  {
+  void add(LatencyAwareHClientPool pool) {
     allPools.add(pool);
     // update the reference of the scores intially it is Zero.
     scores.put(pool, 0.0);
   }
 
   // This will be a expensive call.
-  void updateScores()
-  {
-    for (LatencyAwareHClientPool pool : allPools)
-    {
+  void updateScores() {
+    for (LatencyAwareHClientPool pool : allPools) {
       scores.put(pool, pool.score());
       pool.resetIntervel();
     }
   }
 
-  public int getUpdateInterval()
-  {
+  public int getUpdateInterval() {
     return UPDATE_INTERVAL;
   }
 
@@ -159,13 +138,11 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
    * @param updateInterval
    *          In ms.
    */
-  public void setUpdateInterval(int updateInterval)
-  {
+  public void setUpdateInterval(int updateInterval) {
     UPDATE_INTERVAL = updateInterval;
   }
 
-  public int getResetInterval()
-  {
+  public int getResetInterval() {
     return RESET_INTERVAL;
   }
 
@@ -176,13 +153,11 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
    * @param resetInterval
    *          in ms
    */
-  public void setResetInterval(int resetInterval)
-  {
+  public void setResetInterval(int resetInterval) {
     RESET_INTERVAL = resetInterval;
   }
 
-  public double getBadnessThreshold()
-  {
+  public double getBadnessThreshold() {
     return DYNAMIC_BADNESS_THRESHOLD;
   }
 
@@ -194,8 +169,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy
    * @param badness
    *          in %
    */
-  public void setBadnessThreshold(double badness)
-  {
+  public void setBadnessThreshold(double badness) {
     DYNAMIC_BADNESS_THRESHOLD = badness;
   }
 }

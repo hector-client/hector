@@ -12,8 +12,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
  * 
  * @author Vijay Parthasarathy
  */
-public class LatencyAwareHClientPool extends ConcurrentHClientPool
-{
+public class LatencyAwareHClientPool extends ConcurrentHClientPool {
   private static final AtomicInteger intervalupdates = new AtomicInteger(0);
   // Mostly static configuration this doesnt need to be configurable to the clients.
   private static final int UPDATES_PER_INTERVAL = 1000;
@@ -21,81 +20,68 @@ public class LatencyAwareHClientPool extends ConcurrentHClientPool
   private static final double SENTINEL_COMPARE = 0.768;
   private final LinkedBlockingDeque<Double> latencies;
 
-  public LatencyAwareHClientPool(CassandraHost host)
-  {
+  public LatencyAwareHClientPool(CassandraHost host) {
     super(host);
     latencies = new LinkedBlockingDeque<Double>(WINDOW_QUEUE_SIZE);
   }
 
   @Override
-  public HThriftClient borrowClient() throws HectorException
-  {
+  public HThriftClient borrowClient() throws HectorException {
     HThriftClient client = super.borrowClient();
     client.startToUse();
     return client;
   }
 
   @Override
-  public void releaseClient(HThriftClient client) throws HectorException
-  {
+  public void releaseClient(HThriftClient client) throws HectorException {
     add(client.getSinceLastUsed());
     super.releaseClient(client);
   }
 
-  void add(double i)
-  {
+  void add(double i) {
     if (intervalupdates.intValue() >= UPDATES_PER_INTERVAL)
       return;
-    if (!latencies.offer(i))
-    {
+    if (!latencies.offer(i)) {
       latencies.remove();
       latencies.offer(i);
     }
     intervalupdates.getAndIncrement();
   }
 
-  double score()
-  {
+  double score() {
     double log = 0d;
-    if (latencies.size() > 0)
-    {
+    if (latencies.size() > 0) {
       double probability = p(SENTINEL_COMPARE);
       log = (-1) * Math.log10(probability);
     }
     return log;
   }
 
-  double p(double t)
-  {
+  double p(double t) {
     double mean = mean();
     double exponent = (-1) * (t) / mean;
     return 1 - Math.pow(Math.E, exponent);
   }
 
-  private double mean()
-  {
+  private double mean() {
     double total = 0;
-    for (double d : latencies)
-    {
+    for (double d : latencies) {
       total += d;
     }
     return total / latencies.size();
   }
 
-  public void resetIntervel()
-  {
+  public void resetIntervel() {
     intervalupdates.set(0);
   }
 
-  public void clear()
-  {
+  public void clear() {
     latencies.clear();
     intervalupdates.set(0);
   }
 
   @Override
-  public boolean equals(Object obj)
-  {
+  public boolean equals(Object obj) {
     return ((LatencyAwareHClientPool) obj).getCassandraHost().equals(getCassandraHost());
   }
 }
