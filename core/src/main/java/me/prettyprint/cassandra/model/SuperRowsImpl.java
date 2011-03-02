@@ -20,6 +20,7 @@ import org.apache.cassandra.thrift.SuperColumn;
 public class SuperRowsImpl<K, SN, N, V> implements SuperRows<K, SN, N, V> {
 
   protected final Map<K, SuperRow<K, SN, N, V>> rows;
+  protected final List<SuperRow<K,SN,N,V>> rowsList;
 
   Serializer<K> keySerializer;
 
@@ -27,11 +28,28 @@ public class SuperRowsImpl<K, SN, N, V> implements SuperRows<K, SN, N, V> {
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     Assert.noneNull(thriftRet, keySerializer, sNameSerializer, nameSerializer, valueSerializer);
     this.keySerializer = keySerializer;
-    rows = new LinkedHashMap<K, SuperRow<K, SN, N, V>>(thriftRet.size());
+    rows = new LinkedHashMap<K, SuperRow<K, SN, N, V>>(thriftRet.size(), 1);
+    rowsList = new ArrayList<SuperRow<K,SN,N,V>>(thriftRet.size());
     for (Map.Entry<K, List<SuperColumn>> entry : thriftRet.entrySet()) {
-      rows.put(entry.getKey(), new SuperRowImpl<K, SN, N, V>(entry.getKey(), entry.getValue(),
-          sNameSerializer, nameSerializer, valueSerializer));
+      SuperRowImpl<K, SN, N, V> row = new SuperRowImpl<K, SN, N, V>(entry.getKey(), entry.getValue(),
+              sNameSerializer, nameSerializer, valueSerializer);
+      rows.put(entry.getKey(), row);
+      rowsList.add(row);
     }
+  }
+
+  /**
+   * Preserves rows order
+   * @return a list of Rows
+   */
+  @Override
+  public List<SuperRow<K,SN,N,V>> getList() {
+    return rowsList;
+  }
+
+  @Override
+  public SuperRow<K, SN, N, V> peekLast() {
+    return rowsList != null && rowsList.size() > 0 ? rowsList.get(rowsList.size()-1) : null;
   }
 
   @Override

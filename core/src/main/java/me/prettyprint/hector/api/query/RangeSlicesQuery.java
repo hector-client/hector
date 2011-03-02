@@ -2,7 +2,7 @@ package me.prettyprint.hector.api.query;
 
 import java.util.Collection;
 
-import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Rows;
 
 /**
  * A query for the call get_range_slices.
@@ -12,7 +12,7 @@ import me.prettyprint.hector.api.beans.OrderedRows;
  * @param <N> type of the column names
  * @param <V> type of the column values
  */
-public interface RangeSlicesQuery<K, N, V> extends Query<OrderedRows<K, N,V>>{
+public interface RangeSlicesQuery<K, N, V> extends Query<Rows<K, N,V>>{
 
   RangeSlicesQuery<K, N, V> setKeys(K start, K end);
 

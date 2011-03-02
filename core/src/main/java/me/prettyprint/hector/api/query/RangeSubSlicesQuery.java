@@ -1,6 +1,6 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Rows;
 
 /**
  * A query for the call get_range_slices for subcolumns of supercolumns
@@ -8,7 +8,7 @@ import me.prettyprint.hector.api.beans.OrderedRows;
  * @author Ran Tavory
  *
  */
-public interface RangeSubSlicesQuery<K, SN, N, V> extends Query<OrderedRows<K,N,V>> {
+public interface RangeSubSlicesQuery<K, SN, N, V> extends Query<Rows<K,N,V>> {
 
   RangeSubSlicesQuery<K, SN, N, V> setKeys(K start, K end);
 

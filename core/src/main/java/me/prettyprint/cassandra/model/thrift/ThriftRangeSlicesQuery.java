@@ -8,13 +8,13 @@ import me.prettyprint.cassandra.model.AbstractSliceQuery;
 import me.prettyprint.cassandra.model.HKeyRange;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.OrderedRowsImpl;
+import me.prettyprint.cassandra.model.RowsImpl;
 import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
@@ -30,7 +30,7 @@ import org.apache.cassandra.thrift.ColumnParent;
  * @param <N>
  * @param <V>
  */
-public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, N,V,OrderedRows<K, N,V>>
+public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, N,V,Rows<K, N,V>>
     implements RangeSlicesQuery<K, N, V> {
 
   private final HKeyRange<K> keyRange;
@@ -56,17 +56,17 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
   }
 
   @Override
-  public QueryResult<OrderedRows<K, N, V>> execute() {
+  public QueryResult<Rows<K, N, V>> execute() {
     Assert.notNull(columnFamilyName, "columnFamilyName can't be null");
 
-    return new QueryResultImpl<OrderedRows<K, N,V>>(keyspace.doExecute(
-        new KeyspaceOperationCallback<OrderedRows<K, N,V>>() {
+    return new QueryResultImpl<Rows<K, N,V>>(keyspace.doExecute(
+        new KeyspaceOperationCallback<Rows<K, N,V>>() {
           @Override
-          public OrderedRows<K, N,V > doInKeyspace(KeyspaceService ks) throws HectorException {
+          public Rows<K, N,V > doInKeyspace(KeyspaceService ks) throws HectorException {
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
-            return new OrderedRowsImpl<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
+            return new RowsImpl<K,N,V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }

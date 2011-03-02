@@ -10,8 +10,8 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
@@ -51,16 +51,16 @@ public class RangeSlicesQueryTest extends BaseEmbededServerSetupTest {
   @Test
   public void testKeysOnlyPredicate() {
     RangeSlicesQuery<String, String, Long> rangeSlicesQuery = HFactory.createRangeSlicesQuery(keyspace, se, se, le);
-    QueryResult<OrderedRows<String, String, Long>> result = 
+    QueryResult<Rows<String, String, Long>> result =
       rangeSlicesQuery.setColumnFamily(cf).setKeys("", "").setReturnKeysOnly().execute();
-    OrderedRows<String, String, Long> orderedRows = result.get();
-    Row<String, String, Long> row = orderedRows.iterator().next();
+    Rows<String, String, Long> rows = result.get();
+    Row<String, String, Long> row = rows.iterator().next();
     assertNotNull(row.getKey());
     assertEquals(0,row.getColumnSlice().getColumns().size());
     
     result = rangeSlicesQuery.setColumnNames("birthyear","birthmonth").setRowCount(5).execute();
-    orderedRows = result.get();
-    row = orderedRows.iterator().next();
+    rows = result.get();
+    row = rows.iterator().next();
     assertNotNull(row.getKey());
     assertEquals(2,row.getColumnSlice().getColumns().size());
   }

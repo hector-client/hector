@@ -10,7 +10,7 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.query.QueryResult;
 
 import org.junit.After;
@@ -61,7 +61,7 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
     indexedSlicesQuery.setReturnKeysOnly();
     indexedSlicesQuery.setColumnFamily(cf);
     indexedSlicesQuery.setStartKey("");
-    QueryResult<OrderedRows<String, String, Long>> result = indexedSlicesQuery.execute();
+    QueryResult<Rows<String, String, Long>> result = indexedSlicesQuery.execute();
     assertEquals(4, result.get().getList().size());
 
 
@@ -70,7 +70,7 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
   @Test
   public void testMultiClause() {        
 
-    QueryResult<OrderedRows<String, String, Long>> result = 
+    QueryResult<Rows<String, String, Long>> result =
       new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le)
     .addEqualsExpression("birthyear", 1975L)
     .addGteExpression("birthmonth", 4L)
@@ -86,7 +86,7 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testEqClauseMiss() {        
-    QueryResult<OrderedRows<String, String, Long>> result = 
+    QueryResult<Rows<String, String, Long>> result =
       new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le)
     .addEqualsExpression("birthyear", 5L)
     .addGteExpression("birthmonth", 4L)
@@ -100,7 +100,7 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testRowCountLimit() {
-    QueryResult<OrderedRows<String, String, Long>> result = 
+    QueryResult<Rows<String, String, Long>> result =
       new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le)
     .addEqualsExpression("birthyear", 1975L)
     .addGteExpression("birthmonth", 4L)

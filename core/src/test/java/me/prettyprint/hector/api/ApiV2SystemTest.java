@@ -35,8 +35,6 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
-import me.prettyprint.hector.api.beans.OrderedRows;
-import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.beans.SuperRow;
@@ -239,7 +237,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String cf = "Super1";
 
     TestCleanupDescriptor cleanup = insertSuperColumns(cf, 1,
-          "testSubColumnQuery", 1, "testSubColumnQuerySuperColumn");
+        "testSubColumnQuery", 1, "testSubColumnQuerySuperColumn");
 
     // get value
     SubColumnQuery<String, String, String, String> q = createSubColumnQuery(ko,
@@ -403,7 +401,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setKey("testSuperSliceQuery");
     // try with column name first
     q.setColumnNames("testSuperSliceQuery1", "testSuperSliceQuery2",
-          "testSuperSliceQuery3");
+        "testSuperSliceQuery3");
     QueryResult<SuperSlice<String, String, String>> r = q.execute();
     assertNotNull(r);
     SuperSlice<String, String, String> slice = r.get();
@@ -614,11 +612,11 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setKeys("testRangeSlicesQuery1", "testRangeSlicesQuery3");
     // try with column name first
     q.setColumnNames("testRangeSlicesQueryColumn1",
-          "testRangeSlicesQueryColumn2");
-    QueryResult<OrderedRows<String, String, String>> r = q.execute();
+        "testRangeSlicesQueryColumn2");
+    QueryResult<Rows<String, String, String>> r = q.execute();
 
     assertNotNull(r);
-    OrderedRows<String, String, String> rows = r.get();
+    Rows<String, String, String> rows = r.get();
     assertNotNull(rows);
 
     assertEquals(3, rows.getCount());
@@ -629,7 +627,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertNotNull(slice);
     // Test slice.getColumnByName
     assertEquals("value11", slice
-          .getColumnByName("testRangeSlicesQueryColumn1").getValue());
+        .getColumnByName("testRangeSlicesQueryColumn1").getValue());
     assertEquals("value12", slice
         .getColumnByName("testRangeSlicesQueryColumn2").getValue());
     assertNull(slice.getColumnByName("testRangeSlicesQueryColumn3"));
@@ -670,19 +668,18 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String cf = "Super1";
 
     TestCleanupDescriptor cleanup = insertSuperColumns(cf, 4,
-          "testRangeSuperSlicesQuery", 3, "testRangeSuperSlicesQuery");
+        "testRangeSuperSlicesQuery", 3, "testRangeSuperSlicesQuery");
 
     // get value
     RangeSuperSlicesQuery<String, String, String, String> q = createRangeSuperSlicesQuery(
-          ko, se, se, se, se);
+        ko, se, se, se, se);
     q.setColumnFamily(cf);
     q.setKeys("testRangeSuperSlicesQuery2", "testRangeSuperSlicesQuery3");
     // try with column name first
     q.setColumnNames("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery2");
-    QueryResult<OrderedSuperRows<String, String, String, String>> r = q
-        .execute();
+    QueryResult<SuperRows<String, String, String, String>> r = q.execute();
     assertNotNull(r);
-    OrderedSuperRows<String, String, String, String> rows = r.get();
+    SuperRows<String, String, String, String> rows = r.get();
     assertNotNull(rows);
     assertEquals(2, rows.getCount());
     SuperRow<String, String, String, String> row = rows.getList().get(0);
@@ -694,7 +691,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals("v021", slice.getColumnByName("testRangeSuperSlicesQuery1")
         .get(0).getValue());
     assertEquals("v022", slice.getColumnByName("testRangeSuperSlicesQuery2")
-          .get(0).getValue());
+        .get(0).getValue());
     assertNull(slice.getColumnByName("testRangeSuperSlicesQuery3"));
 
     // now try with setKeys in combination with setRange
@@ -751,9 +748,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     q.setColumnNames("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery2");
 
     {
-      QueryResult<OrderedSuperRows<String, String, String, String>> r = q
-              .execute();
-      OrderedSuperRows<String, String, String, String> rows = r.get();
+      QueryResult<SuperRows<String, String, String, String>> r = q.execute();
+      SuperRows<String, String, String, String> rows = r.get();
       assertEquals(2, rows.getCount());
 
       int i = 0;
@@ -767,8 +763,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     }
 
     {
-      QueryResult<OrderedSuperRows<String, String, String, String>> r = q.execute();
-      OrderedSuperRows<String, String, String, String> rows = r.get();
+      QueryResult<SuperRows<String, String, String, String>> r = q.execute();
+      SuperRows<String, String, String, String> rows = r.get();
       assertEquals(2, rows.getCount());
 
       int i = 0;
@@ -784,7 +780,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // Delete values
     deleteColumns(cleanup);
   }
-
+  
   @Test
   public void testRangeSubSlicesQuery() {
     String cf = "Super1";
@@ -800,9 +796,9 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // try with column name first
     q.setSuperColumn("testRangeSubSlicesQuery1");
     q.setColumnNames("c021", "c111");
-    QueryResult<OrderedRows<String, String, String>> r = q.execute();
+    QueryResult<Rows<String, String, String>> r = q.execute();
     assertNotNull(r);
-    OrderedRows<String, String, String> rows = r.get();
+    Rows<String, String, String> rows = r.get();
     assertNotNull(rows);
     assertEquals(2, rows.getCount());
     Row<String, String, String> row = rows.getList().get(0);

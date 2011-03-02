@@ -9,7 +9,7 @@ import java.util.Map;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
 
@@ -35,7 +35,7 @@ import org.apache.cassandra.thrift.IndexOperator;
  * @author zznate (nate@riptano.com)
  */
 public class IndexedSlicesQuery<K, N, V> extends
-    AbstractSliceQuery<K, N, V, OrderedRows<K, N, V>> {
+    AbstractSliceQuery<K, N, V, Rows<K, N, V>> {
 
   private final IndexClause indexClause;
 
@@ -125,12 +125,12 @@ public class IndexedSlicesQuery<K, N, V> extends
   }
 
   @Override
-  public QueryResult<OrderedRows<K, N, V>> execute() {
+  public QueryResult<Rows<K, N, V>> execute() {
 
-    return new QueryResultImpl<OrderedRows<K, N, V>>(
-        keyspace.doExecute(new KeyspaceOperationCallback<OrderedRows<K, N, V>>() {
+    return new QueryResultImpl<Rows<K, N, V>>(
+        keyspace.doExecute(new KeyspaceOperationCallback<Rows<K, N, V>>() {
           @Override
-          public OrderedRows<K, N, V> doInKeyspace(KeyspaceService ks)
+          public Rows<K, N, V> doInKeyspace(KeyspaceService ks)
               throws HectorException {
             Map<ByteBuffer, List<Column>> ret = null;
             if (!indexClause.isSetStart_key()) {
@@ -140,9 +140,7 @@ public class IndexedSlicesQuery<K, N, V> extends
             ret = ks
                 .getIndexedSlices(columnParent, indexClause, getPredicate());
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ret);
-            return new OrderedRowsImpl<K, N, V>(
-                (LinkedHashMap<K, List<Column>>) thriftRet,
-                columnNameSerializer, valueSerializer);
+            return new RowsImpl<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
         }), this);
   }
