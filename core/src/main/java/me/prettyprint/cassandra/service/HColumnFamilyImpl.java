@@ -41,6 +41,7 @@ import org.slf4j.LoggerFactory;
 public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
 
   private final Logger queryLogger = LoggerFactory.getLogger("HColumnFamilyLogger");
+  private final Logger log = LoggerFactory.getLogger(HColumnFamily.class);
   
   private final ExecutingKeyspace keyspace;
   private final String columnFamilyName;
@@ -56,6 +57,8 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   private boolean hasValues;
   // TODO consider a bounds on this
   private Set<N> columnNames;
+  private int rowIndex = 0;
+  private Map<ByteBuffer, List<ColumnOrSuperColumn>> rows;
   
 
   public HColumnFamilyImpl(Keyspace keyspace, String columnFamilyName, Serializer<K> keySerializer, Serializer<N> columnNameSerializer) {
@@ -185,6 +188,12 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     return extractColumnValue(name, UUIDSerializer.get());
   }
 
+  public HColumnFamily<K, N> next() {
+    rowIndex++;
+    K key = _keys.get(rowIndex);
+    applyToRow(key, rows.get(keySerializer.toByteBuffer(key)));
+    return this;
+  }
   
   /**
    * Extract a value for the specified name and serializer
@@ -221,8 +230,33 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     if ( columns.get(columnName) == null ) {
       columnNames.add(columnName);
       activeSlicePredicate.setColumnNames(columnNames);
-      doExecuteSlice();
+      log.info("keys: {}",_keys);
+      if ( _keys.size() == 1 ) {
+        doExecuteSlice();
+      } else {
+        doExecuteMultigetSlice();
+      }      
     }    
+  }
+  
+  
+  private void applyToRow(K key, List<ColumnOrSuperColumn> cosclist) {
+    HColumn<N, ByteBuffer> column;
+    N colName;
+    for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
+      ColumnOrSuperColumn cosc = iterator.next();            
+
+      colName = columnNameSerializer.fromByteBuffer(cosc.getColumn().name.duplicate());
+      column = columns.get(colName);
+      
+      if ( column == null ) {
+        column = new HColumnImpl<N, ByteBuffer>(cosc.getColumn(), columnNameSerializer, ByteBufferSerializer.get());
+      } else {
+        ((HColumnImpl<N, ByteBuffer>)column).apply(cosc.getColumn());
+      }
+      columns.put(colName, column); 
+      iterator.remove();
+    }
   }
   
   private void doExecuteSlice() {
@@ -235,27 +269,12 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
             queryLogger.debug("---------\nColumnFamily: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
           }
           long startTime = System.nanoTime();
-          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keySerializer.toByteBuffer(_keys.iterator().next()), columnParent,
+          K key = _keys.iterator().next();
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keySerializer.toByteBuffer(key), columnParent,
             activeSlicePredicate.toThrift(), 
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
           long duration = System.nanoTime() - startTime;
-          HColumn<N,ByteBuffer> column;
-          N colName;
-          for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
-            ColumnOrSuperColumn cosc = iterator.next();            
-          
-            // profile against coscList.iterator.remove
-            // step 2. try w/o .duplicate()
-            colName = columnNameSerializer.fromByteBuffer(cosc.getColumn().name.duplicate());
-            column = columns.get(colName);
-            if ( column == null ) {
-              column = new HColumnImpl<N, ByteBuffer>(columnNameSerializer, ByteBufferSerializer.get()).setName(colName);              
-            } else {
-              ((HColumnImpl<N, ByteBuffer>)column).apply(cosc.getColumn());
-            }
-            columns.put(colName, column); 
-            iterator.remove();
-          }
+          applyToRow(key, cosclist);
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
           }
@@ -278,14 +297,14 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
       public Column execute(Cassandra.Client cassandra) throws HectorException {
         try {          
           if ( queryLogger.isDebugEnabled() ) {
-            queryLogger.debug("---------\nColumnFamily: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
+            queryLogger.debug("---------\nColumnFamily multiget: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
           }
           long startTime = System.nanoTime();
-          Map<ByteBuffer, List<ColumnOrSuperColumn>> rows = cassandra.multiget_slice(keySerializer.toBytesList(_keys), columnParent, activeSlicePredicate.toThrift(), 
+          rows = cassandra.multiget_slice(keySerializer.toBytesList(_keys), columnParent, activeSlicePredicate.toThrift(), 
               ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
           long duration = System.nanoTime() - startTime;
 
-
+          
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
           }
@@ -297,6 +316,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
         return null;
       }
     });
+    applyToRow(_keys.get(0), rows.get(keySerializer.toByteBuffer(_keys.get(0))));
   }
 
 }
