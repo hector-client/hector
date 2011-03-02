@@ -7,6 +7,6 @@ import java.util.Collection;
 import java.util.Set;
 
 public interface LoadBalancingPolicy extends Serializable {
-
-  ConcurrentHClientPool getPool(Collection<ConcurrentHClientPool> pools, Set<CassandraHost> excludeHosts);
+  HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts);
+  HClientPool createConnection(CassandraHost host);
 }

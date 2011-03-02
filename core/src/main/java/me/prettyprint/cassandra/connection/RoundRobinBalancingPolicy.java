@@ -16,14 +16,14 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   }
   
   @Override
-  public ConcurrentHClientPool getPool(Collection<ConcurrentHClientPool> pools,
+  public HClientPool getPool(Collection<HClientPool> pools,
       Set<CassandraHost> excludeHosts) {
     Object[] pa = pools.toArray();
     int location = getAndIncrement(pa.length);    
-    ConcurrentHClientPool pool = (ConcurrentHClientPool)pa[location];    
+    HClientPool pool = (HClientPool)pa[location];    
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while ( excludeHosts.contains(pool.getCassandraHost()) ) {
-        pool = (ConcurrentHClientPool)pa[getAndIncrement(pa.length)]; 
+        pool = (HClientPool)pa[getAndIncrement(pa.length)]; 
       }
     }    
     return pool;
@@ -34,4 +34,8 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
     return counter.getAndIncrement() % size;    
   }
 
+  @Override
+  public HClientPool createConnection(CassandraHost host) {
+  	return new ConcurrentHClientPool(host);
+  }
 }

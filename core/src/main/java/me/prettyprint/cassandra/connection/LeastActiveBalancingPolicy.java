@@ -19,17 +19,16 @@ import org.slf4j.LoggerFactory;
 public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   
   private static final long serialVersionUID = 329849818218657061L;
-
   private static final Logger log = LoggerFactory.getLogger(LeastActiveBalancingPolicy.class);
   
   @Override
-  public ConcurrentHClientPool getPool(Collection<ConcurrentHClientPool> pools, Set<CassandraHost> excludeHosts) {
-    List<ConcurrentHClientPool> vals = new ArrayList<ConcurrentHClientPool>(pools);
+  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {
+    List<HClientPool> vals = new ArrayList<HClientPool>(pools);
     // shuffle pools to avoid always returning the same one when we are not terribly busy
     Collections.shuffle(vals);
     Collections.sort(vals, new ShufflingCompare());
-    Iterator<ConcurrentHClientPool> iterator = vals.iterator();
-    ConcurrentHClientPool concurrentHClientPool = iterator.next();
+    Iterator<HClientPool> iterator = vals.iterator();
+    HClientPool concurrentHClientPool = iterator.next();
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while (iterator.hasNext()) {        
         if ( !excludeHosts.contains(concurrentHClientPool.getCassandraHost()) ) {
@@ -41,14 +40,19 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
     return concurrentHClientPool;
   }
 
-  private final class ShufflingCompare implements Comparator<ConcurrentHClientPool> {
+  private final class ShufflingCompare implements Comparator<HClientPool> {
     
-    public int compare(ConcurrentHClientPool o1, ConcurrentHClientPool o2) {
+    public int compare(HClientPool o1, HClientPool o2) {
       if ( log.isDebugEnabled() ) {
         log.debug("comparing 1: {} and count {} with 2: {} and count {}",
           new Object[]{o1.getCassandraHost(), o1.getNumActive(), o2.getCassandraHost(), o2.getNumActive()});
       }
       return o1.getNumActive() - o2.getNumActive();      
     }
+  }
+  
+  @Override
+  public HClientPool createConnection(CassandraHost host) {
+	  return new ConcurrentHClientPool(host);
   }
 }

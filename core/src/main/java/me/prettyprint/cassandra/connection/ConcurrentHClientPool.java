@@ -15,7 +15,7 @@ import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConcurrentHClientPool implements PoolMetric {
+public class ConcurrentHClientPool implements HClientPool {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
@@ -51,7 +51,8 @@ public class ConcurrentHClientPool implements PoolMetric {
   }
 
 
-  public HThriftClient borrowClient() throws HectorException {
+@Override
+public HThriftClient borrowClient() throws HectorException {
     if ( !active.get() ) {
       throw new HectorException("Attempt to borrow on in-active pool: " + getName());
     }
@@ -106,7 +107,6 @@ public class ConcurrentHClientPool implements PoolMetric {
     activeClients.add(cassandraClient);
     numBlocked.decrementAndGet();
 
-
     return cassandraClient;
   }
   
@@ -133,7 +133,8 @@ public class ConcurrentHClientPool implements PoolMetric {
    *
    *
    */
-  void shutdown() {
+  @Override
+  public void shutdown() {
     if (!active.compareAndSet(true, false) ) {
       throw new IllegalArgumentException("shutdown() called for inactive pool: " + getName());
     }
@@ -148,57 +149,63 @@ public class ConcurrentHClientPool implements PoolMetric {
     log.error("Shutdown complete on {}", getName());
   }
 
-  public CassandraHost getCassandraHost() {
+@Override
+public CassandraHost getCassandraHost() {
     return cassandraHost;
   }
 
-  @Override
+@Override
   public String getName() {
     return String.format("<ConcurrentCassandraClientPoolByHost>:{%s}", cassandraHost.getName());
   }
 
-
-  @Override
+@Override
   public int getNumActive() {
     return activeClients.size();
   }
 
 
-  public int getNumBeforeExhausted() {
+@Override
+public int getNumBeforeExhausted() {
     return cassandraHost.getMaxActive() - activeClients.size();
   }
 
 
-  @Override
+@Override
   public int getNumBlockedThreads() {
     return numBlocked.intValue();
   }
 
 
-  @Override
+@Override
   public int getNumIdle() {
     return availableClientQueue.size();
   }
 
 
-  public boolean isExhausted() {
+@Override
+public boolean isExhausted() {
     return getNumBeforeExhausted() == 0;
   }
 
-  public int getMaxActive() {
+@Override
+public int getMaxActive() {
     return cassandraHost.getMaxActive();
   }
 
-  public boolean getIsActive() {
+@Override
+public boolean getIsActive() {
     return active.get();
   }
 
-  public String getStatusAsString() {
+@Override
+public String getStatusAsString() {
     return String.format("%s; IsActive?: %s; Active: %d; Blocked: %d; Idle: %d; NumBeforeExhausted: %d",
         getName(), getIsActive(), getNumActive(), getNumBlockedThreads(), getNumIdle(), getNumBeforeExhausted());
   }
 
-  public void releaseClient(HThriftClient client) throws HectorException {
+@Override
+public void releaseClient(HThriftClient client) throws HectorException {
     activeClients.remove(client);
     boolean open = client.isOpen();
     if ( open ) {
