@@ -3,13 +3,11 @@ package me.prettyprint.cassandra.model;
 import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
-
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
@@ -17,14 +15,15 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.service.HColumnFamilyImpl;
-import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.HColumnFamily;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
+
+import org.junit.Before;
+import org.junit.Test;
 
 
 public class HColumnFamilyTest extends BaseEmbededServerSetupTest {
@@ -98,7 +97,15 @@ public class HColumnFamilyTest extends BaseEmbededServerSetupTest {
     HColumnFamilyImpl<String, String> columnFamily = new HColumnFamilyImpl<String,String>(keyspace, "Standard1",StringSerializer.get(), StringSerializer.get());
     columnFamily.addKey("zznate").addKey("patricioe").setCount(10);
     assertEquals("nate@datastax.com",columnFamily.getString("email"));
+    assertTrue(columnFamily.hasNext());
     columnFamily.next();
     assertEquals("patricioe@datastax.com",columnFamily.getString("email"));
+    assertFalse(columnFamily.hasNext());
+    try {
+      columnFamily.next();
+      fail();
+    } catch (NoSuchElementException nsee) {
+      assertNotNull(nsee);
+    }
   }
 }

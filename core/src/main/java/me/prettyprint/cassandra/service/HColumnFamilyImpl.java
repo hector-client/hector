@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.UUID;
 
@@ -188,13 +189,28 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     return extractColumnValue(name, UUIDSerializer.get());
   }
 
+  @Override
   public HColumnFamily<K, N> next() {
+    if ( !hasNext() ) {
+      throw new NoSuchElementException("No more rows left on this HColumnFamily");
+    }
     rowIndex++;
     K key = _keys.get(rowIndex);
     applyToRow(key, rows.get(keySerializer.toByteBuffer(key)));
     return this;
   }
   
+  @Override
+  public boolean hasNext() {
+    return rowIndex < rows.size() - 1 ;
+  }
+
+  @Override
+  public void remove() {
+    K key = _keys.remove(rowIndex);
+    rows.remove(key);
+  }
+
   /**
    * Extract a value for the specified name and serializer
    */
@@ -230,7 +246,6 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     if ( columns.get(columnName) == null ) {
       columnNames.add(columnName);
       activeSlicePredicate.setColumnNames(columnNames);
-      log.info("keys: {}",_keys);
       if ( _keys.size() == 1 ) {
         doExecuteSlice();
       } else {
@@ -288,9 +303,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     });
   }
   
-  // TODO toggle to multiget when keys > 1
-  // - how will this change the structure of the columns? 
-  // - rely on Iterable and .next() being called to advance to row?
+
   private void doExecuteMultigetSlice() {
     keyspace.doExecuteOperation(new Operation<Column>(OperationType.READ) {
       @Override
