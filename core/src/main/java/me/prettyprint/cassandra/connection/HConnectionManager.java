@@ -262,6 +262,11 @@ public class HConnectionManager {
           }
           monitor.incCounter(Counter.POOL_EXHAUSTED);
           excludeHosts.add(pool.getCassandraHost());
+        } else {
+          // something strange happened. Added here as suggested by sbridges.
+          // I think this gives a sane way to future-proof against any API additions
+          // that we don't add in time. 
+          retryable = false;
         }
         if ( retries <= 0 || retryable == false) throw he;
         log.error("Could not fullfill request on this host {}", client);
