@@ -1,11 +1,9 @@
 package me.prettyprint.cassandra.connection;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 
@@ -36,7 +34,7 @@ public class RoundRobinBalancingPolicyTest extends BaseBalancingPolicyTest {
   }
   
   @Test
-  public void testSkipExhausted() {
+  public void testIgnoreExhausted() {
     Mockito.when(poolWith5Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.1:9160"));
     Mockito.when(poolWith7Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.2:9161"));
     Mockito.when(poolWith10Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.3:9162"));

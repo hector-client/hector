@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 
@@ -9,7 +10,7 @@ import org.junit.Before;
 import org.mockito.Mockito;
 
 public abstract class BaseBalancingPolicyTest {
-  protected Collection<HClientPool> pools = new ArrayList<HClientPool>();
+  protected List<HClientPool> pools = new ArrayList<HClientPool>();
   
   protected ConcurrentHClientPool poolWith5Active;
   protected ConcurrentHClientPool poolWith7Active;

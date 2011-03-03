@@ -7,6 +7,9 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+
 /**
  * Selects the least active host based on the number of active connections.
  * The list of hosts is shuffled on each pass to account for the case
@@ -22,8 +25,8 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   private static final Logger log = LoggerFactory.getLogger(LeastActiveBalancingPolicy.class);
   
   @Override
-  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {
-    List<HClientPool> vals = new ArrayList<HClientPool>(pools);
+  public HClientPool getPool(List<HClientPool> pools, Set<CassandraHost> excludeHosts) {
+    List<HClientPool> vals = Lists.newArrayList(pools);
     // shuffle pools to avoid always returning the same one when we are not terribly busy
     Collections.shuffle(vals);
     Collections.sort(vals, new ShufflingCompare());
