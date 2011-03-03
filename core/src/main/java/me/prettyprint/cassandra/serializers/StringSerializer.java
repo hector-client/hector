@@ -15,7 +15,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
 
   private static final String UTF_8 = "UTF-8";
   private static final StringSerializer instance = new StringSerializer();
-  private static final Charset charset = Charset.defaultCharset();
+  private static final Charset charset =Charset.forName(UTF_8);
 
   public static StringSerializer get() {
     return instance;
@@ -26,11 +26,7 @@ public final class StringSerializer extends AbstractSerializer<String> {
     if (obj == null) {
       return null;
     }
-    try {
-      return ByteBuffer.wrap(obj.getBytes(charset.name()));
-    } catch (UnsupportedEncodingException e) {
-      throw new RuntimeException(e);
-    }
+    return ByteBuffer.wrap(obj.getBytes(charset));
   }
 
   @Override
