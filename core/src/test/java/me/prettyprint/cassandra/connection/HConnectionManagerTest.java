@@ -44,7 +44,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     connectionManager = new HConnectionManager(clusterName, cassandraHostConfigurator);
     CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);    
     HThriftClient client = connectionManager.borrowClient();
-    connectionManager.markHostAsDown(client);
+    connectionManager.markHostAsDown(client.cassandraHost);
     assertEquals(0,connectionManager.getActivePools().size());
   }
   

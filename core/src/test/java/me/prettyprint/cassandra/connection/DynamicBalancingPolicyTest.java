@@ -86,12 +86,15 @@ public class DynamicBalancingPolicyTest {
     DynamicLoadBalancingPolicy dbp = new DynamicLoadBalancingPolicy();
     LatencyAwareHClientPool poolWithScore2_1 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore2_1.score()).thenReturn(2.0);
+    Mockito.when(poolWithScore2_1.getNumActive()).thenReturn(5);
     Mockito.when(poolWithScore2_1.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:9163"));
     LatencyAwareHClientPool poolWithScore2_2 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore2_2.score()).thenReturn(2.0);
+    Mockito.when(poolWithScore2_2.getNumActive()).thenReturn(5);
     Mockito.when(poolWithScore2_2.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.5:9164"));
     LatencyAwareHClientPool poolWithScore2_3 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore2_3.score()).thenReturn(2.0);
+    Mockito.when(poolWithScore2_3.getNumActive()).thenReturn(5);
     Mockito.when(poolWithScore2_3.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.6:9165"));
 
     List<HClientPool> pool = new ArrayList<HClientPool>();

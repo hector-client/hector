@@ -233,8 +233,11 @@ public class HConnectionManager {
           throw he;
         } else if ( he instanceof HectorTransportException) {
           --retries;
-          client.close();
-          markHostAsDown(client);
+          // client can be null in this situation
+          if ( client != null ) {            
+            client.close();
+          }
+          markHostAsDown(pool.getCassandraHost());
           excludeHosts.add(pool.getCassandraHost());
           retryable = true;
           if ( retries > 0 ) {
@@ -332,16 +335,15 @@ public class HConnectionManager {
     return null;
   }
 
-  void markHostAsDown(HThriftClient client) {
-    log.error("MARK HOST AS DOWN TRIGGERED for host {}", client.cassandraHost.getName());
-    HClientPool pool = hostPools.remove(client.cassandraHost);
+  void markHostAsDown(CassandraHost cassandraHost) {
+    log.error("MARK HOST AS DOWN TRIGGERED for host {}", cassandraHost.getName());
+    HClientPool pool = hostPools.remove(cassandraHost);
     if ( pool != null ) {
       log.error("Pool state on shutdown: {}", pool.getStatusAsString());
       pool.shutdown();
       if ( cassandraHostRetryService != null ) 
-        cassandraHostRetryService.add(client.cassandraHost);
+        cassandraHostRetryService.add(cassandraHost);
     }
-    client.close();
   }
 
   public Set<CassandraHost> getDownedHosts() {
