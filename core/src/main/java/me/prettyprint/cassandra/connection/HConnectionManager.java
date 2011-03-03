@@ -75,10 +75,7 @@ public class HConnectionManager {
         }
       }
     }
-
-    if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
-      nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
-    }   
+       
     if ( cassandraHostConfigurator.getUseHostTimeoutTracker() ) {
       hostTimeoutTracker = new HostTimeoutTracker(this, cassandraHostConfigurator);
     }
@@ -86,6 +83,12 @@ public class HConnectionManager {
     exceptionsTranslator = new ExceptionsTranslatorImpl();
     this.cassandraHostConfigurator = cassandraHostConfigurator;
     hostPoolValues = hostPools.values();
+    if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
+      nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
+      if ( cassandraHostConfigurator.getRunAutoDiscoveryAtStartup() ) {
+        nodeAutoDiscoverService.doAddNodes();
+      }
+    }
   }
 
   /**
