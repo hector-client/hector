@@ -62,7 +62,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   }
 
   @Override
-  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {
+  public HClientPool getPool(List<HClientPool> pools, Set<CassandraHost> excludeHosts) {
     List<HClientPool> poolList = Lists.newArrayList(pools);
 
     // remove the hosts from the list.
