@@ -39,6 +39,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int hostTimeoutSuspensionDurationInSeconds = HostTimeoutTracker.DEF_NODE_SUSPENSION_DURATION_IN_SECONDS;
   private int hostTimeoutUnsuspendCheckDelay = HostTimeoutTracker.DEF_NODE_UNSUSPEND_CHECK_DELAY_IN_SECONDS;
   private boolean useHostTimeoutTracker = false;
+  private boolean runAutoDiscoveryAtStartup = false;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -274,5 +275,20 @@ public final class CassandraHostConfigurator implements Serializable {
     this.useHostTimeoutTracker = useHostTimeoutTracker;
   }
 
+  public boolean getRunAutoDiscoveryAtStartup() {
+    return runAutoDiscoveryAtStartup;
+  }
+
+  /**
+   * Set to true to run {@link NodeAutoDiscoverService} at startup.
+   * You must also call {@link CassandraHostConfigurator#setAutoDiscoverHosts(boolean)}
+   * to true for this to have an effect.
+   * @param runAutoDiscoveryAtStartup
+   */
+  public void setRunAutoDiscoveryAtStartup(boolean runAutoDiscoveryAtStartup) {
+    this.runAutoDiscoveryAtStartup = runAutoDiscoveryAtStartup;
+  }
+
+  
 
 }

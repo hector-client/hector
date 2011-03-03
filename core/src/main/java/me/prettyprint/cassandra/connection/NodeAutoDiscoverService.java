@@ -50,23 +50,27 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
 
     @Override
     public void run() {
-      if ( log.isDebugEnabled() ) {
-        log.debug("Auto discovery service running...");
-      }
-      Set<CassandraHost> foundHosts = discoverNodes();
-      if ( foundHosts != null && foundHosts.size() > 0 ) {
-        log.info("Found {} new host(s) in Ring", foundHosts.size());
-        for (CassandraHost cassandraHost : foundHosts) {
-          log.info("Addding found host {} to pool", cassandraHost);
-          cassandraHostConfigurator.applyConfig(cassandraHost);
-          connectionManager.addCassandraHost(cassandraHost);
-        }
-      }
-      if ( log.isDebugEnabled() ) {
-        log.debug("Auto discovery service run complete.");
-      }
+      doAddNodes();
     }
 
+  }
+  
+  public void doAddNodes() {
+    if ( log.isDebugEnabled() ) {
+      log.debug("Auto discovery service running...");
+    }
+    Set<CassandraHost> foundHosts = discoverNodes();
+    if ( foundHosts != null && foundHosts.size() > 0 ) {
+      log.info("Found {} new host(s) in Ring", foundHosts.size());
+      for (CassandraHost cassandraHost : foundHosts) {
+        log.info("Addding found host {} to pool", cassandraHost);
+        cassandraHostConfigurator.applyConfig(cassandraHost);
+        connectionManager.addCassandraHost(cassandraHost);
+      }
+    }
+    if ( log.isDebugEnabled() ) {
+      log.debug("Auto discovery service run complete.");
+    }
   }
 
   public Set<CassandraHost> discoverNodes() {
