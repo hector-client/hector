@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.google.common.collect.Iterables;
+
 import me.prettyprint.cassandra.service.CassandraHost;
 
 /**
@@ -36,13 +38,7 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   }
   
   private HClientPool getPoolSafely(int location, List<HClientPool> pools) {
-    HClientPool pool;
-    try {
-      pool = pools.get(location);
-    } catch (IndexOutOfBoundsException e) {
-      pool = pools.get(0);
-    }
-    return pool;
+    return Iterables.get(pools, location, pools.get(0));
   }
     
   private int getAndIncrement(int size) {
