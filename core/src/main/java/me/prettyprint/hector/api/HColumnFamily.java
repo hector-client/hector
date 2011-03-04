@@ -9,7 +9,7 @@ import java.util.UUID;
 
 import me.prettyprint.hector.api.beans.HColumn;
 
-public interface HColumnFamily<K, N> extends Iterator<HColumnFamily<K,N>> {
+public interface HColumnFamily<K, N> extends Iterator<HColumnFamily<K,N>>,ResultStatus {
 
   HColumnFamily<K, N> setReadConsistencyLevel(HConsistencyLevel readLevel);
   
