@@ -60,6 +60,8 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   private Set<N> columnNames;
   private int rowIndex = 0;
   private Map<ByteBuffer, List<ColumnOrSuperColumn>> rows;
+  private CassandraHost lastHostUsed;
+  private long lastExecutionTime;
   
 
   public HColumnFamilyImpl(Keyspace keyspace, String columnFamilyName, Serializer<K> keySerializer, Serializer<N> columnNameSerializer) {
@@ -231,6 +233,18 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     return this;
   }
 
+  
+  
+  @Override
+  public long getExecutionTimeMicro() {  
+    return lastExecutionTime;
+  }
+
+  @Override
+  public CassandraHost getHostUsed() {
+    return lastHostUsed;
+  }
+
   private <V> V extractColumnValue(N columnName, Serializer<V> valueSerializer) {
     maybeExecuteSlice(columnName);        
     return columns.get(columnName) != null && columns.get(columnName).getValue() != null ? valueSerializer.fromByteBuffer(columns.get(columnName).getValue()) : null;    
@@ -274,6 +288,11 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     }
   }
   
+  private void applyResultStatus(long execTime, CassandraHost cassandraHost) {
+    lastExecutionTime = execTime;
+    lastHostUsed = cassandraHost;
+  }
+  
   private void doExecuteSlice() {
     keyspace.doExecuteOperation(new Operation<Column>(OperationType.READ) {
       @Override
@@ -283,15 +302,15 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("---------\nColumnFamily: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
           }
-          long startTime = System.nanoTime();
+
           K key = _keys.iterator().next();
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keySerializer.toByteBuffer(key), columnParent,
             activeSlicePredicate.toThrift(), 
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
-          long duration = System.nanoTime() - startTime;
+          applyResultStatus(execTime, getCassandraHost());
           applyToRow(key, cosclist);
           if ( queryLogger.isDebugEnabled() ) {
-            queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
+            queryLogger.debug("Execution took {} microseconds on host {}\n----------", lastExecutionTime, lastHostUsed);
           }
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
@@ -312,14 +331,14 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
           if ( queryLogger.isDebugEnabled() ) {
             queryLogger.debug("---------\nColumnFamily multiget: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
           }
-          long startTime = System.nanoTime();
+
           rows = cassandra.multiget_slice(keySerializer.toBytesList(_keys), columnParent, activeSlicePredicate.toThrift(), 
               ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
-          long duration = System.nanoTime() - startTime;
 
+          applyResultStatus(execTime, getCassandraHost());
           
           if ( queryLogger.isDebugEnabled() ) {
-            queryLogger.debug("Execution took {} microseconds on host {}\n----------", duration/1000, getCassandraHost());
+            queryLogger.debug("Execution took {} microseconds on host {}\n----------", lastExecutionTime, lastHostUsed);
           }
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);

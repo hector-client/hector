@@ -38,7 +38,7 @@ public abstract class Operation<T> {
   protected T result;
   private HectorException exception;
   private CassandraHost cassandraHost;
-  private long execTime;
+  protected long execTime;
   public final OperationType operationType;
   
   public Operation(OperationType operationType) {
@@ -117,5 +117,6 @@ public abstract class Operation<T> {
   public CassandraHost getCassandraHost() {
     return this.cassandraHost;
   }
+  
 }
 
