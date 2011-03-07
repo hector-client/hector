@@ -29,20 +29,20 @@ public class IntegerSerializerTest {
 
   @Test
   public void testFromCassandra() {
-    assertEquals(new Integer(1), ext.fromByteBuffer(FBUtilities.toByteBuffer(1)));
-    assertEquals(new Integer(-1), ext.fromByteBuffer(FBUtilities.toByteBuffer(-1)));
-    assertEquals(new Integer(0), ext.fromByteBuffer(FBUtilities.toByteBuffer(0)));
-    assertEquals(new Integer(Integer.MAX_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Integer.MAX_VALUE)));
-    assertEquals(new Integer(Integer.MIN_VALUE), ext.fromByteBuffer(FBUtilities.toByteBuffer(Integer.MIN_VALUE)));
+    assertEquals(new Integer(1), ext.fromByteBuffer(ByteBufferUtil.bytes(1)));
+    assertEquals(new Integer(-1), ext.fromByteBuffer(ByteBufferUtil.bytes(-1)));
+    assertEquals(new Integer(0), ext.fromByteBuffer(ByteBufferUtil.bytes(0)));
+    assertEquals(new Integer(Integer.MAX_VALUE), ext.fromByteBuffer(ByteBufferUtil.bytes(Integer.MAX_VALUE)));
+    assertEquals(new Integer(Integer.MIN_VALUE), ext.fromByteBuffer(ByteBufferUtil.bytes(Integer.MIN_VALUE)));
   }
   
   @Test
   public void testFromCassandraAsBytes() {
-    assertEquals(new Integer(1), ext.fromBytes(FBUtilities.toByteBuffer(1).array()));
-    assertEquals(new Integer(-1), ext.fromBytes(FBUtilities.toByteBuffer(-1).array()));
-    assertEquals(new Integer(0), ext.fromBytes(FBUtilities.toByteBuffer(0).array()));
-    assertEquals(new Integer(Integer.MAX_VALUE), ext.fromBytes(FBUtilities.toByteBuffer(Integer.MAX_VALUE).array()));
-    assertEquals(new Integer(Integer.MIN_VALUE), ext.fromBytes(FBUtilities.toByteBuffer(Integer.MIN_VALUE).array()));
+    assertEquals(new Integer(1), ext.fromBytes(ByteBufferUtil.bytes(1).array()));
+    assertEquals(new Integer(-1), ext.fromBytes(ByteBufferUtil.bytes(-1).array()));
+    assertEquals(new Integer(0), ext.fromBytes(ByteBufferUtil.bytes(0).array()));
+    assertEquals(new Integer(Integer.MAX_VALUE), ext.fromBytes(ByteBufferUtil.bytes(Integer.MAX_VALUE).array()));
+    assertEquals(new Integer(Integer.MIN_VALUE), ext.fromBytes(ByteBufferUtil.bytes(Integer.MIN_VALUE).array()));
   }
   
   

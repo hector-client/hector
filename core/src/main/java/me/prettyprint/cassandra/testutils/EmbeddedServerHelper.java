@@ -5,15 +5,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.config.KSMetaData;
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
+import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
+import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -21,12 +28,14 @@ import org.apache.thrift.transport.TTransportException;
  * 
  */
 public class EmbeddedServerHelper {
+  private static Logger log = LoggerFactory.getLogger(EmbeddedServerHelper.class);
 
   private static final String TMP = "tmp";
 
   private EmbeddedCassandraService cassandra;
   private final String yamlFile;
-
+  static CassandraDaemon cassandraDaemon;
+  
   public EmbeddedServerHelper() {
     this("/cassandra.yaml");
   }
@@ -34,6 +43,8 @@ public class EmbeddedServerHelper {
   public EmbeddedServerHelper(String yamlFile) {
     this.yamlFile = yamlFile;
   }
+  
+  static ExecutorService executor = Executors.newSingleThreadExecutor(); 
 
   /**
    * Set embedded cassandra up and spawn it in a new thread.
@@ -50,17 +61,25 @@ public class EmbeddedServerHelper {
     copy("/log4j.properties", TMP);
     copy(yamlFile, TMP);
     System.setProperty("cassandra.config", "file:" + TMP + yamlFile);
+    System.setProperty("log4j.configuration", "file:" + TMP + "/log4j.properties");
+    System.setProperty("cassandra-foreground","true");
 
-    CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
-    cleaner.prepare();
-
-    loadYamlTables();
-
-    cassandra = new EmbeddedCassandraService();
-    cassandra.init();
-    Thread t = new Thread(cassandra);
-    t.setDaemon(true);
-    t.start();
+    cleanupAndLeaveDirs();
+    loadSchemaFromYaml();
+    //loadYamlTables();
+    log.info("Starting executor");
+    
+    executor.execute(new CassandraRunner());
+    log.info("Started executor");
+    try
+    {
+        TimeUnit.SECONDS.sleep(3);
+        log.info("Done sleeping");
+    }
+    catch (InterruptedException e)
+    {
+        throw new AssertionError(e);
+    }
   }
 
   /**
@@ -78,18 +97,12 @@ public class EmbeddedServerHelper {
     }
   }
 
-  public void teardown() {
-    CassandraServiceDataCleaner cleaner = new CassandraServiceDataCleaner();
-
-    try {
-      cleaner.cleanupDataDirectories();
-      rmdir(TMP);
-    } catch (Exception e) {
-      // IGNORE
-    } catch (java.lang.AssertionError e) {
-      // IGNORE
-    }
-
+  public static void teardown() {
+    //if ( cassandraDaemon != null )
+      //cassandraDaemon.stop();
+    executor.shutdown();
+    executor.shutdownNow();
+    log.info("Teardown complete");
   }
 
   private static void rmdir(String dir) throws IOException {
@@ -131,5 +144,79 @@ public class EmbeddedServerHelper {
    */
   private static void mkdir(String dir) throws IOException {
     FileUtils.createDirectory(dir);
+  }
+  
+
+  public static void cleanupAndLeaveDirs() throws IOException
+  {
+      mkdirs();
+      cleanup();
+      mkdirs();
+      CommitLog.instance.resetUnsafe(); // cleanup screws w/ CommitLog, this brings it back to safe state
+  }
+
+  public static void cleanup() throws IOException
+  {
+      // clean up commitlog
+      String[] directoryNames = { DatabaseDescriptor.getCommitLogLocation(), };
+      for (String dirName : directoryNames)
+      {
+          File dir = new File(dirName);
+          if (!dir.exists())
+              throw new RuntimeException("No such directory: " + dir.getAbsolutePath());
+          FileUtils.deleteRecursive(dir);
+      }
+
+      // clean up data directory which are stored as data directory/table/data files
+      for (String dirName : DatabaseDescriptor.getAllDataFileLocations())
+      {
+          File dir = new File(dirName);
+          if (!dir.exists())
+              throw new RuntimeException("No such directory: " + dir.getAbsolutePath());
+          FileUtils.deleteRecursive(dir);
+      }
+  }
+
+  public static void mkdirs()
+  {
+      try
+      {
+          DatabaseDescriptor.createAllDirectories();
+      }
+      catch (IOException e)
+      {
+          throw new RuntimeException(e);
+      }
+  }  
+  
+  public static void loadSchemaFromYaml()
+  {
+      try
+      {
+          for (KSMetaData ksm : DatabaseDescriptor.readTablesFromYaml())
+          {
+              for (CFMetaData cfm : ksm.cfMetaData().values())
+                  CFMetaData.map(cfm);
+              DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion());
+          }
+      }
+      catch (ConfigurationException e)
+      {
+          throw new RuntimeException(e);
+      }
+  }  
+
+  
+  class CassandraRunner implements Runnable {    
+    
+    @Override
+    public void run() {
+
+      cassandraDaemon = new CassandraDaemon();
+     
+      cassandraDaemon.activate();
+
+    }
+    
   }
 }
