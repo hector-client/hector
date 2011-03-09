@@ -20,12 +20,7 @@ public abstract class BackgroundCassandraHostService {
       CassandraHostConfigurator cassandraHostConfigurator) {
     this.connectionManager = connectionManager;
     this.cassandraHostConfigurator = cassandraHostConfigurator;
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      @Override
-      public void run() {
-        shutdown();
-      }
-    });
+    
   }
 
   abstract void shutdown();
