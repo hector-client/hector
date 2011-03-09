@@ -21,7 +21,7 @@ import org.apache.cassandra.thrift.SliceRange;
  * @author zznate
  */
 public final class HSlicePredicate<N> {
-
+  
   protected Collection<N> columnNames;
   protected N start;
   protected N finish;
@@ -33,6 +33,8 @@ public final class HSlicePredicate<N> {
   protected enum PredicateType {Unknown, ColumnNames, Range};
   protected PredicateType predicateType = PredicateType.Unknown;
 
+  private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.wrap(new byte[0]);
+  
   public HSlicePredicate(Serializer<N> columnNameSerializer) {
     Assert.notNull(columnNameSerializer, "columnNameSerializer can't be null");
     this.columnNameSerializer = columnNameSerializer;
@@ -180,7 +182,7 @@ public final class HSlicePredicate<N> {
   private ByteBuffer findBytes(N val) {
     ByteBuffer valBytes;
     if (val == null) {
-      valBytes =  ByteBuffer.wrap(new byte[0]);
+      valBytes =  EMPTY_BYTE_BUFFER;
     } else {
       valBytes = columnNameSerializer.toByteBuffer(val);
     }
