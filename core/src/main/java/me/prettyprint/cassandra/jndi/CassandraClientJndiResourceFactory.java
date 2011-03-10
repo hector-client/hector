@@ -22,6 +22,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  * {@link Keyspace} references for passing to {@link HFactory}.  
  * A limited set of configuration parameters are supported. 
  * These parameters are defined in a web application's context.xml file.  
+ * Parameter descriptions can be found in {@link CassandraHostConfigurator}
  * 
  * <p>
  * <pre>
@@ -29,8 +30,13 @@ import me.prettyprint.hector.api.factory.HFactory;
  *               auth="Container"
  *               type="me.prettyprint.cassandra.api.Keyspace"
  *               factory="me.prettyprint.cassandra.jndi.CassandraClientJndiResourceFactory"
- *               url="localhost"
- *               port="9160" />      
+ *               hosts="cass1:9160,cass2:9160,cass3:9160"
+ *               keyspace="Keyspace1"
+ *               clusterName="Test Cluster" 
+ *               maxActive="20"
+ *               maxWaitTimeWhenExhausted="10"
+ *               autoDiscoverHosts="true"
+ *               runAutoDiscoveryAtStartup="true"/>      
  * </pre>
  *     
  * @author Perry Hoekstra (dutchman_mn@charter.net)
@@ -87,10 +93,10 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
     RefAddr keyspaceNameRef = resourceRef.get("keyspace");
     // optional
     RefAddr maxActiveRefAddr = resourceRef.get("maxActive");
-    RefAddr maxTimeWhenExhausted = resourceRef.get("maxTimeWhenExhausted");
+    RefAddr maxWaitTimeWhenExhausted = resourceRef.get("maxWaitTimeWhenExhausted");
     RefAddr autoDiscoverHosts = resourceRef.get("autoDiscoverHosts");
-    RefAddr autoDiscoverAtStartup = resourceRef.get("runAutoDiscoveryAtStartup");
-    RefAddr retryDownedHostDelayInSeconds = resourceRef.get("maxTimeWhenExhausted");
+    RefAddr runAutoDiscoverAtStartup = resourceRef.get("runAutoDiscoveryAtStartup");
+    RefAddr retryDownedHostDelayInSeconds = resourceRef.get("retryDownedHostDelayInSeconds");
     
     if ( hostsRefAddr == null || hostsRefAddr.getContent() == null) {
       throw new Exception("A url and port on which Cassandra is installed and listening " + 
@@ -100,7 +106,7 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
     cassandraHostConfigurator = new CassandraHostConfigurator((String)hostsRefAddr.getContent());
     if ( autoDiscoverHosts != null ) {
       cassandraHostConfigurator.setAutoDiscoverHosts(Boolean.parseBoolean((String)autoDiscoverHosts.getContent()));
-      if ( autoDiscoverAtStartup  != null )
+      if ( runAutoDiscoverAtStartup  != null )
         cassandraHostConfigurator.setRunAutoDiscoveryAtStartup(Boolean.parseBoolean((String)autoDiscoverHosts.getContent()));
     }    
     if ( retryDownedHostDelayInSeconds != null ) {
@@ -112,6 +118,8 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
     }
     if ( maxActiveRefAddr != null ) 
       cassandraHostConfigurator.setMaxActive(Integer.parseInt((String)maxActiveRefAddr.getContent()));
+    if ( maxWaitTimeWhenExhausted != null ) 
+      cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(Integer.parseInt((String)maxWaitTimeWhenExhausted.getContent()));
     
     if ( log.isDebugEnabled() )
       log.debug("JNDI resource created with CassandraHostConfiguration: {}", cassandraHostConfigurator.getAutoDiscoverHosts());
