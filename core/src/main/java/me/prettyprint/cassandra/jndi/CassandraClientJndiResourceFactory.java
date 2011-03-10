@@ -8,29 +8,44 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
+import org.apache.commons.lang.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.factory.HFactory;
+
 /**
  * A factory for JNDI Resource managed objects. Responsible for creating a 
- * {@link CassandraClientJndiResourcePool}. Relies on a supplied URL and 
- * port which Cassandra is listening on.  These parameters are defined in 
- * a web application's context.xml file.  For example:
+ * {@link Keyspace} references for passing to {@link HFactory}.  
+ * A limited set of configuration parameters are supported. 
+ * These parameters are defined in a web application's context.xml file.  
  * 
  * <p>
  * <pre>
  *     <Resource name="cassandra/CassandraClientFactory"
  *               auth="Container"
- *               type="me.prettyprint.cassandra.jndi.CassandraClientJndiResourcePool"
+ *               type="me.prettyprint.cassandra.api.Keyspace"
  *               factory="me.prettyprint.cassandra.jndi.CassandraClientJndiResourceFactory"
  *               url="localhost"
  *               port="9160" />      
  * </pre>
  *     
  * @author Perry Hoekstra (dutchman_mn@charter.net)
+ * @author zznate
  * 
  * @since 0.5.1-8
  */
 
-public class CassandraClientJndiResourceFactory implements ObjectFactory 
-{
+public class CassandraClientJndiResourceFactory implements ObjectFactory {
+  private Logger log = LoggerFactory.getLogger(CassandraClientJndiResourceFactory.class);
+  
+  private CassandraHostConfigurator cassandraHostConfigurator;
+  private Cluster cluster;
+  private Keyspace keyspace;
+  
   /**
    * Creates an object using the location or reference information specified. 
    * 
@@ -57,16 +72,51 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory
       throw new Exception("Object provided is not a javax.naming.Reference type");
     }
     
-    RefAddr urlRefAddr = resourceRef.get("url");
-    
-    RefAddr portRefAddr = resourceRef.get("port");
-  
-    if ((urlRefAddr != null) && (portRefAddr != null)) {
-      return new CassandraClientJndiResourcePool((String)urlRefAddr.getContent(), 
-                                               Integer.parseInt((String)portRefAddr.getContent())); 
-    }  else {
-      throw new Exception("A url and port on which Cassandra is installed and listening " + 
-                      "on must be provided as a ResourceParams in the context.xml");
+    // config CassandraHostConfigurator  
+    if ( cluster == null ) {
+      configure(resourceRef);
     }
+
+    return keyspace;
+  }
+  
+  private void configure(Reference resourceRef) throws Exception {
+ // required
+    RefAddr hostsRefAddr = resourceRef.get("hosts");
+    RefAddr clusterNameRef = resourceRef.get("clusterName");
+    RefAddr keyspaceNameRef = resourceRef.get("keyspace");
+    // optional
+    RefAddr maxActiveRefAddr = resourceRef.get("maxActive");
+    RefAddr maxTimeWhenExhausted = resourceRef.get("maxTimeWhenExhausted");
+    RefAddr autoDiscoverHosts = resourceRef.get("autoDiscoverHosts");
+    RefAddr autoDiscoverAtStartup = resourceRef.get("runAutoDiscoveryAtStartup");
+    RefAddr retryDownedHostDelayInSeconds = resourceRef.get("maxTimeWhenExhausted");
+    
+    if ( hostsRefAddr == null || hostsRefAddr.getContent() == null) {
+      throw new Exception("A url and port on which Cassandra is installed and listening " + 
+      "on must be provided as a ResourceParams in the context.xml");
+    }        
+
+    cassandraHostConfigurator = new CassandraHostConfigurator((String)hostsRefAddr.getContent());
+    if ( autoDiscoverHosts != null ) {
+      cassandraHostConfigurator.setAutoDiscoverHosts(Boolean.parseBoolean((String)autoDiscoverHosts.getContent()));
+      if ( autoDiscoverAtStartup  != null )
+        cassandraHostConfigurator.setRunAutoDiscoveryAtStartup(Boolean.parseBoolean((String)autoDiscoverHosts.getContent()));
+    }    
+    if ( retryDownedHostDelayInSeconds != null ) {
+      int retryDelay = Integer.parseInt((String)retryDownedHostDelayInSeconds.getContent());
+      // disable retry if less than 1
+      if ( retryDelay < 1 )
+        cassandraHostConfigurator.setRetryDownedHosts(false);      
+      cassandraHostConfigurator.setRetryDownedHostsDelayInSeconds(retryDelay);
+    }
+    if ( maxActiveRefAddr != null ) 
+      cassandraHostConfigurator.setMaxActive(Integer.parseInt((String)maxActiveRefAddr.getContent()));
+    
+    if ( log.isDebugEnabled() )
+      log.debug("JNDI resource created with CassandraHostConfiguration: {}", cassandraHostConfigurator.getAutoDiscoverHosts());
+    
+    cluster = HFactory.createCluster((String)clusterNameRef.getContent(), cassandraHostConfigurator);
+    keyspace = HFactory.createKeyspace((String)keyspaceNameRef.getContent(), cluster);
   }
 }

@@ -14,6 +14,7 @@ import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.hector.api.Keyspace;
 
 import org.junit.After;
 import org.junit.Before;
@@ -22,12 +23,12 @@ import org.junit.Test;
 
 /**
  * @author Perry Hoekstra (dutchman_mn@charter.net)
+ * @author zznate
  */
-@Ignore
 public class CassandraClientJndiResourceFactoryTest extends BaseEmbededServerSetupTest {
   // canned data
-  private final static String cassandraUrl = "localhost";
-  private final static int cassandraPort = 9170;
+  private final static String cassandraUrl = "localhost:9170";
+
 
   private CassandraClientJndiResourceFactory factory;
 
@@ -45,21 +46,19 @@ public class CassandraClientJndiResourceFactoryTest extends BaseEmbededServerSet
   public void getObjectInstance() throws Exception {
     Reference resource = new Reference("CassandraClientFactory");
 
-    resource.add(new StringRefAddr("url", cassandraUrl));
-    resource.add(new StringRefAddr("port", Integer.toString(cassandraPort)));
+    resource.add(new StringRefAddr("hosts", cassandraUrl));
+    resource.add(new StringRefAddr("clusterName", clusterName));
+    resource.add(new StringRefAddr("keyspace", "Keyspace1"));
+    resource.add(new StringRefAddr("autoDiscoverHosts", "true"));
+    
 
     Name jndiName = mock(Name.class);
     Context context = new InitialContext();
     Hashtable<String, String> environment = new Hashtable<String, String>();
 
-    CassandraClientJndiResourcePool cassandraClientJNDIResourcePool =
-      (CassandraClientJndiResourcePool) factory.getObjectInstance(resource, jndiName, context,
-          environment);
+    Keyspace keyspace = (Keyspace) factory.getObjectInstance(resource, jndiName, context, environment);
 
-    //CassandraClient cassandraClient = (CassandraClient) cassandraClientJNDIResourcePool.borrowObject();
-    // TODO fix this
-    //assertNotNull(cassandraClient);
-    //assertEquals(cassandraUrl, cassandraClient.getCassandraHost().getHost());
-    //assertEquals(cassandraPort, cassandraClient.getCassandraHost().getPort());
+    assertNotNull(keyspace);
+    assertEquals("Keyspace1",keyspace.getKeyspaceName());
   }
 }
