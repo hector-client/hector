@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,19 +27,23 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   }
   
   @Override
-  public HClientPool getPool(List<HClientPool> pools,
+  public HClientPool getPool(Collection<HClientPool> pools,
       Set<CassandraHost> excludeHosts) {
-    HClientPool pool = getPoolSafely(getAndIncrement(pools.size()), pools);    
+    HClientPool pool = getPoolSafely(pools);    
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while ( excludeHosts.contains(pool.getCassandraHost()) ) {
-        pool = getPoolSafely(getAndIncrement(pools.size()), pools);
+        pool = getPoolSafely(pools);
       }
     }    
     return pool;
   }
   
-  private HClientPool getPoolSafely(int location, List<HClientPool> pools) {
-    return Iterables.get(pools, location, pools.get(0));
+  private HClientPool getPoolSafely(Collection<HClientPool> pools) {
+    try {
+      return Iterables.get(pools, getAndIncrement(pools.size()));
+    } catch (IndexOutOfBoundsException e) {
+      return pools.iterator().next();
+    }       
   }
     
   private int getAndIncrement(int size) {

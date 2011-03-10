@@ -41,7 +41,7 @@ public class HConnectionManager {
 
   private final NonBlockingHashMap<CassandraHost,HClientPool> hostPools;
   private final NonBlockingHashMap<CassandraHost,HClientPool> suspendedHostPools;  
-  private final List<HClientPool> hostPoolValues;
+  private final Collection<HClientPool> hostPoolValues;
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
@@ -82,7 +82,7 @@ public class HConnectionManager {
     monitor = JmxMonitor.getInstance().getCassandraMonitor(this);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
     this.cassandraHostConfigurator = cassandraHostConfigurator;
-    hostPoolValues = new ArrayList<HClientPool>(hostPools.values());
+    hostPoolValues = hostPools.values();
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
       if ( cassandraHostConfigurator.getRunAutoDiscoveryAtStartup() ) {
