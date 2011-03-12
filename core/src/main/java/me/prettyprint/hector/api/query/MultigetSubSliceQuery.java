@@ -13,6 +13,8 @@ public interface MultigetSubSliceQuery<K, SN, N, V> extends Query<Rows<K, N, V>>
 
   MultigetSubSliceQuery<K, SN, N, V> setKeys(K... keys);
 
+  MultigetSubSliceQuery<K, SN, N, V> setKeys(Collection<K> keys);
+
   /**
    * Set the supercolumn to run the slice query on
    */
@@ -29,5 +31,7 @@ public interface MultigetSubSliceQuery<K, SN, N, V> extends Query<Rows<K, N, V>>
    * @param columns a list of column names
    */
   MultigetSubSliceQuery<K, SN, N, V> setColumnNames(N... columnNames);
+
+  MultigetSubSliceQuery<K, SN, N, V> setColumnNames(Collection<N> columnNames);
 
 }

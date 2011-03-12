@@ -13,6 +13,8 @@ public interface MultigetSuperSliceQuery<K, SN, N, V> extends Query<SuperRows<K,
 
   MultigetSuperSliceQuery<K, SN, N, V> setKeys(K... keys);
 
+  MultigetSuperSliceQuery<K, SN, N, V> setKeys(Collection<K> keys);
+
   MultigetSuperSliceQuery<K, SN, N, V> setColumnFamily(String cf);
 
   MultigetSuperSliceQuery<K, SN, N, V> setRange(SN start, SN finish, boolean reversed, int count);
@@ -24,5 +26,7 @@ public interface MultigetSuperSliceQuery<K, SN, N, V> extends Query<SuperRows<K,
    * @param columns a list of column names
    */
   MultigetSuperSliceQuery<K, SN, N, V> setColumnNames(SN... columnNames);
+
+  MultigetSuperSliceQuery<K, SN, N, V> setColumnNames(Collection<SN> columnNames);
 
 }

@@ -50,6 +50,12 @@ public final class ThriftMultigetSuperSliceQuery<K, SN, N, V> extends
   }
 
   @Override
+  public MultigetSuperSliceQuery<K, SN, N, V> setKeys(Collection<K> keys) {
+    this.keys = keys;
+    return this;
+  }
+
+  @Override
   public QueryResult<SuperRows<K, SN, N, V>> execute() {
     return new QueryResultImpl<SuperRows<K, SN, N, V>>(
         keyspace.doExecute(new KeyspaceOperationCallback<SuperRows<K, SN, N, V>>() {
@@ -80,6 +86,12 @@ public final class ThriftMultigetSuperSliceQuery<K, SN, N, V> extends
   @SuppressWarnings("unchecked")
   @Override
   public MultigetSuperSliceQuery<K, SN, N, V> setColumnNames(SN... columnNames) {
+    return (MultigetSuperSliceQuery<K, SN, N, V>) super.setColumnNames(columnNames);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public MultigetSuperSliceQuery<K, SN, N, V> setColumnNames(Collection<SN> columnNames) {
     return (MultigetSuperSliceQuery<K, SN, N, V>) super.setColumnNames(columnNames);
   }
 
