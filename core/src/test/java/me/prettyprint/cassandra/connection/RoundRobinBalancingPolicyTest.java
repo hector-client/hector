@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.connection;
 
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -46,4 +47,20 @@ public class RoundRobinBalancingPolicyTest extends BaseBalancingPolicyTest {
     assertEquals(poolWith10Active, roundRobinBalancingPolicy.getPool(pools, new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.1:9160")))));
   }
   
+  @Test
+  public void testIgnoreExhaustedAll() {
+    Mockito.when(poolWith5Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.1:9160"));
+    Mockito.when(poolWith7Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.2:9161"));
+    Mockito.when(poolWith10Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.3:9162"));
+    
+    roundRobinBalancingPolicy = new RoundRobinBalancingPolicy();
+    /*
+    assertEquals(poolWith10Active, roundRobinBalancingPolicy.getPool(pools, 
+        new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.1:9160"),new CassandraHost("127.0.0.2:9161")))));
+    */
+    assertNotNull(roundRobinBalancingPolicy.getPool(pools, 
+        new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.1:9160"),new CassandraHost("127.0.0.2:9161"),new CassandraHost("127.0.0.3:9162")))));
+    
+    
+  }
 }
