@@ -84,6 +84,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
    */
   public AbstractColumnFamilyTemplate<K,N> addColumn(N columnName, Serializer<?> valueSerializer) {
     columnValueSerializers.put(columnName, valueSerializer);
+    activeSlicePredicate.addColumnName(columnName);
     return this;
   }
   

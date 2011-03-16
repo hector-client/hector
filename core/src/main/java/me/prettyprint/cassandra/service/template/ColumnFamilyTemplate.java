@@ -140,11 +140,11 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
   }
 
   public ColumnFamilyResultWrapper<K, N> queryColumns(K key) {
-    return doExecuteSlice(key, null);
+    return doExecuteSlice(key, activeSlicePredicate);
   }
 
   public ColumnFamilyResultWrapper<K, N> queryColumns(Iterable<K> keys) {
-    return doExecuteMultigetSlice(keys, null);
+    return doExecuteMultigetSlice(keys, activeSlicePredicate);
   }
   
   @SuppressWarnings("unchecked")
@@ -248,7 +248,7 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
           
           ByteBuffer sKey = keySerializer.toByteBuffer(key);
           cosc.put(sKey, cassandra.get_slice(sKey, columnParent,
-              (workingSlicePredicate == null ? activeSlicePredicate.setColumnNames(columnValueSerializers.keySet()).toThrift() : workingSlicePredicate.toThrift()), 
+              workingSlicePredicate.toThrift(), 
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType))));
           
         } catch (Exception e) {
