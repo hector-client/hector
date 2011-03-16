@@ -143,6 +143,9 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
     return doExecuteSlice(key, null);
   }
 
+  public ColumnFamilyResultWrapper<K, N> queryColumns(Iterable<K> keys) {
+    return doExecuteMultigetSlice(keys, null);
+  }
   
   @SuppressWarnings("unchecked")
   public <T> T queryColumns(K key, ColumnFamilyRowMapper<K, N, T> mapper) {
