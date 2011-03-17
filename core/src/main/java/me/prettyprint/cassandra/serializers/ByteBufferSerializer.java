@@ -9,10 +9,12 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * The BytesExtractor is a simple identity function. It supports the Extractor
  * interface and implements the fromBytes and toBytes as simple identity
- * functions.
+ * functions. However, the from and to methods both return the results of 
+ * {@link ByteBuffer#duplicate()}  
+ * 
  * 
  * @author Ran Tavory
- * 
+ * @author zznate
  */
 public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>{
 
@@ -27,9 +29,7 @@ public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>{
     if(bytes==null) {
       return null;
     }
-    ByteBuffer b = bytes.slice();
-    bytes.position(bytes.position() + b.remaining());
-    return b;
+    return bytes.duplicate();
   }
 
   @Override
@@ -37,7 +37,7 @@ public final class ByteBufferSerializer extends AbstractSerializer<ByteBuffer>{
     if(obj==null) {
       return null;
     }
-    return obj.slice();
+    return obj.duplicate();
   }
 
   @Override
