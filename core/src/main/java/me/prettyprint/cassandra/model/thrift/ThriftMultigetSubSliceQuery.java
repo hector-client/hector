@@ -45,6 +45,12 @@ public final class ThriftMultigetSubSliceQuery<K, SN, N, V> extends AbstractSlic
     return this;
   }
 
+  @Override
+  public MultigetSubSliceQuery<K, SN, N, V> setKeys(Collection<K> keys) {
+    this.keys = keys;
+    return this;
+  }
+
   /**
    * Set the supercolumn to run the slice query on
    */
@@ -100,4 +106,11 @@ public final class ThriftMultigetSubSliceQuery<K, SN, N, V> extends AbstractSlic
   public MultigetSubSliceQuery<K, SN, N, V> setColumnNames(N... columnNames) {
     return (MultigetSubSliceQuery<K, SN, N, V>) super.setColumnNames(columnNames);
   }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public MultigetSubSliceQuery<K, SN, N, V> setColumnNames(Collection<N> columnNames) {
+    return (MultigetSubSliceQuery<K, SN, N, V>) super.setColumnNames(columnNames);
+  }
+
 }
