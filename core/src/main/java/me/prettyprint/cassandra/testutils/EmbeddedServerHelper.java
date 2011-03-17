@@ -82,20 +82,7 @@ public class EmbeddedServerHelper {
     }
   }
 
-  /**
-   * Manually load tables from the test configuration file.
-   * 
-   * @throws ConfigurationException
-   */
-  private void loadYamlTables() throws ConfigurationException {
-    for (KSMetaData table : DatabaseDescriptor.readTablesFromYaml()) {
-      for (CFMetaData cfm : table.cfMetaData().values()) {
-        CFMetaData.map(cfm);
-      }
-      DatabaseDescriptor.setTableDefinition(table,
-          DatabaseDescriptor.getDefsVersion());
-    }
-  }
+
 
   public static void teardown() {
     //if ( cassandraDaemon != null )
@@ -189,21 +176,10 @@ public class EmbeddedServerHelper {
       }
   }  
   
-  public static void loadSchemaFromYaml()
+  public static void loadSchemaFromYaml()  
   {
-      try
-      {
-          for (KSMetaData ksm : DatabaseDescriptor.readTablesFromYaml())
-          {
-              for (CFMetaData cfm : ksm.cfMetaData().values())
-                  CFMetaData.map(cfm);
-              DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion());
-          }
-      }
-      catch (ConfigurationException e)
-      {
-          throw new RuntimeException(e);
-      }
+    EmbeddedSchemaLoader.loadSchema();
+      
   }  
 
   

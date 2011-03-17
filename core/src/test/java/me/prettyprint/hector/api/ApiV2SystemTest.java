@@ -77,7 +77,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
   @Before
   public void setupCase() {
-    cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
+    cluster = getOrCreateCluster("Test Cluster", "127.0.0.1:9170");
     ko = createKeyspace(KEYSPACE, cluster);
   }
 

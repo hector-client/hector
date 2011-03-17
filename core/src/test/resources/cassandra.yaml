@@ -371,36 +371,4 @@ index_interval: 128
 # NOTE: this keyspace definition is for demonstration purposes only.
 #       Cassandra will not load these definitions during startup. See
 #       http://wiki.apache.org/cassandra/FAQ#no_keyspaces for an explanation.
-keyspaces:
-    - name: Keyspace1
-      replica_placement_strategy: org.apache.cassandra.locator.RackUnawareStrategy
-      replication_factor: 1
-      column_families:
-        - name: Standard1
-          compare_with: BytesType
-          memtable_throughput_in_mb: 24
-          key_cache_save_period_in_seconds: 0
-          keys_cached: 0                                                      
-
-        - name: StandardByUUID1
-          compare_with: TimeUUIDType   
-          memtable_throughput_in_mb: 24       
-          key_cache_save_period_in_seconds: 0
-          keys_cached: 0
-
-        - name: Super1
-          column_type: Super
-          compare_with: BytesType
-          compare_subcolumns_with: BytesType
-          memtable_throughput_in_mb: 24
-          key_cache_save_period_in_seconds: 0
-          keys_cached: 0          
-          
-        - name: Indexed1
-          memtable_throughput_in_mb: 24
-          key_cache_save_period_in_seconds: 0
-          keys_cached: 0          
-          column_metadata:
-            - name: birthyear
-              validator_class: LongType
-              index_type: KEYS   
+  

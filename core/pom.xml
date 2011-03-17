@@ -104,8 +104,13 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-all</artifactId>
-      <version>0.8.0-20110216</version>
+      <artifactId>apache-cassandra</artifactId>
+      <version>0.8.0-20110317</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>apache-cassandra-thrift</artifactId>
+      <version>0.8.0-20110317</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra.deps</groupId>

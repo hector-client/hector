@@ -21,6 +21,7 @@ import org.apache.cassandra.thrift.KeySlice;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.TokenRange;
@@ -93,7 +94,7 @@ public abstract class AbstractThriftClientWrapper extends Client {
 
   @Override
   public List<String> describe_splits(String cfName, String start_token,
-      String end_token, int keys_per_split) throws TException {
+      String end_token, int keys_per_split) throws TException, InvalidRequestException {
     return client.describe_splits(cfName, start_token, end_token,
         keys_per_split);
   }
@@ -232,7 +233,7 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
-  public List<String> recv_describe_splits() throws TException {
+  public List<String> recv_describe_splits() throws TException, InvalidRequestException {
     return client.recv_describe_splits();
   }
 
@@ -312,37 +313,37 @@ public abstract class AbstractThriftClientWrapper extends Client {
 
   @Override
   public String recv_system_add_column_family() throws InvalidRequestException,
-      TException {
+      TException, SchemaDisagreementException {
     return client.recv_system_add_column_family();
   }
 
   @Override
   public String recv_system_add_keyspace() throws InvalidRequestException,
-      TException {
+      TException, SchemaDisagreementException {
     return client.recv_system_add_keyspace();
   }
 
   @Override
   public String recv_system_drop_column_family()
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.recv_system_drop_column_family();
   }
 
   @Override
   public String recv_system_drop_keyspace() throws InvalidRequestException,
-      TException {
+      TException, SchemaDisagreementException {
     return client.recv_system_drop_keyspace();
   }
 
   @Override
   public String recv_system_update_column_family()
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.recv_system_update_column_family();
   }
 
   @Override
   public String recv_system_update_keyspace() throws InvalidRequestException,
-      TException {
+      TException, SchemaDisagreementException {
     return client.recv_system_update_keyspace();
   }
 
@@ -530,37 +531,37 @@ public abstract class AbstractThriftClientWrapper extends Client {
 
   @Override
   public String system_add_column_family(CfDef cf_def)
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.system_add_column_family(cf_def);
   }
 
   @Override
   public String system_add_keyspace(KsDef ks_def)
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.system_add_keyspace(ks_def);
   }
 
   @Override
   public String system_drop_column_family(String column_family)
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.system_drop_column_family(column_family);
   }
 
   @Override
   public String system_drop_keyspace(String keyspace)
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.system_drop_keyspace(keyspace);
   }
 
   @Override
   public String system_update_column_family(CfDef cf_def)
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.system_update_column_family(cf_def);
   }
 
   @Override
   public String system_update_keyspace(KsDef ks_def)
-      throws InvalidRequestException, TException {
+      throws InvalidRequestException, TException, SchemaDisagreementException {
     return client.system_update_keyspace(ks_def);
   }
 
