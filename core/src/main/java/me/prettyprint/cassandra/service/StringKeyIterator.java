@@ -13,9 +13,8 @@ import me.prettyprint.hector.api.Keyspace;
  */
 public class StringKeyIterator extends KeyIterator<String> {
 
-	public StringKeyIterator(Keyspace keyspace, String columnFamily) {
-		super(keyspace, columnFamily, new StringSerializer());
-
-	}
+  public StringKeyIterator(Keyspace keyspace, String columnFamily) {
+    super(keyspace, columnFamily, new StringSerializer());
+  }
 
 }
