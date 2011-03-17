@@ -23,6 +23,10 @@ public class ThriftConverter {
       return ConsistencyLevel.ANY;
     case ONE:
       return ConsistencyLevel.ONE;
+    case TWO:
+      return ConsistencyLevel.TWO;
+    case THREE:
+      return ConsistencyLevel.THREE;
     case QUORUM:
       return ConsistencyLevel.QUORUM;
     case EACH_QUORUM:
