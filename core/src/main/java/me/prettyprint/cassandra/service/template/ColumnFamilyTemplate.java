@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
@@ -240,7 +241,7 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
   
   private ColumnFamilyResultWrapper<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate) {
     
-    return keyspace.doExecuteOperation(new Operation<ColumnFamilyResultWrapper<K, N>>(OperationType.READ) {
+    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<ColumnFamilyResultWrapper<K, N>>(OperationType.READ) {
       @Override
       public ColumnFamilyResultWrapper<K, N> execute(Cassandra.Client cassandra) throws HectorException {
         Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc = new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
@@ -262,7 +263,7 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
   
   private ColumnFamilyResultWrapper<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate) {
     
-    return keyspace.doExecuteOperation(new Operation<ColumnFamilyResultWrapper<K, N>>(OperationType.READ) {
+    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<ColumnFamilyResultWrapper<K, N>>(OperationType.READ) {
       @Override
       public ColumnFamilyResultWrapper<K, N> execute(Cassandra.Client cassandra) throws HectorException {
         Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc;

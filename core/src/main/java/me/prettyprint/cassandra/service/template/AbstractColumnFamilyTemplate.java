@@ -3,9 +3,6 @@ package me.prettyprint.cassandra.service.template;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.cassandra.thrift.ColumnParent;
-
-import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
@@ -15,13 +12,15 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 
+import org.apache.cassandra.thrift.ColumnParent;
+
 public class AbstractColumnFamilyTemplate<K, N> {
   // Used for queries where we just ask for all columns
   public static final int ALL_COLUMNS_COUNT = Integer.MAX_VALUE;
   public static final Object ALL_COLUMNS_START = null;
   public static final Object ALL_COLUMNS_END = null;
 
-  protected ExecutingKeyspace keyspace;
+  protected Keyspace keyspace;
   protected String columnFamily;
   protected Serializer<K> keySerializer;
   protected Map<N, Serializer<?>> columnValueSerializers;
@@ -64,7 +63,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
       Serializer<K> keySerializer, Serializer<N> topSerializer,
       Mutator<K> mutator) {
     // ugly, but safe
-    this.keyspace = (ExecutingKeyspace)keyspace;
+    this.keyspace = keyspace;
     this.columnFamily = columnFamily;
     this.keySerializer = keySerializer;
     this.topSerializer = topSerializer;
