@@ -46,7 +46,7 @@
       upstream loggers.
     -->
     <logger name="me.prettyprint.cassandra.hector.TimingLogger" additivity="false">
-        <level value="info"/>
+        <level value="TRACE"/>
         <appender-ref ref="hector_CoalescingStatistics"/>
     </logger>
 
