@@ -247,7 +247,7 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
     query.setColumnFamily(columnFamily);
     return query;
   }
-
+/*
   @SuppressWarnings("unchecked")
   public <OBJ> ColumnFamilyResultsIterator<K, List<OBJ>> querySuperColumns(
       List<K> key, SuperCfRowMapper<K, SN, N, OBJ> mapper) {
@@ -308,14 +308,15 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
         List<OBJ> ret = new ArrayList<OBJ>();
         for (HSuperColumn<SN, N, ByteBuffer> superCol : slice
             .getSuperColumns()) {
-/*          SuperCfResultWrapper wrapper = new SuperCfResultWrapper(row.getKey(),
+          SuperCfResultWrapper wrapper = new SuperCfResultWrapper(row.getKey(),
               superCol);
-          ret.add(mapper.mapRow(wrapper));*/
+          ret.add(mapper.mapRow(wrapper));
         }
         return ret;
       }
     };
   }
+  */
 
   @SuppressWarnings("unchecked")
   private MultigetSuperSliceQuery<K, SN, N, ByteBuffer> createMultigetSuperSliceQuery(

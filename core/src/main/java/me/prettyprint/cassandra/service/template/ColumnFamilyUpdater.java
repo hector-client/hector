@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
@@ -41,7 +43,8 @@ import me.prettyprint.hector.api.mutation.Mutator;
 public class ColumnFamilyUpdater<K, N> {
   // Values have package access and are assigned by CassandraTemplate
   ColumnFamilyTemplate<K, N> template;
-  K key;
+  List<K> keys;
+  int keyPos = 0;
 
   /**
    * Default no-op update implementation. Sub-classes should override this to provide 
@@ -51,57 +54,68 @@ public class ColumnFamilyUpdater<K, N> {
     // TODO think about this contract in general
   }
 
+  public ColumnFamilyUpdater<K,N> addKey(K key) {
+    if ( keys == null ) {
+      keys = new ArrayList<K>();      
+    } else {
+      keyPos++;
+    }
+    keys.add(key);
+    
+    return this;
+  }
+  
   /**
    * @return Give the updater access to the current key if it needs it
    */
-  public K getKey() {
-    return key;
+  public K getCurrentKey() {
+    return keys.get(keyPos);
   }
 
   public void deleteColumn(N columnName) {
-    template.getMutator().addDeletion(key, template.getColumnFamily(),
+    template.getMutator().addDeletion(getCurrentKey(), template.getColumnFamily(),
         columnName, template.getTopSerializer());
   }
 
   public void setString(N columnName, String value) {
     HColumn<N, String> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), StringSerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public void setUUID(N columnName, UUID value) {
     HColumn<N, UUID> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), UUIDSerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public void setLong(N columnName, Long value) {
     HColumn<N, Long> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), LongSerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public void setInteger(N columnName, Integer value) {
     HColumn<N, Integer> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), IntegerSerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public void setBoolean(N columnName, Boolean value) {
     HColumn<N, Boolean> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), BooleanSerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public void setByteArray(N columnName, byte[] value) {
     HColumn<N, byte[]> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), BytesArraySerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public void setDate(N columnName, Date value) {
     HColumn<N, Date> column = HFactory.createColumn(columnName, value,
         template.getTopSerializer(), DateSerializer.get());
-    template.getMutator().addInsertion(key, template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 }
