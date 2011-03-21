@@ -29,6 +29,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
   private int rowCacheSavePeriodInSeconds;
+  private int keyCacheSavePeriodInSeconds;
   private double memtableOperationsInMillions;
   private int memtableThroughputInMb;
   private int memtableFlushAfterMins;
@@ -53,6 +54,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
     keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
+    keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
     readRepairChance = columnFamilyDefinition.getReadRepairChance();
     columnDefinitions = columnFamilyDefinition.getColumnMetadata() != null 
     ? new ArrayList<ColumnDefinition>(columnFamilyDefinition.getColumnMetadata()) 
@@ -141,7 +143,12 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   public void addColumnDefinition( ColumnDefinition columnDefinition){
     this.columnDefinitions.add( columnDefinition );
+  }  
+
+  public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
+    this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
   }
+  
 
   /**
    * SHOULD THIS BE HERE? A COLUMN DEFINITION IS PART OF A KEYSPACE BY VIRTUE
@@ -240,6 +247,10 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   @Override
   public int getMemtableThroughputInMb() {
     return this.memtableThroughputInMb;
+  }
+
+  public int getKeyCacheSavePeriodInSeconds() {
+    return keyCacheSavePeriodInSeconds;
   }
 
 

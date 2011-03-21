@@ -36,6 +36,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private double memtableOperationsInMillions;
   private int memtableThroughputInMb;
   private int memtableFlushAfterMins;
+  private int keyCacheSavePeriodInSeconds;
 
   public ThriftCfDef(CfDef d) {
     Assert.notNull(d, "CfDef is null");
@@ -48,6 +49,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     rowCacheSize = d.row_cache_size;
     rowCacheSavePeriodInSeconds = d.row_cache_save_period_in_seconds;
     keyCacheSize = d.key_cache_size;
+    keyCacheSavePeriodInSeconds = d.key_cache_save_period_in_seconds;
     readRepairChance = d.read_repair_chance;
     columnMetadata = ThriftColumnDef.fromThriftList(d.column_metadata);
     gcGraceSeconds = d.gc_grace_seconds;
@@ -76,6 +78,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
     keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
+    keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
     readRepairChance = columnFamilyDefinition.getReadRepairChance();
     columnMetadata = columnFamilyDefinition.getColumnMetadata();
     gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
@@ -102,6 +105,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     comparatorType = ComparatorType.BYTESTYPE;
     readRepairChance = CFMetaData.DEFAULT_READ_REPAIR_CHANCE;
     keyCacheSize = CFMetaData.DEFAULT_KEY_CACHE_SIZE;
+    keyCacheSavePeriodInSeconds = CFMetaData.DEFAULT_KEY_CACHE_SAVE_PERIOD_IN_SECONDS;
     gcGraceSeconds = CFMetaData.DEFAULT_GC_GRACE_SECONDS;
     minCompactionThreshold = CFMetaData.DEFAULT_MIN_COMPACTION_THRESHOLD;
     maxCompactionThreshold = CFMetaData.DEFAULT_MAX_COMPACTION_THRESHOLD;
@@ -217,6 +221,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setGc_grace_seconds(gcGraceSeconds);
     d.setId(id);
     d.setKey_cache_size(keyCacheSize);
+    d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds);
     d.setMax_compaction_threshold(maxCompactionThreshold);
     d.setMin_compaction_threshold(minCompactionThreshold);
     d.setRead_repair_chance(readRepairChance);
@@ -325,5 +330,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   @Override
   public int getMemtableThroughputInMb() {
     return memtableThroughputInMb;
+  }
+
+  @Override
+  public int getKeyCacheSavePeriodInSeconds() {
+    return keyCacheSavePeriodInSeconds;
   }
 }
