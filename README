@@ -25,9 +25,10 @@ Some features provided by this client:
  o simple ORM layer that works
  o a type-safe approach to dealing with Apache Cassandra's data model
 
-Detailed documentation of Hector features and usage can be found in PDF form hosted by Riptano: http://www.riptano.com/sites/default/files/hector-v2-client-doc.pdf
+Detailed documentation of Hector features and usage can be found on the wiki: 
+https://github.com/rantav/hector/wiki/User-Guide
 
-Some interesting pages from the wiki:
+Some additional pages from the wiki that may be of interest:
 
  o SLF4J fun and hijinks: https://github.com/rantav/hector/wiki/SLF4J-in-Hector-
  o Mailing Lists: https://github.com/rantav/hector/wiki/Mailing-Lists
