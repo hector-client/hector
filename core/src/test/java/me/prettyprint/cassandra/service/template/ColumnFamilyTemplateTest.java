@@ -1,6 +1,9 @@
 package me.prettyprint.cassandra.service.template;
 
 import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+
 import me.prettyprint.hector.api.factory.HFactory;
 
 import org.junit.Test;
@@ -38,9 +41,27 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
         return results.getString("column1");
       }
     });
-    assertEquals("value1",value);
-   
-        
+    assertEquals("value1",value);           
+  }
+  
+  @Test
+  public void testQueryMultiget() {
+    ColumnFamilyTemplate<String, String> template = new ColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
+    ColumnFamilyUpdater updater = template.createUpdater("mg_key1"); 
+    updater.setString("column1","value1");
+    updater.addKey("mg_key2");
+    updater.setString("column1","value2");
+    updater.addKey("mg_key3");
+    updater.setString("column1","value3");
+    template.update(updater);
+    
+    template.addColumn("column1", se);
+    ColumnFamilyResultWrapper wrapper = template.queryColumns(Arrays.asList("mg_key1", "mg_key2", "mg_key3"));
+    assertEquals("value1",wrapper.getString("column1"));    
+    wrapper.next();
+    assertEquals("value2",wrapper.getString("column1"));
+    wrapper.next();
+    assertEquals("value3",wrapper.getString("column1"));
   }
 
 }
