@@ -1,6 +1,7 @@
 package me.prettyprint.hector.api.beans;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -209,6 +210,15 @@ public class DynamicComposite extends AbstractList<Object> implements
     return "BytesType";
   }
 
+  @SuppressWarnings("unused")
+  private Serializer<?> serializerForComparer(String c) {
+    Serializer<?> s = comparerToSerializerMapping.get(c);
+    if (s != null) {
+      return s;
+    }
+    return ByteBufferSerializer.get();
+  }
+
   public <T> DynamicComposite add(T value, Serializer<T> s) {
     serialized = null;
 
@@ -293,7 +303,7 @@ public class DynamicComposite extends AbstractList<Object> implements
   @SuppressWarnings("unchecked")
   public ByteBuffer serialize() {
     if (serialized != null) {
-      return serialized;
+      return serialized.duplicate();
     }
 
     ByteBufferOutputStream out = new ByteBufferOutputStream();
@@ -308,20 +318,70 @@ public class DynamicComposite extends AbstractList<Object> implements
         out.writeShort((short) c.getComparer().length());
         out.write(ByteBufferUtil.bytes(c.getComparer()));
       }
-      out.write(cb.remaining());
+      out.writeShort((short) cb.remaining());
       out.write(cb.slice());
       out.write(c.isInclusive() ? 1 : 0);
     }
 
     serialized = out.getByteBuffer();
-    return serialized;
+    return serialized.duplicate();
   }
 
+  @SuppressWarnings("unchecked")
   public void deserialize(ByteBuffer b) {
-    serialized = b;
+    serialized = b.duplicate();
     components = new ArrayList<Component>();
 
-    // TODO deserialize
+    String comparer = null;
+    while ((comparer = getComparator(b)) != null) {
+      ByteBuffer data = getWithShortLength(b);
+      if (data != null) {
+        Serializer<?> s = serializerForComparer(comparer);
+        Object value = s.fromByteBuffer(data);
+        boolean inclusive = b.get() != 0;
+        components.add(new Component(value, s, comparer, inclusive));
+      } else {
+        throw new RuntimeException("Missing component data in composite type");
+      }
+    }
+
+  }
+
+  protected static int getShortLength(ByteBuffer bb) {
+    int length = (bb.get() & 0xFF) << 8;
+    return length | (bb.get() & 0xFF);
+  }
+
+  protected static ByteBuffer getBytes(ByteBuffer bb, int length) {
+    ByteBuffer copy = bb.duplicate();
+    copy.limit(copy.position() + length);
+    bb.position(bb.position() + length);
+    return copy;
+  }
+
+  protected static ByteBuffer getWithShortLength(ByteBuffer bb) {
+    int length = getShortLength(bb);
+    return getBytes(bb, length);
+  }
+
+  private String getComparator(ByteBuffer bb) {
+    String name = null;
+    if (bb.hasRemaining()) {
+      try {
+        int header = getShortLength(bb);
+        if ((header & 0x8000) == 0) {
+          name = ByteBufferUtil.string(getBytes(bb, header));
+        } else {
+          name = aliasesToComparerMapping.get((byte) (header & 0xFF));
+        }
+      } catch (CharacterCodingException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    if ((name != null) && (name.length() == 0)) {
+      name = null;
+    }
+    return name;
   }
 
 }
