@@ -1,11 +1,11 @@
 /**
  * 
  */
-package me.prettyprint.hector.api.beans;
+package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
 
-import me.prettyprint.cassandra.serializers.AbstractSerializer;
+import me.prettyprint.hector.api.beans.DynamicComposite;
 
 /**
  * @author Todd Nine
