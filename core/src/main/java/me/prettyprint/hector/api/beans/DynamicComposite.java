@@ -59,19 +59,19 @@ public class DynamicComposite extends AbstractList<Object> implements
 
   static {
     DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("AsciiType",
-        ByteBufferSerializer.get());
+        AsciiSerializer.get());
     DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("BytesType",
         ByteBufferSerializer.get());
     DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("IntegerType",
-        ByteBufferSerializer.get());
+        BigIntegerSerializer.get());
     DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("LexicalUUIDType",
-        ByteBufferSerializer.get());
-    DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("LongType",
-        ByteBufferSerializer.get());
+        UUIDSerializer.get());
+    DEFAULT_COMPARER_TO_SERIALIZER_MAPPING
+        .put("LongType", LongSerializer.get());
     DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("TimeUUIDType",
-        ByteBufferSerializer.get());
+        UUIDSerializer.get());
     DEFAULT_COMPARER_TO_SERIALIZER_MAPPING.put("UTF8Type",
-        ByteBufferSerializer.get());
+        StringSerializer.get());
 
   }
 
@@ -197,9 +197,8 @@ public class DynamicComposite extends AbstractList<Object> implements
   }
 
   @Override
-  public int compareTo(DynamicComposite arg0) {
-    // TODO Auto-generated method stub
-    return 0;
+  public int compareTo(DynamicComposite o) {
+    return serialize().compareTo(o.serialize());
   }
 
   private String comparerForSerializer(Serializer<?> s) {
@@ -210,7 +209,6 @@ public class DynamicComposite extends AbstractList<Object> implements
     return "BytesType";
   }
 
-  @SuppressWarnings("unused")
   private Serializer<?> serializerForComparer(String c) {
     Serializer<?> s = comparerToSerializerMapping.get(c);
     if (s != null) {
