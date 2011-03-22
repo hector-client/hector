@@ -298,6 +298,14 @@ public class DynamicComposite extends AbstractList<Object> implements
     return null;
   }
 
+  public <T> T get(int i, Serializer<T> s) throws ClassCastException {
+    Component c = components.get(i);
+    if (c != null) {
+      return s.fromByteBuffer((ByteBuffer) c.getValue());
+    }
+    return null;
+  }
+
   @SuppressWarnings("unchecked")
   public ByteBuffer serialize() {
     if (serialized != null) {
