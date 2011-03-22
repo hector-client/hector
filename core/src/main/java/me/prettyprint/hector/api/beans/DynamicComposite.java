@@ -202,7 +202,7 @@ public class DynamicComposite extends AbstractList<Object> implements
   }
 
   private String comparerForSerializer(Serializer<?> s) {
-    String comparer = serializerToComparerMapping.get(s);
+    String comparer = serializerToComparerMapping.get(s.getClass());
     if (comparer != null) {
       return comparer;
     }

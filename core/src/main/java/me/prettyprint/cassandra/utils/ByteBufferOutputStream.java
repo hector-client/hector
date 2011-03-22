@@ -18,7 +18,6 @@ package me.prettyprint.cassandra.utils;
  * limitations under the License.
  */
 
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.LinkedList;
@@ -64,7 +63,7 @@ public class ByteBufferOutputStream extends OutputStream {
     for (ByteBuffer buffer : list) {
       result.put(buffer);
     }
-    return result;
+    return (ByteBuffer) result.rewind();
   }
 
   /** Prepend a list of ByteBuffers to this stream. */
@@ -86,10 +85,6 @@ public class ByteBufferOutputStream extends OutputStream {
   public void reset() {
     buffers = new LinkedList<ByteBuffer>();
     buffers.add(ByteBuffer.allocate(BUFFER_SIZE));
-  }
-
-  public void write(ByteBuffer buffer) {
-    buffers.add(buffer);
   }
 
   private ByteBuffer getBufferWithCapacity(int capacity) {
@@ -153,7 +148,7 @@ public class ByteBufferOutputStream extends OutputStream {
   }
 
   /** Add a buffer to the output without copying, if possible. */
-  public void writeBuffer(ByteBuffer buffer) throws IOException {
+  public void write(ByteBuffer buffer) {
     if (buffer.remaining() < BUFFER_SIZE) {
       write(buffer.array(), buffer.position(), buffer.remaining());
     } else { // append w/o copying bytes
