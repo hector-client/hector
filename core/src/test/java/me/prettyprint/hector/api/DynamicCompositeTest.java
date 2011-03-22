@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.DynamicComposite;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
@@ -48,7 +49,8 @@ public class DynamicCompositeTest {
     o = c.get(0);
     assertTrue(o instanceof Long);
 
-    b = createDynamicCompositeKey("Hello", UUID.randomUUID(), 10, false);
+    b = createDynamicCompositeKey("Hello",
+        TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
     c = new DynamicComposite();
     c.deserialize(b);
     o = c.get(0);
