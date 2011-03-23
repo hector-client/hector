@@ -17,13 +17,8 @@ import me.prettyprint.hector.api.beans.Composite;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class CompositeTest {
-
-  private static final Logger log = LoggerFactory
-      .getLogger(ClockResolutionTest.class);
 
   @Test
   public void testSerialization() throws Exception {
