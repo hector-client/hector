@@ -47,7 +47,7 @@ public class ComparatorType {
   }
 
   public static ComparatorType getByClassName(String className) {
-
+    if ( className == null ) return null;
     for (int a = 0; a < values.length; a++) {
       ComparatorType type = values[a];
       if (type.getClassName().equals(className)) {
