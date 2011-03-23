@@ -35,6 +35,13 @@ public class ExecutionResult<T> {
   }
 
   /**
+   * @return the execution time, as already recorded, in nanos
+   */
+  public long getExecutionTimeNano() {
+    return execTime;
+  }
+
+  /**
    * Execution time is actually recorded in nanos, so we divide this by 1000 
    * make the number more sensible
    * @return
@@ -42,6 +49,7 @@ public class ExecutionResult<T> {
   public long getExecutionTimeMicro() {
     return execTime / MICRO_DENOM;
   }
+
 
   @Override
   public String toString() {

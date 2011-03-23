@@ -64,6 +64,6 @@ public class AbstractSubColumnQuery<K, SN, N, V> implements SubColumnQuery<K, SN
     List<HColumn<N,V>> columns = slice.getColumns();
     HColumn<N, V> column = columns.size() == 0 ? null : columns.get(0);
     return new QueryResultImpl<HColumn<N,V>>(
-        new ExecutionResult<HColumn<N,V>>(column, r.getExecutionTimeMicro(), r.getHostUsed()), this);
+        new ExecutionResult<HColumn<N,V>>(column, r.getExecutionTimeNano(), r.getHostUsed()), this);
   }
 }
