@@ -34,6 +34,9 @@ import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+
 @SuppressWarnings("rawtypes")
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
@@ -75,10 +78,12 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         ByteBufferSerializer.get());
     DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(INTEGERTYPE.getTypeName(),
         BigIntegerSerializer.get());
+    // Can't use a BiMap because either UUIDType maps to the same serializer
     DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(LEXICALUUIDTYPE.getTypeName(),
         UUIDSerializer.get());
     DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(LONGTYPE.getTypeName(),
         LongSerializer.get());
+    // Can't use a BiMap because either UUIDType maps to the same serializer
     DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(TIMEUUIDTYPE.getTypeName(),
         UUIDSerializer.get());
     DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(UTF8TYPE.getTypeName(),
@@ -86,53 +91,24 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   }
 
-  public static final Map<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new HashMap<Byte, String>();
-
-  static {
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING
-        .put((byte) 'a', ASCIITYPE.getTypeName());
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING
-        .put((byte) 'b', BYTESTYPE.getTypeName());
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING.put((byte) 'i',
-        INTEGERTYPE.getTypeName());
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING.put((byte) 'x',
-        LEXICALUUIDTYPE.getTypeName());
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING.put((byte) 'l', LONGTYPE.getTypeName());
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING.put((byte) 't',
-        TIMEUUIDTYPE.getTypeName());
-    DEFAULT_ALIAS_TO_COMPARATOR_MAPPING.put((byte) 's', UTF8TYPE.getTypeName());
-
-  }
-
-  public static final Map<String, Byte> DEFAULT_COMPARATOR_TO_ALIAS_MAPPING = new HashMap<String, Byte>();
-
-  static {
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING
-        .put(ASCIITYPE.getTypeName(), (byte) 'a');
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING
-        .put(BYTESTYPE.getTypeName(), (byte) 'b');
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING.put(INTEGERTYPE.getTypeName(),
-        (byte) 'i');
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING.put(LEXICALUUIDTYPE.getTypeName(),
-        (byte) 'x');
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING.put(LONGTYPE.getTypeName(), (byte) 'l');
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING.put(TIMEUUIDTYPE.getTypeName(),
-        (byte) 't');
-    DEFAULT_COMPARATOR_TO_ALIAS_MAPPING.put(UTF8TYPE.getTypeName(), (byte) 's');
-
-  }
+  public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
+      .put((byte) 'a', ASCIITYPE.getTypeName())
+      .put((byte) 'b', BYTESTYPE.getTypeName())
+      .put((byte) 'i', INTEGERTYPE.getTypeName())
+      .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
+      .put((byte) 'l', LONGTYPE.getTypeName())
+      .put((byte) 't', TIMEUUIDTYPE.getTypeName())
+      .put((byte) 's', UTF8TYPE.getTypeName()).build();
 
   Map<Class<? extends Serializer>, String> serializerToComparatorMapping = DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
 
   Map<String, Serializer> comparatorToSerializerMapping = DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING;
 
-  Map<Byte, String> aliasesToComparatorMapping = DEFAULT_ALIAS_TO_COMPARATOR_MAPPING;
-
-  Map<String, Byte> comparatorToAliasMapping = DEFAULT_COMPARATOR_TO_ALIAS_MAPPING;
+  BiMap<Byte, String> aliasToComparatorMapping = DEFAULT_ALIAS_TO_COMPARATOR_MAPPING;
 
   boolean autoDeserialize = true;
 
-  boolean dynamic = false;
+  final boolean dynamic;
 
   List<Serializer<?>> serializersByPosition = null;
   List<String> comparatorsByPosition = null;
@@ -172,16 +148,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   ByteBuffer serialized = null;
 
-  public AbstractComposite() {
-
-  }
-
   public AbstractComposite(boolean dynamic) {
     this.dynamic = dynamic;
-  }
-
-  public AbstractComposite(Object... o) {
-    this.addAll(Arrays.asList(o));
   }
 
   public AbstractComposite(boolean dynamic, Object... o) {
@@ -219,23 +187,14 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   public Map<Byte, String> getAliasesToComparatorMapping() {
-    return aliasesToComparatorMapping;
+    return aliasToComparatorMapping;
   }
 
   public void setAliasesToComparatorMapping(
       Map<Byte, String> aliasesToComparatorMapping) {
     serialized = null;
-    this.aliasesToComparatorMapping = aliasesToComparatorMapping;
-  }
-
-  public Map<String, Byte> getComparatorToAliasMapping() {
-    return comparatorToAliasMapping;
-  }
-
-  public void setComparatorToAliasMapping(
-      Map<String, Byte> comparatorToAliasMapping) {
-    serialized = null;
-    this.comparatorToAliasMapping = comparatorToAliasMapping;
+    this.aliasToComparatorMapping = new ImmutableBiMap.Builder<Byte, String>()
+        .putAll(aliasesToComparatorMapping).build();
   }
 
   public boolean isAutoDeserialize() {
@@ -341,7 +300,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if ((header & 0x8000) == 0) {
           name = ByteBufferUtil.string(getBytes(bb, header));
         } else {
-          name = aliasesToComparatorMapping.get((byte) (header & 0xFF));
+          name = aliasToComparatorMapping.get((byte) (header & 0xFF));
         }
       } catch (CharacterCodingException e) {
         throw new RuntimeException(e);
@@ -478,8 +437,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if (comparator == null) {
           comparator = c.getComparator();
         }
-        if (comparatorToAliasMapping.containsKey(comparator)) {
-          out.writeShort((short) (0x8000 | comparatorToAliasMapping
+        if (aliasToComparatorMapping.inverse().containsKey(comparator)) {
+          out.writeShort((short) (0x8000 | aliasToComparatorMapping.inverse()
               .get(comparator)));
         } else {
           out.writeShort((short) comparator.length());
