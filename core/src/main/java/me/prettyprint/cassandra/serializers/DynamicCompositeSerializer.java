@@ -5,28 +5,29 @@ package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
 
-import me.prettyprint.hector.api.beans.Composite;
+import me.prettyprint.hector.api.beans.DynamicComposite;
 
 /**
  * @author Todd Nine
- *
+ * 
  */
-public class DynamicCompositeSerializer extends AbstractSerializer<Composite>{
+public class DynamicCompositeSerializer extends
+    AbstractSerializer<DynamicComposite> {
 
-	@Override
-	public ByteBuffer toByteBuffer(Composite obj) {
-	
-		return obj.serialize();
-	}
+  @Override
+  public ByteBuffer toByteBuffer(DynamicComposite obj) {
 
-	@Override
-	public Composite fromByteBuffer(ByteBuffer byteBuffer) {
-		
-		Composite composite = new Composite();
-		composite.deserialize(byteBuffer);
-		
-		return composite;
-		
-	}
+    return obj.serialize();
+  }
+
+  @Override
+  public DynamicComposite fromByteBuffer(ByteBuffer byteBuffer) {
+
+    DynamicComposite composite = new DynamicComposite();
+    composite.deserialize(byteBuffer);
+
+    return composite;
+
+  }
 
 }

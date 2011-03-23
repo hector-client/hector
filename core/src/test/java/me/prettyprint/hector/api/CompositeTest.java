@@ -13,6 +13,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.Composite;
+import me.prettyprint.hector.api.beans.DynamicComposite;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
@@ -21,9 +22,9 @@ import org.junit.Test;
 public class CompositeTest {
 
   @Test
-  public void testSerialization() throws Exception {
+  public void testDynamicSerialization() throws Exception {
 
-    Composite c = new Composite();
+    DynamicComposite c = new DynamicComposite();
     c.add("String1");
     ByteBuffer b = c.serialize();
     assertEquals(b.remaining(), 12);
@@ -32,7 +33,7 @@ public class CompositeTest {
     b = c.serialize();
     assertEquals(b.remaining(), 24);
 
-    c = new Composite();
+    c = new DynamicComposite();
     c.deserialize(b);
     assertEquals(2, c.size());
     Object o = c.get(0);
@@ -40,17 +41,17 @@ public class CompositeTest {
     o = c.get(1);
     assertEquals("String2", o);
 
-    c = new Composite();
+    c = new DynamicComposite();
     c.add(new Long(10));
     b = c.serialize();
-    c = new Composite();
+    c = new DynamicComposite();
     c.deserialize(b);
     o = c.get(0);
     assertTrue(o instanceof Long);
 
     b = createDynamicCompositeKey("Hello",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
-    c = new Composite();
+    c = new DynamicComposite();
     c.deserialize(b.slice());
     o = c.get(0);
     assertTrue(o instanceof ByteBuffer);
@@ -63,14 +64,14 @@ public class CompositeTest {
     assertEquals(BigInteger.class, o.getClass());
     assertEquals(BigInteger.valueOf(10), o);
 
-    c = new Composite();
+    c = new DynamicComposite();
     c.setAutoDeserialize(false);
     c.deserialize(b.slice());
     assertTrue(c.get(0) instanceof ByteBuffer);
     assertTrue(c.get(1) instanceof ByteBuffer);
     assertTrue(c.get(2) instanceof ByteBuffer);
 
-    c = new Composite();
+    c = new DynamicComposite();
     c.setSerializersByPosition(StringSerializer.get(), null,
         ByteBufferSerializer.get());
     c.deserialize(b.slice());
@@ -78,10 +79,14 @@ public class CompositeTest {
     assertTrue(c.get(1) instanceof UUID);
     assertTrue(c.get(2) instanceof ByteBuffer);
 
-    b = createCompositeKey("Hello", TimeUUIDUtils.getUniqueTimeUUIDinMillis(),
-        10, false);
-    c = new Composite();
-    c.setDynamic(false);
+  }
+
+  @Test
+  public void testStaticSerialization() throws Exception {
+
+    ByteBuffer b = createCompositeKey("Hello",
+        TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
+    Composite c = new Composite();
     c.setSerializersByPosition(StringSerializer.get(), UUIDSerializer.get(),
         BigIntegerSerializer.get());
     c.deserialize(b.slice());
