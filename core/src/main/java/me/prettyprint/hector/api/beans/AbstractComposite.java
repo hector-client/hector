@@ -13,20 +13,17 @@ import java.nio.charset.CharacterCodingException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 import me.prettyprint.cassandra.serializers.AsciiSerializer;
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
-import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
-import me.prettyprint.cassandra.serializers.ShortSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.ByteBufferOutputStream;
@@ -36,6 +33,7 @@ import org.apache.cassandra.utils.ByteBufferUtil;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
+import com.google.common.collect.ImmutableClassToInstanceMap;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractComposite extends AbstractList<Object> implements
@@ -44,52 +42,21 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   static final Logger logger = Logger.getLogger(AbstractComposite.class
       .getName());
 
-  public static final Map<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
+  public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
+      .put(AsciiSerializer.class, ASCIITYPE.getTypeName())
+      .put(BigIntegerSerializer.class, INTEGERTYPE.getTypeName())
+      .put(ByteBufferSerializer.class, BYTESTYPE.getTypeName())
+      .put(LongSerializer.class, LONGTYPE.getTypeName())
+      .put(StringSerializer.class, UTF8TYPE.getTypeName())
+      .put(UUIDSerializer.class, "UUIDType").build();
 
-  static {
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new HashMap<Class<? extends Serializer>, String>();
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(AsciiSerializer.class,
-        ASCIITYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(BigIntegerSerializer.class,
-        INTEGERTYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(BooleanSerializer.class,
-        BYTESTYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(ByteBufferSerializer.class,
-        BYTESTYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(BytesArraySerializer.class,
-        BYTESTYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(LongSerializer.class,
-        LONGTYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(ShortSerializer.class,
-        BYTESTYPE.getTypeName());
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(StringSerializer.class,
-        UTF8TYPE.getTypeName());
-    // TODO this doesn't work, there isn't a unified UUIDType yet
-    DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING.put(UUIDSerializer.class,
-        "UUIDType");
-  }
-
-  public static final Map<String, Serializer> DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING = new HashMap<String, Serializer>();
-
-  static {
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(ASCIITYPE.getTypeName(),
-        AsciiSerializer.get());
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(BYTESTYPE.getTypeName(),
-        ByteBufferSerializer.get());
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(INTEGERTYPE.getTypeName(),
-        BigIntegerSerializer.get());
-    // Can't use a BiMap because either UUIDType maps to the same serializer
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(LEXICALUUIDTYPE.getTypeName(),
-        UUIDSerializer.get());
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(LONGTYPE.getTypeName(),
-        LongSerializer.get());
-    // Can't use a BiMap because either UUIDType maps to the same serializer
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(TIMEUUIDTYPE.getTypeName(),
-        UUIDSerializer.get());
-    DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING.put(UTF8TYPE.getTypeName(),
-        StringSerializer.get());
-
-  }
+  static final ImmutableClassToInstanceMap<Serializer> SERIALIZERS = new ImmutableClassToInstanceMap.Builder<Serializer>()
+      .put(AsciiSerializer.class, AsciiSerializer.get())
+      .put(BigIntegerSerializer.class, BigIntegerSerializer.get())
+      .put(ByteBufferSerializer.class, ByteBufferSerializer.get())
+      .put(LongSerializer.class, LongSerializer.get())
+      .put(StringSerializer.class, StringSerializer.get())
+      .put(UUIDSerializer.class, UUIDSerializer.get()).build();
 
   public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
       .put((byte) 'a', ASCIITYPE.getTypeName())
@@ -100,9 +67,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put((byte) 't', TIMEUUIDTYPE.getTypeName())
       .put((byte) 's', UTF8TYPE.getTypeName()).build();
 
-  Map<Class<? extends Serializer>, String> serializerToComparatorMapping = DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
-
-  Map<String, Serializer> comparatorToSerializerMapping = DEFAULT_COMPARATOR_TO_SERIALIZER_MAPPING;
+  BiMap<Class<? extends Serializer>, String> serializerToComparatorMapping = DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
 
   BiMap<Byte, String> aliasToComparatorMapping = DEFAULT_ALIAS_TO_COMPARATOR_MAPPING;
 
@@ -173,17 +138,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public void setSerializerToComparatorMapping(
       Map<Class<? extends Serializer>, String> serializerToComparatorMapping) {
     serialized = null;
-    this.serializerToComparatorMapping = serializerToComparatorMapping;
-  }
-
-  public Map<String, Serializer> getComparatorToSerializerMapping() {
-    return comparatorToSerializerMapping;
-  }
-
-  public void setComparatorToSerializerMapping(
-      Map<String, Serializer> comparatorToSerializerMapping) {
-    serialized = null;
-    this.comparatorToSerializerMapping = comparatorToSerializerMapping;
+    this.serializerToComparatorMapping = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
+        .putAll(serializerToComparatorMapping).build();
   }
 
   public Map<Byte, String> getAliasesToComparatorMapping() {
@@ -193,7 +149,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public void setAliasesToComparatorMapping(
       Map<Byte, String> aliasesToComparatorMapping) {
     serialized = null;
-    this.aliasToComparatorMapping = new ImmutableBiMap.Builder<Byte, String>()
+    aliasToComparatorMapping = new ImmutableBiMap.Builder<Byte, String>()
         .putAll(aliasesToComparatorMapping).build();
   }
 
@@ -246,8 +202,21 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     return BYTESTYPE.getTypeName();
   }
 
+  private String comparatorForUUID(UUID uuid) {
+    if (uuid.version() == 1) {
+      return TIMEUUIDTYPE.getTypeName();
+    }
+    return LEXICALUUIDTYPE.getTypeName();
+  }
+
   private Serializer<?> serializerForComparator(String c) {
-    Serializer<?> s = comparatorToSerializerMapping.get(c);
+    if (LEXICALUUIDTYPE.getTypeName().equals(c)
+        || TIMEUUIDTYPE.getTypeName().equals(c)) {
+      return UUIDSerializer.get();
+    }
+
+    Serializer<?> s = SERIALIZERS.getInstance(serializerToComparatorMapping
+        .inverse().get(c));
     if (s != null) {
       return s;
     }
@@ -315,7 +284,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public <T> AbstractComposite add(T value, Serializer<T> s) {
     serialized = null;
 
-    add(value, s, comparatorForSerializer(s));
+    add(value, s, value instanceof UUID ? comparatorForUUID((UUID) value)
+        : comparatorForSerializer(s));
 
     return this;
 
@@ -360,8 +330,12 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);
     }
-    components.add(index, new Component(element, s, comparatorForSerializer(s),
-        false));
+    String c = comparatorForPosition(index);
+    if (c == null) {
+      c = element instanceof UUID ? comparatorForUUID((UUID) element)
+          : comparatorForSerializer(s);
+    }
+    components.add(index, new Component(element, s, c, false));
   }
 
   @Override
@@ -378,9 +352,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @Override
   public Object set(int index, Object element) {
     serialized = null;
-    Serializer s = SerializerTypeInferer.getSerializer(element);
-    Component prev = components.set(index, new Component(element, s,
-        comparatorForSerializer(s), false));
+    Serializer s = serializerForPosition(index);
+    if (s == null) {
+      s = SerializerTypeInferer.getSerializer(element);
+    }
+    String c = comparatorForPosition(index);
+    if (c == null) {
+      c = element instanceof UUID ? comparatorForUUID((UUID) element)
+          : comparatorForSerializer(s);
+    }
+    Component prev = components.set(index, new Component(element, s, c, false));
     if (prev != null) {
       return prev.getValue();
     }
