@@ -11,6 +11,7 @@ import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Serializer;
 
 /**
@@ -71,5 +72,23 @@ abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<K, N> {
 
   public Date getDate(N columnName) {
     return DateSerializer.get().fromByteBuffer(getColumnValue(columnName));
+  }
+  
+  @Override
+  public long getExecutionTimeMicro() {
+    // TODO Auto-generated method stub
+    return 0;
+  }  
+  
+  @Override
+  public long getExecutionTimeNano() {
+    // TODO Auto-generated method stub
+    return 0;
+  }
+
+  @Override
+  public CassandraHost getHostUsed() {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

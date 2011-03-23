@@ -90,15 +90,4 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
     rows.remove();
   }
 
-  @Override
-  public long getExecutionTimeMicro() {
-    // TODO Auto-generated method stub
-    return 0;
-  }
-
-  @Override
-  public CassandraHost getHostUsed() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 }
