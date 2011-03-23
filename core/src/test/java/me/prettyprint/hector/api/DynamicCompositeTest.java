@@ -10,7 +10,7 @@ import java.util.UUID;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
-import me.prettyprint.hector.api.beans.DynamicComposite;
+import me.prettyprint.hector.api.beans.Composite;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
@@ -26,7 +26,7 @@ public class DynamicCompositeTest {
   @Test
   public void testSerialization() throws Exception {
 
-    DynamicComposite c = new DynamicComposite();
+    Composite c = new Composite();
     c.add("String1");
     ByteBuffer b = c.serialize();
     assertEquals(b.remaining(), 12);
@@ -35,7 +35,7 @@ public class DynamicCompositeTest {
     b = c.serialize();
     assertEquals(b.remaining(), 24);
 
-    c = new DynamicComposite();
+    c = new Composite();
     c.deserialize(b);
     assertEquals(2, c.size());
     Object o = c.get(0);
@@ -43,17 +43,17 @@ public class DynamicCompositeTest {
     o = c.get(1);
     assertEquals("String2", o);
 
-    c = new DynamicComposite();
+    c = new Composite();
     c.add(new Long(10));
     b = c.serialize();
-    c = new DynamicComposite();
+    c = new Composite();
     c.deserialize(b);
     o = c.get(0);
     assertTrue(o instanceof Long);
 
     b = createDynamicCompositeKey("Hello",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
-    c = new DynamicComposite();
+    c = new Composite();
     c.deserialize(b.slice());
     o = c.get(0);
     assertTrue(o instanceof ByteBuffer);
@@ -66,14 +66,14 @@ public class DynamicCompositeTest {
     assertEquals(BigInteger.class, o.getClass());
     assertEquals(BigInteger.valueOf(10), o);
 
-    c = new DynamicComposite();
+    c = new Composite();
     c.setAutoDeserialize(false);
     c.deserialize(b.slice());
     assertTrue(c.get(0) instanceof ByteBuffer);
     assertTrue(c.get(1) instanceof ByteBuffer);
     assertTrue(c.get(2) instanceof ByteBuffer);
 
-    c = new DynamicComposite();
+    c = new Composite();
     c.setSerializersByPosition(StringSerializer.get(), null,
         ByteBufferSerializer.get());
     c.deserialize(b.slice());
