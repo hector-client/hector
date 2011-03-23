@@ -7,8 +7,10 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.Composite;
 
@@ -80,9 +82,20 @@ public class DynamicCompositeTest {
     assertTrue(c.get(0) instanceof String);
     assertTrue(c.get(1) instanceof UUID);
     assertTrue(c.get(2) instanceof ByteBuffer);
+
+    b = createCompositeKey("Hello", TimeUUIDUtils.getUniqueTimeUUIDinMillis(),
+        10, false);
+    c = new Composite();
+    c.setDynamic(false);
+    c.setSerializersByPosition(StringSerializer.get(), UUIDSerializer.get(),
+        BigIntegerSerializer.get());
+    c.deserialize(b.slice());
+    assertTrue(c.get(0) instanceof String);
+    assertTrue(c.get(1) instanceof UUID);
+    assertTrue(c.get(2) instanceof BigInteger);
   }
 
-  // from the Casssandra DynamicCompositeType unit test
+  // from the Casssandra DynamicCompositeTypeTest unit test
   private ByteBuffer createDynamicCompositeKey(String s, UUID uuid, int i,
       boolean lastIsOne) {
     ByteBuffer bytes = ByteBufferUtil.bytes(s);
@@ -116,6 +129,46 @@ public class DynamicCompositeTest {
           // fit in a byte *and* IntegerType.fromString() will
           // return something compatible (i.e, putting a full int here
           // would break 'fromStringTest')
+          bb.putShort((short) 1);
+          bb.put((byte) i);
+          bb.put(lastIsOne ? (byte) 1 : (byte) 0);
+        }
+      }
+    }
+    bb.rewind();
+    return bb;
+  }
+
+  // from the Casssandra CompositeTypeTest unit test
+  static ByteBuffer createCompositeKey(String s, UUID uuid, int i,
+      boolean lastIsOne) {
+    ByteBuffer bytes = ByteBufferUtil.bytes(s);
+    int totalSize = 0;
+    if (s != null) {
+      totalSize += 2 + bytes.remaining() + 1;
+      if (uuid != null) {
+        totalSize += 2 + 16 + 1;
+        if (i != -1) {
+          totalSize += 2 + 1 + 1;
+        }
+      }
+    }
+
+    ByteBuffer bb = ByteBuffer.allocate(totalSize);
+
+    if (s != null) {
+      bb.putShort((short) bytes.remaining());
+      bb.put(bytes);
+      bb.put((uuid == null) && lastIsOne ? (byte) 1 : (byte) 0);
+      if (uuid != null) {
+        bb.putShort((short) 16);
+        bb.put(UUIDGen.decompose(uuid));
+        bb.put((i == -1) && lastIsOne ? (byte) 1 : (byte) 0);
+        if (i != -1) {
+          // We are putting a byte only because our test use ints that fit in a
+          // byte *and* IntegerType.fromString() will
+          // return something compatible (i.e, putting a full int here would
+          // break 'fromStringTest')
           bb.putShort((short) 1);
           bb.put((byte) i);
           bb.put(lastIsOne ? (byte) 1 : (byte) 0);

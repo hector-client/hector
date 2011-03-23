@@ -38,8 +38,7 @@ import org.apache.cassandra.utils.ByteBufferUtil;
 public class Composite extends AbstractList<Object> implements
     Comparable<Composite> {
 
-  static final Logger logger = Logger.getLogger(Composite.class
-      .getName());
+  static final Logger logger = Logger.getLogger(Composite.class.getName());
 
   public static final Map<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
 
@@ -318,6 +317,36 @@ public class Composite extends AbstractList<Object> implements
     return comparatorsByPosition.get(i);
   }
 
+  private String getComparator(int i, ByteBuffer bb) {
+    String name = comparatorForPosition(i);
+    if (name != null) {
+      return name;
+    }
+    if (!dynamic) {
+      if (bb.hasRemaining()) {
+        return BYTESTYPE.getTypeName();
+      } else {
+        return null;
+      }
+    }
+    if (bb.hasRemaining()) {
+      try {
+        int header = getShortLength(bb);
+        if ((header & 0x8000) == 0) {
+          name = ByteBufferUtil.string(getBytes(bb, header));
+        } else {
+          name = aliasesToComparatorMapping.get((byte) (header & 0xFF));
+        }
+      } catch (CharacterCodingException e) {
+        throw new RuntimeException(e);
+      }
+    }
+    if ((name != null) && (name.length() == 0)) {
+      name = null;
+    }
+    return name;
+  }
+
   public <T> Composite add(T value, Serializer<T> s) {
     serialized = null;
 
@@ -499,32 +528,6 @@ public class Composite extends AbstractList<Object> implements
   protected static ByteBuffer getWithShortLength(ByteBuffer bb) {
     int length = getShortLength(bb);
     return getBytes(bb, length);
-  }
-
-  private String getComparator(int i, ByteBuffer bb) {
-    String name = comparatorForPosition(i);
-    if (name != null) {
-      return name;
-    }
-    if (!dynamic) {
-      return BYTESTYPE.getTypeName();
-    }
-    if (bb.hasRemaining()) {
-      try {
-        int header = getShortLength(bb);
-        if ((header & 0x8000) == 0) {
-          name = ByteBufferUtil.string(getBytes(bb, header));
-        } else {
-          name = aliasesToComparatorMapping.get((byte) (header & 0xFF));
-        }
-      } catch (CharacterCodingException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    if ((name != null) && (name.length() == 0)) {
-      name = null;
-    }
-    return name;
   }
 
 }
