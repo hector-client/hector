@@ -53,7 +53,7 @@ public class DynamicCompositeTest {
     b = createDynamicCompositeKey("Hello",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
     c = new DynamicComposite();
-    c.deserialize(b);
+    c.deserialize(b.slice());
     o = c.get(0);
     assertTrue(o instanceof ByteBuffer);
     assertEquals("Hello", c.get(0, StringSerializer.get()));
@@ -65,6 +65,19 @@ public class DynamicCompositeTest {
     assertEquals(BigInteger.class, o.getClass());
     assertEquals(BigInteger.valueOf(10), o);
 
+    c = new DynamicComposite();
+    c.setAutoDeserialize(false);
+    c.deserialize(b.slice());
+    assertTrue(c.get(0) instanceof ByteBuffer);
+    assertTrue(c.get(1) instanceof ByteBuffer);
+    assertTrue(c.get(2) instanceof ByteBuffer);
+
+    c = new DynamicComposite();
+    c.setSerializersByPosition(StringSerializer.get());
+    c.deserialize(b.slice());
+    assertTrue(c.get(0) instanceof String);
+    assertTrue(c.get(1) instanceof UUID);
+    assertTrue(c.get(2) instanceof BigInteger);
   }
 
   // from the Casssandra DynamicCompositeType unit test
