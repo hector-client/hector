@@ -4,7 +4,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -109,6 +111,10 @@ public class DynamicComposite extends AbstractList<Object> implements
 
   Map<String, Byte> comparerToAliasMapping = DEFAULT_COMPARER_TO_ALIAS_MAPPING;
 
+  boolean autoDeserialize = true;
+
+  List<Serializer<?>> serializersByPosition = null;
+
   public class Component<T> {
     final Serializer<T> serializer;
     final T value;
@@ -196,6 +202,26 @@ public class DynamicComposite extends AbstractList<Object> implements
     this.comparerToAliasMapping = comparerToAliasMapping;
   }
 
+  public boolean isAutoDeserialize() {
+    return autoDeserialize;
+  }
+
+  public void setAutoDeserialize(boolean autoDeserialize) {
+    this.autoDeserialize = autoDeserialize;
+  }
+
+  public List<Serializer<?>> getSerializersByPosition() {
+    return serializersByPosition;
+  }
+
+  public void setSerializersByPosition(List<Serializer<?>> serializersByPosition) {
+    this.serializersByPosition = serializersByPosition;
+  }
+
+  public void setSerializersByPosition(Serializer<?>... serializers) {
+    serializersByPosition = Arrays.asList(serializers);
+  }
+
   @Override
   public int compareTo(DynamicComposite o) {
     return serialize().compareTo(o.serialize());
@@ -215,6 +241,24 @@ public class DynamicComposite extends AbstractList<Object> implements
       return s;
     }
     return ByteBufferSerializer.get();
+  }
+
+  private Serializer<?> serializerForPosition(int i) {
+    if (serializersByPosition == null) {
+      return null;
+    }
+    if (i >= serializersByPosition.size()) {
+      return null;
+    }
+    return serializersByPosition.get(i);
+  }
+
+  private Serializer<?> getSerializer(int i, String c) {
+    Serializer<?> s = serializerForPosition(i);
+    if (s != null) {
+      return s;
+    }
+    return serializerForComparer(c);
   }
 
   public <T> DynamicComposite add(T value, Serializer<T> s) {
@@ -261,7 +305,10 @@ public class DynamicComposite extends AbstractList<Object> implements
   @Override
   public void add(int index, Object element) {
     serialized = null;
-    Serializer s = SerializerTypeInferer.getSerializer(element);
+    Serializer s = serializerForPosition(index);
+    if (s == null) {
+      s = SerializerTypeInferer.getSerializer(element);
+    }
     components.add(index, new Component(element, s, comparerForSerializer(s),
         false));
   }
@@ -306,6 +353,18 @@ public class DynamicComposite extends AbstractList<Object> implements
     return null;
   }
 
+  public Component getComponent(int i) {
+    if (i >= components.size()) {
+      return null;
+    }
+    Component c = components.get(i);
+    return c;
+  }
+
+  public Iterator<Component> componentsIterator() {
+    return components.iterator();
+  }
+
   @SuppressWarnings("unchecked")
   public ByteBuffer serialize() {
     if (serialized != null) {
@@ -339,16 +398,19 @@ public class DynamicComposite extends AbstractList<Object> implements
     components = new ArrayList<Component>();
 
     String comparer = null;
+    int i = 0;
     while ((comparer = getComparator(b)) != null) {
       ByteBuffer data = getWithShortLength(b);
       if (data != null) {
-        Serializer<?> s = serializerForComparer(comparer);
+        Serializer<?> s = autoDeserialize ? getSerializer(i, comparer)
+            : ByteBufferSerializer.get();
         Object value = s.fromByteBuffer(data);
         boolean inclusive = b.get() != 0;
         components.add(new Component(value, s, comparer, inclusive));
       } else {
         throw new RuntimeException("Missing component data in composite type");
       }
+      i++;
     }
 
   }
