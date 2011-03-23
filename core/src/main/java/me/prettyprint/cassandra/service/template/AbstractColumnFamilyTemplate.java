@@ -150,7 +150,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
   }
 
   protected MutationResult executeIfNotBatched() {    
-    return isBatched() ? executeBatch() : null;
+    return !isBatched() ? executeBatch() : null;
   }
 
   public void deleteRow(K key) {
