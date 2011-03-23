@@ -118,8 +118,10 @@ public class AbstractColumnFamilyTemplate<K, N> {
     return topSerializer;
   }
 
-  public MutationResult executeBatch() {
-    return mutator.execute();
+  public MutationResult executeBatch() {    
+    MutationResult result = mutator.execute();
+    mutator.discardPendingMutations();
+    return result;
   }
 
   public Mutator<K> getMutator() {
@@ -147,11 +149,8 @@ public class AbstractColumnFamilyTemplate<K, N> {
     this.exceptionsTranslator = exceptionsTranslator;
   }
 
-  protected MutationResult executeIfNotBatched() {
-    if (!isBatched()) {
-      return mutator.execute();
-    }
-    return null;
+  protected MutationResult executeIfNotBatched() {    
+    return isBatched() ? executeBatch() : null;
   }
 
   public void deleteRow(K key) {

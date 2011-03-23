@@ -237,7 +237,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   
   @Override
   public long getExecutionTimeMicro() {  
-    return lastExecutionTime;
+    return lastExecutionTime / 1000;
   }
 
   @Override
@@ -349,6 +349,11 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
       }
     });
     applyToRow(_keys.get(0), rows.get(keySerializer.toByteBuffer(_keys.get(0))));
+  }
+
+  @Override
+  public long getExecutionTimeNano() {
+    return lastExecutionTime;
   }
 
 }

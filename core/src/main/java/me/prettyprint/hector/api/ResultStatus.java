@@ -18,6 +18,8 @@ public interface ResultStatus {
    * @return
    */
   long getExecutionTimeMicro();
+  
+  long getExecutionTimeNano();
 
   /**
    * The {@link CassandraHost} on which this operation
