@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.DynamicComposite;
@@ -73,11 +74,12 @@ public class DynamicCompositeTest {
     assertTrue(c.get(2) instanceof ByteBuffer);
 
     c = new DynamicComposite();
-    c.setSerializersByPosition(StringSerializer.get());
+    c.setSerializersByPosition(StringSerializer.get(), null,
+        ByteBufferSerializer.get());
     c.deserialize(b.slice());
     assertTrue(c.get(0) instanceof String);
     assertTrue(c.get(1) instanceof UUID);
-    assertTrue(c.get(2) instanceof BigInteger);
+    assertTrue(c.get(2) instanceof ByteBuffer);
   }
 
   // from the Casssandra DynamicCompositeType unit test
