@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -14,8 +15,8 @@ public class MappedColumnFamilyResultWrapper<K, N, V> extends ColumnFamilyResult
   
   public MappedColumnFamilyResultWrapper(Serializer<K> keySerializer,
       Serializer<N> columnNameSerializer,
-      Map<ByteBuffer, List<ColumnOrSuperColumn>> rows, ColumnFamilyRowMapper mapper) {
-    super(keySerializer, columnNameSerializer, rows);    
+      ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> executionResult, ColumnFamilyRowMapper mapper) {
+    super(keySerializer, columnNameSerializer, executionResult);    
   }
 
   @Override

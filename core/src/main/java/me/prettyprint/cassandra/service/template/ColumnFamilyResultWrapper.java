@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
@@ -26,12 +27,13 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   private Map<N,HColumn<N,ByteBuffer>> columns = new HashMap<N,HColumn<N,ByteBuffer>>();
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
+  private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
   
   public ColumnFamilyResultWrapper(Serializer<K> keySerializer,
       Serializer<N> columnNameSerializer,
-      Map<ByteBuffer,List<ColumnOrSuperColumn>> rows) {
-    super(keySerializer, columnNameSerializer);
-    this.rows = rows.entrySet().iterator();
+      ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult) {
+    super(keySerializer, columnNameSerializer, executionResult);    
+    this.rows = executionResult.get().entrySet().iterator();    
     next();
   }
     

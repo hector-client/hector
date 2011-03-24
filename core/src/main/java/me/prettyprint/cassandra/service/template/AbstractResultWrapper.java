@@ -12,6 +12,7 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.hector.api.ResultStatus;
 import me.prettyprint.hector.api.Serializer;
 
 /**
@@ -21,14 +22,16 @@ import me.prettyprint.hector.api.Serializer;
  * a primitive type when requested.
  * 
  * This class is a non-static inner class which inherits the Java generic
- * parameters of it's containing CassandraTemplate instance. This allows it to
- * inherit the <KEY> parameter from CassandraTemplate.
+ * parameters of it's containing ColumnFamilyTemplate instance. This allows it to
+ * inherit the <K> parameter from ColumnFamilyTemplate.
  * 
- * The <TYPE> parameters allows this to be used by standard and super column
+ * The <N> parameters allows this to be used by standard and super column
  * queries
  * 
  * @author david
- * @since Mar 10, 2011
+ * @author zznate
+ * @param <K> 
+ *          the type of the key
  * @param <N>
  *          the standard column name type or the super column's child column
  *          type
@@ -37,10 +40,12 @@ abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<K, N> {
 
   protected Serializer<K> keySerializer;
   protected Serializer<N> columnNameSerializer;
+  protected ResultStatus resultStatus;
   
-  public AbstractResultWrapper(Serializer<K> keySerializer, Serializer<N> columnNameSerializer) {
+  public AbstractResultWrapper(Serializer<K> keySerializer, Serializer<N> columnNameSerializer, ResultStatus resultStatus) {
     this.keySerializer = keySerializer;
     this.columnNameSerializer = columnNameSerializer;
+    this.resultStatus = resultStatus;
   }
 
   public abstract ByteBuffer getColumnValue(N columnName);
@@ -76,19 +81,17 @@ abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<K, N> {
   
   @Override
   public long getExecutionTimeMicro() {
-    // TODO Auto-generated method stub
-    return 0;
+    return  resultStatus.getExecutionTimeMicro();
   }  
   
   @Override
   public long getExecutionTimeNano() {
-    // TODO Auto-generated method stub
-    return 0;
+    return resultStatus.getExecutionTimeNano();
   }
 
   @Override
   public CassandraHost getHostUsed() {
-    // TODO Auto-generated method stub
-    return null;
+    return resultStatus.getHostUsed();
   }
+  
 }

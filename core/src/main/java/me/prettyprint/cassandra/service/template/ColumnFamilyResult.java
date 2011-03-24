@@ -7,30 +7,31 @@ import java.util.UUID;
 import me.prettyprint.hector.api.ResultStatus;
 
 /**
- * A commen interface for access to the resuls of a query of either a standard or super column family.
+ * A common interface for access to the resuls of a query of either a standard or super column family.
  * There are different implementations of this which hide the differences requires of standar/super 
- * column families.
+ * column families. As this interface inherits from {@link ResultStatus}, results will also provide
+ * execution details.
  *  
  * @author david
- * @since Mar 10, 2011
+ * @author zznate
  * @param <K>
  * @param <N>
  */
 public interface ColumnFamilyResult<K, N> extends Iterator<ColumnFamilyResult<K,N>>,ResultStatus {
-  public K getKey();
+  K getKey();
 
-  public UUID getUUID(N columnName);
+  UUID getUUID(N columnName);
 
-  public String getString(N columnName);
+  String getString(N columnName);
 
-  public Long getLong(N columnName);
+  Long getLong(N columnName);
 
-  public Integer getInteger(N columnName);
+  Integer getInteger(N columnName);
 
-  public Boolean getBoolean(N columnName);
+  Boolean getBoolean(N columnName);
 
-  public byte[] getByteArray(N columnName);
+  byte[] getByteArray(N columnName);
 
-  public Date getDate(N columnName);
+  Date getDate(N columnName);  
 
 }
