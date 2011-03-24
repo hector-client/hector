@@ -47,6 +47,7 @@ import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.mutation.CounterMutator;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
@@ -311,6 +312,19 @@ public final class HFactory {
   public static <K, N, V> Mutator<K> createMutator(Keyspace keyspace,
       Serializer<K> keySerializer) {
     return new MutatorImpl<K>(keyspace, keySerializer);
+  }
+  
+
+  /**
+   * Creates a counter mutator for updating counters in a keyspace.
+   *
+   * @param keyspace
+   * @param keySerializer
+   */
+  public static <K, N> CounterMutator<K> createCounterMutator(Keyspace keyspace,
+      Serializer<K> keySerializer) {
+    return null; // TODO (patricioe) to be implemented.
+    //return new CounterMutatorImpl<K>(keyspace, keySerializer);
   }
 
   public static <K, N, V> ColumnQuery<K, N, V> createColumnQuery(
