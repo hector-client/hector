@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.hector.api.ResultStatus;
 
 
 /**
@@ -11,7 +12,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
  * @author Ran
  * @author zznate
  */
-public class ExecutionResult<T> {
+public class ExecutionResult<T> implements ResultStatus {
 
   private final T value;
   private final long execTime;

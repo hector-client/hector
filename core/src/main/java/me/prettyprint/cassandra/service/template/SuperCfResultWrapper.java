@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+
+import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -26,8 +29,9 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
 
 
   public SuperCfResultWrapper(Serializer<K> keySerializer,
-      Serializer<N> columnNameSerializer) {
-    super(keySerializer, columnNameSerializer);
+      Serializer<N> columnNameSerializer,
+      ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> executionResult) {
+    super(keySerializer, columnNameSerializer, executionResult);
     // TODO Auto-generated constructor stub
   }
 
