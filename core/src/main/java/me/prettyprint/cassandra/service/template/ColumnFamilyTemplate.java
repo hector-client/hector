@@ -75,29 +75,14 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
   }
 
   public ColumnFamilyUpdater<K, N> createUpdater(K key) {
-    ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>();
+    ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>(this, columnFactory);
     updater.addKey(key);
-    updater.template = this;
     return updater;
   }
   
   public void update(ColumnFamilyUpdater<K, N> updater) {
     updater.update();
     executeIfNotBatched();
-  }
-  
-  /**
-   * Updates values in a standard column family in the row specified by key.
-   * 
-   * @param key
-   *          the row key
-   * @param updater
-   *          the object performing updates of the current row
-   */
-  public void update(K key, ColumnFamilyUpdater<K, N> updater) {
-    updater.template = this;
-    updater.addKey(key);
-    update(updater);
   }
   
   

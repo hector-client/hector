@@ -4,8 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.prettyprint.cassandra.model.HSlicePredicate;
+import me.prettyprint.cassandra.model.thrift.ThriftColumnFactory;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
+import me.prettyprint.hector.api.ColumnFactory;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -26,6 +28,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
   protected Map<N, Serializer<?>> columnValueSerializers;
   protected ColumnParent columnParent;
   protected HSlicePredicate<N> activeSlicePredicate;
+  protected ColumnFactory columnFactory;
   
   /** The serializer for a standard column name or a super-column name */
   protected Serializer<N> topSerializer;
@@ -72,6 +75,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
     this.columnParent = new ColumnParent(columnFamily);
     this.activeSlicePredicate = new HSlicePredicate<N>(topSerializer);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
+    this.columnFactory = new ThriftColumnFactory();
   }
 
 
@@ -147,6 +151,10 @@ public class AbstractColumnFamilyTemplate<K, N> {
 
   public void setExceptionsTranslator(ExceptionsTranslator exceptionsTranslator) {
     this.exceptionsTranslator = exceptionsTranslator;
+  }    
+
+  public void setColumnFactory(ColumnFactory columnFactory) {
+    this.columnFactory = columnFactory;
   }
 
   protected MutationResult executeIfNotBatched() {    
