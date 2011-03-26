@@ -27,12 +27,9 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   @Test
   public void testCreateSelectTemplate() {
     ColumnFamilyTemplate<String, String> template = new ColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
-    template.update("key1", new ColumnFamilyUpdater<String, String>() {      
-      @Override
-      public void update() {
-        setString("column1", "value1");        
-      }
-    });
+    ColumnFamilyUpdater updater = template.createUpdater("key1"); 
+    updater.setString("column1","value1");
+    updater.update();
     
     String value = template.queryColumns("key1", "", "", new ColumnFamilyRowMapper<String, String, String>() {
       @Override
