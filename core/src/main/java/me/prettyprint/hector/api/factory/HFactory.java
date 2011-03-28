@@ -7,6 +7,7 @@ import java.util.Map;
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.ExecutingVirtualKeyspace;
 import me.prettyprint.cassandra.model.HColumnImpl;
+import me.prettyprint.cassandra.model.HCounterColumnImpl;
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.MutatorImpl;
@@ -42,6 +43,7 @@ import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -486,6 +488,21 @@ public final class HFactory {
       String value) {
     StringSerializer se = StringSerializer.get();
     return createColumn(name, value, se, se);
+  }
+  
+  /**
+   * Create a counter column with a name and long value
+   */
+  public static <N> HCounterColumn<N> createCounterColumn(N name, long value, Serializer<N> nameSerializer) {
+    return new HCounterColumnImpl<N>(name, value, nameSerializer);
+  }
+  
+  /**
+   * Convenient method for creating a counter column with a String name and long value
+   */
+  public static HCounterColumn<String> createCounterColumn(String name, long value) {
+    StringSerializer se = StringSerializer.get();
+    return createCounterColumn(name, value, se);
   }
 
   /**
