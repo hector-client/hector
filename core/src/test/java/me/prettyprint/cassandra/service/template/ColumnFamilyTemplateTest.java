@@ -19,7 +19,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     template.update(updater);
     
     template.addColumn("column1", se);
-    ColumnFamilyResultWrapper wrapper = template.queryColumns("key1");    
+    ColumnFamilyResult wrapper = template.queryColumns("key1");    
     assertEquals("value1",wrapper.getString("column1"));
         
   }
@@ -53,7 +53,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     template.update(updater);
     
     template.addColumn("column1", se);
-    ColumnFamilyResultWrapper wrapper = template.queryColumns(Arrays.asList("mg_key1", "mg_key2", "mg_key3"));
+    ColumnFamilyResult wrapper = template.queryColumns(Arrays.asList("mg_key1", "mg_key2", "mg_key3"));
     assertEquals("value1",wrapper.getString("column1"));    
     wrapper.next();
     assertEquals("value2",wrapper.getString("column1"));
