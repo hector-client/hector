@@ -47,12 +47,12 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
     return mapper.mapRow(doExecuteSlice(key,predicate));
   }
     
-  public ColumnFamilyResultWrapper<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate) {    
+  public ColumnFamilyResult<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate) {    
     return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer, 
         sliceInternal(key, workingSlicePredicate));
   }
     
-  public ColumnFamilyResultWrapper<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate) {    
+  public ColumnFamilyResult<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate) {    
     return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer, 
         multigetSliceInternal(keys, workingSlicePredicate));
   }

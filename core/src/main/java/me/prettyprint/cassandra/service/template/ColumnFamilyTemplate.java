@@ -126,11 +126,11 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     return query.execute().get();
   }
 
-  public ColumnFamilyResultWrapper<K, N> queryColumns(K key) {
+  public ColumnFamilyResult<K, N> queryColumns(K key) {
     return doExecuteSlice(key, activeSlicePredicate);
   }
 
-  public ColumnFamilyResultWrapper<K, N> queryColumns(Iterable<K> keys) {
+  public ColumnFamilyResult<K, N> queryColumns(Iterable<K> keys) {
     return doExecuteMultigetSlice(keys, activeSlicePredicate);
   }
   
@@ -222,9 +222,9 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   
   protected abstract <T> T doExecuteSlice(K key, HSlicePredicate<N> predicate, ColumnFamilyRowMapper<K, N, T> mapper);
     
-  protected abstract ColumnFamilyResultWrapper<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate);
+  protected abstract ColumnFamilyResult<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate);
     
-  protected abstract ColumnFamilyResultWrapper<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate);
+  protected abstract ColumnFamilyResult<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate);
 
   protected abstract <V> MappedColumnFamilyResult<K, N, V> doExecuteMultigetSlice(final Iterable<K> keys, 
       final HSlicePredicate<N> workingSlicePredicate,
