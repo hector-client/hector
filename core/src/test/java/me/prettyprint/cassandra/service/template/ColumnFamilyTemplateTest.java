@@ -12,7 +12,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testCreateSelect() {
-    ColumnFamilyTemplate<String, String> template = new ColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
         
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
@@ -26,7 +26,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
 
   @Test
   public void testCreateSelectTemplate() {
-    ColumnFamilyTemplate<String, String> template = new ColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     updater.update();
@@ -43,7 +43,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testQueryMultiget() {
-    ColumnFamilyTemplate<String, String> template = new ColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
     ColumnFamilyUpdater updater = template.createUpdater("mg_key1"); 
     updater.setString("column1","value1");
     updater.addKey("mg_key2");
