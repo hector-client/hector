@@ -47,7 +47,7 @@ import com.google.common.collect.Iterators;
  * @param <N>
  *          The column family name type 
  */
-public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, N> {
+public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, N> {
   
   public ColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
       Serializer<K> keySerializer, Serializer<N> topSerializer) {
@@ -156,7 +156,7 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
     predicate.setStartOn(start);
     predicate.setEndOn(end);
     predicate.setCount(100);
-    return executeSliceQuery(key, predicate, mapper);
+    return doExecuteSlice(key, predicate, mapper);
   }
 
   /**
@@ -174,7 +174,7 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
       ColumnFamilyRowMapper<K, N, T> mapper) {
     HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);
     predicate.setColumnNames(columns);        
-    return executeSliceQuery(key, predicate, mapper);
+    return doExecuteSlice(key, predicate, mapper);
   }
 
 
@@ -220,70 +220,15 @@ public class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTemplate<K, 
 
   //-------------------------- delegation methods ----------------------------
   
-  private <T> T executeSliceQuery(K key, HSlicePredicate predicate, ColumnFamilyRowMapper<K, N, T> mapper) {
-    return mapper.mapRow(doExecuteSlice(key,predicate));
-  }
+  protected abstract <T> T doExecuteSlice(K key, HSlicePredicate<N> predicate, ColumnFamilyRowMapper<K, N, T> mapper);
     
-  private ColumnFamilyResultWrapper<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate) {    
-    return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer, 
-        sliceInternal(key, workingSlicePredicate));
-  }
+  protected abstract ColumnFamilyResultWrapper<K, N> doExecuteSlice(final K key, final HSlicePredicate<N> workingSlicePredicate);
     
-  private ColumnFamilyResultWrapper<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate) {    
-    return new ColumnFamilyResultWrapper<K, N>(keySerializer, topSerializer, 
-        multigetSliceInternal(keys, workingSlicePredicate));
-  }
+  protected abstract ColumnFamilyResultWrapper<K, N> doExecuteMultigetSlice(final Iterable<K> keys, final HSlicePredicate<N> workingSlicePredicate);
 
-  private <V> MappedColumnFamilyResult<K, N, V> doExecuteMultigetSlice(final Iterable<K> keys, 
+  protected abstract <V> MappedColumnFamilyResult<K, N, V> doExecuteMultigetSlice(final Iterable<K> keys, 
       final HSlicePredicate<N> workingSlicePredicate,
-      final ColumnFamilyRowMapper<K, N, V> mapper) {    
-    return new MappedColumnFamilyResultWrapper<K,N,V>(keySerializer, topSerializer, 
-        multigetSliceInternal(keys, workingSlicePredicate), mapper);    
-  }
+      final ColumnFamilyRowMapper<K, N, V> mapper);
 
   
-  private ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> sliceInternal(final K key,
-      final HSlicePredicate<N> workingSlicePredicate) {
-    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
-      @Override
-      public Map<ByteBuffer,List<ColumnOrSuperColumn>> execute(Cassandra.Client cassandra) throws HectorException {
-        Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc = new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
-        try {          
-
-          ByteBuffer sKey = keySerializer.toByteBuffer(key);
-          cosc.put(sKey, cassandra.get_slice(sKey, columnParent,
-              workingSlicePredicate.toThrift(), 
-              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType))));
-
-        } catch (Exception e) {
-          throw exceptionsTranslator.translate(e);
-        }        
-
-        return cosc;
-      }
-    });
-  }
-  
-  private ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> multigetSliceInternal(final Iterable<K> keys,
-      final HSlicePredicate<N> workingSlicePredicate) {
-    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
-      @Override
-      public Map<ByteBuffer,List<ColumnOrSuperColumn>> execute(Cassandra.Client cassandra) throws HectorException {
-        Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc = new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
-        try {          
-          List<K> keyList = new ArrayList<K>();
-          Iterators.addAll(keyList, keys.iterator());
-          cosc = cassandra.multiget_slice(keySerializer.toBytesList(keyList), columnParent,
-              (workingSlicePredicate == null ? activeSlicePredicate.setColumnNames(columnValueSerializers.keySet()).toThrift() : workingSlicePredicate.toThrift()),              
-            ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
-        } catch (Exception e) {
-          throw exceptionsTranslator.translate(e);
-        }        
-
-        return cosc;
-      }
-    });
-  }
-
-
 }
