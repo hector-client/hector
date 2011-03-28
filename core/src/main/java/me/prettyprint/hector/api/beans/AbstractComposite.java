@@ -210,6 +210,10 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   private Serializer<?> serializerForComparator(String c) {
+    int p = c.indexOf('(');
+    if (p >= 0) {
+      c = c.substring(0, p);
+    }
     if (LEXICALUUIDTYPE.getTypeName().equals(c)
         || TIMEUUIDTYPE.getTypeName().equals(c)) {
       return UUIDSerializer.get();
@@ -269,7 +273,15 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if ((header & 0x8000) == 0) {
           name = ByteBufferUtil.string(getBytes(bb, header));
         } else {
-          name = aliasToComparatorMapping.get((byte) (header & 0xFF));
+          byte a = (byte) (header & 0xFF);
+          name = aliasToComparatorMapping.get(a);
+          if (name == null) {
+            a = (byte) Character.toUpperCase(a);
+            name = aliasToComparatorMapping.get(a);
+            if (name != null) {
+              name += "(sort=desc)";
+            }
+          }
         }
       } catch (CharacterCodingException e) {
         throw new RuntimeException(e);
@@ -418,9 +430,18 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if (comparator == null) {
           comparator = c.getComparator();
         }
+        int p = comparator.indexOf("(sort=desc)");
+        boolean desc = false;
+        if (p >= 0) {
+          comparator = comparator.substring(0, p);
+          desc = true;
+        }
         if (aliasToComparatorMapping.inverse().containsKey(comparator)) {
-          out.writeShort((short) (0x8000 | aliasToComparatorMapping.inverse()
-              .get(comparator)));
+          byte a = aliasToComparatorMapping.inverse().get(comparator);
+          if (desc) {
+            a = (byte) Character.toUpperCase(a);
+          }
+          out.writeShort((short) (0x8000 | a));
         } else {
           out.writeShort((short) comparator.length());
           out.write(ByteBufferUtil.bytes(comparator));
