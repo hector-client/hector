@@ -11,6 +11,8 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.Counter;
+import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
@@ -46,6 +48,18 @@ public interface KeyspaceService {
   Column getColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
 
   Column getColumn(String key, ColumnPath columnPath) throws HectorException;
+  
+  /**
+   * Get the Counter  at the given columnPath.
+   *
+   * If no value is present, NotFoundException is thrown.
+   *
+   * @throws HNotFoundException
+   *           if no value exists for the counter
+   */
+  Counter getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  
+  Counter getCounter(String key, ColumnPath columnPath) throws HectorException;
 
   /**
    * Get the SuperColumn at the given columnPath.
@@ -146,6 +160,16 @@ public interface KeyspaceService {
   void insert(String key, ColumnPath columnPath, ByteBuffer value) throws HectorException;
 
   void insert(String key, ColumnPath columnPath, ByteBuffer value, long timestamp) throws HectorException;
+  
+  /**
+   * Add a counter with CL.ONE
+   */
+  void addCounter(ByteBuffer key, ColumnParent columnParent, CounterColumn counterColumn) throws HectorException;
+  
+  /**
+   * Add a counter with CL.ONE
+   */
+  void addCounter(String key, ColumnParent columnParent, CounterColumn counterColumn) throws HectorException;
 
   /**
    * Call batch mutate with the assembled mutationMap. This method is a direct pass-through
@@ -169,6 +193,10 @@ public interface KeyspaceService {
   void remove(String key, ColumnPath columnPath) throws HectorException;
 
   void remove(String key, ColumnPath columnPath, long timestamp) throws HectorException;
+  
+  void removeCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  
+  void removeCounter(String key, ColumnPath columnPath) throws HectorException;
 
 
   /**

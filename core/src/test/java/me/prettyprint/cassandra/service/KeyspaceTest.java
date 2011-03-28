@@ -29,6 +29,8 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 //import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.Counter;
+import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
@@ -98,6 +100,68 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         // good
       }
     }
+  }
+  
+  @Test
+  public void testInsertAndGetAndRemoveCounter() throws IllegalArgumentException, NoSuchElementException,
+      IllegalStateException, HNotFoundException, Exception {
+
+    StringSerializer ss = StringSerializer.get();
+    // insert value
+    ColumnParent cp = new ColumnParent("Counter1");
+    //cp.setColumn(bytes("testInsertAndGetAndRemoveCounter"));
+    
+    // Insert 3 counters for the same key
+    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("A", 5L)); 
+    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("A", -1L)); 
+    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("B", 10L)); 
+    // Total for counter A is (5 - 1) = 4.
+    // Total for counter B is 10.
+
+    ColumnPath cph = new ColumnPath("Counter1");
+    cph.setColumn(ss.toByteBuffer("A"));
+    Counter counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    assertNotNull(counter);
+    assertEquals(4, counter.getColumn().value);
+    
+    cph.setColumn(ss.toByteBuffer("B"));
+    counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    assertNotNull(counter);
+    assertEquals(10, counter.getColumn().value);
+    
+    // Reuse the ColumnPath associated to Conter B and remove only B.
+    keyspace.removeCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    
+    // Fetch it and it should not exist
+    try {
+      keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    } catch (HNotFoundException e) {
+      // good
+    }
+    
+    // Fetch Counter A again to verify I did not delete it
+    cph.setColumn(ss.toByteBuffer("A"));
+    counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    assertNotNull(counter);
+    
+    // Delete the whole row
+    cph.column = null;
+    keyspace.removeCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+
+    // Fetch A again to verify it is not there.
+    try {
+      cph.setColumn(ss.toByteBuffer("A"));
+      counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    } catch (HNotFoundException e) {
+      // good
+    }
+  }
+  
+  private CounterColumn createCounterColumn(String name, long value) {
+	  CounterColumn cc = new CounterColumn();
+	  cc.setName(StringSerializer.get().toByteBuffer(name));
+	  cc.setValue(value);
+	  return cc;
   }
 
   /**
