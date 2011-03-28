@@ -8,6 +8,7 @@ import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.ExecutingVirtualKeyspace;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HCounterColumnImpl;
+import me.prettyprint.cassandra.model.HCounterSuperColumnImpl;
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.MutatorImpl;
@@ -44,6 +45,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
+import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -463,6 +465,11 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new HSuperColumnImpl<SN, N, V>(name, columns, clock,
         superNameSerializer, nameSerializer, valueSerializer);
+  }
+  
+  public static <SN, N> HCounterSuperColumn<SN, N> createCounterSuperColumn(SN name,
+      List<HCounterColumn<N>> columns, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
+    return new HCounterSuperColumnImpl<SN, N>(name, columns, superNameSerializer, nameSerializer);
   }
 
   public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
