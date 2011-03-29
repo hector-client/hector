@@ -36,7 +36,7 @@ import me.prettyprint.hector.api.Serializer;
  *          the standard column name type or the super column's child column
  *          type
  */
-abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<K, N> {
+public abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<K, N> {
 
   protected Serializer<K> keySerializer;
   protected Serializer<N> columnNameSerializer;
