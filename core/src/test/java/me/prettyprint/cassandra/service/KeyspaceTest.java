@@ -158,10 +158,10 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   }
   
   private CounterColumn createCounterColumn(String name, long value) {
-	  CounterColumn cc = new CounterColumn();
-	  cc.setName(StringSerializer.get().toByteBuffer(name));
-	  cc.setValue(value);
-	  return cc;
+    CounterColumn cc = new CounterColumn();
+    cc.setName(StringSerializer.get().toByteBuffer(name));
+    cc.setValue(value);
+    return cc;
   }
 
   /**

@@ -77,9 +77,9 @@ public class EmbeddedSchemaLoader {
             bytes), indexCFMD(ks1, "Indexed1", true), indexCFMD(ks1,
             "Indexed2", false), new CFMetaData(ks1, "StandardInteger1", st,
             IntegerType.instance, null).keyCacheSize(0), new CFMetaData(ks1,
-            "Counter1", st, bytes, null)
+            "Counter1", st, bytes, null).replicateOnWrite(true)
             .defaultValidator(CounterColumnType.instance), new CFMetaData(ks1,
-            "SuperCounter1", su, bytes, bytes)
+            "SuperCounter1", su, bytes, bytes).replicateOnWrite(true)
             .defaultValidator(CounterColumnType.instance), jdbcCFMD(ks1,
             "JdbcInteger", IntegerType.instance), jdbcCFMD(ks1, "JdbcUtf8",
             UTF8Type.instance), jdbcCFMD(ks1, "JdbcLong", LongType.instance),

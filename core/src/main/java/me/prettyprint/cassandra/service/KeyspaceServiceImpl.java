@@ -363,7 +363,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
         @Override
         public Void execute(Cassandra.Client cassandra) throws HectorException {
           try {
-            cassandra.add(key, columnParent, counterColumn, ThriftConverter.consistencyLevel(HConsistencyLevel.ONE));
+            cassandra.add(key, columnParent, counterColumn, getThriftCl(OperationType.WRITE));
             return null;
           } catch (Exception e) {
             throw xtrans.translate(e);
@@ -592,8 +592,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
         @Override
         public Void execute(Cassandra.Client cassandra) throws HectorException {
           try {
-            // NOTE" CL is ONE for counters
-            cassandra.remove_counter(key, columnPath, ThriftConverter.consistencyLevel(HConsistencyLevel.ONE));
+            cassandra.remove_counter(key, columnPath, getThriftCl(OperationType.WRITE));
             return null;
           } catch (Exception e) {
             throw xtrans.translate(e);
@@ -664,7 +663,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
         public Counter execute(Cassandra.Client cassandra) throws HectorException {
           Counter cosc;
           try {
-            cosc = cassandra.get_counter(key, columnPath, ThriftConverter.consistencyLevel(HConsistencyLevel.ONE));
+            cosc = cassandra.get_counter(key, columnPath, getThriftCl(OperationType.READ));
           } catch (NotFoundException e) {
             setException(xtrans.translate(e));
             return null;

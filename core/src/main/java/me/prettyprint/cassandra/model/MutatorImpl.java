@@ -9,11 +9,15 @@ import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HCounterColumn;
+import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.CounterDeletion;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 
@@ -30,6 +34,7 @@ import org.apache.cassandra.thrift.SlicePredicate;
  *
  * @author Ran Tavory
  * @author zznate
+ * @author patricioe
  */
 public final class MutatorImpl<K> implements Mutator<K> {
 
@@ -225,6 +230,102 @@ public final class MutatorImpl<K> implements Mutator<K> {
       pendingMutations = new BatchMutation<K>(keySerializer);
     }
     return pendingMutations;
+  }
+  
+  // Counters support.
+
+  @Override
+  public <N> MutationResult insertCounter(final K key, final String cf, final HCounterColumn<N> c) {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+        @Override
+        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
+          ks.addCounter(keySerializer.toByteBuffer(key), new ColumnParent(cf), ((HCounterColumnImpl<N>) c).toThrift());
+          return null;
+        }
+    }));
+  }
+
+
+  @Override
+  public <SN, N> MutationResult insertCounter(K key, String cf, HCounterSuperColumn<SN, N> superColumn) {
+    addCounter(key, cf, superColumn);
+    return execute();
+  }
+
+
+  @Override
+  public <N> MutationResult deleteCounter(final K key, final String cf, final N counterColumnName, 
+      final Serializer<N> nameSerializer) {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+        @Override
+        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
+          ks.removeCounter(keySerializer.toByteBuffer(key), ThriftFactory.createColumnPath(cf, counterColumnName, 
+              nameSerializer));
+          return null;
+        }
+    }));
+  }
+
+  @Override
+  public <SN, N> MutationResult subDeleteCounter(final K key, final String cf, final SN supercolumnName, 
+      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+        @Override
+        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
+          ks.removeCounter(keySerializer.toByteBuffer(key), ThriftFactory.createSuperColumnPath(cf,
+              supercolumnName, columnName, sNameSerializer, nameSerializer));
+          return null;
+        }
+      }));
+  }
+
+  @Override
+  public <N> Mutator<K> addCounter(K key, String cf, HCounterColumn<N> c) {
+    getPendingMutations().addCounterInsertion(key, Arrays.asList(cf), ((HCounterColumnImpl<N>) c).toThrift());
+    return this;
+  }
+
+  @Override
+  public <SN, N> Mutator<K> addCounter(K key, String cf, HCounterSuperColumn<SN, N> sc) {
+    getPendingMutations().addSuperCounterInsertion(key, Arrays.asList(cf), 
+        ((HCounterSuperColumnImpl<SN, N>) sc).toThrift());
+    return this;
+  }
+
+
+  @Override
+  public <N> Mutator<K> addCounterDeletion(K key, String cf, N counterColumnName, Serializer<N> nameSerializer) {
+    SlicePredicate sp = new SlicePredicate();
+    CounterDeletion d;
+    if ( counterColumnName != null ) {
+      sp.addToColumn_names(nameSerializer.toByteBuffer(counterColumnName));
+      d = new CounterDeletion().setPredicate(sp);
+    } else { 
+      d = new CounterDeletion();
+    }
+    getPendingMutations().addCounterDeletion(key, Arrays.asList(cf), d);
+    return this;
+  }
+
+  @Override
+  public <N> Mutator<K> addCounterDeletion(K key, String cf) {
+    addCounterDeletion(key, cf);
+    return this;
+  }
+
+  @Override
+  public <SN, N> Mutator<K> addCounterSubDeletion(K key, String cf, HCounterSuperColumn<SN, N> sc) {
+    SlicePredicate pred = new SlicePredicate();
+    CounterDeletion d = new CounterDeletion();
+    if ( sc.getColumns() != null ) {      
+      for (HCounterColumn<N> col : sc.getColumns()) {
+        pred.addToColumn_names(col.getNameSerializer().toByteBuffer(col.getName()));
+      }
+      d.setPredicate(pred);
+    }    
+    d.setSuper_column(sc.getNameByteBuffer());
+    getPendingMutations().addCounterDeletion(key, Arrays.asList(cf), d);
+    return this;
   }
 
 }

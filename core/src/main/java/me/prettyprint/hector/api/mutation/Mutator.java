@@ -2,6 +2,8 @@ package me.prettyprint.hector.api.mutation;
 
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HCounterColumn;
+import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 
 /**
@@ -115,5 +117,60 @@ public interface Mutator<K> {
    * Discards all pending mutations.
    */
   Mutator<K> discardPendingMutations();
+  
+  // Support for counters
+  
+  // Simple and immediate insertion of a column
+  <N> MutationResult insertCounter(final K key, final String cf, final HCounterColumn<N> c);
+  
+  // overloaded insert-super
+  <SN, N> MutationResult insertCounter(final K key, final String cf, final HCounterSuperColumn<SN, N> superColumn);
+
+  <N> MutationResult deleteCounter(final K key, final String cf, final N columnName, final Serializer<N> nameSerializer);
+  
+  /**
+   * Deletes a subcolumn of a supercolumn for a counter
+   * @param <SN> super column type
+   * @param <N> subcolumn type
+   */
+  <SN, N> MutationResult subDeleteCounter(final K key, final String cf, final SN supercolumnName,
+      final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer);
+  
+  /**
+   * Schedule an increment of a CounterColumn to be inserted in batch mode by {@link #execute()}
+   */
+  <N> Mutator<K> addCounter(K key, String cf, HCounterColumn<N> c);
+
+  /**
+   * Schedule an increment of a SuperColumn to be inserted in batch mode by {@link #execute()}
+   */
+  <SN, N> Mutator<K> addCounter(K key, String cf, HCounterSuperColumn<SN, N> sc);
+  
+  /**
+   * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null
+   * in which case the whole row being deleted.
+   *
+   * @param <N> column name type
+   * @param key row key
+   * @param cf column family
+   * @param counterColumnName column name. Use null to delete the whole row.
+   * @param nameSerializer a name serializer
+   * @return a mutator
+   */
+  <N> Mutator<K> addCounterDeletion(K key, String cf, N counterColumnName, Serializer<N> nameSerializer);
+  
+  /**
+   * Alternate form for easy deletion of the whole row.
+   * 
+   * @param <N>
+   * @param key
+   * @return
+   */
+  <N> Mutator<K> addCounterDeletion(K key, String cf);
+
+  /**
+   * Schedule a counter deletion.
+   */
+  <SN,N> Mutator<K> addCounterSubDeletion(K key, String cf, HCounterSuperColumn<SN,N> sc);
 
 }
