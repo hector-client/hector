@@ -15,6 +15,7 @@ import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSubSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
@@ -54,6 +55,7 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
+import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
@@ -322,6 +324,11 @@ public final class HFactory {
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new ThriftColumnQuery<K, N, V>(keyspace, keySerializer,
         nameSerializer, valueSerializer);
+  }
+  
+  public static <K, N> CounterQuery<K, N> createCounterColumnQuery(
+      Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer) {
+    return new ThriftCounterColumnQuery<K, N>(keyspace, keySerializer, nameSerializer);
   }
 
   public static <K, N> CountQuery<K, N> createCountQuery(Keyspace keyspace,

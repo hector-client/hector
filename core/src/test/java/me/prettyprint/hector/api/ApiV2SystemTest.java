@@ -3,6 +3,8 @@ package me.prettyprint.hector.api;
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createCountQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createCounterColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createCounterColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMultigetSliceQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createMultigetSubSliceQuery;
@@ -34,6 +36,7 @@ import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
@@ -46,6 +49,7 @@ import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
+import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
@@ -85,6 +89,46 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   public void teardownCase() {
     ko = null;
     cluster = null;
+  }
+  
+  @Test
+  public void testInsertGetRemoveCounter() {
+    String cf = "Counter1";
+    Mutator<String> m = createMutator(ko, se);
+    MutationResult mr = m.insertCounter("testInsertGetRemoveCounter", cf, 
+        createCounterColumn("testInsertGetRemoveCounter_name", 25));
+
+    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
+    log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
+    
+    // get value
+    CounterQuery<String, String> q = createCounterColumnQuery(ko, se, se);
+    q.setColumnFamily(cf).setName("testInsertGetRemoveCounter_name");
+    QueryResult<HCounterColumn<String>> r = q.setKey("testInsertGetRemoveCounter")
+        .execute();
+    assertNotNull(r);
+
+    HCounterColumn<String> c = r.get();
+    assertNotNull(c);
+    Long value = c.getValue();
+    assertEquals(25, value.longValue());
+    String name = c.getName();
+    assertEquals("testInsertGetRemoveCounter_name", name);
+    assertEquals(q, r.getQuery());
+    assertTrue("Time should be > 0", r.getExecutionTimeMicro() > 0);
+    
+    // remove value
+    m = createMutator(ko, se);
+    MutationResult mr2 = m.deleteCounter("testInsertGetRemoveCounter", cf, "testInsertGetRemoveCounter_name", se);
+    assertTrue("Time should be > 0", mr2.getExecutionTimeMicro() > 0);
+
+    // get already removed value
+    CounterQuery<String, String> q2 = createCounterColumnQuery(ko, se, se);
+    q2.setName("testInsertGetRemoveCounter_name").setColumnFamily(cf);
+    QueryResult<HCounterColumn<String>> r2 = q2.setKey("testInsertGetRemoveCounter")
+        .execute();
+    assertNotNull(r2);
+    assertNull("Value should have been deleted", r2.get());
   }
 
   @Test
