@@ -23,11 +23,7 @@ public class DynamicCompositeSerializer extends
   @Override
   public DynamicComposite fromByteBuffer(ByteBuffer byteBuffer) {
 
-    DynamicComposite composite = new DynamicComposite();
-    composite.setAutoDeserialize(false);
-    composite.deserialize(byteBuffer);
-
-    return composite;
+    return DynamicComposite.fromByteBuffer(byteBuffer);
 
   }
 
