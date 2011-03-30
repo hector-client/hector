@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service.template;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -24,7 +25,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
  */
 public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
-  private Map<N,HColumn<N,ByteBuffer>> columns = new HashMap<N,HColumn<N,ByteBuffer>>();
+  private Map<N,HColumn<N,ByteBuffer>> columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
   private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
