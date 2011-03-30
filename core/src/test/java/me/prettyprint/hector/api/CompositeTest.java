@@ -65,11 +65,10 @@ public class CompositeTest {
     assertEquals(BigInteger.valueOf(10), o);
 
     c = new DynamicComposite();
-    c.setAutoDeserialize(false);
     c.deserialize(b.slice());
-    assertTrue(c.get(0) instanceof ByteBuffer);
-    assertTrue(c.get(1) instanceof ByteBuffer);
-    assertTrue(c.get(2) instanceof ByteBuffer);
+    assertTrue(c.get(0, ByteBufferSerializer.get()) instanceof ByteBuffer);
+    assertTrue(c.get(1, ByteBufferSerializer.get()) instanceof ByteBuffer);
+    assertTrue(c.get(2, ByteBufferSerializer.get()) instanceof ByteBuffer);
 
     c = new DynamicComposite();
     c.setSerializersByPosition(StringSerializer.get(), null,

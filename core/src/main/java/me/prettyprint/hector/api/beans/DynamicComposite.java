@@ -13,14 +13,8 @@ public class DynamicComposite extends AbstractComposite {
   }
 
   public static DynamicComposite fromByteBuffer(ByteBuffer byteBuffer) {
-    return fromByteBuffer(true, byteBuffer);
-  }
-
-  public static DynamicComposite fromByteBuffer(boolean deserializeComponents,
-      ByteBuffer byteBuffer) {
 
     DynamicComposite composite = new DynamicComposite();
-    composite.setAutoDeserialize(deserializeComponents);
     composite.deserialize(byteBuffer);
 
     return composite;
