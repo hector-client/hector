@@ -467,11 +467,15 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   public <T> T get(int i, Serializer<T> s) throws ClassCastException {
+    T value = null;
     Component c = components.get(i);
     if (c != null) {
-      return s.fromByteBuffer((ByteBuffer) c.getValue());
+      ByteBuffer cb = ((ByteBuffer) c.getValue()).duplicate();
+      if (cb.hasRemaining()) {
+        value = s.fromByteBuffer(cb);
+      }
     }
-    return null;
+    return value;
   }
 
   public Component getComponent(int i) {
@@ -500,7 +504,12 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       if (s == null) {
         s = c.getSerializer();
       }
-      ByteBuffer cb = s.toByteBuffer(c.getValue());
+      ByteBuffer cb = null;
+      if (s != null) {
+        cb = s.toByteBuffer(c.getValue());
+      } else {
+        cb = ByteBuffer.allocate(0);
+      }
 
       if (dynamic) {
         String comparator = comparatorForPosition(i);
@@ -546,7 +555,10 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       if (data != null) {
         Serializer<?> s = autoDeserialize ? getSerializer(i, comparator)
             : ByteBufferSerializer.get();
-        Object value = s.fromByteBuffer(data);
+        Object value = null;
+        if (data.hasRemaining()) {
+          value = s.fromByteBuffer(data);
+        }
         boolean inclusive = b.get() != 0;
         components.add(new Component(value, s, comparator, inclusive));
       } else {
