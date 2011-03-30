@@ -130,6 +130,27 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertNotNull(r2);
     assertNull("Value should have been deleted", r2.get());
   }
+  
+  @Test
+  public void testIncrementDecrementCounter() {
+    String cf = "Counter1";
+    createMutator(ko, se).incrementCounter("testIncrementDecrementCounter", cf, "testIncrementDecrementCounter_name", 7);
+    createMutator(ko, se).decrementCounter("testIncrementDecrementCounter", cf, "testIncrementDecrementCounter_name", 2);
+
+    // The total in the counter is 5. (7 - 2)
+    
+    // get value
+    CounterQuery<String, String> q = createCounterColumnQuery(ko, se, se);
+    q.setColumnFamily(cf).setName("testIncrementDecrementCounter_name");
+    QueryResult<HCounterColumn<String>> r = q.setKey("testIncrementDecrementCounter")
+        .execute();
+    assertNotNull(r);
+
+    HCounterColumn<String> c = r.get();
+    assertNotNull(c);
+    Long value = c.getValue();
+    assertEquals(5, value.longValue());
+  }
 
   @Test
   public void testInsertGetRemove() {

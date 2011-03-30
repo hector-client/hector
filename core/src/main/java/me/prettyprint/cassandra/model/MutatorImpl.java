@@ -244,6 +244,16 @@ public final class MutatorImpl<K> implements Mutator<K> {
         }
     }));
   }
+  
+  @Override
+  public <N> MutationResult incrementCounter(final K key, final String cf, final N columnName, final long increment) {
+	  return insertCounter(key, cf, new HCounterColumnImpl<N>(columnName, increment, TypeInferringSerializer.<N> get()));
+  }
+  
+  @Override
+  public <N> MutationResult decrementCounter(final K key, final String cf, final N columnName, final long increment) {
+    return incrementCounter(key, cf, columnName, increment * -1L);
+  }
 
 
   @Override

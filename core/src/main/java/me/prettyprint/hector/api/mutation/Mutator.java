@@ -120,11 +120,17 @@ public interface Mutator<K> {
   
   // Support for counters
   
-  // Simple and immediate insertion of a column
+  /** Simple and immediate insertion (increment/decrement) of a counter */
   <N> MutationResult insertCounter(final K key, final String cf, final HCounterColumn<N> c);
   
-  // overloaded insert-super
+  /** Simple and immediate insertion (increment/decrement) of a counter part of a super column */
   <SN, N> MutationResult insertCounter(final K key, final String cf, final HCounterSuperColumn<SN, N> superColumn);
+  
+  /** Convenient method to increment a simple counter */
+  <N> MutationResult incrementCounter(final K key, final String cf, final N columnName, final long increment);
+  
+  /** Convenient method to decrement a simple counter */
+  <N> MutationResult decrementCounter(final K key, final String cf, final N columnName, final long increment);
 
   <N> MutationResult deleteCounter(final K key, final String cf, final N columnName, final Serializer<N> nameSerializer);
   

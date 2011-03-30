@@ -62,5 +62,12 @@ public class ThriftFactory {
     cc.setValue(value);
     return cc;
   }
+  
+  public static <N> CounterColumn createCounterColumn(N name, long value, Serializer<N> ns) {
+    CounterColumn cc = new CounterColumn();
+    cc.setName(ns.toByteBuffer(name));
+    cc.setValue(value);
+    return cc;
+  }
 
 }
