@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.model;
 
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
+import static me.prettyprint.hector.api.factory.HFactory.createCounterColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
@@ -165,6 +166,15 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     columnResult = createColumnQuery(keyspace, se, se, se).
         setColumnFamily(cf).setKey("key0").setName("name").execute();
     assertNull(columnResult.get());
+  }
+  
+  @Test
+  public void testInsertCounter() {
+    Mutator<String> m = createMutator(keyspace, se);
+    MutationResult mr = m.insertCounter("k", "Counter1", createCounterColumn("name", 5));
+    assertTrue("Execution time on single counter insert should be > 0", mr.getExecutionTimeMicro() > 0);
+    assertTrue("Should have operated on a host", mr.getHostUsed() != null);
+    assertColumnExists("Keyspace1", "Counter1", "k", "name");
   }
 
   private void assertColumnExists(String keyspace, String cf, String key, String column) {
