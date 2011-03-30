@@ -1,5 +1,7 @@
 package me.prettyprint.hector.api;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -24,6 +26,7 @@ public class CompositeTest {
   @Test
   public void testDynamicSerialization() throws Exception {
 
+    // test correct serialization sizes for strings
     DynamicComposite c = new DynamicComposite();
     c.add("String1");
     ByteBuffer b = c.serialize();
@@ -33,6 +36,7 @@ public class CompositeTest {
     b = c.serialize();
     assertEquals(b.remaining(), 24);
 
+    // test deserialization of strings
     c = new DynamicComposite();
     c.deserialize(b);
     assertEquals(2, c.size());
@@ -41,6 +45,7 @@ public class CompositeTest {
     o = c.get(1);
     assertEquals("String2", o);
 
+    // test serialization and deserialization of longs
     c = new DynamicComposite();
     c.add(new Long(10));
     b = c.serialize();
@@ -49,6 +54,26 @@ public class CompositeTest {
     o = c.get(0);
     assertTrue(o instanceof Long);
 
+    // test serialization and deserialization of random UUIDS
+    c = new DynamicComposite();
+    c.add(UUID.randomUUID());
+    b = c.serialize();
+    c = DynamicComposite.fromByteBuffer(b);
+    o = c.get(0);
+    assertTrue(o instanceof UUID);
+    assertEquals(LEXICALUUIDTYPE.getTypeName(), c.getComponent(0)
+        .getComparator());
+
+    // test serialization and deserialization of time-based UUIDS
+    c = new DynamicComposite();
+    c.add(TimeUUIDUtils.getUniqueTimeUUIDinMillis());
+    b = c.serialize();
+    c = DynamicComposite.fromByteBuffer(b);
+    o = c.get(0);
+    assertTrue(o instanceof UUID);
+    assertEquals(TIMEUUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
+
+    // test compatibility with Cassandra unit tests
     b = createDynamicCompositeKey("Hello",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
     c = new DynamicComposite();
@@ -64,12 +89,14 @@ public class CompositeTest {
     assertEquals(BigInteger.class, o.getClass());
     assertEquals(BigInteger.valueOf(10), o);
 
+    // test using supplied deserializer rather than auto-mapped
     c = new DynamicComposite();
     c.deserialize(b.slice());
     assertTrue(c.get(0, ByteBufferSerializer.get()) instanceof ByteBuffer);
     assertTrue(c.get(1, ByteBufferSerializer.get()) instanceof ByteBuffer);
     assertTrue(c.get(2, ByteBufferSerializer.get()) instanceof ByteBuffer);
 
+    // test setting a deserializer for specific components
     c = new DynamicComposite();
     c.setSerializersByPosition(StringSerializer.get(), null,
         ByteBufferSerializer.get());
