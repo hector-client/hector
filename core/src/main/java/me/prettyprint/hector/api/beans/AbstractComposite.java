@@ -35,6 +35,14 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 
+/**
+ * Parent class of Composite and DynamicComposite. Acts as a list of objects
+ * that get serialized into a composite column name. Unless
+ * setAutoDeserialize(true) is called, it's going to try to match serializers to
+ * Cassandra comparator types.
+ * 
+ * @author edanuff
+ */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
@@ -177,6 +185,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     serializersByPosition = Arrays.asList(serializers);
   }
 
+  public void setSerializerByPosition(int index, Serializer<?> s) {
+    if (serializersByPosition == null) {
+      serializersByPosition = new ArrayList<Serializer<?>>();
+    }
+    while (serializersByPosition.size() <= index) {
+      serializersByPosition.add(null);
+    }
+    serializersByPosition.set(index, s);
+  }
+
   public List<String> getComparatorsByPosition() {
     return comparatorsByPosition;
   }
@@ -187,6 +205,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   public void setComparatorsByPosition(String... comparators) {
     comparatorsByPosition = Arrays.asList(comparators);
+  }
+
+  public void setComparatorByPosition(int index, String c) {
+    if (comparatorsByPosition == null) {
+      comparatorsByPosition = new ArrayList<String>();
+    }
+    while (comparatorsByPosition.size() <= index) {
+      comparatorsByPosition.add(null);
+    }
+    comparatorsByPosition.set(index, c);
   }
 
   @Override
@@ -293,36 +321,6 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     return name;
   }
 
-  public <T> AbstractComposite add(T value, Serializer<T> s) {
-    serialized = null;
-
-    add(value, s, value instanceof UUID ? comparatorForUUID((UUID) value)
-        : comparatorForSerializer(s));
-
-    return this;
-
-  }
-
-  public <T> AbstractComposite add(T value, Serializer<T> s, String comparator) {
-    serialized = null;
-
-    add(value, s, comparator, false);
-
-    return this;
-
-  }
-
-  @SuppressWarnings("unchecked")
-  public <T> AbstractComposite add(T value, Serializer<T> s, String comparator,
-      boolean inclusive) {
-    serialized = null;
-
-    components.add(new Component(value, s, comparator, inclusive));
-
-    return this;
-
-  }
-
   @Override
   public void clear() {
     serialized = null;
@@ -332,6 +330,52 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @Override
   public int size() {
     return components.size();
+  }
+
+  public <T> AbstractComposite addComponent(T value, Serializer<T> s) {
+
+    addComponent(value, s,
+        value instanceof UUID ? comparatorForUUID((UUID) value)
+            : comparatorForSerializer(s));
+
+    return this;
+
+  }
+
+  public <T> AbstractComposite addComponent(T value, Serializer<T> s,
+      String comparator) {
+
+    addComponent(value, s, comparator, false);
+
+    return this;
+
+  }
+
+  public <T> AbstractComposite addComponent(T value, Serializer<T> s,
+      String comparator, boolean inclusive) {
+
+    addComponent(-1, value, s, comparator, inclusive);
+
+    return this;
+
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> AbstractComposite addComponent(int index, T value,
+      Serializer<T> s, String comparator, boolean inclusive) {
+    serialized = null;
+
+    if (index < 0) {
+      index = components.size();
+    }
+
+    while (components.size() < index) {
+      components.add(null);
+    }
+    components.add(index, new Component(value, s, comparator, inclusive));
+
+    return this;
+
   }
 
   @SuppressWarnings("unchecked")
@@ -358,6 +402,39 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       return prev.getValue();
     }
     return null;
+  }
+
+  public <T> AbstractComposite setComponent(int index, T value, Serializer<T> s) {
+
+    setComponent(index, value, s,
+        value instanceof UUID ? comparatorForUUID((UUID) value)
+            : comparatorForSerializer(s));
+
+    return this;
+
+  }
+
+  public <T> AbstractComposite setComponent(int index, T value,
+      Serializer<T> s, String comparator) {
+
+    setComponent(index, value, s, comparator, false);
+
+    return this;
+
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> AbstractComposite setComponent(int index, T value,
+      Serializer<T> s, String comparator, boolean inclusive) {
+    serialized = null;
+
+    while (components.size() <= index) {
+      components.add(null);
+    }
+    components.set(index, new Component(value, s, comparator, inclusive));
+
+    return this;
+
   }
 
   @SuppressWarnings("unchecked")
