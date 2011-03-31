@@ -61,7 +61,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
     this(keyspace, columnFamily, keySerializer, topSerializer, HFactory
         .createMutator(keyspace, keySerializer));
   }
-
+  
   public AbstractColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
       Serializer<K> keySerializer, Serializer<N> topSerializer,
       Mutator<K> mutator) {
@@ -76,6 +76,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
     this.activeSlicePredicate = new HSlicePredicate<N>(topSerializer);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
     this.columnFactory = new ThriftColumnFactory();
+    setCount(100);
   }
 
 
@@ -171,4 +172,11 @@ public class AbstractColumnFamilyTemplate<K, N> {
     executeIfNotBatched();
   }
 
+  /**
+   * The number of columns to return when not doing a name-based template
+   * @param count
+   */
+  public void setCount(int count) {
+    activeSlicePredicate.setCount(count);
+  }
 }

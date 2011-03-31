@@ -136,7 +136,10 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   
   @SuppressWarnings("unchecked")
   public <T> T queryColumns(K key, ColumnFamilyRowMapper<K, N, T> mapper) {
-    return queryColumns(key, (N) ALL_COLUMNS_START, (N) ALL_COLUMNS_END, mapper);
+    HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);
+    predicate.setStartOn((N) ALL_COLUMNS_START);
+    predicate.setEndOn((N) ALL_COLUMNS_END);
+    return queryColumns(key, predicate, mapper);
   }
 
   /**
@@ -150,12 +153,8 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
    * @param mapper
    * @return
    */
-  public <T> T queryColumns(K key, N start, N end,
+  public <T> T queryColumns(K key, HSlicePredicate<N> predicate,
       ColumnFamilyRowMapper<K, N, T> mapper) {
-    HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);
-    predicate.setStartOn(start);
-    predicate.setEndOn(end);
-    predicate.setCount(100);
     return doExecuteSlice(key, predicate, mapper);
   }
 
@@ -184,11 +183,7 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   }
 
   public <V> MappedColumnFamilyResult<K,N,V> queryColumns(Iterable<K> keys,
-      N start, N end, ColumnFamilyRowMapper<K, N, V> mapper) {
-    HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);
-    predicate.setStartOn(start);
-    predicate.setEndOn(end);
-    predicate.setCount(100);
+      HSlicePredicate<N> predicate, ColumnFamilyRowMapper<K, N, V> mapper) {     
     return doExecuteMultigetSlice(keys, predicate, mapper);
   }
 
