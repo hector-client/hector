@@ -4,12 +4,22 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
+
+import me.prettyprint.cassandra.model.ExecutingKeyspace;
+import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HSlicePredicate;
+import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
+import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -17,6 +27,7 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.beans.SuperRow;
 import me.prettyprint.hector.api.beans.SuperRows;
 import me.prettyprint.hector.api.beans.SuperSlice;
+import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
@@ -40,9 +51,13 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
       Serializer<K> keySerializer, Serializer<SN> topSerializer,
       Serializer<N> subSerializer, Mutator<K> mutator) {
     super(keyspace, columnFamily, keySerializer, topSerializer, mutator);
-
+    this.subSerializer = subSerializer;
   }
 
+  public Serializer<N> getSubSerializer() {
+    return subSerializer;
+  }
+  
   /**
    * Checks if there are any columns at a row specified by key in a super column
    * family
@@ -138,12 +153,14 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
       SN columnName, N subColumnName, Class<V> valueClass) {
     return null;
   }
+  
+  
 
   public <VAL> HColumn<N, VAL> querySingleSubColumn(K key,
       SN columnName, N subColumnName, Serializer<VAL> valueSerializer) {
     return null;
   }
-
+  
   @SuppressWarnings("unchecked")
   public <T> List<T> querySuperColumns(K key,
       SuperCfRowMapper<K, SN, N, T> mapper) {
@@ -160,10 +177,55 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
       SuperCfRowMapper<K, SN, N, T> mapper) {
     return null;
   }
+  
+  public SuperCfUpdater<K, SN, N> createUpdater(K key, SN sColumnName) {
+    SuperCfUpdater<K, SN, N> updater = new SuperCfUpdater<K, SN, N>(this, columnFactory);
+    updater.addKey(key);
+    updater.addSuperColumn(sColumnName);
+    return updater;
+  }
 
+  public void update(SuperCfUpdater<K, SN, N> updater) {
+    updater.updateInternal();
+    updater.update();
+    executeIfNotBatched();
+  }
+  
+  public SuperCfResult<K, SN, N> querySuperColumn(K key, SN sColumnName) {
+    ColumnParent workingColumnParent = columnParent.deepCopy();
+    workingColumnParent.setSuper_column(topSerializer.toByteBuffer(sColumnName));
+    return doExecuteSlice(key, workingColumnParent, activeSlicePredicate);
+  }
+  
+  protected SuperCfResult<K,SN,N> doExecuteSlice(K key, ColumnParent workingColumnParent, HSlicePredicate<SN> predicate) {
+    SuperCfResultWrapper<K, SN, N> wrapper = 
+      new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
+          sliceInternal(key, workingColumnParent, predicate));
+    return wrapper;
+  } 
+  
+  private ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> sliceInternal(final K key,
+      final ColumnParent workingColumnParent,
+      final HSlicePredicate<SN> workingSlicePredicate) {
+    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
+      @Override
+      public Map<ByteBuffer,List<ColumnOrSuperColumn>> execute(Cassandra.Client cassandra) throws HectorException {
+        Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc = new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
+        try {          
 
+          ByteBuffer sKey = keySerializer.toByteBuffer(key);
+          cosc.put(sKey, cassandra.get_slice(sKey, workingColumnParent,
+              workingSlicePredicate.toThrift(), 
+              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType))));
 
+        } catch (Exception e) {
+          throw exceptionsTranslator.translate(e);
+        }        
 
+        return cosc;
+      }
+    });
+  }
   
 
 }

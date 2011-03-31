@@ -2,12 +2,18 @@ package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 
 import me.prettyprint.cassandra.model.ExecutionResult;
+import me.prettyprint.cassandra.model.HColumnImpl;
+import me.prettyprint.cassandra.model.HSuperColumnImpl;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -27,63 +33,78 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
  */
 public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> implements SuperCfResult<K,SN,N> {
 
-
+  private Map<SN,HSuperColumn<SN,N,ByteBuffer>> columns = new LinkedHashMap<SN,HSuperColumn<SN,N,ByteBuffer>>();
+  private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
+  private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
+  private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
+  private Serializer<N> subSerializer;
+  protected Serializer<SN> columnNameSerializer;
+  
   public SuperCfResultWrapper(Serializer<K> keySerializer,
-      Serializer<N> columnNameSerializer,
+      Serializer<SN> topSerializer,
+      Serializer<N> subSerializer,
       ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> executionResult) {
-    super(keySerializer, columnNameSerializer, executionResult);
-    // TODO Auto-generated constructor stub
+    super(keySerializer, null, executionResult);
+    this.columnNameSerializer = topSerializer;
+    this.subSerializer = subSerializer;
+    this.rows = executionResult.get().entrySet().iterator();    
+    next();
   }
 
-  private HSuperColumn<SN,N,ByteBuffer> superColumn;
-  private List<HColumn<N,ByteBuffer>> subColumns;
-  private Map<N,HColumn<N,ByteBuffer>> subColumnsMap = new HashMap<N,HColumn<N,ByteBuffer>>();
+  @Override
+  public SuperCfResult<K, SN, N> next() {
+    if ( !hasNext() ) {
+      throw new NoSuchElementException("No more rows left on this HColumnFamily");
+    }
+    entry = rows.next();    
+    applyToRow(keySerializer.fromByteBuffer(entry.getKey()), entry.getValue());
+    return this;
+  }
+  
+  @Override
+  public boolean hasNext() {
+    return rows.hasNext();
+  }
 
+  @Override
+  public void remove() {
+    rows.remove();
+  }
+
+  private void applyToRow(K key, List<ColumnOrSuperColumn> cosclist) {
+    HSuperColumn<SN, N, ByteBuffer> column;
+    SN colName;
+    for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
+      ColumnOrSuperColumn cosc = iterator.next();            
+
+      colName = columnNameSerializer.fromByteBuffer(cosc.getSuper_column().name.duplicate());
+      column = new HSuperColumnImpl(cosc.getSuper_column(), columnNameSerializer, subSerializer, ByteBufferSerializer.get());
+      // TODO cache columns
+      // TODO add clear() on HSuperColumnImpl
+      columns.put(colName, column); 
+      iterator.remove();
+    }
+  }
+
+  @Override
+  public K getKey() {    
+    return keySerializer.fromByteBuffer(entry.getKey());
+  }
   
 
   /**
    * Provides access to the current super column name from the mapper objects. This may be
    * needed when the super columm name may be part of the object being mapped into.
    */
-  public SN getSuperName()
-  {
-    return superColumn.getName();
+  public SN getSuperName() {
+    return columnNameSerializer.fromByteBuffer(entry.getKey());
   }
 
-  public ByteBuffer getColumnValue( N columnName)
-  {
-    HColumn<N,ByteBuffer> col = getColumn( columnName );
-    return col != null ? col.getValue() : null;
+
+  private HSuperColumn<SN,N,ByteBuffer> getColumn( SN columnName ) {
+    return columns.get(columnName);
   }
 
-  private HColumn<N,ByteBuffer> getColumn( N columnName )
-  {
-    return subColumnsMap.get( columnName );
-  }
-
-  @Override
-  public K getKey() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public boolean hasNext() {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public ColumnFamilyResult<K, N> next() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  @Override
-  public void remove() {
-    // TODO Auto-generated method stub
-    
-  }
 
   @Override
   public long getExecutionTimeMicro() {
@@ -93,6 +114,12 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
 
   @Override
   public CassandraHost getHostUsed() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public ByteBuffer getColumnValue(N columnName) {
     // TODO Auto-generated method stub
     return null;
   }
