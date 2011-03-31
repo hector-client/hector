@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.hector.api.Keyspace;
@@ -133,200 +134,36 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
   }
 
   @SuppressWarnings("unchecked")
-  public <VAL> HColumn<N, VAL> querySingleSubColumn(K key,
-      SN columnName, N subColumnName, Class<VAL> valueClass) {
-    return querySingleSubColumn(key, columnName, subColumnName,
-        (Serializer<VAL>) SerializerTypeInferer.getSerializer(valueClass));
+  public <V> HColumn<N, V> querySingleSubColumn(K key,
+      SN columnName, N subColumnName, Class<V> valueClass) {
+    return null;
   }
 
   public <VAL> HColumn<N, VAL> querySingleSubColumn(K key,
       SN columnName, N subColumnName, Serializer<VAL> valueSerializer) {
-    SubColumnQuery<K, SN, N, VAL> query = HFactory
-        .createSubColumnQuery(keyspace, keySerializer, topSerializer,
-            subSerializer, valueSerializer);
-    query.setColumnFamily(columnFamily);
-    query.setKey(key);
-    query.setSuperColumn(columnName);
-    query.setColumn(subColumnName);
-    QueryResult<HColumn<N, VAL>> result = query.execute();
-    return result != null ? result.get() : null;
-  }
-
-  /**
-   * Writes a series of object in a row of a super column family. Each object's
-   * properties are written to a super-column's child columns
-   * 
-   * @param <OBJ>
-   *          the type of Object to be persisted
-   * @param <N>
-   *          the type of the sub column name
-   * @param key
-   *          the row key
-   * @param objects
-   *          list of objects to write to the db
-   * @param subSerializer
-   *          the serializer for the child columns in the super column
-   * @param updater
-   *          the object which performs updates on a
-   */
-  public <OBJ> void update(K key, List<OBJ> objects,
-      SuperCfUpdater<K, SN, N, OBJ> updater) {
-    if (objects == null || objects.size() == 0) {
-      return;
-    }
-
-    updater.key = key;
-    updater.subSerializer = subSerializer;
-
-    for (OBJ obj : objects) {
-      updater.columns = new ArrayList<HColumn<N, ByteBuffer>>();
-
-      SN columnName = updater.update(obj);
-
-      HSuperColumn<SN, N, ByteBuffer> superColumn = HFactory
-          .createSuperColumn(columnName, updater.columns, topSerializer,
-              subSerializer, ByteBufferSerializer.get());
-      mutator.addInsertion(key, columnFamily, superColumn);
-
-      if (updater.columnsToDelete != null) {
-        HSuperColumn<SN, N, ByteBuffer> superColumnWithDeletes = HFactory
-            .createSuperColumn(columnName, updater.columnsToDelete,
-                topSerializer, subSerializer, ByteBufferSerializer.get());
-        mutator.addSubDelete(key, columnFamily, superColumnWithDeletes);
-        updater.columnsToDelete = null;
-      }
-    }
-    executeIfNotBatched();
-  }
-
-  @SuppressWarnings("unchecked")
-  public <OBJ> List<OBJ> querySuperColumns(K key,
-      SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    return querySuperColumns(key, (SN) ALL_COLUMNS_START,
-        (SN) ALL_COLUMNS_END, mapper);
-  }
-
-  public <OBJ> List<OBJ> querySuperColumns(K key, SN start, SN end,
-      SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    SuperSliceQuery<K, SN, N, ByteBuffer> query = createSuperSliceQuery(key);
-    query.setRange(start, end, false, ALL_COLUMNS_COUNT);
-    return executeSuperSliceQuery(key, query, mapper);
-  }
-
-  @SuppressWarnings("unchecked")
-  public <OBJ> List<OBJ> querySuperColumns(K key, List<SN> columns,
-      SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    SuperSliceQuery<K, SN, N, ByteBuffer> query = createSuperSliceQuery(key);
-    query.setColumnNames((SN[]) columns.toArray());
-    return executeSuperSliceQuery(key, query, mapper);
-  }
-
-  private <OBJ> List<OBJ> executeSuperSliceQuery(K key,
-      SuperSliceQuery<K, SN, N, ByteBuffer> query,
-      SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    QueryResult<SuperSlice<SN, N, ByteBuffer>> result = query.execute();
-    SuperSlice<SN, N, ByteBuffer> slice = result.get();
-    if (slice.getSuperColumns() != null && slice.getSuperColumns().size() > 0) {
-      List<OBJ> ret = new ArrayList<OBJ>();
-      for (HSuperColumn<SN, N, ByteBuffer> superCol : slice
-          .getSuperColumns()) {
-        /*SuperCfResultWrapper wrapper = new SuperCfResultWrapper(key, superCol);
-        ret.add(mapper.mapRow(wrapper));*/
-      }
-      return ret;
-    }
     return null;
   }
 
-  private SuperSliceQuery<K, SN, N, ByteBuffer> createSuperSliceQuery(
-      K key) {
-    SuperSliceQuery<K, SN, N, ByteBuffer> query = HFactory
-        .createSuperSliceQuery(keyspace, keySerializer, topSerializer,
-            subSerializer, ByteBufferSerializer.get());
-    query.setKey(key);
-    query.setColumnFamily(columnFamily);
-    return query;
-  }
-/*
   @SuppressWarnings("unchecked")
-  public <OBJ> ColumnFamilyResultsIterator<K, List<OBJ>> querySuperColumns(
-      List<K> key, SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    return querySuperColumns(key, (SN) ALL_COLUMNS_START,
-        (SN) ALL_COLUMNS_END, mapper);
+  public <T> List<T> querySuperColumns(K key,
+      SuperCfRowMapper<K, SN, N, T> mapper) {
+    return null;
   }
 
-  public <OBJ> ColumnFamilyResultsIterator<K, List<OBJ>> querySuperColumns(
-      List<K> key, SN start, SN end,
-      SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    MultigetSuperSliceQuery<K, SN, N, ByteBuffer> query = createMultigetSuperSliceQuery(key);
-    query.setRange(start, end, false, ALL_COLUMNS_COUNT);
-    return executeMultigetSuperSliceQuery(key, query, mapper);
+  public <T> List<T> querySuperColumns(K key, HSlicePredicate<SN> predicate,
+      SuperCfRowMapper<K, SN, N, T> mapper) {
+    return null;
   }
 
   @SuppressWarnings("unchecked")
-  public <OBJ> ColumnFamilyResultsIterator<K, List<OBJ>> querySuperColumns(
-      List<K> key, List<SN> columns,
-      SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    MultigetSuperSliceQuery<K, SN, N, ByteBuffer> query = createMultigetSuperSliceQuery(key);
-    query.setColumnNames((SN[]) columns.toArray());
-    return executeMultigetSuperSliceQuery(key, query, mapper);
+  public <T> List<T> querySuperColumns(K key, List<SN> columns,
+      SuperCfRowMapper<K, SN, N, T> mapper) {
+    return null;
   }
 
-  private <OBJ> ColumnFamilyResultsIterator<K, List<OBJ>> executeMultigetSuperSliceQuery(
-      final List<K> key,
-      MultigetSuperSliceQuery<K, SN, N, ByteBuffer> query,
-      final SuperCfRowMapper<K, SN, N, OBJ> mapper) {
-    QueryResult<SuperRows<K, SN, N, ByteBuffer>> result = query
-        .execute();
-    final SuperRows<K, SN, N, ByteBuffer> rows = result.get();
 
-    final Iterator<SuperRow<K, SN, N, ByteBuffer>> iter = rows
-        .iterator();
-    return new ColumnFamilyResultsIterator<K, List<OBJ>>() {
-      public boolean hasNext() {
-        return iter.hasNext();
-      }
 
-      public List<OBJ> next() {
-        return mapRow(iter.next());
-      }
 
-      public void remove() {
-        throw new UnsupportedOperationException("remove() is not supported");
-      }
-
-      public List<OBJ> getByKey(K key) {
-        return mapRow(rows.getByKey(key));
-      }
-
-      public int getCount() {
-        return rows.getCount();
-      }
-
-      private List<OBJ> mapRow(SuperRow<K, SN, N, ByteBuffer> row) {
-        SuperSlice<SN, N, ByteBuffer> slice = row.getSuperSlice();
-        List<OBJ> ret = new ArrayList<OBJ>();
-        for (HSuperColumn<SN, N, ByteBuffer> superCol : slice
-            .getSuperColumns()) {
-          SuperCfResultWrapper wrapper = new SuperCfResultWrapper(row.getKey(),
-              superCol);
-          ret.add(mapper.mapRow(wrapper));
-        }
-        return ret;
-      }
-    };
-  }
-  */
-
-  @SuppressWarnings("unchecked")
-  private MultigetSuperSliceQuery<K, SN, N, ByteBuffer> createMultigetSuperSliceQuery(
-      List<K> keys) {
-    MultigetSuperSliceQuery<K, SN, N, ByteBuffer> query = HFactory
-        .createMultigetSuperSliceQuery(keyspace, keySerializer, topSerializer,
-            subSerializer, ByteBufferSerializer.get());
-    query.setKeys((K[]) keys.toArray());
-    query.setColumnFamily(columnFamily);
-    return query;
-  }
+  
 
 }
