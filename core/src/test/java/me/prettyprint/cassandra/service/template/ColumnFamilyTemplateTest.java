@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
+import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.hector.api.factory.HFactory;
 
 import org.junit.Test;
@@ -30,8 +31,8 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     updater.update();
-    
-    String value = template.queryColumns("key1", "", "", new ColumnFamilyRowMapper<String, String, String>() {
+    template.setCount(10);
+    String value = template.queryColumns("key1", new ColumnFamilyRowMapper<String, String, String>() {
       @Override
       public String mapRow(ColumnFamilyResult<String, String> results) {
         // TODO Auto-generated method stub

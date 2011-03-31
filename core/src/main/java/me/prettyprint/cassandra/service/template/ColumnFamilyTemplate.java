@@ -136,10 +136,7 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   
   @SuppressWarnings("unchecked")
   public <T> T queryColumns(K key, ColumnFamilyRowMapper<K, N, T> mapper) {
-    HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);
-    predicate.setStartOn((N) ALL_COLUMNS_START);
-    predicate.setEndOn((N) ALL_COLUMNS_END);
-    return queryColumns(key, predicate, mapper);
+    return queryColumns(key, activeSlicePredicate, mapper);
   }
 
   /**
