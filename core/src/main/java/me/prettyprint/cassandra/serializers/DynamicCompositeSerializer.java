@@ -24,7 +24,6 @@ public class DynamicCompositeSerializer extends
   public DynamicComposite fromByteBuffer(ByteBuffer byteBuffer) {
 
     DynamicComposite composite = new DynamicComposite();
-    composite.setAutoDeserialize(false);
     composite.deserialize(byteBuffer);
 
     return composite;
