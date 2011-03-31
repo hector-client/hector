@@ -2,24 +2,25 @@ package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import me.prettyprint.cassandra.model.HColumnImpl;
+import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.hector.api.ColumnFactory;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.beans.HSuperColumn;
-import me.prettyprint.hector.api.factory.HFactory;
-import me.prettyprint.hector.api.mutation.Mutator;
 
 /**
  * This provides an interface of updating a specified row, most likely with the
@@ -50,80 +51,108 @@ import me.prettyprint.hector.api.mutation.Mutator;
  * @param <V>
  *          the object instance to persist
  */
-public abstract class SuperCfUpdater<K,SN,N,V> {
-  // Values have package access and are assigned by CassandraTemplate
-  K key;
-  Serializer<N> subSerializer;
-  List<HColumn<N, ByteBuffer>> columns;
-  List<HColumn<N, ByteBuffer>> columnsToDelete;
-
-  /**
-   * The CassandraTemplate update methods for super columns take a list of
-   * objects to persist. The update() method of this updater is call once for
-   * every object in the collection. The appropriate internally variables are
-   * initialized between calls so that the correct is saved.
-   * 
-   * Since the updater has intimate knowledge of the object being persisted, it
-   * should also know which super column this is being saved into. It conveys
-   * this to the CassandraTemplate by returning the value which will be the
-   * super column name these updates will go into.
-   * 
-   * @param obj
-   * @return the super column name where the object contents are saved
-   */
-  public abstract SN update(V obj);
-
-  /**
-   * Give the updater access to the current key being updated
-   * 
-   * @return
-   */
-  public K getKey() {
-    return key;
+public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
+      
+  protected SuperCfTemplate<K,SN, N> template;
+  private List<SN> sColumnNames;
+  private int sColPos;
+  private HSuperColumnImpl<SN,N,?> activeColumn;
+  private List<HColumn> subColumns;
+  
+  public SuperCfUpdater(SuperCfTemplate<K,SN,N> sTemplate, ColumnFactory columnFactory) {
+    super((AbstractColumnFamilyTemplate<K, N>) sTemplate, columnFactory);
+    this.template = sTemplate;
   }
-
-  public void deleteColumn(N columnName) {
-    if (columnsToDelete == null) {
-      columnsToDelete = new ArrayList<HColumn<N, ByteBuffer>>();
+  
+  public SuperCfUpdater<K,SN,N> addSuperColumn(SN sColumnName) {
+    if ( sColumnNames == null ) {
+      sColumnNames = new ArrayList<SN>();
+      subColumns = new ArrayList<HColumn>();
+    } else {
+      sColPos++;
     }
-    HColumn<N, ByteBuffer> col = new HColumnImpl<N, ByteBuffer>(
-        subSerializer, ByteBufferSerializer.get());
-    col.setName(columnName);
-    columnsToDelete.add(col);
+    sColumnNames.add(sColumnName);
+    
+    return this;
+  }
+  
+  public SN getCurrentSuperColumn() {
+    return sColumnNames.get(sColPos);
+  }
+  
+  /**
+   * collapse the state of the active HSuperColumn 
+   */
+  void updateInternal() {
+    // HSuperColumnImpl needs a refactor, this construction is lame.
+    // the value serializer is not used in HSuperColumnImpl, so this is safe for name
+    HSuperColumnImpl<SN, N, ?> column = new HSuperColumnImpl(getCurrentSuperColumn(), subColumns, 
+        template.getEffectiveClock(), template.getTopSerializer(), template.getSubSerializer(), TypeInferringSerializer.get());
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
-  public void setString(N columnName, String value) {
-    columns.add(HFactory.createColumn(columnName, StringSerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  /**
+   * Deletes the super column and all of its sub columns
+   */
+  public void deleteSuperColumn(SN sColumnName) {
+    template.getMutator().addDeletion(getCurrentKey(), template.getColumnFamily(), 
+        sColumnName, template.getTopSerializer());    
+  }
+  
+  public void deleteSubColumn(SN sColumnName, N columnName) {
+    template.getMutator().addSubDelete(getCurrentKey(), template.getColumnFamily(), 
+        new HSuperColumnImpl<SN, N, ByteBuffer>(sColumnName, (List<HColumn<N, ByteBuffer>>)Arrays.asList(columnFactory.createColumn(columnName, ByteBuffer.wrap(new byte[]{}), 
+            template.getSubSerializer(), ByteBufferSerializer.get())), template.getEffectiveClock(), 
+            template.getTopSerializer(), template.getSubSerializer(), ByteBufferSerializer.get()));
   }
 
-  public void setUUID(N columnName, UUID value) {
-    columns.add(HFactory.createColumn(columnName, UUIDSerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  public void setString(N subColumnName, String value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), StringSerializer.get()));
   }
 
-  public void setLong(N columnName, Long value) {
-    columns.add(HFactory.createColumn(columnName, LongSerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  public void setUUID(N subColumnName, UUID value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), UUIDSerializer.get()));
   }
 
-  public void setInteger(N columnName, Integer value) {
-    columns.add(HFactory.createColumn(columnName, IntegerSerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  public void setLong(N subColumnName, Long value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), LongSerializer.get()));
   }
 
-  public void setBoolean(N columnName, Boolean value) {
-    columns.add(HFactory.createColumn(columnName, BooleanSerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  public void setInteger(N subColumnName, Integer value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), IntegerSerializer.get()));
   }
 
-  public void setByteArray(N columnName, byte[] value) {
-    columns.add(HFactory.createColumn(columnName, BytesArraySerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  public void setBoolean(N subColumnName, Boolean value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), BooleanSerializer.get())); 
   }
 
-  public void setDate(N columnName, Date value) {
-    columns.add(HFactory.createColumn(columnName, DateSerializer.get()
-        .toByteBuffer(value), subSerializer, ByteBufferSerializer.get()));
+  public void setByteArray(N subColumnName, byte[] value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), BytesArraySerializer.get()));
+  }
+
+  public void setByteBuffer(N subColumnName, ByteBuffer value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), ByteBufferSerializer.get()));
+  }
+  
+  public void setDate(N subColumnName, Date value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), DateSerializer.get()));
+  }
+  
+  public void setDouble(N subColumnName, Double value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), DoubleSerializer.get()));
+  }
+  
+  public <V> void setValue(N subColumnName, V value, Serializer<V> serializer) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value,
+        template.getSubSerializer(), serializer));
   }
 }
