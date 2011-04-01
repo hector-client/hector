@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
@@ -34,4 +35,5 @@ public interface ColumnFamilyResult<K, N> extends Iterator<ColumnFamilyResult<K,
 
   Date getDate(N columnName);  
 
+  Collection<N> getColumnNames();
 }
