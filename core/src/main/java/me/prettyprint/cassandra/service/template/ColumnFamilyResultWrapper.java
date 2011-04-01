@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -37,8 +38,15 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
     this.rows = executionResult.get().entrySet().iterator();    
     next();
   }
-    
-
+   
+  /**
+   * All the column names we know about in the current iterator position
+   * @return
+   */
+  public Collection<N> getColumnNames() {
+    return columns.keySet();
+  }
+  
   public ByteBuffer getColumnValue( N columnName) {
     HColumn<N,ByteBuffer> col = getColumn( columnName );
     return col != null ? col.getValue() : null;
