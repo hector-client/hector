@@ -49,7 +49,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   }
   
 
-  private void applyToRow(K key, List<ColumnOrSuperColumn> cosclist) {
+  private void applyToRow(List<ColumnOrSuperColumn> cosclist) {
     HColumn<N, ByteBuffer> column;
     N colName;
     for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
@@ -79,7 +79,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
       throw new NoSuchElementException("No more rows left on this HColumnFamily");
     }
     entry = rows.next();    
-    applyToRow(keySerializer.fromByteBuffer(entry.getKey()), entry.getValue());
+    applyToRow(entry.getValue());
     return this;
   }
   

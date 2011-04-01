@@ -1,44 +1,18 @@
 package me.prettyprint.cassandra.service.template;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
-import org.apache.cassandra.thrift.ColumnParent;
-
-import me.prettyprint.cassandra.model.ExecutingKeyspace;
-import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HSlicePredicate;
-import me.prettyprint.cassandra.model.thrift.ThriftConverter;
-import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
-import me.prettyprint.cassandra.service.Operation;
-import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.beans.HSuperColumn;
-import me.prettyprint.hector.api.beans.SuperRow;
-import me.prettyprint.hector.api.beans.SuperRows;
-import me.prettyprint.hector.api.beans.SuperSlice;
-import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
-import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
-import me.prettyprint.hector.api.query.QueryResult;
-import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SuperCountQuery;
-import me.prettyprint.hector.api.query.SuperSliceQuery;
 
-public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, SN> {
-  private Serializer<N> subSerializer;
+public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, SN> {
+  protected Serializer<N> subSerializer;
 
   public SuperCfTemplate(Keyspace keyspace, String columnFamily,
       Serializer<K> keySerializer, Serializer<SN> topSerializer,
@@ -192,40 +166,9 @@ public class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemplate<K, S
   }
   
   public SuperCfResult<K, SN, N> querySuperColumn(K key, SN sColumnName) {
-    ColumnParent workingColumnParent = columnParent.deepCopy();
-    workingColumnParent.setSuper_column(topSerializer.toByteBuffer(sColumnName));
-    return doExecuteSlice(key, workingColumnParent, activeSlicePredicate);
+    return doExecuteSlice(key, sColumnName, activeSlicePredicate);
   }
   
-  protected SuperCfResult<K,SN,N> doExecuteSlice(K key, ColumnParent workingColumnParent, HSlicePredicate<SN> predicate) {
-    SuperCfResultWrapper<K, SN, N> wrapper = 
-      new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
-          sliceInternal(key, workingColumnParent, predicate));
-    return wrapper;
-  } 
-  
-  private ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> sliceInternal(final K key,
-      final ColumnParent workingColumnParent,
-      final HSlicePredicate<SN> workingSlicePredicate) {
-    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
-      @Override
-      public Map<ByteBuffer,List<ColumnOrSuperColumn>> execute(Cassandra.Client cassandra) throws HectorException {
-        Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc = new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
-        try {          
-
-          ByteBuffer sKey = keySerializer.toByteBuffer(key);
-          cosc.put(sKey, cassandra.get_slice(sKey, workingColumnParent,
-              workingSlicePredicate.toThrift(), 
-              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType))));
-
-        } catch (Exception e) {
-          throw exceptionsTranslator.translate(e);
-        }        
-
-        return cosc;
-      }
-    });
-  }
-  
+  protected abstract SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate);
 
 }
