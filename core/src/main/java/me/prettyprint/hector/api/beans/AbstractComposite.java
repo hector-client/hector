@@ -359,7 +359,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
             a = (byte) Character.toUpperCase((char) a);
             name = aliasToComparatorMapping.get(a);
             if (name != null) {
-              name += "(sort=desc)";
+              name += "(reversed=true)";
             }
           }
         }
@@ -565,7 +565,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if (comparator == null) {
           comparator = BYTESTYPE.getTypeName();
         }
-        int p = comparator.indexOf("(sort=desc)");
+        int p = comparator.indexOf("(reversed=true)");
         boolean desc = false;
         if (p >= 0) {
           comparator = comparator.substring(0, p);
