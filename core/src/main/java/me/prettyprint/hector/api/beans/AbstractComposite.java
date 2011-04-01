@@ -47,6 +47,30 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
 
+  public enum ComponentEquality {
+    LESS_THAN_EQUAL((byte) -1), EQUAL((byte) 0), GREATER_THAN_EQUAL((byte) 1);
+
+    private final byte equality;
+
+    ComponentEquality(byte equality) {
+      this.equality = equality;
+    }
+
+    public byte toByte() {
+      return equality;
+    }
+
+    public static ComponentEquality fromByte(byte equality) {
+      if (equality > 0) {
+        return GREATER_THAN_EQUAL;
+      }
+      if (equality < 0) {
+        return LESS_THAN_EQUAL;
+      }
+      return EQUAL;
+    }
+  }
+
   static final Logger logger = Logger.getLogger(AbstractComposite.class
       .getName());
 
@@ -89,15 +113,15 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     final T value;
     final ByteBuffer bytes;
     final String comparator;
-    final boolean inclusive;
+    final ComponentEquality equality;
 
     public Component(T value, ByteBuffer bytes, Serializer<T> serializer,
-        String comparator, boolean inclusive) {
+        String comparator, ComponentEquality equality) {
       this.serializer = serializer;
       this.value = value;
       this.bytes = bytes;
       this.comparator = comparator;
-      this.inclusive = inclusive;
+      this.equality = equality;
     }
 
     public Serializer<T> getSerializer() {
@@ -148,8 +172,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       return comparator;
     }
 
-    public boolean isInclusive() {
-      return inclusive;
+    public ComponentEquality getEquality() {
+      return equality;
     }
   }
 
@@ -373,16 +397,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public <T> AbstractComposite addComponent(T value, Serializer<T> s,
       String comparator) {
 
-    addComponent(value, s, comparator, false);
+    addComponent(value, s, comparator, ComponentEquality.EQUAL);
 
     return this;
 
   }
 
   public <T> AbstractComposite addComponent(T value, Serializer<T> s,
-      String comparator, boolean inclusive) {
+      String comparator, ComponentEquality equality) {
 
-    addComponent(-1, value, s, comparator, inclusive);
+    addComponent(-1, value, s, comparator, equality);
 
     return this;
 
@@ -390,7 +414,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   @SuppressWarnings("unchecked")
   public <T> AbstractComposite addComponent(int index, T value,
-      Serializer<T> s, String comparator, boolean inclusive) {
+      Serializer<T> s, String comparator, ComponentEquality equality) {
     serialized = null;
 
     if (index < 0) {
@@ -400,7 +424,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     while (components.size() < index) {
       components.add(null);
     }
-    components.add(index, new Component(value, null, s, comparator, inclusive));
+    components.add(index, new Component(value, null, s, comparator, equality));
 
     return this;
 
@@ -419,7 +443,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       c = element instanceof UUID ? comparatorForUUID((UUID) element)
           : comparatorForSerializer(s);
     }
-    components.add(index, new Component(element, null, s, c, false));
+    components.add(index, new Component(element, null, s, c,
+        ComponentEquality.EQUAL));
   }
 
   @Override
@@ -445,7 +470,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public <T> AbstractComposite setComponent(int index, T value,
       Serializer<T> s, String comparator) {
 
-    setComponent(index, value, s, comparator, false);
+    setComponent(index, value, s, comparator, ComponentEquality.EQUAL);
 
     return this;
 
@@ -453,13 +478,13 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   @SuppressWarnings("unchecked")
   public <T> AbstractComposite setComponent(int index, T value,
-      Serializer<T> s, String comparator, boolean inclusive) {
+      Serializer<T> s, String comparator, ComponentEquality equality) {
     serialized = null;
 
     while (components.size() <= index) {
       components.add(null);
     }
-    components.set(index, new Component(value, null, s, comparator, inclusive));
+    components.set(index, new Component(value, null, s, comparator, equality));
 
     return this;
 
@@ -479,7 +504,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           : comparatorForSerializer(s);
     }
     Component prev = components.set(index, new Component(element, null, s, c,
-        false));
+        ComponentEquality.EQUAL));
     if (prev != null) {
       return prev.getValue();
     }
@@ -559,7 +584,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       }
       out.writeShort((short) cb.remaining());
       out.write(cb.slice());
-      out.write(c.isInclusive() ? 1 : 0);
+      out.write(c.getEquality().toByte());
       i++;
     }
 
@@ -578,9 +603,9 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       ByteBuffer data = getWithShortLength(b);
       if (data != null) {
         Serializer<?> s = getSerializer(i, comparator);
-        boolean inclusive = b.get() != 0;
+        ComponentEquality equality = ComponentEquality.fromByte(b.get());
         components.add(new Component(null, data.slice(), s, comparator,
-            inclusive));
+            equality));
       } else {
         throw new RuntimeException("Missing component data in composite type");
       }
