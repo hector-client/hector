@@ -105,6 +105,26 @@ public class CompositeTest {
     assertTrue(c.get(1) instanceof UUID);
     assertTrue(c.get(2) instanceof ByteBuffer);
 
+    b = DynamicComposite.toByteBuffer(1, "string",
+        TimeUUIDUtils.getUniqueTimeUUIDinMillis());
+    c = DynamicComposite.fromByteBuffer(b);
+    assertTrue(c.get(0) instanceof BigInteger);
+    assertTrue(c.get(1) instanceof String);
+    assertTrue(c.get(2) instanceof UUID);
+
+    b = DynamicComposite.toByteBuffer((long) 1, "string",
+        TimeUUIDUtils.getUniqueTimeUUIDinMillis());
+    c = DynamicComposite.fromByteBuffer(b);
+    assertTrue(c.get(0) instanceof Long);
+    assertTrue(c.get(1) instanceof String);
+    assertTrue(c.get(2) instanceof UUID);
+
+    b = DynamicComposite.toByteBuffer((byte) 1, "string", UUID.randomUUID());
+    c = DynamicComposite.fromByteBuffer(b);
+    assertTrue(c.get(0) instanceof BigInteger);
+    assertTrue(c.get(1) instanceof String);
+    assertTrue(c.get(2) instanceof UUID);
+
   }
 
   @Test

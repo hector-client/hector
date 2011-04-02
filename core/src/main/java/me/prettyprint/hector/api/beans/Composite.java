@@ -19,4 +19,10 @@ public class Composite extends AbstractComposite {
 
     return composite;
   }
+
+  public static ByteBuffer toByteBuffer(Object... o) {
+    Composite composite = new Composite(o);
+    return composite.serialize();
+  }
+
 }
