@@ -1,11 +1,15 @@
 package me.prettyprint.cassandra.serializers;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
+import me.prettyprint.hector.api.ddl.ComparatorType;
+
 /**
- * Almost identical to StringSerializer except we use the US-ASCII
- * character set code
+ * Almost identical to StringSerializer except we use the US-ASCII character set
+ * code
  * 
  * @author zznate
  */
@@ -18,22 +22,26 @@ public final class AsciiSerializer extends AbstractSerializer<String> {
   public static AsciiSerializer get() {
     return instance;
   }
-  
+
   @Override
   public String fromByteBuffer(ByteBuffer byteBuffer) {
     if (byteBuffer == null) {
       return null;
-    }    
-    return charset.decode(byteBuffer).toString();  
+    }
+    return charset.decode(byteBuffer).toString();
   }
 
   @Override
   public ByteBuffer toByteBuffer(String obj) {
     if (obj == null) {
       return null;
-    }    
-    return ByteBuffer.wrap(obj.getBytes(charset)); 
+    }
+    return ByteBuffer.wrap(obj.getBytes(charset));
   }
 
-  
+  @Override
+  public ComparatorType getComparatorType() {
+    return ASCIITYPE;
+  }
+
 }

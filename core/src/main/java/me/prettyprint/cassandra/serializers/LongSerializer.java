@@ -1,6 +1,10 @@
 package me.prettyprint.cassandra.serializers;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
+
 import java.nio.ByteBuffer;
+
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * Converts bytes to Long and vise a versa
@@ -21,7 +25,7 @@ public final class LongSerializer extends AbstractSerializer<Long> {
     if (obj == null) {
       return null;
     }
-    return ByteBuffer.allocate(8).putLong(0, obj);    
+    return ByteBuffer.allocate(8).putLong(0, obj);
   }
 
   @Override
@@ -31,6 +35,11 @@ public final class LongSerializer extends AbstractSerializer<Long> {
     }
     long l = byteBuffer.getLong();
     return l;
+  }
+
+  @Override
+  public ComparatorType getComparatorType() {
+    return LONGTYPE;
   }
 
 }

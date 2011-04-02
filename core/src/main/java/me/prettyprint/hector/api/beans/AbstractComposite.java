@@ -76,12 +76,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .getName());
 
   public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
-      .put(AsciiSerializer.class, ASCIITYPE.getTypeName())
-      .put(BigIntegerSerializer.class, INTEGERTYPE.getTypeName())
-      .put(ByteBufferSerializer.class, BYTESTYPE.getTypeName())
-      .put(LongSerializer.class, LONGTYPE.getTypeName())
-      .put(StringSerializer.class, UTF8TYPE.getTypeName())
-      .put(UUIDSerializer.class, "UUIDType").build();
+      .put(AsciiSerializer.class,
+          AsciiSerializer.get().getComparatorType().getTypeName())
+      .put(BigIntegerSerializer.class,
+          BigIntegerSerializer.get().getComparatorType().getTypeName())
+      .put(LongSerializer.class,
+          LongSerializer.get().getComparatorType().getTypeName())
+      .put(StringSerializer.class,
+          StringSerializer.get().getComparatorType().getTypeName())
+      .put(UUIDSerializer.class,
+          UUIDSerializer.get().getComparatorType().getTypeName()).build();
 
   static final ImmutableClassToInstanceMap<Serializer> SERIALIZERS = new ImmutableClassToInstanceMap.Builder<Serializer>()
       .put(AsciiSerializer.class, AsciiSerializer.get())

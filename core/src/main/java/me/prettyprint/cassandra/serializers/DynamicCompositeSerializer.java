@@ -3,9 +3,12 @@
  */
 package me.prettyprint.cassandra.serializers;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.DYNAMICCOMPOSITETYPE;
+
 import java.nio.ByteBuffer;
 
 import me.prettyprint.hector.api.beans.DynamicComposite;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * @author Todd Nine
@@ -28,6 +31,11 @@ public class DynamicCompositeSerializer extends
 
     return composite;
 
+  }
+
+  @Override
+  public ComparatorType getComparatorType() {
+    return DYNAMICCOMPOSITETYPE;
   }
 
 }
