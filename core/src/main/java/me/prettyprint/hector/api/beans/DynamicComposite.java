@@ -19,4 +19,9 @@ public class DynamicComposite extends AbstractComposite {
 
     return composite;
   }
+
+  public static ByteBuffer toByteBuffer(Object... o) {
+    DynamicComposite composite = new DynamicComposite(o);
+    return composite.serialize();
+  }
 }

@@ -8,6 +8,7 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.AbstractList;
@@ -430,10 +431,18 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   }
 
+  public static Object mapIfNumber(Object o) {
+    if ((o instanceof Byte) || (o instanceof Integer) || (o instanceof Short)) {
+      return BigInteger.valueOf(((Number) o).longValue());
+    }
+    return o;
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public void add(int index, Object element) {
     serialized = null;
+    element = mapIfNumber(element);
     Serializer s = serializerForPosition(index);
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);
@@ -494,6 +503,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @Override
   public Object set(int index, Object element) {
     serialized = null;
+    element = mapIfNumber(element);
     Serializer s = serializerForPosition(index);
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);

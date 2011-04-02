@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.UUID;
 
@@ -8,9 +9,9 @@ import me.prettyprint.hector.api.Serializer;
 /**
  * Utility class that infers the concrete Serializer needed to turn a value into
  * its binary representation
- *
+ * 
  * @author Bozhidar Bozhanov
- *
+ * 
  */
 public class SerializerTypeInferer {
 
@@ -27,6 +28,8 @@ public class SerializerTypeInferer {
       serializer = LongSerializer.get();
     } else if (value instanceof Integer) {
       serializer = IntegerSerializer.get();
+    } else if (value instanceof BigInteger) {
+      serializer = BigIntegerSerializer.get();
     } else if (value instanceof Boolean) {
       serializer = BooleanSerializer.get();
     } else if (value instanceof byte[]) {
@@ -52,7 +55,8 @@ public class SerializerTypeInferer {
       serializer = LongSerializer.get();
     } else if (valueClass.equals(Integer.class) || valueClass.equals(int.class)) {
       serializer = IntegerSerializer.get();
-    } else if (valueClass.equals(Boolean.class) || valueClass.equals(boolean.class)) {
+    } else if (valueClass.equals(Boolean.class)
+        || valueClass.equals(boolean.class)) {
       serializer = BooleanSerializer.get();
     } else if (valueClass.equals(byte[].class)) {
       serializer = ByteBufferSerializer.get();
