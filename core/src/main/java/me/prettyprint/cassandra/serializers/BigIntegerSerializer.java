@@ -1,7 +1,11 @@
 package me.prettyprint.cassandra.serializers;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * Serializer implementation for BigInteger
@@ -11,14 +15,14 @@ import java.nio.ByteBuffer;
 public final class BigIntegerSerializer extends AbstractSerializer<BigInteger> {
 
   private static final BigIntegerSerializer INSTANCE = new BigIntegerSerializer();
-  
+
   public static BigIntegerSerializer get() {
     return INSTANCE;
   }
-  
+
   @Override
   public BigInteger fromByteBuffer(ByteBuffer byteBuffer) {
-    if ( byteBuffer == null ) {
+    if (byteBuffer == null) {
       return null;
     }
     int length = byteBuffer.remaining();
@@ -29,11 +33,15 @@ public final class BigIntegerSerializer extends AbstractSerializer<BigInteger> {
 
   @Override
   public ByteBuffer toByteBuffer(BigInteger obj) {
-    if ( obj == null ) {
+    if (obj == null) {
       return null;
     }
-    return ByteBuffer.wrap(obj.toByteArray());    
+    return ByteBuffer.wrap(obj.toByteArray());
   }
 
-  
+  @Override
+  public ComparatorType getComparatorType() {
+    return INTEGERTYPE;
+  }
+
 }

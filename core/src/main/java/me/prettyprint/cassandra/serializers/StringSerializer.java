@@ -1,8 +1,11 @@
 package me.prettyprint.cassandra.serializers;
 
-import java.io.UnsupportedEncodingException;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
+
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * A StringSerializer translates the byte[] to and from string using utf-8
@@ -25,15 +28,21 @@ public final class StringSerializer extends AbstractSerializer<String> {
   public ByteBuffer toByteBuffer(String obj) {
     if (obj == null) {
       return null;
-    }    
-    return ByteBuffer.wrap(obj.getBytes(charset));    
+    }
+    return ByteBuffer.wrap(obj.getBytes(charset));
   }
 
   @Override
   public String fromByteBuffer(ByteBuffer byteBuffer) {
     if (byteBuffer == null) {
       return null;
-    }    
-    return charset.decode(byteBuffer).toString();    
+    }
+    return charset.decode(byteBuffer).toString();
   }
+
+  @Override
+  public ComparatorType getComparatorType() {
+    return UTF8TYPE;
+  }
+
 }

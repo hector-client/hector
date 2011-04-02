@@ -21,9 +21,14 @@ public class ComparatorType {
       "org.apache.cassandra.db.marshal.TimeUUIDType");
   public static ComparatorType UTF8TYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.UTF8Type");
+  public static ComparatorType COMPOSITETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.CompositeType");
+  public static ComparatorType DYNAMICCOMPOSITETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DynamicCompositeType");
 
   private static ComparatorType[] values = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
-      LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE, UTF8TYPE };
+      LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
+      UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE };
 
   private final String className;
   private final String typeName;
@@ -47,7 +52,9 @@ public class ComparatorType {
   }
 
   public static ComparatorType getByClassName(String className) {
-    if ( className == null ) return null;
+    if (className == null) {
+      return null;
+    }
     for (int a = 0; a < values.length; a++) {
       ComparatorType type = values[a];
       if (type.getClassName().equals(className)) {
