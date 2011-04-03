@@ -195,6 +195,11 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     this.addAll(Arrays.asList(o));
   }
 
+  public AbstractComposite(boolean dynamic, List<?> l) {
+    this.dynamic = dynamic;
+    this.addAll(l);
+  }
+
   public List<Component<?>> getComponents() {
     return components;
   }
