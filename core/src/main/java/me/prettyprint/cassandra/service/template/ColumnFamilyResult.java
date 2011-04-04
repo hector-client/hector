@@ -1,11 +1,14 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.UUID;
 
 import me.prettyprint.hector.api.ResultStatus;
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.HColumn;
 
 /**
  * A common interface for access to the resuls of a query of either a standard or super column family.
@@ -36,4 +39,7 @@ public interface ColumnFamilyResult<K, N> extends Iterator<ColumnFamilyResult<K,
   Date getDate(N columnName);  
 
   Collection<N> getColumnNames();
+  
+  HColumn<N,ByteBuffer> getColumn(N columnName);
+    
 }

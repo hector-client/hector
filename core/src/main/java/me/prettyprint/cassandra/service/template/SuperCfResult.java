@@ -14,5 +14,6 @@ package me.prettyprint.cassandra.service.template;
  *          child column name data type
  */
 public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
-  public SN getSuperName();
+  SN getSuperName();
+  
 }

@@ -53,7 +53,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
     return col != null ? col.getValue() : null;
   }
 
-  private HColumn<N,ByteBuffer> getColumn( N columnName ) {
+  public HColumn<N,ByteBuffer> getColumn( N columnName ) {
     return columns.get( columnName );
   }
   

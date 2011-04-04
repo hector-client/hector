@@ -1,8 +1,10 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.List;
 
+import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
@@ -127,7 +129,13 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
   
   public <V> HColumn<N, V> querySingleSubColumn(K key,
       SN columnName, N subColumnName, Serializer<V> valueSerializer) {
-    return null;
+    
+    SuperCfResult<K,SN,N> result = doExecuteSlice(key, columnName, activeSlicePredicate);    
+    HColumn<N,ByteBuffer> origCol = result.getColumn(subColumnName);
+    // TODO make this far less hacky
+    return new HColumnImpl<N, V>(subColumnName, 
+        valueSerializer.fromByteBuffer(origCol.getValue()), origCol.getClock(), 
+        subSerializer, valueSerializer);
   }
   
   @SuppressWarnings("unchecked")
