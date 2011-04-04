@@ -21,6 +21,7 @@ import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.ColumnFactory;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.factory.HFactory;
 
 /**
  * This provides an interface of updating a specified row, most likely with the
@@ -86,8 +87,9 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   void updateInternal() {
     // HSuperColumnImpl needs a refactor, this construction is lame.
     // the value serializer is not used in HSuperColumnImpl, so this is safe for name
+    // TODO need to mod to work with 0 timestamp
     HSuperColumnImpl<SN, N, ?> column = new HSuperColumnImpl(getCurrentSuperColumn(), subColumns, 
-        template.getEffectiveClock(), template.getTopSerializer(), template.getSubSerializer(), TypeInferringSerializer.get());
+        0, template.getTopSerializer(), template.getSubSerializer(), TypeInferringSerializer.get());
     template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
