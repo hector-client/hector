@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
@@ -124,6 +125,15 @@ public class CompositeTest {
     assertTrue(c.get(0) instanceof BigInteger);
     assertTrue(c.get(1) instanceof String);
     assertTrue(c.get(2) instanceof UUID);
+
+    b = DynamicComposite.toByteBuffer(Arrays.asList(Arrays.asList(0, 1, 2), 3,
+        4, 5, Arrays.asList(6, 7, 8)));
+    c = DynamicComposite.fromByteBuffer(b);
+    for (int i = 0; i < 9; i++) {
+      o = c.get(i);
+      assertTrue(o instanceof BigInteger);
+      assertEquals(i, ((BigInteger) o).intValue());
+    }
 
   }
 
