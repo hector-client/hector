@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.util.Collection;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.HSlicePredicate;
@@ -122,53 +123,53 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
     return query.execute().get();
   }
 
-  @SuppressWarnings("unchecked")
+
+  
   public <V> HColumn<N, V> querySingleSubColumn(K key,
-      SN columnName, N subColumnName, Class<V> valueClass) {
-    return null;
-  }
-  
-  
-
-  public <VAL> HColumn<N, VAL> querySingleSubColumn(K key,
-      SN columnName, N subColumnName, Serializer<VAL> valueSerializer) {
+      SN columnName, N subColumnName, Serializer<V> valueSerializer) {
     return null;
   }
   
   @SuppressWarnings("unchecked")
-  public <T> List<T> querySuperColumns(K key,
-      SuperCfRowMapper<K, SN, N, T> mapper) {
-    return null;
+  public SuperCfResult<K, SN, N> querySuperColumns(K key, List<SN> sColumnNames) {
+    HSlicePredicate<SN> workingSlicePredicate = new HSlicePredicate<SN>(topSerializer);
+    workingSlicePredicate.setColumnNames(sColumnNames);
+    return doExecuteSlice(key, null, workingSlicePredicate);    
   }
 
-  public <T> List<T> querySuperColumns(K key, HSlicePredicate<SN> predicate,
+  
+
+  public <T> T querySuperColumns(K key, List<SN> sColumnNames,
       SuperCfRowMapper<K, SN, N, T> mapper) {
-    return null;
+    
+    HSlicePredicate<SN> workingSlicePredicate = new HSlicePredicate<SN>(topSerializer);
+    workingSlicePredicate.setColumnNames(sColumnNames);
+    return mapper.mapRow(doExecuteSlice(key, null, workingSlicePredicate));
   }
 
-  @SuppressWarnings("unchecked")
-  public <T> List<T> querySuperColumns(K key, List<SN> columns,
-      SuperCfRowMapper<K, SN, N, T> mapper) {
-    return null;
+  public SuperCfResult<K, SN, N> querySuperColumn(K key, SN sColumnName) {
+    return doExecuteSlice(key, sColumnName, activeSlicePredicate);
   }
   
-  public SuperCfUpdater<K, SN, N> createUpdater(K key, SN sColumnName) {
+  public SuperCfUpdater<K, SN, N> createUpdater(K key, SN sColumnName) {    
+    return createUpdater(key).addSuperColumn(sColumnName);
+  }
+
+  public SuperCfUpdater<K, SN, N> createUpdater(K key) {
     SuperCfUpdater<K, SN, N> updater = new SuperCfUpdater<K, SN, N>(this, columnFactory);
     updater.addKey(key);
-    updater.addSuperColumn(sColumnName);
     return updater;
   }
-
+  
   public void update(SuperCfUpdater<K, SN, N> updater) {
     updater.updateInternal();
     updater.update();
     executeIfNotBatched();
   }
   
-  public SuperCfResult<K, SN, N> querySuperColumn(K key, SN sColumnName) {
-    return doExecuteSlice(key, sColumnName, activeSlicePredicate);
-  }
+
   
   protected abstract SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate);
+  
 
 }

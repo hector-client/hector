@@ -29,7 +29,9 @@ public class ThriftSuperCfTemplate<K, SN, N> extends SuperCfTemplate<K, SN, N> {
   
   protected SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate) {
     ColumnParent workingColumnParent = columnParent.deepCopy();
-    workingColumnParent.setSuper_column(topSerializer.toByteBuffer(sColumnName));
+    if ( sColumnName != null ) {
+      workingColumnParent.setSuper_column(topSerializer.toByteBuffer(sColumnName));
+    }
     SuperCfResultWrapper<K, SN, N> wrapper = 
       new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
           sliceInternal(key, workingColumnParent, predicate), 
