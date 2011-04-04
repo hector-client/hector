@@ -450,6 +450,9 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   @SuppressWarnings({ "unchecked" })
   private static Collection<?> flatten(Collection<?> c) {
+    if (c instanceof AbstractComposite) {
+      return ((AbstractComposite) c).getComponents();
+    }
     boolean hasCollection = false;
     for (Object o : c) {
       if (o instanceof Collection) {
