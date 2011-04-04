@@ -29,6 +29,8 @@ public class SuperCfResultWrapper<K,SN,N> extends ColumnFamilyResultWrapper<K,N>
       SN sColumnName) {
     super(keySerializer, subSerializer, executionResult);
     this.sNameSerializer = sNameSerializer;
+    this.sColumnName = sColumnName;
+    
   }
   
 

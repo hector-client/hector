@@ -16,6 +16,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 
+import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 
 /**
@@ -26,10 +27,10 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
  */
 public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
-  private Map<N,HColumn<N,ByteBuffer>> columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
-  private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
-  private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
-  private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
+  protected Map<N,HColumn<N,ByteBuffer>> columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
+  protected Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
+  protected Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
+  protected ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
   
   public ColumnFamilyResultWrapper(Serializer<K> keySerializer,
       Serializer<N> columnNameSerializer,
@@ -58,22 +59,37 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
 
   private void applyToRow(List<ColumnOrSuperColumn> cosclist) {
-    HColumn<N, ByteBuffer> column;
-    N colName;
+    
     for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
       ColumnOrSuperColumn cosc = iterator.next();            
-
-      colName = columnNameSerializer.fromByteBuffer(cosc.getColumn().name.duplicate());
-      column = columns.get(colName);
-      
-      if ( column == null ) {
-        column = new HColumnImpl<N, ByteBuffer>(cosc.getColumn(), columnNameSerializer, ByteBufferSerializer.get());
+      if ( cosc.isSetSuper_column() ) {
+        applySuper(cosc);
       } else {
-        ((HColumnImpl<N, ByteBuffer>)column).apply(cosc.getColumn());
+        applyStandard(cosc.getColumn());        
       }
-      columns.put(colName, column); 
+       
       iterator.remove();
     }
+  }
+  
+  private void applySuper(ColumnOrSuperColumn cosc) {
+    Iterator<Column> tcolumns = cosc.getSuper_column().getColumnsIterator();
+    while ( tcolumns.hasNext() ) {
+      applyStandard(tcolumns.next());
+    }    
+  }
+
+  
+  private void applyStandard(Column cosc) {
+    N colName = columnNameSerializer.fromByteBuffer(cosc.name.duplicate());
+    HColumn<N, ByteBuffer> column = columns.get(colName);
+    
+    if ( column == null ) {
+      column = new HColumnImpl<N, ByteBuffer>(cosc, columnNameSerializer, ByteBufferSerializer.get());
+    } else {
+      ((HColumnImpl<N, ByteBuffer>)column).apply(cosc);
+    }
+    columns.put(colName, column);  
   }
 
   @Override
