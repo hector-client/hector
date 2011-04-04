@@ -500,6 +500,12 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @Override
   public void add(int index, Object element) {
     serialized = null;
+
+    if (element instanceof Component) {
+      components.add((Component<?>) element);
+      return;
+    }
+
     element = mapIfNumber(element);
     Serializer s = serializerForPosition(index);
     if (s == null) {
@@ -561,6 +567,15 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @Override
   public Object set(int index, Object element) {
     serialized = null;
+
+    if (element instanceof Component) {
+      Component prev = components.set(index, (Component<?>) element);
+      if (prev != null) {
+        return prev.getValue();
+      }
+      return null;
+    }
+
     element = mapIfNumber(element);
     Serializer s = serializerForPosition(index);
     if (s == null) {
