@@ -502,7 +502,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     serialized = null;
 
     if (element instanceof Component) {
-      components.add((Component<?>) element);
+      components.add(index, (Component<?>) element);
       return;
     }
 
