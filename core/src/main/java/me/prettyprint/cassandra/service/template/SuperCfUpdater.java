@@ -67,11 +67,12 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   
   public SuperCfUpdater<K,SN,N> addSuperColumn(SN sColumnName) {
     if ( sColumnNames == null ) {
-      sColumnNames = new ArrayList<SN>();
-      subColumns = new ArrayList<HColumn>();
+      sColumnNames = new ArrayList<SN>();      
     } else {
-      sColPos++;
+      updateInternal();
+      sColPos++;      
     }
+    subColumns = new ArrayList<HColumn>();
     sColumnNames.add(sColumnName);
     
     return this;
