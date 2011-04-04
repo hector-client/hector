@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
+
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,6 +12,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * A base class for serializer implementations. Takes care of the default
@@ -117,5 +120,9 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
 
   public int computeInitialHashSize(int initialSize) {
     return Double.valueOf(Math.floor(initialSize / 0.75)).intValue() + 1;
+  }
+
+  public ComparatorType getComparatorType() {
+    return BYTESTYPE;
   }
 }

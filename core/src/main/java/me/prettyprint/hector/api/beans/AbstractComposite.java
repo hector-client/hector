@@ -8,11 +8,13 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,12 +77,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .getName());
 
   public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
-      .put(AsciiSerializer.class, ASCIITYPE.getTypeName())
-      .put(BigIntegerSerializer.class, INTEGERTYPE.getTypeName())
-      .put(ByteBufferSerializer.class, BYTESTYPE.getTypeName())
-      .put(LongSerializer.class, LONGTYPE.getTypeName())
-      .put(StringSerializer.class, UTF8TYPE.getTypeName())
-      .put(UUIDSerializer.class, "UUIDType").build();
+      .put(AsciiSerializer.class,
+          AsciiSerializer.get().getComparatorType().getTypeName())
+      .put(BigIntegerSerializer.class,
+          BigIntegerSerializer.get().getComparatorType().getTypeName())
+      .put(LongSerializer.class,
+          LongSerializer.get().getComparatorType().getTypeName())
+      .put(StringSerializer.class,
+          StringSerializer.get().getComparatorType().getTypeName())
+      .put(UUIDSerializer.class,
+          UUIDSerializer.get().getComparatorType().getTypeName()).build();
 
   static final ImmutableClassToInstanceMap<Serializer> SERIALIZERS = new ImmutableClassToInstanceMap.Builder<Serializer>()
       .put(AsciiSerializer.class, AsciiSerializer.get())
@@ -188,6 +194,11 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public AbstractComposite(boolean dynamic, Object... o) {
     this.dynamic = dynamic;
     this.addAll(Arrays.asList(o));
+  }
+
+  public AbstractComposite(boolean dynamic, List<?> l) {
+    this.dynamic = dynamic;
+    this.addAll(l);
   }
 
   public List<Component<?>> getComponents() {
@@ -430,10 +441,72 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   }
 
+  private static Object mapIfNumber(Object o) {
+    if ((o instanceof Byte) || (o instanceof Integer) || (o instanceof Short)) {
+      return BigInteger.valueOf(((Number) o).longValue());
+    }
+    return o;
+  }
+
+  @SuppressWarnings({ "unchecked" })
+  private static Collection<?> flatten(Collection<?> c) {
+    boolean hasCollection = false;
+    for (Object o : c) {
+      if (o instanceof Collection) {
+        hasCollection = true;
+        break;
+      }
+    }
+    if (!hasCollection) {
+      return c;
+    }
+    List newList = new ArrayList();
+    for (Object o : c) {
+      if (o instanceof Collection) {
+        newList.addAll(flatten((Collection) o));
+      } else {
+        newList.add(o);
+      }
+    }
+    return newList;
+  }
+
+  @Override
+  public boolean addAll(Collection<? extends Object> c) {
+    return super.addAll(flatten(c));
+  }
+
+  @Override
+  public boolean containsAll(Collection<?> c) {
+    return super.containsAll(flatten(c));
+  }
+
+  @Override
+  public boolean removeAll(Collection<?> c) {
+    return super.removeAll(flatten(c));
+  }
+
+  @Override
+  public boolean retainAll(Collection<?> c) {
+    return super.retainAll(flatten(c));
+  }
+
+  @Override
+  public boolean addAll(int i, Collection<? extends Object> c) {
+    return super.addAll(i, flatten(c));
+  }
+
   @SuppressWarnings("unchecked")
   @Override
   public void add(int index, Object element) {
     serialized = null;
+
+    if (element instanceof Component) {
+      components.add(index, (Component<?>) element);
+      return;
+    }
+
+    element = mapIfNumber(element);
     Serializer s = serializerForPosition(index);
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);
@@ -494,6 +567,16 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @Override
   public Object set(int index, Object element) {
     serialized = null;
+
+    if (element instanceof Component) {
+      Component prev = components.set(index, (Component<?>) element);
+      if (prev != null) {
+        return prev.getValue();
+      }
+      return null;
+    }
+
+    element = mapIfNumber(element);
     Serializer s = serializerForPosition(index);
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);

@@ -1,6 +1,7 @@
 package me.prettyprint.hector.api.beans;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 
 public class Composite extends AbstractComposite {
 
@@ -12,6 +13,10 @@ public class Composite extends AbstractComposite {
     super(false, o);
   }
 
+  public Composite(List<?> l) {
+    super(false, l);
+  }
+
   public static Composite fromByteBuffer(ByteBuffer byteBuffer) {
 
     Composite composite = new Composite();
@@ -19,4 +24,15 @@ public class Composite extends AbstractComposite {
 
     return composite;
   }
+
+  public static ByteBuffer toByteBuffer(Object... o) {
+    Composite composite = new Composite(o);
+    return composite.serialize();
+  }
+
+  public static ByteBuffer toByteBuffer(List<?> l) {
+    Composite composite = new Composite(l);
+    return composite.serialize();
+  }
+
 }
