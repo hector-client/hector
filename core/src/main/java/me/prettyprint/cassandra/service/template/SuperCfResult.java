@@ -46,4 +46,7 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   Date getDate(SN sColumnName, N columnName);  
   
   void applySuperColumn(SN sColumnName);
+  
+  @Override
+  SuperCfResult<K, SN, N> next();
 }
