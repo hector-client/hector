@@ -27,10 +27,10 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
  */
 public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
-  protected Map<N,HColumn<N,ByteBuffer>> columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
-  protected Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
-  protected Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
-  protected ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
+  private Map<N,HColumn<N,ByteBuffer>> columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
+  private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
+  private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
+  private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
   
   public ColumnFamilyResultWrapper(Serializer<K> keySerializer,
       Serializer<N> columnNameSerializer,

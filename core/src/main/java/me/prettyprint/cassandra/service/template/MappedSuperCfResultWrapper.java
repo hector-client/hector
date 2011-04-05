@@ -19,10 +19,8 @@ public class MappedSuperCfResultWrapper<K, SN, N, V> extends SuperCfResultWrappe
       Serializer<SN> sNameSerializer,
       Serializer<N> subSerializer,
       ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> executionResult,
-      SN sColumnName,
       SuperCfRowMapper<K, SN, N, V> mapper) {
-    super(keySerializer, sNameSerializer, subSerializer, executionResult,
-        sColumnName);
+    super(keySerializer, sNameSerializer, subSerializer, executionResult);
     this.rowMapper = mapper;
   }
 

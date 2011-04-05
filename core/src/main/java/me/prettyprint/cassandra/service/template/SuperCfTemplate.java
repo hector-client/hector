@@ -159,7 +159,9 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
   }
 
   public SuperCfResult<K, SN, N> querySuperColumn(K key, SN sColumnName) {
-    return doExecuteSlice(key, sColumnName, activeSlicePredicate);
+    HSlicePredicate<SN> workingSlicePredicate = new HSlicePredicate<SN>(topSerializer);
+    workingSlicePredicate.addColumnName(sColumnName);
+    return doExecuteSlice(key, sColumnName, workingSlicePredicate);
   }
   
   public SuperCfUpdater<K, SN, N> createUpdater(K key, SN sColumnName) {    
