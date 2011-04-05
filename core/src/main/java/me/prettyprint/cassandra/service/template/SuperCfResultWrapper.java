@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HColumnImpl;
-import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
@@ -24,7 +23,6 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.beans.HSuperColumn;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -47,6 +45,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
   private List<SN> superColumns;
   private Map<N,HColumn<N,ByteBuffer>> subColumns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
   private SN currentSuperColumn;
+  private boolean hasEntries;
 
   private Serializer<SN> sNameSerializer;
   
@@ -58,6 +57,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
     this.sNameSerializer = sNameSerializer;
     this.rows = executionResult.get().entrySet().iterator();    
     next();
+    hasEntries = getSuperColumns() != null && getSuperColumns().size() > 0;
   }    
 
   @Override
@@ -195,6 +195,11 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
     this.currentSuperColumn = sColumnName;
     this.subColumns = columns.get(currentSuperColumn);
 
+  }
+
+  @Override
+  public boolean hasResults() {
+    return hasEntries;
   }
   
   

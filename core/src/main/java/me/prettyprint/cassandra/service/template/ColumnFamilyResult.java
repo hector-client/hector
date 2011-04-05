@@ -41,5 +41,7 @@ public interface ColumnFamilyResult<K, N> extends Iterator<ColumnFamilyResult<K,
   Collection<N> getColumnNames();
   
   HColumn<N,ByteBuffer> getColumn(N columnName);
+  
+  boolean hasResults();
     
 }

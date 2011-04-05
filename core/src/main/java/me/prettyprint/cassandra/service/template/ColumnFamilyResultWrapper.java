@@ -31,6 +31,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
   private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
+  private boolean hasEntries;
   
   public ColumnFamilyResultWrapper(Serializer<K> keySerializer,
       Serializer<N> columnNameSerializer,
@@ -38,6 +39,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
     super(keySerializer, columnNameSerializer, executionResult);    
     this.rows = executionResult.get().entrySet().iterator();    
     next();
+    hasEntries = getColumnNames() != null && getColumnNames().size() > 0;
   }
    
   /**
@@ -116,5 +118,12 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   public void remove() {
     rows.remove();
   }
+
+  @Override
+  public boolean hasResults() {    
+    return hasEntries;
+  }
+  
+  
 
 }

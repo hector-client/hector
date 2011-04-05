@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.service.template;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 
@@ -60,6 +60,13 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals("value2",wrapper.getString("column1"));
     wrapper.next();
     assertEquals("value3",wrapper.getString("column1"));
+  }
+  
+  @Test
+  public void testHasNoResults() {
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
+    assertFalse(template.queryColumns("noresults").hasResults());
+    
   }
 
 }
