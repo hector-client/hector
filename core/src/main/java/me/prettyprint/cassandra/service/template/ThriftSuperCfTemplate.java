@@ -30,15 +30,21 @@ public class ThriftSuperCfTemplate<K, SN, N> extends SuperCfTemplate<K, SN, N> {
   protected SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate) {    
     SuperCfResultWrapper<K, SN, N> wrapper = 
       new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
-          sliceInternal(key, columnParent, predicate));
+          sliceInternal(key, predicate));
     if ( sColumnName != null ) {
       wrapper.applySuperColumn(sColumnName);
     }
     return wrapper;
   } 
   
+  protected SuperCfResult<K,SN,N> doExecuteMultigetSlice(List<K> keys, HSlicePredicate<SN> predicate) {    
+    SuperCfResultWrapper<K, SN, N> wrapper = 
+      new SuperCfResultWrapper<K, SN, N>(keySerializer, topSerializer, subSerializer, 
+          multigetSliceInternal(keys, columnParent, predicate));    
+    return wrapper;
+  } 
+  
   private ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> sliceInternal(final K key,
-      final ColumnParent workingColumnParent,
       final HSlicePredicate<SN> workingSlicePredicate) {
     return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
       @Override
@@ -47,9 +53,32 @@ public class ThriftSuperCfTemplate<K, SN, N> extends SuperCfTemplate<K, SN, N> {
         try {          
 
           ByteBuffer sKey = keySerializer.toByteBuffer(key);
-          cosc.put(sKey, cassandra.get_slice(sKey, workingColumnParent,
+          cosc.put(sKey, cassandra.get_slice(sKey, columnParent,
               workingSlicePredicate.toThrift(), 
               ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType))));
+
+        } catch (Exception e) {
+          throw exceptionsTranslator.translate(e);
+        }        
+
+        return cosc;
+      }
+    });
+  }
+  
+  private ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> multigetSliceInternal(final List<K> keys,
+      final ColumnParent workingColumnParent,
+      final HSlicePredicate<SN> workingSlicePredicate) {
+    return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
+      @Override
+      public Map<ByteBuffer,List<ColumnOrSuperColumn>> execute(Cassandra.Client cassandra) throws HectorException {
+        Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc;
+        try {          
+
+          List<ByteBuffer> sKeys = keySerializer.toBytesList(keys);
+          cosc = cassandra.multiget_slice(sKeys, workingColumnParent,
+              workingSlicePredicate.toThrift(), 
+              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
 
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);

@@ -148,7 +148,12 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
     return doExecuteSlice(key, null, workingSlicePredicate);    
   }
 
-  
+  @SuppressWarnings("unchecked")
+  public SuperCfResult<K, SN, N> querySuperColumns(List<K> keys, List<SN> sColumnNames) {
+    HSlicePredicate<SN> workingSlicePredicate = new HSlicePredicate<SN>(topSerializer);
+    workingSlicePredicate.setColumnNames(sColumnNames);
+    return doExecuteMultigetSlice(keys, workingSlicePredicate);    
+  }
 
   public <T> T querySuperColumns(K key, List<SN> sColumnNames,
       SuperCfRowMapper<K, SN, N, T> mapper) {
@@ -183,6 +188,8 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
 
   
   protected abstract SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate);
+  
+  protected abstract SuperCfResult<K,SN,N> doExecuteMultigetSlice(List<K> keys, HSlicePredicate<SN> predicate);
   
 
 }

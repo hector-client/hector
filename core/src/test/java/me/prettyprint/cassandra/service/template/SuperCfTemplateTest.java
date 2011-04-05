@@ -71,4 +71,22 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertNull(myCol);
   }
   
+  @Test
+  public void testSuperCfInsertReadMultiKey() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey1","super1");
+    sUpdater.setString("sub_col_1", "sub_val_1");
+    sUpdater.addKey("skey2");
+    sUpdater.addSuperColumn("super1");
+    sUpdater.setString("sub_col_1", "sub_val_2");
+    sTemplate.update(sUpdater);
+
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("skey1","skey2"), Arrays.asList("super1"));
+    
+    assertEquals("sub_val_1",result.getString("super1","sub_col_1"));
+    assertEquals("sub_val_2",result.next().getString("super1","sub_col_1"));
+    
+  }
+  
 }
