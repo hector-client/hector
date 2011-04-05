@@ -47,6 +47,8 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   
   void applySuperColumn(SN sColumnName);
   
+  SN getActiveSuperColumn();
+  
   @Override
   SuperCfResult<K, SN, N> next();
 }

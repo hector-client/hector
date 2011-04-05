@@ -184,7 +184,11 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
     return extractType(sColumnName, columnName, ByteBufferSerializer.get());
   }
 
-
+  
+  @Override
+  public SN getActiveSuperColumn() {
+    return currentSuperColumn;
+  }
 
   @Override
   public void applySuperColumn(SN sColumnName) {
