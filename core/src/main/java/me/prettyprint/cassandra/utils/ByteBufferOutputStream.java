@@ -150,7 +150,8 @@ public class ByteBufferOutputStream extends OutputStream {
   /** Add a buffer to the output without copying, if possible. */
   public void write(ByteBuffer buffer) {
     if (buffer.remaining() < BUFFER_SIZE) {
-      write(buffer.array(), buffer.position(), buffer.remaining());
+      write(buffer.array(), buffer.arrayOffset() + buffer.position(),
+          buffer.remaining());
     } else { // append w/o copying bytes
       ByteBuffer dup = buffer.duplicate();
       dup.position(buffer.limit()); // ready for flip

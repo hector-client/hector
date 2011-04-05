@@ -18,6 +18,7 @@ import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.beans.DynamicComposite;
 
+import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
 import org.junit.Test;
@@ -135,6 +136,10 @@ public class CompositeTest {
       assertEquals(i, ((BigInteger) o).intValue());
     }
 
+    b = DynamicComposite.toByteBuffer("foo");
+    c = DynamicComposite.fromByteBuffer(b);
+    b = c.getComponent(0).getBytes();
+    UTF8Type.instance.validate(b);
   }
 
   @Test
