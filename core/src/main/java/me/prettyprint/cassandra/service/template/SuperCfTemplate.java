@@ -140,19 +140,21 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
         valueSerializer.fromByteBuffer(origCol.getValue()), origCol.getClock(), 
         subSerializer, valueSerializer);
   }
-  
-  @SuppressWarnings("unchecked")
+    
   public SuperCfResult<K, SN, N> querySuperColumns(K key, List<SN> sColumnNames) {
     HSlicePredicate<SN> workingSlicePredicate = new HSlicePredicate<SN>(topSerializer);
     workingSlicePredicate.setColumnNames(sColumnNames);
     return doExecuteSlice(key, null, workingSlicePredicate);    
   }
-
-  @SuppressWarnings("unchecked")
+  
   public SuperCfResult<K, SN, N> querySuperColumns(List<K> keys, List<SN> sColumnNames) {
     HSlicePredicate<SN> workingSlicePredicate = new HSlicePredicate<SN>(topSerializer);
     workingSlicePredicate.setColumnNames(sColumnNames);
     return doExecuteMultigetSlice(keys, workingSlicePredicate);    
+  }
+  
+  public SuperCfResult<K, SN, N> querySuperColumns(List<K> keys) {        
+    return doExecuteMultigetSlice(keys, activeSlicePredicate);    
   }
 
   public <T> T querySuperColumns(K key, List<SN> sColumnNames,
