@@ -106,5 +106,20 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals("sub_val_2",result.next().getString("super1","sub_col_1"));
     
   }
+
+  @Test
+  public void testSuperCfKeyOnly() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey1","super1");
+    sUpdater.setString("sub_col_1", "sub_val_1");
+    sUpdater.addSuperColumn("super2");
+    sUpdater.setString("sub_col_1", "sub_val_2");
+    sTemplate.update(sUpdater);
+    
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumns("skey1");        
+    assertEquals(2, result.getSuperColumns().size());
+    
+  }
   
 }
