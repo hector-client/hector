@@ -98,7 +98,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     MutationResult mr = m.insertCounter("testInsertGetRemoveCounter", cf, 
         createCounterColumn("testInsertGetRemoveCounter_name", 25));
 
-    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
     
     // get value
@@ -114,13 +113,11 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertEquals(25, value.longValue());
     String name = c.getName();
     assertEquals("testInsertGetRemoveCounter_name", name);
-    assertEquals(q, r.getQuery());
-    assertTrue("Time should be > 0", r.getExecutionTimeMicro() > 0);
+    assertEquals(q, r.getQuery());   
     
     // remove value
     m = createMutator(ko, se);
     MutationResult mr2 = m.deleteCounter("testInsertGetRemoveCounter", cf, "testInsertGetRemoveCounter_name", se);
-    assertTrue("Time should be > 0", mr2.getExecutionTimeMicro() > 0);
 
     // get already removed value
     CounterQuery<String, String> q2 = createCounterColumnQuery(ko, se, se);
@@ -165,7 +162,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // Check the mutation result metadata
     // assertEquals("127.0.0.1:9170", mr.getHostUsed());
-    assertTrue("Time should be > 0", mr.getExecutionTimeMicro() > 0);
 
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
 
@@ -183,13 +179,13 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     String name = c.getName();
     assertEquals("testInsertGetRemove", name);
     assertEquals(q, r.getQuery());
-    assertTrue("Time should be > 0", r.getExecutionTimeMicro() > 0);
+
 
     // remove value
     m = createMutator(ko, se);
     MutationResult mr2 = m.delete("testInsertGetRemove", cf,
         "testInsertGetRemove", se);
-    assertTrue("Time should be > 0", mr2.getExecutionTimeMicro() > 0);
+    
 
     // get already removed value
     ColumnQuery<String, String, String> q2 = createColumnQuery(ko, se, se, se);
