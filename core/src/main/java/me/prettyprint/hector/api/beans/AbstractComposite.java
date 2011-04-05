@@ -145,6 +145,9 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           return s.fromByteBuffer(cb);
         }
       }
+      if (value instanceof ByteBuffer) {
+        return (A) ((ByteBuffer) value).duplicate();
+      }
       return (A) value;
     }
 
@@ -163,11 +166,11 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
             s = (Serializer<A>) serializer;
           }
           if (s != null) {
-            return s.toByteBuffer((A) value);
+            return s.toByteBuffer((A) value).duplicate();
           }
         }
       }
-      return bytes;
+      return bytes.duplicate();
     }
 
     public ByteBuffer getBytes() {
@@ -180,6 +183,11 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
     public ComponentEquality getEquality() {
       return equality;
+    }
+
+    @Override
+    public String toString() {
+      return "Component [" + getValue() + "]";
     }
   }
 
