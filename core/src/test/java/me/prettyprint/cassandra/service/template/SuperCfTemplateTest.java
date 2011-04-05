@@ -83,7 +83,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     sTemplate.update(sUpdater);
 
     SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("skey1","skey2"), Arrays.asList("super1"));
-    
+    assertTrue(result.hasResults());
     assertEquals("sub_val_1",result.getString("super1","sub_col_1"));
     assertEquals("sub_val_2",result.next().getString("super1","sub_col_1"));
     
@@ -101,7 +101,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     sTemplate.update(sUpdater);
 
     SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("skey1","skey2"));
-    
+    assertTrue(result.hasResults());
     assertEquals("sub_val_1",result.getString("super1","sub_col_1"));
     assertEquals("sub_val_2",result.next().getString("super1","sub_col_1"));
     
@@ -119,9 +119,17 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     
     SuperCfResult<String,String,String> result = sTemplate.querySuperColumns("skey1");        
     assertEquals(2, result.getSuperColumns().size());
-    
+    assertTrue(result.hasResults());
     result = sTemplate.querySuperColumns("skey1-non-existing-key");
     assertNull(result.getActiveSuperColumn());
+  }
+  
+  @Test
+  public void testSuperCfNoResults() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    
+    assertFalse(sTemplate.querySuperColumns("no_results").hasResults());
   }
   
 }
