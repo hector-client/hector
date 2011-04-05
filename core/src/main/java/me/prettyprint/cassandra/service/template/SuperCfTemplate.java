@@ -130,12 +130,19 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
   public <V> HColumn<N, V> querySingleSubColumn(K key,
       SN columnName, N subColumnName, Serializer<V> valueSerializer) {
     
-    SuperCfResult<K,SN,N> result = doExecuteSlice(key, columnName, activeSlicePredicate);        
+    SuperCfResult<K,SN,N> result = doExecuteSlice(key, columnName, activeSlicePredicate);
+    
+    if (result == null) { 
+    	return null;
+    }
+    
     HColumn<N,ByteBuffer> origCol = result.getColumn(subColumnName);
+    
     // TODO make this far less hacky
     if ( columnName == null || origCol == null ) {
       return null;
     }
+    
     return new HColumnImpl<N, V>(subColumnName, 
         valueSerializer.fromByteBuffer(origCol.getValue()), origCol.getClock(), 
         subSerializer, valueSerializer);

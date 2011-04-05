@@ -120,6 +120,8 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     SuperCfResult<String,String,String> result = sTemplate.querySuperColumns("skey1");        
     assertEquals(2, result.getSuperColumns().size());
     
+    result = sTemplate.querySuperColumns("skey1-non-existing-key");
+    assertNull(result.getActiveSuperColumn());
   }
   
 }
