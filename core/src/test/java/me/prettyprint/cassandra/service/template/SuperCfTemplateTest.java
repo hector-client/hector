@@ -158,4 +158,59 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(2, result.getColumnNames().size());
   }
   
+  @Test
+  public void testTemplateLevelDeleteSuper() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey_del_super","super1");
+    sUpdater.setString("sub1_col_1", "sub1_val_1");
+    sTemplate.update(sUpdater);
+    
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey_del_super","super1");
+    assertEquals(1, result.getColumnNames().size());
+    
+    sTemplate.deleteColumn("skey_del_super", "super1");        
+    
+    result = sTemplate.querySuperColumn("skey_del_super","super1");
+    assertFalse(result.hasResults());
+    assertEquals(0, result.getColumnNames().size());
+  }
+  
+  @Test
+  public void testTemplateLevelDeleteRow() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey_row_del","super1");
+    sUpdater.setString("sub1_col_1", "sub1_val_1");
+    sTemplate.update(sUpdater);
+    
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey_row_del","super1");
+    assertEquals(1, result.getColumnNames().size());
+    
+    sTemplate.deleteRow("skey_row_del");        
+    
+    result = sTemplate.querySuperColumns("skey_row_del");
+    assertFalse(result.hasResults());
+    assertEquals(0, result.getSuperColumns().size());
+  }
+  
+  @Test
+  public void testTemplateLevelDeleteMiss() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey_row_del_miss","super1");
+    sUpdater.setString("sub1_col_1", "sub1_val_1");
+    sTemplate.update(sUpdater);
+    
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey_row_del_miss","super1");
+    assertEquals(1, result.getColumnNames().size());
+    
+    sTemplate.deleteRow("skey_row_miss_foo");  
+    sTemplate.deleteColumn("skey_row_del", "foo");
+    
+    result = sTemplate.querySuperColumns("skey_row_del_miss");
+    assertTrue(result.hasResults());
+    assertEquals(1, result.getSuperColumns().size());
+  }
+  
 }
