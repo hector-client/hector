@@ -116,7 +116,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
 
   @Override
   public Collection<N> getColumnNames() {
-    return subColumns.keySet();
+    return subColumns != null ? subColumns.keySet() : new ArrayList<N>();
   }
 
 
