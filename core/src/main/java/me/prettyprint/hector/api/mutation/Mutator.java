@@ -41,12 +41,18 @@ public interface Mutator<K> {
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer);
   
   /**
-   * Deletes a supercolumn
+   * Deletes a supercolumn immediately
    * @param <SN> super column type
    */
-  <SN> MutationResult superDelete(final K key, final String cf, final SN supercolumnName,
-      final Serializer<SN> sNameSerializer);
-
+  <SN> MutationResult superDelete(K key, String cf, SN supercolumnName,
+      Serializer<SN> sNameSerializer);
+  
+  /**
+   * batches a super column for deletion
+   * 
+   */
+  <SN> Mutator<K> addSuperDelete(K key, String cf, SN sColumnName, Serializer<SN> sNameSerializer);
+  
 
   // schedule an insertion to be executed in batch by the execute method
   // CAVEAT: a large number of calls with a typo in one of them will leave things in an
@@ -111,6 +117,11 @@ public interface Mutator<K> {
   <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc);
 
   <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock);
+  
+  <SN,N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName, N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerialer);
+  
+  <SN,N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName, N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerialer, long clock);
+  
   
   
   /**

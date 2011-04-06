@@ -7,6 +7,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
@@ -53,7 +56,7 @@ import me.prettyprint.hector.api.factory.HFactory;
  *          the object instance to persist
  */
 public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
-      
+  private static final Logger log = LoggerFactory.getLogger(SuperCfUpdater.class);
   protected SuperCfTemplate<K,SN, N> template;
   private List<SN> sColumnNames;
   private int sColPos;
@@ -65,15 +68,32 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
     this.template = sTemplate;
   }
   
+  
+  
+  @Override
+  public SuperCfUpdater<K, SN, N> addKey(K key) {        
+    
+    if ( keys != null && keys.size() > 0 ) {
+      updateInternal();
+    }
+    super.addKey(key);
+    sColumnNames = new ArrayList<SN>();
+    sColPos = 0;
+    return this;
+  }
+
+
+
   public SuperCfUpdater<K,SN,N> addSuperColumn(SN sColumnName) {
-    if ( sColumnNames == null ) {
-      sColumnNames = new ArrayList<SN>();      
-    } else {
+    if ( sColumnNames.size() > 0 ) {
       updateInternal();
       sColPos++;      
     }
+    
     subColumns = new ArrayList<HColumn>();
+    
     sColumnNames.add(sColumnName);
+    
     
     return this;
   }
@@ -85,28 +105,28 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   /**
    * collapse the state of the active HSuperColumn 
    */
-  void updateInternal() {
+  void updateInternal() {    
     // HSuperColumnImpl needs a refactor, this construction is lame.
     // the value serializer is not used in HSuperColumnImpl, so this is safe for name
     // TODO need to mod to work with 0 timestamp
+    log.debug("Adding column {} for key {} and cols {}", new Object[]{getCurrentSuperColumn(), getCurrentKey(), subColumns});
     HSuperColumnImpl<SN, N, ?> column = new HSuperColumnImpl(getCurrentSuperColumn(), subColumns, 
         0, template.getTopSerializer(), template.getSubSerializer(), TypeInferringSerializer.get());
-    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);  
+
   }
 
   /**
    * Deletes the super column and all of its sub columns
    */
-  public void deleteSuperColumn(SN sColumnName) {
+  public void deleteSuperColumn() {
     template.getMutator().addDeletion(getCurrentKey(), template.getColumnFamily(), 
-        sColumnName, template.getTopSerializer());    
+        getCurrentSuperColumn(), template.getTopSerializer());    
   }
   
-  public void deleteSubColumn(SN sColumnName, N columnName) {
+  public void deleteSubColumn(N columnName) {
     template.getMutator().addSubDelete(getCurrentKey(), template.getColumnFamily(), 
-        new HSuperColumnImpl<SN, N, ByteBuffer>(sColumnName, (List<HColumn<N, ByteBuffer>>)Arrays.asList(columnFactory.createColumn(columnName, ByteBuffer.wrap(new byte[]{}), 
-            template.getSubSerializer(), ByteBufferSerializer.get())), template.getEffectiveClock(), 
-            template.getTopSerializer(), template.getSubSerializer(), ByteBufferSerializer.get()));
+        getCurrentSuperColumn(), columnName, template.getTopSerializer(), template.getSubSerializer());
   }
 
   public void setString(N subColumnName, String value) {

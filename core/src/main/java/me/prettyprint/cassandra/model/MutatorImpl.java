@@ -353,5 +353,35 @@ public final class MutatorImpl<K> implements Mutator<K> {
     return this;
   }
 
+  @Override
+  public <SN, N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName,
+      N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return addSubDelete(key, cf, sColumnName, columnName, sNameSerializer, nameSerializer, keyspace.createClock());
+  }
+  
+  @Override
+  public <SN, N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName,
+      N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, long clock) {
+    Deletion d = new Deletion(clock);            
+    SlicePredicate predicate = new SlicePredicate();
+    predicate.addToColumn_names(nameSerializer.toByteBuffer(columnName));
+    d.setPredicate(predicate);
+    d.setSuper_column(sNameSerializer.toByteBuffer(sColumnName));
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    return this;
+  }
+
+
+  
+  @Override
+  public <SN> Mutator<K> addSuperDelete(K key, String cf, SN sColumnName,
+      Serializer<SN> sNameSerializer) {    
+    Deletion d = new Deletion();            
+    d.setSuper_column(sNameSerializer.toByteBuffer(sColumnName));
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);   
+    return this;
+  }
+
+
 
 }

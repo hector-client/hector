@@ -7,8 +7,8 @@ import me.prettyprint.hector.api.ColumnFactory;
 
 public abstract class AbstractTemplateUpdater<K,N> {
 
-  private List<K> keys;
-  private int keyPos = 0;
+  protected List<K> keys;
+  protected int keyPos = 0;
   protected ColumnFactory columnFactory;
   protected AbstractColumnFamilyTemplate<K,N> template;
   
