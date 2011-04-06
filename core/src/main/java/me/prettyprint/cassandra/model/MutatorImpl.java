@@ -101,6 +101,21 @@ public final class MutatorImpl<K> implements Mutator<K> {
     }));
   }  
   
+  @Override
+  public <SN> MutationResult superDelete(final K key, final String cf, final SN supercolumnName, 
+      final Serializer<SN> sNameSerializer) {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+        @Override
+        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
+          // Remove a Super Column.
+          ks.remove(
+              keySerializer.toByteBuffer(key), 
+              ThriftFactory.createSuperColumnPath(cf, supercolumnName, sNameSerializer));
+          return null;
+        }
+      }));
+  }
+  
   /**
    * Deletes the columns defined in the HSuperColumn. If there are no HColumns attached,
    * we delete the whole thing. 
@@ -337,5 +352,6 @@ public final class MutatorImpl<K> implements Mutator<K> {
     getPendingMutations().addCounterDeletion(key, Arrays.asList(cf), d);
     return this;
   }
+
 
 }

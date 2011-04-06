@@ -46,7 +46,7 @@ public class ThriftFactory {
     return columnPath;
   }
 
-  /*package*/ static <SN> ColumnPath createSuperColumnPath(String columnFamilyName,
+  public static <SN> ColumnPath createSuperColumnPath(String columnFamilyName,
       SN superColumnName, Serializer<SN> superNameSerializer) {
     noneNull(columnFamilyName, superNameSerializer);
     ColumnPath columnPath = createColumnPath(columnFamilyName, null);

@@ -62,15 +62,34 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testInsertSuper() {
+  public void testInsertAndDeleteSuper() {
     Mutator<String> m = createMutator(keyspace, se);
     List<HColumn<String, String>> columnList = new ArrayList<HColumn<String,String>>();
     columnList.add(createColumn("name","value",se,se));
-    HSuperColumn<String, String, String> superColumn =
-        createSuperColumn("super_name", columnList, se, se, se);
+    HSuperColumn<String, String, String> superColumn = createSuperColumn("super_name", columnList, se, se, se);
+    
+    // Insert Super Column
     MutationResult r = m.insert("sk", "Super1", superColumn);
+    
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", r.getHostUsed() != null);
+    
+    // Fetch and verify it exists.
+    SuperColumnQuery<String, String, String, String> scq = HFactory.createSuperColumnQuery(keyspace, se, se, se, se);
+    scq.setColumnFamily("Super1");
+    scq.setKey("sk");
+    scq.setSuperName("super_name");
+    assertEquals("super_name", scq.execute().get().getName());
+    
+    // Remove the Super Column
+    m.superDelete("sk", "Super1", "super_name", se);
+    
+    // Fetch and verify it exists.
+    scq = HFactory.createSuperColumnQuery(keyspace, se, se, se, se);
+    scq.setColumnFamily("Super1");
+    scq.setKey("sk");
+    scq.setSuperName("super_name");
+    assertNull("super_name", scq.execute().get());
   }
 
   @Test
