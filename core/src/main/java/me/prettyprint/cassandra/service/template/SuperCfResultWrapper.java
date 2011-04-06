@@ -66,7 +66,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
       throw new NoSuchElementException("No more rows left on this HColumnFamily");
     }
     entry = rows.next();    
-    log.debug("found entry{}", getKey());
+    log.debug("found entry {} with value {}", getKey(), entry.getValue());
     applyToRow(entry.getValue());
     return this;
   }

@@ -95,6 +95,21 @@ public final class MutatorImpl<K> implements Mutator<K> {
       }
     }));
   }  
+
+  @Override
+  public <SN> MutationResult superDelete(final K key, final String cf, final SN supercolumnName, 
+      final Serializer<SN> sNameSerializer) {
+    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+        @Override
+        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
+          // Remove a Super Column.
+          ks.remove(
+              keySerializer.toByteBuffer(key), 
+              ThriftFactory.createSuperColumnPath(cf, supercolumnName, sNameSerializer));
+          return null;
+        }
+      }));
+  }
   
   /**
    * Deletes the columns defined in the HSuperColumn. If there are no HColumns attached,
@@ -225,6 +240,35 @@ public final class MutatorImpl<K> implements Mutator<K> {
       pendingMutations = new BatchMutation<K>(keySerializer);
     }
     return pendingMutations;
+  }
+
+  @Override
+  public <SN, N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName,
+      N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return addSubDelete(key, cf, sColumnName, columnName, sNameSerializer, nameSerializer, keyspace.createClock());
+  }
+  
+  @Override
+  public <SN, N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName,
+      N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, long clock) {
+    Deletion d = new Deletion(clock);            
+    SlicePredicate predicate = new SlicePredicate();
+    predicate.addToColumn_names(nameSerializer.toByteBuffer(columnName));
+    d.setPredicate(predicate);
+    d.setSuper_column(sNameSerializer.toByteBuffer(sColumnName));
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    return this;
+  }
+
+
+  
+  @Override
+  public <SN> Mutator<K> addSuperDelete(K key, String cf, SN sColumnName,
+      Serializer<SN> sNameSerializer) {    
+    Deletion d = new Deletion();            
+    d.setSuper_column(sNameSerializer.toByteBuffer(sColumnName));
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);   
+    return this;
   }
 
 }

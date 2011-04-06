@@ -22,6 +22,12 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey1", "super1");
     
     assertEquals("sub_val_1",result.getString("super1","sub_col_1"));
+    
+    sUpdater.deleteSuperColumn();
+    sTemplate.update(sUpdater);
+    assertEquals("super1",sUpdater.getCurrentSuperColumn());
+    result = sTemplate.querySuperColumn("skey1", "super1");
+    assertFalse(result.hasResults());
   }
   
   
@@ -75,17 +81,17 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfInsertReadMultiKey() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey1","super1");
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("s_multi_key1","super1");
     sUpdater.setString("sub_col_1", "sub_val_1");
-    sUpdater.addKey("skey2");
+    sUpdater.addKey("s_multi_key2");
     sUpdater.addSuperColumn("super1");
     sUpdater.setString("sub_col_1", "sub_val_2");
     sTemplate.update(sUpdater);
 
-    SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("skey1","skey2"), Arrays.asList("super1"));
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("s_multi_key1","s_multi_key2"), Arrays.asList("super1"));
     assertTrue(result.hasResults());
-    assertEquals("sub_val_1",result.getString("super1","sub_col_1"));
-    assertEquals("sub_val_2",result.next().getString("super1","sub_col_1"));
+    assertEquals("sub_val_2",result.getString("super1","sub_col_1"));
+    assertEquals("sub_val_1",result.next().getString("super1","sub_col_1"));
     
   }
   
@@ -93,17 +99,17 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfInsertReadMultiKeyNoSc() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey1","super1");
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("s_multi_key1","super1");
     sUpdater.setString("sub_col_1", "sub_val_1");
-    sUpdater.addKey("skey2");
+    sUpdater.addKey("s_multi_key2");
     sUpdater.addSuperColumn("super1");
     sUpdater.setString("sub_col_1", "sub_val_2");
     sTemplate.update(sUpdater);
 
-    SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("skey1","skey2"));
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumns(Arrays.asList("s_multi_key1","s_multi_key2"));
     assertTrue(result.hasResults());
-    assertEquals("sub_val_1",result.getString("super1","sub_col_1"));
-    assertEquals("sub_val_2",result.next().getString("super1","sub_col_1"));
+    assertEquals("sub_val_2",result.getString("super1","sub_col_1"));
+    assertEquals("sub_val_1",result.next().getString("super1","sub_col_1"));
     
   }
 
