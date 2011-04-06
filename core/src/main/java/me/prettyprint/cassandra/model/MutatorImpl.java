@@ -111,6 +111,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
       }));
   }
   
+  
   /**
    * Deletes the columns defined in the HSuperColumn. If there are no HColumns attached,
    * we delete the whole thing. 
@@ -241,6 +242,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
     }
     return pendingMutations;
   }
+
 
   @Override
   public <SN, N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName,
