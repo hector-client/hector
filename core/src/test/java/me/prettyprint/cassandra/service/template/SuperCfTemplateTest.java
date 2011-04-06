@@ -138,4 +138,24 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertFalse(sTemplate.querySuperColumns("no_results").hasResults());
   }
   
+  @Test
+  public void testDeleteSubColumns() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    sUpdater.setString("sub1_col_1", "sub1_val_1");
+    sUpdater.setString("sub1_col_2", "sub1_val_2");
+    sUpdater.setString("sub1_col_3", "sub1_val_3");
+    sTemplate.update(sUpdater);
+    
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey3","super1");
+    assertEquals(3, result.getColumnNames().size());
+    
+    sUpdater.deleteSubColumn("sub1_col_1");
+    sTemplate.update(sUpdater);
+    
+    result = sTemplate.querySuperColumn("skey3","super1");
+    assertEquals(2, result.getColumnNames().size());
+  }
+  
 }
