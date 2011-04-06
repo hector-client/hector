@@ -267,10 +267,12 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <SN> Mutator<K> addSuperDelete(K key, String cf, SN sColumnName,
       Serializer<SN> sNameSerializer) {    
-    Deletion d = new Deletion();            
+    Deletion d = new Deletion(keyspace.createClock());            
     d.setSuper_column(sNameSerializer.toByteBuffer(sColumnName));
-    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);   
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);    
+
     return this;
+
   }
 
 }

@@ -121,8 +121,10 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
    * Deletes the super column and all of its sub columns
    */
   public void deleteSuperColumn() {
-    template.getMutator().addDeletion(getCurrentKey(), template.getColumnFamily(), 
-        getCurrentSuperColumn(), template.getTopSerializer());    
+    //template.getMutator().addDeletion(getCurrentKey(), template.getColumnFamily(), 
+    //    getCurrentSuperColumn(), template.getTopSerializer());    
+    template.getMutator().addSuperDelete(getCurrentKey(), template.getColumnFamily(), 
+        getCurrentSuperColumn(), template.getTopSerializer());  
   }
   
   public void deleteSubColumn(N columnName) {
