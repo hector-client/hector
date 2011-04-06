@@ -37,6 +37,13 @@ public interface Mutator<K> {
    */
   <SN, N> MutationResult subDelete(final K key, final String cf, final SN supercolumnName,
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer);
+  
+  /**
+   * Deletes a supercolumn
+   * @param <SN> super column type
+   */
+  <SN> MutationResult superDelete(final K key, final String cf, final SN supercolumnName,
+      final Serializer<SN> sNameSerializer);
 
 
   // schedule an insertion to be executed in batch by the execute method
