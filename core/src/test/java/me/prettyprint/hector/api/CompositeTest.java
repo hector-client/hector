@@ -1,7 +1,6 @@
 package me.prettyprint.hector.api;
 
-import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -63,8 +62,7 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     o = c.get(0);
     assertTrue(o instanceof UUID);
-    assertEquals(LEXICALUUIDTYPE.getTypeName(), c.getComponent(0)
-        .getComparator());
+    assertEquals(UUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
 
     // test serialization and deserialization of time-based UUIDS
     c = new DynamicComposite();
@@ -73,7 +71,7 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     o = c.get(0);
     assertTrue(o instanceof UUID);
-    assertEquals(TIMEUUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
+    assertEquals(UUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
 
     // test compatibility with Cassandra unit tests
     b = createDynamicCompositeKey("Hello",
