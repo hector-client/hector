@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
-import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 
 import java.nio.ByteBuffer;
 import java.util.UUID;
@@ -50,7 +50,7 @@ public final class UUIDSerializer extends AbstractSerializer<UUID> {
 
   @Override
   public ComparatorType getComparatorType() {
-    return LEXICALUUIDTYPE;
+    return UUIDTYPE;
   }
 
 }
