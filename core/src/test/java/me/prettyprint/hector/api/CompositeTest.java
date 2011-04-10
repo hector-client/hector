@@ -2,6 +2,7 @@ package me.prettyprint.hector.api;
 
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
+import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
@@ -138,6 +140,23 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     b = c.getComponent(0).getBytes();
     UTF8Type.instance.validate(b);
+  }
+
+  @Test
+  public void testNullValueSerialization() throws Exception {
+
+    // test correct serialization with null values and user specified
+    // serialization
+    DynamicComposite c = new DynamicComposite();
+    c.addComponent(null, StringSerializer.get());
+
+    DynamicCompositeSerializer serializer = new DynamicCompositeSerializer();
+
+    ByteBuffer buff = serializer.toByteBuffer(c);
+
+    DynamicComposite result = serializer.fromByteBuffer(buff);
+
+    assertNull(result.get(0));
   }
 
   @Test
