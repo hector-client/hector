@@ -162,15 +162,20 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if (value instanceof ByteBuffer) {
           return ((ByteBuffer) value).duplicate();
         }
-        if (value != null) {
-          if (s == null) {
-            s = (Serializer<A>) serializer;
-          }
-          if (s != null) {
-            return s.toByteBuffer((A) value).duplicate();
-          }
+
+        if (value == null) {
+          return null;
         }
+
+        if (s == null) {
+          s = (Serializer<A>) serializer;
+        }
+        if (s != null) {
+          return s.toByteBuffer((A) value).duplicate();
+        }
+
       }
+
       return bytes.duplicate();
     }
 
