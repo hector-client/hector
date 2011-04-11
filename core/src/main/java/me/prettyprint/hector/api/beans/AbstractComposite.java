@@ -19,7 +19,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import me.prettyprint.cassandra.serializers.AsciiSerializer;
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
@@ -32,6 +31,8 @@ import me.prettyprint.cassandra.utils.ByteBufferOutputStream;
 import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
@@ -48,6 +49,8 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
+
+  private static Logger log = LoggerFactory.getLogger(AbstractComposite.class);
 
   public enum ComponentEquality {
     LESS_THAN_EQUAL((byte) -1), EQUAL((byte) 0), GREATER_THAN_EQUAL((byte) 1);
@@ -72,9 +75,6 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       return EQUAL;
     }
   }
-
-  static final Logger logger = Logger.getLogger(AbstractComposite.class
-      .getName());
 
   public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
       .put(AsciiSerializer.class,
@@ -667,6 +667,9 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         } else {
           out.writeShort((short) comparator.length());
           out.write(ByteBufferUtil.bytes(comparator));
+        }
+        if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() == 0)) {
+          log.warn("Writing zero-length BytesType, probably an error");
         }
       }
       out.writeShort((short) cb.remaining());
