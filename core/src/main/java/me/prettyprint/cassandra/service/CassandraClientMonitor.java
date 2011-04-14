@@ -110,7 +110,9 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public Set<String> getExhaustedPoolNames() {
     Set<String> ret = new HashSet<String>();
-
+    for ( CassandraHost host : connectionManager.getDownedHosts() ) {
+      ret.add(host.toString());
+    }
     return ret;
   }
 
