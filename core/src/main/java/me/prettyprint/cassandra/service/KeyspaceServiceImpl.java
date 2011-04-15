@@ -22,7 +22,6 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.Counter;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
@@ -656,21 +655,21 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
   
   @Override
-  public Counter getCounter(final ByteBuffer key, final ColumnPath columnPath) throws HectorException {
-    Operation<Counter> op = new Operation<Counter>(OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+  public CounterColumn getCounter(final ByteBuffer key, final ColumnPath columnPath) throws HectorException {
+    Operation<CounterColumn> op = new Operation<CounterColumn>(OperationType.READ, failoverPolicy, keyspaceName, credentials) {
 
         @Override
-        public Counter execute(Cassandra.Client cassandra) throws HectorException {
-          Counter cosc;
+        public CounterColumn execute(Cassandra.Client cassandra) throws HectorException {
+          ColumnOrSuperColumn cosc;
           try {
-            cosc = cassandra.get_counter(key, columnPath, getThriftCl(OperationType.READ));
+            cosc = cassandra.get(key, columnPath, getThriftCl(OperationType.READ));            
           } catch (NotFoundException e) {
             setException(xtrans.translate(e));
             return null;
           } catch (Exception e) {
             throw xtrans.translate(e);
           }
-          return cosc;
+          return cosc.getCounter_column();
         }
 
     };
@@ -682,7 +681,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
   
   @Override
-  public Counter getCounter(String key, ColumnPath columnPath) throws HectorException {
+  public CounterColumn getCounter(String key, ColumnPath columnPath) throws HectorException {
 	  return getCounter(StringSerializer.get().toByteBuffer(key), columnPath);
   }
 

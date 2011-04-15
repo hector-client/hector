@@ -17,7 +17,6 @@ import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 
 import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.CounterDeletion;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 
@@ -127,7 +126,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
   
   public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock) {
     SlicePredicate pred = new SlicePredicate();
-    Deletion d = new Deletion(clock);
+    Deletion d = new Deletion().setTimestamp(clock);
     if ( sc.getColumns() != null ) {      
       for (HColumn<N, V> col : sc.getColumns()) {
         pred.addToColumn_names(col.getNameSerializer().toByteBuffer(col.getName()));
@@ -197,9 +196,9 @@ public final class MutatorImpl<K> implements Mutator<K> {
     Deletion d;
     if ( columnName != null ) {
       sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
-      d = new Deletion(clock).setPredicate(sp);
+      d = new Deletion().setTimestamp(clock).setPredicate(sp);
     } else { 
-      d = new Deletion(clock);
+      d = new Deletion().setTimestamp(clock);
     }
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
@@ -321,14 +320,14 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <N> Mutator<K> addCounterDeletion(K key, String cf, N counterColumnName, Serializer<N> nameSerializer) {
     SlicePredicate sp = new SlicePredicate();
-    CounterDeletion d;
+    Deletion d;
     if ( counterColumnName != null ) {
       sp.addToColumn_names(nameSerializer.toByteBuffer(counterColumnName));
-      d = new CounterDeletion().setPredicate(sp);
+      d = new Deletion().setPredicate(sp);
     } else { 
-      d = new CounterDeletion();
+      d = new Deletion();
     }
-    getPendingMutations().addCounterDeletion(key, Arrays.asList(cf), d);
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
 
@@ -341,7 +340,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <SN, N> Mutator<K> addCounterSubDeletion(K key, String cf, HCounterSuperColumn<SN, N> sc) {
     SlicePredicate pred = new SlicePredicate();
-    CounterDeletion d = new CounterDeletion();
+    Deletion d = new Deletion();
     if ( sc.getColumns() != null ) {      
       for (HCounterColumn<N> col : sc.getColumns()) {
         pred.addToColumn_names(col.getNameSerializer().toByteBuffer(col.getName()));
@@ -349,7 +348,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
       d.setPredicate(pred);
     }    
     d.setSuper_column(sc.getNameByteBuffer());
-    getPendingMutations().addCounterDeletion(key, Arrays.asList(cf), d);
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
 
@@ -362,7 +361,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <SN, N> Mutator<K> addSubDelete(K key, String cf, SN sColumnName,
       N columnName, Serializer<SN> sNameSerializer, Serializer<N> nameSerializer, long clock) {
-    Deletion d = new Deletion(clock);            
+    Deletion d = new Deletion().setTimestamp(clock);            
     SlicePredicate predicate = new SlicePredicate();
     predicate.addToColumn_names(nameSerializer.toByteBuffer(columnName));
     d.setPredicate(predicate);
@@ -376,7 +375,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <SN> Mutator<K> addSuperDelete(K key, String cf, SN sColumnName,
       Serializer<SN> sNameSerializer) {    
-    Deletion d = new Deletion(keyspace.createClock());            
+    Deletion d = new Deletion().setTimestamp(keyspace.createClock());            
     d.setSuper_column(sNameSerializer.toByteBuffer(sColumnName));
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);    
 

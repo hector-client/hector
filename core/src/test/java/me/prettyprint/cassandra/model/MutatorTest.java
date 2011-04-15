@@ -7,15 +7,12 @@ import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.createSuperColumn;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.Assert.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.utils.StringUtils;
 import me.prettyprint.hector.api.Cluster;
@@ -26,6 +23,7 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 
@@ -218,7 +216,9 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     MutationResult mr = m.insertCounter("k", "Counter1", createCounterColumn("name", 5));
     assertTrue("Execution time on single counter insert should be > 0", mr.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", mr.getHostUsed() != null);
-    assertColumnExists("Keyspace1", "Counter1", "k", "name");
+    CounterQuery<String, String> counter = new ThriftCounterColumnQuery<String,String>(keyspace, se, se);
+    counter.setColumnFamily("Counter1").setKey("k").setName("name");
+    assertEquals(new Long(5), counter.execute().get().getValue());
   }
 
   private void assertColumnExists(String keyspace, String cf, String key, String column) {

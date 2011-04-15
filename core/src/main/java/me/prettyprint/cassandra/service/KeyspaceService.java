@@ -11,7 +11,6 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.Counter;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
@@ -57,9 +56,9 @@ public interface KeyspaceService {
    * @throws HNotFoundException
    *           if no value exists for the counter
    */
-  Counter getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
   
-  Counter getCounter(String key, ColumnPath columnPath) throws HectorException;
+  CounterColumn getCounter(String key, ColumnPath columnPath) throws HectorException;
 
   /**
    * Get the SuperColumn at the given columnPath.

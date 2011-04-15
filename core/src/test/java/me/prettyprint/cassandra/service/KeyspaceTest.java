@@ -28,8 +28,6 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-//import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.Counter;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.KeyRange;
@@ -120,14 +118,14 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
     ColumnPath cph = new ColumnPath("Counter1");
     cph.setColumn(ss.toByteBuffer("A"));
-    Counter counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
+    CounterColumn counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
     assertNotNull(counter);
-    assertEquals(4, counter.getColumn().value);
+    assertEquals(4, counter.value);
     
     cph.setColumn(ss.toByteBuffer("B"));
     counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
     assertNotNull(counter);
-    assertEquals(10, counter.getColumn().value);
+    assertEquals(10, counter.value);
     
     // Reuse the ColumnPath associated to Conter B and remove only B.
     keyspace.removeCounter("testInsertAndGetAndRemoveCounter_key1", cph);
@@ -287,7 +285,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
         slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
       }
       Mutation mutation = new Mutation();
-      Deletion deletion = new Deletion(connectionManager.createClock());
+      Deletion deletion = new Deletion().setTimestamp(connectionManager.createClock());
       deletion.setPredicate(slicePredicate);
       mutation.setDeletion(deletion);
       mutations.add(mutation);
@@ -345,7 +343,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       for (int j = 0; j < 10; j++) {
         slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
       }
-      Deletion deletion = new Deletion(connectionManager.createClock());
+      Deletion deletion = new Deletion().setTimestamp(connectionManager.createClock());
       deletion.setPredicate(slicePredicate);
       batchMutation.addDeletion("testBatchMutateColumn_" + i, columnFamilies, deletion);
     }
@@ -390,7 +388,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("deleteThroughInserBatch_col"));
 
-    Deletion deletion = new Deletion(connectionManager.createClock());
+    Deletion deletion = new Deletion().setTimestamp(connectionManager.createClock());
     deletion.setPredicate(slicePredicate);
 
     batchMutation.addDeletion("deleteThroughInserBatch_key", columnFamilies, deletion);

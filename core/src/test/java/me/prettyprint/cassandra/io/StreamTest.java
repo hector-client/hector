@@ -31,7 +31,7 @@ public class StreamTest extends BaseEmbededServerSetupTest {
     BLOB_CF_DEF.comparator_type = "IntegerType";
   }
 
-  public final static KeyspaceDefinition KEYSPACE_DEV = new ThriftKsDef(new KsDef(KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(new CfDef[] { BLOB_CF_DEF })));
+  public static KeyspaceDefinition KEYSPACE_DEV;
 
   private Keyspace keyspace;
   private ThriftCluster cassandraCluster;
@@ -40,7 +40,8 @@ public class StreamTest extends BaseEmbededServerSetupTest {
   @Before
   public void setUp() throws Exception {
     super.setupClient();
-
+    KEYSPACE_DEV = new ThriftKsDef(new KsDef(KEYSPACE, "org.apache.cassandra.locator.SimpleStrategy", Arrays.asList(new CfDef[] { BLOB_CF_DEF })));
+    ((ThriftKsDef)KEYSPACE_DEV).setReplicationFactor(1);
     cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
 

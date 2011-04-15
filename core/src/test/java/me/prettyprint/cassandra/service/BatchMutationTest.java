@@ -11,12 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.hector.api.query.SuperCountQuery;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.CounterColumn;
-import org.apache.cassandra.thrift.CounterDeletion;
-import org.apache.cassandra.thrift.CounterMutation;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.Mutation;
@@ -72,7 +69,7 @@ public class BatchMutationTest {
 
   @Test
   public void testAddDeletion() {
-    Deletion deletion = new Deletion(System.currentTimeMillis());
+    Deletion deletion = new Deletion().setTimestamp(System.currentTimeMillis());
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("c_name"));
     deletion.setPredicate(slicePredicate);
@@ -80,7 +77,7 @@ public class BatchMutationTest {
 
     assertEquals(1,batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
 
-    deletion = new Deletion(System.currentTimeMillis());
+    deletion = new Deletion().setTimestamp(System.currentTimeMillis());
     slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("c_name2"));
     deletion.setPredicate(slicePredicate);
@@ -105,13 +102,8 @@ public class BatchMutationTest {
     batchMutate.addCounterInsertion("key1", columnFamilies, cc1);
     assertFalse(batchMutate.isEmpty());
     
-    // Delete the Column/SuperColumn mutations and it should be still not empty
-    batchMutate.getMutationMap().clear();
-    assertFalse(batchMutate.isEmpty());
     
-    // Delete the Counter mutations. Now the batchMutate should be empty.
-    batchMutate.getCounterMutationMap().clear();
-    assertTrue(batchMutate.isEmpty());
+    
   }
   
   // ********** Test Counters related operations ******************
@@ -125,7 +117,7 @@ public class BatchMutationTest {
     batchMutate.addCounterInsertion("key1", columnFamilies, cc1);
     
     // assert there is one outter map row with 'key' as the key
-    Map<ByteBuffer, Map<String, List<CounterMutation>>> mutationMap = batchMutate.getCounterMutationMap();
+    Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = batchMutate.getMutationMap();
     assertEquals(1, mutationMap.get(StringSerializer.get().toByteBuffer("key1")).size());
 
     // add again with a different counter and verify there is one key and two mutations underneath
@@ -138,22 +130,22 @@ public class BatchMutationTest {
   @Test
   public void testAddCounterDeletion() {
    
-    CounterDeletion counterDeletion = new CounterDeletion();
+    Deletion counterDeletion = new Deletion();
     
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("c_name"));
     counterDeletion.setPredicate(slicePredicate);
     
-    batchMutate.addCounterDeletion("key1", columnFamilies, counterDeletion);
+    batchMutate.addDeletion("key1", columnFamilies, counterDeletion);
 
-    assertEquals(1, batchMutate.getCounterMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
+    assertEquals(1, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
 
-    counterDeletion = new CounterDeletion();
+    counterDeletion = new Deletion();
     slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("c_name2"));
     counterDeletion.setPredicate(slicePredicate);
-    batchMutate.addCounterDeletion("key1", columnFamilies, counterDeletion);
-    assertEquals(2,batchMutate.getCounterMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
+    batchMutate.addDeletion("key1", columnFamilies, counterDeletion);
+    assertEquals(2,batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
   
   @Test
@@ -164,13 +156,13 @@ public class BatchMutationTest {
 
     batchMutate.addSuperCounterInsertion("key1", columnFamilies, csc1);
     // assert there is one outter map row with 'key' as the key
-    assertEquals(1, batchMutate.getCounterMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
+    assertEquals(1, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
 
     // add again with a different column and verify there is one key and two mutations underneath
     // for "standard1"
     CounterSuperColumn csc2 = new CounterSuperColumn(StringSerializer.get().toByteBuffer("c_name2"), 
             Arrays.asList(new CounterColumn(StringSerializer.get().toByteBuffer("c_name"), 456)));
     batchMutate.addSuperCounterInsertion("key1", columnFamilies, csc2);
-    assertEquals(2, batchMutate.getCounterMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
+    assertEquals(2, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
 }

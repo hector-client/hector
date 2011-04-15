@@ -105,16 +105,17 @@
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>apache-cassandra</artifactId>
-      <version>0.8.0-20110317</version>
+      <version>0.8.0-20110415</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>apache-cassandra-thrift</artifactId>
-      <version>0.8.0-20110317</version>
+      <version>0.8.0-20110415</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra.deps</groupId>
       <artifactId>libthrift</artifactId>
+      <version>0.6.0</version>
     </dependency>
     <dependency> 
       <groupId>org.yaml</groupId> 
