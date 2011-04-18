@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -477,8 +478,57 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     keyspace.remove("testGetSlice_", cp);
     keyspace.remove("testGetSlice", cp);
   }
-
+  
   @Test
+  public void testGetCounterSlice() throws HectorException {
+    // insert value
+    ArrayList<ByteBuffer> columnnames = new ArrayList<ByteBuffer>(50);
+    final StringSerializer ss = StringSerializer.get();
+    for (int i = 0; i < 100; i++) {
+      ColumnParent cp = new ColumnParent("Counter1");
+
+      keyspace.addCounter("testGetCounterSlice", cp, createCounterColumn("testGetCounterSlice_" + i, i)); 
+      
+      if (i < 50) {
+        // I want to query only 50.
+        columnnames.add(ss.toByteBuffer("testGetCounterSlice_" + i));
+      }
+    }
+
+    // Query 50 counters. From testGetCounterSlice_0 to testGetCounterSlice_49.
+    ColumnParent clp = new ColumnParent("Counter1");
+     
+    // TODO (patricioe) Slice by range will be in the next snapshot.
+    //SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[49]), false, 150);
+    SlicePredicate sp = new SlicePredicate();
+    //sp.setSlice_range(sr);
+    sp.setColumn_names(columnnames);
+    List<CounterColumn> cols = keyspace.getCounterSlice("testGetCounterSlice", clp, sp);
+
+    assertNotNull(cols);
+    assertEquals(50, cols.size());
+
+    Collections.sort(columnnames);
+    
+    ArrayList<ByteBuffer> gotlist = new ArrayList<ByteBuffer>(50);
+    for (int i = 0; i < 50; i++) {
+      CounterColumn cc = cols.get(i);
+      gotlist.add(cc.name.duplicate());
+      assertEquals(getValueFromName(ss.fromByteBuffer(cc.name.duplicate())), cc.getValue());
+    }
+    assertEquals(columnnames, gotlist);
+
+    // Clean up the data this test wrote
+    ColumnPath cp = new ColumnPath("Counter1");
+    keyspace.removeCounter("testGetCounterSlice", cp);
+  }
+
+  // extract counter value from names like counter_23. In that case the value is 23.
+  private long getValueFromName(String counterName) {
+    return Long.valueOf(counterName.substring(counterName.indexOf("_") +1));
+}
+
+@Test
   public void testGetSuperSlice() throws HectorException {
     // insert value
     for (int i = 0; i < 100; i++) {

@@ -102,9 +102,23 @@ public interface KeyspaceService {
    */
   List<Column> getSlice(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException;
-
+  
   List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
-  throws HectorException;
+      throws HectorException;
+  
+  /**
+   * Get the group of counter columns contained by columnParent.
+   *
+   * Returns Either a ColumnFamily name or a ColumnFamily/SuperColumn specified
+   * by the given predicate. If no matching values are found, an empty list is
+   * returned.
+   */
+  List<CounterColumn> getCounterSlice(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException;
+  
+  public List<CounterColumn> getCounterSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException;
+
 
   /**
    * Get the group of superColumn contained by columnParent.

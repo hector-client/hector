@@ -228,11 +228,52 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     operateWithFailover(op);
     return op.getResult();
   }
-
+  
   @Override
   public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
   throws HectorException {
       return getSlice(StringSerializer.get().toByteBuffer(key), columnParent, predicate);
+  }
+  
+  @Override
+  public List<CounterColumn> getCounterSlice(final ByteBuffer key, final ColumnParent columnParent,
+      final SlicePredicate predicate) throws HectorException {
+    Operation<List<CounterColumn>> op = 
+        new Operation<List<CounterColumn>>(OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public List<CounterColumn> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
+              predicate, getThriftCl(OperationType.READ));
+
+          if (cosclist == null) {
+            return null;
+          }
+          ArrayList<CounterColumn> result = new ArrayList<CounterColumn>(cosclist.size());
+          for (ColumnOrSuperColumn cosc : cosclist) {
+            if (cosc.isSetCounter_column()) {
+              result.add(cosc.getCounter_column());
+            } else {
+              // Inconsistency
+              throw new HectorException("Regular Column is part of the set of Counter Column");
+            }
+            
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+
+  @Override
+  public List<CounterColumn> getCounterSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException {
+    return getCounterSlice(StringSerializer.get().toByteBuffer(key), columnParent, predicate);
   }
 
   @Override
