@@ -5,6 +5,24 @@ Changes by version:
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 
+0.7.0-29
+========
+Huge contrib of template-method design pattern approach by David Cox. See m.p.c.service.template packageand testing coverage for such. Fans of SpringFramework's JdbcTemplate should give this a look (still work in progress though).
+PHI accrural algorithm load balancing policy available. Thanks to Vijay for the patch.
+Removed redundant shutdownHook registration in pooling services. Thanks to sbridges for the patient explanation.
+Added setKeys/setColumnNames overloading with Collection type arguments in MultigetSuperSliceQuery/MultigetSubSliceQuery. Thanks to user rstml for the patch.
+Fix potential bug with RR balancing policy on small clusters (https://github.com/rantav/hector/issues/186)
+Added KeyIterator and StringKeyIterator utility classes (thanks to tkoop for the patch)
+Support for consistency levels "TWO" and "THREE"
+Added key_cache_save_period_in_seconds to column family creation (https://github.com/rantav/hector/issues/191)
+Fix of result time for SC slice query (thanks to user tamalex for the patch)
+Additional serializers for primitive types, BigInteger and ASCII
+Additional modifications to Mutator for working with super columns
+Added describe_schema_version to Cluster interface
+Dynamic composite comparators (see http://www.anuff.com/2011/02/indexing-in-cassandra.html and https://issues.apache.org/jira/browse/CASSANDRA-2231 for some background). Thanks to Ed Anuff and Todd Nine for a ton of work and testing here.
+
+
+
 0.7.0-28
 ========
 Rethrow on HUnavailableException since we cannot satisfy the requested CL and never will be able to (hence futility of retrying) 
