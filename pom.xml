@@ -10,7 +10,7 @@
   <groupId>me.prettyprint</groupId>
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
-  <version>0.7.0-29-SNAPSHOT</version>
+  <version>0.7.0-29</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/rantav/hector</url>
