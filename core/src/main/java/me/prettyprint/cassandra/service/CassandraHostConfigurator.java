@@ -40,7 +40,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int hostTimeoutUnsuspendCheckDelay = HostTimeoutTracker.DEF_NODE_UNSUSPEND_CHECK_DELAY_IN_SECONDS;
   private boolean useHostTimeoutTracker = false;
   private boolean runAutoDiscoveryAtStartup = false;
-
+  private boolean useSocketKeepalive = false;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -73,6 +73,7 @@ public final class CassandraHostConfigurator implements Serializable {
     cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
     cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
+    cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
 
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
@@ -288,6 +289,18 @@ public final class CassandraHostConfigurator implements Serializable {
    */
   public void setRunAutoDiscoveryAtStartup(boolean runAutoDiscoveryAtStartup) {
     this.runAutoDiscoveryAtStartup = runAutoDiscoveryAtStartup;
+  }
+
+  public boolean getUseSocketKeepalive() {
+    return useSocketKeepalive;
+  }
+
+  /**
+   * Enable SO_KEEPALIVE on the underlying socket. OFF by default (per java.net.Socket) 
+   * 
+   */
+  public void setUseSocketKeepalive(boolean useSocketKeepalive) {
+    this.useSocketKeepalive = useSocketKeepalive;
   }
 
   

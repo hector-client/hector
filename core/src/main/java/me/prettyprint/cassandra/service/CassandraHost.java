@@ -59,6 +59,7 @@ public final class CassandraHost {
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  private boolean useSocketKeepalive;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String url) {
@@ -225,4 +226,13 @@ public final class CassandraHost {
     this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
   }
 
+  public boolean getUseSocketKeepalive() {
+    return useSocketKeepalive;
+  }
+
+  public void setUseSocketKeepalive(boolean useSocketKeepalive) {
+    this.useSocketKeepalive = useSocketKeepalive;
+  }
+
+  
 }
