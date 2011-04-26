@@ -10,7 +10,8 @@
         <version>0.8.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>hector-migration</artifactId>
-    <version>0.1-SNAPSHOT</version>
+    <groupId>me.prettyprint.migration</groupId>
+    <version>0.1</version>
     <packaging>pom</packaging>
     <name>hector-migration</name>
 

@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>hector-migration</artifactId>
-        <groupId>me.prettyprint</groupId>
-        <version>0.1-SNAPSHOT</version>
+        <groupId>me.prettyprint.migration</groupId>
+        <version>0.1</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
