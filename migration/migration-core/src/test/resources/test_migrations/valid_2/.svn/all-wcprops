@@ -1,0 +1,23 @@
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/126/trunk/db-migration/src/test/resources/test_migrations/valid_2
+END
+001.sql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/126/trunk/db-migration/src/test/resources/test_migrations/valid_2/001.sql
+END
+002.sql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/126/trunk/db-migration/src/test/resources/test_migrations/valid_2/002.sql
+END
+003.sql
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/126/trunk/db-migration/src/test/resources/test_migrations/valid_2/003.sql
+END
