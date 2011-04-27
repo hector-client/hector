@@ -32,8 +32,8 @@ public class CassandraMigrationManager implements MigrationManager {
         this.cluster = cluster;
     }
 
-    public CassandraMigrationManager(String name,String hosts){
-        this(HFactory.getOrCreateCluster(name,hosts));
+    public CassandraMigrationManager(String hosts) {
+        this(HFactory.getOrCreateCluster("CassandraCluster", hosts));
     }
 
     public boolean validate() {
@@ -55,10 +55,8 @@ public class CassandraMigrationManager implements MigrationManager {
     }
 
     public void migrate() {
-        if (!versionStrategy.isVersioningEnabled(cluster)) {
-            versionStrategy.enableVersioning(cluster);
-        }
 
+        versionStrategy.enableVersioning(cluster);
         final Set<Migration> pendingMigrations = pendingMigrations();
 
         if (pendingMigrations.isEmpty()) {

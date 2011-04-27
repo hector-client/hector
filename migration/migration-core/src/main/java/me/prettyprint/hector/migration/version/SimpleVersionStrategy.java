@@ -19,17 +19,28 @@ import java.util.Set;
  * A trivial VersionStrategy which tracks only the minimal information required to note the current state of the database: the current version.
  */
 public class SimpleVersionStrategy implements VersionStrategy {
-    public static final String DEFAULT_VERSIONS_KS = "support";
-    public static final String DEFAULT_VERSIONS_CF = "versions";
 
-    private String versionsKS = DEFAULT_VERSIONS_KS;
-    private String versionsCF = DEFAULT_VERSIONS_CF;
+    public static final String DEFAULT_HECTOR_KS = "hector_support";
+    public static final String DEFAULT_MIGRATIONS_CF = "hector_migrations_cf";
+
+    private String hectorKS;
+    private String migrationsCF;
+
+    public SimpleVersionStrategy() {
+        this.hectorKS = DEFAULT_HECTOR_KS;
+        this.migrationsCF = DEFAULT_MIGRATIONS_CF;
+    }
+
+    public SimpleVersionStrategy(String hectorKS, String migrationsCF) {
+        this.hectorKS = hectorKS;
+        this.migrationsCF = migrationsCF;
+    }
 
     public boolean isVersioningEnabled(Cluster cluster) {
         try {
-            KeyspaceDefinition ksDef = cluster.describeKeyspace(versionsKS);
+            KeyspaceDefinition ksDef = cluster.describeKeyspace(hectorKS);
             for (ColumnFamilyDefinition cfDef : ksDef.getCfDefs())
-                if (versionsCF.equals(cfDef.getName())) return true;
+                if (migrationsCF.equals(cfDef.getName())) return true;
         } catch (Exception e) {
             return false;
         }
@@ -38,18 +49,18 @@ public class SimpleVersionStrategy implements VersionStrategy {
 
     public void enableVersioning(Cluster cluster) {
         if (!isVersioningEnabled(cluster)) {
-            if (cluster.describeKeyspace(versionsKS) == null) {
-                KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition(versionsKS);
+            if (cluster.describeKeyspace(hectorKS) == null) {
+                KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition(hectorKS);
                 cluster.addKeyspace(ksDef);
             }
-            ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition(versionsKS, versionsCF);
+            ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition(hectorKS, migrationsCF);
             cluster.addColumnFamily(cfDef);
         }
     }
 
     public void disableVersioning(Cluster cluster) {
         if (isVersioningEnabled(cluster)) {
-            cluster.dropKeyspace(versionsKS);
+            cluster.dropKeyspace(hectorKS);
         }
     }
 
@@ -58,11 +69,11 @@ public class SimpleVersionStrategy implements VersionStrategy {
 
         HashSet<String> set = new HashSet<String>();
 
-        Keyspace ks = HFactory.createKeyspace(versionsKS, cluster);
+        Keyspace ks = HFactory.createKeyspace(hectorKS, cluster);
         StringSerializer se = new StringSerializer();
         RangeSlicesQuery<String, String, String> q = HFactory.createRangeSlicesQuery(ks, se, se, se);
         q.setKeys(null, null)
-                .setColumnFamily(versionsCF)
+                .setColumnFamily(migrationsCF)
                 .setRange(null, null, false, Integer.MAX_VALUE)
                 .setReturnKeysOnly();
         for (Row<String, String, String> row : q.execute().get()) {
@@ -72,19 +83,19 @@ public class SimpleVersionStrategy implements VersionStrategy {
     }
 
     public void recordMigration(Cluster cluster, String version, Date startTime, long duration) {
-        Keyspace ks = HFactory.createKeyspace(versionsKS, cluster);
+        Keyspace ks = HFactory.createKeyspace(hectorKS, cluster);
         Mutator<String> m = HFactory.createMutator(ks, StringSerializer.get());
-        m.addInsertion(version, versionsCF, HFactory.createStringColumn("duration", String.valueOf(duration)));
-        m.addInsertion(version, versionsCF, HFactory.createStringColumn("startTime", String.valueOf(startTime.getTime())));
+        m.addInsertion(version, migrationsCF, HFactory.createStringColumn("duration", String.valueOf(duration)));
+        m.addInsertion(version, migrationsCF, HFactory.createStringColumn("startTime", String.valueOf(startTime.getTime())));
         m.execute();
     }
 
-    public void setVersionsKS(String versionsKS) {
-        this.versionsKS = versionsKS;
+    public void setHectorKS(String hectorKS) {
+        this.hectorKS = hectorKS;
     }
 
 
-    public void setVersionsCF(String versionsCF) {
-        this.versionsCF = versionsCF;
+    public void setMigrationsCF(String migrationsCF) {
+        this.migrationsCF = migrationsCF;
     }
 }

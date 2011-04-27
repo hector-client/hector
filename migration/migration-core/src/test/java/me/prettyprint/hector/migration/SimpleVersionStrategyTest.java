@@ -21,8 +21,8 @@ public class SimpleVersionStrategyTest extends CassandraTestBase {
     @Before
     public void setup() {
         strategy = new SimpleVersionStrategy();
-        strategy.setVersionsKS(KS_NAME);
-        strategy.setVersionsCF(CF_NAME);
+        strategy.setHectorKS(KS_NAME);
+        strategy.setMigrationsCF(CF_NAME);
     }
 
     @After
