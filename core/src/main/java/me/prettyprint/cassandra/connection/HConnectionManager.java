@@ -269,8 +269,8 @@ public class HConnectionManager {
           retryable = false;
         }
         if ( retries <= 0 || retryable == false) throw he;
-        log.error("Could not fullfill request on this host {}", client);
-        log.error("Exception: ", he);
+        log.warn("Could not fullfill request on this host {}", client);
+        log.warn("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
         sleepBetweenHostSkips(op.failoverPolicy);
       } finally {
