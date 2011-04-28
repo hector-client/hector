@@ -1,61 +1,0 @@
-10
-
-dir
-241
-http://c5-db-migration.googlecode.com/svn/trunk/db-migration/src/test/resources/test_migrations
-http://c5-db-migration.googlecode.com/svn
-
-
-
-2010-03-27T05:43:49.867671Z
-221
-christian.nelson
-
-
-svn:special svn:externals svn:needs-lock
-
-
-
-
-
-
-
-
-
-
-
-bc33d865-0547-0410-b93a-375c3849f0f1
-
-bad_script_1
-dir
-
-dsmmst
-dir
-
-duplicate_1
-dir
-
-groovy_1
-dir
-
-h2
-dir
-
-hsql
-dir
-
-mysql_50
-dir
-
-postgresql_8
-dir
-
-sqlserver_2000
-dir
-
-valid_1
-dir
-
-valid_2
-dir
-
