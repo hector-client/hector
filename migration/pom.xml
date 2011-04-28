@@ -11,7 +11,7 @@
     </parent>
     <artifactId>hector-migration</artifactId>
     <groupId>me.prettyprint.migration</groupId>
-    <version>0.1</version>
+    <version>0.2</version>
     <packaging>pom</packaging>
     <name>hector-migration</name>
 
@@ -22,25 +22,24 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>me.prettyprint</groupId>
+                <artifactId>hector-core</artifactId>
+                <version>0.7.0-29</version>
+            </dependency>
+            <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-test</artifactId>
                 <version>3.0.5.RELEASE</version>
             </dependency>
-
             <dependency>
                 <groupId>org.springframework</groupId>
                 <artifactId>spring-context</artifactId>
                 <version>3.0.5.RELEASE</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.maven</groupId>
-                <artifactId>maven-plugin-api</artifactId>
-                <version>2.1.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.maven</groupId>
-                <artifactId>maven-project</artifactId>
-                <version>2.1.0</version>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>3.0.5.RELEASE</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
@@ -54,11 +53,6 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>me.prettyprint</groupId>
-                <artifactId>hector-core</artifactId>
-                <version>0.7.0-29</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>1.4</version>
@@ -67,21 +61,6 @@
                 <groupId>commons-collections</groupId>
                 <artifactId>commons-collections</artifactId>
                 <version>3.2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-core</artifactId>
-                <version>3.0.5.RELEASE</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.maven.shared</groupId>
-                <artifactId>maven-plugin-testing-harness</artifactId>
-                <version>1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.8.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
