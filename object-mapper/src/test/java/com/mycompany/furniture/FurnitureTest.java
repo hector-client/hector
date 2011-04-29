@@ -15,12 +15,12 @@ import me.prettyprint.hom.EntityManagerImpl;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.thrift.transport.TTransportException;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 
 public class FurnitureTest extends CassandraTestBase {
-  static Keyspace keyspace;
   static EntityManagerImpl entityMgr;
 
   @Test
@@ -71,18 +71,9 @@ public class FurnitureTest extends CassandraTestBase {
 
   // --------------
 
-  @BeforeClass
-  public static void setup() throws TTransportException, SecurityException, IllegalArgumentException,
+  @Before
+  public void setup() throws TTransportException, SecurityException, IllegalArgumentException,
   IOException, InterruptedException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-    startCassandraInstance("target/cassandra-data");
-    ArrayList<CfDef> cfDefList = new ArrayList<CfDef>(2);
-    cfDefList.add(new CfDef("TestKeyspace", "Furniture").setComparator_type(BytesType.class.getSimpleName())
-        .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
-
-    Cluster cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9170");
-    createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
-    keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
-
     entityMgr = new EntityManagerImpl(keyspace, "com.mycompany.furniture");
   }
 
