@@ -36,7 +36,9 @@ public class BatchMutationTest {
 
   @Test
   public void testAddInsertion() {
-    Column column = new Column(StringSerializer.get().toByteBuffer("c_name"), StringSerializer.get().toByteBuffer("c_val"), System.currentTimeMillis());
+    Column column = new Column(StringSerializer.get().toByteBuffer("c_name"));
+    column.setValue(StringSerializer.get().toByteBuffer("c_val"));
+    column.setTimestamp(System.currentTimeMillis());
     batchMutate.addInsertion("key1", columnFamilies, column);
     // assert there is one outter map row with 'key' as the key
     Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = batchMutate.getMutationMap();
@@ -45,23 +47,29 @@ public class BatchMutationTest {
 
     // add again with a different column and verify there is one key and two mutations underneath
     // for "standard1"
-    Column column2 = new Column(StringSerializer.get().toByteBuffer("c_name2"), StringSerializer.get().toByteBuffer("c_val2"), System.currentTimeMillis());
+    Column column2 = new Column(StringSerializer.get().toByteBuffer("c_name2"));
+    column2.setValue(StringSerializer.get().toByteBuffer("c_val2"));
+    column2.setTimestamp(System.currentTimeMillis());
     batchMutate.addInsertion("key1",columnFamilies, column2);
     assertEquals(2, mutationMap.get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
 
   @Test
   public void testAddSuperInsertion() {
-    SuperColumn sc = new SuperColumn(StringSerializer.get().toByteBuffer("c_name"),
-        Arrays.asList(new Column(StringSerializer.get().toByteBuffer("c_name"), StringSerializer.get().toByteBuffer("c_val"), System.currentTimeMillis())));
+    Column column = new Column(StringSerializer.get().toByteBuffer("c_name"));
+    column.setValue(StringSerializer.get().toByteBuffer("c_val"));
+    column.setTimestamp(System.currentTimeMillis());
+    SuperColumn sc = new SuperColumn(StringSerializer.get().toByteBuffer("c_name"), Arrays.asList(column));
     batchMutate.addSuperInsertion("key1", columnFamilies, sc);
     // assert there is one outter map row with 'key' as the key
     assertEquals(1, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
 
     // add again with a different column and verify there is one key and two mutations underneath
     // for "standard1"
-    SuperColumn sc2 = new SuperColumn(StringSerializer.get().toByteBuffer("c_name2"),
-        Arrays.asList(new Column(StringSerializer.get().toByteBuffer("c_name"), StringSerializer.get().toByteBuffer("c_val"), System.currentTimeMillis())));
+    column = new Column(StringSerializer.get().toByteBuffer("c_name"));
+    column.setValue(StringSerializer.get().toByteBuffer("c_val"));
+    column.setTimestamp(System.currentTimeMillis());
+    SuperColumn sc2 = new SuperColumn(StringSerializer.get().toByteBuffer("c_name2"), Arrays.asList(column));
     batchMutate.addSuperInsertion("key1", columnFamilies, sc2);
     assertEquals(2, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
@@ -84,16 +92,15 @@ public class BatchMutationTest {
     batchMutate.addDeletion("key1", columnFamilies, deletion);
     assertEquals(2,batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
-  
+
   @Test
   public void testIsEmpty() {
     assertTrue(batchMutate.isEmpty());
-    
+
     // Insert a column
-    Column c1 = new Column(
-        StringSerializer.get().toByteBuffer("c_name"), 
-        StringSerializer.get().toByteBuffer("c_val"), 
-        System.currentTimeMillis());
+    Column c1 = new Column(StringSerializer.get().toByteBuffer("c_name"));
+    c1.setValue(StringSerializer.get().toByteBuffer("c_val"));
+    c1.setTimestamp(System.currentTimeMillis());
     batchMutate.addInsertion("key1", columnFamilies, c1);
     assertFalse(batchMutate.isEmpty());
 
@@ -101,21 +108,21 @@ public class BatchMutationTest {
     CounterColumn cc1 = new CounterColumn(StringSerializer.get().toByteBuffer("c_name"), 13);
     batchMutate.addCounterInsertion("key1", columnFamilies, cc1);
     assertFalse(batchMutate.isEmpty());
-    
-    
-    
+
+
+
   }
-  
+
   // ********** Test Counters related operations ******************
-  
+
   @Test
   public void testAddCounterInsertion() {
 
     // Insert a Counter.
     CounterColumn cc1 = new CounterColumn(StringSerializer.get().toByteBuffer("c_name"), 222);
-    
+
     batchMutate.addCounterInsertion("key1", columnFamilies, cc1);
-    
+
     // assert there is one outter map row with 'key' as the key
     Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap = batchMutate.getMutationMap();
     assertEquals(1, mutationMap.get(StringSerializer.get().toByteBuffer("key1")).size());
@@ -126,16 +133,16 @@ public class BatchMutationTest {
     batchMutate.addCounterInsertion("key1", columnFamilies, cc2);
     assertEquals(2, mutationMap.get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
-  
+
   @Test
   public void testAddCounterDeletion() {
-   
+
     Deletion counterDeletion = new Deletion();
-    
+
     SlicePredicate slicePredicate = new SlicePredicate();
     slicePredicate.addToColumn_names(StringSerializer.get().toByteBuffer("c_name"));
     counterDeletion.setPredicate(slicePredicate);
-    
+
     batchMutate.addDeletion("key1", columnFamilies, counterDeletion);
 
     assertEquals(1, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).size());
@@ -147,11 +154,11 @@ public class BatchMutationTest {
     batchMutate.addDeletion("key1", columnFamilies, counterDeletion);
     assertEquals(2,batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());
   }
-  
+
   @Test
   public void testAddSuperCounterInsertion() {
     // Create 1 super counter.
-    CounterSuperColumn csc1 = new CounterSuperColumn(StringSerializer.get().toByteBuffer("c_name"), 
+    CounterSuperColumn csc1 = new CounterSuperColumn(StringSerializer.get().toByteBuffer("c_name"),
         Arrays.asList(new CounterColumn(StringSerializer.get().toByteBuffer("c_name"), 123)));
 
     batchMutate.addSuperCounterInsertion("key1", columnFamilies, csc1);
@@ -160,7 +167,7 @@ public class BatchMutationTest {
 
     // add again with a different column and verify there is one key and two mutations underneath
     // for "standard1"
-    CounterSuperColumn csc2 = new CounterSuperColumn(StringSerializer.get().toByteBuffer("c_name2"), 
+    CounterSuperColumn csc2 = new CounterSuperColumn(StringSerializer.get().toByteBuffer("c_name2"),
             Arrays.asList(new CounterColumn(StringSerializer.get().toByteBuffer("c_name"), 456)));
     batchMutate.addSuperCounterInsertion("key1", columnFamilies, csc2);
     assertEquals(2, batchMutate.getMutationMap().get(StringSerializer.get().toByteBuffer("key1")).get("Standard1").size());

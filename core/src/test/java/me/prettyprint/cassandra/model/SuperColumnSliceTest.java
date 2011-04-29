@@ -34,7 +34,9 @@ public class SuperColumnSliceTest {
     Assert.assertTrue(slice.getSuperColumns().isEmpty());
 
     // non-empty one
-    Column c = new Column(le.toByteBuffer(5L), be.toByteBuffer(ByteBuffer.wrap(new byte[] { 1 })), 2L);
+    Column c = new Column(le.toByteBuffer(5L));
+    c.setValue(be.toByteBuffer(ByteBuffer.wrap(new byte[] { 1 })));
+    c.setTimestamp(2L);
     tColumns.add(new SuperColumn(se.toByteBuffer("super"), Arrays.asList(c)));
     slice = new SuperSliceImpl<String, Long, ByteBuffer>(tColumns, se, le, be);
     Assert.assertEquals(1, slice.getSuperColumns().size());
