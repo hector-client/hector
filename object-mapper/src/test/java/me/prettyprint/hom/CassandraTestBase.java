@@ -47,20 +47,14 @@ public class CassandraTestBase {
     cleaner.prepare();
     EmbeddedCassandraService cassandra = new EmbeddedCassandraService();
     try {
-      cassandra.init();
+        cassandraStarted = true;
+        cassandra.start();
     }
-    catch (TTransportException e) {
+    catch (IOException e) {
       System.out.println( "Could not initialize Cassandra");
       e.printStackTrace();
       throw e;
     }
-
-    cassandraStarted = true;
-
-    Thread t = new Thread(cassandra);
-    t.setName(cassandra.getClass().getSimpleName());
-    t.setDaemon(true);
-    t.start();
 
     System.out.println( "Successfully started Cassandra");
   }
@@ -68,7 +62,8 @@ public class CassandraTestBase {
   public static void createKeyspace(Cluster cluster, String name, String strategy, int replicationFactor,
       List<CfDef> cfDefList) {
     try {
-      KsDef ksDef = new KsDef(name, strategy, replicationFactor, cfDefList);
+      KsDef ksDef = new KsDef(name, strategy, cfDefList);
+      ksDef.setReplication_factor(replicationFactor);
       cluster.addKeyspace(new ThriftKsDef(ksDef));
       return;
     }
@@ -94,16 +89,16 @@ public class CassandraTestBase {
       InterruptedException, NoSuchMethodException, IllegalAccessException,
       InvocationTargetException {
         startCassandraInstance("tmp/var/lib/cassandra");
-      
+
         ArrayList<CfDef> cfDefList = new ArrayList<CfDef>(2);
         cfDefList.add(new CfDef("TestKeyspace", "TestBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "CustomIdColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "SimpleTestBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())
-            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));  
+            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "SimpleRelationshipBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())
-            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));          
+            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "NoAnonymousColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "ComplexColumnFamily").setComparator_type(BytesType.class.getSimpleName())

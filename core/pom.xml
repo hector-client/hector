@@ -104,70 +104,70 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
-      <artifactId>apache-cassandra</artifactId>
-      <version>0.8.0-20110415</version>
+      <artifactId>cassandra-all</artifactId>
+      <version>0.8.0-beta1</version>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
-      <artifactId>apache-cassandra-thrift</artifactId>
-      <version>0.8.0-20110415</version>
+      <artifactId>cassandra-thrift</artifactId>
+      <version>0.8.0-beta1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.thrift</groupId>
+      <artifactId>libthrift</artifactId>
+      <version>0.6.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>1.6</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>r08</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-collections</groupId>
+      <artifactId>commons-collections</artifactId>
+      <version>3.2.1</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra.deps</groupId>
-      <artifactId>libthrift</artifactId>
-      <version>0.6.0</version>
+      <artifactId>avro</artifactId>
+      <version>1.4.0-cassandra-1</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>netty</artifactId>
+          <groupId>org.jboss.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>paranamer</artifactId>
+          <groupId>com.thoughtworks.paranamer</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>paranamer-ant</artifactId>
+          <groupId>com.thoughtworks.paranamer</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>velocity</artifactId>
+          <groupId>org.apache.velocity</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
-    <dependency> 
-      <groupId>org.yaml</groupId> 
-      <artifactId>snakeyaml</artifactId> 
-      <version>1.6</version> 
-      <scope>test</scope>
-    </dependency> 
-    <dependency> 
-      <groupId>com.google.guava</groupId> 
-      <artifactId>guava</artifactId> 
-      <version>r08</version> 
-    </dependency> 
-    <dependency> 
-      <groupId>commons-collections</groupId> 
-      <artifactId>commons-collections</artifactId> 
-      <version>3.2.1</version> 
-      <scope>test</scope>
-    </dependency> 
-    <dependency> 
-      <groupId>org.apache.cassandra.deps</groupId> 
-      <artifactId>avro</artifactId> 
-      <version>1.4.0-cassandra-1</version> 
-      <scope>test</scope>
-      <exclusions> 
-        <exclusion> 
-          <artifactId>netty</artifactId> 
-          <groupId>org.jboss.netty</groupId> 
-        </exclusion> 
-        <exclusion> 
-          <artifactId>paranamer</artifactId> 
-          <groupId>com.thoughtworks.paranamer</groupId> 
-        </exclusion> 
-        <exclusion> 
-          <artifactId>paranamer-ant</artifactId> 
-          <groupId>com.thoughtworks.paranamer</groupId> 
-        </exclusion> 
-        <exclusion> 
-          <artifactId>velocity</artifactId> 
-          <groupId>org.apache.velocity</groupId> 
-        </exclusion> 
-      </exclusions> 
-    </dependency> 
-    <dependency> 
-      <groupId>org.antlr</groupId> 
-      <artifactId>antlr</artifactId> 
+    <dependency>
+      <groupId>org.antlr</groupId>
+      <artifactId>antlr</artifactId>
       <version>3.1.3</version>
-      <scope>test</scope> 
-    </dependency>     
-    <dependency> 
-      <groupId>com.googlecode.concurrentlinkedhashmap</groupId> 
-      <artifactId>concurrentlinkedhashmap-lru</artifactId> 
-      <version>1.1</version> 
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
+      <artifactId>concurrentlinkedhashmap-lru</artifactId>
+      <version>1.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -232,7 +232,7 @@
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
       <scope>test</scope>
-    </dependency>     
+    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-log4j12</artifactId>

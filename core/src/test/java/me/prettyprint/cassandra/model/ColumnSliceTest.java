@@ -22,7 +22,7 @@ import org.junit.Test;
 public class ColumnSliceTest {
   StringSerializer se = StringSerializer.get();
   LongSerializer le = LongSerializer.get();
-  
+
 
   @Test
   public void testConstruction() {
@@ -30,22 +30,31 @@ public class ColumnSliceTest {
     ColumnSlice<String, Long> slice = new ColumnSliceImpl<String, Long>(tColumns, se, le);
     Assert.assertTrue(slice.getColumns().isEmpty());
 
-    tColumns.add(new Column(ByteBuffer.wrap(new byte[]{}), ByteBuffer.wrap(new byte[]{}), 0L));
+    Column column = new Column(ByteBuffer.wrap(new byte[]{}));
+    column.setValue(ByteBuffer.wrap(new byte[]{}));
+    column.setTimestamp(0L);
+    tColumns.add(column);
     slice = new ColumnSliceImpl<String, Long>(tColumns, se, le);
     Assert.assertEquals(1, slice.getColumns().size());
 
     tColumns = new ArrayList<Column>();
-    tColumns.add(new Column(se.toByteBuffer("1"), le.toByteBuffer(1L), 0L));
+    column = new Column(se.toByteBuffer("1"));
+    column.setValue(le.toByteBuffer(1L));
+    column.setTimestamp(0L);
+    tColumns.add(column);
     slice = new ColumnSliceImpl<String, Long>(tColumns, se, le);
     Assert.assertEquals((Long) 1L, slice.getColumnByName("1").getValue());
   }
-  
+
   @Test
   public void testMultiCallOnByteBuffer() {
     List<Column> tColumns = new ArrayList<Column>();
-    tColumns.add(new Column(se.toByteBuffer("1"), ByteBuffer.wrap("colvalue".getBytes()), 0L));
+    Column column = new Column(se.toByteBuffer("1"));
+    column.setValue(ByteBuffer.wrap("colvalue".getBytes()));
+    column.setTimestamp(0L);
+    tColumns.add(column);
     ColumnSlice<String, ByteBuffer> slice = new ColumnSliceImpl<String, ByteBuffer>(tColumns, se, ByteBufferSerializer.get());
-        
+
     ByteBuffer value = slice.getColumnByName("1").getValue();
     Assert.assertEquals("colvalue", se.fromByteBuffer(value));
     value.rewind();
