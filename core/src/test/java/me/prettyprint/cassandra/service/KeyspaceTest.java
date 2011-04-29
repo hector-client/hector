@@ -60,8 +60,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   @Before
   public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
     super.setupClient();
-    
-    keyspace = new KeyspaceServiceImpl("Keyspace1", new QuorumAllConsistencyLevelPolicy(), 
+
+    keyspace = new KeyspaceServiceImpl("Keyspace1", new QuorumAllConsistencyLevelPolicy(),
         connectionManager, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
   }
 
@@ -100,7 +100,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       }
     }
   }
-  
+
   @Test
   public void testInsertAndGetAndRemoveCounter() throws IllegalArgumentException, NoSuchElementException,
       IllegalStateException, HNotFoundException, Exception {
@@ -109,11 +109,11 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     // insert value
     ColumnParent cp = new ColumnParent("Counter1");
     //cp.setColumn(bytes("testInsertAndGetAndRemoveCounter"));
-    
+
     // Insert 3 counters for the same key
-    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("A", 5L)); 
-    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("A", -1L)); 
-    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("B", 10L)); 
+    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("A", 5L));
+    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("A", -1L));
+    keyspace.addCounter("testInsertAndGetAndRemoveCounter_key1", cp, createCounterColumn("B", 10L));
     // Total for counter A is (5 - 1) = 4.
     // Total for counter B is 10.
 
@@ -122,27 +122,27 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     CounterColumn counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
     assertNotNull(counter);
     assertEquals(4, counter.value);
-    
+
     cph.setColumn(ss.toByteBuffer("B"));
     counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
     assertNotNull(counter);
     assertEquals(10, counter.value);
-    
+
     // Reuse the ColumnPath associated to Conter B and remove only B.
     keyspace.removeCounter("testInsertAndGetAndRemoveCounter_key1", cph);
-    
+
     // Fetch it and it should not exist
     try {
       keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
     } catch (HNotFoundException e) {
       // good
     }
-    
+
     // Fetch Counter A again to verify I did not delete it
     cph.setColumn(ss.toByteBuffer("A"));
     counter = keyspace.getCounter("testInsertAndGetAndRemoveCounter_key1", cph);
     assertNotNull(counter);
-    
+
     // Delete the whole row
     cph.column = null;
     keyspace.removeCounter("testInsertAndGetAndRemoveCounter_key1", cph);
@@ -155,7 +155,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
       // good
     }
   }
-  
+
   private CounterColumn createCounterColumn(String name, long value) {
     CounterColumn cc = new CounterColumn();
     cc.setName(StringSerializer.get().toByteBuffer(name));
@@ -173,10 +173,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     // insert value
     ColumnParent columnParent = new ColumnParent("Super1");
     columnParent.setSuper_column(StringSerializer.get().toByteBuffer("testInsertSuper_super"));
-    Column column = new Column(StringSerializer.get().toByteBuffer("testInsertSuper_column"), 
-        StringSerializer.get().toByteBuffer("testInsertSuper_value"), connectionManager.createClock());
-
-
+    Column column = new Column(StringSerializer.get().toByteBuffer("testInsertSuper_column"));
+    column.setValue(StringSerializer.get().toByteBuffer("testInsertSuper_value"));
+    column.setTimestamp(connectionManager.createClock());
 
     keyspace.insert(StringSerializer.get().toByteBuffer("testInsertSuper_key"), columnParent, column);
     column.setName(StringSerializer.get().toByteBuffer("testInsertSuper_column2"));
@@ -247,8 +246,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
       ArrayList<Mutation> mutations = new ArrayList<Mutation>(10);
       for (int j = 0; j < 10; j++) {
-        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j),
-            StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j), connectionManager.createClock());
+        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
+        col.setValue(StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j));
+        col.setTimestamp(connectionManager.createClock());
         //list.add(col);
         ColumnOrSuperColumn cosc = new ColumnOrSuperColumn();
         cosc.setColumn(col);
@@ -317,8 +317,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 10; i++) {
 
       for (int j = 0; j < 10; j++) {
-        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j),
-            StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j), connectionManager.createClock());
+        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
+        col.setValue(StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j));
+        col.setTimestamp(connectionManager.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -381,8 +382,9 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 10; i++) {
 
       for (int j = 0; j < 10; j++) {
-        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j),
-            StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j), connectionManager.createClock());
+        Column col = new Column(StringSerializer.get().toByteBuffer("testBatchMutateColumn_" + j));
+        col.setValue(StringSerializer.get().toByteBuffer("testBatchMutateColumn_value_" + j));
+        col.setTimestamp(connectionManager.createClock());
         batchMutation.addInsertion("testBatchMutateColumn_" + i, columnFamilies, col);
       }
     }
@@ -478,7 +480,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     keyspace.remove("testGetSlice_", cp);
     keyspace.remove("testGetSlice", cp);
   }
-  
+
   @Test
   public void testGetCounterSlice() throws HectorException {
     // insert value
@@ -487,8 +489,8 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 100; i++) {
       ColumnParent cp = new ColumnParent("Counter1");
 
-      keyspace.addCounter("testGetCounterSlice", cp, createCounterColumn("testGetCounterSlice_" + i, i)); 
-      
+      keyspace.addCounter("testGetCounterSlice", cp, createCounterColumn("testGetCounterSlice_" + i, i));
+
       if (i < 50) {
         // I want to query only 50.
         columnnames.add(ss.toByteBuffer("testGetCounterSlice_" + i));
@@ -497,7 +499,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
 
     // Query 50 counters. From testGetCounterSlice_0 to testGetCounterSlice_49.
     ColumnParent clp = new ColumnParent("Counter1");
-     
+
     // TODO (patricioe) Slice by range will be in the next snapshot.
     //SliceRange sr = new SliceRange(ByteBuffer.wrap(new byte[0]), ByteBuffer.wrap(new byte[49]), false, 150);
     SlicePredicate sp = new SlicePredicate();
@@ -509,7 +511,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     assertEquals(50, cols.size());
 
     Collections.sort(columnnames);
-    
+
     ArrayList<ByteBuffer> gotlist = new ArrayList<ByteBuffer>(50);
     for (int i = 0; i < 50; i++) {
       CounterColumn cc = cols.get(i);
@@ -931,7 +933,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
     assertEquals(5,counts.size());
     assertEquals(new Integer(25),counts.entrySet().iterator().next().getValue());
 
-    slicePredicate.setSlice_range(new SliceRange(StringSerializer.get().toByteBuffer(""), 
+    slicePredicate.setSlice_range(new SliceRange(StringSerializer.get().toByteBuffer(""),
         StringSerializer.get().toByteBuffer(""), false, 5));
     counts = keyspace.multigetCount(keys, clp, slicePredicate);
 

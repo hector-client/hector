@@ -57,7 +57,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   private CassandraHost cassandraHost;
 
   private final FailoverPolicy failoverPolicy;
-  
+
   private final Map<String, String> credentials;
 
   public KeyspaceServiceImpl(String keyspaceName,
@@ -228,17 +228,17 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     operateWithFailover(op);
     return op.getResult();
   }
-  
+
   @Override
   public List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
   throws HectorException {
       return getSlice(StringSerializer.get().toByteBuffer(key), columnParent, predicate);
   }
-  
+
   @Override
   public List<CounterColumn> getCounterSlice(final ByteBuffer key, final ColumnParent columnParent,
       final SlicePredicate predicate) throws HectorException {
-    Operation<List<CounterColumn>> op = 
+    Operation<List<CounterColumn>> op =
         new Operation<List<CounterColumn>>(OperationType.READ, failoverPolicy, keyspaceName, credentials) {
 
       @Override
@@ -258,7 +258,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
               // Inconsistency
               throw new HectorException("Regular Column is part of the set of Counter Column");
             }
-            
+
           }
           return result;
         } catch (Exception e) {
@@ -394,9 +394,9 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     };
     operateWithFailover(op);
   }
-  
+
   @Override
-  public void addCounter(final ByteBuffer key, final ColumnParent columnParent, final CounterColumn counterColumn) 
+  public void addCounter(final ByteBuffer key, final ColumnParent columnParent, final CounterColumn counterColumn)
       throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE, failoverPolicy, keyspaceName, credentials) {
 
@@ -412,7 +412,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       };
       operateWithFailover(op);
   }
-  
+
   @Override
   public void addCounter(String key, ColumnParent columnParent, CounterColumn counterColumn) throws HectorException {
 	  addCounter(StringSerializer.get().toByteBuffer(key), columnParent, counterColumn);
@@ -425,7 +425,9 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       if (columnPath.isSetSuper_column()) {
         columnParent.setSuper_column(columnPath.getSuper_column());
       }
-      Column column = new Column(ByteBuffer.wrap(columnPath.getColumn()), value, connectionManager.createClock());
+      Column column = new Column(ByteBuffer.wrap(columnPath.getColumn()));
+      column.setValue(value);
+      column.setTimestamp(connectionManager.createClock());
       insert(StringSerializer.get().toByteBuffer(key), columnParent, column);
   }
 
@@ -436,7 +438,9 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       if (columnPath.isSetSuper_column()) {
       columnParent.setSuper_column(columnPath.getSuper_column());
     }
-      Column column = new Column(ByteBuffer.wrap(columnPath.getColumn()), value, timestamp);
+      Column column = new Column(ByteBuffer.wrap(columnPath.getColumn()));
+      column.setValue(value);
+      column.setTimestamp(timestamp);
       insert(StringSerializer.get().toByteBuffer(key), columnParent, column);
   }
 
@@ -624,7 +628,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     };
     operateWithFailover(op);
   }
-  
+
   @Override
   public void removeCounter(final ByteBuffer key, final ColumnPath columnPath) throws HectorException {
     Operation<Void> op = new Operation<Void>(OperationType.WRITE, failoverPolicy, keyspaceName, credentials) {
@@ -641,7 +645,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       };
       operateWithFailover(op);
   }
-  
+
   @Override
   public void removeCounter(String key, ColumnPath columnPath) throws HectorException {
 	  removeCounter(StringSerializer.get().toByteBuffer(key), columnPath);
@@ -694,7 +698,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     }
     return op.getResult();
   }
-  
+
   @Override
   public CounterColumn getCounter(final ByteBuffer key, final ColumnPath columnPath) throws HectorException {
     Operation<CounterColumn> op = new Operation<CounterColumn>(OperationType.READ, failoverPolicy, keyspaceName, credentials) {
@@ -703,7 +707,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
         public CounterColumn execute(Cassandra.Client cassandra) throws HectorException {
           ColumnOrSuperColumn cosc;
           try {
-            cosc = cassandra.get(key, columnPath, getThriftCl(OperationType.READ));            
+            cosc = cassandra.get(key, columnPath, getThriftCl(OperationType.READ));
           } catch (NotFoundException e) {
             setException(xtrans.translate(e));
             return null;
@@ -720,7 +724,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     }
     return op.getResult();
   }
-  
+
   @Override
   public CounterColumn getCounter(String key, ColumnPath columnPath) throws HectorException {
 	  return getCounter(StringSerializer.get().toByteBuffer(key), columnPath);
