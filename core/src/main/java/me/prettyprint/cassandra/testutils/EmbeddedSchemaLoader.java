@@ -50,12 +50,9 @@ public class EmbeddedSchemaLoader {
     String ks2 = "Keyspace2";
 
     Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
-    Map<String, String> no_opts = Collections.<String, String> emptyMap();
-    int rep_factor1 = 1;
-    int rep_factor2 = 2;
-    int rep_factor3 = 3;
-    int rep_factor5 = 5;
-
+    Map<String, String> opts = new HashMap<String, String>();
+    opts.put("replication_factor", Integer.toString(1));
+    
     ColumnFamilyType st = ColumnFamilyType.Standard;
     ColumnFamilyType su = ColumnFamilyType.Super;
     AbstractType bytes = BytesType.instance;
@@ -64,8 +61,7 @@ public class EmbeddedSchemaLoader {
     schema.add(new KSMetaData(
         ks1,
         simple,
-        no_opts,
-        rep_factor1,
+        opts,
 
         // Column Families
         standardCFMD(ks1, "Standard1"), standardCFMD(ks1, "Standard2"),

@@ -88,7 +88,12 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>0.7.0</version>
+        <version>0.8.0-beta1</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.cassandra</groupId>
+        <artifactId>cassandra-thrift</artifactId>
+        <version>0.8.0-beta1</version>
       </dependency>
       <dependency>
         <groupId>org.apache.cassandra</groupId>
@@ -96,9 +101,9 @@
         <version>0.7.0</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.cassandra.deps</groupId>
+        <groupId>org.apache.thrift</groupId>
         <artifactId>libthrift</artifactId>
-        <version>0.5.0</version>
+        <version>0.6.1</version>
       </dependency>
       <dependency>
         <groupId>com.github.stephenc.high-scale-lib</groupId>
@@ -137,8 +142,8 @@
         <artifactId>mockito-all</artifactId>
         <version>1.8.2</version>
         <scope>test</scope>
-      </dependency>            
-    </dependencies>            
+      </dependency>
+    </dependencies>
   </dependencyManagement>
 
   <build>
@@ -321,5 +326,12 @@
     <org.springframework.version>3.0.0.RELEASE</org.springframework.version>
     <slf4j.version>1.6.1</slf4j.version>
   </properties>
+  <repositories>
+    <repository>
+      <id>apache-staging</id>
+      <name>apache-staging</name>
+      <url>https://repository.apache.org/content/repositories/orgapachecassandra-114</url>
+    </repository>
+  </repositories>
 
 </project>

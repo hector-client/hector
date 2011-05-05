@@ -11,10 +11,7 @@ import me.prettyprint.hector.api.Serializer;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
-import org.apache.cassandra.thrift.Counter;
 import org.apache.cassandra.thrift.CounterColumn;
-import org.apache.cassandra.thrift.CounterDeletion;
-import org.apache.cassandra.thrift.CounterMutation;
 import org.apache.cassandra.thrift.CounterSuperColumn;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.Mutation;
@@ -35,20 +32,16 @@ import org.apache.cassandra.thrift.SuperColumn;
 public final class BatchMutation<K> {
 
   private final Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap;
-  private Map<ByteBuffer,Map<String,List<CounterMutation>>> countersMutationMap;
   private final Serializer<K> keySerializer;
 
   public BatchMutation(Serializer<K> serializer) {
     this.keySerializer = serializer;
     mutationMap = new HashMap<ByteBuffer,Map<String,List<Mutation>>>();
-    countersMutationMap = null;
   }
 
-  private BatchMutation(Serializer<K> serializer, Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap, 
-		  Map<ByteBuffer, Map<String, List<CounterMutation>>> countersMutationMap) {
+  private BatchMutation(Serializer<K> serializer, Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap) {
     this.keySerializer = serializer;
     this.mutationMap = mutationMap;
-    this.countersMutationMap = countersMutationMap;
   }
 
   /**
@@ -77,11 +70,9 @@ public final class BatchMutation<K> {
    * Add a ColumnCounter insertion (or update)
    */
   public BatchMutation<K> addCounterInsertion(K key, List<String> columnFamilies, CounterColumn counterColumn) {
-    Counter counter = new Counter();
-    counter.setColumn(counterColumn);
-    CounterMutation mutation = new CounterMutation();
-    mutation.setCounter(counter);
-    addCounterMutation(key, columnFamilies, mutation);
+    Mutation mutation = new Mutation();
+    mutation.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_column(counterColumn));
+    addMutation(key, columnFamilies, mutation);
     return this;
   }
   
@@ -90,11 +81,9 @@ public final class BatchMutation<K> {
    */
   public BatchMutation<K> addSuperCounterInsertion(K key, List<String> columnFamilies, 
       CounterSuperColumn counterSuperColumn) {
-    Counter counter = new Counter();
-    counter.setSuper_column(counterSuperColumn);
-    CounterMutation mutation = new CounterMutation();
-    mutation.setCounter(counter);
-    addCounterMutation(key, columnFamilies, mutation);
+    Mutation mutation = new Mutation();
+    mutation.setColumn_or_supercolumn(new ColumnOrSuperColumn().setCounter_super_column(counterSuperColumn));
+    addMutation(key, columnFamilies, mutation);
     return this;
   }
 
@@ -108,15 +97,6 @@ public final class BatchMutation<K> {
     return this;
   }
   
-  /**
-   * Add a counterDeletion request to the batch mutation.
-   */
-  public BatchMutation<K> addCounterDeletion(K key, List<String> columnFamilies, CounterDeletion deletion) {
-    CounterMutation mutation = new CounterMutation();
-    mutation.setDeletion(deletion);
-    addCounterMutation(key, columnFamilies, mutation);
-    return this;
-  }
 
   private void addMutation(K key, List<String> columnFamilies, Mutation mutation) {
     Map<String, List<Mutation>> innerMutationMap = getInnerMutationMap(key);
@@ -132,19 +112,7 @@ public final class BatchMutation<K> {
     mutationMap.put(keySerializer.toByteBuffer(key), innerMutationMap);
   }
   
-  private void addCounterMutation(K key, List<String> columnFamilies, CounterMutation mutation) {
-    Map<String, List<CounterMutation>> innerMutationMap = getCountersInnerMutationMap(key);
-    for (String columnFamily : columnFamilies) {
-      if (innerMutationMap.get(columnFamily) == null) {
-        innerMutationMap.put(columnFamily, Arrays.asList(mutation));
-      } else {
-        List<CounterMutation> mutations = new ArrayList<CounterMutation>(innerMutationMap.get(columnFamily));
-        mutations.add(mutation);
-        innerMutationMap.put(columnFamily, mutations);
-      }
-    }
-    getCreateCounterMutationMap().put(keySerializer.toByteBuffer(key), innerMutationMap);
-  }
+
 
   private Map<String, List<Mutation>> getInnerMutationMap(K key) {
     Map<String, List<Mutation>> innerMutationMap = mutationMap.get(keySerializer.toByteBuffer(key));
@@ -154,34 +122,8 @@ public final class BatchMutation<K> {
     return innerMutationMap;
   }
   
-  private Map<String, List<CounterMutation>> getCountersInnerMutationMap(K key) {
-    Map<String, List<CounterMutation>> innerMutationMap = getCreateCounterMutationMap().get(keySerializer.toByteBuffer(key));
-    if (innerMutationMap == null) {
-      innerMutationMap = new HashMap<String, List<CounterMutation>>();
-    }
-    return innerMutationMap;
-  }
-
-  /** 
-   * Assuming that not all the operations are with counter, we create it on demand.
-   * @return
-   */
-  private Map<ByteBuffer,Map<String,List<CounterMutation>>> getCreateCounterMutationMap() {
-    if (countersMutationMap == null) {
-      countersMutationMap = new HashMap<ByteBuffer,Map<String,List<CounterMutation>>>();
-    }
-    return countersMutationMap;
-  }
-
   Map<ByteBuffer,Map<String,List<Mutation>>> getMutationMap() {
     return mutationMap;
-  }
-  
-  /**
-   * Note it can be NULL !
-   */
-  Map<ByteBuffer,Map<String,List<CounterMutation>>> getCounterMutationMap() {
-    return countersMutationMap;
   }
 
   /**
@@ -189,7 +131,7 @@ public final class BatchMutation<K> {
    * @return
    */
   public BatchMutation<K> makeCopy() {
-    return new BatchMutation<K>(keySerializer, mutationMap, countersMutationMap);
+    return new BatchMutation<K>(keySerializer, mutationMap);
   }
 
   /**
@@ -197,6 +139,6 @@ public final class BatchMutation<K> {
    * @return
    */
   public boolean isEmpty() {
-    return mutationMap.isEmpty() && (countersMutationMap == null || countersMutationMap.isEmpty()) ;
+    return mutationMap.isEmpty() ;
   }
 }

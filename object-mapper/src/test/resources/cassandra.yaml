@@ -1,9 +1,9 @@
-# Cassandra storage config YAML 
+# Cassandra storage config YAML
 
-#NOTE !!!!!!!! NOTE 
+#NOTE !!!!!!!! NOTE
 # See http://wiki.apache.org/cassandra/StorageConfiguration for
 # full explanations of configuration directives
-#NOTE !!!!!!!! NOTE 
+#NOTE !!!!!!!! NOTE
 
 # The name of the cluster. This is mainly used to prevent machines in
 # one logical cluster from joining another.
@@ -58,10 +58,10 @@ commitlog_directory: target/cassandra-data/commitlog
 # saved caches
 saved_caches_directory: target/cassandra-data/saved_caches
 
-# Size to allow commitlog to grow to before creating a new segment 
+# Size to allow commitlog to grow to before creating a new segment
 commitlog_rotation_threshold_in_mb: 128
 
-# commitlog_sync may be either "periodic" or "batch." 
+# commitlog_sync may be either "periodic" or "batch."
 # When in batch mode, Cassandra won't ack writes until the commit log
 # has been fsynced to disk.  It will wait up to
 # CommitLogSyncBatchWindowInMS milliseconds for other writes, before
@@ -73,12 +73,17 @@ commitlog_sync: periodic
 # milliseconds.
 commitlog_sync_period_in_ms: 10000
 
-# Addresses of hosts that are deemed contact points. 
-# Cassandra nodes use this list of hosts to find each other and learn
-# the topology of the ring.  You must change this if you are running
-# multiple nodes!
-seeds:
-    - 127.0.0.1
+# any class that implements the SeedProvider interface and has a constructor that takes a Map<String, String> of
+# parameters will do.
+seed_provider:
+    # Addresses of hosts that are deemed contact points.
+    # Cassandra nodes use this list of hosts to find each other and learn
+    # the topology of the ring.  You must change this if you are running
+    # multiple nodes!
+    - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+      parameters:
+          # seeds is actually a comma-delimited list of addresses.
+          - seeds: "127.0.0.1"
 
 # Access mode.  mmapped i/o is substantially faster, but only practical on
 # a 64bit machine (which notably does not include EC2 "small" instances)
@@ -105,7 +110,7 @@ concurrent_writes: 8
 # By default this will be set to the amount of data directories defined.
 #memtable_flush_writers: 1
 
-# Buffer size to use when performing contiguous column slices. 
+# Buffer size to use when performing contiguous column slices.
 # Increase this to the size of the column slices you typically perform
 sliced_buffer_size_in_kb: 64
 
@@ -115,7 +120,7 @@ storage_port: 7001
 # Address to bind to and tell other Cassandra nodes to connect to. You
 # _must_ change this if you want multiple nodes to be able to
 # communicate!
-# 
+#
 # Leaving it blank leaves it up to InetAddress.getLocalHost(). This
 # will always do the Right Thing *if* the node is properly configured
 # (hostname, name resolution, etc), and the Right Thing is to use the
@@ -127,7 +132,7 @@ listen_address: localhost
 # The address to bind the Thrift RPC service to -- clients connect
 # here. Unlike ListenAddress above, you *can* specify 0.0.0.0 here if
 # you want Thrift to listen on all interfaces.
-# 
+#
 # Leaving this blank has the same effect it does for ListenAddress,
 # (i.e. it will be based on the configured hostname of the node).
 rpc_address: localhost
@@ -178,7 +183,7 @@ column_index_size_in_kb: 64
 # will be logged specifying the row key.
 in_memory_compaction_limit_in_mb: 64
 
-# Time to wait for a reply from other nodes before failing the command 
+# Time to wait for a reply from other nodes before failing the command
 rpc_timeout_in_ms: 10000
 
 # phi value that must be reached for a host to be marked down.
@@ -208,7 +213,7 @@ endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
 dynamic_snitch: true
 # controls how often to perform the more expensive part of host score
 # calculation
-dynamic_snitch_update_interval_in_ms: 100 
+dynamic_snitch_update_interval_in_ms: 100
 # controls how often to reset all host scores, allowing a bad host to
 # possibly recover
 dynamic_snitch_reset_interval_in_ms: 600000
@@ -238,7 +243,7 @@ request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 # NoScheduler - Has no options
 # RoundRobin
 #  - throttle_limit -- The throttle_limit is the number of in-flight
-#                      requests per client.  Requests beyond 
+#                      requests per client.  Requests beyond
 #                      that limit are queued up until
 #                      running requests can complete.
 #                      The value of 80 here is twice the number of
@@ -266,7 +271,7 @@ request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 #  the index is at the cost of space.
 index_interval: 128
 
-# A ColumnFamily is the Cassandra concept closest to a relational table. 
+# A ColumnFamily is the Cassandra concept closest to a relational table.
 #
 # Keyspaces are separate groups of ColumnFamilies.  Except in very
 # unusual circumstances you will have one Keyspace per application.
@@ -277,8 +282,8 @@ index_interval: 128
 # - replica_placement_strategy: the class that determines how replicas
 #   are distributed among nodes. Contains both the class as well as
 #   configuration information.  Must extend AbstractReplicationStrategy.
-#   Out of the box, Cassandra provides 
-#     * org.apache.cassandra.locator.SimpleStrategy 
+#   Out of the box, Cassandra provides
+#     * org.apache.cassandra.locator.SimpleStrategy
 #     * org.apache.cassandra.locator.NetworkTopologyStrategy
 #     * org.apache.cassandra.locator.OldNetworkTopologyStrategy
 #
@@ -286,7 +291,7 @@ index_interval: 128
 #   replica at the node whose token is closest to the key (as determined
 #   by the Partitioner), and additional replicas on subsequent nodes
 #   along the ring in increasing Token order.
-# 
+#
 #   With NetworkTopologyStrategy,
 #   for each datacenter, you can specify how many replicas you want
 #   on a per-keyspace basis.  Replicas are placed on different racks
@@ -299,8 +304,8 @@ index_interval: 128
 #        DC1 : 3
 #        DC2 : 2
 #        DC3 : 1
-# 
-#   OldNetworkToplogyStrategy [formerly RackAwareStrategy] 
+#
+#   OldNetworkToplogyStrategy [formerly RackAwareStrategy]
 #   places one replica in each of two datacenters, and the third on a
 #   different rack in in the first.  Additional datacenters are not
 #   guaranteed to get a replica.  Additional replicas after three are placed
@@ -318,7 +323,7 @@ index_interval: 128
 #       and IntegerType (a generic variable-length integer type).
 #       You can also specify the fully-qualified class name to a class of
 #       your choice extending org.apache.cassandra.db.marshal.AbstractType.
-#    
+#
 #     ColumnFamily optional parameters:
 #     - keys_cached: specifies the number of keys per sstable whose
 #        locations we keep in memory in "mostly LRU" order.  (JUST the key
@@ -330,7 +335,7 @@ index_interval: 128
 #        or ColumnFamilies with high write:read ratios. Specify a fraction
 #        (value less than 1) or an absolute number of rows to cache.
 #        Defaults to 0. (i.e. row caching is off by default)
-#     - comment: used to attach additional human-readable information about 
+#     - comment: used to attach additional human-readable information about
 #        the column family to its definition.
 #     - read_repair_chance: specifies the probability with which read
 #        repairs should be invoked on non-quorum reads.  must be between 0
@@ -352,7 +357,7 @@ index_interval: 128
 #        row caches.  The row caches can be saved periodically and if one
 #        exists on startup it will be loaded.
 #     - key_cache_save_period_in_seconds: number of seconds between saving
-#        key caches.  The key caches can be saved periodically and if one 
+#        key caches.  The key caches can be saved periodically and if one
 #        exists on startup it will be loaded.
 #     - memtable_flush_after_mins: The maximum time to leave a dirty table
 #        unflushed.  This should be large enough that it won't cause a flush
@@ -366,52 +371,4 @@ index_interval: 128
 # NOTE: this keyspace definition is for demonstration purposes only.
 #       Cassandra will not load these definitions during startup. See
 #       http://wiki.apache.org/cassandra/FAQ#no_keyspaces for an explanation.
-keyspaces:
-    - name: Keyspace1
-      replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
-      replication_factor: 1
-      column_families:
-        - name: Standard1
-          compare_with: BytesType
-          keys_cached: 10000
-          rows_cached: 1000
-          row_cache_save_period_in_seconds: 0
-          key_cache_save_period_in_seconds: 3600
-          memtable_flush_after_mins: 59
-          memtable_throughput_in_mb: 255
-          memtable_operations_in_millions: 0.29
 
-        - name: Standard2
-          compare_with: UTF8Type
-          read_repair_chance: 0.1
-          keys_cached: 100
-          gc_grace_seconds: 0
-          min_compaction_threshold: 5
-          max_compaction_threshold: 31
-
-        - name: StandardByUUID1
-          compare_with: TimeUUIDType
-
-        - name: Super1
-          column_type: Super
-          compare_with: BytesType
-          compare_subcolumns_with: BytesType
-
-        - name: Super2
-          column_type: Super
-          compare_subcolumns_with: UTF8Type
-          rows_cached: 10000
-          keys_cached: 50
-          comment: 'A column family with supercolumns, whose column and subcolumn names are UTF8 strings'
-
-        - name: Super3
-          column_type: Super
-          compare_with: LongType
-          comment: 'A column family with supercolumns, whose column names are Longs (8 bytes)'
-
-        - name: Indexed1
-          default_validation_class: LongType
-          column_metadata:
-            - name: birthdate
-              validator_class: LongType
-              index_type: KEYS

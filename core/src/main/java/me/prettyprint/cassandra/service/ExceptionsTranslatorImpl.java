@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.service;
 
+import java.net.SocketTimeoutException;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
@@ -25,9 +26,16 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
     if (original instanceof HectorException) {
       return (HectorException) original;
     } else if (original instanceof TApplicationException) {
-      return new HCassandraInternalException(((TApplicationException)original).getType(), original.getMessage());
-    } else if (original instanceof TException || original instanceof TTransportException) {
-      return new HectorTransportException(original);
+      return new HCassandraInternalException(((TApplicationException)original).getType(), original.getMessage());    
+    } else if (original instanceof TTransportException) {
+      // if the underlying cause is a scoket timeout, reflect that directly
+      // TODO this may be an issue on the Cassandra side which warrants ivestigation.
+      // I seem to remember these coming back as TimedOutException previously
+      if ( ((TTransportException)original).getCause() instanceof SocketTimeoutException ) {
+        return new HTimedOutException(original);
+      } else {
+        return new HectorTransportException(original);
+      }
     } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {
       return new HTimedOutException(original);
     } else if (original instanceof org.apache.cassandra.thrift.InvalidRequestException) {
@@ -50,6 +58,8 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
       return new HNotFoundException(original);
     } else if (original instanceof org.apache.cassandra.thrift.UnavailableException) {
       return new HUnavailableException(original);
+    } else if (original instanceof TException) {
+      return new HectorTransportException(original);
     } else if (original instanceof NoSuchElementException) {
       return new PoolExhaustedException(original);
     } else if (original instanceof IllegalStateException) {

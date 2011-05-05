@@ -1,8 +1,8 @@
 package me.prettyprint.hector.api;
 
-import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigInteger;
@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
+import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
@@ -63,8 +64,7 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     o = c.get(0);
     assertTrue(o instanceof UUID);
-    assertEquals(LEXICALUUIDTYPE.getTypeName(), c.getComponent(0)
-        .getComparator());
+    assertEquals(UUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
 
     // test serialization and deserialization of time-based UUIDS
     c = new DynamicComposite();
@@ -73,7 +73,7 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     o = c.get(0);
     assertTrue(o instanceof UUID);
-    assertEquals(TIMEUUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
+    assertEquals(UUIDTYPE.getTypeName(), c.getComponent(0).getComparator());
 
     // test compatibility with Cassandra unit tests
     b = createDynamicCompositeKey("Hello",
@@ -140,6 +140,23 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     b = c.getComponent(0).getBytes();
     UTF8Type.instance.validate(b);
+  }
+
+  @Test
+  public void testNullValueSerialization() throws Exception {
+
+    // test correct serialization with null values and user specified
+    // serialization
+    DynamicComposite c = new DynamicComposite();
+    c.addComponent(null, StringSerializer.get());
+
+    DynamicCompositeSerializer serializer = new DynamicCompositeSerializer();
+
+    ByteBuffer buff = serializer.toByteBuffer(c);
+
+    DynamicComposite result = serializer.fromByteBuffer(buff);
+
+    assertNull(result.get(0));
   }
 
   @Test

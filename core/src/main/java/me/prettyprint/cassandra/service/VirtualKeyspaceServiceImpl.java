@@ -16,6 +16,7 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
 import org.apache.cassandra.thrift.Mutation;
@@ -110,6 +111,13 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
       SlicePredicate predicate) throws HectorException {
 
     return super.getSlice(ps.toByteBuffer(key), columnParent, predicate);
+  }
+  
+  @Override
+  public List<CounterColumn> getCounterSlice(ByteBuffer key, ColumnParent columnParent,
+      SlicePredicate predicate) throws HectorException {
+
+    return super.getCounterSlice(ps.toByteBuffer(key), columnParent, predicate);
   }
 
   @Override

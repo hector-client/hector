@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,22 +13,23 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang.math.NumberUtils;
 
 public class ThriftKsDef implements KeyspaceDefinition {
 
+  private static final String REPLICATION_FACTOR = "replication_factor";
   public static final String DEF_STRATEGY_CLASS = "org.apache.cassandra.locator.SimpleStrategy";
   private final String name;
   private String strategyClass;
-  private Map<String, String> strategyOptions;
-  private int replicationFactor;
+  private Map<String, String> strategyOptions = new HashMap<String, String>();
   private final List<ColumnFamilyDefinition> cfDefs;
 
   public ThriftKsDef(KsDef k) {
     Assert.notNull(k, "KsDef is null");
     name = k.name;
     strategyClass = k.strategy_class;
-    strategyOptions = k.strategy_options;
-    replicationFactor = k.replication_factor;
+    strategyOptions = k.strategy_options != null ? k.strategy_options : new HashMap<String, String>();
+    setReplicationFactor(NumberUtils.toInt(strategyOptions.get(REPLICATION_FACTOR), 1));
     cfDefs = ThriftCfDef.fromThriftList(k.cf_defs);
   }
 
@@ -35,14 +37,14 @@ public class ThriftKsDef implements KeyspaceDefinition {
       List<ColumnFamilyDefinition> cfDefs) {
     this.name = keyspaceName;
     this.strategyClass = strategyClass;
-    this.replicationFactor = replicationFactor;
+    setReplicationFactor(replicationFactor);
     this.cfDefs = cfDefs;
   }
 
   public ThriftKsDef(String keyspaceName) {
     this.name = keyspaceName;
     this.cfDefs = new ArrayList<ColumnFamilyDefinition>();
-    this.replicationFactor = 1;
+    setReplicationFactor(1);
     this.strategyClass = DEF_STRATEGY_CLASS;
   }
   
@@ -50,7 +52,7 @@ public class ThriftKsDef implements KeyspaceDefinition {
     name = keyspaceDefinition.getName();
     strategyClass = keyspaceDefinition.getStrategyClass();
     strategyOptions = keyspaceDefinition.getStrategyOptions();
-    replicationFactor = keyspaceDefinition.getReplicationFactor();
+    setReplicationFactor(keyspaceDefinition.getReplicationFactor());
     cfDefs = keyspaceDefinition.getCfDefs();
   }
 
@@ -82,7 +84,7 @@ public class ThriftKsDef implements KeyspaceDefinition {
 
   @Override
   public int getReplicationFactor() {
-    return replicationFactor;
+    return NumberUtils.toInt(strategyOptions.get(REPLICATION_FACTOR), 1);
   }
 
   @Override
@@ -91,7 +93,9 @@ public class ThriftKsDef implements KeyspaceDefinition {
   }
 
   public KsDef toThrift() {
-    return new KsDef(name, strategyClass, replicationFactor, ThriftCfDef.toThriftList(cfDefs));
+    KsDef def =  new KsDef(name, strategyClass, ThriftCfDef.toThriftList(cfDefs));    
+    def.setStrategy_options(strategyOptions);
+    return def;
   }
 
   public void setStrategyClass(String strategyClass) {
@@ -103,7 +107,8 @@ public class ThriftKsDef implements KeyspaceDefinition {
   }
 
   public void setReplicationFactor(int replicationFactor) {
-    this.replicationFactor = replicationFactor;
+    // Compensate for CASSANDRA-1263 (wasnt my idea)
+    strategyOptions.put(REPLICATION_FACTOR,Integer.toString(replicationFactor));
   }
 
   @Override

@@ -41,6 +41,8 @@ public interface Cluster {
   String describeClusterName() throws HectorException;
 
   String describeThriftVersion() throws HectorException;
+  
+  Map<String, List<String>> describeSchemaVersions() throws HectorException;
 
   KeyspaceDefinition describeKeyspace(final String keyspace) throws HectorException;
 

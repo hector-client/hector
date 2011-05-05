@@ -7,6 +7,7 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -18,7 +19,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 import me.prettyprint.cassandra.serializers.AsciiSerializer;
@@ -103,7 +103,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
       .put((byte) 't', TIMEUUIDTYPE.getTypeName())
-      .put((byte) 's', UTF8TYPE.getTypeName()).build();
+      .put((byte) 's', UTF8TYPE.getTypeName())
+      .put((byte) 'u', UUIDTYPE.getTypeName()).build();
 
   BiMap<Class<? extends Serializer>, String> serializerToComparatorMapping = DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
 
@@ -161,15 +162,20 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
         if (value instanceof ByteBuffer) {
           return ((ByteBuffer) value).duplicate();
         }
-        if (value != null) {
-          if (s == null) {
-            s = (Serializer<A>) serializer;
-          }
-          if (s != null) {
-            return s.toByteBuffer((A) value).duplicate();
-          }
+
+        if (value == null) {
+          return null;
         }
+
+        if (s == null) {
+          s = (Serializer<A>) serializer;
+        }
+        if (s != null) {
+          return s.toByteBuffer((A) value).duplicate();
+        }
+
       }
+
       return bytes.duplicate();
     }
 
@@ -301,13 +307,6 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     return BYTESTYPE.getTypeName();
   }
 
-  private String comparatorForUUID(UUID uuid) {
-    if (uuid.version() == 1) {
-      return TIMEUUIDTYPE.getTypeName();
-    }
-    return LEXICALUUIDTYPE.getTypeName();
-  }
-
   private Serializer<?> serializerForComparator(String c) {
     int p = c.indexOf('(');
     if (p >= 0) {
@@ -405,9 +404,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   public <T> AbstractComposite addComponent(T value, Serializer<T> s) {
 
-    addComponent(value, s,
-        value instanceof UUID ? comparatorForUUID((UUID) value)
-            : comparatorForSerializer(s));
+    addComponent(value, s, comparatorForSerializer(s));
 
     return this;
 
@@ -524,8 +521,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     }
     String c = comparatorForPosition(index);
     if (c == null) {
-      c = element instanceof UUID ? comparatorForUUID((UUID) element)
-          : comparatorForSerializer(s);
+      c = comparatorForSerializer(s);
     }
     components.add(index, new Component(element, null, s, c,
         ComponentEquality.EQUAL));
@@ -543,9 +539,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   public <T> AbstractComposite setComponent(int index, T value, Serializer<T> s) {
 
-    setComponent(index, value, s,
-        value instanceof UUID ? comparatorForUUID((UUID) value)
-            : comparatorForSerializer(s));
+    setComponent(index, value, s, comparatorForSerializer(s));
 
     return this;
 
@@ -594,8 +588,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     }
     String c = comparatorForPosition(index);
     if (c == null) {
-      c = element instanceof UUID ? comparatorForUUID((UUID) element)
-          : comparatorForSerializer(s);
+      c = comparatorForSerializer(s);
     }
     Component prev = components.set(index, new Component(element, null, s, c,
         ComponentEquality.EQUAL));

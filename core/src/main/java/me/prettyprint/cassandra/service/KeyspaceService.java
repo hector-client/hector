@@ -11,7 +11,6 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.Counter;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.KeyRange;
@@ -57,9 +56,9 @@ public interface KeyspaceService {
    * @throws HNotFoundException
    *           if no value exists for the counter
    */
-  Counter getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
   
-  Counter getCounter(String key, ColumnPath columnPath) throws HectorException;
+  CounterColumn getCounter(String key, ColumnPath columnPath) throws HectorException;
 
   /**
    * Get the SuperColumn at the given columnPath.
@@ -103,9 +102,23 @@ public interface KeyspaceService {
    */
   List<Column> getSlice(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException;
-
+  
   List<Column> getSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
-  throws HectorException;
+      throws HectorException;
+  
+  /**
+   * Get the group of counter columns contained by columnParent.
+   *
+   * Returns Either a ColumnFamily name or a ColumnFamily/SuperColumn specified
+   * by the given predicate. If no matching values are found, an empty list is
+   * returned.
+   */
+  List<CounterColumn> getCounterSlice(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException;
+  
+  public List<CounterColumn> getCounterSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException;
+
 
   /**
    * Get the group of superColumn contained by columnParent.

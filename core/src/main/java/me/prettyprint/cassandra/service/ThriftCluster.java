@@ -36,6 +36,20 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
     return op.getResult();
   }
 
+  public Map<String,List<String>> describeSchemaVersions() throws HectorException {
+    Operation<Map<String,List<String>>> op = new Operation<Map<String,List<String>>>(OperationType.META_READ, getCredentials()) {
+      @Override
+      public Map<String,List<String>> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          return cassandra.describe_schema_versions();
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    connectionManager.operateWithFailover(op);
+    return op.getResult();
+  }
 
 
   @Override

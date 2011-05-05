@@ -14,6 +14,7 @@ import static me.prettyprint.hector.api.factory.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSubSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createCounterSliceQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSubColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSubCountQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSubSliceQuery;
@@ -35,6 +36,7 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.beans.CounterSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -57,6 +59,7 @@ import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.hector.api.query.SliceCounterQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
@@ -438,6 +441,49 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     }
 
     deleteColumns(cleanup);
+  }
+  
+  @Test
+  public void testCounterSliceQuery() {
+    String cf = "Counter1";
+
+    //TestCleanupDescriptor cleanup = insertColumns(cf, 1, "testSliceQuery", 4, "testSliceQuery");
+    Mutator<String> mutator = createMutator(ko, se);
+    for (int i = 0; i < 10; i++) {
+    	mutator.addCounter("testCounterSliceQuery_key", cf, createCounterColumn("" + i, i));
+    }
+    mutator.execute();
+
+    // get value
+    SliceCounterQuery<String, String> q = createCounterSliceQuery(ko, se, se);
+    q.setColumnFamily(cf);
+    q.setKey("testCounterSliceQuery_key");
+    
+    // try with column name first
+    q.setColumnNames("4", "5", "6");
+    QueryResult<CounterSlice<String>> r = q.execute();
+    
+    assertNotNull(r);
+    
+    CounterSlice<String> slice = r.get();
+    
+    assertNotNull(slice);
+    
+    assertEquals(3, slice.getColumns().size());
+    
+    // Test slice.getColumnByName
+    assertEquals(4, slice.getColumnByName("4").getValue().longValue());
+    assertEquals(5, slice.getColumnByName("5").getValue().longValue());
+    assertEquals(6, slice.getColumnByName("6").getValue().longValue());
+    
+    // Test slice.getColumns
+    List<HCounterColumn<String>> columns = slice.getColumns();
+    assertNotNull(columns);
+    assertEquals(3, columns.size());
+    
+    // Cleanup
+    mutator.deleteCounter("testCounterSliceQuery_key", cf, null, se);
+    mutator.execute();
   }
 
   @Test

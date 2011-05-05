@@ -1,29 +1,20 @@
 package me.prettyprint.cassandra.model.thrift;
 
 import me.prettyprint.cassandra.model.AbstractBasicQuery;
-import me.prettyprint.cassandra.model.AbstractColumnQuery;
-import me.prettyprint.cassandra.model.AbstractQuery;
-import me.prettyprint.cassandra.model.ExecutingKeyspace;
-import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.model.HCounterColumnImpl;
 import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.QueryResultImpl;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.Counter;
+import org.apache.cassandra.thrift.CounterColumn;
 
 /**
  * Thrift implementation of the ColumnQuery type.
@@ -74,9 +65,9 @@ public class ThriftCounterColumnQuery<K, N> extends AbstractBasicQuery<K, N, HCo
           @Override
           public HCounterColumn<N> doInKeyspace(KeyspaceService ks) throws HectorException {
             try {
-              Counter thriftCounter = ks.getCounter(keySerializer.toByteBuffer(key),
+              CounterColumn thriftCounter = ks.getCounter(keySerializer.toByteBuffer(key),
                   ThriftFactory.createColumnPath(columnFamilyName, name, columnNameSerializer));
-              return new HCounterColumnImpl<N>(thriftCounter.getColumn(), columnNameSerializer);
+              return new HCounterColumnImpl<N>(thriftCounter, columnNameSerializer);
             } catch (HNotFoundException e) {
               return null;
             }
