@@ -33,6 +33,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private double memtableOperationsInMillions;
   private int memtableThroughputInMb;
   private int memtableFlushAfterMins;
+  private boolean replicateOnWrite;
 
   private final List<ColumnDefinition> columnDefinitions;
 
@@ -67,6 +68,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions();
     memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb();
     memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins();
+    replicateOnWrite = columnFamilyDefinition.isReplicateOnWrite();
   }
 
   public void setKeyspaceName(String keyspaceName) {
@@ -141,7 +143,11 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.memtableFlushAfterMins = memtableFlushAfterMins;
   }
 
-  public void addColumnDefinition( ColumnDefinition columnDefinition){
+  public void setReplicateOnWrite(boolean replicateOnWrite) {
+    this.replicateOnWrite = replicateOnWrite;
+  }
+
+    public void addColumnDefinition( ColumnDefinition columnDefinition){
     this.columnDefinitions.add( columnDefinition );
   }  
 
@@ -247,6 +253,10 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   @Override
   public int getMemtableThroughputInMb() {
     return this.memtableThroughputInMb;
+  }
+
+  public boolean isReplicateOnWrite() {
+    return replicateOnWrite;
   }
 
   public int getKeyCacheSavePeriodInSeconds() {
