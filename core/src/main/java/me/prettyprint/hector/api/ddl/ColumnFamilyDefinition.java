@@ -31,6 +31,7 @@ public interface ColumnFamilyDefinition {
   double getMemtableOperationsInMillions();
   int getMemtableThroughputInMb();
   int getMemtableFlushAfterMins();
+  boolean isReplicateOnWrite();
 
 
 }
