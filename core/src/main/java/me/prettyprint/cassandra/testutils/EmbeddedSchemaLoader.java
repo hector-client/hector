@@ -67,20 +67,22 @@ public class EmbeddedSchemaLoader {
         standardCFMD(ks1, "Standard1"), standardCFMD(ks1, "Standard2"),
         standardCFMD(ks1, "Standard3"), standardCFMD(ks1, "Standard4"),
         standardCFMD(ks1, "StandardLong1"), standardCFMD(ks1, "StandardLong2"),
-        superCFMD(ks1, "Super1", BytesType.instance), superCFMD(ks1, "Super2",
-            LongType.instance), superCFMD(ks1, "Super3", LongType.instance),
-        superCFMD(ks1, "Super4", UTF8Type.instance), superCFMD(ks1, "Super5",
-            bytes), indexCFMD(ks1, "Indexed1", true), indexCFMD(ks1,
-            "Indexed2", false), new CFMetaData(ks1, "StandardInteger1", st,
-            IntegerType.instance, null).keyCacheSize(0), new CFMetaData(ks1,
-            "Counter1", st, bytes, null).replicateOnWrite(true)
-            .defaultValidator(CounterColumnType.instance), new CFMetaData(ks1,
-            "SuperCounter1", su, bytes, bytes).replicateOnWrite(true)
-            .defaultValidator(CounterColumnType.instance), jdbcCFMD(ks1,
-            "JdbcInteger", IntegerType.instance), jdbcCFMD(ks1, "JdbcUtf8",
-            UTF8Type.instance), jdbcCFMD(ks1, "JdbcLong", LongType.instance),
-        jdbcCFMD(ks1, "JdbcBytes", bytes), jdbcCFMD(ks1, "JdbcAscii",
-            AsciiType.instance)));
+            superCFMD(ks1, "Super1", BytesType.instance),
+            superCFMD(ks1, "Super2", LongType.instance),
+            superCFMD(ks1, "Super3", LongType.instance),
+            superCFMD(ks1, "Super4", UTF8Type.instance),
+            superCFMD(ks1, "Super5", bytes),
+            indexCFMD(ks1, "Indexed1", true),
+            indexCFMD(ks1, "Indexed2", false),
+            new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),
+            new CFMetaData(ks1, "Counter1", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
+            new CFMetaData(ks1, "Counter2", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
+            new CFMetaData(ks1, "SuperCounter1", su, bytes, bytes).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
+            jdbcCFMD(ks1, "JdbcInteger", IntegerType.instance),
+            jdbcCFMD(ks1, "JdbcUtf8", UTF8Type.instance),
+            jdbcCFMD(ks1, "JdbcLong", LongType.instance),
+            jdbcCFMD(ks1, "JdbcBytes", bytes),
+            jdbcCFMD(ks1, "JdbcAscii", AsciiType.instance)));
 
     // Keyspace 2
    
