@@ -113,7 +113,7 @@ public class CassandraAuthTest {
     ThriftCluster cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator, user1Credentials);
     KeyspaceDefinition keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
     assertNotNull(keyspaceDetail);
-    assertEquals(21, keyspaceDetail.getCfDefs().size());
+    assertEquals(22, keyspaceDetail.getCfDefs().size());
   }
 
   @Test

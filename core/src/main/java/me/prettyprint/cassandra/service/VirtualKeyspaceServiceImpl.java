@@ -13,15 +13,7 @@ import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.CounterColumn;
-import org.apache.cassandra.thrift.IndexClause;
-import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.*;
 
 public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
@@ -98,6 +90,14 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
+  public Map<ByteBuffer, List<CounterColumn>> getRangeCounterSlices(
+        ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange) throws HectorException {
+
+        return ps.fromBytesMap(super.getRangeCounterSlices(columnParent, predicate,
+                prefixKeyRange(keyRange)));
+  }
+
+    @Override
   public Map<ByteBuffer, List<SuperColumn>> getSuperRangeSlices(
       ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange)
       throws HectorException {
@@ -107,6 +107,14 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
+  public Map<ByteBuffer, List<CounterSuperColumn>> getSuperRangeCounterSlices(
+            ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange) throws HectorException {
+
+        return ps.fromBytesMap(super.getSuperRangeCounterSlices(columnParent, predicate,
+                prefixKeyRange(keyRange)));
+  }
+
+    @Override
   public List<Column> getSlice(ByteBuffer key, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException {
 

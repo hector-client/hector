@@ -8,15 +8,7 @@ import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.CounterColumn;
-import org.apache.cassandra.thrift.IndexClause;
-import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.*;
 
 /**
  * The keyspace is a high level handle to all read/write operations to cassandra.
@@ -223,11 +215,26 @@ public interface KeyspaceService {
   Map<ByteBuffer, List<Column>> getRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
 
+
+  /**
+   * returns a subset of counter columns for a range of keys
+   */
+  public Map<ByteBuffer, List<CounterColumn>> getRangeCounterSlices(final ColumnParent columnParent,
+        final SlicePredicate predicate, final KeyRange keyRange) throws HectorException;
+
+
+
   /**
    * returns a subset of super columns for a range of keys.
    */
   Map<ByteBuffer, List<SuperColumn>> getSuperRangeSlices(ColumnParent columnParent, SlicePredicate predicate,
       KeyRange keyRange) throws HectorException;
+
+  /**
+   * returns a subset of counter super columns for a range of keys
+   */
+  public Map<ByteBuffer, List<CounterSuperColumn>> getSuperRangeCounterSlices(
+        final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange);
 
   /**
    * returns a subset of columns for a range of keys.
