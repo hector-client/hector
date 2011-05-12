@@ -151,11 +151,30 @@ public interface KeyspaceService {
       SlicePredicate predicate) throws HectorException;
 
   /**
+   * Performs a get_slice for columnParent and predicate for the given keys in
+   * parallel.
+   */
+  Map<ByteBuffer, List<CounterColumn>> multigetCounterSlice(List<ByteBuffer> keys, ColumnParent columnParent,
+      SlicePredicate predicate) throws HectorException;
+
+
+
+  /**
    * Performs a get_slice for a superColumn columnParent and predicate for the
    * given keys in parallel.
    */
   Map<ByteBuffer, List<SuperColumn>> multigetSuperSlice(List<ByteBuffer> keys,
       ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
+
+  /**
+   * Performs a get_slice for a superColumn columnParent and predicate for the
+   * given keys in parallel.
+   */
+  Map<ByteBuffer, List<CounterSuperColumn>> multigetCounterSuperSlice(List<ByteBuffer> keys,
+      ColumnParent columnParent, SlicePredicate predicate) throws HectorException;
+
+
+
 
   /**
    * Inserts a column.
