@@ -168,11 +168,29 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
+  public Map<ByteBuffer, List<CounterColumn>> multigetCounterSlice(List<ByteBuffer> keys,
+      ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException {
+
+    return ps.fromBytesMap(super.multigetCounterSlice(ps.toBytesList(keys),
+        columnParent, predicate));
+  }
+
+  @Override
   public Map<ByteBuffer, List<SuperColumn>> multigetSuperSlice(
       List<ByteBuffer> keys, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException {
 
     return ps.fromBytesMap(super.multigetSuperSlice(ps.toBytesList(keys),
+        columnParent, predicate));
+  }
+
+  @Override
+  public Map<ByteBuffer, List<CounterSuperColumn>> multigetCounterSuperSlice(
+      List<ByteBuffer> keys, ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException {
+
+    return ps.fromBytesMap(super.multigetCounterSuperSlice(ps.toBytesList(keys),
         columnParent, predicate));
   }
 

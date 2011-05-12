@@ -518,6 +518,33 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   }
 
+  @Override
+  public Map<ByteBuffer, List<CounterColumn>> multigetCounterSlice(final List<ByteBuffer> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
+    Operation<Map<ByteBuffer, List<CounterColumn>>> getCount = new Operation<Map<ByteBuffer, List<CounterColumn>>>(
+        OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public Map<ByteBuffer, List<CounterColumn>> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
+              keys, columnParent, predicate, getThriftCl(OperationType.READ));
+
+          Map<ByteBuffer, List<CounterColumn>> result = new HashMap<ByteBuffer, List<CounterColumn>>();
+          for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+            result.put(entry.getKey(), getCounterColumnList(entry.getValue()));
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(getCount);
+    return getCount.getResult();
+
+  }
+
 
   @Override
   public Map<ByteBuffer, SuperColumn> multigetSuperColumn(List<ByteBuffer> keys, ColumnPath columnPath)
@@ -601,6 +628,53 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     return getCount.getResult();
 
   }
+
+  @Override
+  public Map<ByteBuffer, List<CounterSuperColumn>> multigetCounterSuperSlice(final List<ByteBuffer> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
+    Operation<Map<ByteBuffer, List<CounterSuperColumn>>> getCount = new Operation<Map<ByteBuffer, List<CounterSuperColumn>>>(
+        OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public Map<ByteBuffer, List<CounterSuperColumn>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
+              keys, columnParent, predicate, getThriftCl(OperationType.READ));
+          // if user not given super column name, the multiget_slice will return
+          // List
+          // filled with
+          // super column, if user given a column name, the return List will
+          // filled
+          // with column,
+          // this is a bad interface design.
+          if (!columnParent.isSetSuper_column()) {
+            Map<ByteBuffer, List<CounterSuperColumn>> result = new HashMap<ByteBuffer, List<CounterSuperColumn>>();
+            for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+              result.put(entry.getKey(), getCounterSuperColumnList(entry.getValue()));
+            }
+            return result;
+          } else {
+            Map<ByteBuffer, List<CounterSuperColumn>> result = new HashMap<ByteBuffer, List<CounterSuperColumn>>();
+            for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+              CounterSuperColumn spc = new CounterSuperColumn(ByteBuffer.wrap(columnParent.getSuper_column()),
+                  getCounterColumnList(entry.getValue()));
+              ArrayList<CounterSuperColumn> spclist = new ArrayList<CounterSuperColumn>(1);
+              spclist.add(spc);
+              result.put(entry.getKey(), spclist);
+            }
+            return result;
+          }
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(getCount);
+    return getCount.getResult();
+
+  }
+
 
   @Override
   public Map<ByteBuffer, List<Column>> getIndexedSlices(final ColumnParent columnParent,

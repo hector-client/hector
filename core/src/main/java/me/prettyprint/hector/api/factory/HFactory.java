@@ -341,6 +341,14 @@ public final class HFactory {
         nameSerializer, valueSerializer);
   }
 
+  public static <K, N> MultigetSliceCounterQuery<K, N> createMultigetSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<N> nameSerializer) {
+    return new ThriftMultigetSliceCounterQuery<K, N>(keyspace, keySerializer,
+        nameSerializer);
+  }
+
+
   public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -355,6 +363,13 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new ThriftMultigetSuperSliceQuery<K, SN, N, V>(keyspace,
         keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+  }
+
+  public static <K, SN, N> MultigetSuperSliceCounterQuery<K, SN, N> createMultigetSuperSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftMultigetSuperSliceCounterQuery<K, SN, N>(keyspace,
+        keySerializer, sNameSerializer, nameSerializer);
   }
 
   public static <K, SN, N, V> MultigetSubSliceQuery<K, SN, N, V> createMultigetSubSliceQuery(
