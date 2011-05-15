@@ -348,6 +348,14 @@ public final class HFactory {
         nameSerializer);
   }
 
+  public static <K, SN, N> SuperSliceCounterQuery<K, SN, N> createSuperSliceCounterQuery(
+          Keyspace keyspace, Serializer<K> keySerializer,
+          Serializer<SN> sNameSerializer,
+          Serializer<N> nameSerializer) {
+      return new ThriftSuperSliceCounterQuery<K, SN, N>(keyspace, keySerializer, sNameSerializer, nameSerializer);
+  }
+
+
 
   public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(
       Keyspace keyspace, Serializer<K> keySerializer,

@@ -122,6 +122,15 @@ public interface KeyspaceService {
           SlicePredicate predicate) throws HectorException;
 
   /**
+   * Get the group of superColumn contained by columnParent.
+   */
+  List<CounterSuperColumn> getCounterSuperSlice(ByteBuffer key, ColumnParent columnParent,
+      SlicePredicate predicate) throws HectorException;
+
+  List<CounterSuperColumn> getCounterSuperSlice(String key, ColumnParent columnParent,
+          SlicePredicate predicate) throws HectorException;
+
+  /**
    * Performs a get for columnPath in parallel on the given list of keys.
    *
    * The return value maps keys to the ColumnOrSuperColumn found. If no value
