@@ -342,6 +342,21 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     return keyCacheSavePeriodInSeconds;
   }
 
+  public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
+    this.memtableOperationsInMillions = memtableOperationsInMillions;
+  }
+
+  public void setMemtableThroughputInMb(int memtableThroughputInMb) {
+    this.memtableThroughputInMb = memtableThroughputInMb;
+  }
+
+  public void setMemtableFlushAfterMins(int memtableFlushAfterMins) {
+    this.memtableFlushAfterMins = memtableFlushAfterMins;
+  }
+
+  public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
+    this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
+  }
 
   public boolean isReplicateOnWrite() {
     return replicateOnWrite;
