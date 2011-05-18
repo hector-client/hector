@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.cassandra.thrift.TokenRange;
+
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -47,6 +49,8 @@ public interface Cluster {
   KeyspaceDefinition describeKeyspace(final String keyspace) throws HectorException;
 
   List<KeyspaceDefinition> describeKeyspaces() throws HectorException;
+  
+  List<TokenRange> describeRing(final String keyspace) throws HectorException;
 
   /**
    * Drops the Keyspace from the cluster. Equivalent of 'drop database' in SQL terms
