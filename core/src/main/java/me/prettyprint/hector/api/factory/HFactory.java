@@ -469,6 +469,12 @@ public final class HFactory {
         valueSerializer);
   }
 
+  public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock, int ttl,
+	      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+	    return new HColumnImpl<N, V>(name, value, clock, ttl, nameSerializer,
+	        valueSerializer);
+  }
+
   /**
    * Creates a column with the clock of now.
    */
@@ -478,6 +484,15 @@ public final class HFactory {
         valueSerializer);
   }
 
+  /**
+   * Creates a column with the clock of now
+   */
+  public static <N, V> HColumn<N, V> createColumn(N name, V value, int ttl,
+      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+    return new HColumnImpl<N, V>(name, value, createClock(), ttl, nameSerializer,
+        valueSerializer);
+  }
+  
   /**
    * Convienience method for creating a column with a String name and String
    * value
