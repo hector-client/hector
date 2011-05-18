@@ -193,9 +193,9 @@
       <version>3.2.0</version>
     </dependency>
     <dependency>
-      <groupId>org.perf4j</groupId>
-      <artifactId>perf4j</artifactId>
-      <version>0.9.12</version>
+      <groupId>com.ecyrd.speed4j</groupId>
+      <artifactId>speed4j</artifactId>
+      <version>0.5</version>
     </dependency>
 
 	<!-- Note the optional tag. If you need to use fastinfoset serialization, you must include this dependency in your project! -->

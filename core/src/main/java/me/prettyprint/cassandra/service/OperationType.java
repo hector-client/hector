@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.service;
 
 /**
  * Specifies the "type" of operation - read or write.
- * It's used for perf4j, so should be in sync with hectorLog4j.xml
+ * It's used for Speed4j, so should be in sync with hectorLog4j.xml
  * @author Ran Tavory (ran@outbain.com)
  * 
  */

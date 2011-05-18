@@ -62,37 +62,6 @@ public class JmxMonitor {
     }
 
     mbs.registerMBean(monitoringInterface, oName);
-
-    // Register perf4j monitors
-    if ("true".equalsIgnoreCase(
-        System.getProperty("com.prettyprint.cassandra.load_hector_log4j", "true"))) {
-      registerPerf4J();
-    }
-  }
-
-  private void registerPerf4J() {
-    URL url = getClass().getClassLoader().getResource("hectorLog4j.xml");
-    if (url == null) {
-      log.warn("Unable to locate hectorLog4j.xml; performance counters will not be exported");
-    } else {
-      try {
-        final Class<?> domConfiguratorClass = getClass().getClassLoader().loadClass("org.apache.log4j.xml.DOMConfigurator");
-        final Method method = domConfiguratorClass.getMethod( "configure", URL.class );
-        method.invoke( null, url );
-      } catch( ClassNotFoundException e ) {
-        log.warn("Unable to load log4j's DOMConfigurator. Performance counters will not be exported. To fix, include the log4j jar in your application's classpath.");
-      } catch( SecurityException e ) {
-        log.error( "Could not access method DOMConfigurator.configure(URL)", e );
-      } catch( NoSuchMethodException e ) {
-        log.error( "Could not find method DOMConfigurator.configure(URL)", e );
-      } catch( IllegalArgumentException e ) {
-        log.error( "Could not invoke method DOMConfigurator.configure(URL)", e );
-      } catch( IllegalAccessException e ) {
-        log.error( "Could not invoke method DOMConfigurator.configure(URL)", e );
-      } catch( InvocationTargetException e ) {
-        throw new RuntimeException(e.getCause());
-      }
-    }
   }
 
   private String generateMonitorName(String className, String monitorType) {
