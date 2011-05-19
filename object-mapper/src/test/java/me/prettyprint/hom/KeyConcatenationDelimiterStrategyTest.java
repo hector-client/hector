@@ -6,7 +6,6 @@ import java.nio.ByteBuffer;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.openjpa.persistence.kernel.common.apps.ByteArray;
 import org.junit.Test;
 
 public class KeyConcatenationDelimiterStrategyTest {
