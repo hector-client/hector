@@ -60,6 +60,10 @@ public class CassandraTestBase {
   InterruptedException, NoSuchMethodException, IllegalAccessException,
   InvocationTargetException {
 
+    if ( cassandraStarted ) {
+    	return;
+    }
+    
     embedded = new EmbeddedServerHelper();
     try {
       embedded.setup();
@@ -83,6 +87,8 @@ public class CassandraTestBase {
     cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9161");
     createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
     keyspace = HFactory.createKeyspace("TestKeyspace", cluster);
+    
+    cassandraStarted = true;
   }
 
   @AfterClass
