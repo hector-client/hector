@@ -52,6 +52,8 @@ public class CassandraTestBase {
     } catch (ConfigurationException ce) {
       throw new RuntimeException(ce);
     }
+    
+    cassandraStarted = true;
   }
 
   public static void createKeyspace(Cluster cluster, String name, String strategy, int replicationFactor,
