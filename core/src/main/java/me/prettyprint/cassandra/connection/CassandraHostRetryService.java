@@ -96,8 +96,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       boolean reconnected = verifyConnection(cassandraHost);
       log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
       if ( reconnected ) {
-        //cassandraClientPool.getCluster().addHost(cassandraHost, true);
-        connectionManager.addCassandraHost(cassandraHost);
+        reconnected = connectionManager.addCassandraHost(cassandraHost);
       }
       if ( !reconnected && cassandraHost != null ) {
         downedHostQueue.add(cassandraHost);
@@ -128,7 +127,4 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   }
 
-  // TODO create callable to handle checking
-
-  // perhaps wrap CassandraHost and add a lastRetryTime?
 }
