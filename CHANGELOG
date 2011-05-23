@@ -5,6 +5,18 @@ Changes by version:
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 
+0.7.0-30
+========
+Moved check for transport exception to where it will actually do something. Thanks to Jim Ancona for changes.
+Added option for setting keepalive on the underlying socket. Defaults to false.
+Updated logger level to more appropriate warn in HConnectionManager.
+Slight changes to use Cluster class and definitions already defined to check for new nodes.  Originally causing a problem when Cassandra security it turned on. Thanks to nneuberger1 for the patch.
+Add ability to return a timestamp based on UUID.
+Added HColumn timestamp signature changes from master. Thanks to Oleg Tsvinev for the patch.
+Reset to the results of adding the pool to the connection manager. This could cause a pretty ugly issue where the host would just disappear if there was a failure adding it back after the successful test.
+Fixed retry logic in the case of fail after one more try configuration. Also modifies some long standing (and I believe incorrect) behaviour of trying until successful on a timeout exception.
+
+
 0.7.0-29
 ========
 Huge contrib of template-method design pattern approach by David Cox. See m.p.c.service.template packageand testing coverage for such. Fans of SpringFramework's JdbcTemplate should give this a look (still work in progress though).
