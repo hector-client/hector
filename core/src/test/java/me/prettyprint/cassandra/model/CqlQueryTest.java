@@ -4,17 +4,17 @@ import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
-import static org.junit.Assert.*;
-
-import org.junit.Before;
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.query.QueryResult;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class CqlQueryTest extends BaseEmbededServerSetupTest {
   
@@ -62,4 +62,12 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
     assertEquals(2, result.get().getAsCount());
   }
 
+  @Test(expected=HInvalidRequestException.class)
+  public void testSyntaxFailQuery() {
+    CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
+    cqlQuery.setQuery("SELECT COUNT(*) FROM Standard1 WHERE KEY = 'cqlQueryTest_key1'");
+    QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
+
+  }
+  
 }
