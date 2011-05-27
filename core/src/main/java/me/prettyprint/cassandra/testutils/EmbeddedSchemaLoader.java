@@ -66,7 +66,8 @@ public class EmbeddedSchemaLoader {
         // Column Families
         standardCFMD(ks1, "Standard1"), standardCFMD(ks1, "Standard2"),
         standardCFMD(ks1, "Standard3"), standardCFMD(ks1, "Standard4"),
-        standardCFMD(ks1, "StandardLong1"), standardCFMD(ks1, "StandardLong2"),
+        standardCFMD(ks1, "StandardLong1").keyValidator(UTF8Type.instance), 
+        standardCFMD(ks1, "StandardLong2"),
         superCFMD(ks1, "Super1", BytesType.instance), superCFMD(ks1, "Super2",
             LongType.instance), superCFMD(ks1, "Super3", LongType.instance),
         superCFMD(ks1, "Super4", UTF8Type.instance), superCFMD(ks1, "Super5",
