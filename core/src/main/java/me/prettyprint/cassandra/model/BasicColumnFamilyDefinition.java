@@ -25,6 +25,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private double readRepairChance;
   private int gcGraceSeconds;
   private String defaultValidationClass;
+  private String keyValidationClass;
   private int id;
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
@@ -40,7 +41,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   public BasicColumnFamilyDefinition() {
     this.columnDefinitions = new ArrayList<ColumnDefinition>();
   }
-  
+
   /**
    * Builds a {@link BasicColumnFamilyDefinition} based off the interface
    */
@@ -56,8 +57,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
     keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
     readRepairChance = columnFamilyDefinition.getReadRepairChance();
-    columnDefinitions = columnFamilyDefinition.getColumnMetadata() != null 
-    ? new ArrayList<ColumnDefinition>(columnFamilyDefinition.getColumnMetadata()) 
+    columnDefinitions = columnFamilyDefinition.getColumnMetadata() != null
+    ? new ArrayList<ColumnDefinition>(columnFamilyDefinition.getColumnMetadata())
         : new ArrayList<ColumnDefinition>();
     gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
     defaultValidationClass = columnFamilyDefinition.getDefaultValidationClass();
@@ -123,7 +124,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   public void setMinCompactionThreshold(int minCompactionThreshold) {
     this.minCompactionThreshold = minCompactionThreshold;
-  }    
+  }
 
   public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
     this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
@@ -143,12 +144,15 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   public void addColumnDefinition( ColumnDefinition columnDefinition){
     this.columnDefinitions.add( columnDefinition );
-  }  
+  }
 
   public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
     this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
   }
-  
+
+  public void setKeyValidationClass(String keyValidationClass){
+      this.keyValidationClass = keyValidationClass;
+  }
 
   /**
    * SHOULD THIS BE HERE? A COLUMN DEFINITION IS PART OF A KEYSPACE BY VIRTUE
@@ -253,5 +257,9 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     return keyCacheSavePeriodInSeconds;
   }
 
+  @Override
+  public String getKeyValidationClass() {
+      return keyValidationClass;
+  }
 
 }
