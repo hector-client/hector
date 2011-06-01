@@ -6,7 +6,7 @@ package me.prettyprint.hector.api.beans;
  *
  * A Row may be used to hold the returned value from queries such as get_range_slices.
  *
- * @author Ran Tavory
+ * 
  *
  * @param <N> Column name type
  *

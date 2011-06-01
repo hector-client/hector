@@ -8,7 +8,16 @@ import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
-import org.apache.cassandra.thrift.*;
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.CounterColumn;
+import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SuperColumn;
 
 /**
  * The keyspace is a high level handle to all read/write operations to cassandra.

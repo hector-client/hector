@@ -1,16 +1,14 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.hector.api.beans.CounterSuperSlice;
-import me.prettyprint.hector.api.beans.SuperSlice;
-
 import java.util.Collection;
+
+import me.prettyprint.hector.api.beans.CounterSuperSlice;
 
 /**
  * A query for the  call get_slice.
  * <p>
- * Get a slice of super columns from a super column family.
+ * Get a slice of super counter columns from a super column family.
  *
- * @author Ran Tavory
  *
  * @param <SN> type of the super column name
  * @param <N> type of the column name

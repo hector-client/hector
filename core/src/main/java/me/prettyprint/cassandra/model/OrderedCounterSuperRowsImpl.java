@@ -1,20 +1,18 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.CounterSuperRow;
-import me.prettyprint.hector.api.beans.OrderedCounterSuperRows;
-import me.prettyprint.hector.api.beans.OrderedSuperRows;
-import me.prettyprint.hector.api.beans.SuperRow;
-import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.SuperColumn;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.CounterSuperRow;
+import me.prettyprint.hector.api.beans.OrderedCounterSuperRows;
+
+import org.apache.cassandra.thrift.CounterSuperColumn;
+
 /**
  * Return type from get_range_slices for super columns
- * @author Ran Tavory
+ * 
  *
  */
 public final class OrderedCounterSuperRowsImpl<K,SN,N> extends CounterSuperRowsImpl<K,SN,N>

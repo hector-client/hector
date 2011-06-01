@@ -1,14 +1,13 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.hector.api.beans.OrderedCounterRows;
-import me.prettyprint.hector.api.beans.OrderedRows;
-
 import java.util.Collection;
+
+import me.prettyprint.hector.api.beans.OrderedCounterRows;
 
 /**
  * A query for the call get_range_slices.
  *
- * @author Ran Tavory
+ * 
  *
  * @param <N> type of the column names
  */

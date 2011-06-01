@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * Return type from get_range_slices for simple columns
- * @author Ran Tavory
+ * 
  *
  * @param <N> column name type
  */

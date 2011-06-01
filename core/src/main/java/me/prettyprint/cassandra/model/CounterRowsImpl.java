@@ -1,23 +1,20 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.CounterRow;
-import me.prettyprint.hector.api.beans.CounterRows;
-import me.prettyprint.hector.api.beans.Row;
-import me.prettyprint.hector.api.beans.Rows;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.CounterColumn;
-
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.CounterRow;
+import me.prettyprint.hector.api.beans.CounterRows;
+
+import org.apache.cassandra.thrift.CounterColumn;
+
 /**
  * Returned by a MultigetSliceQuery (multiget_slice thrift call)
  *
- * @author Ran Tavory
  *
  * @param <N>
  */

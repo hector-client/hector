@@ -16,7 +16,22 @@ import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.cassandra.thrift.*;
+import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CounterColumn;
+import org.apache.cassandra.thrift.CounterSuperColumn;
+import org.apache.cassandra.thrift.IndexClause;
+import org.apache.cassandra.thrift.KeyRange;
+import org.apache.cassandra.thrift.KeySlice;
+import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.NotFoundException;
+import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
+import org.apache.cassandra.thrift.SuperColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -631,12 +646,8 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
               keys, columnParent, predicate, getThriftCl(OperationType.READ));
           // if user not given super column name, the multiget_slice will return
-          // List
-          // filled with
-          // super column, if user given a column name, the return List will
-          // filled
-          // with column,
-          // this is a bad interface design.
+          // List filled with super column, if user given a column name, the return List will
+          // filled with column, this is a bad interface design.
           if (!columnParent.isSetSuper_column()) {
             Map<ByteBuffer, List<SuperColumn>> result = new HashMap<ByteBuffer, List<SuperColumn>>();
             for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
@@ -677,12 +688,8 @@ public class KeyspaceServiceImpl implements KeyspaceService {
           Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
               keys, columnParent, predicate, getThriftCl(OperationType.READ));
           // if user not given super column name, the multiget_slice will return
-          // List
-          // filled with
-          // super column, if user given a column name, the return List will
-          // filled
-          // with column,
-          // this is a bad interface design.
+          // List filled with super column, if user given a column name, the return List will
+          // filled with column, this is a bad interface design.
           if (!columnParent.isSetSuper_column()) {
             Map<ByteBuffer, List<CounterSuperColumn>> result = new HashMap<ByteBuffer, List<CounterSuperColumn>>();
             for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {

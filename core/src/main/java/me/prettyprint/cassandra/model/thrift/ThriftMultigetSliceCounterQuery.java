@@ -1,26 +1,28 @@
 package me.prettyprint.cassandra.model.thrift;
 
-import me.prettyprint.cassandra.model.*;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.service.KeyspaceService;
-import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.CounterRows;
-import me.prettyprint.hector.api.beans.Rows;
-import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.query.MultigetSliceCounterQuery;
-import me.prettyprint.hector.api.query.MultigetSliceQuery;
-import me.prettyprint.hector.api.query.QueryResult;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.CounterColumn;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import me.prettyprint.cassandra.model.AbstractSliceQuery;
+import me.prettyprint.cassandra.model.CounterRowsImpl;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.CounterRows;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.query.MultigetSliceCounterQuery;
+import me.prettyprint.hector.api.query.QueryResult;
+
+import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.CounterColumn;
 
 /**
  * A query wrapper for the thrift call multiget_slice

@@ -1,14 +1,12 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.hector.api.beans.CounterSuperRows;
-import me.prettyprint.hector.api.beans.SuperRows;
-
 import java.util.Collection;
+
+import me.prettyprint.hector.api.beans.CounterSuperRows;
 
 /**
  * A query wrapper for the call multiget_slice for a slice of supercolumns
  *
- * @author ran
  */
 public interface MultigetSuperSliceCounterQuery<K, SN, N> extends Query<CounterSuperRows<K, SN, N>>{
 

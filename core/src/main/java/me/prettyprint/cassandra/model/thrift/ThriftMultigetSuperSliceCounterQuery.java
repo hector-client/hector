@@ -1,27 +1,32 @@
 package me.prettyprint.cassandra.model.thrift;
 
-import me.prettyprint.cassandra.model.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
+import me.prettyprint.cassandra.model.AbstractSliceQuery;
+import me.prettyprint.cassandra.model.CounterSuperRowsImpl;
+import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
+import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.CounterSuperRows;
-import me.prettyprint.hector.api.beans.SuperRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.MultigetSuperSliceCounterQuery;
-import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.QueryResult;
+
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.SuperColumn;
-
-import java.util.*;
 
 /**
  * A query wrapper for the thrift call multiget_slice for a slice of supercolumns
  *
- * @author ran
  */
 public final class ThriftMultigetSuperSliceCounterQuery<K, SN, N> extends
     AbstractSliceQuery<K, SN, Long, CounterSuperRows<K, SN, N>> implements MultigetSuperSliceCounterQuery<K, SN, N> {
