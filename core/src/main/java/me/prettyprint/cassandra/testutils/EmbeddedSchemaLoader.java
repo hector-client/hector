@@ -99,19 +99,15 @@ public class EmbeddedSchemaLoader {
         BytesType.instance, subcc).keyCacheSize(0);
   }
 
-  private static CFMetaData indexCFMD(String ksName, String cfName,
-      final Boolean withIdxType) {
-    return standardCFMD(ksName, cfName).columnMetadata(
-        Collections
-            .unmodifiableMap(new HashMap<ByteBuffer, ColumnDefinition>() {
-              {
-                ByteBuffer cName = ByteBuffer.wrap("birthyear"
-                    .getBytes(Charsets.UTF_8));
-                IndexType keys = withIdxType ? IndexType.KEYS : null;
-                put(cName, new ColumnDefinition(cName, LongType.instance, keys,
-                    null));
-              }
-            }));
+  private static CFMetaData indexCFMD(String ksName, String cfName, final Boolean withIdxType)
+  {
+      return standardCFMD(ksName, cfName)
+              .columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
+                  {{
+                      ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
+                      IndexType keys = withIdxType ? IndexType.KEYS : null;
+                      put(cName, new ColumnDefinition(cName, LongType.instance, keys, null));
+                  }});
   }
 
   private static CFMetaData jdbcCFMD(String ksName, String cfName,
