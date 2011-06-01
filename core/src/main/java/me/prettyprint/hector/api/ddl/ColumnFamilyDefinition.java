@@ -20,6 +20,7 @@ public interface ColumnFamilyDefinition {
   int getRowCacheSavePeriodInSeconds();
   int getKeyCacheSavePeriodInSeconds();
   double getKeyCacheSize();
+  String getKeyValidationClass();
   double getReadRepairChance();
   List<ColumnDefinition> getColumnMetadata();
   int getGcGraceSeconds();
