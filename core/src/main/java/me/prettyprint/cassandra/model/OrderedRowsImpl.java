@@ -16,14 +16,19 @@ import org.apache.cassandra.thrift.Column;
  * @param <N>
  * @param <V>
  */
-public final class OrderedRowsImpl<K,N,V> extends RowsImpl<K,N,V> implements OrderedRows<K, N, V> {
+public class OrderedRowsImpl<K,N,V> extends RowsImpl<K,N,V> implements OrderedRows<K, N, V> {
 
-  private final List<Row<K,N,V>> rowsList;
+  protected final List<Row<K,N,V>> rowsList;
 
   public OrderedRowsImpl(LinkedHashMap<K, List<Column>> thriftRet, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     super(thriftRet, nameSerializer, valueSerializer);
     rowsList = new ArrayList<Row<K,N,V>>(rows.values());
+  }
+  
+  protected OrderedRowsImpl() {
+    super();
+    rowsList = new ArrayList<Row<K,N,V>>();
   }
 
   /**

@@ -11,7 +11,6 @@ import javax.persistence.InheritanceType;
 import me.prettyprint.hom.CFMappingDef;
 import me.prettyprint.hom.ClassCacheMgr;
 
-import org.apache.openjpa.util.UnsupportedException;
 
 /**
  * Parse, validate, and set defaults if needed for Inheritance functionality.
@@ -38,7 +37,7 @@ public class InheritanceParserValidator implements ParserValidator {
     if (InheritanceType.SINGLE_TABLE == anno.strategy()) {
       cfMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
     } else {
-      throw new UnsupportedException("Hector object mapper only supports "
+      throw new RuntimeException("Hector object mapper only supports "
           + InheritanceType.SINGLE_TABLE + " inheritance at the moment");
     }
   }

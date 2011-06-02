@@ -15,6 +15,8 @@ import me.prettyprint.hector.api.ClockResolution;
  *
  */
 public final class TimeUUIDUtils {
+	
+  static final long NUM_100NS_INTERVALS_SINCE_UUID_EPOCH = 0x01b21dd213814000L;
 
   /**
    * Gets a new and unique time uuid in milliseconds. It is useful to use in a TimeUUIDType sorted column family.
@@ -54,7 +56,7 @@ public final class TimeUUIDUtils {
     long time;
 
     // UTC time
-    long timeToUse = (currentTime * 10000) + 0x01B21DD213814000L;
+    long timeToUse = (currentTime * 10000) + NUM_100NS_INTERVALS_SINCE_UUID_EPOCH;
 
     // time low
     time = timeToUse << 32;
@@ -86,7 +88,11 @@ public final class TimeUUIDUtils {
    * @return a long representing the time
    */
   public static long getTimeFromUUID(byte[] uuid) {
-    return TimeUUIDUtils.toUUID(uuid).timestamp();
+    return getTimeFromUUID(TimeUUIDUtils.toUUID(uuid));
+  }
+  
+  public static long getTimeFromUUID(UUID uuid) {
+    return (uuid.timestamp() - NUM_100NS_INTERVALS_SINCE_UUID_EPOCH) / 10000;
   }
 
   /**

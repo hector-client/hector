@@ -38,6 +38,12 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
     this.column.setTimestamp(clock);
   }
 
+  public HColumnImpl(N name, V value, long clock, int ttl,
+		Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+	  this(name, value, clock, nameSerializer, valueSerializer);
+	  setTtl(ttl);
+  }
+
   public HColumnImpl(Column thriftColumn, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     this(nameSerializer, valueSerializer);

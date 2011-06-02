@@ -1,43 +1,26 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.*;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
-import me.prettyprint.cassandra.service.FailoverPolicy;
-import me.prettyprint.cassandra.service.JmxMonitor;
-import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
-import me.prettyprint.hector.api.exceptions.HTimedOutException;
-import me.prettyprint.hector.api.exceptions.HUnavailableException;
-import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorTransportException;
-import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.*;
 
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import org.perf4j.StopWatch;
-import org.perf4j.slf4j.Slf4JStopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ecyrd.speed4j.StopWatch;
+import com.ecyrd.speed4j.StopWatchFactory;
+import com.ecyrd.speed4j.log.PeriodicalLog;
 
 public class HConnectionManager {
 
   private static final Logger log = LoggerFactory.getLogger(HConnectionManager.class);
-  private static final Logger perf4jLogger =
-    LoggerFactory.getLogger("me.prettyprint.cassandra.hector.TimingLogger");
+  private StopWatchFactory stopWatchFactory;
 
   private final NonBlockingHashMap<CassandraHost,HClientPool> hostPools;
   private final NonBlockingHashMap<CassandraHost,HClientPool> suspendedHostPools;  
@@ -48,7 +31,6 @@ public class HConnectionManager {
   private LoadBalancingPolicy loadBalancingPolicy;
   private CassandraHostConfigurator cassandraHostConfigurator;
   private HostTimeoutTracker hostTimeoutTracker;
-
   private final ClockResolution clock;
 
   final ExceptionsTranslator exceptionsTranslator;
@@ -89,6 +71,19 @@ public class HConnectionManager {
         nodeAutoDiscoverService.doAddNodes();
       }
     }
+    
+    //
+    //  This sets up the Speed4J logging system.  Alternatively, we could
+    //  use the speed4j.properties -file.  This was chosen just so that
+    //  it wouldn't confuse anyone and would work pretty much the same
+    //  way as what the old hector config does.
+    //
+    PeriodicalLog slog = new PeriodicalLog();
+    slog.setName("hector-"+clusterName);
+    slog.setPeriod(60); // 60 seconds
+    slog.setSlf4jLogname( "me.prettyprint.cassandra.hector.TimingLogger" );
+    
+    stopWatchFactory = StopWatchFactory.getInstance( slog );
   }
 
   /**
@@ -202,7 +197,7 @@ public class HConnectionManager {
 
 
   public void operateWithFailover(Operation<?> op) throws HectorException {
-    final StopWatch stopWatch = new Slf4JStopWatch(perf4jLogger);
+    final StopWatch stopWatch = stopWatchFactory.getStopWatch();
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HThriftClient client = null;
     HClientPool pool = null;
@@ -232,7 +227,6 @@ public class HConnectionManager {
           // break out on HUnavailableException as well since we can no longer satisfy the CL
           throw he;
         } else if ( he instanceof HectorTransportException) {
-          --retries;
           // client can be null in this situation
           if ( client != null ) {            
             client.close();
@@ -240,23 +234,22 @@ public class HConnectionManager {
           markHostAsDown(pool.getCassandraHost());
           excludeHosts.add(pool.getCassandraHost());
           retryable = true;
-          if ( retries > 0 ) {
-            monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
-          }        
+          
+          monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
+                  
         } else if (he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
           // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);          
           doTimeoutCheck(pool.getCassandraHost());
-          if ( hostPools.size() > 1) {
-            retryable = true;
-          }
+
+          retryable = true;
+
           monitor.incCounter(Counter.RECOVERABLE_TIMED_OUT_EXCEPTIONS);
           client.close();
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
         } else if ( he instanceof PoolExhaustedException ) {
           retryable = true;
-          --retries;
           if ( hostPools.size() == 1 ) {
             throw he;
           }
@@ -269,11 +262,13 @@ public class HConnectionManager {
           retryable = false;
         }
         if ( retries <= 0 || retryable == false) throw he;
+        
         log.warn("Could not fullfill request on this host {}", client);
         log.warn("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
         sleepBetweenHostSkips(op.failoverPolicy);
       } finally {
+        --retries;
         if ( !success ) {
           monitor.incCounter(op.failCounter);
           stopWatch.stop(op.stopWatchTagName + ".fail_");
