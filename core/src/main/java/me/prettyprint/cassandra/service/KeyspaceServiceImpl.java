@@ -16,21 +16,7 @@ import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.ConsistencyLevel;
-import org.apache.cassandra.thrift.CounterColumn;
-import org.apache.cassandra.thrift.IndexClause;
-import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.thrift.KeySlice;
-import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.NotFoundException;
-import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SliceRange;
-import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +154,36 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
 
 
+  @Override
+  public Map<ByteBuffer, List<CounterColumn>> getRangeCounterSlices(final ColumnParent columnParent,
+      final SlicePredicate predicate, final KeyRange keyRange) throws HectorException {
+    Operation<Map<ByteBuffer, List<CounterColumn>>> op = new Operation<Map<ByteBuffer, List<CounterColumn>>>(
+        OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public Map<ByteBuffer, List<CounterColumn>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
+              predicate, keyRange, getThriftCl(OperationType.READ));
+          if (keySlices == null || keySlices.isEmpty()) {
+            return new LinkedHashMap<ByteBuffer, List<CounterColumn>>(0);
+          }
+          LinkedHashMap<ByteBuffer, List<CounterColumn>> ret = new LinkedHashMap<ByteBuffer, List<CounterColumn>>(
+              keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(ByteBuffer.wrap(keySlice.getKey()), getCounterColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      };
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+
 
   @Override
   public Map<ByteBuffer, List<SuperColumn>> getSuperRangeSlices(
@@ -200,6 +216,36 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     return op.getResult();
   }
 
+    @Override
+  public Map<ByteBuffer, List<CounterSuperColumn>> getSuperRangeCounterSlices(
+      final ColumnParent columnParent, final SlicePredicate predicate, final KeyRange keyRange)
+      throws HectorException {
+    Operation<Map<ByteBuffer, List<CounterSuperColumn>>> op = new Operation<Map<ByteBuffer, List<CounterSuperColumn>>>(
+        OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public Map<ByteBuffer, List<CounterSuperColumn>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          List<KeySlice> keySlices = cassandra.get_range_slices(columnParent,
+              predicate, keyRange, getThriftCl(OperationType.READ));
+          if (keySlices == null || keySlices.isEmpty()) {
+            return new LinkedHashMap<ByteBuffer, List<CounterSuperColumn>>();
+          }
+          LinkedHashMap<ByteBuffer, List<CounterSuperColumn>> ret = new LinkedHashMap<ByteBuffer, List<CounterSuperColumn>>(
+              keySlices.size());
+          for (KeySlice keySlice : keySlices) {
+            ret.put(ByteBuffer.wrap(keySlice.getKey()), getCounterSuperColumnList(keySlice.getColumns()));
+          }
+          return ret;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
 
   @Override
   public List<Column> getSlice(final ByteBuffer key, final ColumnParent columnParent,
@@ -377,6 +423,41 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
 
 
+  @Override
+  public List<CounterSuperColumn> getCounterSuperSlice(String key, ColumnParent columnParent, SlicePredicate predicate)
+          throws HectorException {
+      return getCounterSuperSlice(StringSerializer.get().toByteBuffer(key), columnParent, predicate);
+  }
+
+
+  @Override
+  public List<CounterSuperColumn> getCounterSuperSlice(final ByteBuffer key, final ColumnParent columnParent,
+      final SlicePredicate predicate) throws HectorException {
+    Operation<List<CounterSuperColumn>> op = new Operation<List<CounterSuperColumn>>(OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public List<CounterSuperColumn> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(key, columnParent,
+              predicate, getThriftCl(OperationType.READ));
+          if (cosclist == null) {
+            return null;
+          }
+          ArrayList<CounterSuperColumn> result = new ArrayList<CounterSuperColumn>(cosclist.size());
+          for (ColumnOrSuperColumn cosc : cosclist) {
+            result.add(cosc.getCounter_super_column());
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(op);
+    return op.getResult();
+  }
+
+
 
   @Override
   public void insert(final ByteBuffer key, final ColumnParent columnParent, final Column column) throws HectorException {
@@ -472,6 +553,33 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   }
 
+  @Override
+  public Map<ByteBuffer, List<CounterColumn>> multigetCounterSlice(final List<ByteBuffer> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
+    Operation<Map<ByteBuffer, List<CounterColumn>>> getCount = new Operation<Map<ByteBuffer, List<CounterColumn>>>(
+        OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public Map<ByteBuffer, List<CounterColumn>> execute(Cassandra.Client cassandra) throws HectorException {
+        try {
+          Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
+              keys, columnParent, predicate, getThriftCl(OperationType.READ));
+
+          Map<ByteBuffer, List<CounterColumn>> result = new HashMap<ByteBuffer, List<CounterColumn>>();
+          for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+            result.put(entry.getKey(), getCounterColumnList(entry.getValue()));
+          }
+          return result;
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(getCount);
+    return getCount.getResult();
+
+  }
+
 
   @Override
   public Map<ByteBuffer, SuperColumn> multigetSuperColumn(List<ByteBuffer> keys, ColumnPath columnPath)
@@ -555,6 +663,53 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     return getCount.getResult();
 
   }
+
+  @Override
+  public Map<ByteBuffer, List<CounterSuperColumn>> multigetCounterSuperSlice(final List<ByteBuffer> keys,
+      final ColumnParent columnParent, final SlicePredicate predicate) throws HectorException {
+    Operation<Map<ByteBuffer, List<CounterSuperColumn>>> getCount = new Operation<Map<ByteBuffer, List<CounterSuperColumn>>>(
+        OperationType.READ, failoverPolicy, keyspaceName, credentials) {
+
+      @Override
+      public Map<ByteBuffer, List<CounterSuperColumn>> execute(Cassandra.Client cassandra)
+          throws HectorException {
+        try {
+          Map<ByteBuffer, List<ColumnOrSuperColumn>> cfmap = cassandra.multiget_slice(
+              keys, columnParent, predicate, getThriftCl(OperationType.READ));
+          // if user not given super column name, the multiget_slice will return
+          // List
+          // filled with
+          // super column, if user given a column name, the return List will
+          // filled
+          // with column,
+          // this is a bad interface design.
+          if (!columnParent.isSetSuper_column()) {
+            Map<ByteBuffer, List<CounterSuperColumn>> result = new HashMap<ByteBuffer, List<CounterSuperColumn>>();
+            for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+              result.put(entry.getKey(), getCounterSuperColumnList(entry.getValue()));
+            }
+            return result;
+          } else {
+            Map<ByteBuffer, List<CounterSuperColumn>> result = new HashMap<ByteBuffer, List<CounterSuperColumn>>();
+            for (Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry : cfmap.entrySet()) {
+              CounterSuperColumn spc = new CounterSuperColumn(ByteBuffer.wrap(columnParent.getSuper_column()),
+                  getCounterColumnList(entry.getValue()));
+              ArrayList<CounterSuperColumn> spclist = new ArrayList<CounterSuperColumn>(1);
+              spclist.add(spc);
+              result.put(entry.getKey(), spclist);
+            }
+            return result;
+          }
+        } catch (Exception e) {
+          throw xtrans.translate(e);
+        }
+      }
+    };
+    operateWithFailover(getCount);
+    return getCount.getResult();
+
+  }
+
 
   @Override
   public Map<ByteBuffer, List<Column>> getIndexedSlices(final ColumnParent columnParent,
@@ -773,6 +928,14 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     return list;
   }
 
+  private static List<CounterColumn> getCounterColumnList(List<ColumnOrSuperColumn> columns) {
+      ArrayList<CounterColumn> list = new ArrayList<CounterColumn>(columns.size());
+      for (ColumnOrSuperColumn col : columns) {
+          list.add(col.getCounter_column());
+      }
+      return list;
+  }
+
   private static List<SuperColumn> getSuperColumnList(List<ColumnOrSuperColumn> columns) {
     ArrayList<SuperColumn> list = new ArrayList<SuperColumn>(columns.size());
     for (ColumnOrSuperColumn col : columns) {
@@ -780,6 +943,15 @@ public class KeyspaceServiceImpl implements KeyspaceService {
     }
     return list;
   }
+
+  private static List<CounterSuperColumn> getCounterSuperColumnList(List<ColumnOrSuperColumn> columns) {
+      ArrayList<CounterSuperColumn> list = new ArrayList<CounterSuperColumn>(columns.size());
+      for (ColumnOrSuperColumn col : columns) {
+          list.add(col.getCounter_super_column());
+      }
+      return list;
+  }
+
 
   @Override
   public String toString() {

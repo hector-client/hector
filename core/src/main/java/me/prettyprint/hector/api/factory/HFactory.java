@@ -13,23 +13,7 @@ import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.model.MutatorImpl;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
-import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftCountQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftCounterColumnQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftMultigetSliceQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftMultigetSubSliceQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSliceCounterQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSubSliceQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
-import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceQuery;
+import me.prettyprint.cassandra.model.thrift.*;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.FailoverPolicy;
@@ -54,23 +38,7 @@ import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.ComparatorType;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.mutation.Mutator;
-import me.prettyprint.hector.api.query.ColumnQuery;
-import me.prettyprint.hector.api.query.CountQuery;
-import me.prettyprint.hector.api.query.CounterQuery;
-import me.prettyprint.hector.api.query.MultigetSliceQuery;
-import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
-import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
-import me.prettyprint.hector.api.query.RangeSlicesQuery;
-import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
-import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
-import me.prettyprint.hector.api.query.SliceCounterQuery;
-import me.prettyprint.hector.api.query.SliceQuery;
-import me.prettyprint.hector.api.query.SubColumnQuery;
-import me.prettyprint.hector.api.query.SubCountQuery;
-import me.prettyprint.hector.api.query.SubSliceQuery;
-import me.prettyprint.hector.api.query.SuperColumnQuery;
-import me.prettyprint.hector.api.query.SuperCountQuery;
-import me.prettyprint.hector.api.query.SuperSliceQuery;
+import me.prettyprint.hector.api.query.*;
 
 /**
  * A convenience class with bunch of factory static methods to help create a
@@ -373,6 +341,22 @@ public final class HFactory {
         nameSerializer, valueSerializer);
   }
 
+  public static <K, N> MultigetSliceCounterQuery<K, N> createMultigetSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<N> nameSerializer) {
+    return new ThriftMultigetSliceCounterQuery<K, N>(keyspace, keySerializer,
+        nameSerializer);
+  }
+
+  public static <K, SN, N> SuperSliceCounterQuery<K, SN, N> createSuperSliceCounterQuery(
+          Keyspace keyspace, Serializer<K> keySerializer,
+          Serializer<SN> sNameSerializer,
+          Serializer<N> nameSerializer) {
+      return new ThriftSuperSliceCounterQuery<K, SN, N>(keyspace, keySerializer, sNameSerializer, nameSerializer);
+  }
+
+
+
   public static <K, SN, N, V> SubColumnQuery<K, SN, N, V> createSubColumnQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -387,6 +371,13 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new ThriftMultigetSuperSliceQuery<K, SN, N, V>(keyspace,
         keySerializer, sNameSerializer, nameSerializer, valueSerializer);
+  }
+
+  public static <K, SN, N> MultigetSuperSliceCounterQuery<K, SN, N> createMultigetSuperSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftMultigetSuperSliceCounterQuery<K, SN, N>(keyspace,
+        keySerializer, sNameSerializer, nameSerializer);
   }
 
   public static <K, SN, N, V> MultigetSubSliceQuery<K, SN, N, V> createMultigetSubSliceQuery(
@@ -404,6 +395,15 @@ public final class HFactory {
         nameSerializer, valueSerializer);
   }
 
+  public static <K, N> RangeSlicesCounterQuery<K, N> createRangeSlicesCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<N> nameSerializer) {
+    return new ThriftRangeSlicesCounterQuery<K, N>(keyspace, keySerializer,
+        nameSerializer);
+  }
+
+
+
   public static <K, SN, N, V> RangeSuperSlicesQuery<K, SN, N, V> createRangeSuperSlicesQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<SN> sNameSerializer, Serializer<N> nameSerializer,
@@ -411,6 +411,15 @@ public final class HFactory {
     return new ThriftRangeSuperSlicesQuery<K, SN, N, V>(keyspace,
         keySerializer, sNameSerializer, nameSerializer, valueSerializer);
   }
+
+  public static <K, SN, N> RangeSuperSlicesCounterQuery<K, SN, N> createRangeSuperSlicesCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftRangeSuperSlicesCounterQuery<K, SN, N>(keyspace,
+        keySerializer, sNameSerializer, nameSerializer);
+  }
+
+
 
   public static <K, N, V> IndexedSlicesQuery<K, N, V> createIndexedSlicesQuery(
       Keyspace keyspace, Serializer<K> keySerializer,

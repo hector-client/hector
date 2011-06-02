@@ -38,6 +38,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private int memtableThroughputInMb;
   private int memtableFlushAfterMins;
   private int keyCacheSavePeriodInSeconds;
+  private boolean replicateOnWrite;
 
   public ThriftCfDef(CfDef d) {
     Assert.notNull(d, "CfDef is null");
@@ -68,6 +69,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     memtableThroughputInMb = d.memtable_throughput_in_mb == 0 ?
         CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : d.memtable_throughput_in_mb;
 
+    replicateOnWrite = d.replicate_on_write;
   }
 
   public ThriftCfDef(ColumnFamilyDefinition columnFamilyDefinition) {
@@ -97,6 +99,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
         CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : columnFamilyDefinition.getMemtableThroughputInMb();
     memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions() == 0 ?
         CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : columnFamilyDefinition.getMemtableOperationsInMillions();
+    replicateOnWrite = columnFamilyDefinition.isReplicateOnWrite();
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
@@ -115,6 +118,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     memtableFlushAfterMins = CFMetaData.DEFAULT_MEMTABLE_LIFETIME_IN_MINS;
     memtableThroughputInMb = CFMetaData.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB;
     memtableOperationsInMillions = CFMetaData.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS;
+    replicateOnWrite = CFMetaData.DEFAULT_REPLICATE_ON_WRITE;
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName, ComparatorType comparatorType) {
@@ -233,6 +237,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setMemtable_operations_in_millions(memtableOperationsInMillions);
     d.setMemtable_throughput_in_mb(memtableThroughputInMb);
     d.setMemtable_flush_after_mins(memtableFlushAfterMins);
+    d.setReplicate_on_write(replicateOnWrite);
 
     if (subComparatorType != null) {
       d.setSubcomparator_type(subComparatorType.getClassName());
@@ -348,5 +353,29 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   @Override
   public int getKeyCacheSavePeriodInSeconds() {
     return keyCacheSavePeriodInSeconds;
+  }
+
+  public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
+    this.memtableOperationsInMillions = memtableOperationsInMillions;
+  }
+
+  public void setMemtableThroughputInMb(int memtableThroughputInMb) {
+    this.memtableThroughputInMb = memtableThroughputInMb;
+  }
+
+  public void setMemtableFlushAfterMins(int memtableFlushAfterMins) {
+    this.memtableFlushAfterMins = memtableFlushAfterMins;
+  }
+
+  public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
+    this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
+  }
+
+  public boolean isReplicateOnWrite() {
+    return replicateOnWrite;
+  }
+
+  public void setReplicateOnWrite(boolean replicateOnWrite) {
+    this.replicateOnWrite = replicateOnWrite;
   }
 }
