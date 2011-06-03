@@ -70,4 +70,10 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
 
   }
   
+  @Test
+  public void testInsertSyntax() {
+    CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
+    cqlQuery.setQuery("update StandardLong1 set 'birthyear' = '1976' WHERE KEY = 'cqlQueryTest_key7'");
+    QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
+  }
 }

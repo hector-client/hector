@@ -66,8 +66,8 @@ public class EmbeddedSchemaLoader {
         // Column Families
         standardCFMD(ks1, "Standard1"), standardCFMD(ks1, "Standard2"),
         standardCFMD(ks1, "Standard3"), standardCFMD(ks1, "Standard4"),
-        standardCFMD(ks1, "StandardLong1").keyValidator(UTF8Type.instance), 
-	standardCFMD(ks1, "StandardLong2"),
+        cqlTestCf(ks1, "StandardLong1",UTF8Type.instance), 
+        standardCFMD(ks1, "StandardLong2").keyValidator(UTF8Type.instance),
         superCFMD(ks1, "Super1", BytesType.instance),
         superCFMD(ks1, "Super2", LongType.instance),
         superCFMD(ks1, "Super3", LongType.instance),
@@ -116,6 +116,16 @@ public class EmbeddedSchemaLoader {
       AbstractType comp) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
         .defaultValidator(comp);
+  }
+  
+  private static CFMetaData cqlTestCf(String ksName, String cfName,
+      AbstractType comp) {
+    return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
+        .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
+            {{
+              ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
+              put(cName, new ColumnDefinition(cName, LongType.instance, null, null));
+          }});
   }
 }
 
