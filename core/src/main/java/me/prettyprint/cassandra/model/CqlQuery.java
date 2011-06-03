@@ -77,7 +77,7 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
   }
   
   public CqlQuery<K, N, V> setQuery(ByteBuffer qeury) {
-    this.query = query;
+    this.query = qeury;
     return this;
   }
   
