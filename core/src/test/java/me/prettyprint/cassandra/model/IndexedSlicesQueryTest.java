@@ -25,11 +25,13 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
   private Cluster cluster;
   private Keyspace keyspace;
   private String cf = "Indexed1";
+  private static boolean inserted = false;
 
   @Before
   public void setupCase() {
     cluster = getOrCreateCluster("MyCluster", "127.0.0.1:9170");
     keyspace = createKeyspace(KEYSPACE, cluster);
+    if (!inserted) {
     createMutator(keyspace, se)
     .addInsertion("indexedSlicesTest_key1", cf, createColumn("birthyear", 1974L, se, le))
     .addInsertion("indexedSlicesTest_key1", cf, createColumn("birthmonth", 4L, se, le))
@@ -44,6 +46,8 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
     .addInsertion("indexedSlicesTest_key6", cf, createColumn("birthyear", 1976L, se, le))
     .addInsertion("indexedSlicesTest_key6", cf, createColumn("birthmonth", 6L, se, le))
     .execute();
+    inserted = true;
+    }
   }
 
   @After
@@ -57,8 +61,9 @@ public class IndexedSlicesQueryTest extends BaseEmbededServerSetupTest {
 
     IndexedSlicesQuery<String, String, Long> indexedSlicesQuery = new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le);
     indexedSlicesQuery.addEqualsExpression("birthyear", 1975L);
-    //indexedSlicesQuery.setColumnNames("birthyear");
-    indexedSlicesQuery.setReturnKeysOnly();
+    indexedSlicesQuery.setColumnNames("birthmonth");
+    // see CASSANDRA-2653
+    //indexedSlicesQuery.setReturnKeysOnly();
     indexedSlicesQuery.setColumnFamily(cf);
     indexedSlicesQuery.setStartKey("");
     QueryResult<OrderedRows<String, String, Long>> result = indexedSlicesQuery.execute();
