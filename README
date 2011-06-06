@@ -34,6 +34,7 @@ https://github.com/rantav/hector/wiki/Getting-started-%285-minutes%29
 
 Some additional pages from the wiki that may be of interest:
 
+ o Wiki: https://github.com/rantav/hector/wiki
  o SLF4J fun and hijinks: https://github.com/rantav/hector/wiki/SLF4J-in-Hector-
  o Mailing Lists: https://github.com/rantav/hector/wiki/Mailing-Lists
  o Maven Central location (includes javadoc): http://repo2.maven.org/maven2/me/prettyprint/
@@ -46,3 +47,16 @@ Example projects using Hector:
 
 The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 
+----------------------------------------------------------------------------------------------------
+Building Hector from sources
+
+Hector sues maven to build the sources. If you are new to Maven, take a look at this tutorial first:
+ o  http://maven.apache.org/run-maven/index.html 
+
+In order to to build Hector (this is not Hector specific) you run: 
+
+  mvn clean package 
+or 
+  mvn clean package -DskipTests (to run faster and skip the tests) 
+
+Hector jar will be under <hector_dir>/target  
