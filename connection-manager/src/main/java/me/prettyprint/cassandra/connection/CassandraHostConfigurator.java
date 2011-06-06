@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.cassandra.connection;
 
 import java.io.Serializable;
 
