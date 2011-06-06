@@ -17,7 +17,7 @@ import com.ecyrd.speed4j.StopWatch;
 import com.ecyrd.speed4j.StopWatchFactory;
 import com.ecyrd.speed4j.log.PeriodicalLog;
 
-public class HConnectionManager {
+public class HConnectionManagerImpl implements HConnectionManager {
 
   private static final Logger log = LoggerFactory.getLogger(HConnectionManager.class);
   private StopWatchFactory stopWatchFactory;

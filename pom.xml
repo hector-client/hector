@@ -81,6 +81,8 @@
   <modules>
     <module>core</module>
     <module>object-mapper</module>
+    <module>connection-manager</module>
+    <module>api</module>
   </modules>
 
   <dependencyManagement>

@@ -5,9 +5,10 @@
     <artifactId>hector</artifactId>
     <version>0.8.0-1-SNAPSHOT</version>
   </parent>
-  <artifactId>hector-core</artifactId>
+  <artifactId>hector-connection-manager</artifactId>
   <packaging>bundle</packaging>
-  <name>hector-core</name>
+  <name>hector-connection-manager</name>
+
   <properties>
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
@@ -92,18 +93,11 @@
     </plugins>
   </build>
   <dependencies>
-    <!-- Hector dependencies -->
     <dependency>
       <groupId>me.prettyprint</groupId>
       <artifactId>hector-api</artifactId>
       <version>${parent.version}</version>
     </dependency>
-    <dependency>
-      <groupId>me.prettyprint</groupId>
-      <artifactId>hector-connection-manager</artifactId>
-      <version>${parent.version}</version>
-    </dependency>
-    
     <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>

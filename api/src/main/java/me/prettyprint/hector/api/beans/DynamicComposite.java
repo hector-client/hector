@@ -3,6 +3,8 @@ package me.prettyprint.hector.api.beans;
 import java.nio.ByteBuffer;
 import java.util.List;
 
+import me.prettyprint.hector.api.AbstractComposite;
+
 public class DynamicComposite extends AbstractComposite {
 
   public final static String DEFAULT_DYNAMIC_COMPOSITE_ALIASES = "(a=>AsciiType,b=>BytesType,i=>IntegerType,x=>LexicalUUIDType,l=>LongType,t=>TimeUUIDType,s=>UTF8Type,u=>UUIDType,A=>AsciiType(reversed=true),B=>BytesType(reversed=true),I=>IntegerType(reversed=true),X=>LexicalUUIDType(reversed=true),L=>LongType(reversed=true),T=>TimeUUIDType(reversed=true),S=>UTF8Type(reversed=true),U=>UUIDType(reversed=true))";
