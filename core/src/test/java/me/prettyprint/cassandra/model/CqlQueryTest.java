@@ -13,6 +13,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.query.QueryResult;
 
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,6 +75,17 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
   public void testInsertSyntax() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("update StandardLong1 set 'birthyear' = '1976' WHERE KEY = 'cqlQueryTest_key7'");
+    QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
+  }
+  
+  @Test
+  public void testInsertSyntaxHex() {
+    CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
+    String query = String.format("update Standard1 set '%s' = '%s' WHERE KEY = '%s'",
+        ByteBufferUtil.bytesToHex(se.toByteBuffer("birthyear")),
+        ByteBufferUtil.bytesToHex(se.toByteBuffer("1976")),
+        ByteBufferUtil.bytesToHex(se.toByteBuffer("mykey1")));
+    cqlQuery.setQuery(query);
     QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
   }
 }
