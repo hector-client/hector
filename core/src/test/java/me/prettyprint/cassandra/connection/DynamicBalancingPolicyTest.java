@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,9 +30,9 @@ public class DynamicBalancingPolicyTest {
     poolWithScore10 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore10.score()).thenReturn(10.0);
 
-    Mockito.when(poolWithScore5.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.1:9160"));
-    Mockito.when(poolWithScore7.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.2:9161"));
-    Mockito.when(poolWithScore10.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.3:9162"));
+    Mockito.when(poolWithScore5.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.1:9160"));
+    Mockito.when(poolWithScore7.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.2:9161"));
+    Mockito.when(poolWithScore10.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.3:9162"));
 
     pools.add(poolWithScore5);
     pools.add(poolWithScore7);
@@ -66,19 +66,19 @@ public class DynamicBalancingPolicyTest {
     dynBalancingPolicy = new DynamicLoadBalancingPolicy();
     dynBalancingPolicy.add(poolWithScore10);
     Mockito.when(poolWithScore10.score()).thenReturn(100.0);
-    Mockito.when(poolWithScore10.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.3:9162"));
+    Mockito.when(poolWithScore10.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.3:9162"));
     dynBalancingPolicy.add(poolWithScore7);
     Mockito.when(poolWithScore7.score()).thenReturn(7.0);
-    Mockito.when(poolWithScore7.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.2:9161"));
+    Mockito.when(poolWithScore7.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.2:9161"));
     dynBalancingPolicy.add(poolWithScore5);
     Mockito.when(poolWithScore5.score()).thenReturn(5.0);
-    Mockito.when(poolWithScore5.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.1:9160"));
+    Mockito.when(poolWithScore5.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.1:9160"));
     dynBalancingPolicy.updateScores();
 
     assertEquals(poolWithScore7, dynBalancingPolicy.getPool(pools,
-        new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.1:9160")))));
+        new HashSet<HCassandraHost>(Arrays.asList(new HCassandraHost("127.0.0.1:9160")))));
     assertEquals(poolWithScore5, dynBalancingPolicy.getPool(pools,
-        new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.3:9162")))));
+        new HashSet<HCassandraHost>(Arrays.asList(new HCassandraHost("127.0.0.3:9162")))));
   }
 
   @Test
@@ -87,15 +87,15 @@ public class DynamicBalancingPolicyTest {
     LatencyAwareHClientPool poolWithScore2_1 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore2_1.score()).thenReturn(2.0);
     Mockito.when(poolWithScore2_1.getNumActive()).thenReturn(5);
-    Mockito.when(poolWithScore2_1.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:9163"));
+    Mockito.when(poolWithScore2_1.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.4:9163"));
     LatencyAwareHClientPool poolWithScore2_2 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore2_2.score()).thenReturn(2.0);
     Mockito.when(poolWithScore2_2.getNumActive()).thenReturn(5);
-    Mockito.when(poolWithScore2_2.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.5:9164"));
+    Mockito.when(poolWithScore2_2.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.5:9164"));
     LatencyAwareHClientPool poolWithScore2_3 = Mockito.mock(LatencyAwareHClientPool.class);
     Mockito.when(poolWithScore2_3.score()).thenReturn(2.0);
     Mockito.when(poolWithScore2_3.getNumActive()).thenReturn(5);
-    Mockito.when(poolWithScore2_3.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.6:9165"));
+    Mockito.when(poolWithScore2_3.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.6:9165"));
 
     List<HClientPool> pool = new ArrayList<HClientPool>();
     pool.add(poolWithScore2_1);
@@ -107,10 +107,10 @@ public class DynamicBalancingPolicyTest {
     dbp.updateScores();
 
     // should hit all three equal hosts over the course of 50 runs
-    Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
+    Set<HCassandraHost> foundHosts = new HashSet<HCassandraHost>();
     for (int i = 0; i < 50; i++) {
       HClientPool foundPool = dbp.getPool(pool, null);
-      CassandraHost p = foundPool.getCassandraHost();
+      HCassandraHost p = foundPool.getCassandraHost();
       foundHosts.add(p);
       assert 5 == foundPool.getNumActive();
     }

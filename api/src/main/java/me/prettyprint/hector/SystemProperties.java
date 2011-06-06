@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.hector;
 
 /**
  * System properties used by Hector.

@@ -110,7 +110,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public Set<String> getExhaustedPoolNames() {
     Set<String> ret = new HashSet<String>();
-    for ( CassandraHost host : connectionManager.getDownedHosts() ) {
+    for ( HCassandraHost host : connectionManager.getDownedHosts() ) {
       ret.add(host.toString());
     }
     return ret;
@@ -165,7 +165,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public List<String> getKnownHosts() {
     List<String> hosts = new ArrayList<String>();
-    for (CassandraHost cassandraHost : connectionManager.getHosts()) {
+    for (HCassandraHost cassandraHost : connectionManager.getHosts()) {
         hosts.add(cassandraHost.toString());
     }
     return hosts;
@@ -204,19 +204,19 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   @Override
   public boolean addCassandraHost(String hostStr) {    
-    return connectionManager.addCassandraHost(new CassandraHost(hostStr));
+    return connectionManager.addCassandraHost(new HCassandraHost(hostStr));
   }
 
   @Override
   public boolean removeCassandraHost(String hostStr) {  
-    return connectionManager.removeCassandraHost(new CassandraHost(hostStr));
+    return connectionManager.removeCassandraHost(new HCassandraHost(hostStr));
   }
 
   @Override
   public Set<String> getSuspendedCassandraHosts() {
-    Set<CassandraHost> hosts = connectionManager.getSuspendedCassandraHosts();
+    Set<HCassandraHost> hosts = connectionManager.getSuspendedCassandraHosts();
     Set<String> hostsStr = new HashSet<String>();
-    for (CassandraHost host : hosts) {
+    for (HCassandraHost host : hosts) {
         hostsStr.add(host.getName());    
     }
     return hostsStr;
@@ -224,12 +224,12 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   @Override
   public boolean suspendCassandraHost(String hostStr) {    
-    return connectionManager.suspendCassandraHost(new CassandraHost(hostStr));
+    return connectionManager.suspendCassandraHost(new HCassandraHost(hostStr));
   }
 
   @Override
   public boolean unsuspendCassandraHost(String hostStr) {
-    return connectionManager.unsuspendCassandraHost(new CassandraHost(hostStr));
+    return connectionManager.unsuspendCassandraHost(new HCassandraHost(hostStr));
   }
   
   

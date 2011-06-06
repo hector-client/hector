@@ -55,7 +55,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
 
   private final HConnectionManager connectionManager;
 
-  private CassandraHost cassandraHost;
+  private HCassandraHost cassandraHost;
 
   private final FailoverPolicy failoverPolicy;
 
@@ -133,7 +133,7 @@ public class KeyspaceServiceImpl implements KeyspaceService {
   }
 
   @Override
-  public CassandraHost getCassandraHost() {
+  public HCassandraHost getCassandraHost() {
     return this.cassandraHost;
   }
 

@@ -92,7 +92,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
    * @param cassandraHost
    * @return
    */
-  public boolean addCassandraHost(CassandraHost cassandraHost) {
+  public boolean addCassandraHost(HCassandraHost cassandraHost) {
     if ( !getHosts().contains(cassandraHost) ) {
       HClientPool pool = null;
       try {
@@ -120,7 +120,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
    * suspended map.
    * @param cassandraHost
    */
-  public boolean removeCassandraHost(CassandraHost cassandraHost) {
+  public boolean removeCassandraHost(HCassandraHost cassandraHost) {
     boolean removed = getHosts().contains(cassandraHost);
     if ( removed ) {
     	HClientPool pool = hostPools.remove(cassandraHost);
@@ -146,7 +146,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
    * @param cassandraHost
    * @return true if the operation was successful.
    */
-  public boolean suspendCassandraHost(CassandraHost cassandraHost) {
+  public boolean suspendCassandraHost(HCassandraHost cassandraHost) {
     HClientPool pool = hostPools.remove(cassandraHost);
     boolean removed = pool != null;
     if ( removed ) {      
@@ -162,7 +162,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
    * @return true if this operation was successful. A no-op returning false 
    * if there was no such host in the underlying suspendedHostPool map.
    */
-  public boolean unsuspendCassandraHost(CassandraHost cassandraHost) {
+  public boolean unsuspendCassandraHost(HCassandraHost cassandraHost) {
     HClientPool pool = suspendedHostPools.remove(cassandraHost);
     boolean readded = pool != null;
     if ( readded ) {      
@@ -179,11 +179,11 @@ public class HConnectionManagerImpl implements HConnectionManager {
    * Returns a Set of {@link CassandraHost} which are in the suspended status
    * @return
    */
-  public Set<CassandraHost> getSuspendedCassandraHosts() {
+  public Set<HCassandraHost> getSuspendedCassandraHosts() {
     return suspendedHostPools.keySet();
   }
   
-  public Set<CassandraHost> getHosts() {
+  public Set<HCassandraHost> getHosts() {
     return Collections.unmodifiableSet(hostPools.keySet());
   }
 
@@ -203,7 +203,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
     HClientPool pool = null;
     boolean success = false;
     boolean retryable = false;
-    Set<CassandraHost> excludeHosts = new HashSet<CassandraHost>(); // HLT.getExcludedHosts() (will be empty most times)
+    Set<HCassandraHost> excludeHosts = new HashSet<HCassandraHost>(); // HLT.getExcludedHosts() (will be empty most times)
     // TODO start timer for limiting retry time spent
     while ( !success ) {
       try {

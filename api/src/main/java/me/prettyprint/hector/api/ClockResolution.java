@@ -1,10 +1,5 @@
 package me.prettyprint.hector.api;
 
-import me.prettyprint.cassandra.service.clock.MicrosecondsClockResolution;
-import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
-import me.prettyprint.cassandra.service.clock.MillisecondsClockResolution;
-import me.prettyprint.cassandra.service.clock.SecondsClockResolution;
-
 import java.io.Serializable;
 
 

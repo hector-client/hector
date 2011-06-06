@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 

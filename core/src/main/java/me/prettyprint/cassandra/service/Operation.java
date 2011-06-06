@@ -37,7 +37,7 @@ public abstract class Operation<T> {
   
   protected T result;
   private HectorException exception;
-  private CassandraHost cassandraHost;
+  private HCassandraHost cassandraHost;
   protected long execTime;
   public final OperationType operationType;
   
@@ -95,7 +95,7 @@ public abstract class Operation<T> {
    */
   public abstract T execute(Cassandra.Client cassandra) throws HectorException;
 
-  public void executeAndSetResult(Cassandra.Client cassandra, CassandraHost cassandraHost) throws HectorException {
+  public void executeAndSetResult(Cassandra.Client cassandra, HCassandraHost cassandraHost) throws HectorException {
     this.cassandraHost = cassandraHost;
     long startTime = System.nanoTime();
     setResult(execute(cassandra));
@@ -114,7 +114,7 @@ public abstract class Operation<T> {
     return exception;
   }
   
-  public CassandraHost getCassandraHost() {
+  public HCassandraHost getCassandraHost() {
     return this.cassandraHost;
   }
   

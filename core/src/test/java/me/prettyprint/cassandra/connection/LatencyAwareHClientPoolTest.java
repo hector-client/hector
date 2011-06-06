@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import static org.junit.Assert.assertTrue;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -10,7 +10,7 @@ import org.junit.Test;
 public class LatencyAwareHClientPoolTest extends BaseEmbededServerSetupTest {
 
   private static final double DYNAMIC_BADNESS_THRESHOLD = 0.24;
-  private CassandraHost cassandraHost;
+  private HCassandraHost cassandraHost;
   private LatencyAwareHClientPool clientPool;
 
   @Before

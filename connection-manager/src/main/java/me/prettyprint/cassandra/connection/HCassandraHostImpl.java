@@ -1,7 +1,9 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.cassandra.connection;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
+import me.prettyprint.hector.SystemProperties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,36 +15,9 @@ import org.slf4j.LoggerFactory;
  * @author zznate(nate@riptano.com)
  *
  */
-public final class CassandraHost {
-  private static Logger log = LoggerFactory.getLogger(CassandraHost.class);
-
-  /**
-   * The default port number to which we will connect
-   */
-  public static final int DEFAULT_PORT = 9160;
-
-  public static final int DEFAULT_MAX_ACTIVE = 50;
-
-  /**
-   * By default, we will use TSocket transport on thrift (matches default Cassandra configs)
-   */
-  public static final boolean DEFAULT_USE_FRAMED_THRIFT_TRANSPORT = true;
-
-  /**
-   * The default max wait time when exhausted happens, default value is negative, which means
-   * it'll block indefinitely.
-   */
-  public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
-
-  /**
-   * The default max idle number determines how many idle connections may reside in the pool.
-   * If -1 then it's infinity.
-   */
-  public static final int DEFAULT_MAX_IDLE = -1;
-
-  public static final boolean DEFAULT_LIFO = true;
-  public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS = 18000000;
-  public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = -1;
+public class HCassandraHostImpl implements HCassandraHost {
+	
+  private static Logger log = LoggerFactory.getLogger(HCassandraHostImpl.class);
 
   private final String host, ip, url;
   private final int port;
@@ -62,12 +37,12 @@ public final class CassandraHost {
   private boolean useSocketKeepalive;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
-  public CassandraHost(String url) {
-    this(url, parsePortFromUrl(url));
+  public HCassandraHostImpl(String url) {
+    this(url, HostUtils.parsePortFromUrl(url));
   }
 
-  public CassandraHost(String url2, int port) {
-    url2 = parseHostFromUrl(url2);
+  public HCassandraHostImpl(String url2, int port) {
+    url2 = HostUtils.parseHostFromUrl(url2);
     this.port = port;
     StringBuilder b = new StringBuilder();
     InetAddress address;
@@ -134,11 +109,11 @@ public final class CassandraHost {
    */
   @Override
   public boolean equals(Object obj) {
-    if (! (obj instanceof CassandraHost)) {
+    if (! (obj instanceof HCassandraHost)) {
       return false;
     }
-    CassandraHost other = (CassandraHost) obj;
-    return other.ip.equals(ip) && other.port == port;
+    HCassandraHost other = (HCassandraHost) obj;
+    return other.getIp().equals(ip) && other.getPort() == port;
   }
 
   @Override
@@ -192,14 +167,6 @@ public final class CassandraHost {
 
   public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
     this.useThriftFramedTransport = useThriftFramedTransport;
-  }
-
-  public static String parseHostFromUrl(String urlPort) {
-    return urlPort.lastIndexOf(':') > 0 ? urlPort.substring(0, urlPort.lastIndexOf(':')) : urlPort;
-  }
-
-  public static int parsePortFromUrl(String urlPort) {
-    return urlPort.lastIndexOf(':') > 0 ? Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length())) : DEFAULT_PORT;
   }
 
   public boolean getLifo() {

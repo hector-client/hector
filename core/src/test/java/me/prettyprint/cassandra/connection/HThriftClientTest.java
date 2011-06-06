@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import static org.junit.Assert.*;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 
 import org.junit.After;
 import org.junit.Before;
@@ -12,11 +12,11 @@ public class HThriftClientTest extends BaseEmbededServerSetupTest {
 
   private HThriftClient hThriftClient;
   // cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
-  private CassandraHost cassandraHost;
+  private HCassandraHost cassandraHost;
   
   @Before
   public void doSetup() {
-    cassandraHost = new CassandraHost("127.0.0.1:9170");
+    cassandraHost = new HCassandraHost("127.0.0.1:9170");
     hThriftClient = new HThriftClient(cassandraHost);
   }
   

@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.IndexedSlicesQuery;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -125,7 +125,7 @@ public interface HectorTemplate {
 
   /**
    * Creates a clock of now with the default clock resolution (micorosec) as defined in
-   * {@link CassandraHost}
+   * {@link HCassandraHost}
    */
   long createClock();
 

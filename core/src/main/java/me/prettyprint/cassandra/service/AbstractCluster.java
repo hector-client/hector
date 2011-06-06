@@ -50,7 +50,7 @@ public abstract class AbstractCluster implements Cluster {
   private final FailoverPolicy failoverPolicy;
   private final CassandraClientMonitor cassandraClientMonitor;
   private Set<String> knownClusterHosts;
-  private Set<CassandraHost> knownPoolHosts;
+  private Set<HCassandraHost> knownPoolHosts;
   protected final ExceptionsTranslator xtrans;
   private final Map<String, String> credentials;
 
@@ -78,7 +78,7 @@ public abstract class AbstractCluster implements Cluster {
    * @see me.prettyprint.cassandra.service.Cluster#getKnownPoolHosts(boolean)
    */
   @Override
-  public Set<CassandraHost> getKnownPoolHosts(boolean refresh) {
+  public Set<HCassandraHost> getKnownPoolHosts(boolean refresh) {
     if (refresh || knownPoolHosts == null) {
       knownPoolHosts = connectionManager.getHosts();
       if ( log.isInfoEnabled() ) {
@@ -93,7 +93,7 @@ public abstract class AbstractCluster implements Cluster {
    * @see me.prettyprint.cassandra.service.Cluster#addHost(me.prettyprint.cassandra.service.CassandraHost, boolean)
    */
   @Override
-  public void addHost(CassandraHost cassandraHost, boolean skipApplyConfig) {
+  public void addHost(HCassandraHost cassandraHost, boolean skipApplyConfig) {
     if (!skipApplyConfig && configurator != null) {
       configurator.applyConfig(cassandraHost);
     }

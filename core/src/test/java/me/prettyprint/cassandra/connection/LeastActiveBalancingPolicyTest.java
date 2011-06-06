@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -36,25 +36,25 @@ public class LeastActiveBalancingPolicyTest extends BaseBalancingPolicyTest {
   @Test
   public void testSkipExhausted() {    
     leastActiveBalancingPolicy = new LeastActiveBalancingPolicy();
-    assertEquals(poolWith7Active, leastActiveBalancingPolicy.getPool(pools, new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.1:9160")))));
-    assertEquals(poolWith5Active, leastActiveBalancingPolicy.getPool(pools, new HashSet<CassandraHost>(Arrays.asList(new CassandraHost("127.0.0.2:9161")))));
+    assertEquals(poolWith7Active, leastActiveBalancingPolicy.getPool(pools, new HashSet<HCassandraHost>(Arrays.asList(new HCassandraHost("127.0.0.1:9160")))));
+    assertEquals(poolWith5Active, leastActiveBalancingPolicy.getPool(pools, new HashSet<HCassandraHost>(Arrays.asList(new HCassandraHost("127.0.0.2:9161")))));
   }
   
   @Test
   public void testShuffleOnAllEqual() {
     ConcurrentHClientPool poolWith5Active2 = Mockito.mock(ConcurrentHClientPool.class);    
     Mockito.when(poolWith5Active2.getNumActive()).thenReturn(5);
-    Mockito.when(poolWith5Active2.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.4:9163"));
+    Mockito.when(poolWith5Active2.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.4:9163"));
     ConcurrentHClientPool poolWith5Active3 = Mockito.mock(ConcurrentHClientPool.class);    
     Mockito.when(poolWith5Active3.getNumActive()).thenReturn(5);
-    Mockito.when(poolWith5Active3.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.5:9164"));
+    Mockito.when(poolWith5Active3.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.5:9164"));
     
     pools.add(poolWith5Active2);
     pools.add(poolWith5Active3);
     
     leastActiveBalancingPolicy = new LeastActiveBalancingPolicy();
     // should hit all three equal hosts over the course of 50 runs
-    Set<CassandraHost> foundHosts = new HashSet<CassandraHost>(3);
+    Set<HCassandraHost> foundHosts = new HashSet<HCassandraHost>(3);
     for (int i = 0; i < 50; i++) {
       HClientPool foundPool = leastActiveBalancingPolicy.getPool(pools, null);
       foundHosts.add(foundPool.getCassandraHost());

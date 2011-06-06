@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
 public class HostTimeoutTrackerTest {
@@ -27,7 +27,7 @@ public class HostTimeoutTrackerTest {
     
   @Test
   public void testTrackHostLatency() {
-    CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+    HCassandraHost cassandraHost = new HCassandraHost("localhost:9170");
     assertFalse(hostTimeoutTracker.checkTimeout(cassandraHost));
     assertFalse(hostTimeoutTracker.checkTimeout(cassandraHost));
     assertFalse(hostTimeoutTracker.checkTimeout(cassandraHost));

@@ -2,14 +2,14 @@ package me.prettyprint.cassandra.connection;
 
 import static org.junit.Assert.assertEquals;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 
 import org.junit.Before;
 import org.junit.Test;
 
 public class ConcurrentHClientPoolTest extends BaseEmbededServerSetupTest {
     
-  private CassandraHost cassandraHost;
+  private HCassandraHost cassandraHost;
   private ConcurrentHClientPool clientPool;
   
   @Before

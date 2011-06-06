@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 import me.prettyprint.hector.api.ResultStatus;
 
 
@@ -16,12 +16,12 @@ public class ExecutionResult<T> implements ResultStatus {
 
   private final T value;
   private final long execTime;
-  private final CassandraHost cassandraHost;
+  private final HCassandraHost cassandraHost;
   
   protected static final String BASE_MSG_FORMAT = "%s took (%dus) for query (%s) on host: %s";
   private static final int MICRO_DENOM = 1000;
 
-  public ExecutionResult(T value, long execTime, CassandraHost cassandraHost) {
+  public ExecutionResult(T value, long execTime, HCassandraHost cassandraHost) {
     this.value = value;
     this.execTime = execTime;
     this.cassandraHost = cassandraHost;
@@ -62,7 +62,7 @@ public class ExecutionResult<T> implements ResultStatus {
   }
 
   /** The cassandra host that was actually used to execute the operation */
-  public CassandraHost getHostUsed() {
+  public HCassandraHost getHostUsed() {
     return this.cassandraHost;
   }
 

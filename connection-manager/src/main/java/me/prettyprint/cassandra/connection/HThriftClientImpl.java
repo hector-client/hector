@@ -1,11 +1,9 @@
 package me.prettyprint.cassandra.connection;
 
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicLong;
 
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.SystemProperties;
+import me.prettyprint.hector.SystemProperties;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
@@ -22,13 +20,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class HThriftClient {
+public class HThriftClientImpl implements HThriftClient {
 
-  private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
+  private static Logger log = LoggerFactory.getLogger(HThriftClientImpl.class);
 
   private static final AtomicLong serial = new AtomicLong(0);
 
-  final CassandraHost cassandraHost;
+  final HCassandraHost cassandraHost;
 
   private final long mySerial;
   private final int timeout;
@@ -38,7 +36,7 @@ public class HThriftClient {
   private TTransport transport;
   private Cassandra.Client cassandraClient;
 
-  HThriftClient(CassandraHost cassandraHost) {
+  public HThriftClientImpl(HCassandraHost cassandraHost) {
     this.cassandraHost = cassandraHost;
     this.timeout = getTimeout(cassandraHost);
     mySerial = serial.incrementAndGet();
@@ -76,7 +74,7 @@ public class HThriftClient {
     return cassandraClient;
   }
 
-  HThriftClient close() {
+  public HThriftClient close() {
     if ( log.isDebugEnabled() ) {
       log.debug("Closing client {}", this);
     }
@@ -97,7 +95,7 @@ public class HThriftClient {
   }
 
 
-  HThriftClient open() {
+  public HThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
     }
@@ -133,7 +131,7 @@ public class HThriftClient {
   }
 
 
-  boolean isOpen() {
+  public boolean isOpen() {
     boolean open = false;
     if (transport != null) {
       open = transport.isOpen();
@@ -151,7 +149,7 @@ public class HThriftClient {
    * If doesn't exist, returns 0.
    * @param cassandraHost
    */
-  private int getTimeout(CassandraHost cassandraHost) {
+  public int getTimeout(HCassandraHost cassandraHost) {
     int timeoutVar = 0;
     if ( cassandraHost != null && cassandraHost.getCassandraThriftSocketTimeout() > 0 ) {
       timeoutVar = cassandraHost.getCassandraThriftSocketTimeout();

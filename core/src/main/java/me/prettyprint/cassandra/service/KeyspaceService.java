@@ -292,5 +292,5 @@ public interface KeyspaceService {
 
   String getName();
 
-  CassandraHost getCassandraHost();
+  HCassandraHost getCassandraHost();
 }

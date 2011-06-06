@@ -60,7 +60,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   private Set<N> columnNames;
   private int rowIndex = 0;
   private Map<ByteBuffer, List<ColumnOrSuperColumn>> rows;
-  private CassandraHost lastHostUsed;
+  private HCassandraHost lastHostUsed;
   private long lastExecutionTime;
   
 
@@ -241,7 +241,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
   }
 
   @Override
-  public CassandraHost getHostUsed() {
+  public HCassandraHost getHostUsed() {
     return lastHostUsed;
   }
 
@@ -288,7 +288,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
     }
   }
   
-  private void applyResultStatus(long execTime, CassandraHost cassandraHost) {
+  private void applyResultStatus(long execTime, HCassandraHost cassandraHost) {
     lastExecutionTime = execTime;
     lastHostUsed = cassandraHost;
   }

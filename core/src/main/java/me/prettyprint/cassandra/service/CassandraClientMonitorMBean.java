@@ -129,7 +129,7 @@ public interface CassandraClientMonitorMBean {
   
   /**
    * Remove a host in the format of "[hostname]:[port]"
-   * @see {@link CassandraHost#equals(Object)} for how hosts are compared
+   * @see {@link HCassandraHost#equals(Object)} for how hosts are compared
    * 
    * @param hostStr
    * @return
@@ -138,7 +138,7 @@ public interface CassandraClientMonitorMBean {
   
   /**
    * @see {@link #removeCassandraHost(String)} above for semantics of the host string. 
-   * @see {@link HConnectionManager#removeCassandraHost(CassandraHost)} for details of this operation.
+   * @see {@link HConnectionManager#removeCassandraHost(HCassandraHost)} for details of this operation.
    * @param hostStr
    * @return
    */

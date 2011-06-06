@@ -16,17 +16,17 @@ public final class CassandraHostConfigurator implements Serializable {
   private static final long serialVersionUID = -5798876803582956262L;
 
   private String hosts;
-  private int port = CassandraHost.DEFAULT_PORT;
-  private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
-  private int maxIdle = CassandraHost.DEFAULT_MAX_IDLE;
-  private boolean lifo = CassandraHost.DEFAULT_LIFO;
-  private long minEvictableIdleTimeMillis = CassandraHost.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-  private long timeBetweenEvictionRunsMillis = CassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
-  private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
+  private int port = HCassandraHost.DEFAULT_PORT;
+  private int maxActive = HCassandraHost.DEFAULT_MAX_ACTIVE;
+  private int maxIdle = HCassandraHost.DEFAULT_MAX_IDLE;
+  private boolean lifo = HCassandraHost.DEFAULT_LIFO;
+  private long minEvictableIdleTimeMillis = HCassandraHost.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
+  private long timeBetweenEvictionRunsMillis = HCassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
+  private long maxWaitTimeWhenExhausted = HCassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution = DEF_CLOCK_RESOLUTION;
-  private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  private boolean useThriftFramedTransport = HCassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean retryDownedHosts = true;
   private boolean autoDiscoverHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
@@ -50,21 +50,21 @@ public final class CassandraHostConfigurator implements Serializable {
     this.hosts = hosts;
   }
 
-  public CassandraHost[] buildCassandraHosts() {
+  public HCassandraHost[] buildCassandraHosts() {
     if (this.hosts == null) {
       throw new IllegalArgumentException("Need to define at least one host in order to apply configuration.");
     }
     String[] hostVals = hosts.split(",");
-    CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
+    HCassandraHost[] cassandraHosts = new HCassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
-      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port);
+      HCassandraHost cassandraHost = this.port == HCassandraHost.DEFAULT_PORT ? new HCassandraHost(hostVals[x]) : new HCassandraHost(hostVals[x], this.port);
       applyConfig(cassandraHost);
       cassandraHosts[x] = cassandraHost;
     }
     return cassandraHosts;
   }
 
-  public void applyConfig(CassandraHost cassandraHost) {
+  public void applyConfig(HCassandraHost cassandraHost) {
 
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setMaxIdle(maxIdle);

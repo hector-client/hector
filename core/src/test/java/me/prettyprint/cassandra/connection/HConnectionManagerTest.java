@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.Operation;
@@ -24,7 +24,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
   @Test
   public void testRemoveHost() {
     setupClient();
-    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);
+    HCassandraHost cassandraHost = new HCassandraHost("127.0.0.1", 9170);
     connectionManager.removeCassandraHost(cassandraHost);
     assertEquals(0,connectionManager.getActivePools().size());
     assertTrue(connectionManager.addCassandraHost(cassandraHost));
@@ -34,7 +34,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
   @Test 
   public void testAddCassandraHostFail() {
     setupClient();
-    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9180);
+    HCassandraHost cassandraHost = new HCassandraHost("127.0.0.1", 9180);
     assertFalse(connectionManager.addCassandraHost(cassandraHost));
   }
   
@@ -48,7 +48,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
     cassandraHostConfigurator.setRetryDownedHosts(false);
     connectionManager = new HConnectionManager(clusterName, cassandraHostConfigurator);
-    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);    
+    HCassandraHost cassandraHost = new HCassandraHost("127.0.0.1", 9170);    
     HThriftClient client = connectionManager.borrowClient();
     connectionManager.markHostAsDown(client.cassandraHost);
     assertEquals(0,connectionManager.getActivePools().size());
@@ -57,7 +57,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
   @Test
   public void testSuspendCassandraHost() {
     setupClient();
-    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);
+    HCassandraHost cassandraHost = new HCassandraHost("127.0.0.1", 9170);
     assertTrue(connectionManager.suspendCassandraHost(cassandraHost));
     assertEquals(1,connectionManager.getSuspendedCassandraHosts().size());
     assertTrue(connectionManager.unsuspendCassandraHost(cassandraHost));

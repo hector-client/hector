@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 
 import org.junit.Before;
 import org.mockito.Mockito;
@@ -26,9 +26,9 @@ public abstract class BaseBalancingPolicyTest {
     poolWith10Active = Mockito.mock(ConcurrentHClientPool.class);
     Mockito.when(poolWith10Active.getNumActive()).thenReturn(10);
     
-    Mockito.when(poolWith5Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.1:9160"));
-    Mockito.when(poolWith7Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.2:9161"));
-    Mockito.when(poolWith10Active.getCassandraHost()).thenReturn(new CassandraHost("127.0.0.3:9162"));
+    Mockito.when(poolWith5Active.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.1:9160"));
+    Mockito.when(poolWith7Active.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.2:9161"));
+    Mockito.when(poolWith10Active.getCassandraHost()).thenReturn(new HCassandraHost("127.0.0.3:9162"));
     
     pools.add(poolWith5Active);        
     pools.add(poolWith7Active);

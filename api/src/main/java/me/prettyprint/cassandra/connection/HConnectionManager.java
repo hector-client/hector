@@ -25,7 +25,7 @@ public interface HConnectionManager {
    * @param cassandraHost
    * @return
    */
-  public boolean addCassandraHost(CassandraHost cassandraHost);
+  public boolean addCassandraHost(HCassandraHost cassandraHost);
 
   /**
    * Remove the {@link CassandraHost} from the pool, bypassing retry service. This
@@ -35,7 +35,7 @@ public interface HConnectionManager {
    * suspended map.
    * @param cassandraHost
    */
-  public boolean removeCassandraHost(CassandraHost cassandraHost);
+  public boolean removeCassandraHost(HCassandraHost cassandraHost);
   
   /**
    * Remove the {@link HClientPool} referenced by the {@link CassandraHost} from 
@@ -44,7 +44,7 @@ public interface HConnectionManager {
    * @param cassandraHost
    * @return true if the operation was successful.
    */
-  public boolean suspendCassandraHost(CassandraHost cassandraHost);
+  public boolean suspendCassandraHost(HCassandraHost cassandraHost);
 
   /** 
    * The opposite of suspendCassandraHost, places the pool back into selection
@@ -52,29 +52,29 @@ public interface HConnectionManager {
    * @return true if this operation was successful. A no-op returning false 
    * if there was no such host in the underlying suspendedHostPool map.
    */
-  public boolean unsuspendCassandraHost(CassandraHost cassandraHost);
+  public boolean unsuspendCassandraHost(HCassandraHost cassandraHost);
   
   /**
    * Returns a Set of {@link CassandraHost} which are in the suspended status
    * @return
    */
-  public Set<CassandraHost> getSuspendedCassandraHosts();
+  public Set<HCassandraHost> getSuspendedCassandraHosts();
   
-  public Set<CassandraHost> getHosts() ;
+  public Set<HCassandraHost> getHosts() ;
 
   public List<String> getStatusPerPool();
 
   public void operateWithFailover(Operation<?> op) throws HectorException;
 
-  private HClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts);
+  public HClientPool getClientFromLBPolicy(Set<HCassandraHost> excludeHosts);
 
   void releaseClient(HThriftClient client);
 
   HThriftClient borrowClient();
 
-  void markHostAsDown(CassandraHost cassandraHost);
+  void markHostAsDown(HCassandraHost cassandraHost);
 
-  public Set<CassandraHost> getDownedHosts();
+  public Set<HCassandraHost> getDownedHosts();
 
   public Collection<HClientPool> getActivePools();
 

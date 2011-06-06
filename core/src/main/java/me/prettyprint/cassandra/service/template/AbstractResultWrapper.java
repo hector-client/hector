@@ -11,7 +11,7 @@ import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.HCassandraHost;
 import me.prettyprint.hector.api.ResultStatus;
 import me.prettyprint.hector.api.Serializer;
 
@@ -90,7 +90,7 @@ public abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<
   }
 
   @Override
-  public CassandraHost getHostUsed() {
+  public HCassandraHost getHostUsed() {
     return resultStatus.getHostUsed();
   }
   
