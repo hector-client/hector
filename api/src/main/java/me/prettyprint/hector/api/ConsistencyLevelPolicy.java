@@ -1,8 +1,5 @@
 package me.prettyprint.hector.api;
 
-import me.prettyprint.cassandra.model.AllOneConsistencyLevelPolicy;
-import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
-import me.prettyprint.cassandra.service.OperationType;
 
 /**
  * Defines the interface for the consistency level policy.

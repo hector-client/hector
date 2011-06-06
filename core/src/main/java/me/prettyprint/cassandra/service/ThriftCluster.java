@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.connection.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;

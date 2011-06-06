@@ -6,8 +6,7 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -23,7 +22,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   public static final int DEF_QUEUE_SIZE = -1;
   public static final int DEF_RETRY_DELAY = 10;
-  private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
+  private final LinkedBlockingQueue<HCassandraHost> downedHostQueue;
   private final ExceptionsTranslator exceptionsTranslator;
 
   public CassandraHostRetryService(HConnectionManager connectionManager,
@@ -31,7 +30,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     super(connectionManager, cassandraHostConfigurator);
     this.exceptionsTranslator = connectionManager.exceptionsTranslator;
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
-    downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1 
+    downedHostQueue = new LinkedBlockingQueue<HCassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1 
         ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());
           
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
@@ -53,19 +52,19 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     log.info("Downed Host retry shutdown complete");
   }
 
-  public void add(CassandraHost cassandraHost) {
+  public void add(HCassandraHost cassandraHost) {
     downedHostQueue.add(cassandraHost);
     if ( log.isInfoEnabled() ) {
       log.info("Host detected as down was added to retry queue: {}", cassandraHost.getName());
     }
   }
 
-  public boolean contains(CassandraHost cassandraHost) {
+  public boolean contains(HCassandraHost cassandraHost) {
     return downedHostQueue.contains(cassandraHost);
   }
 
-  public Set<CassandraHost> getDownedHosts() {
-    return Collections.unmodifiableSet(new HashSet<CassandraHost>(downedHostQueue));
+  public Set<HCassandraHost> getDownedHosts() {
+    return Collections.unmodifiableSet(new HashSet<HCassandraHost>(downedHostQueue));
   }
 
   @Override
@@ -85,7 +84,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
     @Override
     public void run() {
-      CassandraHost cassandraHost = downedHostQueue.poll();
+      HCassandraHost cassandraHost = downedHostQueue.poll();
       if ( cassandraHost == null ) {
         if ( log.isDebugEnabled() ) { 
           log.debug("Retry service fired... nothing to do.");
@@ -104,12 +103,12 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
     }
 
-    private boolean verifyConnection(CassandraHost cassandraHost) {
+    private boolean verifyConnection(HCassandraHost cassandraHost) {
       if ( cassandraHost == null ) {
         return false;
       }
       boolean found = false;
-      HThriftClient client = new HThriftClient(cassandraHost);
+      HThriftClient client = new HThriftClientImpl(cassandraHost);
       try {
         
         client.open();

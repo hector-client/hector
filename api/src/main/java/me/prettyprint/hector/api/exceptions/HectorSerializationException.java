@@ -1,6 +1,5 @@
 package me.prettyprint.hector.api.exceptions;
 
-import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.hector.api.Serializer;
 
 /**

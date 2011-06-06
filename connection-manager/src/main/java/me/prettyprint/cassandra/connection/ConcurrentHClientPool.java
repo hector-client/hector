@@ -7,7 +7,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
@@ -22,14 +21,14 @@ public class ConcurrentHClientPool implements HClientPool {
   private final ArrayBlockingQueue<HThriftClient> availableClientQueue;
   private final NonBlockingHashSet<HThriftClient> activeClients;
 
-  private final CassandraHost cassandraHost;
+  private final HCassandraHost cassandraHost;
   //private final CassandraClientMonitor monitor;
   private final AtomicInteger numBlocked;
   private final AtomicBoolean active;
 
   private final long maxWaitTimeWhenExhausted;
 
-  public ConcurrentHClientPool(CassandraHost host) {
+  public ConcurrentHClientPool(HCassandraHost host) {
     this.cassandraHost = host;
 
     availableClientQueue = new ArrayBlockingQueue<HThriftClient>(cassandraHost.getMaxActive(), true);
@@ -40,7 +39,7 @@ public class ConcurrentHClientPool implements HClientPool {
     maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted() < 0 ? 0 : cassandraHost.getMaxWaitTimeWhenExhausted();
 
     for (int i = 0; i < cassandraHost.getMaxActive()/3; i++) {
-      availableClientQueue.add(new HThriftClient(cassandraHost).open());
+      availableClientQueue.add(new HThriftClientImpl(cassandraHost).open());
     }
     if ( log.isDebugEnabled() ) {
       log.debug("Concurrent Host pool started with {} active clients; max: {} exhausted wait: {}",
@@ -119,7 +118,7 @@ public HThriftClient borrowClient() throws HectorException {
     if ( log.isDebugEnabled() ) {
       log.debug("Greedy creation of new client");
     }
-    HThriftClient client = new HThriftClient(cassandraHost).open();
+    HThriftClient client = new HThriftClientImpl(cassandraHost).open();
     activeClients.add(client);
     numBlocked.decrementAndGet();
     return client;
@@ -150,7 +149,7 @@ public HThriftClient borrowClient() throws HectorException {
   }
 
 @Override
-public CassandraHost getCassandraHost() {
+public HCassandraHost getCassandraHost() {
     return cassandraHost;
   }
 
@@ -216,7 +215,7 @@ public void releaseClient(HThriftClient client) throws HectorException {
         client.close();
       }
     } else {
-      addClientToPoolGently(new HThriftClient(cassandraHost).open());
+      addClientToPoolGently(new HThriftClientImpl(cassandraHost).open());
     }
 
     if ( log.isDebugEnabled() ) {

@@ -22,8 +22,8 @@ public class HConnectionManagerImpl implements HConnectionManager {
   private static final Logger log = LoggerFactory.getLogger(HConnectionManager.class);
   private StopWatchFactory stopWatchFactory;
 
-  private final NonBlockingHashMap<CassandraHost,HClientPool> hostPools;
-  private final NonBlockingHashMap<CassandraHost,HClientPool> suspendedHostPools;  
+  private final NonBlockingHashMap<HCassandraHost,HClientPool> hostPools;
+  private final NonBlockingHashMap<HCassandraHost,HClientPool> suspendedHostPools;  
   private final Collection<HClientPool> hostPoolValues;
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
@@ -40,13 +40,13 @@ public class HConnectionManagerImpl implements HConnectionManager {
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
-    hostPools = new NonBlockingHashMap<CassandraHost, HClientPool>();
-    suspendedHostPools = new NonBlockingHashMap<CassandraHost, HClientPool>();
+    hostPools = new NonBlockingHashMap<HCassandraHost, HClientPool>();
+    suspendedHostPools = new NonBlockingHashMap<HCassandraHost, HClientPool>();
     this.clusterName = clusterName;
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
     }    
-    for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts()) {
+    for (HCassandraHost host : cassandraHostConfigurator.buildCassandraHosts()) {
       try {
         HClientPool hcp = loadBalancingPolicy.createConnection(host);
         hostPools.put(host,hcp);
@@ -309,7 +309,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
       }
     }
 
-  private HClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
+  public HClientPool getClientFromLBPolicy(Set<HCassandraHost> excludeHosts) {
     if ( hostPools.isEmpty() ) {
       throw new HectorException("All host pools marked down. Retry burden pushed out to client.");
     }        
@@ -327,7 +327,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
     }
   }
 
-  HThriftClient borrowClient() {
+  public HThriftClient borrowClient() {
     HClientPool pool = getClientFromLBPolicy(null);
     if ( pool != null ) {
       return pool.borrowClient();
@@ -335,7 +335,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
     return null;
   }
 
-  void markHostAsDown(CassandraHost cassandraHost) {
+  public void markHostAsDown(HCassandraHost cassandraHost) {
     log.error("MARK HOST AS DOWN TRIGGERED for host {}", cassandraHost.getName());
     HClientPool pool = hostPools.remove(cassandraHost);
     if ( pool != null ) {
@@ -346,7 +346,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
     }
   }
 
-  public Set<CassandraHost> getDownedHosts() {
+  public Set<HCassandraHost> getDownedHosts() {
     return cassandraHostRetryService.getDownedHosts();
   }
 

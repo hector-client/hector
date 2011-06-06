@@ -4,15 +4,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import me.prettyprint.cassandra.connection.HCassandraHost;
 import me.prettyprint.cassandra.connection.HConnectionManager;
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 public interface Cluster {
 
-  Set<CassandraHost> getKnownPoolHosts(boolean refresh);
+  Set<HCassandraHost> getKnownPoolHosts(boolean refresh);
 
   HConnectionManager getConnectionManager();
 
@@ -23,7 +23,7 @@ public interface Cluster {
    * @param cassandraHost
    * @param skipApplyConfig
    */
-  void addHost(CassandraHost cassandraHost, boolean skipApplyConfig);
+  void addHost(HCassandraHost cassandraHost, boolean skipApplyConfig);
 
   /**
    * Descriptive name of the cluster.

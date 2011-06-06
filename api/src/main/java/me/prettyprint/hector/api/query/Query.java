@@ -1,6 +1,5 @@
 package me.prettyprint.hector.api.query;
 
-import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
 
 
 /**

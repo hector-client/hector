@@ -1,13 +1,10 @@
 package me.prettyprint.cassandra.connection;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.collect.Iterables;
-
-import me.prettyprint.cassandra.service.CassandraHost;
 
 /**
  * Implements a RoundRobin balancing policy based off the contents
@@ -28,7 +25,7 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   
   @Override
   public HClientPool getPool(Collection<HClientPool> pools,
-      Set<CassandraHost> excludeHosts) {
+      Set<HCassandraHost> excludeHosts) {
     HClientPool pool = getPoolSafely(pools);    
     if ( excludeHosts != null && excludeHosts.size() > 0 ) {
       while ( excludeHosts.contains(pool.getCassandraHost()) ) {
@@ -54,7 +51,7 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   }
 
   @Override
-  public HClientPool createConnection(CassandraHost host) {
+  public HClientPool createConnection(HCassandraHost host) {
   	return new ConcurrentHClientPool(host);
   }
 }

@@ -1,6 +1,7 @@
 package me.prettyprint.hector.api;
 
-import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.connection.HCassandraHost;
+
 
 /**
  * Common interface for tracking the {@link CassandraHost} used
@@ -25,5 +26,5 @@ public interface ResultStatus {
    * The {@link CassandraHost} on which this operation
    * was successful
    */
-  CassandraHost getHostUsed();
+  HCassandraHost getHostUsed();
 }

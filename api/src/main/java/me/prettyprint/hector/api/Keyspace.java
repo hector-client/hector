@@ -1,7 +1,5 @@
 package me.prettyprint.hector.api;
 
-import me.prettyprint.cassandra.service.Operation;
-import me.prettyprint.hector.api.exceptions.HectorException;
 
 
 /**

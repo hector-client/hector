@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.hector.api;
 
 /**
  * Specifies the "type" of operation - read or write.
