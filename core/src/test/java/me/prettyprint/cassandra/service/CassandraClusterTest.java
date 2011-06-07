@@ -115,7 +115,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     String ksid2 = cassandraCluster.dropKeyspace("DynKeyspace");
     assertNotNull(ksid2);
   }
-  
+
   @Test
   public void testEditKeyspace() throws Exception {
         
@@ -177,4 +177,14 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     assertEquals("birthdate",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(0).getName()));
     assertEquals("nonindexed_field",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(1).getName()));
   }
+  
+  @Test
+  public void testAddEmptyKeyspace() throws Exception {
+    
+    cassandraCluster.addKeyspace(new ThriftKsDef("DynKeyspaceEmpty"));
+    assertNotNull(cassandraCluster.describeKeyspace("DynKeyspaceEmpty"));
+    String ksid2 = cassandraCluster.dropKeyspace("DynKeyspaceEmpty");
+    assertNotNull(ksid2);
+  }
+  
 }
