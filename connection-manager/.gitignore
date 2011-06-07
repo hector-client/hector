@@ -1,0 +1,15 @@
+.idea
+.DS_Store
+hector.iml
+releases
+target
+tmp
+bin
+.classpath
+.project
+.settings
+out
+*.ipr
+*.iws
+*.iml
+.springBeans

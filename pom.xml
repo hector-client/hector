@@ -79,10 +79,11 @@
 
   <!-- Hector submodules -->
   <modules>
+    <module>api</module>
+    <module>connection-manager</module>
+    <module>utils</module>
     <module>core</module>
     <module>object-mapper</module>
-    <module>connection-manager</module>
-    <module>api</module>
   </modules>
 
   <dependencyManagement>

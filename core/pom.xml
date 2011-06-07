@@ -100,6 +100,11 @@
     </dependency>
     <dependency>
       <groupId>me.prettyprint</groupId>
+      <artifactId>hector-utils</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>me.prettyprint</groupId>
       <artifactId>hector-connection-manager</artifactId>
       <version>${parent.version}</version>
     </dependency>

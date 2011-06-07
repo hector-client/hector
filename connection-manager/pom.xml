@@ -99,6 +99,11 @@
       <version>${parent.version}</version>
     </dependency>
     <dependency>
+      <groupId>me.prettyprint</groupId>
+      <artifactId>hector-utils</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+    <dependency>
       <groupId>commons-lang</groupId>
       <artifactId>commons-lang</artifactId>
       <version>2.4</version>

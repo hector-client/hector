@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.clock.ClockUtils;
 import me.prettyprint.cassandra.connection.CassandraHostConfigurator;
 import me.prettyprint.cassandra.model.ExecutingKeyspace;
 import me.prettyprint.cassandra.model.ExecutingVirtualKeyspace;
@@ -694,17 +695,7 @@ public final class HFactory {
    * @return a ClockResolution
    */
   public static ClockResolution createClockResolution(String clockResolutionName) {
-    if (clockResolutionName.equals(ClockResolution.SECONDS)) {
-      return new SecondsClockResolution();
-    } else if (clockResolutionName.equals(ClockResolution.MILLISECONDS)) {
-      return new MillisecondsClockResolution();
-    } else if (clockResolutionName.equals(ClockResolution.MICROSECONDS)) {
-      return new MicrosecondsClockResolution();
-    } else if (clockResolutionName.equals(ClockResolution.MICROSECONDS_SYNC)) {
-      return new MicrosecondsSyncClockResolution();
-    }
-    throw new RuntimeException(String.format(
-        "Unsupported clock resolution: %s", clockResolutionName));
+    return ClockUtils.createClockResolution(clockResolutionName);
   }
 
 }

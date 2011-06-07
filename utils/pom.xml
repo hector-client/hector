@@ -1,0 +1,154 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>me.prettyprint</groupId>
+    <artifactId>hector</artifactId>
+    <version>0.8.0-1-SNAPSHOT</version>
+  </parent>
+  <artifactId>hector-utils</artifactId>
+  <packaging>bundle</packaging>
+  <name>hector-utils</name>
+  <properties>
+    <!-- OSGi bundle properties -->
+    <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
+    <bundle.namespace>me.prettyprint</bundle.namespace>
+  </properties>
+
+  <build>
+    <plugins>
+
+      <!--
+        run examples thusly: mvn exec:java
+        -Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
+      -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>1.1</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>java</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.ops4j</groupId>
+        <artifactId>maven-pax-plugin</artifactId>
+        <version>1.4</version>
+        <configuration>
+          <provision>
+            <param>--platform=equinox</param>
+          </provision>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>1.4.3</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
+            <Bundle-Version>${pom.version}</Bundle-Version>
+            <Embed-Dependency>
+              libthrift;scope=compile|runtime;type=!pom;inline=false,
+              cassandra;scope=compile|runtime;type=!pom;inline=false,
+              <!-- *;scope=compile|runtime;type=!pom;inline=false -->
+            </Embed-Dependency>
+
+            <Export-Package>
+              <!-- !${bundle.namespace}.internal.*, -->
+              ${bundle.namespace}.*;version="${pom.version}"
+            </Export-Package>
+
+            <Import-Package>
+              !org.apache.avro.*,
+              !javax.jms.*,
+              !javax.mail.*,
+              !javax.servlet.*,
+              !com.sun.*,
+              !org.antlr.*,
+              !jline.*,
+              !sun.misc.*,
+              *;resolution:=optional
+            </Import-Package>
+            <Private-Package>
+              <!-- ${bundle.namespace}.internal.* -->
+            </Private-Package>
+            <_include>-osgi.bnd</_include>
+          </instructions>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <forkMode>always</forkMode>
+          <argLine>-Xmx512M -Xms512M -Dfile.encoding=UTF-8 -Dsun.jnu.encoding=UTF-8</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <!-- Hector dependencies -->
+    <dependency>
+      <groupId>me.prettyprint</groupId>
+      <artifactId>hector-api</artifactId>
+      <version>${parent.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.github.stephenc.eaio-uuid</groupId>
+      <artifactId>uuid</artifactId>
+      <version>3.2.0</version>
+    </dependency>
+
+    <!-- OSGi deps -->
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_core</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi_R4_compendium</artifactId>
+      <version>1.0</version>
+      <scope>provided</scope>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- test dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <profiles>
+    <profile>
+      <id>riptano</id>
+      <distributionManagement>
+        <repository>
+          <id>riptano</id>
+          <name>riptano</name>
+          <url>http://mvn.riptano.com/content/repositories/public/</url>
+        </repository>
+      </distributionManagement>
+    </profile>
+  </profiles>
+  <repositories>
+    <repository>
+      <id>riptano</id>
+      <name>riptano</name>
+      <url>http://mvn.riptano.com/content/repositories/public/</url>
+    </repository>
+    <repository>
+      <id>apache-staging</id>
+      <name>apache-staging</name>
+      <url>https://repository.apache.org/content/repositories/orgapachecassandra-114</url>
+    </repository>
+  </repositories>
+</project>
