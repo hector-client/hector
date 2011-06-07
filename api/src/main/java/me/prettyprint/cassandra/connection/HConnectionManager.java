@@ -1,19 +1,12 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
-import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.*;
-
-import org.apache.cassandra.thrift.AuthenticationRequest;
-import org.apache.cassandra.thrift.Cassandra;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.ecyrd.speed4j.StopWatch;
-import com.ecyrd.speed4j.StopWatchFactory;
-import com.ecyrd.speed4j.log.PeriodicalLog;
+import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.hector.api.exceptions.ExceptionsTranslator;
+import me.prettyprint.hector.api.exceptions.HectorException;
 
 public interface HConnectionManager {
 
@@ -83,6 +76,8 @@ public interface HConnectionManager {
   public String getClusterName();
 
   public void shutdown();
+  
+  public ExceptionsTranslator getExceptionsTranslator();
 
 
 }

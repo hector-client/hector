@@ -1,6 +1,6 @@
-package me.prettyprint.cassandra.model;
+package me.prettyprint.cassandra.service;
 
-import me.prettyprint.cassandra.service.HCassandraHost;
+import me.prettyprint.cassandra.connection.HCassandraHost;
 import me.prettyprint.hector.api.ResultStatus;
 
 
@@ -16,7 +16,7 @@ public class ExecutionResult<T> implements ResultStatus {
 
   private final T value;
   private final long execTime;
-  private final HCassandraHost cassandraHost;
+  private final me.prettyprint.cassandra.connection.HCassandraHost cassandraHost;
   
   protected static final String BASE_MSG_FORMAT = "%s took (%dus) for query (%s) on host: %s";
   private static final int MICRO_DENOM = 1000;

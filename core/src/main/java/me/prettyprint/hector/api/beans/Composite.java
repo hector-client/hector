@@ -3,8 +3,6 @@ package me.prettyprint.hector.api.beans;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import me.prettyprint.hector.api.AbstractComposite;
-
 public class Composite extends AbstractComposite {
 
   public Composite() {

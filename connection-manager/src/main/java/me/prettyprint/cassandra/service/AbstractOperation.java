@@ -3,9 +3,11 @@ package me.prettyprint.cassandra.service;
 import java.util.Collections;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.ExecutionResult;
-import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.connection.jmx.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.connection.HCassandraHost;
+
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.OperationType;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -19,7 +21,8 @@ import org.apache.cassandra.thrift.Cassandra;
  *
  *          Oh closures, how I wish you were here...
  */
-public abstract class Operation<T> {
+public abstract class AbstractOperation<T> implements Operation<T> {
+	
   private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   /** Counts failed attempts */
@@ -41,18 +44,18 @@ public abstract class Operation<T> {
   protected long execTime;
   public final OperationType operationType;
   
-  public Operation(OperationType operationType) {
+  public AbstractOperation(OperationType operationType) {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
     this.operationType = operationType;
     this.stopWatchTagName = operationType.name();
   }
 
-  public Operation(OperationType operationType, Map<String, String> credentials) {
+  public AbstractOperation(OperationType operationType, Map<String, String> credentials) {
     this(operationType, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, null, credentials);
   }
   
-  public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
+  public AbstractOperation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
     this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
     this.operationType = operationType;

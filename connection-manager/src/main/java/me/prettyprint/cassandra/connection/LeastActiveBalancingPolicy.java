@@ -1,13 +1,15 @@
 package me.prettyprint.cassandra.connection;
 
-import me.prettyprint.cassandra.service.CassandraHost;
-
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -25,7 +27,7 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   private static final Logger log = LoggerFactory.getLogger(LeastActiveBalancingPolicy.class);
   
   @Override
-  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {
+  public HClientPool getPool(Collection<HClientPool> pools, Set<HCassandraHost> excludeHosts) {
     List<HClientPool> vals = Lists.newArrayList(pools);
     // shuffle pools to avoid always returning the same one when we are not terribly busy
     Collections.shuffle(vals);
@@ -55,7 +57,7 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   }
   
   @Override
-  public HClientPool createConnection(CassandraHost host) {
+  public HClientPool createConnection(HCassandraHost host) {
 	  return new ConcurrentHClientPool(host);
   }
 }

@@ -36,6 +36,12 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.6.1</version>
         </dependency>
+        
+        <dependency>
+          <groupId>me.prettyprint</groupId>
+          <artifactId>hector-api</artifactId>
+          <version>0.8.0-1-SNAPSHOT</version>
+        </dependency>
 
         <dependency>
             <groupId>me.prettyprint</groupId>

@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.cassandra.connection.jmx;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;

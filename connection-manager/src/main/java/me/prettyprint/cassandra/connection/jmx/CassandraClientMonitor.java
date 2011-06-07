@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.connection;
+package me.prettyprint.cassandra.connection.jmx;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.connection.ConcurrentHClientPool;
+import me.prettyprint.cassandra.connection.HCassandraHost;
+import me.prettyprint.cassandra.connection.HCassandraHostImpl;
 import me.prettyprint.cassandra.connection.HClientPool;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -204,12 +206,12 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   @Override
   public boolean addCassandraHost(String hostStr) {    
-    return connectionManager.addCassandraHost(new HCassandraHost(hostStr));
+    return connectionManager.addCassandraHost(new HCassandraHostImpl(hostStr));
   }
 
   @Override
   public boolean removeCassandraHost(String hostStr) {  
-    return connectionManager.removeCassandraHost(new HCassandraHost(hostStr));
+    return connectionManager.removeCassandraHost(new HCassandraHostImpl(hostStr));
   }
 
   @Override
@@ -224,12 +226,12 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   @Override
   public boolean suspendCassandraHost(String hostStr) {    
-    return connectionManager.suspendCassandraHost(new HCassandraHost(hostStr));
+    return connectionManager.suspendCassandraHost(new HCassandraHostImpl(hostStr));
   }
 
   @Override
   public boolean unsuspendCassandraHost(String hostStr) {
-    return connectionManager.unsuspendCassandraHost(new HCassandraHost(hostStr));
+    return connectionManager.unsuspendCassandraHost(new HCassandraHostImpl(hostStr));
   }
   
   

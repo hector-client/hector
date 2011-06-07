@@ -6,13 +6,9 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-
-import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.ExceptionsTranslator;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,7 +24,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
   public CassandraHostRetryService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
-    this.exceptionsTranslator = connectionManager.exceptionsTranslator;
+    this.exceptionsTranslator = connectionManager.getExceptionsTranslator();
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<HCassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1 
         ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());

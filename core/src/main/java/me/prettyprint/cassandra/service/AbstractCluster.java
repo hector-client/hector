@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import me.prettyprint.cassandra.connection.CassandraClientMonitor;
 import me.prettyprint.cassandra.connection.CassandraHostConfigurator;
 import me.prettyprint.cassandra.connection.HCassandraHost;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.connection.HConnectionManagerImpl;
+import me.prettyprint.cassandra.connection.jmx.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;

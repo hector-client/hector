@@ -3,7 +3,6 @@ package me.prettyprint.cassandra.connection;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 /**
@@ -20,7 +19,7 @@ public class LatencyAwareHClientPool extends ConcurrentHClientPool {
   private static final double SENTINEL_COMPARE = 0.768;
   private final LinkedBlockingDeque<Double> latencies;
 
-  public LatencyAwareHClientPool(CassandraHost host) {
+  public LatencyAwareHClientPool(HCassandraHost host) {
     super(host);
     latencies = new LinkedBlockingDeque<Double>(WINDOW_QUEUE_SIZE);
   }

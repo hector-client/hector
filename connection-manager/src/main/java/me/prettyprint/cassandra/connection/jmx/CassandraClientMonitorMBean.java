@@ -1,8 +1,10 @@
-package me.prettyprint.cassandra.connection;
+package me.prettyprint.cassandra.connection.jmx;
 
 import java.util.List;
 import java.util.Set;
 
+import me.prettyprint.cassandra.connection.ExhaustedPolicy;
+import me.prettyprint.cassandra.connection.HCassandraHost;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 

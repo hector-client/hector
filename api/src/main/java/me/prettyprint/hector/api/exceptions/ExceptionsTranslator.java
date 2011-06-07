@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.service;
+package me.prettyprint.hector.api.exceptions;
 
 import me.prettyprint.hector.api.exceptions.HectorException;
 

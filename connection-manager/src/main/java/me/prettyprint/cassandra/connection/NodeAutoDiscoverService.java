@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Keyspace;
 
 import org.apache.cassandra.thrift.KsDef;
@@ -59,10 +57,10 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     if ( log.isDebugEnabled() ) {
       log.debug("Auto discovery service running...");
     }
-    Set<CassandraHost> foundHosts = discoverNodes();
+    Set<HCassandraHost> foundHosts = discoverNodes();
     if ( foundHosts != null && foundHosts.size() > 0 ) {
       log.info("Found {} new host(s) in Ring", foundHosts.size());
-      for (CassandraHost cassandraHost : foundHosts) {
+      for (HCassandraHost cassandraHost : foundHosts) {
         log.info("Addding found host {} to pool", cassandraHost);
         cassandraHostConfigurator.applyConfig(cassandraHost);
         connectionManager.addCassandraHost(cassandraHost);
@@ -73,9 +71,9 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     }
   }
 
-  public Set<CassandraHost> discoverNodes() {
-    Set<CassandraHost> existingHosts = connectionManager.getHosts();
-    Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
+  public Set<HCassandraHost> discoverNodes() {
+    Set<HCassandraHost> existingHosts = connectionManager.getHosts();
+    Set<HCassandraHost> foundHosts = new HashSet<HCassandraHost>();
 
     HThriftClient thriftClient = null;
     log.info("using existing hosts {}", existingHosts);
@@ -87,7 +85,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
           List<TokenRange> tokenRanges = thriftClient.getCassandra().describe_ring(keyspace.getName());
           for (TokenRange tokenRange : tokenRanges) {
             for (String host : tokenRange.getEndpoints()) {
-              CassandraHost foundHost = new CassandraHost(host,cassandraHostConfigurator.getPort());
+              HCassandraHost foundHost = new HCassandraHostImpl(host,cassandraHostConfigurator.getPort());
               if ( !existingHosts.contains(foundHost) ) {
                 log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
                 foundHosts.add(foundHost);

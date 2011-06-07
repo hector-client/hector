@@ -9,9 +9,6 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-
 /**
  * Keep track of how often a node replies with a HTimeoutException. If we go 
  * past the threshold of [timeoutCounter] timeouts within [timeWindow] milliseconds,
@@ -27,8 +24,8 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 public class HostTimeoutTracker extends BackgroundCassandraHostService {
   private static final Logger log = LoggerFactory.getLogger(HostTimeoutTracker.class);
 
-  private ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> timeouts;
-  private ConcurrentHashMap<CassandraHost, Long> suspended;
+  private ConcurrentHashMap<HCassandraHost, LinkedBlockingQueue<Long>> timeouts;
+  private ConcurrentHashMap<HCassandraHost, Long> suspended;
   private int timeoutCounter;
   private int timeoutWindow;
   private int nodeSuspensionDurationInSeconds;
@@ -43,15 +40,15 @@ public class HostTimeoutTracker extends BackgroundCassandraHostService {
       CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
     retryDelayInSeconds = cassandraHostConfigurator.getHostTimeoutUnsuspendCheckDelay();
-    timeouts = new ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>>();
-    suspended = new ConcurrentHashMap<CassandraHost, Long>();
+    timeouts = new ConcurrentHashMap<HCassandraHost, LinkedBlockingQueue<Long>>();
+    suspended = new ConcurrentHashMap<HCassandraHost, Long>();
     sf = executor.scheduleWithFixedDelay(new Unsuspender(), retryDelayInSeconds,retryDelayInSeconds, TimeUnit.SECONDS);
     timeoutCounter = cassandraHostConfigurator.getHostTimeoutCounter();
     timeoutWindow = cassandraHostConfigurator.getHostTimeoutWindow();
     nodeSuspensionDurationInSeconds = cassandraHostConfigurator.getHostTimeoutSuspensionDurationInSeconds();
   }
 
-  public boolean checkTimeout(CassandraHost cassandraHost) {
+  public boolean checkTimeout(HCassandraHost cassandraHost) {
     timeouts.putIfAbsent(cassandraHost, new LinkedBlockingQueue<Long>());
     long currentTimeMillis = System.currentTimeMillis();
     timeouts.get(cassandraHost).add(currentTimeMillis);
@@ -72,8 +69,8 @@ public class HostTimeoutTracker extends BackgroundCassandraHostService {
 
     @Override
     public void run() {
-      for (Iterator<Entry<CassandraHost,Long>> iterator = suspended.entrySet().iterator(); iterator.hasNext();) {
-        Entry<CassandraHost,Long> vals = iterator.next();
+      for (Iterator<Entry<HCassandraHost,Long>> iterator = suspended.entrySet().iterator(); iterator.hasNext();) {
+        Entry<HCassandraHost,Long> vals = iterator.next();
         if ( vals.getValue() < (System.currentTimeMillis() - (nodeSuspensionDurationInSeconds * 1000)) ) {
           connectionManager.unsuspendCassandraHost(vals.getKey());
           iterator.remove();          

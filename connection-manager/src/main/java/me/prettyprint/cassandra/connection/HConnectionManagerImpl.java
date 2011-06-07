@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import java.util.*;
 
+import me.prettyprint.cassandra.connection.jmx.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.*;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.hector.api.ClockResolution;
@@ -37,7 +38,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
   private CassandraClientMonitor monitor;
 
 
-  public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
+  public HConnectionManagerImpl(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new NonBlockingHashMap<HCassandraHost, HClientPool>();
@@ -378,6 +379,11 @@ public class HConnectionManagerImpl implements HConnectionManager {
         log.error("Out of order in HConnectionManager shutdown()?: {}", iae.getMessage());
       }
     }
+  }
+
+  @Override
+  public ExceptionsTranslator getExceptionsTranslator() {
+    return exceptionsTranslator;
   }
 
 
