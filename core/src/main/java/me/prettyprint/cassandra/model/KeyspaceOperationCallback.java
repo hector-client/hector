@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.service.ExecutionResult;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.exceptions.HectorException;
 

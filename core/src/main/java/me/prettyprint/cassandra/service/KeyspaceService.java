@@ -4,7 +4,9 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.connection.HCassandraHost;
 import me.prettyprint.hector.api.HConsistencyLevel;
+import me.prettyprint.hector.api.OperationType;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 

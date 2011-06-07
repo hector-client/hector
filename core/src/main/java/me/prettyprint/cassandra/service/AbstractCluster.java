@@ -10,10 +10,13 @@ import me.prettyprint.cassandra.connection.HCassandraHost;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.connection.HConnectionManagerImpl;
 import me.prettyprint.cassandra.connection.jmx.CassandraClientMonitor;
+import me.prettyprint.cassandra.connection.jmx.JmxMonitor;
 import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.exceptions.ExceptionsTranslator;
+import me.prettyprint.hector.api.exceptions.ExceptionsTranslatorImpl;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Cassandra;

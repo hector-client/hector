@@ -4,8 +4,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
-import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
+import me.prettyprint.cassandra.service.ExecutionResult;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
@@ -13,6 +12,8 @@ import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.exceptions.ExceptionsTranslator;
+import me.prettyprint.hector.api.exceptions.ExceptionsTranslatorImpl;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 /**
@@ -31,7 +32,7 @@ public class ExecutingKeyspace implements Keyspace {
   protected final HConnectionManager connectionManager;
   protected final String keyspace;
   protected final Map<String, String> credentials;
-  private final ExceptionsTranslator exceptionTranslator;
+  private final me.prettyprint.hector.api.exceptions.ExceptionsTranslator exceptionTranslator;
 
   public ExecutingKeyspace(String keyspace,
       HConnectionManager connectionManager,

@@ -10,8 +10,6 @@ import me.prettyprint.cassandra.clock.MillisecondsClockResolution;
 import me.prettyprint.cassandra.clock.SecondsClockResolution;
 import me.prettyprint.hector.api.ClockResolution;
 
-
-import org.junit.Before;
 import org.junit.Test;
 
 public class ClockUtilsTest {
