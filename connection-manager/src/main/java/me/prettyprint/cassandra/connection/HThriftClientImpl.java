@@ -194,4 +194,9 @@ public class HThriftClientImpl implements HThriftClient {
 
 
   private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
+
+  @Override
+  public HCassandraHost getHCassandraHost() {
+    return cassandraHost;
+  }
 }

@@ -12,6 +12,8 @@ public interface HThriftClient {
   public Cassandra.Client getCassandra();
 
   public Cassandra.Client getCassandra(String keyspaceNameArg);
+  
+  public HCassandraHost getHCassandraHost();
 
   HThriftClient close();
 

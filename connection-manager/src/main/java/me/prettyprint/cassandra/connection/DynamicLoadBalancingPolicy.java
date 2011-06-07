@@ -10,8 +10,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import me.prettyprint.cassandra.service.CassandraHost;
-
 import org.apache.cassandra.concurrent.RetryingScheduledThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +60,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   }
 
   @Override
-  public HClientPool getPool(Collection<HClientPool> pools, Set<CassandraHost> excludeHosts) {
+  public HClientPool getPool(Collection<HClientPool> pools, Set<HCassandraHost> excludeHosts) {
     List<HClientPool> poolList = Lists.newArrayList(pools);
 
     // remove the hosts from the list.
@@ -86,7 +84,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
     return poolList.get(0);
   }
 
-  private void filter(List<HClientPool> from, Set<CassandraHost> subList) {
+  private void filter(List<HClientPool> from, Set<HCassandraHost> subList) {
     Iterator<HClientPool> it = from.iterator();
     while (it.hasNext()) {
       if (subList.contains(it.next().getCassandraHost()))
@@ -107,7 +105,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   }
 
   @Override
-  public HClientPool createConnection(CassandraHost host) {
+  public HClientPool createConnection(HCassandraHost host) {
     LatencyAwareHClientPool pool = new LatencyAwareHClientPool(host);
     add(pool);
     return pool;

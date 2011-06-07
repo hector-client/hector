@@ -3,8 +3,9 @@ package me.prettyprint.cassandra.connection;
 import java.util.*;
 
 import me.prettyprint.cassandra.connection.jmx.CassandraClientMonitor;
+import me.prettyprint.cassandra.connection.jmx.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.connection.jmx.JmxMonitor;
 import me.prettyprint.cassandra.service.*;
-import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.exceptions.*;
 
@@ -197,7 +198,11 @@ public class HConnectionManagerImpl implements HConnectionManager {
   }
 
 
-  public void operateWithFailover(Operation<?> op) throws HectorException {
+  public void operateWithFailover(Operation<?> iOp) throws HectorException {
+    
+    // TODO (patricioe) review this cast
+    AbstractOperation op = (AbstractOperation<?>) iOp;
+    
     final StopWatch stopWatch = stopWatchFactory.getStopWatch();
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HThriftClient client = null;
@@ -284,7 +289,7 @@ public class HConnectionManagerImpl implements HConnectionManager {
    * we are configured for such AND there is more than one operating host pool
    * @param cassandraHost
    */
-  private void doTimeoutCheck(CassandraHost cassandraHost) {
+  private void doTimeoutCheck(HCassandraHost cassandraHost) {
     if ( hostTimeoutTracker != null && hostPools.size() > 1) {
       if (hostTimeoutTracker.checkTimeout(cassandraHost) ) {
         suspendCassandraHost(cassandraHost);
@@ -317,9 +322,9 @@ public class HConnectionManagerImpl implements HConnectionManager {
     return loadBalancingPolicy.getPool(hostPoolValues, excludeHosts);    
   }
 
-  void releaseClient(HThriftClient client) {
+  public void releaseClient(HThriftClient client) {
     if ( client == null ) return;
-    HClientPool pool = hostPools.get(client.cassandraHost);
+    HClientPool pool = hostPools.get(client.getHCassandraHost());
     if ( pool != null ) {
       pool.releaseClient(client);
     } else {
