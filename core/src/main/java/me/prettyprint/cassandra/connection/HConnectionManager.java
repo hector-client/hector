@@ -218,7 +218,7 @@ public class HConnectionManager {
 
         op.executeAndSetResult(c, pool.getCassandraHost());
         success = true;
-        stopWatch.stop(op.stopWatchTagName + ".success_");
+        stopWatch.stop(op.stopWatchTagName.concat(".success_"));
         break;
 
       } catch (Exception ex) {
@@ -271,7 +271,7 @@ public class HConnectionManager {
         --retries;
         if ( !success ) {
           monitor.incCounter(op.failCounter);
-          stopWatch.stop(op.stopWatchTagName + ".fail_");
+          stopWatch.stop(op.stopWatchTagName.concat(".fail_"));
         }
         releaseClient(client);
       }
