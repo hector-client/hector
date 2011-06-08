@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 
+import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -67,6 +68,14 @@ public class ThriftKsDef implements KeyspaceDefinition {
     return l;
   }
 
+  public void addCfDef(CfDef cfDef) {
+    cfDefs.add(new ThriftCfDef(cfDef));
+  }
+  
+  public void addColumnFamilyDefinition(ColumnFamilyDefinition columnFamilyDefinition) {
+    cfDefs.add(new ThriftCfDef(columnFamilyDefinition));
+  }
+  
   @Override
   public String getName() {
     return name;
