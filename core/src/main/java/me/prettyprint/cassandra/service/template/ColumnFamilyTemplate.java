@@ -172,8 +172,18 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     predicate.setColumnNames(columns);        
     return doExecuteSlice(key, predicate, mapper);
   }
+  
+  public ColumnFamilyResult<K, N> queryColumns(K key, List<N> columns) {
+    HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);
+    predicate.setColumnNames(columns);        
+    return doExecuteSlice(key, predicate);
+  }
 
+  public ColumnFamilyResult<K, N> queryColumns(K key, HSlicePredicate<N> predicate) {
+    return doExecuteSlice(key, predicate);
+  }
 
+  
   public <V> MappedColumnFamilyResult<K,N,V> queryColumns(Iterable<K> keys,
       ColumnFamilyRowMapper<K, N, V> mapper) {    
     return doExecuteMultigetSlice(keys, activeSlicePredicate, mapper);
