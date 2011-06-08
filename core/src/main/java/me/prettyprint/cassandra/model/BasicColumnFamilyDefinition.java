@@ -63,6 +63,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
         : new ArrayList<ColumnDefinition>();
     gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
     defaultValidationClass = columnFamilyDefinition.getDefaultValidationClass();
+    keyValidationClass = columnFamilyDefinition.getKeyValidationClass();
     id = columnFamilyDefinition.getId();
     minCompactionThreshold = columnFamilyDefinition.getMinCompactionThreshold();
     maxCompactionThreshold = columnFamilyDefinition.getMaxCompactionThreshold();
