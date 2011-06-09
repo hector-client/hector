@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.UUID;
 
@@ -34,6 +35,8 @@ public class SerializerTypeInferer {
       serializer = BooleanSerializer.get();
     } else if (value instanceof byte[]) {
       serializer = BytesArraySerializer.get();
+    } else if (value instanceof ByteBuffer ) {
+      serializer = ByteBufferSerializer.get();
     } else if (value instanceof Date) {
       serializer = DateSerializer.get();
     } else {
@@ -59,6 +62,8 @@ public class SerializerTypeInferer {
         || valueClass.equals(boolean.class)) {
       serializer = BooleanSerializer.get();
     } else if (valueClass.equals(byte[].class)) {
+      serializer = ByteBufferSerializer.get();
+    } else if (valueClass.equals(ByteBuffer.class)) {
       serializer = ByteBufferSerializer.get();
     } else if (valueClass.equals(Date.class)) {
       serializer = DateSerializer.get();
