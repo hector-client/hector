@@ -27,10 +27,12 @@ public class ComparatorType {
       "org.apache.cassandra.db.marshal.DynamicCompositeType");
   public static ComparatorType UUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.UUIDType");
+  public static ComparatorType COUNTERTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.CounterColumnType");
 
   private static ComparatorType[] values = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
       LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-      UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE };
+      UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
 
   private final String className;
   private final String typeName;
