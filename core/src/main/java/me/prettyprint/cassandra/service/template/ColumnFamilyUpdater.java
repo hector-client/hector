@@ -110,4 +110,8 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
         template.getTopSerializer(), serializer);
     template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
+  
+  public <V> void setColumn(HColumn<N, V> column) {
+    template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+  }
 }
