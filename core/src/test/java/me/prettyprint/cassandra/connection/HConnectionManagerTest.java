@@ -29,6 +29,8 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     assertEquals(0,connectionManager.getActivePools().size());
     assertTrue(connectionManager.addCassandraHost(cassandraHost));
     assertEquals(1,connectionManager.getActivePools().size());
+    connectionManager.markHostAsDown(cassandraHost);
+    assertTrue(connectionManager.removeCassandraHost(cassandraHost));
   }
   
   @Test 
