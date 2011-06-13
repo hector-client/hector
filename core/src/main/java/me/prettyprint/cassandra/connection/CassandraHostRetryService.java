@@ -60,6 +60,10 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     }
   }
 
+  public boolean remove(CassandraHost cassandraHost) {
+      return downedHostQueue.remove(cassandraHost);
+  }
+  
   public boolean contains(CassandraHost cassandraHost) {
     return downedHostQueue.contains(cassandraHost);
   }
