@@ -116,8 +116,12 @@ public class HConnectionManager {
    * Remove the {@link CassandraHost} from the pool, bypassing retry service. This
    * would be called on a host that is known to be going away. Gracefully shuts down
    * the underlying connections via {@link HClientPool#shutdown()}. This method
-   * will also shutdown pools in the suspended state, removing them from the underlying
-   * suspended map.
+   * will also:
+   * <ul>
+   * <li>shutdown pools in the suspended state, removing them from the underlying
+   * suspended map.</li>
+   * <li>remove hosts from {@link CassandraHostRetryService} if contained therein</li></ul>
+   * 
    * @param cassandraHost
    */
   public boolean removeCassandraHost(CassandraHost cassandraHost) {
@@ -134,6 +138,11 @@ public class HConnectionManager {
         removed = false;
         log.info("removeCassandraHost attempt miss for CassandraHost {} May have been beaten by another thread?", cassandraHost);
       }
+    } else if ( cassandraHostRetryService != null && cassandraHostRetryService.contains(cassandraHost)) {
+        log.info("Host {} not in active pools, but found in retry service.", cassandraHost);
+        removed = cassandraHostRetryService.remove(cassandraHost);
+    } else {
+        log.info("Remove requested on a host that was not found in active or disabled pools: {}", cassandraHost);    
     }
     log.info("Remove status for CassandraHost pool {} was {}", cassandraHost, removed);
     return removed;
