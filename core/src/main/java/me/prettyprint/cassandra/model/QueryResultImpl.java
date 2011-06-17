@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.query.Query;
 import me.prettyprint.hector.api.query.QueryResult;
 
@@ -12,9 +13,14 @@ import me.prettyprint.hector.api.query.QueryResult;
 public final class QueryResultImpl<T> extends ExecutionResult<T> implements QueryResult<T> {
 
   private final Query<T> query;
+  
+  public QueryResultImpl(T value, long execTime, CassandraHost cassandraHost, Query<T> query) {
+    super(value, execTime, cassandraHost);
+    this.query = query;  
+  }
 
   public QueryResultImpl(ExecutionResult<T> res, Query<T> query) {
-    super(res.get(), res.getExecutionTimeMicro(), res.getHostUsed());
+    super(res.get(), res.getExecutionTimeNano(), res.getHostUsed());
     this.query = query;
   }
 
