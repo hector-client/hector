@@ -54,11 +54,19 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
 
   @Override
   public String updateKeyspace(final KeyspaceDefinition ksdef) throws HectorException {
+    return updateKeyspace(ksdef, false);
+  }
+  
+  public String updateKeyspace(final KeyspaceDefinition ksdef, final boolean blockUntilComplete) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.system_update_keyspace(((ThriftKsDef) ksdef).toThrift());
+          String schemaId = cassandra.system_update_keyspace(((ThriftKsDef) ksdef).toThrift());
+          if (blockUntilComplete) {
+            waitForSchemaAgreement(cassandra);
+          }
+          return schemaId;
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -70,6 +78,11 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
 
   @Override
   public String addColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException {
+    return addColumnFamily(cfdef, false);
+  }
+  
+  @Override
+  public String addColumnFamily(final ColumnFamilyDefinition cfdef, final boolean blockUntilComplete) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE,
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE,
         cfdef.getKeyspaceName(), 
@@ -77,7 +90,12 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.system_add_column_family(((ThriftCfDef) cfdef).toThrift());
+        	
+          String schemaId = cassandra.system_add_column_family(((ThriftCfDef) cfdef).toThrift());
+          if (blockUntilComplete) {
+            waitForSchemaAgreement(cassandra);
+          }
+          return schemaId;
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -86,9 +104,14 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
     connectionManager.operateWithFailover(op);
     return op.getResult();
   }
-
+  
   @Override
   public String updateColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException {
+    return updateColumnFamily(cfdef, false);
+  }
+  
+  @Override
+  public String updateColumnFamily(final ColumnFamilyDefinition cfdef, final boolean blockUntilComplete) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE,
         FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE,
         cfdef.getKeyspaceName(), 
@@ -96,7 +119,11 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.system_update_column_family(((ThriftCfDef) cfdef).toThrift());
+          String schemaId = cassandra.system_update_column_family(((ThriftCfDef) cfdef).toThrift());
+          if (blockUntilComplete) {
+            waitForSchemaAgreement(cassandra);
+          }
+          return schemaId;
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -108,11 +135,20 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
   
   @Override
   public String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException {
+    return addKeyspace(ksdef, false);
+  }
+  
+  @Override
+  public String addKeyspace(final KeyspaceDefinition ksdef, final boolean blockUntilComplete) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.system_add_keyspace(((ThriftKsDef) ksdef).toThrift());
+          String schemaId = cassandra.system_add_keyspace(((ThriftKsDef) ksdef).toThrift());
+          if (blockUntilComplete) {
+            waitForSchemaAgreement(cassandra);
+          }
+          return schemaId;
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
