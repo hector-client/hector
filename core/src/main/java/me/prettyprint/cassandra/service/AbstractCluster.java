@@ -1,18 +1,20 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
-import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.InvalidRequestException;
+import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +44,11 @@ public abstract class AbstractCluster implements Cluster {
   private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
 
   private final Logger log = LoggerFactory.getLogger(AbstractCluster.class);
+  
+  /**
+   * Linked to Cassandra StorageProxy.
+   */
+  private static final int RING_DELAY = 30 * 1000; // delay after which we assume ring has stablized
 
   protected final HConnectionManager connectionManager;
   private final String name;
@@ -205,11 +212,20 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public String dropKeyspace(final String keyspace) throws HectorException {
+    return dropKeyspace(keyspace, false);
+  }
+  
+  @Override
+  public String dropKeyspace(final String keyspace, final boolean blockUntilComplete) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          return cassandra.system_drop_keyspace(keyspace);
+          String schemaId = cassandra.system_drop_keyspace(keyspace);
+          if (blockUntilComplete) {
+            waitForSchemaAgreement(cassandra);
+          }
+          return schemaId;
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -239,14 +255,22 @@ public abstract class AbstractCluster implements Cluster {
     return op.getResult();
   }
 
-
   @Override
   public String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException {
+    return dropColumnFamily(keyspaceName, columnFamily, false);
+  }
+
+  @Override
+  public String dropColumnFamily(final String keyspaceName, final String columnFamily,  final boolean blockUntilComplete) throws HectorException {
     Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {
-          return cassandra.system_drop_column_family(columnFamily);
+        try {          
+          String schemaId = cassandra.system_drop_column_family(columnFamily);
+          if (blockUntilComplete) {
+            waitForSchemaAgreement(cassandra);
+          }
+          return schemaId;
         } catch (Exception e) {
           throw xtrans.translate(e);
         }
@@ -255,6 +279,7 @@ public abstract class AbstractCluster implements Cluster {
     connectionManager.operateWithFailover(op);
     return op.getResult();
   }
+
 
   @Override
   public Map<String, String> getCredentials() {
@@ -276,9 +301,24 @@ public abstract class AbstractCluster implements Cluster {
     };
     connectionManager.operateWithFailover(op);
   }
-  
-  
 
-    
+  
+  protected static void waitForSchemaAgreement(Cassandra.Client cassandra) throws InvalidRequestException, TException, InterruptedException {
+    int waited = 0;
+    int versions = 0;
+    while (versions != 1) {
+      ArrayList<String> liveschemas = new ArrayList<String>();
+      Map<String, List<String>> schema = cassandra.describe_schema_versions();
+      for (Map.Entry<String, List<String>> entry : schema.entrySet()) {
+        if (!entry.getKey().equals("UNREACHABLE"))
+          liveschemas.add(entry.getKey());
+      }
+      versions = liveschemas.size();
+      Thread.sleep(1000);
+      waited += 1000;
+      if (waited > RING_DELAY)
+        throw new RuntimeException("Could not reach schema agreement in " + RING_DELAY + "ms");
+    }
+  }
 
 }

@@ -90,6 +90,11 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     cassandraCluster.addColumnFamily(cfDef);
     String cfid2 = cassandraCluster.dropColumnFamily("Keyspace1", "DynCf");
     assertNotNull(cfid2);
+    
+    // Let's wait for agreement
+    cassandraCluster.addColumnFamily(cfDef, true);
+    cfid2 = cassandraCluster.dropColumnFamily("Keyspace1", "DynCf", true);
+    assertNotNull(cfid2);
   }
   
   @Test
@@ -113,6 +118,11 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
         new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)));
 
     String ksid2 = cassandraCluster.dropKeyspace("DynKeyspace");
+    assertNotNull(ksid2);
+    
+    // Now let's wait for schema agreement.
+    cassandraCluster.addKeyspace(new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)), true);
+    ksid2 = cassandraCluster.dropKeyspace("DynKeyspace", true);
     assertNotNull(ksid2);
   }
   
