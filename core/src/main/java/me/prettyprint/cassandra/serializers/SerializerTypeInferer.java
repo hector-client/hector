@@ -17,7 +17,7 @@ import me.prettyprint.hector.api.Serializer;
 public class SerializerTypeInferer {
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public static <T> Serializer<T> getSerializer(Object value) {
+  public static <T> Serializer<T> getSerializer(T value) {
     Serializer serializer = null;
     if (value == null) {
       serializer = ByteBufferSerializer.get();

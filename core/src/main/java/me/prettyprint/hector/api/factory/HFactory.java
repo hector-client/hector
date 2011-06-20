@@ -36,6 +36,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.ThriftCfDef;
@@ -315,6 +316,36 @@ public final class HFactory {
         keyPrefixSerializer, cluster.getConnectionManager(),
         consistencyLevelPolicy, failoverPolicy, credentials);
   }
+  
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
+      E keyPrefix, Cluster cluster) {
+    return createVirtualKeyspace(keyspace, keyPrefix,
+        SerializerTypeInferer.getSerializer(keyPrefix),
+        cluster, createDefaultConsistencyLevelPolicy(),
+        FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
+  }
+  
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
+      E keyPrefix, Cluster cluster,
+      ConsistencyLevelPolicy consistencyLevelPolicy) {
+    return createVirtualKeyspace(keyspace, keyPrefix,
+        cluster, consistencyLevelPolicy,
+        FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE);
+  }
+
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
+      E keyPrefix, Cluster cluster, ConsistencyLevelPolicy consistencyLevelPolicy,
+      FailoverPolicy failoverPolicy) {
+    return createVirtualKeyspace(keyspace, keyPrefix, cluster,
+        consistencyLevelPolicy, failoverPolicy, cluster.getCredentials());
+  }
+
+  public static <E> Keyspace createVirtualKeyspace(String keyspace,
+      E keyPrefix, Cluster cluster, ConsistencyLevelPolicy consistencyLevelPolicy,
+      FailoverPolicy failoverPolicy, Map<String, String> credentials) {
+    return createVirtualKeyspace(keyspace, keyPrefix, cluster,
+        consistencyLevelPolicy, failoverPolicy, credentials);
+  }
 
   public static ConsistencyLevelPolicy createDefaultConsistencyLevelPolicy() {
     return DEFAULT_CONSISTENCY_LEVEL_POLICY;
@@ -531,10 +562,29 @@ public final class HFactory {
     return new HSuperColumnImpl<SN, N, V>(name, columns, clock,
         superNameSerializer, nameSerializer, valueSerializer);
   }
+
+  public static <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
+      List<HColumn<N, V>> columns) {
+    return createSuperColumn(name, columns, createClock());
+  }
+
+  public static <SN, N, V> HSuperColumn<SN, N, V> createSuperColumn(SN name,
+      List<HColumn<N, V>> columns, long clock) {
+    HColumn<N,V> c = columns.get(0);
+    return new HSuperColumnImpl<SN, N, V>(name, columns, clock,
+        SerializerTypeInferer.getSerializer(name), SerializerTypeInferer.getSerializer(c.getName()),
+        SerializerTypeInferer.getSerializer(c.getValue()));
+  }
   
   public static <SN, N> HCounterSuperColumn<SN, N> createCounterSuperColumn(SN name,
       List<HCounterColumn<N>> columns, Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
     return new HCounterSuperColumnImpl<SN, N>(name, columns, superNameSerializer, nameSerializer);
+  }
+  
+  public static <SN, N> HCounterSuperColumn<SN, N> createCounterSuperColumn(SN name,
+      List<HCounterColumn<N>> columns) {
+    return new HCounterSuperColumnImpl<SN, N>(name, columns, SerializerTypeInferer.getSerializer(name),
+        SerializerTypeInferer.getSerializer(columns.get(0).getName()));
   }
 
   public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
@@ -557,6 +607,11 @@ public final class HFactory {
     return new HColumnImpl<N, V>(name, value, createClock(), nameSerializer,
         valueSerializer);
   }
+  
+  public static <N, V> HColumn<N, V> createColumn(N name, V value) {
+    return new HColumnImpl<N, V>(name, value, createClock(), SerializerTypeInferer.getSerializer(name),
+        SerializerTypeInferer.getSerializer(value));
+  }
 
   /**
    * Creates a column with the clock of now
@@ -571,10 +626,10 @@ public final class HFactory {
    * Convienience method for creating a column with a String name and String
    * value
    */
+  @Deprecated
   public static HColumn<String, String> createStringColumn(String name,
       String value) {
-    StringSerializer se = StringSerializer.get();
-    return createColumn(name, value, se, se);
+    return createColumn(name, value);
   }
   
   /**
@@ -584,12 +639,16 @@ public final class HFactory {
     return new HCounterColumnImpl<N>(name, value, nameSerializer);
   }
   
+  public static <N> HCounterColumn<N> createCounterColumn(N name, long value) {
+    return new HCounterColumnImpl<N>(name, value, SerializerTypeInferer.getSerializer(name));
+  }
+  
   /**
    * Convenient method for creating a counter column with a String name and long value
    */
+  @Deprecated
   public static HCounterColumn<String> createCounterColumn(String name, long value) {
-    StringSerializer se = StringSerializer.get();
-    return createCounterColumn(name, value, se);
+    return createCounterColumn(name, value);
   }
 
   /**
