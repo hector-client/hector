@@ -17,8 +17,8 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 public class ThriftCfDef implements ColumnFamilyDefinition {
 
-  private final String keyspace;
-  private final String name;
+  private String keyspace;
+  private String name;
   private ColumnType columnType;
   private ComparatorType comparatorType;
   private ComparatorType subComparatorType;
@@ -305,6 +305,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   public void setColumnMetadata(List<ColumnDefinition> columnMetadata) {
     this.columnMetadata = columnMetadata;
   }
+  
+  @Override
+  public void addColumnDefinition(ColumnDefinition columnDefinition) {
+    this.columnMetadata.add(columnDefinition);
+  }
 
   public void setGcGraceSeconds(int gcGraceSeconds) {
     this.gcGraceSeconds = gcGraceSeconds;
@@ -378,4 +383,15 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   public void setReplicateOnWrite(boolean replicateOnWrite) {
     this.replicateOnWrite = replicateOnWrite;
   }
+
+  @Override
+  public void setKeyspaceName(String keyspaceName) {
+    this.keyspace = keyspaceName;
+  }
+
+  @Override
+  public void setName(String name) {
+    this.name = name;
+  }
+
 }
