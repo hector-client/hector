@@ -61,7 +61,8 @@ public final class ThriftMultigetSliceQuery<K, N, V> extends AbstractSliceQuery<
           public Rows<K, N,V> doInKeyspace(KeyspaceService ks) throws HectorException {
             List<ByteBuffer> keysList = new ArrayList<ByteBuffer>();
             for (K k : keys) {
-              keysList.add(keySerializer.toByteBuffer(k));
+              if ( k !=null )
+                keysList.add(keySerializer.toByteBuffer(k));
             }
             ColumnParent columnParent = new ColumnParent(columnFamilyName);
             Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(
