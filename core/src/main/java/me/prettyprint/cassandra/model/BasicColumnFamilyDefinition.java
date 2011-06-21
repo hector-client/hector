@@ -149,7 +149,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.replicateOnWrite = replicateOnWrite;
   }
 
-    public void addColumnDefinition( ColumnDefinition columnDefinition){
+  public void addColumnDefinition( ColumnDefinition columnDefinition){
     this.columnDefinitions.add( columnDefinition );
   }
 
