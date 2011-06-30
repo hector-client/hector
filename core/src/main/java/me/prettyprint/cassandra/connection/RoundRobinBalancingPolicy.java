@@ -20,10 +20,10 @@ import me.prettyprint.cassandra.service.CassandraHost;
 public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
 
   private static final long serialVersionUID = 1107204068032227079L;
-  private AtomicInteger counter;
+  private int counter;
   
   public RoundRobinBalancingPolicy() {
-    counter = new AtomicInteger();
+    counter = 0;
   }
   
   @Override
@@ -49,8 +49,18 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   }
     
   private int getAndIncrement(int size) {
-    counter.compareAndSet(16384, 0);
-    return counter.getAndIncrement() % size;    
+    int counterToReturn;
+    
+    // There should not be that much of contention here as
+    // the "if" statement plus the increment is executed real fast.
+    synchronized (this) {
+      if (counter >= 16384) {
+        counter = 0;
+      }
+      counterToReturn = counter++;
+    }
+
+    return counterToReturn % size;
   }
 
   @Override
