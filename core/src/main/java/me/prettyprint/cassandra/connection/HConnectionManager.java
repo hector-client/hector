@@ -333,6 +333,9 @@ public class HConnectionManager {
   void releaseClient(HThriftClient client) {
     if ( client == null ) return;
     HClientPool pool = hostPools.get(client.cassandraHost);
+    if ( pool == null ) {
+      pool = suspendedHostPools.get(client.cassandraHost);
+    }
     if ( pool != null ) {
       pool.releaseClient(client);
     } else {
