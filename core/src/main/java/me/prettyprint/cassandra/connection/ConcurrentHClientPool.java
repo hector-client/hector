@@ -138,7 +138,7 @@ public HThriftClient borrowClient() throws HectorException {
     if (!active.compareAndSet(true, false) ) {
       throw new IllegalArgumentException("shutdown() called for inactive pool: " + getName());
     }
-    log.error("Shutdown triggered on {}", getName());
+    log.info("Shutdown triggered on {}", getName());
     Set<HThriftClient> clients = new HashSet<HThriftClient>();
     availableClientQueue.drainTo(clients);
     if ( clients.size() > 0 ) {
@@ -146,7 +146,7 @@ public HThriftClient borrowClient() throws HectorException {
         hThriftClient.close();
       }
     }
-    log.error("Shutdown complete on {}", getName());
+    log.info("Shutdown complete on {}", getName());
   }
 
 @Override
