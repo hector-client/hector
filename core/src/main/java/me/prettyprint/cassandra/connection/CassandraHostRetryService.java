@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,8 @@ import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Sets;
 
 public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
@@ -89,23 +92,32 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
     @Override
     public void run() {
-      CassandraHost cassandraHost = downedHostQueue.poll();
-      if ( cassandraHost == null ) {
-        if ( log.isDebugEnabled() ) { 
+      if( downedHostQueue.isEmpty()) {
           log.debug("Retry service fired... nothing to do.");
-        }
-        return;
+          return;
+      }  
+      Set<CassandraHost> alreadyTried = Sets.newHashSet();
+      Iterator<CassandraHost> iter = downedHostQueue.iterator();
+      while( iter.hasNext() ) {
+         CassandraHost cassandraHost = iter.next();
+         if( cassandraHost == null ) {
+             continue;
+         }
+         if( !alreadyTried.add(cassandraHost) ) {
+             iter.remove();
+             continue;
+         }
+         boolean reconnected = verifyConnection(cassandraHost);
+         log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
+         if ( reconnected ) {
+           connectionManager.addCassandraHost(cassandraHost);
+           //we can't call iter.remove() based on return value of connectionManager.addCassandraHost, since
+           //that returns false if an error occurs, or if the host already exists
+           if(connectionManager.getHosts().contains(cassandraHost)) {
+               iter.remove();
+           }
+         }
       }
-      
-      boolean reconnected = verifyConnection(cassandraHost);
-      log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
-      if ( reconnected ) {
-        reconnected = connectionManager.addCassandraHost(cassandraHost);
-      }
-      if ( !reconnected && cassandraHost != null ) {
-        downedHostQueue.add(cassandraHost);
-      }
-
     }
 
     private boolean verifyConnection(CassandraHost cassandraHost) {
