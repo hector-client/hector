@@ -14,11 +14,17 @@
         <constructor-arg value="TestCluster"/>
         <constructor-arg ref="cassandraHostConfigurator"/>
     </bean>
+
+    <bean id="consistencyLevelPolicy" class="me.prettyprint.cassandra.model.ConfigurableConsistencyLevel"> 
+        <property name="defaultReadConsistencyLevel" value="ONE"/>
+    </bean>
     
     <bean id="keyspaceOperator" class="me.prettyprint.hector.api.factory.HFactory" factory-method="createKeyspace">
         <constructor-arg value="Keyspace1"/>
         <constructor-arg ref="cluster"/>
+        <constructor-arg ref="consistencyLevelPolicy"/>
     </bean>
+
 
     <bean id="simpleCassandraDao" class="me.prettyprint.cassandra.dao.SimpleCassandraDao">
         <property name="keyspace" ref="keyspaceOperator"/>
