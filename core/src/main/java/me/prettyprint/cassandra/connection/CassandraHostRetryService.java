@@ -96,15 +96,10 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           log.debug("Retry service fired... nothing to do.");
           return;
       }  
-      Set<CassandraHost> alreadyTried = Sets.newHashSet();
       Iterator<CassandraHost> iter = downedHostQueue.iterator();
       while( iter.hasNext() ) {
          CassandraHost cassandraHost = iter.next();
          if( cassandraHost == null ) {
-             continue;
-         }
-         if( !alreadyTried.add(cassandraHost) ) {
-             iter.remove();
              continue;
          }
          boolean reconnected = verifyConnection(cassandraHost);
