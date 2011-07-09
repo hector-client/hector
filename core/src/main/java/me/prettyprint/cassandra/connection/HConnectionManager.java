@@ -1,11 +1,29 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import me.prettyprint.cassandra.service.*;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
+import me.prettyprint.cassandra.service.FailoverPolicy;
+import me.prettyprint.cassandra.service.JmxMonitor;
+import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.*;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
+import me.prettyprint.hector.api.exceptions.HUnavailableException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
@@ -13,14 +31,9 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ecyrd.speed4j.StopWatch;
-import com.ecyrd.speed4j.StopWatchFactory;
-import com.ecyrd.speed4j.log.PeriodicalLog;
-
 public class HConnectionManager {
 
   private static final Logger log = LoggerFactory.getLogger(HConnectionManager.class);
-  private StopWatchFactory stopWatchFactory;
 
   private final NonBlockingHashMap<CassandraHost,HClientPool> hostPools;
   private final NonBlockingHashMap<CassandraHost,HClientPool> suspendedHostPools;  
@@ -35,7 +48,7 @@ public class HConnectionManager {
 
   final ExceptionsTranslator exceptionsTranslator;
   private CassandraClientMonitor monitor;
-
+  private HOpTimer timer;
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
@@ -72,18 +85,8 @@ public class HConnectionManager {
       }
     }
     
-    //
-    //  This sets up the Speed4J logging system.  Alternatively, we could
-    //  use the speed4j.properties -file.  This was chosen just so that
-    //  it wouldn't confuse anyone and would work pretty much the same
-    //  way as what the old hector config does.
-    //
-    PeriodicalLog slog = new PeriodicalLog();
-    slog.setName("hector-"+clusterName);
-    slog.setPeriod(60); // 60 seconds
-    slog.setSlf4jLogname( "me.prettyprint.cassandra.hector.TimingLogger" );
-    
-    stopWatchFactory = StopWatchFactory.getInstance( slog );
+    timer = cassandraHostConfigurator.getOpTimer();
+
   }
 
   /**
@@ -206,7 +209,7 @@ public class HConnectionManager {
 
 
   public void operateWithFailover(Operation<?> op) throws HectorException {
-    final StopWatch stopWatch = stopWatchFactory.getStopWatch();
+    final Object timerToken = timer.start(); 
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HThriftClient client = null;
     HClientPool pool = null;
@@ -227,7 +230,7 @@ public class HConnectionManager {
 
         op.executeAndSetResult(c, pool.getCassandraHost());
         success = true;
-        stopWatch.stop(op.stopWatchTagName.concat(".success_"));
+        timer.stop(timerToken, op.stopWatchTagName, true);
         break;
 
       } catch (Exception ex) {
@@ -280,11 +283,19 @@ public class HConnectionManager {
         --retries;
         if ( !success ) {
           monitor.incCounter(op.failCounter);
-          stopWatch.stop(op.stopWatchTagName.concat(".fail_"));
+          timer.stop(timerToken, op.stopWatchTagName, false);
         }
         releaseClient(client);
       }
     }
+  }
+  
+  public HOpTimer getTimer() {
+	return timer;
+  }
+
+  public void setTimer(HOpTimer timer) {
+	this.timer = timer;
   }
   
   /**
