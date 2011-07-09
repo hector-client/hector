@@ -147,11 +147,11 @@ public final class CassandraHostConfigurator implements Serializable {
   }
 
   public HOpTimer getOpTimer() {
-	return opTimer;
+	  return opTimer;
   }
 
   public void setOpTimer(HOpTimer opTimer) {
-	this.opTimer = opTimer;
+	  this.opTimer = opTimer;
   }
   
   @Override
