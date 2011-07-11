@@ -10,15 +10,10 @@ import java.util.concurrent.TimeUnit;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Sets;
 
 public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
@@ -56,15 +51,23 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     log.info("Downed Host retry shutdown complete");
   }
 
-  public void add(CassandraHost cassandraHost) {
-    if(verifyConnection(cassandraHost)) {
-      connectionManager.addCassandraHost(cassandraHost);
-      return;
-    }
+  public void add(final CassandraHost cassandraHost) {
     downedHostQueue.add(cassandraHost);
     if ( log.isInfoEnabled() ) {
       log.info("Host detected as down was added to retry queue: {}", cassandraHost.getName());
     }
+    
+    //schedule a check of this host immediately,
+    executor.submit(new Runnable() {
+      @Override
+      public void run() {
+        if(verifyConnection(cassandraHost)) {
+          connectionManager.addCassandraHost(cassandraHost);
+          downedHostQueue.remove(cassandraHost);
+          return;
+        }
+      }
+    });
   }
 
   public boolean remove(CassandraHost cassandraHost) {
