@@ -100,7 +100,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       while( iter.hasNext() ) {
          CassandraHost cassandraHost = iter.next();
          if( cassandraHost == null ) {
-             continue;
+           continue;
          }
          boolean reconnected = verifyConnection(cassandraHost);
          log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
@@ -109,7 +109,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
            //we can't call iter.remove() based on return value of connectionManager.addCassandraHost, since
            //that returns false if an error occurs, or if the host already exists
            if(connectionManager.getHosts().contains(cassandraHost)) {
-               iter.remove();
+             iter.remove();
            }
          }
       }
