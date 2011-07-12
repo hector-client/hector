@@ -668,9 +668,10 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           out.writeShort((short) comparator.length());
           out.write(ByteBufferUtil.bytes(comparator));
         }
-        if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() == 0)) {
-          log.warn("Writing zero-length BytesType, probably an error");
-        }
+        // if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() ==
+        // 0)) {
+        // log.warn("Writing zero-length BytesType, probably an error");
+        // }
       }
       out.writeShort((short) cb.remaining());
       out.write(cb.slice());
