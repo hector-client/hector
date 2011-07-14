@@ -61,51 +61,54 @@ public HThriftClient borrowClient() throws HectorException {
     int tillExhausted = cassandraHost.getMaxActive() - currentActive;
 
     numBlocked.incrementAndGet();
-    cassandraClient = availableClientQueue.poll();
-    if ( cassandraClient == null ) {
-      if ( tillExhausted > 0 ) {
-        // if we start with #of threads == getMaxActive, we could trigger this condition
-        // replace addClientToPoolGently(new HThriftClient(cassandraHost).open()) with immediate acquisition
-        return greedyCreate();        
-      }
-      // blocked take on the queue if we are configured to wait forever
-      if ( log.isDebugEnabled() ) {
-        log.debug("blocking on queue - current block count {}", numBlocked.get());
-      }
-      // wait and catch, creating a new one if the counts have changed. Infinite wait should just recurse.
-      if ( maxWaitTimeWhenExhausted == 0 ) {
-        while (cassandraClient == null && active.get() ) {
+    try
+    {
+      cassandraClient = availableClientQueue.poll();
+      if ( cassandraClient == null ) {
+        if ( tillExhausted > 0 ) {
+          // if we start with #of threads == getMaxActive, we could trigger this condition
+          // replace addClientToPoolGently(new HThriftClient(cassandraHost).open()) with immediate acquisition
+          return greedyCreate();        
+        }
+        // blocked take on the queue if we are configured to wait forever
+        if ( log.isDebugEnabled() ) {
+          log.debug("blocking on queue - current block count {}", numBlocked.get());
+        }
+        // wait and catch, creating a new one if the counts have changed. Infinite wait should just recurse.
+        if ( maxWaitTimeWhenExhausted == 0 ) {
+          while (cassandraClient == null && active.get() ) {
+            try {
+              cassandraClient = availableClientQueue.poll(100, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException ie) {
+              log.error("InterruptedException poll operation on retry forever", ie);
+              break;
+            }
+          }
+        } else {
+  
           try {
-            cassandraClient = availableClientQueue.poll(100, TimeUnit.MILLISECONDS);
+            cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
+            if ( cassandraClient == null ) {
+              throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread %s on host %s",
+                  new Object[]{
+                  Thread.currentThread().getName(),
+                  cassandraHost.getName()}
+              ));
+            }
           } catch (InterruptedException ie) {
-            log.error("InterruptedException poll operation on retry forever", ie);
-            break;
+            //monitor.incCounter(Counter.POOL_EXHAUSTED);
+            log.error("Cassandra client acquisition interrupted",ie);
           }
         }
-      } else {
-
-        try {
-          cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
-          if ( cassandraClient == null ) {
-            numBlocked.decrementAndGet();
-            throw new PoolExhaustedException(String.format("maxWaitTimeWhenExhausted exceeded for thread %s on host %s",
-                new Object[]{
-                Thread.currentThread().getName(),
-                cassandraHost.getName()}
-            ));
-          }
-        } catch (InterruptedException ie) {
-          //monitor.incCounter(Counter.POOL_EXHAUSTED);
-          log.error("Cassandra client acquisition interrupted",ie);
-        }
+  
       }
-
+      if ( cassandraClient == null ) {
+        throw new HectorException("HConnectionManager returned a null client after aquisition - are we shutting down?");
+      }
+      activeClients.add(cassandraClient);
+    } finally {
+      numBlocked.decrementAndGet();
     }
-    if ( cassandraClient == null ) {
-      throw new HectorException("HConnectionManager returned a null client after aquisition - are we shutting down?");
-    }
-    activeClients.add(cassandraClient);
-    numBlocked.decrementAndGet();
 
     return cassandraClient;
   }
@@ -121,7 +124,6 @@ public HThriftClient borrowClient() throws HectorException {
     }
     HThriftClient client = new HThriftClient(cassandraHost).open();
     activeClients.add(client);
-    numBlocked.decrementAndGet();
     return client;
   }
 
