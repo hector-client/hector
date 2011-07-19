@@ -4,6 +4,14 @@ Changes by version:
 -22 stands for hector's version
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
+0.7.0-31
+========
+Expose setters in ColumnFamilyDefinition iface 
+Added remove method to retry service, ensures that HConnectionManager.removeHost correctly pulls hosts from CassandraHostRetryService if configured. Addresses GH issue 216
+Optionally block on schema agreement for cluster operations
+Fix issue 224 with RR balancing policy (merge from master)
+Addressing issue 226 on gh where attempts to release on suspended pools will leak clients
+CassandraHostRetryService should retry all downed hosts when checking, not just the first host (sbridges)
 
 0.7.0-30
 ========
