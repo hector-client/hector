@@ -41,13 +41,13 @@ public class HConnectionManager {
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
   private NodeAutoDiscoverService nodeAutoDiscoverService;
-  private LoadBalancingPolicy loadBalancingPolicy;
-  private CassandraHostConfigurator cassandraHostConfigurator;
+  private final LoadBalancingPolicy loadBalancingPolicy;
+  private final CassandraHostConfigurator cassandraHostConfigurator;
   private HostTimeoutTracker hostTimeoutTracker;
   private final ClockResolution clock;
 
   final ExceptionsTranslator exceptionsTranslator;
-  private CassandraClientMonitor monitor;
+  private final CassandraClientMonitor monitor;
   private HOpTimer timer;
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
@@ -181,6 +181,7 @@ public class HConnectionManager {
       boolean alreadyThere = hostPools.putIfAbsent(cassandraHost, pool) != null;
       if ( alreadyThere ) {
         log.error("Unsuspend called on a pool that was already active for CassandraHost {}", cassandraHost);
+        pool.shutdown();
       }
     }
     log.info("UN-Suspend operation status was {} for CassandraHost {}", readded, cassandraHost);
