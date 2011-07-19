@@ -1,6 +1,10 @@
 package me.prettyprint.cassandra.connection;
 
-public class NullOpTimer implements HOpTimer {
+import java.io.Serializable;
+
+public class NullOpTimer implements HOpTimer, Serializable {
+
+  private static final long serialVersionUID = -4762728985083933452L;
 
   @Override
   public Object start() {
