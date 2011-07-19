@@ -1,5 +1,20 @@
 Changes by version:
 ===================
+0.8.0-2
+=======
+Synchronize on RR balancing policy counter
+Added key_validation_class support on CfDef wrappers
+Fixed issue with using correct timestamp on execution result which could manifest as order of magnitude differences in op timing in some cases
+Added remove method to retry service, ensures that HConnectionManager.removeHost correctly pulls hosts from CassandraHostRetryService if configured. Addresses GH issue 216
+Expose setters in ColumnFamilyDefinition iface
+Added option to wait for schema agreements on cluster operations
+Check for null on keys in a list. Addresses issue 221
+Addressing issue 226 on gh where attempts to release on suspended pools will leak clients
+Fixed issue with using BB serializer for BA serializer as pointed out by @bhuvan.rajt on ML
+Wrapper api for op timers (makes current speed4j implementation plugable). The default logger is no a nulllogger, so op timing is off by default (sbridges)
+Tweaks to retry down host logic including: immediate check when triggered, and retrying all downed hosts. See issue 238 for details (sbridges)
+Fix potential race condition in numBlocked if an exception was thrown creating a thrift client (sbridges)
+
 0.8.0-1
 =======
 CQL queries available via CqlQuery
