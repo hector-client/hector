@@ -89,7 +89,8 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testHasNoResults() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
     assertFalse(template.queryColumns("noresults").hasResults());
-    
+    assertFalse(template.queryColumns("noresults").hasNext());
+    assertEquals("noresults",template.queryColumns("noresults").getKey());
   }
 
 }

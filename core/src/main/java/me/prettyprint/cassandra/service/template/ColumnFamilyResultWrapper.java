@@ -27,7 +27,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
  */
 public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
-  private Map<N,HColumn<N,ByteBuffer>> columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
+  private Map<N,HColumn<N,ByteBuffer>> columns;
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
   private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
@@ -61,7 +61,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   
 
   private void applyToRow(List<ColumnOrSuperColumn> cosclist) {
-    
+    hasEntries = cosclist.size() > 0;
     for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
       ColumnOrSuperColumn cosc = iterator.next();            
       if ( cosc.isSetSuper_column() ) {
@@ -104,7 +104,8 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
     if ( !hasNext() ) {
       throw new NoSuchElementException("No more rows left on this HColumnFamily");
     }
-    entry = rows.next();    
+    entry = rows.next();   
+    columns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
     applyToRow(entry.getValue());
     return this;
   }
