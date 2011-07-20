@@ -96,7 +96,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
 
   @Override
   public K getKey() {    
-    return keySerializer.fromByteBuffer(entry.getKey());
+    return keySerializer.fromByteBuffer(entry.getKey().duplicate());
   }
 
   @Override
