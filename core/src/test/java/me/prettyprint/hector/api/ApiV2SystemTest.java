@@ -78,6 +78,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
   static final Logger log = LoggerFactory.getLogger(ApiV2SystemTest.class);
   final static String KEYSPACE = "Keyspace1";
+  final static String COUNTER_CF = "Counter1";
   static final StringSerializer se = new StringSerializer();
   Cluster cluster;
   Keyspace ko;
@@ -96,18 +97,18 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   
   @Test
   public void testInsertGetRemoveCounter() {
-    String cf = "Counter1";
     Mutator<String> m = createMutator(ko, se);
-    MutationResult mr = m.insertCounter("testInsertGetRemoveCounter", cf, 
+    MutationResult mr = m.insertCounter("testInsertGetRemoveCounter", COUNTER_CF, 
         createCounterColumn("testInsertGetRemoveCounter_name", 25));
 
     log.debug("insert execution time: {}", mr.getExecutionTimeMicro());
     
     // get value
     CounterQuery<String, String> q = createCounterColumnQuery(ko, se, se);
-    q.setColumnFamily(cf).setName("testInsertGetRemoveCounter_name");
-    QueryResult<HCounterColumn<String>> r = q.setKey("testInsertGetRemoveCounter")
-        .execute();
+    q.setColumnFamily(COUNTER_CF).
+    	setName("testInsertGetRemoveCounter_name").
+    	setKey("testInsertGetRemoveCounter");
+    QueryResult<HCounterColumn<String>> r = q.execute();
     assertNotNull(r);
 
     HCounterColumn<String> c = r.get();
@@ -120,11 +121,11 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     
     // remove value
     m = createMutator(ko, se);
-    MutationResult mr2 = m.deleteCounter("testInsertGetRemoveCounter", cf, "testInsertGetRemoveCounter_name", se);
+    MutationResult mr2 = m.deleteCounter("testInsertGetRemoveCounter", COUNTER_CF, "testInsertGetRemoveCounter_name", se);
 
     // get already removed value
     CounterQuery<String, String> q2 = createCounterColumnQuery(ko, se, se);
-    q2.setName("testInsertGetRemoveCounter_name").setColumnFamily(cf);
+    q2.setName("testInsertGetRemoveCounter_name").setColumnFamily(COUNTER_CF);
     QueryResult<HCounterColumn<String>> r2 = q2.setKey("testInsertGetRemoveCounter")
         .execute();
     assertNotNull(r2);
@@ -132,16 +133,47 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
   
   @Test
-  public void testIncrementDecrementCounter() {
-    String cf = "Counter1";
-    createMutator(ko, se).incrementCounter("testIncrementDecrementCounter", cf, "testIncrementDecrementCounter_name", 7);
-    createMutator(ko, se).decrementCounter("testIncrementDecrementCounter", cf, "testIncrementDecrementCounter_name", 2);
+  public void testCounterMutation() {
+    // Insert a counter mutation
+	Mutator<String> m = createMutator(ko, se);
+	m.addCounter("testCounterMutation", 
+			  	 COUNTER_CF, 
+			  	 createCounterColumn("testCounterMutation_col_name", 5));
+	m.execute();
+	  
+	// Check the value
+	assertEquals(new Long(5), readCounterValue("testCounterMutation", COUNTER_CF, "testCounterMutation_col_name"));
+	
+	// Delete
+	m = createMutator(ko, se);
+	m.addCounterDeletion("testCounterMutation", COUNTER_CF);
+	m.execute();
+	
+	// Check the value again. IT should be deleted.
+	assertNull(readCounterValue("testCounterMutation", COUNTER_CF, "testCounterMutation_col_name"));
+  }
+  
+  private Long readCounterValue(String key, String cf, String colName) {
+    CounterQuery<String, String> q = createCounterColumnQuery(ko, se, se);
+	q.setColumnFamily(cf).setName(colName).setKey(key);
+	HCounterColumn<String> c = q.execute().get();
+	
+	if (c == null)
+		return null;
+	
+	return c.getValue();
+  }
+
+  @Test
+  public void testIncrementDecrementCounter() {   
+    createMutator(ko, se).incrementCounter("testIncrementDecrementCounter", COUNTER_CF, "testIncrementDecrementCounter_name", 7);
+    createMutator(ko, se).decrementCounter("testIncrementDecrementCounter", COUNTER_CF, "testIncrementDecrementCounter_name", 2);
 
     // The total in the counter is 5. (7 - 2)
     
     // get value
     CounterQuery<String, String> q = createCounterColumnQuery(ko, se, se);
-    q.setColumnFamily(cf).setName("testIncrementDecrementCounter_name");
+    q.setColumnFamily(COUNTER_CF).setName("testIncrementDecrementCounter_name");
     QueryResult<HCounterColumn<String>> r = q.setKey("testIncrementDecrementCounter")
         .execute();
     assertNotNull(r);

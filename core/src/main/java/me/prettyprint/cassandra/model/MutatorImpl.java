@@ -332,8 +332,8 @@ public final class MutatorImpl<K> implements Mutator<K> {
   }
 
   @Override
-  public <N> Mutator<K> addCounterDeletion(K key, String cf) {
-    addCounterDeletion(key, cf);
+  public <N> Mutator<K> addCounterDeletion(K key, String cf) {    
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), new Deletion());
     return this;
   }
 
