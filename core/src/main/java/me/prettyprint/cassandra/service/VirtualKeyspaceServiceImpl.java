@@ -234,5 +234,29 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
     return super.getColumn(ps.toByteBuffer(key), columnPath);
   }
+  
+  @Override
+  public CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException {
+	  return super.getCounter(ps.toByteBuffer(key), columnPath);
+  }
+  
+  @Override
+  public void addCounter(final ByteBuffer key, final ColumnParent columnParent, final CounterColumn counterColumn)
+      throws HectorException {
+	  super.addCounter(ps.toByteBuffer(key), columnParent, counterColumn);
+  }
+
+  @Override
+  public List<CounterSuperColumn> getCounterSuperSlice(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate)
+		throws HectorException {    
+    return super.getCounterSuperSlice(ps.toByteBuffer(key), columnParent, predicate);
+  }
+
+  @Override
+  public void removeCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException {
+    // TODO Auto-generated method stub
+    super.removeCounter(ps.toByteBuffer(key), columnPath);
+  }
+  
 
 }
