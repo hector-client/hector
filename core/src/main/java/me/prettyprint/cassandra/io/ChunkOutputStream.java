@@ -86,9 +86,6 @@ public class ChunkOutputStream<T> extends OutputStream {
       }
       chunkPos++;
       pos = 0;
-      if (close) {
-        
-      }
     }
 
   }
