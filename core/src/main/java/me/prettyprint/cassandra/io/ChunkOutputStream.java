@@ -33,6 +33,7 @@ public class ChunkOutputStream<T> extends OutputStream {
     this.key = key;
     this.chunk = new byte[chunkSize];
     this.mutator = HFactory.createMutator(keyspace, keySerializer);
+    mutator.delete(key, cf, null, null);
   }
 
   /*
@@ -85,6 +86,9 @@ public class ChunkOutputStream<T> extends OutputStream {
       }
       chunkPos++;
       pos = 0;
+      if (close) {
+        
+      }
     }
 
   }
