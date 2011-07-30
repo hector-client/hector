@@ -49,6 +49,14 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
+  public void add(ByteBuffer key, ColumnParent column_parent,
+      CounterColumn column, ConsistencyLevel consistency_level)
+      throws InvalidRequestException, UnavailableException, TimedOutException,
+      TException {
+    client.add(key, column_parent, column, consistency_level);
+  }
+
+  @Override
   public void batch_mutate(
       Map<ByteBuffer, Map<String, List<Mutation>>> mutation_map,
       ConsistencyLevel consistency_level) throws InvalidRequestException,
@@ -109,20 +117,17 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
+  public CqlResult execute_cql_query(ByteBuffer query, Compression compression)
+      throws InvalidRequestException, UnavailableException, TimedOutException,
+      SchemaDisagreementException, TException {
+    return client.execute_cql_query(query, compression);
+  }
+
+  @Override
   public ColumnOrSuperColumn get(ByteBuffer key, ColumnPath column_path,
       ConsistencyLevel consistency_level) throws InvalidRequestException,
       NotFoundException, UnavailableException, TimedOutException, TException {
     return client.get(key, column_path, consistency_level);
-  }
-
-  @Override
-  public TProtocol getInputProtocol() {
-    return client.getInputProtocol();
-  }
-
-  @Override
-  public TProtocol getOutputProtocol() {
-    return client.getOutputProtocol();
   }
 
   @Override
@@ -160,6 +165,16 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
+  public TProtocol getInputProtocol() {
+    return client.getInputProtocol();
+  }
+
+  @Override
+  public TProtocol getOutputProtocol() {
+    return client.getOutputProtocol();
+  }
+
+  @Override
   public void insert(ByteBuffer key, ColumnParent column_parent, Column column,
       ConsistencyLevel consistency_level) throws InvalidRequestException,
       UnavailableException, TimedOutException, TException {
@@ -189,6 +204,12 @@ public abstract class AbstractThriftClientWrapper extends Client {
       TException {
     return client.multiget_slice(keys, column_parent, predicate,
         consistency_level);
+  }
+
+  @Override
+  public void recv_add() throws InvalidRequestException, UnavailableException,
+      TimedOutException, TException {
+    client.recv_add();
   }
 
   @Override
@@ -245,6 +266,13 @@ public abstract class AbstractThriftClientWrapper extends Client {
   @Override
   public String recv_describe_version() throws TException {
     return client.recv_describe_version();
+  }
+
+  @Override
+  public CqlResult recv_execute_cql_query() throws InvalidRequestException,
+      UnavailableException, TimedOutException, SchemaDisagreementException,
+      TException {
+    return client.recv_execute_cql_query();
   }
 
   @Override
@@ -312,6 +340,12 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
+  public void recv_remove_counter() throws InvalidRequestException,
+      UnavailableException, TimedOutException, TException {
+    client.recv_remove_counter();
+  }
+
+  @Override
   public void recv_set_keyspace() throws InvalidRequestException, TException {
     client.recv_set_keyspace();
   }
@@ -366,6 +400,20 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
+  public void remove_counter(ByteBuffer key, ColumnPath path,
+      ConsistencyLevel consistency_level) throws InvalidRequestException,
+      UnavailableException, TimedOutException, TException {
+    client.remove_counter(key, path, consistency_level);
+  }
+
+  @Override
+  public void send_add(ByteBuffer key, ColumnParent column_parent,
+      CounterColumn column, ConsistencyLevel consistency_level)
+      throws TException {
+    client.send_add(key, column_parent, column, consistency_level);
+  }
+
+  @Override
   public void send_batch_mutate(
       Map<ByteBuffer, Map<String, List<Mutation>>> mutation_map,
       ConsistencyLevel consistency_level) throws TException {
@@ -416,6 +464,12 @@ public abstract class AbstractThriftClientWrapper extends Client {
   @Override
   public void send_describe_version() throws TException {
     client.send_describe_version();
+  }
+
+  @Override
+  public void send_execute_cql_query(ByteBuffer query, Compression compression)
+      throws TException {
+    client.send_execute_cql_query(query, compression);
   }
 
   @Override
@@ -485,6 +539,12 @@ public abstract class AbstractThriftClientWrapper extends Client {
   public void send_remove(ByteBuffer key, ColumnPath column_path,
       long timestamp, ConsistencyLevel consistency_level) throws TException {
     client.send_remove(key, column_path, timestamp, consistency_level);
+  }
+
+  @Override
+  public void send_remove_counter(ByteBuffer key, ColumnPath path,
+      ConsistencyLevel consistency_level) throws TException {
+    client.send_remove_counter(key, path, consistency_level);
   }
 
   @Override
@@ -574,65 +634,5 @@ public abstract class AbstractThriftClientWrapper extends Client {
   public void truncate(String cfname) throws InvalidRequestException,
       UnavailableException, TException {
     client.truncate(cfname);
-  }
-
-  @Override
-  public void add(ByteBuffer key, ColumnParent column_parent,
-      CounterColumn column, ConsistencyLevel consistency_level)
-      throws InvalidRequestException, UnavailableException, TimedOutException,
-      TException {
-    client.add(key, column_parent, column, consistency_level);
-  }
-
-  @Override
-  public void send_add(ByteBuffer key, ColumnParent column_parent,
-      CounterColumn column, ConsistencyLevel consistency_level)
-      throws TException {
-    client.send_add(key, column_parent, column, consistency_level);
-  }
-
-  @Override
-  public void recv_add() throws InvalidRequestException, UnavailableException,
-      TimedOutException, TException {
-    client.recv_add();
-  }
-
-  @Override
-  public void remove_counter(ByteBuffer key, ColumnPath path,
-      ConsistencyLevel consistency_level) throws InvalidRequestException,
-      UnavailableException, TimedOutException, TException {
-    client.remove_counter(key, path, consistency_level);
-  }
-
-  @Override
-  public void send_remove_counter(ByteBuffer key, ColumnPath path,
-      ConsistencyLevel consistency_level) throws TException {
-    client.send_remove_counter(key, path, consistency_level);
-  }
-
-  @Override
-  public void recv_remove_counter() throws InvalidRequestException,
-      UnavailableException, TimedOutException, TException {
-    client.recv_remove_counter();
-  }
-
-  @Override
-  public CqlResult execute_cql_query(ByteBuffer query, Compression compression)
-      throws InvalidRequestException, UnavailableException, TimedOutException,
-      SchemaDisagreementException, TException {
-    return client.execute_cql_query(query, compression);
-  }
-
-  @Override
-  public void send_execute_cql_query(ByteBuffer query, Compression compression)
-      throws TException {
-    client.send_execute_cql_query(query, compression);
-  }
-
-  @Override
-  public CqlResult recv_execute_cql_query() throws InvalidRequestException,
-      UnavailableException, TimedOutException, SchemaDisagreementException,
-      TException {
-    return client.recv_execute_cql_query();
   }
 }
