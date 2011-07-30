@@ -13,7 +13,10 @@ import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CounterColumn;
+import org.apache.cassandra.thrift.CqlResult;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
@@ -94,7 +97,8 @@ public abstract class AbstractThriftClientWrapper extends Client {
 
   @Override
   public List<String> describe_splits(String cfName, String start_token,
-      String end_token, int keys_per_split) throws TException, InvalidRequestException {
+      String end_token, int keys_per_split) throws TException,
+      InvalidRequestException {
     return client.describe_splits(cfName, start_token, end_token,
         keys_per_split);
   }
@@ -233,7 +237,8 @@ public abstract class AbstractThriftClientWrapper extends Client {
   }
 
   @Override
-  public List<String> recv_describe_splits() throws TException, InvalidRequestException {
+  public List<String> recv_describe_splits() throws TException,
+      InvalidRequestException {
     return client.recv_describe_splits();
   }
 
@@ -569,5 +574,65 @@ public abstract class AbstractThriftClientWrapper extends Client {
   public void truncate(String cfname) throws InvalidRequestException,
       UnavailableException, TException {
     client.truncate(cfname);
+  }
+
+  @Override
+  public void add(ByteBuffer key, ColumnParent column_parent,
+      CounterColumn column, ConsistencyLevel consistency_level)
+      throws InvalidRequestException, UnavailableException, TimedOutException,
+      TException {
+    client.add(key, column_parent, column, consistency_level);
+  }
+
+  @Override
+  public void send_add(ByteBuffer key, ColumnParent column_parent,
+      CounterColumn column, ConsistencyLevel consistency_level)
+      throws TException {
+    client.send_add(key, column_parent, column, consistency_level);
+  }
+
+  @Override
+  public void recv_add() throws InvalidRequestException, UnavailableException,
+      TimedOutException, TException {
+    client.recv_add();
+  }
+
+  @Override
+  public void remove_counter(ByteBuffer key, ColumnPath path,
+      ConsistencyLevel consistency_level) throws InvalidRequestException,
+      UnavailableException, TimedOutException, TException {
+    client.remove_counter(key, path, consistency_level);
+  }
+
+  @Override
+  public void send_remove_counter(ByteBuffer key, ColumnPath path,
+      ConsistencyLevel consistency_level) throws TException {
+    client.send_remove_counter(key, path, consistency_level);
+  }
+
+  @Override
+  public void recv_remove_counter() throws InvalidRequestException,
+      UnavailableException, TimedOutException, TException {
+    client.recv_remove_counter();
+  }
+
+  @Override
+  public CqlResult execute_cql_query(ByteBuffer query, Compression compression)
+      throws InvalidRequestException, UnavailableException, TimedOutException,
+      SchemaDisagreementException, TException {
+    return client.execute_cql_query(query, compression);
+  }
+
+  @Override
+  public void send_execute_cql_query(ByteBuffer query, Compression compression)
+      throws TException {
+    client.send_execute_cql_query(query, compression);
+  }
+
+  @Override
+  public CqlResult recv_execute_cql_query() throws InvalidRequestException,
+      UnavailableException, TimedOutException, SchemaDisagreementException,
+      TException {
+    return client.recv_execute_cql_query();
   }
 }

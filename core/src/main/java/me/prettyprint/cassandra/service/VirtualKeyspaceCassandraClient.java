@@ -15,6 +15,7 @@ import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
+import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.cassandra.thrift.IndexClause;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KeyRange;
@@ -172,6 +173,21 @@ public class VirtualKeyspaceCassandraClient extends AbstractThriftClientWrapper 
       UnavailableException, TimedOutException, TException {
     super.remove(ps.toByteBuffer(key), column_path, timestamp,
         consistency_level);
+  }
+
+  @Override
+  public void add(ByteBuffer key, ColumnParent column_parent,
+      CounterColumn column, ConsistencyLevel consistency_level)
+      throws InvalidRequestException, UnavailableException, TimedOutException,
+      TException {
+    super.add(ps.toByteBuffer(key), column_parent, column, consistency_level);
+  }
+
+  @Override
+  public void remove_counter(ByteBuffer key, ColumnPath path,
+      ConsistencyLevel consistency_level) throws InvalidRequestException,
+      UnavailableException, TimedOutException, TException {
+    super.remove_counter(ps.toByteBuffer(key), path, consistency_level);
   }
 
 }
