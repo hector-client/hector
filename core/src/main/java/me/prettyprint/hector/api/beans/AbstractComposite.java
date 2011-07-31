@@ -50,7 +50,7 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
 
-  private static Logger log = LoggerFactory.getLogger(AbstractComposite.class);
+  public static Logger log = LoggerFactory.getLogger(AbstractComposite.class);
 
   public enum ComponentEquality {
     LESS_THAN_EQUAL((byte) -1), EQUAL((byte) 0), GREATER_THAN_EQUAL((byte) 1);
@@ -198,6 +198,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   List<Component<?>> components = new ArrayList<Component<?>>();
+  ComponentEquality equality = ComponentEquality.EQUAL;
 
   ByteBuffer serialized = null;
 
@@ -675,7 +676,12 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       }
       out.writeShort((short) cb.remaining());
       out.write(cb.slice());
-      out.write(c.getEquality().toByte());
+      if ((i == (components.size() - 1))
+          && (equality != ComponentEquality.EQUAL)) {
+        out.write(equality.toByte());
+      } else {
+        out.write(c.getEquality().toByte());
+      }
       i++;
     }
 
@@ -720,6 +726,15 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   protected static ByteBuffer getWithShortLength(ByteBuffer bb) {
     int length = getShortLength(bb);
     return getBytes(bb, length);
+  }
+
+  public ComponentEquality getEquality() {
+    return equality;
+  }
+
+  public void setEquality(ComponentEquality equality) {
+    serialized = null;
+    this.equality = equality;
   }
 
 }
