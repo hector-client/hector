@@ -11,11 +11,10 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 
 /**
  * Holds the result for the contents of a super column. This interface add
- * access to the current super column name since this may be a property of the
- * object being mapped into.
+ * access to the current super column similar to {@link ColumnFamilyResult}
  * 
  * @author david
- * @since Mar 10, 2011
+ * @author zznate
  * @param <K>
  * @param <SN>
  *          super column name data type
@@ -23,7 +22,6 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
  *          child column name data type
  */
 public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
-  // TODO remove. this no loger makes sense with many-to-one on a row
   
   Collection<SN> getSuperColumns();
   
@@ -48,6 +46,15 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   void applySuperColumn(SN sColumnName);
   
   SN getActiveSuperColumn();
+  
+  /**
+   * Retrieved named superColumn as an HSuperColumn with sub columns. 
+   * Underlying column value is a ByteBuffer. 
+   * Note: Correct derialization and treatment is up to the caller.
+   * @param superColumn
+   * @return
+   */
+  HSuperColumn<SN, N, ByteBuffer> getSuperColumn(SN superColumn);
   
   @Override
   SuperCfResult<K, SN, N> next();

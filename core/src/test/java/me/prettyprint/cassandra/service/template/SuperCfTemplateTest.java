@@ -2,9 +2,11 @@ package me.prettyprint.cassandra.service.template;
 
 import static org.junit.Assert.*;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
 
 import org.junit.Test;
 
@@ -64,6 +66,21 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals("sub1_val_1", myCol.getValue());
   }
   
+  @Test
+  public void testQuerySingleSubColumnExtractSuper() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    sUpdater.setString("sub1_col_1", "sub1_val_1");
+    sUpdater.setString("sub1_col_2", "sub1_val_2");
+    sTemplate.update(sUpdater);
+    
+    SuperCfResult<String, String, String> result = sTemplate.querySuperColumns("skey3");
+    HSuperColumn<String, String, ByteBuffer> superColumn = result.getSuperColumn("super1");
+    assertNotNull(superColumn);
+    assertEquals("super1",superColumn.getName());
+    assertEquals(2,superColumn.getColumns().size());
+  }
   
   @Test
   public void testQuerySingleSubColumnEmpty() {
