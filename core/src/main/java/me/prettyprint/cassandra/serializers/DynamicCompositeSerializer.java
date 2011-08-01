@@ -15,24 +15,30 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
  * 
  */
 public class DynamicCompositeSerializer extends
-    AbstractSerializer<DynamicComposite> {
+		AbstractSerializer<DynamicComposite> {
 
-  @Override
-  public ByteBuffer toByteBuffer(DynamicComposite obj) {
+	private static final DynamicCompositeSerializer instance = new DynamicCompositeSerializer();
 
-    return obj.serialize();
-  }
+	public static DynamicCompositeSerializer get() {
+		return instance;
+	}
 
-  @Override
-  public DynamicComposite fromByteBuffer(ByteBuffer byteBuffer) {
+	@Override
+	public ByteBuffer toByteBuffer(DynamicComposite obj) {
 
-    return DynamicComposite.fromByteBuffer(byteBuffer);
+		return obj.serialize();
+	}
 
-  }
+	@Override
+	public DynamicComposite fromByteBuffer(ByteBuffer byteBuffer) {
 
-  @Override
-  public ComparatorType getComparatorType() {
-    return DYNAMICCOMPOSITETYPE;
-  }
+		return DynamicComposite.fromByteBuffer(byteBuffer);
+
+	}
+
+	@Override
+	public ComparatorType getComparatorType() {
+		return DYNAMICCOMPOSITETYPE;
+	}
 
 }
