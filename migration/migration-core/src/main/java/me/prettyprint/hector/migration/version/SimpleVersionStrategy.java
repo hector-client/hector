@@ -51,7 +51,7 @@ public class SimpleVersionStrategy implements VersionStrategy {
         if (!isVersioningEnabled(cluster)) {
             if (cluster.describeKeyspace(hectorKS) == null) {
                 KeyspaceDefinition ksDef = HFactory.createKeyspaceDefinition(hectorKS);
-                cluster.addKeyspace(ksDef);
+                cluster.addKeyspace(ksDef,true);
             }
             ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition(hectorKS, migrationsCF);
             cluster.addColumnFamily(cfDef);

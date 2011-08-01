@@ -7,11 +7,11 @@
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.7.0-29</version>
+        <version>0.7.0-31</version>
     </parent>
     <artifactId>hector-migration</artifactId>
     <groupId>me.prettyprint.migration</groupId>
-    <version>0.2</version>
+    <version>${migration.version}</version>
     <packaging>pom</packaging>
     <name>hector-migration</name>
 
@@ -24,7 +24,7 @@
             <dependency>
                 <groupId>me.prettyprint</groupId>
                 <artifactId>hector-core</artifactId>
-                <version>0.7.0-29</version>
+                <version>0.7.0-31</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework</groupId>
@@ -112,4 +112,15 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <repository>
+            <id>epam.coolweb</id>
+            <url>http://ec2-184-72-255-140.compute-1.amazonaws.com:8081/nexus/content/repositories/epam.coolweb</url>
+        </repository>
+    </distributionManagement>
+
+    <properties>
+        <migration.version>0.4</migration.version>
+    </properties>
 </project>
