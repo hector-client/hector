@@ -113,13 +113,6 @@
         </plugins>
     </build>
 
-    <distributionManagement>
-        <repository>
-            <id>epam.coolweb</id>
-            <url>http://ec2-184-72-255-140.compute-1.amazonaws.com:8081/nexus/content/repositories/epam.coolweb</url>
-        </repository>
-    </distributionManagement>
-
     <properties>
         <migration.version>0.4</migration.version>
     </properties>
