@@ -143,6 +143,12 @@
         <version>1.8.2</version>
         <scope>test</scope>
       </dependency>
+      <dependency>
+        <groupid>org.mortbay.jetty</groupid>
+        <artifactid>servlet-api</artifactid>
+        <version>2.5-20081211</version>
+        <scope>provided</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
