@@ -10,6 +10,7 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.query.QueryResult;
 
@@ -63,7 +64,7 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
     assertEquals(2, result.get().getAsCount());
   }
 
-  @Test(expected=HInvalidRequestException.class)
+  @Test(expected=HCassandraInternalException.class)
   public void testSyntaxFailQuery() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("SELECT COUNT(*) FROM Standard1 WHERE KEY = 'cqlQueryTest_key1'");
