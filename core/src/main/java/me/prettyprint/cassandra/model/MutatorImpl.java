@@ -5,6 +5,7 @@ import java.util.Arrays;
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.BatchMutation;
+import me.prettyprint.cassandra.service.BatchSizeHint;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
@@ -42,16 +43,27 @@ public final class MutatorImpl<K> implements Mutator<K> {
   protected final Serializer<K> keySerializer;
 
   private BatchMutation<K> pendingMutations;
+  
+  private BatchSizeHint sizeHint;
 
-  public MutatorImpl(Keyspace keyspace, Serializer<K> keySerializer) {
+  public MutatorImpl(Keyspace keyspace, Serializer<K> keySerializer, BatchSizeHint sizeHint) {
     this.keyspace = (ExecutingKeyspace) keyspace;
     this.keySerializer = keySerializer;
+    this.sizeHint = sizeHint;
+  }
+
+  public MutatorImpl(Keyspace keyspace, Serializer<K> keySerializer) {
+    this(keyspace, keySerializer, null);
   }
 
   public MutatorImpl(Keyspace keyspace) {
     this(keyspace, TypeInferringSerializer.<K> get());
   }
 
+  public MutatorImpl(Keyspace keyspace, BatchSizeHint sizeHint) {
+    this(keyspace, TypeInferringSerializer.<K> get(), sizeHint);
+  }
+  
   // Simple and immediate insertion of a column
   @Override
   public <N,V> MutationResult insert(final K key, final String cf, final HColumn<N,V> c) {
@@ -241,7 +253,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
 
   private BatchMutation<K> getPendingMutations() {
     if (pendingMutations == null) {
-      pendingMutations = new BatchMutation<K>(keySerializer);
+      pendingMutations = new BatchMutation<K>(keySerializer, sizeHint);
     }
     return pendingMutations;
   }
