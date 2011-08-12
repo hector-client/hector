@@ -4,7 +4,7 @@
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.8.0-2-SNAPSHOT</version>
+        <version>0.8.0-3-SNAPSHOT</version>
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
@@ -40,7 +40,7 @@
         <dependency>
             <groupId>me.prettyprint</groupId>
             <artifactId>hector-core</artifactId>
-            <version>0.8.0-2-SNAPSHOT</version>
+            <version>0.8.0-3-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>
@@ -51,8 +51,13 @@
                     <artifactId>jcl-over-slf4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency> 
+        <dependency>
+           <groupId>me.prettyprint</groupId>
+           <artifactId>hector-test</artifactId>
+           <version>0.8.0-3-SNAPSHOT</version>
+           <scope>test</scope>      
         </dependency>
-
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

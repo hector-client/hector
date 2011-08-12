@@ -22,12 +22,12 @@ import java.util.NoSuchElementException;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.model.QuorumAllConsistencyLevelPolicy;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.io.util.FileUtils;

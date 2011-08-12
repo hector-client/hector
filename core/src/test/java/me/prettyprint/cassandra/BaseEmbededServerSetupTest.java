@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;

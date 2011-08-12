@@ -30,10 +30,10 @@ import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.ByteBufferOutputStream;
 import me.prettyprint.hector.api.Serializer;
 
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -370,7 +370,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       try {
         int header = getShortLength(bb);
         if ((header & 0x8000) == 0) {
-          name = ByteBufferUtil.string(getBytes(bb, header));
+          
+          name = Charsets.UTF_8.newDecoder().decode(getBytes(bb, header).duplicate()).toString();
         } else {
           byte a = (byte) (header & 0xFF);
           name = aliasToComparatorMapping.get(a);
@@ -667,7 +668,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           out.writeShort((short) (0x8000 | a));
         } else {
           out.writeShort((short) comparator.length());
-          out.write(ByteBufferUtil.bytes(comparator));
+          out.write(ByteBuffer.wrap(comparator.getBytes(Charsets.UTF_8)));
         }
         // if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() ==
         // 0)) {

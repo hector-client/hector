@@ -13,6 +13,7 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
+
 import org.junit.Before;
 import org.junit.Test;
 

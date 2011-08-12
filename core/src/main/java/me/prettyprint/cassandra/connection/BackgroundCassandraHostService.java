@@ -7,6 +7,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.utils.DaemonThreadPoolFactory;
 
 public abstract class BackgroundCassandraHostService {
 
@@ -20,7 +21,7 @@ public abstract class BackgroundCassandraHostService {
 
   public BackgroundCassandraHostService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    executor = Executors.newScheduledThreadPool(1, new DaemonThreadPoolFactory("Hector." + getClass().getSimpleName() + "Thread"));
+    executor = Executors.newScheduledThreadPool(1, new DaemonThreadPoolFactory(getClass()));
     this.connectionManager = connectionManager;
     this.cassandraHostConfigurator = cassandraHostConfigurator;
     
@@ -40,24 +41,7 @@ public abstract class BackgroundCassandraHostService {
     this.retryDelayInSeconds = retryDelayInSeconds;
   }
   
-  private static class DaemonThreadPoolFactory implements ThreadFactory {
 
-    private static final AtomicInteger count = new AtomicInteger(); 
-    private final String name;
-
-    public DaemonThreadPoolFactory(String name) {
-      this.name = name;
-    }
-
-    @Override
-    public Thread newThread(Runnable r) {
-        Thread t = new Thread(r);
-        t.setDaemon(true);
-        t.setName(name + "-" + count.incrementAndGet());
-        return t;
-    }
-      
-  }
 
 }
 
