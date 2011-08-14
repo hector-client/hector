@@ -55,6 +55,22 @@ public class BatchMutationTest {
   }
 
   @Test
+  public void testAddInsertionWithHint() {
+	  BatchMutation<String> batchMutate = new BatchMutation<String>(StringSerializer.get(), new BatchSizeHint(1, 50));
+	    Column column = new Column(StringSerializer.get().toByteBuffer("c_name"));
+	    column.setValue(StringSerializer.get().toByteBuffer("c_val"));
+	    column.setTimestamp(System.currentTimeMillis());
+	    batchMutate.addInsertion("key1", columnFamilies, column);
+	    Map<ByteBuffer, Map<String, List<Mutation>>> mutMap = batchMutate.getMutationMap();
+	    assertEquals(1, mutMap.size());
+	    assertEquals(ByteBuffer.wrap("key1".getBytes()), mutMap.keySet().iterator().next());
+	    Map<String, List<Mutation>> cfMutMap = mutMap.values().iterator().next();
+	    assertEquals(1, cfMutMap.size());
+	    List<Mutation> cfMutList = cfMutMap.values().iterator().next();
+	    assertTrue(cfMutList instanceof ArrayList);
+  }
+
+  @Test
   public void testAddSuperInsertion() {
     Column column = new Column(StringSerializer.get().toByteBuffer("c_name"));
     column.setValue(StringSerializer.get().toByteBuffer("c_val"));
