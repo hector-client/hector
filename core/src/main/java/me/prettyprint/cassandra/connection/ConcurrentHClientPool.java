@@ -3,6 +3,8 @@ package me.prettyprint.cassandra.connection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,7 +13,6 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
-import org.cliffc.high_scale_lib.NonBlockingHashSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,9 @@ public class ConcurrentHClientPool implements HClientPool {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
+  private static final Object PRESENT = new Object();
   private final ArrayBlockingQueue<HThriftClient> availableClientQueue;
-  private final NonBlockingHashSet<HThriftClient> activeClients;
+  private final ConcurrentMap<HThriftClient, Object> activeClients;
 
   private final CassandraHost cassandraHost;
   //private final CassandraClientMonitor monitor;
@@ -33,7 +35,7 @@ public class ConcurrentHClientPool implements HClientPool {
     this.cassandraHost = host;
 
     availableClientQueue = new ArrayBlockingQueue<HThriftClient>(cassandraHost.getMaxActive(), true);
-    activeClients = new NonBlockingHashSet<HThriftClient>();
+    activeClients = new ConcurrentHashMap<HThriftClient, Object>();
     numBlocked = new AtomicInteger();
     active = new AtomicBoolean(true);
 
@@ -105,7 +107,7 @@ public HThriftClient borrowClient() throws HectorException {
       if ( cassandraClient == null ) {
         throw new HectorException("HConnectionManager returned a null client after aquisition - are we shutting down?");
       }
-      activeClients.add(cassandraClient);
+      activeClients.put(cassandraClient, PRESENT);
     } finally {
       numBlocked.decrementAndGet();
     }
@@ -123,7 +125,7 @@ public HThriftClient borrowClient() throws HectorException {
       log.debug("Greedy creation of new client");
     }
     HThriftClient client = new HThriftClient(cassandraHost).open();
-    activeClients.add(client);
+    activeClients.put(client, PRESENT);
     return client;
   }
 

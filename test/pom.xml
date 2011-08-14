@@ -10,7 +10,7 @@
   <name>test</name>
   <properties>
     <!-- OSGi bundle properties -->
-    <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
+    <bundle.symbolicName>me.prettyprint.hector-test</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
   </properties>
 
@@ -93,116 +93,9 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-pool</groupId>
-      <artifactId>commons-pool</artifactId>
-      <version>1.5.3</version>
-    </dependency>
-    <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-all</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-thrift</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.thrift</groupId>
-      <artifactId>libthrift</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>1.6</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>r08</version>
-    </dependency>
-    <dependency>
-      <groupId>commons-collections</groupId>
-      <artifactId>commons-collections</artifactId>
-      <version>3.2.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cassandra.deps</groupId>
-      <artifactId>avro</artifactId>
-      <version>1.4.0-cassandra-1</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>netty</artifactId>
-          <groupId>org.jboss.netty</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>paranamer</artifactId>
-          <groupId>com.thoughtworks.paranamer</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>paranamer-ant</artifactId>
-          <groupId>com.thoughtworks.paranamer</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>velocity</artifactId>
-          <groupId>org.apache.velocity</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.antlr</groupId>
-      <artifactId>antlr</artifactId>
-      <version>3.1.3</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.googlecode.concurrentlinkedhashmap</groupId>
-      <artifactId>concurrentlinkedhashmap-lru</artifactId>
-      <version>1.1</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.stephenc.high-scale-lib</groupId>
-      <artifactId>high-scale-lib</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-javautils</artifactId>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jul-to-slf4j</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.stephenc.eaio-uuid</groupId>
-      <artifactId>uuid</artifactId>
-      <version>3.2.0</version>
-    </dependency>
-    <dependency>
-      <groupId>com.ecyrd.speed4j</groupId>
-      <artifactId>speed4j</artifactId>
-      <version>0.9</version>
-    </dependency>
-
-	<!-- Note the optional tag. If you need to use fastinfoset serialization, you must include this dependency in your project! -->
-    <dependency>
-      <artifactId>FastInfoset</artifactId>
-      <groupId>com.sun.xml.fastinfoset</groupId>
-      <version>1.2.2</version>
-      <optional>true</optional>
-    </dependency>
-
     <!-- OSGi deps -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -217,52 +110,6 @@
       <version>1.0</version>
       <scope>provided</scope>
       <optional>true</optional>
-    </dependency>
-
-    <!-- test dependencies -->
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>${org.springframework.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${org.springframework.version}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${org.springframework.version}</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
   <profiles>

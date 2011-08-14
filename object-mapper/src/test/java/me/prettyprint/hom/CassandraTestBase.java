@@ -14,7 +14,6 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.config.ConfigurationException;
-import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.service.EmbeddedCassandraService;
