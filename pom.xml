@@ -81,6 +81,7 @@
   <modules>
     <module>core</module>
     <module>object-mapper</module>
+    <module>test</module>
   </modules>
 
   <dependencyManagement>

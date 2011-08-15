@@ -51,8 +51,13 @@
                     <artifactId>jcl-over-slf4j</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency> 
+        <dependency>
+           <groupId>me.prettyprint</groupId>
+           <artifactId>hector-test</artifactId>
+           <version>0.8.0-3-SNAPSHOT</version>
+           <scope>test</scope>      
         </dependency>
-
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>

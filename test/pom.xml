@@ -5,9 +5,9 @@
     <artifactId>hector</artifactId>
     <version>0.8.0-3-SNAPSHOT</version>
   </parent>
-  <artifactId>hector-core</artifactId>
-  <packaging>bundle</packaging>
-  <name>hector-core</name>
+  <artifactId>hector-test</artifactId>
+  <packaging>jar</packaging>
+  <name>test</name>
   <properties>
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
@@ -104,18 +104,16 @@
     </dependency>
     <dependency>
       <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-thrift</artifactId>
     </dependency>
     <dependency>
       <groupId>org.apache.thrift</groupId>
       <artifactId>libthrift</artifactId>
     </dependency>
-    <dependency>
-      <groupId>me.prettyprint</groupId>
-      <artifactId>hector-test</artifactId>
-      <version>${pom.version}</version>
-      <scope>test</scope>      
-   </dependency> 
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>

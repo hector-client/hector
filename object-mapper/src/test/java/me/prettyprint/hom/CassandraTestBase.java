@@ -8,10 +8,10 @@ import java.util.List;
 
 import me.prettyprint.cassandra.service.ThriftCfDef;
 import me.prettyprint.cassandra.service.ThriftKsDef;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
