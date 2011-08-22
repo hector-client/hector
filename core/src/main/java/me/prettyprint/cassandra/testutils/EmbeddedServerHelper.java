@@ -333,6 +333,8 @@ public class EmbeddedServerHelper {
 		final String configFileName = "cassandra.yaml";
 		
 		Map values = new HashMap();
+		final String pathSeparator = File.separator;
+
 		values.put("cluster_name", clusterName);
 		values.put("dir", directory);
 		values.put("port", port);
@@ -350,10 +352,10 @@ public class EmbeddedServerHelper {
 			result.add(sub.replace(line));
 		}
 
-		File file = writeLines(directory+"/cassandra.yaml", result);
+		File file = writeLines(directory+pathSeparator+configFileName, result);
 		
 		if(file == null) {
-			throw new RuntimeException("Error writing new cassanda.yaml");
+			throw new RuntimeException("Error writing new " + configFileName);
 		}
 		
 		return file;
