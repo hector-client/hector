@@ -1,37 +1,21 @@
 package me.prettyprint.cassandra.testutils;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.BufferedReader;
-import java.io.PrintWriter;
-import java.io.FileWriter;
-import java.io.FileReader;
+import java.io.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.HashMap;
 import java.net.URL;
 
 import org.apache.commons.lang.text.StrSubstitutor;
 
-import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.config.KSMetaData;
-import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
@@ -46,35 +30,24 @@ import org.slf4j.LoggerFactory;
 public class EmbeddedServerHelper {
   private static Logger log = LoggerFactory.getLogger(EmbeddedServerHelper.class);
 
-  private EmbeddedCassandraService cassandra;
-  private String log4jFile = null;
-  private final String clusterName;
-  private final String folder;
-  private final int port;
-  private boolean useDefaultLog4j;
-  
-  static CassandraDaemon cassandraDaemon;
-  
-  public EmbeddedServerHelper(String log4jFile, String clusterName, String folder, int port) {
-  	this.log4jFile = log4jFile;
-  	this.clusterName = clusterName;
-  	this.folder = folder;
-  	this.port = port;
-  	this.useDefaultLog4j = false;
-  	
-  }
-  	
+  private static EmbeddedServerConfigurator configurator;
+
+  CassandraDaemon cassandraDaemon;
+
   public EmbeddedServerHelper() {
-  	this("/log4j.properties", "Test Cluster", "tmp",9170);
-  	
-  	this.useDefaultLog4j = true;
+    this(new EmbeddedServerConfigurator());
+  }
+
+  // Main constructor that is called from all other constructors
+  public EmbeddedServerHelper(EmbeddedServerConfigurator cfg) {
+    this.configurator = cfg;
   }
   
   // Kept this constructor to be compatible
   public EmbeddedServerHelper(String yamlFile) {
-  	this();
+  	this(EmbeddedServerConfigurator.createFromYaml(yamlFile));
   }
-  
+
   static ExecutorService executor = Executors.newSingleThreadExecutor(); 
 
   /**
@@ -86,35 +59,26 @@ public class EmbeddedServerHelper {
    */
   public void setup() throws TTransportException, IOException,
       InterruptedException, ConfigurationException {
-    
-    rmdir(folder);
-    
-    // Different copy strategies if he use the default log4j in the packge
-    // or one provided with a URL String
-    if( useDefaultLog4j) {
-    	copy(log4jFile, folder);
-    }
-    else {
-    	copyFile(log4jFile, folder);
- 	}
- 	// retrieve the cassandra.yaml.template from the JAR
- 	URL url =  EmbeddedServerHelper.class.getResource("cassandra.yaml.template");
+
+    // Delete the old folder and create a new one
+    rmdir(configurator.getFolder());
+    mkdir(configurator.getFolder());
+
+    // Copy the log4j file into the destination folder specified in the configurator
+    copy(configurator);
  	
- 	if(url == null) {
- 		throw new RuntimeException("Did not find the cassandra.yaml.template");
- 	}
- 	
- 	// Create a new file in the new folder without .template containing the following settings:
- 	File cassandraConfig = createConfigFromTemplate(new File(url.getFile()), clusterName, folder, port);
-    
-    System.setProperty("cassandra.config", "file:" + folder + "/cassandra.yaml");
-    System.setProperty("log4j.configuration", "file:" + folder + "/" + log4jFile.substring(log4jFile.lastIndexOf("/") +1));
+ 	// Create a new cassandra config based on the information in the EmbeddedServerConfigurator
+ 	loadConfigIntoDestination(configurator);
+
+    System.setProperty("cassandra.config", "file:" + configurator.getFolder() + File.separator + "cassandra.yaml");
+    System.setProperty("log4j.configuration", "file:" + configurator.getFolder() + File.separator + "log4j.properties");
     System.setProperty("cassandra-foreground","true");
 
     cleanupAndLeaveDirs();
+
     loadSchemaFromYaml();
+
     log.info("Starting executor");
-    
     executor.execute(new CassandraRunner());
     log.info("Started executor");
     try
@@ -128,87 +92,73 @@ public class EmbeddedServerHelper {
     }
   }
 
-
-
-  public static void teardown() {
-    //if ( cassandraDaemon != null )
-      //cassandraDaemon.stop();
+  public static void teardown() throws IOException {
     executor.shutdown();
     executor.shutdownNow();
+
+    rmdir(configurator.getFolder());
     log.info("Teardown complete");
   }
 
-  private static void rmdir(String dir) throws IOException {
+  private static void rmdir(String dir) throws IOException{
+    if(dir.contains(File.separator)) {
+        dir = dir.substring(0,dir.indexOf(File.separator));
+    }
+    log.info("Deleting " + dir);
     File dirFile = new File(dir);
     if (dirFile.exists()) {
-      FileUtils.deleteRecursive(new File(dir));
+        FileUtils.deleteRecursive(dirFile);
+
     }
   }
 
-/**
-   * Copies a resource from within the jar to a directory.
-   * 
-   * @param resource
-   * @param directory
-   * @throws IOException
-   */
-  private static void copy(String resource, String directory) throws IOException {
-    mkdir(directory);
-    InputStream is = EmbeddedServerHelper.class.getResourceAsStream(resource);
-    
-    if( is == null) {
-    	throw new RuntimeException("Did not find resource: " + resource);
+    /**
+     * Copy the log4j file into the the destination folder specified in configurator
+     * @param configurator Holds information where to copy the log4j and whether to use the packaged one
+     */
+    private static void copy(EmbeddedServerConfigurator configurator) {
+        String dest = configurator.getFolder() + File.separator + "log4j.properties";
+        InputStream is = null;
+        if(configurator.isUsePackagedLog4j()) {
+            is = EmbeddedServerHelper.class.getResourceAsStream(File.separator + "log4j.properties");
+        }
+        else {
+            try {
+                is = new FileInputStream(configurator.getLog4jPath());
+            }
+            catch (FileNotFoundException fnfe) {
+                is = EmbeddedServerHelper.class.getResourceAsStream(File.separator + "log4j.properties");
+            }
+        }
+
+        File f = new File(dest);
+        OutputStream out;
+        try {
+              out =  new FileOutputStream(f);
+        }
+        catch( FileNotFoundException fnfe ){
+            try {
+                f.createNewFile();
+                out = new FileOutputStream(f);
+            }catch (IOException ioe) {
+                throw new RuntimeException("Caught an IOException " + ioe.getLocalizedMessage());
+            }
+        }
+
+        byte buf[] = new byte[1024];
+        int len;
+
+        try {
+        while ((len = is.read(buf)) > 0) {
+          out.write(buf, 0, len);
+        }
+        out.close();
+        is.close();
+        }
+        catch (IOException ioe) {
+            throw new RuntimeException("Caught an IOException " + ioe.getLocalizedMessage());
+        }
     }
-    
-    String fileName = resource.substring(resource.lastIndexOf("/") + 1);
-    File file = new File(directory + System.getProperty("file.separator")
-        + fileName);
-    OutputStream out = new FileOutputStream(file);
-    byte buf[] = new byte[1024];
-    int len;
-    while ((len = is.read(buf)) > 0) {
-      out.write(buf, 0, len);
-    }
-    out.close();
-    is.close();
-  }
- 
-  /**
-   * Copies a resource from within the jar to a directory.
-   * 
-   * @param resource
-   * @param directory
-   * @throws IOException
-   */
-  private static void copyFile(String resource, String directory)
-      throws IOException {
-    mkdir(directory);
-    
-    String fileName = resource.substring(resource.lastIndexOf("/") + 1);
-    File resourceFile = new File(resource);
-    if (! resourceFile.exists() ) {
-    	throw new RuntimeException("CopyFile did not find "+ resource);
-    }
-    
-    InputStream is = new FileInputStream(resourceFile);
-    
-    File file = new File(directory + System.getProperty("file.separator")
-        + fileName);
-    OutputStream out = new FileOutputStream(file);
-    byte buf[] = new byte[1024];
-    int len;
-    
-    if(is == null) {
-    	throw new RuntimeException("Did not find " + resource );
-    }
-    
-    while ((len = is.read(buf)) > 0) {
-      out.write(buf, 0, len);
-    }
-    out.close();
-    is.close();
-  }
-  
 
   /**
    * Creates a directory
@@ -218,6 +168,7 @@ public class EmbeddedServerHelper {
    */
   private static void mkdir(String dir) throws IOException {
     FileUtils.createDirectory(dir);
+    log.info("Creating directory: " + dir);
   }
   
 
@@ -267,16 +218,12 @@ public class EmbeddedServerHelper {
   	
   	List<String> result = new ArrayList<String>();
   	
-  	BufferedReader br = null;
-  	
-  	
-  	
-  	String filename = filepath.substring(filepath.lastIndexOf("/")+1);
+  	BufferedReader br;
   	
   	try {
-  		br = new BufferedReader(new InputStreamReader(EmbeddedServerHelper.class.getResourceAsStream(filename)));
+  		br = new BufferedReader(new InputStreamReader(EmbeddedServerHelper.class.getResourceAsStream(filepath), "UTF-8"));
   	
-  		String line = null;
+  		String line;
   		while((line = br.readLine()) != null ) {
   			result.add(line);
   		}
@@ -284,10 +231,6 @@ public class EmbeddedServerHelper {
   	}
   	catch (Exception e) {
   		log.info("Exception when reading file: " + e.getMessage());
-  	}
-  	
-  	if(result.size() == 0 ) {
-  		throw new RuntimeException("Didn't read any lines? file: " + filepath);
   	}
   	
   	return result;
@@ -325,40 +268,35 @@ public class EmbeddedServerHelper {
   public static void loadSchemaFromYaml()  
   {
     EmbeddedSchemaLoader.loadSchema();
-      
   }  
   
-  private static File createConfigFromTemplate(File configTemplate, String clusterName, String directory, int port) {
+  //private static File loadConfigIntoDestination(File configTemplate, String clusterName, String directory, int port) {
+  private static void loadConfigIntoDestination(EmbeddedServerConfigurator cfg) {
+
+        URL url =  EmbeddedServerHelper.class.getResource("cassandra.yaml.template");
+
 
 		final String configFileName = "cassandra.yaml";
-		
-		Map values = new HashMap();
 		final String pathSeparator = File.separator;
 
-		values.put("cluster_name", clusterName);
-		values.put("dir", directory);
-		values.put("port", port);
+
+		Map<String,String> values = new HashMap<String,String>();
+		values.put("cluster_name",  cfg.getClusterName());
+		values.put("dir",           cfg.getFolder());
+		values.put("port",          Integer.toString(cfg.getThriftPort()));
 		
 		StrSubstitutor sub = new StrSubstitutor(values);
-		
-		List<String> lines = readLinesOfResource(configTemplate.getAbsolutePath());
+
+
+		List<String> lines = readLinesOfResource(new File(url.getFile()).getName());
 		List<String> result = new ArrayList<String>();
-		
-		if(lines == null) {
-			throw new RuntimeException("Could not read lines from template");
-		}
 		
 		for(String line : lines) {
 			result.add(sub.replace(line));
 		}
-
-		File file = writeLines(directory+pathSeparator+configFileName, result);
-		
-		if(file == null) {
-			throw new RuntimeException("Error writing new " + configFileName);
-		}
-		
-		return file;
+	
+	
+		writeLines(cfg.getFolder()+pathSeparator+configFileName, result);
 	}
 
   
