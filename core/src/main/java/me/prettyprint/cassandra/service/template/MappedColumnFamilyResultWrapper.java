@@ -17,6 +17,7 @@ public class MappedColumnFamilyResultWrapper<K, N, V> extends ColumnFamilyResult
       Serializer<N> columnNameSerializer,
       ExecutionResult<Map<ByteBuffer, List<ColumnOrSuperColumn>>> executionResult, ColumnFamilyRowMapper mapper) {
     super(keySerializer, columnNameSerializer, executionResult);    
+    this.rowMapper = mapper;
   }
 
   @Override

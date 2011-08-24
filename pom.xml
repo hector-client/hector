@@ -97,19 +97,30 @@
         <version>0.8.3</version>
       </dependency>
       <dependency>
-        <groupId>org.apache.cassandra</groupId>
-        <artifactId>cassandra-javautils</artifactId>
-        <version>0.7.0</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.thrift</groupId>
         <artifactId>libthrift</artifactId>
         <version>0.6.1</version>
       </dependency>
       <dependency>
-        <groupId>com.github.stephenc.high-scale-lib</groupId>
-        <artifactId>high-scale-lib</artifactId>
-        <version>1.1.1</version>
+        <groupId>commons-lang</groupId>
+        <artifactId>commons-lang</artifactId>
+        <version>2.4</version>
+      </dependency>
+        <dependency>
+        <groupId>commons-pool</groupId>
+        <artifactId>commons-pool</artifactId>
+        <version>1.5.3</version>
+      </dependency>
+       <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>r09</version>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -131,6 +142,11 @@
         <artifactId>jcl-over-slf4j</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
+      <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>1.2.16</version>
+      </dependency>      
       <!-- common test dependencies -->
       <dependency>
         <groupId>junit</groupId>
@@ -150,6 +166,22 @@
         <version>2.5-20081211</version>
         <scope>provided</scope>
       </dependency>
+      <dependency>
+        <groupId>com.github.stephenc.eaio-uuid</groupId>
+        <artifactId>uuid</artifactId>
+        <version>3.2.0</version>
+      </dependency>
+      <dependency>
+        <groupId>com.ecyrd.speed4j</groupId>
+        <artifactId>speed4j</artifactId>
+        <version>0.9</version>
+      </dependency>
+      <dependency>
+          <groupId>joda-time</groupId>
+          <artifactId>joda-time</artifactId>
+          <version>1.6.1</version>
+      </dependency>
+      
     </dependencies>
   </dependencyManagement>
 

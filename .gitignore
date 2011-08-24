@@ -13,3 +13,4 @@ out
 *.iws
 *.iml
 .springBeans
+*.swp
