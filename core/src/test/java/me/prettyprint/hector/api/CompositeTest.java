@@ -8,6 +8,8 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
@@ -16,10 +18,20 @@ import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
+import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
 import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.beans.DynamicComposite;
 
+import org.apache.cassandra.db.marshal.AbstractType;
+import org.apache.cassandra.db.marshal.AsciiType;
+import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.DynamicCompositeType;
+import org.apache.cassandra.db.marshal.IntegerType;
+import org.apache.cassandra.db.marshal.LexicalUUIDType;
+import org.apache.cassandra.db.marshal.LongType;
+import org.apache.cassandra.db.marshal.TimeUUIDType;
 import org.apache.cassandra.db.marshal.UTF8Type;
+import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
 import org.junit.Test;
@@ -140,6 +152,7 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     b = c.getComponent(0).getBytes();
     UTF8Type.instance.validate(b);
+
   }
 
   @Test
@@ -171,6 +184,31 @@ public class CompositeTest {
     assertTrue(c.get(0) instanceof String);
     assertTrue(c.get(1) instanceof UUID);
     assertTrue(c.get(2) instanceof BigInteger);
+  }
+
+  @Test
+  public void testEquality() throws Exception {
+    DynamicCompositeType instance = getDefaultDynamicComparator();
+
+    DynamicComposite c1 = new DynamicComposite(10, "foo");
+    DynamicComposite c2 = new DynamicComposite(10, "foo");
+
+    assertEquals(0, instance.compare(c1.serialize(), c2.serialize()));
+
+    c2.setEquality(ComponentEquality.GREATER_THAN_EQUAL);
+    assertEquals(-1, instance.compare(c1.serialize(), c2.serialize()));
+
+    c2.setEquality(ComponentEquality.LESS_THAN_EQUAL);
+    assertEquals(1, instance.compare(c1.serialize(), c2.serialize()));
+
+    c2.setEquality(ComponentEquality.EQUAL);
+    assertEquals(0, instance.compare(c1.serialize(), c2.serialize()));
+
+    c1.setEquality(ComponentEquality.LESS_THAN_EQUAL);
+    assertEquals(-1, instance.compare(c1.serialize(), c2.serialize()));
+
+    c1.setEquality(ComponentEquality.GREATER_THAN_EQUAL);
+    assertEquals(1, instance.compare(c1.serialize(), c2.serialize()));
   }
 
   // from the Casssandra DynamicCompositeTypeTest unit test
@@ -255,6 +293,21 @@ public class CompositeTest {
     }
     bb.rewind();
     return bb;
+  }
+
+  @SuppressWarnings("rawtypes")
+  public DynamicCompositeType getDefaultDynamicComparator() {
+    Map<Byte, AbstractType> aliases = new HashMap<Byte, AbstractType>();
+    aliases.put((byte) 'a', AsciiType.instance);
+    aliases.put((byte) 'b', BytesType.instance);
+    aliases.put((byte) 'i', IntegerType.instance);
+    aliases.put((byte) 'x', LexicalUUIDType.instance);
+    aliases.put((byte) 'l', LongType.instance);
+    aliases.put((byte) 't', TimeUUIDType.instance);
+    aliases.put((byte) 's', UTF8Type.instance);
+    aliases.put((byte) 'u', UUIDType.instance);
+    DynamicCompositeType comparator = DynamicCompositeType.getInstance(aliases);
+    return comparator;
   }
 
 }

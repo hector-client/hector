@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.UUID;
 
-import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.clock.MicrosecondsClockResolution;
 import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
 import me.prettyprint.hector.api.ClockResolution;

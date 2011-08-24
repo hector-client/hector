@@ -3,9 +3,11 @@ package me.prettyprint.cassandra.service;
 import java.io.Serializable;
 
 import me.prettyprint.cassandra.connection.CassandraHostRetryService;
+import me.prettyprint.cassandra.connection.HOpTimer;
 import me.prettyprint.cassandra.connection.HostTimeoutTracker;
 import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
 import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
+import me.prettyprint.cassandra.connection.NullOpTimer;
 import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -41,6 +43,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean useHostTimeoutTracker = false;
   private boolean runAutoDiscoveryAtStartup = false;
   private boolean useSocketKeepalive = false;
+  private HOpTimer opTimer = new NullOpTimer();
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -143,6 +146,14 @@ public final class CassandraHostConfigurator implements Serializable {
     clockResolution = HFactory.createClockResolution(resolutionString);
   }
 
+  public HOpTimer getOpTimer() {
+	  return opTimer;
+  }
+
+  public void setOpTimer(HOpTimer opTimer) {
+	  this.opTimer = opTimer;
+  }
+  
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder();
@@ -165,6 +176,8 @@ public final class CassandraHostConfigurator implements Serializable {
     s.append(useThriftFramedTransport);
     s.append("&retryDownedHosts=");
     s.append(retryDownedHosts);
+    s.append("&opTimer=");
+    s.append(opTimer);    
     s.append(">");
     return s.toString();
   }

@@ -13,6 +13,7 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HColumnImpl;
+import me.prettyprint.cassandra.model.HSuperColumnImpl;
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
@@ -23,6 +24,8 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.factory.HFactory;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -188,6 +191,15 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
   @Override
   public SN getActiveSuperColumn() {
     return currentSuperColumn;
+  }
+    
+
+  @Override
+  public HSuperColumn<SN, N, ByteBuffer> getSuperColumn(SN sColumnName) {
+    Map<N, HColumn<N, ByteBuffer>> subCols = columns.get(sColumnName);
+    HSuperColumnImpl<SN, N, ByteBuffer> scol = new HSuperColumnImpl<SN, N, ByteBuffer>(sColumnName, new ArrayList<HColumn<N,ByteBuffer>>(subCols.values()), 
+        HFactory.createClock(), sNameSerializer, columnNameSerializer, ByteBufferSerializer.get());
+    return scol;
   }
 
   @Override

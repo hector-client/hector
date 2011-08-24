@@ -2,8 +2,8 @@ package me.prettyprint.cassandra.service;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,15 +33,27 @@ public final class BatchMutation<K> {
 
   private final Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap;
   private final Serializer<K> keySerializer;
+  private BatchSizeHint sizeHint;
 
-  public BatchMutation(Serializer<K> serializer) {
+  public BatchMutation(Serializer<K> serializer, BatchSizeHint sizeHint) {
     this.keySerializer = serializer;
-    mutationMap = new HashMap<ByteBuffer,Map<String,List<Mutation>>>();
+    this.sizeHint = sizeHint;
+    if (null == sizeHint) {
+      mutationMap = new HashMap<ByteBuffer,Map<String,List<Mutation>>>();
+    }
+    else {
+      mutationMap = new HashMap<ByteBuffer,Map<String,List<Mutation>>>(sizeHint.getNumOfRows());
+    }
   }
 
-  private BatchMutation(Serializer<K> serializer, Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap) {
+  public BatchMutation(Serializer<K> serializer) {
+    this(serializer, null);
+  }
+
+  private BatchMutation(Serializer<K> serializer, Map<ByteBuffer,Map<String,List<Mutation>>> mutationMap, BatchSizeHint sizeHint) {
     this.keySerializer = serializer;
     this.mutationMap = mutationMap;
+    this.sizeHint = sizeHint;
   }
 
   /**
@@ -96,28 +108,30 @@ public final class BatchMutation<K> {
     addMutation(key, columnFamilies, mutation);
     return this;
   }
-  
 
   private void addMutation(K key, List<String> columnFamilies, Mutation mutation) {
     Map<String, List<Mutation>> innerMutationMap = getInnerMutationMap(key);
     for (String columnFamily : columnFamilies) {
-      if (innerMutationMap.get(columnFamily) == null) {
-        innerMutationMap.put(columnFamily, Arrays.asList(mutation));
-      } else {
-        List<Mutation> mutations = new ArrayList<Mutation>(innerMutationMap.get(columnFamily));
-        mutations.add(mutation);
-        innerMutationMap.put(columnFamily, mutations);
+      List<Mutation> mutList = innerMutationMap.get(columnFamily);
+      if (mutList == null) {
+    	if (sizeHint == null) {
+    	  mutList = new LinkedList<Mutation>();
+    	}
+    	else {
+    	  mutList = new ArrayList<Mutation>(sizeHint.getNumOfColumns());	
+    	}
+        innerMutationMap.put(columnFamily, mutList);
       }
+      mutList.add(mutation);
     }
-    mutationMap.put(keySerializer.toByteBuffer(key), innerMutationMap);
   }
   
-
 
   private Map<String, List<Mutation>> getInnerMutationMap(K key) {
     Map<String, List<Mutation>> innerMutationMap = mutationMap.get(keySerializer.toByteBuffer(key));
     if (innerMutationMap == null) {
       innerMutationMap = new HashMap<String, List<Mutation>>();
+      mutationMap.put(keySerializer.toByteBuffer(key), innerMutationMap);
     }
     return innerMutationMap;
   }
@@ -131,7 +145,7 @@ public final class BatchMutation<K> {
    * @return
    */
   public BatchMutation<K> makeCopy() {
-    return new BatchMutation<K>(keySerializer, mutationMap);
+    return new BatchMutation<K>(keySerializer, mutationMap, sizeHint);
   }
 
   /**

@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.connection;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -9,11 +10,8 @@ import java.util.concurrent.TimeUnit;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,11 +51,23 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     log.info("Downed Host retry shutdown complete");
   }
 
-  public void add(CassandraHost cassandraHost) {
+  public void add(final CassandraHost cassandraHost) {
     downedHostQueue.add(cassandraHost);
     if ( log.isInfoEnabled() ) {
       log.info("Host detected as down was added to retry queue: {}", cassandraHost.getName());
     }
+    
+    //schedule a check of this host immediately,
+    executor.submit(new Runnable() {
+      @Override
+      public void run() {
+        if(downedHostQueue.contains(cassandraHost) && verifyConnection(cassandraHost)) {
+          connectionManager.addCassandraHost(cassandraHost);
+          downedHostQueue.remove(cassandraHost);
+          return;
+        }
+      }
+    });
   }
 
   public boolean remove(CassandraHost cassandraHost) {
@@ -89,46 +99,49 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
     @Override
     public void run() {
-      CassandraHost cassandraHost = downedHostQueue.poll();
-      if ( cassandraHost == null ) {
-        if ( log.isDebugEnabled() ) { 
+      if( downedHostQueue.isEmpty()) {
           log.debug("Retry service fired... nothing to do.");
+          return;
+      }  
+      Iterator<CassandraHost> iter = downedHostQueue.iterator();
+      while( iter.hasNext() ) {
+        CassandraHost cassandraHost = iter.next();
+        if( cassandraHost == null ) {
+          continue;
         }
-        return;
+        boolean reconnected = verifyConnection(cassandraHost);
+        log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
+        if ( reconnected ) {
+          connectionManager.addCassandraHost(cassandraHost);
+          //we can't call iter.remove() based on return value of connectionManager.addCassandraHost, since
+          //that returns false if an error occurs, or if the host already exists
+          if(connectionManager.getHosts().contains(cassandraHost)) {
+            iter.remove();
+          }
+        }
       }
-      
-      boolean reconnected = verifyConnection(cassandraHost);
-      log.info("Downed Host retry status {} with host: {}", reconnected, cassandraHost.getName());
-      if ( reconnected ) {
-        reconnected = connectionManager.addCassandraHost(cassandraHost);
-      }
-      if ( !reconnected && cassandraHost != null ) {
-        downedHostQueue.add(cassandraHost);
-      }
-
     }
-
-    private boolean verifyConnection(CassandraHost cassandraHost) {
-      if ( cassandraHost == null ) {
-        return false;
-      }
-      boolean found = false;
-      HThriftClient client = new HThriftClient(cassandraHost);
-      try {
-        
-        client.open();
-        found = client.getCassandra().describe_cluster_name() != null;
-        client.close();              
-      } catch (HectorTransportException he) {        
-        log.warn("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
-      } catch (Exception ex) {
-                
-        log.error("Downed Host retry failed attempt to verify CassandraHost", ex);
-        
-      } 
-      return found;
-    }
-
   }
 
+  
+  private boolean verifyConnection(CassandraHost cassandraHost) {
+    if ( cassandraHost == null ) {
+      return false;
+    }
+    boolean found = false;
+    HThriftClient client = new HThriftClient(cassandraHost);
+    try {
+      
+      client.open();
+      found = client.getCassandra().describe_cluster_name() != null;
+      client.close();              
+    } catch (HectorTransportException he) {        
+      log.warn("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
+    } catch (Exception ex) {
+              
+      log.error("Downed Host retry failed attempt to verify CassandraHost", ex);
+      
+    } 
+    return found;
+  }
 }

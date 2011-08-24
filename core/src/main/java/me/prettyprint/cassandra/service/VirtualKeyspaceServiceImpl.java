@@ -100,13 +100,14 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
   @Override
   public Map<ByteBuffer, List<CounterColumn>> getRangeCounterSlices(
-        ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange) throws HectorException {
+      ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange)
+      throws HectorException {
 
-        return ps.fromBytesMap(super.getRangeCounterSlices(columnParent, predicate,
-                prefixKeyRange(keyRange)));
+    return ps.fromBytesMap(super.getRangeCounterSlices(columnParent, predicate,
+        prefixKeyRange(keyRange)));
   }
 
-    @Override
+  @Override
   public Map<ByteBuffer, List<SuperColumn>> getSuperRangeSlices(
       ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange)
       throws HectorException {
@@ -117,22 +118,24 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
   @Override
   public Map<ByteBuffer, List<CounterSuperColumn>> getSuperRangeCounterSlices(
-            ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange) throws HectorException {
+      ColumnParent columnParent, SlicePredicate predicate, KeyRange keyRange)
+      throws HectorException {
 
-        return ps.fromBytesMap(super.getSuperRangeCounterSlices(columnParent, predicate,
-                prefixKeyRange(keyRange)));
+    return ps.fromBytesMap(super.getSuperRangeCounterSlices(columnParent,
+        predicate, prefixKeyRange(keyRange)));
   }
 
-    @Override
+  @Override
   public List<Column> getSlice(ByteBuffer key, ColumnParent columnParent,
       SlicePredicate predicate) throws HectorException {
 
     return super.getSlice(ps.toByteBuffer(key), columnParent, predicate);
   }
-  
+
   @Override
-  public List<CounterColumn> getCounterSlice(ByteBuffer key, ColumnParent columnParent,
-      SlicePredicate predicate) throws HectorException {
+  public List<CounterColumn> getCounterSlice(ByteBuffer key,
+      ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException {
 
     return super.getCounterSlice(ps.toByteBuffer(key), columnParent, predicate);
   }
@@ -177,8 +180,8 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
-  public Map<ByteBuffer, List<CounterColumn>> multigetCounterSlice(List<ByteBuffer> keys,
-      ColumnParent columnParent, SlicePredicate predicate)
+  public Map<ByteBuffer, List<CounterColumn>> multigetCounterSlice(
+      List<ByteBuffer> keys, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException {
 
     return ps.fromBytesMap(super.multigetCounterSlice(ps.toBytesList(keys),
@@ -199,8 +202,8 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
       List<ByteBuffer> keys, ColumnParent columnParent, SlicePredicate predicate)
       throws HectorException {
 
-    return ps.fromBytesMap(super.multigetCounterSuperSlice(ps.toBytesList(keys),
-        columnParent, predicate));
+    return ps.fromBytesMap(super.multigetCounterSuperSlice(
+        ps.toBytesList(keys), columnParent, predicate));
   }
 
   @Override
@@ -233,6 +236,32 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
       throws HectorException {
 
     return super.getColumn(ps.toByteBuffer(key), columnPath);
+  }
+
+  @Override
+  public CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath)
+      throws HectorException {
+    return super.getCounter(ps.toByteBuffer(key), columnPath);
+  }
+
+  @Override
+  public void addCounter(final ByteBuffer key, final ColumnParent columnParent,
+      final CounterColumn counterColumn) throws HectorException {
+    super.addCounter(ps.toByteBuffer(key), columnParent, counterColumn);
+  }
+
+  @Override
+  public List<CounterSuperColumn> getCounterSuperSlice(ByteBuffer key,
+      ColumnParent columnParent, SlicePredicate predicate)
+      throws HectorException {
+    return super.getCounterSuperSlice(ps.toByteBuffer(key), columnParent,
+        predicate);
+  }
+
+  @Override
+  public void removeCounter(ByteBuffer key, ColumnPath columnPath)
+      throws HectorException {
+    super.removeCounter(ps.toByteBuffer(key), columnPath);
   }
 
 }

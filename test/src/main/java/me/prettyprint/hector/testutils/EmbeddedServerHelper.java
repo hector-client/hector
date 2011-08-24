@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.testutils;
+package me.prettyprint.hector.testutils;
 
 import java.io.*;
 import java.util.concurrent.ExecutorService;

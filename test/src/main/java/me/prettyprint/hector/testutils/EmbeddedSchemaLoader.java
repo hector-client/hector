@@ -1,9 +1,9 @@
-package me.prettyprint.cassandra.testutils;
+package me.prettyprint.hector.testutils;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,7 @@ import org.apache.cassandra.db.ColumnFamilyType;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.AsciiType;
 import org.apache.cassandra.db.marshal.BytesType;
+import org.apache.cassandra.db.marshal.CompositeType;
 import org.apache.cassandra.db.marshal.CounterColumnType;
 import org.apache.cassandra.db.marshal.IntegerType;
 import org.apache.cassandra.db.marshal.LongType;
@@ -56,7 +57,12 @@ public class EmbeddedSchemaLoader {
     ColumnFamilyType st = ColumnFamilyType.Standard;
     ColumnFamilyType su = ColumnFamilyType.Super;
     AbstractType bytes = BytesType.instance;
-
+    
+    List<AbstractType> subComparators = new ArrayList<AbstractType>();
+    subComparators.add(BytesType.instance);
+    subComparators.add(TimeUUIDType.instance);
+    subComparators.add(IntegerType.instance);
+    
     // Keyspace 1
     schema.add(new KSMetaData(
         ks1,
@@ -75,7 +81,7 @@ public class EmbeddedSchemaLoader {
         superCFMD(ks1, "Super5", bytes),
         indexCFMD(ks1, "Indexed1", true),
         indexCFMD(ks1, "Indexed2", false),
-        new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),
+        new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),        
         new CFMetaData(ks1, "Counter1", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
         new CFMetaData(ks1, "Counter2", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
         new CFMetaData(ks1, "SuperCounter1", su, bytes, bytes).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
@@ -90,6 +96,15 @@ public class EmbeddedSchemaLoader {
     return schema;
   }
 
+  private static CFMetaData compositeCFMD(String ksName, String cfName, AbstractType... types) {
+    try {
+      return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, CompositeType.getInstance(Arrays.asList(types)), null);      
+    } catch (ConfigurationException e) {
+      
+    }
+    return null;
+  }
+  
   private static CFMetaData standardCFMD(String ksName, String cfName) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard,
         BytesType.instance, null).keyCacheSize(0);

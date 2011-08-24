@@ -30,10 +30,10 @@ import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.ByteBufferOutputStream;
 import me.prettyprint.hector.api.Serializer;
 
-import org.apache.cassandra.utils.ByteBufferUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
@@ -50,7 +50,7 @@ import com.google.common.collect.ImmutableClassToInstanceMap;
 public abstract class AbstractComposite extends AbstractList<Object> implements
     Comparable<AbstractComposite> {
 
-  private static Logger log = LoggerFactory.getLogger(AbstractComposite.class);
+  public static Logger log = LoggerFactory.getLogger(AbstractComposite.class);
 
   public enum ComponentEquality {
     LESS_THAN_EQUAL((byte) -1), EQUAL((byte) 0), GREATER_THAN_EQUAL((byte) 1);
@@ -198,6 +198,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   List<Component<?>> components = new ArrayList<Component<?>>();
+  ComponentEquality equality = ComponentEquality.EQUAL;
 
   ByteBuffer serialized = null;
 
@@ -369,12 +370,13 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       try {
         int header = getShortLength(bb);
         if ((header & 0x8000) == 0) {
-          name = ByteBufferUtil.string(getBytes(bb, header));
+          
+          name = Charsets.UTF_8.newDecoder().decode(getBytes(bb, header).duplicate()).toString();
         } else {
           byte a = (byte) (header & 0xFF);
           name = aliasToComparatorMapping.get(a);
           if (name == null) {
-            a = (byte) Character.toUpperCase((char) a);
+            a = (byte) Character.toLowerCase((char) a);
             name = aliasToComparatorMapping.get(a);
             if (name != null) {
               name += "(reversed=true)";
@@ -666,15 +668,21 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           out.writeShort((short) (0x8000 | a));
         } else {
           out.writeShort((short) comparator.length());
-          out.write(ByteBufferUtil.bytes(comparator));
+          out.write(ByteBuffer.wrap(comparator.getBytes(Charsets.UTF_8)));
         }
-        if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() == 0)) {
-          log.warn("Writing zero-length BytesType, probably an error");
-        }
+        // if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() ==
+        // 0)) {
+        // log.warn("Writing zero-length BytesType, probably an error");
+        // }
       }
       out.writeShort((short) cb.remaining());
       out.write(cb.slice());
-      out.write(c.getEquality().toByte());
+      if ((i == (components.size() - 1))
+          && (equality != ComponentEquality.EQUAL)) {
+        out.write(equality.toByte());
+      } else {
+        out.write(c.getEquality().toByte());
+      }
       i++;
     }
 
@@ -719,6 +727,15 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   protected static ByteBuffer getWithShortLength(ByteBuffer bb) {
     int length = getShortLength(bb);
     return getBytes(bb, length);
+  }
+
+  public ComponentEquality getEquality() {
+    return equality;
+  }
+
+  public void setEquality(ComponentEquality equality) {
+    serialized = null;
+    this.equality = equality;
   }
 
 }
