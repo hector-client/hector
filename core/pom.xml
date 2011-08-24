@@ -117,8 +117,8 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.6</version>
-      <scope>test</scope>
+      <version>1.9</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
