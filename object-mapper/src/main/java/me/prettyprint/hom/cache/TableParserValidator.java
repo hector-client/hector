@@ -52,6 +52,8 @@ public class TableParserValidator implements ParserValidator {
       validateBaseClass(cacheMgr, cfMapDef);
     } else if (cfMapDef.isDerivedClassInheritance()) {
       validateDerivedClass(cacheMgr, cfMapDef);
+    } else if (cfMapDef.isIntermediateClassInheritance()) {
+      validateIntermediateClass(cacheMgr, cfMapDef);
     }
   }
 
@@ -77,6 +79,14 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
+  private <T> void validateIntermediateClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+      if (null != cfMapDef.getColFamName()) {
+        throw new HectorObjectMapperException(cfMapDef.getRealClass()
+            + " is recognized as an intermediate class, but specifies a @" + Table.class.getSimpleName()
+            + " - quitting");
+      }
+  }
+  
   private <T> void validateDerivedClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     findAndSetBaseClassViaMappings(cacheMgr, cfMapDef);
     if (null == cfMapDef.getCfBaseMapDef()) {

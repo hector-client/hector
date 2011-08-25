@@ -135,8 +135,8 @@ public class ClassCacheMgr {
     // classes, and and set any defaults
     checkMappingAndSetDefaults(cfMapDef);
 
-    // if this class is not a derived class, then map the ColumnFamily name
-    if (!cfMapDef.isDerivedClassInheritance()) {
+    // if this class is not a derived or intermediate class, then map the ColumnFamily name
+    if (!cfMapDef.isDerivedClassInheritance() && ! cfMapDef.isIntermediateClassInheritance()) {
       cfMapByColFamName.put(cfMapDef.getEffectiveColFamName(), cfMapDef);
     }
 
@@ -172,9 +172,9 @@ public class ClassCacheMgr {
     Class<T> theType = cfMapDef.getEffectiveClass();
 
     Map<String, PropertyDescriptor> pdMap = getFieldPropertyDescriptorMap(theType);
-    if (pdMap.isEmpty() && !cfMapDef.isDerivedClassInheritance()) {
-      throw new HectorObjectMapperException("could not find any properties annotated with @"
-          + Column.class.getSimpleName());
+    if (pdMap.isEmpty() && !cfMapDef.isDerivedClassInheritance() & !cfMapDef.isIntermediateClassInheritance()) {
+      throw new HectorObjectMapperException("Could not find any properties annotated with @"
+          + Column.class.getSimpleName() + " in class " + cfMapDef.getEffectiveClass());
     }
 
     Field[] fieldArr = theType.getDeclaredFields();

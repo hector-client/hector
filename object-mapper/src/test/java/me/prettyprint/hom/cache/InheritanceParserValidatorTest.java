@@ -6,7 +6,9 @@ import javax.persistence.InheritanceType;
 
 import me.prettyprint.hom.CFMappingDef;
 import me.prettyprint.hom.ClassCacheMgr;
+import me.prettyprint.hom.beans.MyAbstractGreenTestBean;
 import me.prettyprint.hom.beans.MyBlueTestBean;
+import me.prettyprint.hom.beans.MyGreenTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
 
 import org.junit.Test;
@@ -96,4 +98,27 @@ public class InheritanceParserValidatorTest {
     fail("should have reported missing discriminator value annotation");
   }
 
+  @Test
+  public void testValidateIntermediateClass() {
+    CFMappingDef<MyTestBean> cfBaseMapDef = new CFMappingDef<MyTestBean>(
+        MyTestBean.class);
+    cfBaseMapDef.setInheritanceType(InheritanceType.SINGLE_TABLE);
+    cfBaseMapDef.setDiscColumn("myType");
+
+    CFMappingDef<MyAbstractGreenTestBean> cfIntermediateMapDef = new CFMappingDef<MyAbstractGreenTestBean>(
+        MyAbstractGreenTestBean.class);
+    cfIntermediateMapDef.setCfBaseMapDef(cfBaseMapDef);
+
+    CFMappingDef<MyGreenTestBean> cfDerivedMapDef = new CFMappingDef<MyGreenTestBean>(
+            MyGreenTestBean.class);
+      cfDerivedMapDef.setCfBaseMapDef(cfBaseMapDef);
+      cfDerivedMapDef.setDiscValue("Green");
+
+    InheritanceParserValidator val = new InheritanceParserValidator();
+    try {
+      val.validateAndSetDefaults(null, cfIntermediateMapDef);
+    } catch (HectorObjectMapperException e) {
+      fail(e.getMessage());
+    }
+  }
 }

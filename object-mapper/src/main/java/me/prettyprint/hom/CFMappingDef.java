@@ -1,10 +1,10 @@
 package me.prettyprint.hom;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,9 +12,9 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.InheritanceType;
 
-import com.google.common.collect.Sets;
-
 import me.prettyprint.hom.cache.HectorObjectMapperException;
+
+import com.google.common.collect.Sets;
 
 /**
  * Holder for the mapping between a Class annotated with {@link Entity} and the
@@ -234,8 +234,12 @@ public class CFMappingDef<T> {
     return !isBaseInheritanceClass() && null != getDiscValue();
   }
 
+  public boolean isIntermediateClassInheritance() {
+      return !isBaseInheritanceClass() && null == getDiscValue() && Modifier.isAbstract(getEffectiveClass().getModifiers());
+  }
+
   public boolean isStandaloneClass() {
-    return !isBaseInheritanceClass() && !isDerivedClassInheritance();
+    return !isBaseInheritanceClass() && !isDerivedClassInheritance() && !Modifier.isAbstract(getEffectiveClass().getModifiers());
   }
 
   public String[] getSliceColumnNameArr() {
