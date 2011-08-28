@@ -11,9 +11,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;

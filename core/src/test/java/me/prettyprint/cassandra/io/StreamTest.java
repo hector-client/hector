@@ -59,13 +59,13 @@ public class StreamTest extends BaseEmbededServerSetupTest {
     String key1 = UUID.randomUUID().toString();
     String key2 = UUID.randomUUID().toString();
     check(key1, 10);
+    check(key2, 10);
     check(key2, 10000);
-
   }
 
   private void check(String key, int chunksize) throws IOException {
     String testData = "This is a testdata, we should be able to read it again via the Inpustream";
-    ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), 10);
+    ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), chunksize);
     out.write(testData.getBytes());
     out.close();
 

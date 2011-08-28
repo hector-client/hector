@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
@@ -27,7 +29,6 @@ import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
-import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,8 @@ public class HConnectionManager {
 
   private static final Logger log = LoggerFactory.getLogger(HConnectionManager.class);
 
-  private final NonBlockingHashMap<CassandraHost,HClientPool> hostPools;
-  private final NonBlockingHashMap<CassandraHost,HClientPool> suspendedHostPools;  
+  private final ConcurrentMap<CassandraHost,HClientPool> hostPools;
+  private final ConcurrentMap<CassandraHost,HClientPool> suspendedHostPools;  
   private final Collection<HClientPool> hostPoolValues;
   private final String clusterName;
   private CassandraHostRetryService cassandraHostRetryService;
@@ -53,8 +54,8 @@ public class HConnectionManager {
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
-    hostPools = new NonBlockingHashMap<CassandraHost, HClientPool>();
-    suspendedHostPools = new NonBlockingHashMap<CassandraHost, HClientPool>();
+    hostPools = new ConcurrentHashMap<CassandraHost, HClientPool>();
+    suspendedHostPools = new ConcurrentHashMap<CassandraHost, HClientPool>();
     this.clusterName = clusterName;
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
       cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);

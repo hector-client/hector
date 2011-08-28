@@ -5,12 +5,12 @@
     <artifactId>hector</artifactId>
     <version>0.8.0-3-SNAPSHOT</version>
   </parent>
-  <artifactId>hector-core</artifactId>
-  <packaging>bundle</packaging>
-  <name>hector-core</name>
+  <artifactId>hector-test</artifactId>
+  <packaging>jar</packaging>
+  <name>test</name>
   <properties>
     <!-- OSGi bundle properties -->
-    <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
+    <bundle.symbolicName>me.prettyprint.hector-test</bundle.symbolicName>
     <bundle.namespace>me.prettyprint</bundle.namespace>
   </properties>
 
@@ -93,55 +93,9 @@
   </build>
   <dependencies>
     <dependency>
-      <groupId>commons-lang</groupId>
-      <artifactId>commons-lang</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>commons-pool</groupId>
-      <artifactId>commons-pool</artifactId>
-    </dependency>
-    <dependency>
       <groupId>org.apache.cassandra</groupId>
-      <artifactId>cassandra-thrift</artifactId>
+      <artifactId>cassandra-all</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.apache.thrift</groupId>
-      <artifactId>libthrift</artifactId>
-      <exclusions>
-        <exclusion>
-          <groupId>javax.servlet</groupId>
-          <artifactId>servlet-api</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.github.stephenc.eaio-uuid</groupId>
-      <artifactId>uuid</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>com.ecyrd.speed4j</groupId>
-      <artifactId>speed4j</artifactId>
-    </dependency>
-	<!-- Note the optional tag. If you need to use fastinfoset serialization, you must include this dependency in your project! -->
-    <dependency>
-      <artifactId>FastInfoset</artifactId>
-      <groupId>com.sun.xml.fastinfoset</groupId>
-      <version>1.2.2</version>
-      <optional>true</optional>
-    </dependency>
-
     <!-- OSGi deps -->
     <dependency>
       <groupId>org.osgi</groupId>
@@ -156,63 +110,6 @@
       <version>1.0</version>
       <scope>provided</scope>
       <optional>true</optional>
-    </dependency>
-
-    <!-- test dependencies -->
-    <dependency>
-      <groupId>me.prettyprint</groupId>
-      <artifactId>hector-test</artifactId>
-      <version>${pom.version}</version>
-      <scope>test</scope>      
-    </dependency>     
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jcl-over-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>jul-to-slf4j</artifactId>
-      <scope>test</scope>
-    </dependency>    
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-beans</artifactId>
-      <version>${org.springframework.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-context</artifactId>
-      <version>${org.springframework.version}</version>
-      <scope>test</scope>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-test</artifactId>
-      <version>${org.springframework.version}</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
   <profiles>

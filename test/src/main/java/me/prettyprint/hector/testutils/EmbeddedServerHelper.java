@@ -1,4 +1,4 @@
-package me.prettyprint.cassandra.testutils;
+package me.prettyprint.hector.testutils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -9,14 +9,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
-import org.apache.cassandra.config.KSMetaData;
-import org.apache.cassandra.contrib.utils.service.CassandraServiceDataCleaner;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.CassandraDaemon;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
@@ -32,7 +28,6 @@ public class EmbeddedServerHelper {
 
   private static final String TMP = "tmp";
 
-  private EmbeddedCassandraService cassandra;
   private final String yamlFile;
   static CassandraDaemon cassandraDaemon;
   

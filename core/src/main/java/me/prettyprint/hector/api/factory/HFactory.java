@@ -36,6 +36,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceQuery;
 import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.cassandra.service.BatchSizeHint;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.ThriftCfDef;
@@ -330,6 +331,11 @@ public final class HFactory {
       Serializer<K> keySerializer) {
     return new MutatorImpl<K>(keyspace, keySerializer);
   }
+  
+  public static <K, N, V> Mutator<K> createMutator(Keyspace keyspace,
+	      Serializer<K> keySerializer, BatchSizeHint sizeHint) {
+	    return new MutatorImpl<K>(keyspace, keySerializer, sizeHint);
+	  }
 
   public static <K, N, V> ColumnQuery<K, N, V> createColumnQuery(
       Keyspace keyspace, Serializer<K> keySerializer,

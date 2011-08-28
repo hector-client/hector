@@ -12,9 +12,9 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.InheritanceType;
 
-import me.prettyprint.hom.cache.HectorObjectMapperException;
+import com.google.common.collect.Sets;
 
-import org.apache.commons.collections.collection.CompositeCollection;
+import me.prettyprint.hom.cache.HectorObjectMapperException;
 
 /**
  * Holder for the mapping between a Class annotated with {@link Entity} and the
@@ -183,8 +183,9 @@ public class CFMappingDef<T> {
       if (null == cfSuperMapDef) {
         allMappedProps = propSet;
       } else {
-        allMappedProps = new CompositeCollection(
-            new Collection[] { propSet, cfSuperMapDef.getAllProperties() });
+        allMappedProps = Sets.union(
+                propSet, (Set) cfSuperMapDef.getAllProperties()
+                );
       }
     }
 

@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.utils.DaemonThreadPoolFactory;
 
-import org.apache.cassandra.concurrent.RetryingScheduledThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +31,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
 
   private static final long serialVersionUID = -1044985880174118325L;
   private static final Logger log = LoggerFactory.getLogger(DynamicLoadBalancingPolicy.class);
-  public static RetryingScheduledThreadPoolExecutor tasks = new RetryingScheduledThreadPoolExecutor("BGTasks");
+  
+  private final ScheduledExecutorService tasks = new ScheduledThreadPoolExecutor(1, new DaemonThreadPoolFactory(getClass()));
 
   // references which is used to make the real time requests faster.
   private Map<HClientPool, Double> scores = Maps.newConcurrentMap();
@@ -45,15 +48,23 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
     // Pre-calculate the scores so as we can compare it fast.
     Runnable updateThread = new Runnable() {
       public void run() {
-        updateScores();
+        try {
+          updateScores();
+        } catch(Exception e) {
+          log.info("exception updating scores", e);
+        }
       }
     };
 
     // Clear Stats.
     Runnable resetThread = new Runnable() {
       public void run() {
-        for (LatencyAwareHClientPool pool : allPools) {
-          pool.clear();
+        try {
+          for (LatencyAwareHClientPool pool : allPools) {
+            pool.clear();
+          }
+        } catch(Exception e) {
+          log.info("exceotuib reseting stats", e);
         }
       }
     };

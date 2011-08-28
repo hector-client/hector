@@ -53,7 +53,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
-    updater.update();
+    template.update(updater);
     template.setCount(10);
     String value = template.queryColumns("key1", new ColumnFamilyRowMapper<String, String, String>() {
       @Override
@@ -63,6 +63,31 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
       }
     });
     assertEquals("value1",value);           
+  }
+  
+  @Test
+  public void testOverloadedMapRowCallback() {
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyUpdater updater = template.createUpdater("key1"); 
+    updater.setString("column1","value1");
+    updater.addKey("key2");
+    updater.setString("column1", "value2");
+    template.update(updater);
+    template.setCount(10);
+    MappedColumnFamilyResult result = template.queryColumns(Arrays.asList("key1","key2"), new ColumnFamilyRowMapper<String, String, String>() {
+      @Override
+      public String mapRow(ColumnFamilyResult<String, String> results) {
+
+        return results.getString("column1");
+      }
+    });
+    assertEquals("key1",result.getKey());
+    assertEquals("value1", result.getRow());
+    result.next();
+    assertEquals("key2",result.getKey());
+    assertEquals("value2", result.getRow());
+    
+    
   }
   
   @Test

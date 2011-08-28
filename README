@@ -50,7 +50,7 @@ The work was initially inspired by http://code.google.com/p/cassandra-java-clien
 ----------------------------------------------------------------------------------------------------
 Building Hector from sources
 
-Hector sues maven to build the sources. If you are new to Maven, take a look at this tutorial first:
+Hector uses maven to build the sources. If you are new to Maven, take a look at this tutorial first:
  o  http://maven.apache.org/run-maven/index.html 
 
 In order to to build Hector (this is not Hector specific) you run: 
