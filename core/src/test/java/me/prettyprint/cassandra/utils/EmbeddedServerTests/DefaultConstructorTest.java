@@ -1,8 +1,8 @@
 package me.prettyprint.cassandra.utils.EmbeddedServerTests;
 
-import me.prettyprint.cassandra.testutils.EmbeddedSchemaLoader;
-import me.prettyprint.cassandra.testutils.EmbeddedServerConfigurator;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
+import me.prettyprint.hector.testutils.EmbeddedSchemaLoader;
+import me.prettyprint.hector.testutils.EmbeddedServerConfigurator;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.slf4j.LoggerFactory;

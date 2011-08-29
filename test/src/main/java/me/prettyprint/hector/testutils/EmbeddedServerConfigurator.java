@@ -1,6 +1,5 @@
-package me.prettyprint.cassandra.testutils;
+package me.prettyprint.hector.testutils;
 
-import me.prettyprint.cassandra.service.template.MappedColumnFamilyResult;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;

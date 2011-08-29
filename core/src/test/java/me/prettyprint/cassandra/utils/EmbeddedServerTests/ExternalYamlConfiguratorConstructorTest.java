@@ -2,8 +2,8 @@ package me.prettyprint.cassandra.utils.EmbeddedServerTests;
 
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
-import me.prettyprint.cassandra.testutils.EmbeddedServerConfigurator;
-import me.prettyprint.cassandra.testutils.EmbeddedServerHelper;
+import me.prettyprint.hector.testutils.EmbeddedServerConfigurator;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
