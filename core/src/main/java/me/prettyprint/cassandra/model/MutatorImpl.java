@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.model;
 
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
@@ -85,6 +87,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
     addDeletion(key, cf, columnName, nameSerializer);
     return execute();
   }
+  
   
   @Override
   public <N> MutationResult delete(K key, String cf, N columnName,
@@ -196,6 +199,19 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <N> Mutator<K> addDeletion(K key, String cf, long clock) {
     addDeletion(key, cf, null, null, clock);
+    return this;
+  }
+  
+  @Override
+  public <N> Mutator<K> addDeletion(List<K> keys, String cf) {
+    return addDeletion(keys, cf, keyspace.createClock());
+  }
+  
+  @Override
+  public <N> Mutator<K> addDeletion(List<K> keys, String cf, long clock) {
+    for (K key : keys) {
+      addDeletion(key, cf, null, null, clock);
+    }
     return this;
   }
 
@@ -394,7 +410,5 @@ public final class MutatorImpl<K> implements Mutator<K> {
     return this;
 
   }
-
-
 
 }
