@@ -1,7 +1,5 @@
 package me.prettyprint.hector.api.mutation;
 
-import java.util.List;
-
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
@@ -99,7 +97,7 @@ public interface Mutator<K> {
    * @param cf Column Family name
    * @return this object (method chain)
    */
-  <N> Mutator<K> addDeletion(List<K> keys, String cf);
+  <N> Mutator<K> addDeletion(Iterable<K> keys, String cf);
   
   /**
    * Convenience methods to delete a list of rows.
@@ -110,7 +108,7 @@ public interface Mutator<K> {
    * @param clock user defined clock
    * @return this object (method chain)
    */
-  <N> Mutator<K> addDeletion(List<K> keys, String cf, long clock);
+  <N> Mutator<K> addDeletion(Iterable<K> keys, String cf, long clock);
   
   /**
    * Same as above accept we add the clock

@@ -1,8 +1,6 @@
 package me.prettyprint.cassandra.model;
 
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
@@ -203,12 +201,12 @@ public final class MutatorImpl<K> implements Mutator<K> {
   }
   
   @Override
-  public <N> Mutator<K> addDeletion(List<K> keys, String cf) {
+  public <N> Mutator<K> addDeletion(Iterable<K> keys, String cf) {
     return addDeletion(keys, cf, keyspace.createClock());
   }
   
   @Override
-  public <N> Mutator<K> addDeletion(List<K> keys, String cf, long clock) {
+  public <N> Mutator<K> addDeletion(Iterable<K> keys, String cf, long clock) {
     for (K key : keys) {
       addDeletion(key, cf, null, null, clock);
     }
