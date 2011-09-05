@@ -75,17 +75,18 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
   }
 
   @Override
-  public void batchMutate(
-      Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap)
-      throws HectorException {
-
+  public void batchMutate(Map<ByteBuffer, Map<String, List<Mutation>>> mutationMap) throws HectorException {
     super.batchMutate(ps.toBytesMap(mutationMap));
   }
 
   @Override
-  public int getCount(ByteBuffer key, ColumnParent columnParent,
-      SlicePredicate predicate) throws HectorException {
+  public void batchMutate(BatchMutation batchMutate) throws HectorException {
+    batchMutate(batchMutate.getMutationMap());
+  }
 
+
+  @Override
+  public int getCount(ByteBuffer key, ColumnParent columnParent, SlicePredicate predicate) throws HectorException {
     return super.getCount(ps.toByteBuffer(key), columnParent, predicate);
   }
 
@@ -210,6 +211,9 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
   public Map<ByteBuffer, List<Column>> getIndexedSlices(
       ColumnParent columnParent, IndexClause indexClause,
       SlicePredicate predicate) throws HectorException {
+
+      if (indexClause.isSetStart_key())
+        indexClause.setStart_key(ps.toByteBuffer(indexClause.start_key));
 
     return ps.fromBytesMap(super.getIndexedSlices(columnParent, indexClause,
         predicate));
