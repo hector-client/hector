@@ -1,5 +1,10 @@
 Changes by version:
 ===================
+
+0.8.0-3
+=======
+Fix race condition in connection pool. https://github.com/rantav/hector/issues/257
+
 0.8.0-2
 =======
 Synchronize on RR balancing policy counter
