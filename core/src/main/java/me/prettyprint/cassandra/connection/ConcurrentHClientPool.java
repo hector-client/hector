@@ -82,6 +82,7 @@ public class ConcurrentHClientPool implements HClientPool {
       }
     } catch (RuntimeException e) {
       activeClientsCount.decrementAndGet();
+      throw e;
     }
 
     realActiveClientsCount.incrementAndGet();
