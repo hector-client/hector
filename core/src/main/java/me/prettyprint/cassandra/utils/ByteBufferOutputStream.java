@@ -31,7 +31,7 @@ import java.util.List;
  * Hector and added getByteBuffer to return single ByteBuffer from contents.
  */
 public class ByteBufferOutputStream extends OutputStream {
-  public static final int BUFFER_SIZE = 8192;
+  static final int INITIAL_BUFFER_SIZE = 256;
 
   private List<ByteBuffer> buffers;
 
@@ -84,16 +84,21 @@ public class ByteBufferOutputStream extends OutputStream {
 
   public void reset() {
     buffers = new LinkedList<ByteBuffer>();
-    buffers.add(ByteBuffer.allocate(BUFFER_SIZE));
+    buffers.add(ByteBuffer.allocate(INITIAL_BUFFER_SIZE));
   }
 
   private ByteBuffer getBufferWithCapacity(int capacity) {
-    ByteBuffer buffer = buffers.get(buffers.size() - 1);
-    if (buffer.remaining() < capacity) {
-      buffer = ByteBuffer.allocate(BUFFER_SIZE);
-      buffers.add(buffer);
+    ByteBuffer lastBuffer = buffers.get(buffers.size() - 1);
+    if (lastBuffer.remaining() >= capacity) {
+      return lastBuffer;
+    } 
+    int newSize = lastBuffer.capacity() * 2;
+    if(newSize < capacity) {
+      newSize = capacity;
     }
-    return buffer;
+    ByteBuffer newBuffer = ByteBuffer.allocate(newSize);
+    buffers.add(newBuffer);
+    return newBuffer;
   }
 
   @Override
@@ -132,24 +137,34 @@ public class ByteBufferOutputStream extends OutputStream {
     buffer.putDouble(value);
   }
 
+  //override so callers can call us without having to 
+  //deal with IOException
+  @Override
+  public void write(byte[] b) {
+    write(b, 0, b.length);
+  }
+  
   @Override
   public void write(byte[] b, int off, int len) {
-    ByteBuffer buffer = buffers.get(buffers.size() - 1);
-    int remaining = buffer.remaining();
-    while (len > remaining) {
-      buffer.put(b, off, remaining);
-      len -= remaining;
-      off += remaining;
-      buffer = ByteBuffer.allocate(BUFFER_SIZE);
-      buffers.add(buffer);
-      remaining = buffer.remaining();
+    ByteBuffer lastBuffer = buffers.get(buffers.size() - 1);
+    if(lastBuffer.remaining() >= len) {
+      lastBuffer.put(b, off, len);
+    } else {
+      int writtenToLast = lastBuffer.remaining();
+      if(lastBuffer.remaining() != 0) {
+        lastBuffer.put(b, off, writtenToLast);
+      }
+      //this will create a buffer with 
+      //a capacity of at least len - writtenToLast 
+      getBufferWithCapacity(len - writtenToLast);
+      //this will not need to resize
+      write(b, off + writtenToLast, len - writtenToLast);
     }
-    buffer.put(b, off, len);
   }
 
   /** Add a buffer to the output without copying, if possible. */
   public void write(ByteBuffer buffer) {
-    if (buffer.remaining() < BUFFER_SIZE) {
+    if (buffer.remaining() < 8196) {
       write(buffer.array(), buffer.arrayOffset() + buffer.position(),
           buffer.remaining());
     } else { // append w/o copying bytes
