@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import me.prettyprint.cassandra.connection.ConcurrentHClientPool;
 import me.prettyprint.cassandra.connection.HClientPool;
 import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
