@@ -1,5 +1,7 @@
 package me.prettyprint.hector.api.ddl;
 
+import me.prettyprint.hector.api.beans.DynamicComposite;
+
 /**
  * @author: peter
  */
@@ -24,7 +26,8 @@ public class ComparatorType {
   public static ComparatorType COMPOSITETYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CompositeType");
   public static ComparatorType DYNAMICCOMPOSITETYPE = new ComparatorType(
-      "org.apache.cassandra.db.marshal.DynamicCompositeType");
+      "org.apache.cassandra.db.marshal.DynamicCompositeType",
+      DynamicComposite.DEFAULT_DYNAMIC_COMPOSITE_ALIASES);
   public static ComparatorType UUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.UUIDType");
   public static ComparatorType COUNTERTYPE = new ComparatorType(
@@ -36,8 +39,9 @@ public class ComparatorType {
 
   private final String className;
   private final String typeName;
+  private String typeAlias = "";
 
-  private ComparatorType(String className) {
+  public ComparatorType(String className) {
     this.className = className;
     if (className.startsWith("org.apache.cassandra.db.marshal.")) {
       typeName = className.substring("org.apache.cassandra.db.marshal."
@@ -46,13 +50,18 @@ public class ComparatorType {
       typeName = className;
     }
   }
+  
+  public ComparatorType(String className, String typeAlias) {
+    this(className);
+    this.typeAlias = typeAlias;
+  }
 
   public String getClassName() {
-    return className;
+    return className + typeAlias;
   }
 
   public String getTypeName() {
-    return typeName;
+    return typeName + typeAlias;
   }
 
   public static ComparatorType getByClassName(String className) {
