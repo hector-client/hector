@@ -86,6 +86,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
     return execute();
   }
   
+  
   @Override
   public <N> MutationResult delete(K key, String cf, N columnName,
       Serializer<N> nameSerializer, long clock) {   
@@ -196,6 +197,19 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <N> Mutator<K> addDeletion(K key, String cf, long clock) {
     addDeletion(key, cf, null, null, clock);
+    return this;
+  }
+  
+  @Override
+  public <N> Mutator<K> addDeletion(Iterable<K> keys, String cf) {
+    return addDeletion(keys, cf, keyspace.createClock());
+  }
+  
+  @Override
+  public <N> Mutator<K> addDeletion(Iterable<K> keys, String cf, long clock) {
+    for (K key : keys) {
+      addDeletion(key, cf, null, null, clock);
+    }
     return this;
   }
 
@@ -394,7 +408,5 @@ public final class MutatorImpl<K> implements Mutator<K> {
     return this;
 
   }
-
-
 
 }

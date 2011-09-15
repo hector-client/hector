@@ -1,5 +1,18 @@
 Changes by version:
 ===================
+
+0.8.0-3
+=======
+Fix race condition in connection pool. https://github.com/rantav/hector/issues/257
+Reduce default size of ByteBufferOutputStream to 256 from 8196 bytes, https://github.com/rantav/hector/issues/268
+ObjectSerializer can take a custom ClassLoader, https://github.com/rantav/hector/issues/134
+Move EmbeddedSchemaLoader and EmbeddedServerHelper into the hector-test module, https://github.com/rantav/hector/issues/223
+- hector-core depends only on cassandra-thrift, not cassandra-all
+- Remove dependencies on avro, high-scale-lib 
+Threads started by hector are daemon threads, https://github.com/rantav/hector/issues/220
+Fixed speed4j setup - modified hector so it only uses speed4j.properties to configure logging.  the logger
+  name must be of the form "hector-<cluster-name>".  Updating wiki page as well.
+
 0.8.0-2
 =======
 Synchronize on RR balancing policy counter
