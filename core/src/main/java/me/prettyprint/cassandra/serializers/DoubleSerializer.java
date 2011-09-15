@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import me.prettyprint.cassandra.serializers.AbstractSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * Uses LongSerializer via translating Doubles to and from raw long bytes form.
@@ -26,6 +27,11 @@ public class DoubleSerializer extends AbstractSerializer<Double> {
   @Override
   public Double fromByteBuffer(ByteBuffer bytes) {
     return Double.longBitsToDouble (LongSerializer.get().fromByteBuffer(bytes));
+  }
+
+  @Override
+  public ComparatorType getComparatorType() {
+    return ComparatorType.DOUBLETYPE;
   }
 
 }

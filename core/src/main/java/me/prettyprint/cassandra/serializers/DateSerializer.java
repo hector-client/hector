@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import me.prettyprint.hector.api.ddl.ComparatorType;
+
 import java.nio.ByteBuffer;
 import java.util.Date;
 
@@ -35,4 +37,9 @@ public final class DateSerializer extends AbstractSerializer<Date> {
     }
     return new Date(LONG_SERIALIZER.fromByteBuffer(bytes));
   }
+
+    @Override
+    public ComparatorType getComparatorType() {
+        return ComparatorType.DATETYPE;
+    }
 }

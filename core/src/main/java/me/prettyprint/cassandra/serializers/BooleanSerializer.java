@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
+import me.prettyprint.hector.api.ddl.ComparatorType;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -37,4 +39,8 @@ public final class BooleanSerializer extends AbstractSerializer<Boolean> {
     return b == (byte) 1;
   }
 
+    @Override
+    public ComparatorType getComparatorType() {
+        return ComparatorType.BOOLEANTYPE;
+    }
 }

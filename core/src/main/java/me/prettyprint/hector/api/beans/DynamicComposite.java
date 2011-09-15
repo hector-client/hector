@@ -5,7 +5,40 @@ import java.util.List;
 
 public class DynamicComposite extends AbstractComposite {
 
-  public final static String DEFAULT_DYNAMIC_COMPOSITE_ALIASES = "(a=>AsciiType,b=>BytesType,i=>IntegerType,x=>LexicalUUIDType,l=>LongType,t=>TimeUUIDType,s=>UTF8Type,u=>UUIDType,A=>AsciiType(reversed=true),B=>BytesType(reversed=true),I=>IntegerType(reversed=true),X=>LexicalUUIDType(reversed=true),L=>LongType(reversed=true),T=>TimeUUIDType(reversed=true),S=>UTF8Type(reversed=true),U=>UUIDType(reversed=true))";
+  public final static String DEFAULT_DYNAMIC_COMPOSITE_ALIASES =
+          "(a=>AsciiType,b=>BytesType,i=>IntegerType,x=>LexicalUUIDType,l=>LongType,t=>TimeUUIDType,s=>UTF8Type,u=>UUIDType,A=>AsciiType(reversed=true),B=>BytesType(reversed=true),I=>IntegerType(reversed=true),X=>LexicalUUIDType(reversed=true),L=>LongType(reversed=true),T=>TimeUUIDType(reversed=true),S=>UTF8Type(reversed=true),U=>UUIDType(reversed=true))";
+
+    /** Adds in new native types added in Cassandra 0.8.1
+     *       DateType, BooleanType, FloatType, DoubleType
+     */
+  public final static String EXTENDED_DYNAMIC_COMPOSITE_ALIASES =
+          "(a=>AsciiType," +
+          "b=>BytesType," +
+          "d=>DateType," +
+          "e=>BooleanType," +
+          "f=>FloatType," +
+          "i=>IntegerType," +
+          "l=>LongType," +
+          "o=>DoubleType," +
+          "s=>UTF8Type," +
+          "t=>TimeUUIDType," +
+          "u=>UUIDType," +
+          "x=>LexicalUUIDType," +
+
+          "A=>AsciiType(reversed=true)," +
+          "B=>BytesType(reversed=true)," +
+          "D=>DateType," +
+          "E=>BooleanType," +
+          "F=>FloatType," +
+          "I=>IntegerType(reversed=true)," +
+          "L=>LongType(reversed=true)," +
+          "O=>DoubleType(reversed=true)," +
+          "S=>UTF8Type(reversed=true)," +
+          "T=>TimeUUIDType(reversed=true)," +
+          "U=>UUIDType(reversed=true)," +
+          "X=>LexicalUUIDType(reversed=true))";
+
+
 
   public DynamicComposite() {
     super(true);
