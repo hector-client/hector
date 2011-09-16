@@ -24,7 +24,13 @@ public interface ColumnFamilyDefinition {
   
   ComparatorType getSubComparatorType();
   void setSubComparatorType(ComparatorType subComparitorType);
-  
+
+	String getComparatorTypeMeta();
+	void setComparatorTypeMeta(String meta);
+
+	String getSubComparatorTypeMeta();
+	void setSubComparatorTypeMeta(String meta);
+
   String getComment();
   void setComment(String comment);
   
