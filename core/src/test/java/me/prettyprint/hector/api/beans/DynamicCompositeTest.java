@@ -48,6 +48,7 @@ public class DynamicCompositeTest {
 		composite.addComponent(13, timeUUID, TimeUUIDSerializer.get(), "TimeUUIDType(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(14, "UTF8Text", StringSerializer.get(), "UTF8Type(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(15,  lexUUID, UUIDSerializer.get(), "UUIDType(reversed=true)", ComponentEquality.EQUAL);
+		composite.addComponent(16, "My element", ComponentEquality.EQUAL);
 		
 		//serialize to the native bytes value
 		
@@ -75,6 +76,7 @@ public class DynamicCompositeTest {
 		assertEquals(timeUUID, parsed.get(13, TimeUUIDSerializer.get()));
 		assertEquals("UTF8Text", parsed.get(14, StringSerializer.get()));
 		assertEquals(lexUUID, parsed.get(15, UUIDSerializer.get()));
+		assertEquals("My element", parsed.get(16, StringSerializer.get()));
 		
 
 	}
