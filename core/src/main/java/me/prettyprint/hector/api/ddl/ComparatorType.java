@@ -30,9 +30,23 @@ public class ComparatorType {
   public static ComparatorType COUNTERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CounterColumnType");
 
+  // New types added in cassandra 0.8.1
+  //    DateType, BooleanType, FloatType, DoubleType
+  public static ComparatorType DATETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DateType");
+  public static ComparatorType BOOLEANTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.BooleanType");
+  public static ComparatorType FLOATTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.FloatType");
+  public static ComparatorType DOUBLETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DoubleType");
+
+
+
   private static ComparatorType[] values = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
       LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-      UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
+      UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE,
+      DATETYPE, BOOLEANTYPE, FLOATTYPE, DOUBLETYPE };
 
   private final String className;
   private final String typeName;

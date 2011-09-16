@@ -1,14 +1,5 @@
 package me.prettyprint.hector.api.beans;
 
-import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -37,6 +28,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
+
+import static me.prettyprint.hector.api.ddl.ComparatorType.*;
 
 /**
  * Parent class of Composite and DynamicComposite. Acts as a list of objects
@@ -96,15 +89,35 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put(StringSerializer.class, StringSerializer.get())
       .put(UUIDSerializer.class, UUIDSerializer.get()).build();
 
+  /*
+    New Extended set of aliases supported since cassandra 0.8.1
+      a=>AsciiType
+      b=>BytesType
+      d=>DateType
+      e=>BooleanType
+      f=>FloatType
+      i=>IntegerType
+      l=>LongType
+      o=>DoubleType
+      s=>UTF8Type
+      t=>TimeUUIDType
+      u=>UUIDType
+      x=>LexicalUUIDType
+   */
   public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
       .put((byte) 'a', ASCIITYPE.getTypeName())
       .put((byte) 'b', BYTESTYPE.getTypeName())
+      .put((byte) 'd', DATETYPE.getTypeName())
+      .put((byte) 'e', BOOLEANTYPE.getTypeName())
+      .put((byte) 'f', FLOATTYPE.getTypeName())
       .put((byte) 'i', INTEGERTYPE.getTypeName())
-      .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
-      .put((byte) 't', TIMEUUIDTYPE.getTypeName())
+      .put((byte) 'o', DOUBLETYPE.getTypeName())
       .put((byte) 's', UTF8TYPE.getTypeName())
-      .put((byte) 'u', UUIDTYPE.getTypeName()).build();
+      .put((byte) 't', TIMEUUIDTYPE.getTypeName())
+      .put((byte) 'u', UUIDTYPE.getTypeName())
+      .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
+            .build();
 
   BiMap<Class<? extends Serializer>, String> serializerToComparatorMapping = DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
 
@@ -305,7 +318,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     if (comparator != null) {
       return comparator;
     }
-    return BYTESTYPE.getTypeName();
+    return s.getComparatorType().getTypeName();
   }
 
   private Serializer<?> serializerForComparator(String c) {

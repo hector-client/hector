@@ -39,6 +39,10 @@ public class SerializerTypeInferer {
       serializer = ByteBufferSerializer.get();
     } else if (value instanceof Date) {
       serializer = DateSerializer.get();
+    } else if (value instanceof Float) {
+      serializer = FloatSerializer.get();
+    } else if (value instanceof Double) {
+      serializer = DoubleSerializer.get();
     } else {
       serializer = ObjectSerializer.get();
     }
@@ -67,6 +71,10 @@ public class SerializerTypeInferer {
       serializer = ByteBufferSerializer.get();
     } else if (valueClass.equals(Date.class)) {
       serializer = DateSerializer.get();
+    } else if (valueClass.equals(Float.class) || valueClass.equals(float.class)) {
+      serializer = FloatSerializer.get();
+    } else if (valueClass.equals(Double.class) || valueClass.equals(double.class)) {
+      serializer = DoubleSerializer.get();
     } else {
       serializer = ObjectSerializer.get();
     }
