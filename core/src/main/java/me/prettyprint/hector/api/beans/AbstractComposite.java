@@ -1,5 +1,18 @@
 package me.prettyprint.hector.api.beans;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.BOOLEANTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.DATETYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.DOUBLETYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.FLOATTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
+
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -28,8 +41,6 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
-
-import static me.prettyprint.hector.api.ddl.ComparatorType.*;
 
 /**
  * Parent class of Composite and DynamicComposite. Acts as a list of objects
@@ -117,7 +128,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put((byte) 't', TIMEUUIDTYPE.getTypeName())
       .put((byte) 'u', UUIDTYPE.getTypeName())
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
-            .build();
+          .build();
 
   BiMap<Class<? extends Serializer>, String> serializerToComparatorMapping = DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING;
 

@@ -35,4 +35,3 @@ public class DoubleSerializer extends AbstractSerializer<Double> {
   }
 
 }
-

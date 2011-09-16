@@ -39,8 +39,8 @@ public final class BooleanSerializer extends AbstractSerializer<Boolean> {
     return b == (byte) 1;
   }
 
-    @Override
-    public ComparatorType getComparatorType() {
-        return ComparatorType.BOOLEANTYPE;
-    }
+  @Override
+  public ComparatorType getComparatorType() {
+      return ComparatorType.BOOLEANTYPE;
+  }
 }

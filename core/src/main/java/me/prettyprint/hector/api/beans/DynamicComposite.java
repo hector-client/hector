@@ -12,31 +12,31 @@ public class DynamicComposite extends AbstractComposite {
      *       DateType, BooleanType, FloatType, DoubleType
      */
   public final static String EXTENDED_DYNAMIC_COMPOSITE_ALIASES =
-          "(a=>AsciiType," +
-          "b=>BytesType," +
-          "d=>DateType," +
-          "e=>BooleanType," +
-          "f=>FloatType," +
-          "i=>IntegerType," +
-          "l=>LongType," +
-          "o=>DoubleType," +
-          "s=>UTF8Type," +
-          "t=>TimeUUIDType," +
-          "u=>UUIDType," +
-          "x=>LexicalUUIDType," +
+      "(a=>AsciiType," +
+      "b=>BytesType," +
+      "d=>DateType," +
+      "e=>BooleanType," +
+      "f=>FloatType," +
+      "i=>IntegerType," +
+      "l=>LongType," +
+      "o=>DoubleType," +
+      "s=>UTF8Type," +
+      "t=>TimeUUIDType," +
+      "u=>UUIDType," +
+      "x=>LexicalUUIDType," +
 
-          "A=>AsciiType(reversed=true)," +
-          "B=>BytesType(reversed=true)," +
-          "D=>DateType," +
-          "E=>BooleanType," +
-          "F=>FloatType," +
-          "I=>IntegerType(reversed=true)," +
-          "L=>LongType(reversed=true)," +
-          "O=>DoubleType(reversed=true)," +
-          "S=>UTF8Type(reversed=true)," +
-          "T=>TimeUUIDType(reversed=true)," +
-          "U=>UUIDType(reversed=true)," +
-          "X=>LexicalUUIDType(reversed=true))";
+      "A=>AsciiType(reversed=true)," +
+      "B=>BytesType(reversed=true)," +
+      "D=>DateType," +
+      "E=>BooleanType," +
+      "F=>FloatType," +
+      "I=>IntegerType(reversed=true)," +
+      "L=>LongType(reversed=true)," +
+      "O=>DoubleType(reversed=true)," +
+      "S=>UTF8Type(reversed=true)," +
+      "T=>TimeUUIDType(reversed=true)," +
+      "U=>UUIDType(reversed=true)," +
+      "X=>LexicalUUIDType(reversed=true))";
 
 
 

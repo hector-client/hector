@@ -38,8 +38,8 @@ public final class DateSerializer extends AbstractSerializer<Date> {
     return new Date(LONG_SERIALIZER.fromByteBuffer(bytes));
   }
 
-    @Override
-    public ComparatorType getComparatorType() {
-        return ComparatorType.DATETYPE;
-    }
+  @Override
+  public ComparatorType getComparatorType() {
+      return ComparatorType.DATETYPE;
+  }
 }
