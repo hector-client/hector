@@ -404,6 +404,28 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     return components.size();
   }
 
+  @SuppressWarnings("unchecked")
+  public <T> AbstractComposite addComponent(int index, T element, ComponentEquality equality) {
+    serialized = null;
+
+    if (element instanceof Component) {
+      components.add(index, (Component<?>) element);
+      return this;
+    }
+    
+    Serializer s = serializerForPosition(index);
+    if (s == null) {
+      s = SerializerTypeInferer.getSerializer(element);
+    }
+    String c = comparatorForPosition(index);
+    if (c == null) {
+      c = comparatorForSerializer(s);
+    }
+    components.add(index, new Component(element, null, s, c,
+        equality));
+    return this;
+  }
+    
   public <T> AbstractComposite addComponent(T value, Serializer<T> s) {
 
     addComponent(value, s, comparatorForSerializer(s));
@@ -506,28 +528,11 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     return super.addAll(i, flatten(c));
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public void add(int index, Object element) {
-    serialized = null;
-
-    if (element instanceof Component) {
-      components.add(index, (Component<?>) element);
-      return;
-    }
-
+  public void add(int index, Object element) {    
     element = mapIfNumber(element);
-    Serializer s = serializerForPosition(index);
-    if (s == null) {
-      s = SerializerTypeInferer.getSerializer(element);
-    }
-    String c = comparatorForPosition(index);
-    if (c == null) {
-      c = comparatorForSerializer(s);
-    }
-    components.add(index, new Component(element, null, s, c,
-        ComponentEquality.EQUAL));
-  }
+    addComponent(index, element, ComponentEquality.EQUAL);
+  }  
 
   @Override
   public Object remove(int index) {
