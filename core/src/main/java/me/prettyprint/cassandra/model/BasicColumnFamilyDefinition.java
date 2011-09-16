@@ -19,6 +19,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private ColumnType columnType = ColumnType.STANDARD;
   private ComparatorType comparatorType = ComparatorType.BYTESTYPE;
   private ComparatorType subComparatorType;
+	private String comparatorTypeAlias = "";
+	private String subComparatorTypeAlias = "";
   private String comment;
   private double rowCacheSize;
   private double keyCacheSize;
@@ -52,6 +54,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     columnType = columnFamilyDefinition.getColumnType();
     comparatorType = columnFamilyDefinition.getComparatorType();
     subComparatorType = columnFamilyDefinition.getSubComparatorType();
+		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
+		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
@@ -92,6 +96,10 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   public void setSubComparatorType(ComparatorType subComparitorType) {
     this.subComparatorType = subComparitorType;
   }
+
+	public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
+
+	public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
 
   public void setComment(String comment) {
     this.comment = comment;
@@ -189,6 +197,10 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   public ComparatorType getSubComparatorType() {
     return this.subComparatorType;
   }
+
+	public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
+
+	public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
 
   @Override
   public String getComment() {

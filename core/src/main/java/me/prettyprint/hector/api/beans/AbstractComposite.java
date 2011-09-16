@@ -673,7 +673,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           out.writeShort((short) (0x8000 | a));
         } else {
           out.writeShort((short) comparator.length());
-          out.write(ByteBuffer.wrap(comparator.getBytes(Charsets.UTF_8)));
+          out.write(comparator.getBytes(Charsets.UTF_8));
         }
         // if (comparator.equals(BYTESTYPE.getTypeName()) && (cb.remaining() ==
         // 0)) {
