@@ -19,8 +19,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private ColumnType columnType = ColumnType.STANDARD;
   private ComparatorType comparatorType = ComparatorType.BYTESTYPE;
   private ComparatorType subComparatorType;
-	private String comparatorTypeMeta = "";
-	private String subComparatorTypeMeta = "";
+	private String comparatorTypeAlias = "";
+	private String subComparatorTypeAlias = "";
   private String comment;
   private double rowCacheSize;
   private double keyCacheSize;
@@ -54,8 +54,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     columnType = columnFamilyDefinition.getColumnType();
     comparatorType = columnFamilyDefinition.getComparatorType();
     subComparatorType = columnFamilyDefinition.getSubComparatorType();
-		comparatorTypeMeta = columnFamilyDefinition.getComparatorTypeMeta();
-		subComparatorTypeMeta = columnFamilyDefinition.getSubComparatorTypeMeta();
+		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
+		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
@@ -97,9 +97,9 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.subComparatorType = subComparitorType;
   }
 
-	public void setComparatorTypeMeta(String meta) { this.comparatorTypeMeta = meta; }
+	public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
 
-	public void setSubComparatorTypeMeta(String meta) { this.subComparatorTypeMeta = meta; }
+	public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
 
   public void setComment(String comment) {
     this.comment = comment;
@@ -198,9 +198,9 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     return this.subComparatorType;
   }
 
-	public String getComparatorTypeMeta() { return this.comparatorTypeMeta; }
+	public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
 
-	public String getSubComparatorTypeMeta() { return this.subComparatorTypeMeta; }
+	public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
 
   @Override
   public String getComment() {
