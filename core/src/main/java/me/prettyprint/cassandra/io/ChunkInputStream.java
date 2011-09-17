@@ -49,7 +49,7 @@ public class ChunkInputStream<T> extends InputStream {
         return -1;
       }
     }
-    return chunk[pos++];
+    return chunk[pos++] & 0xff;
   }
 
   /**
