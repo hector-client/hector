@@ -1,5 +1,7 @@
 package me.prettyprint.hom;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -126,6 +128,26 @@ public class EntityManagerImpl implements EntityManager {
 
     return (T)objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
   }
+  
+  public <T, I> Map<I, T> load(Class<T> clazz, Collection<I> ids) {
+	  if (null == clazz) {
+		  throw new IllegalArgumentException("clazz cannot be null");
+	  }
+	  if (null == ids) {
+		  throw new IllegalArgumentException("ids cannot be null");
+	  }
+
+	  CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
+	  if (null == cfMapDef) {
+		  throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
+	  }
+
+	  Set<I> idSet = new HashSet<I>(ids.size(), 1);
+	  idSet.addAll(ids);
+
+	  return (Map<I, T>) objMapper.getObjects(keyspace, cfMapDef.getEffectiveColFamName(), idSet);
+  }
+
 
   /**
    * Load an entity instance given the raw column slice. This is a stop gap

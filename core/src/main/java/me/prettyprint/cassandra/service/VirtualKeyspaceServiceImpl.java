@@ -241,6 +241,7 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
 
     return super.getColumn(ps.toByteBuffer(key), columnPath);
   }
+  
 
   @Override
   public CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath)

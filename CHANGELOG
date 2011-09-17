@@ -1,9 +1,46 @@
 Changes by version:
 ===================
-0.7.0 stands for cassandra's 0.7.0 version.
--22 stands for hector's version
 
-Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
+0.8.0-3
+=======
+Fix race condition in connection pool. https://github.com/rantav/hector/issues/257
+Reduce default size of ByteBufferOutputStream to 256 from 8196 bytes, https://github.com/rantav/hector/issues/268
+ObjectSerializer can take a custom ClassLoader, https://github.com/rantav/hector/issues/134
+Move EmbeddedSchemaLoader and EmbeddedServerHelper into the hector-test module, https://github.com/rantav/hector/issues/223
+- hector-core depends only on cassandra-thrift, not cassandra-all
+- Remove dependencies on avro, high-scale-lib 
+Threads started by hector are daemon threads, https://github.com/rantav/hector/issues/220
+Fixed speed4j setup - modified hector so it only uses speed4j.properties to configure logging.  the logger
+  name must be of the form "hector-<cluster-name>".  Updating wiki page as well.
+
+0.8.0-2
+=======
+Synchronize on RR balancing policy counter
+Added key_validation_class support on CfDef wrappers
+Fixed issue with using correct timestamp on execution result which could manifest as order of magnitude differences in op timing in some cases
+Added remove method to retry service, ensures that HConnectionManager.removeHost correctly pulls hosts from CassandraHostRetryService if configured. Addresses GH issue 216
+Expose setters in ColumnFamilyDefinition iface
+Added option to wait for schema agreements on cluster operations
+Check for null on keys in a list. Addresses issue 221
+Addressing issue 226 on gh where attempts to release on suspended pools will leak clients
+Fixed issue with using BB serializer for BA serializer as pointed out by @bhuvan.rajt on ML
+Wrapper api for op timers (makes current speed4j implementation plugable). The default logger is no a nulllogger, so op timing is off by default (sbridges)
+Tweaks to retry down host logic including: immediate check when triggered, and retrying all downed hosts. See issue 238 for details (sbridges)
+Fix potential race condition in numBlocked if an exception was thrown creating a thrift client (sbridges)
+
+0.8.0-1
+=======
+CQL queries available via CqlQuery
+Removed openjpa and JPA 2.0 targeted code; still using JPA influenced annotations.
+Reset to the results of adding the pool to the connection manager. This could cause a pretty ugly issue where the host would just disappear if there was a failure adding it back after the successful test.
+Fixed retry logic in the case of fail after one more try configuration. Also modifies some long standing (and I believe incorrect) behaviour of trying until successful on a timeout exception.
+Adding recommended default configuration string for dynamic comparator 
+First cut of CqlQuery, loosened OrderedRowsImpl to hornshoe in results 
+CfDef.key_validation_class support (michaelsembwever)
+Expose memtable throughput, operations, flush and key cache save period (Greg Hinkle)
+Counter super slice support (Greg Hinkle)
+Multiget Counter Slice and super slice (Greg Hinkle)
+Support replicate_on_write setting for column families (Greg Hinkle)
 
 0.7.0-27
 ========

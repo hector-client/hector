@@ -9,8 +9,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Map.Entry;
 
@@ -30,8 +33,11 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.Row;
+import me.prettyprint.hector.api.beans.Rows;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
@@ -39,6 +45,7 @@ import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.converters.Converter;
 import me.prettyprint.hom.converters.DefaultConverter;
 
+import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +64,7 @@ import org.slf4j.LoggerFactory;
 public class HectorObjectMapper {
   private static Logger logger = LoggerFactory.getLogger(HectorObjectMapper.class);
 
-  private static final int MAX_NUM_COLUMNS = 100;
+  private static final int MAX_NUM_COLUMNS = 2000000000;
 
   private int maxNumColumns = MAX_NUM_COLUMNS;
   private ClassCacheMgr cacheMgr;
@@ -107,6 +114,71 @@ public class HectorObjectMapper {
     T obj = createObject(cfMapDef, pkObj, result.get());
     return obj;
   }
+  
+  /**
+   * Retrieve columns from cassandra keyspace for multiple keys of column family, instantiate 
+   * new objects of required type, and then map them to the object's properties.
+   * 
+   * @param <T> 
+   * 
+   * @param keyspace
+   * @param colFamName
+   * @param pkObjSet - set of primary key objects
+   * @return map of keys:primary key, value:entity
+   */
+  @SuppressWarnings("unchecked")
+  public <T> Map<Object, T> getObjects(Keyspace keyspace, String colFamName, Set<? extends Object> pkObjSet) {	  
+      CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(colFamName, true);
+      Converter<Object> converter = null;
+      Collection<PropertyDescriptor> pds = null;
+      boolean comlexKey = false;
+      if (cfMapDef.getKeyDef().isComplexKey()) {      	
+      	pds = cfMapDef.getKeyDef().getPropertyDescriptorMap().values();
+      	comlexKey = true;
+      	converter = new DefaultConverter();
+      }
+      else {
+        converter = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator().next().getConverter();
+      }
+      MultigetSliceQuery<byte[], String, byte[]> query =
+              HFactory.createMultigetSliceQuery(keyspace, BytesArraySerializer.get(), StringSerializer.get(),
+                      BytesArraySerializer.get());
+      query.setColumnFamily(cfMapDef.getEffectiveColFamName());
+      byte[][] keys = new byte[pkObjSet.size()][];
+      int index = 0;
+      Class<Object> pkClass = null;
+      //using map of Hex String instead of primary key type to avoid object identity issues 
+      //caused by byte[]  in collections 
+      Map<String, Object> keyToPkObjMap = new HashMap<String, Object>();
+      for (Object pkObj : pkObjSet) {
+    	  if(pkClass == null) {
+    		  pkClass = (Class<Object>) pkObj.getClass();
+    	  }
+    	  byte[] key = (comlexKey)? generateColumnFamilyKeyFromPkObjComplexType(pds, pkObj, converter)
+				: generateColumnFamilyKeyFromPkObjSimpleType(pkObj, converter);
+    	  keys[index++] = key;
+    	  keyToPkObjMap.put(new String(Hex.encodeHex(key)), pkObj);
+      }
+      query.setKeys(keys);
+      if (cfMapDef.isSliceColumnArrayRequired()) {
+    	  query.setColumnNames(cfMapDef.getSliceColumnNameArr());
+      } else {
+    	  query.setRange("", "", false, maxNumColumns);
+      }
+      QueryResult<Rows<byte[], String, byte[]>> result = query.execute();
+      Rows<byte[], String, byte[]> rows = result.get();
+      Iterator<Row<byte[], String, byte[]>> iterator = rows.iterator();
+      Map<Object, T> map = new LinkedHashMap<Object, T>();
+      while (iterator.hasNext()) {
+          Row<byte[], String, byte[]> row = iterator.next();
+          byte[] key = row.getKey();
+          Object pkObj = keyToPkObjMap.get(new String(Hex.encodeHex(key)));
+          T obj = createObject(cfMapDef, pkObj, row.getColumnSlice());
+          map.put(pkObj, obj);          
+      }
+	  return map;
+  }
+
 
   public <T> T saveObj(Keyspace keyspace, T obj) {
     if (null == obj) {
@@ -134,22 +206,37 @@ public class HectorObjectMapper {
     return obj;
   }
 
+  @SuppressWarnings("unchecked")
   private byte[] generateColumnFamilyKeyFromPkObj(CFMappingDef<?> cfMapDef, Object pkObj) {
-    List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
+	  byte[] key = null;
 
-    if (cfMapDef.getKeyDef().isComplexKey()) {
-      for (PropertyDescriptor pd : cfMapDef.getKeyDef().getPropertyDescriptorMap().values()) {
-        segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(),
-            new DefaultConverter()));
-      }
-    }
-    else {
-      PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator().next();
-      segmentList.add(md.getConverter().convertObjTypeToCassType(pkObj));
-    }
+	  if (cfMapDef.getKeyDef().isComplexKey()) {
+		  key = generateColumnFamilyKeyFromPkObjComplexType(cfMapDef.getKeyDef().getPropertyDescriptorMap().values(),
+				  pkObj, new DefaultConverter());
+	  }
+	  else {
+		  PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator().next();
+		  key = generateColumnFamilyKeyFromPkObjSimpleType(pkObj, md.getConverter());
+	  }
 
-    return keyConcatStrategy.concat(segmentList);
+	  return key;
   }
+
+  private byte[] generateColumnFamilyKeyFromPkObjComplexType(Collection<PropertyDescriptor> pds, 
+		  Object pkObj, Converter<Object> converter) {
+	  List<byte[]> segmentList = new ArrayList<byte[]>(pds.size());
+	  for (PropertyDescriptor pd : pds) {
+		  segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(), converter));
+	  }
+	  return keyConcatStrategy.concat(segmentList);
+  }
+
+  private byte[] generateColumnFamilyKeyFromPkObjSimpleType(Object pkObj, Converter<Object> converter) {
+	  List<byte[]> segmentList = new ArrayList<byte[]>(1);
+	  segmentList.add(converter.convertObjTypeToCassType(pkObj));
+	  return keyConcatStrategy.concat(segmentList);
+  }
+
 
   private byte[] generateColumnFamilyKeyFromPojo(Object obj, CFMappingDef<?> cfMapDef) {
     List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
