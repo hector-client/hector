@@ -22,6 +22,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class StreamTest extends BaseEmbededServerSetupTest {
+  private final static String STRING_TEST_DATA = "This is a testdata, we should be able to read it again via the Inpustream - éèëàâ";
+  private final static byte[] BINARY_TEST_DATA = { 0x01, 0x00, 0x0a, 0x03, 0x0d, 0x0a, 0x04, (byte) 0xff, 0x05 };
+  
   public final static String POOL_NAME = "TestPool";
   public final static String KEYSPACE = "TestKeyspace";
 
@@ -61,12 +64,16 @@ public class StreamTest extends BaseEmbededServerSetupTest {
     check(key1, 10);
     check(key2, 10);
     check(key2, 10000);
+    check(key1, BINARY_TEST_DATA, 10);
   }
 
   private void check(String key, int chunksize) throws IOException {
-    String testData = "This is a testdata, we should be able to read it again via the Inpustream";
+    check(key, STRING_TEST_DATA.getBytes(), chunksize);
+  }
+
+  private void check(String key, byte[] value, int chunksize) throws IOException {
     ChunkOutputStream<String> out = new ChunkOutputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get(), chunksize);
-    out.write(testData.getBytes());
+    out.write(value);
     out.close();
 
     ChunkInputStream<String> in = new ChunkInputStream<String>(keyspace, BLOB_CF, key, StringSerializer.get());
@@ -74,11 +81,10 @@ public class StreamTest extends BaseEmbededServerSetupTest {
     int written = 0;
 
     while ((i = in.read()) != -1) {
-      assertSame(testData.charAt(written++), (char) i);
-
+      assertSame(value[written++], (byte) i);
     }
 
-    assertEquals(testData.length(), written);
+    assertEquals(value.length, written);
     in.close();
   }
 
