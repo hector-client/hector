@@ -201,11 +201,14 @@ public class ClassCacheMgr {
         if (anno instanceof Column || anno instanceof me.prettyprint.hom.annotations.Column) {
           columnPar.parse(f, anno, pd, cfMapDef);
         } else if (anno instanceof Basic) {
-//          basicPar.parse(f, anno, pd, cfMapDef);
+          // basicPar.parse(f, anno, pd, cfMapDef);
         } else if (anno instanceof Id) {
           processIdAnnotation(f, (Id) anno, cfMapDef, pdMap);
         } else if (anno instanceof me.prettyprint.hom.annotations.Id) {
           processIdCustomAnnotation(f, (me.prettyprint.hom.annotations.Id) anno, cfMapDef, pdMap);
+//        } else if (anno instanceof me.prettyprint.hom.annotations.List) {
+//          processListCustomAnnotation(f, (me.prettyprint.hom.annotations.List) anno, cfMapDef,
+//              pdMap);
         }
       }
     }
@@ -328,7 +331,7 @@ public class ClassCacheMgr {
   }
 
   private void generateColumnSliceIfNeeded(CFMappingDef<?> cfMapDef) {
-    if (!cfMapDef.isAnonymousHandlerAvailable()) {
+    if (cfMapDef.isColumnSliceRequired()) {
       Collection<PropertyMappingDefinition> coll = cfMapDef.getAllProperties();
 
       String[] daNames = new String[cfMapDef.isStandaloneClass() ? coll.size() : coll.size() + 1];
