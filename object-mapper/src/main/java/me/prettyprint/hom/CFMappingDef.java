@@ -1,6 +1,7 @@
 package me.prettyprint.hom;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -251,8 +252,12 @@ public class CFMappingDef<T> {
     return !isBaseInheritanceClass() && null != getDiscValue();
   }
 
+  public boolean isIntermediateClassInheritance() {
+      return !isBaseInheritanceClass() && null == getDiscValue() && Modifier.isAbstract(getEffectiveClass().getModifiers());
+  }
+
   public boolean isStandaloneClass() {
-    return !isBaseInheritanceClass() && !isDerivedClassInheritance();
+    return !isBaseInheritanceClass() && !isDerivedClassInheritance() && !Modifier.isAbstract(getEffectiveClass().getModifiers());
   }
 
   public String[] getSliceColumnNameArr() {

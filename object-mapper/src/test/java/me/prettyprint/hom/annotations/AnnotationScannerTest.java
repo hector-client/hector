@@ -9,6 +9,7 @@ import me.prettyprint.hom.annotations.AnnotationScanner;
 import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCustomIdBean;
+import me.prettyprint.hom.beans.MyGreenTestBean;
 import me.prettyprint.hom.beans.MyPurpleTestBean;
 import me.prettyprint.hom.beans.MyRedTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
@@ -36,6 +37,8 @@ public class AnnotationScannerTest {
     assertTrue(classSet.contains(MyRedTestBean.class));
     count++;
     assertTrue(classSet.contains(MyPurpleTestBean.class));
+    count++;
+    assertTrue(classSet.contains(MyGreenTestBean.class));
     count++;
     assertTrue(classSet.contains(MyCustomIdBean.class));
     count++;

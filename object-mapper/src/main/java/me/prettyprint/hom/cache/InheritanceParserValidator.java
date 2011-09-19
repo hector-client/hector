@@ -59,10 +59,12 @@ public class InheritanceParserValidator implements ParserValidator {
       validateBaseClassInheritance(cfMapDef);
     } else if (cfMapDef.isDerivedClassInheritance()) {
       validateDerivedClassInheritance(cfMapDef);
+    } else if (cfMapDef.isIntermediateClassInheritance()) {
+        validateIntermediateClassInheritance(cfMapDef);
     } else {
       if (null != cacheMgr.findBaseClassViaMappings(cfMapDef))
         throw new HectorObjectMapperException("@" + Inheritance.class.getSimpleName()
-            + " found in class hierarchy, but no @" + DiscriminatorValue.class.getSimpleName()
+            + " found in class hierarchy of class " + cfMapDef.getEffectiveClass().getName() + ", but no @" + DiscriminatorValue.class.getSimpleName()
             + " - quitting");
     }
   }
@@ -104,6 +106,14 @@ public class InheritanceParserValidator implements ParserValidator {
     }
   }
 
+  private <T> void validateIntermediateClassInheritance(CFMappingDef<T> cfMapDef) {
+    if (null != cfMapDef.getDiscValue()) {
+      throw new HectorObjectMapperException(cfMapDef.getRealClass().getName() 
+          + " is abstract, but specified a "
+          + DiscriminatorValue.class.getSimpleName() + " annotation");
+    }
+  }
+
   private <T> void validateDerivedClassInheritance(CFMappingDef<T> cfMapDef) {
     if (null == cfMapDef.getDiscValue()) {
       throw new HectorObjectMapperException("Base class "
@@ -113,5 +123,4 @@ public class InheritanceParserValidator implements ParserValidator {
           + DiscriminatorValue.class.getSimpleName() + " annotation");
     }
   }
-
 }
