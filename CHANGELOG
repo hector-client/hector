@@ -4,6 +4,7 @@ Changes by version:
 -22 stands for hector's version
 
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
+See object-mapper/CHANGELOG for HOM specifics
 
 0.7.0-27
 ========
