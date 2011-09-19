@@ -31,11 +31,6 @@ public class CollectionMapperHelper {
     }
   }
 
-  //
-  // public String createCollectionInfoColName(String propName) {
-  // return propName + ":info";
-  // }
-
   public byte[] createCollectionInfoColValue(Collection<Object> coll) {
     return String.valueOf(coll.getClass().getName() + ":" + coll.size()).getBytes();
   }

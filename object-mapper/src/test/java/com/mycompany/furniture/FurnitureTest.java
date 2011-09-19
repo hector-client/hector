@@ -49,7 +49,7 @@ public class FurnitureTest extends CassandraTestBase {
     desk.setExtendable(false);
     desk.setShape("rectangle");
     desk.setDeskType("roll-top");
-    desk.addDrawer("pencil").addDrawer("filing").addDrawer("upperLeft").addDrawer("lowerLeft");
+    desk.addDrawer(new Drawer(true, true, "pencil")).addDrawer(new Drawer(false, true, "filing")).addDrawer(new Drawer(false, false, "upperLeft")).addDrawer(new Drawer(false, true, "lowerLeft"));
     entityMgr.persist(desk);
 
     Furniture f1 = entityMgr.find(Furniture.class, 1);

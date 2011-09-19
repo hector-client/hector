@@ -19,6 +19,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class EntityManagerTest extends CassandraTestBase {
 
@@ -123,9 +124,9 @@ public class EntityManagerTest extends CassandraTestBase {
     
     MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
     
-    assertEquals( b1.getMyList().size(), b2.getMyList().size());
-    for ( int i=0;i < b1.getMyList().size();i++ ) {
-      assertEquals( b1.getMyList().get(i), b2.getMyList().get(i));
+    assertEquals( b1.getMySet().size(), b2.getMySet().size());
+    for ( Integer myInt : b1.getMySet()) {
+      assertTrue( b2.getMySet().remove(myInt));
     }
   }
   
@@ -143,9 +144,26 @@ public class EntityManagerTest extends CassandraTestBase {
     em.persist(b2);
     
     MyBlueTestBean b3 = em.load(MyBlueTestBean.class, b1.getBaseId());
-    assertEquals( b2.getMyList().size(), b3.getMyList().size());
-    for ( int i=0;i < b2.getMyList().size();i++ ) {
-      assertEquals( b2.getMyList().get(i), b3.getMyList().get(i));
+    assertEquals( b2.getMySet().size(), b3.getMySet().size());
+    for ( Integer myInt : b2.getMySet()) {
+      assertTrue( b3.getMySet().remove(myInt));
     }
   }
+  
+  @Test
+  public void testPojoWithSetCollection() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyBlueTestBean b1 = new MyBlueTestBean();
+    b1.setBaseId(UUID.randomUUID());
+    b1.addToList(100).addToList(200).addToList(300);
+    em.persist(b1);
+    
+    MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    
+    assertEquals( b1.getMySet().size(), b2.getMySet().size());
+    for ( Integer myInt : b1.getMySet()) {
+      assertTrue( b2.getMySet().remove(myInt));
+    }
+  }
+
 }

@@ -15,13 +15,13 @@ public class Desk extends BasicTable {
   private String deskType;
 
   @me.prettyprint.hom.annotations.Column(name = "drawerList")
-  private List<String> drawerList = new ArrayList<String>();
+  private List<Drawer> drawerList = new ArrayList<Drawer>();
 
-  public List<String> getDrawerList() {
+  public List<Drawer> getDrawerList() {
     return drawerList;
   }
 
-  public void setDrawerList(List<String> drawerList) {
+  public void setDrawerList(List<Drawer> drawerList) {
     this.drawerList = drawerList;
   }
 
@@ -33,8 +33,8 @@ public class Desk extends BasicTable {
     this.deskType = deskType;
   }
 
-  public Desk addDrawer(String drawerDescription) {
-    getDrawerList().add(drawerDescription);
+  public Desk addDrawer(Drawer drawer) {
+    getDrawerList().add(drawer);
     return this;
   }
 }

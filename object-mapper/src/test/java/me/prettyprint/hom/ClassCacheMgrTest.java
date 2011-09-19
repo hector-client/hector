@@ -1,15 +1,10 @@
 package me.prettyprint.hom;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.DiscriminatorType;
@@ -39,6 +34,12 @@ import org.junit.Test;
 import com.mycompany.furniture.Chair;
 import com.mycompany.furniture.Desk;
 import com.mycompany.furniture.Furniture;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ClassCacheMgrTest {
 
@@ -253,11 +254,11 @@ public class ClassCacheMgrTest {
   @Test
   public void testCollectionPropertyHandling() {
     ClassCacheMgr cacheMgr = new ClassCacheMgr();
-    CFMappingDef<ListBean> cfMapDef = cacheMgr.initializeCacheForClass(ListBean.class);
+    CFMappingDef<CollectionBean> cfMapDef = cacheMgr.initializeCacheForClass(CollectionBean.class);
     
-    PropertyMappingDefinition md = cfMapDef.getPropMapByPropName("myList");
-    assertEquals( List.class, md.getCollectionType() );
-    assertEquals( "myList", md.getColName());
+    PropertyMappingDefinition md = cfMapDef.getPropMapByPropName("mySet");
+    assertEquals( Set.class, md.getCollectionType() );
+    assertEquals( "mySet", md.getColName());
     assertNull( "should not be using slice query with List collection", cfMapDef.getSliceColumnNameArr());
   }
 }
@@ -269,21 +270,21 @@ class NewBean extends MyTestBean {
 }
 
 @Entity
-@Table(name = "MyListBean")
-class ListBean {
-  @Column(name="myList")
-  private List<Integer> myList = new ArrayList<Integer>();
+@Table(name = "MyCollectionBean")
+class CollectionBean {
+  @Column(name="mySet")
+  private Set<Integer> mySet = new HashSet<Integer>();
 
-  public List<Integer> getMyList() {
-    return myList;
+  public Set<Integer> getMySet() {
+    return mySet;
   }
 
-  public void setMyList(List<Integer> myList) {
-    this.myList = myList;
+  public void setMySet(Set<Integer> mySet) {
+    this.mySet = mySet;
   }
 
-  public ListBean addItem(Integer i) {
-    myList.add(i);
+  public CollectionBean addItem(Integer myInt) {
+    mySet.add(myInt);
     return this;
   }
 

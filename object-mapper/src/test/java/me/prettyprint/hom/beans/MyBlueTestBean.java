@@ -1,7 +1,7 @@
 package me.prettyprint.hom.beans;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
@@ -12,20 +12,20 @@ import me.prettyprint.hom.annotations.Column;
 @DiscriminatorValue("Blue")
 public class MyBlueTestBean extends MyTestBean {
 
-  @Column(name="myList")
-  private List<Integer> myList = new LinkedList<Integer>();
+  @Column(name="mySet")
+  private Set<Integer> mySet = new HashSet<Integer>();
 
   public MyBlueTestBean addToList(Integer i) {
-    myList.add(i);
+    mySet.add(i);
     return this;
   }
 
-  public List<Integer> getMyList() {
-    return myList;
+  public Set<Integer> getMySet() {
+    return mySet;
   }
 
-  public void setMyList(List<Integer> myList) {
-    this.myList = myList;
+  public void setMySet(Set<Integer> mySet) {
+    this.mySet = mySet;
   }
 
 }
