@@ -1,0 +1,7 @@
+Changes by version:
+===================
+
+1.1-03
+=======
+- updating to support Collection properties.  This is implemented by saving the list elements within same Cassandra row as POJO.
+

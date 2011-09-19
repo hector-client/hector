@@ -16,7 +16,6 @@ import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.thrift.transport.TTransportException;

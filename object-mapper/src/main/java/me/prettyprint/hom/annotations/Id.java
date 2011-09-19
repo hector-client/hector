@@ -22,6 +22,7 @@ public @interface Id {
    * 
    * @return Class of converter
    */
+  @SuppressWarnings("rawtypes")
   Class<? extends Converter> converter() default me.prettyprint.hom.converters.DefaultConverter.class;
 
 }
