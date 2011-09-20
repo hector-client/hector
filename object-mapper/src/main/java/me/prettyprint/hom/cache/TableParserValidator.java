@@ -25,8 +25,7 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
-  private <T> void parseTableAnnotation(ClassCacheMgr cacheMgr, Table anno,
-      CFMappingDef<T> cfMapDef) {
+  private <T> void parseTableAnnotation(ClassCacheMgr cacheMgr, Table anno, CFMappingDef<T> cfMapDef) {
     CFMappingDef<?> tmpDef;
 
     // column family can only be mapped to one class (base class)
@@ -46,30 +45,36 @@ public class TableParserValidator implements ParserValidator {
 
   @Override
   public <T> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
-    if (cfMapDef.isStandaloneClass()) {
-      validateStandaloneClass(cacheMgr, cfMapDef);
-    } else if (cfMapDef.isBaseInheritanceClass()) {
-      validateBaseClass(cacheMgr, cfMapDef);
-    } else if (cfMapDef.isDerivedClassInheritance()) {
-      validateDerivedClass(cacheMgr, cfMapDef);
+    if (cfMapDef.isBaseEntity()) {
+      validateBaseEntityClass(cacheMgr, cfMapDef);
+    } else if ( cfMapDef.isDerivedEntity() ) {
+      validateDerivedEntityClass(cacheMgr, cfMapDef);
+      if (cfMapDef.isPersistableDerivedEntity()) {
+        validatePersistableDerivedEntityClass(cacheMgr, cfMapDef);
+      }
+    }
+
+    if (cfMapDef.isPersistableEntity()) {
+      validatePersistableEntityClass(cacheMgr, cfMapDef);
     }
   }
 
-  private <T> void validateStandaloneClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
-    CFMappingDef<? super T> cfSuperDef;
+  private <T> void validatePersistableEntityClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+//    CFMappingDef<? super T> cfSuperDef;
 
     if (null == cfMapDef.getEffectiveColFamName()) {
       throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass().getName()
           + ", is missing @" + Table.class.getSimpleName());
-    } else if (null != (cfSuperDef = cacheMgr.findBaseClassViaMappings(cfMapDef))) {
-      throw new HectorObjectMapperException("@" + Table.class.getSimpleName()
-          + " can only be used once per hierarchy and has been specified in class "
-          + cfSuperDef.getRealClass().getName() + " and " + cfMapDef.getRealClass().getName()
-          + " - quitting");
     }
+//    else if (null != (cfSuperDef = cacheMgr.findBaseClassViaMappings(cfMapDef))) {
+//      throw new HectorObjectMapperException("@" + Table.class.getSimpleName()
+//          + " can only be used once per hierarchy and has been specified in class "
+//          + cfSuperDef.getRealClass().getName() + " and " + cfMapDef.getRealClass().getName()
+//          + " - quitting");
+//    }
   }
 
-  private <T> void validateBaseClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+  private <T> void validateBaseEntityClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     if (null == cfMapDef.getColFamName()) {
       throw new HectorObjectMapperException(cfMapDef.getRealClass()
           + " is recognized as a base class, but doesn't specify @" + Table.class.getSimpleName()
@@ -77,7 +82,12 @@ public class TableParserValidator implements ParserValidator {
     }
   }
 
-  private <T> void validateDerivedClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+  private <T> void validatePersistableDerivedEntityClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
+    // save this class in the base class for reference during loading
+    cfMapDef.getCfBaseMapDef().addDerivedClassMap(cfMapDef);
+  }
+
+  private <T> void validateDerivedEntityClass(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
     findAndSetBaseClassViaMappings(cacheMgr, cfMapDef);
     if (null == cfMapDef.getCfBaseMapDef()) {
       throw new HectorObjectMapperException("@" + Table.class.getSimpleName() + " used by class, "
@@ -85,9 +95,6 @@ public class TableParserValidator implements ParserValidator {
           + " has already been specified by base class, "
           + cfMapDef.getCfBaseMapDef().getEffectiveClass().getName());
     }
-
-    // save this class in the base class for reference during loading
-    cfMapDef.getCfBaseMapDef().addDerivedClassMap(cfMapDef);
   }
 
   private <T> void findAndSetBaseClassViaMappings(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {

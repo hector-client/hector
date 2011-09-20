@@ -2,7 +2,6 @@ package me.prettyprint.hom;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -71,6 +70,8 @@ public class ClassCacheMgrTest {
     CFMappingDef<?> cfMapDef = cacheMgr.getCfMapDef(MyTestBean.class, false);
 
     assertNotNull(cfMapDef);
+    assertEquals( "TestBeanColumnFamily", cfMapDef.getColFamName());
+    assertNotNull( "Column family not registered properly", cacheMgr.getCfMapDef("TestBeanColumnFamily", false));
     assertEquals(MyTestBean.class, cfMapDef.getEffectiveClass());
     assertEquals("did not find @Id properly", "baseId", cfMapDef.getKeyDef().getIdPropertyMap()
                                                                 .values().iterator().next()

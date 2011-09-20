@@ -1,6 +1,7 @@
 package me.prettyprint.hom;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +85,8 @@ public class CFMappingDef<T> {
   public boolean isColumnSliceRequired() {
     return null == getAnonymousPropertyAddHandler()
         && !isAnyCollections()
-        && isStandaloneClass();
+        && !isAbstract()
+        && !isDerivedEntity();
   }
 
   public boolean isAnyCollections() {
@@ -243,18 +245,30 @@ public class CFMappingDef<T> {
         + ", effectiveClass=" + effectiveClass + "]";
   }
 
-  public boolean isBaseInheritanceClass() {
+  public boolean isAbstract() {
+    return Modifier.isAbstract(effectiveClass.getModifiers());
+  }
+  
+  public boolean isBaseEntity() {
     return null != inheritanceType;
   }
 
-  public boolean isDerivedClassInheritance() {
-    return !isBaseInheritanceClass() && null != getDiscValue();
+  public boolean isPersistableEntity() {
+    return !isAbstract();
   }
 
-  public boolean isStandaloneClass() {
-    return !isBaseInheritanceClass() && !isDerivedClassInheritance();
+  public boolean isPersistableDerivedEntity() {
+    return !isBaseEntity() && null != getDiscValue() && !isAbstract();
   }
 
+  public boolean isNonPersistableDerivedEntity() {
+    return !isBaseEntity() && !isPersistableDerivedEntity() && isAbstract();
+  }
+
+  public boolean isDerivedEntity() {
+    return isPersistableDerivedEntity() || isNonPersistableDerivedEntity();
+  }
+  
   public String[] getSliceColumnNameArr() {
     return sliceColumnNameArr;
   }
