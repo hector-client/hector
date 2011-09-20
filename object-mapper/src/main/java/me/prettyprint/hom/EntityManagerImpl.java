@@ -23,11 +23,10 @@ import me.prettyprint.hom.cache.HectorObjectMapperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * Handles entity management by scanning classpath for classes annotated with
  * {@link Entity} and providing basic load and save methods.
- *
+ * 
  * @author
  */
 public class EntityManagerImpl implements EntityManager {
@@ -39,8 +38,7 @@ public class EntityManagerImpl implements EntityManager {
   private boolean open;
 
   public EntityManagerImpl(Keyspace keyspace, String classpathPrefix) {
-    this(keyspace, new String[] {
-        classpathPrefix }, null, null);
+    this(keyspace, new String[] { classpathPrefix }, null, null);
   }
 
   public EntityManagerImpl(Keyspace keyspace, String[] classpathPrefix) {
@@ -53,15 +51,13 @@ public class EntityManagerImpl implements EntityManager {
 
     if (null != cacheMgr) {
       this.cacheMgr = cacheMgr;
-    }
-    else {
+    } else {
       this.cacheMgr = new ClassCacheMgr();
     }
 
     if (null != objMapper) {
       this.objMapper = objMapper;
-    }
-    else {
+    } else {
       this.objMapper = new HectorObjectMapper(this.cacheMgr);
     }
 
@@ -72,8 +68,9 @@ public class EntityManagerImpl implements EntityManager {
    * Initialize the manager by scanning the classpath starting with the
    * <code>classpathPrefix</code>, looking for classes annotated with
    * {@link Entity}. If an Entity class is found, it looks for the
-   * {@link BasicTable} annotation to determine the Cassandra column family name.
-   *
+   * {@link BasicTable} annotation to determine the Cassandra column family
+   * name.
+   * 
    * @param classpathPrefixArr
    */
   public void initialize(String[] classpathPrefixArr) {
@@ -82,9 +79,9 @@ public class EntityManagerImpl implements EntityManager {
         initializeClasspath(classpathPrefix);
       }
     }
-    if ( logger.isDebugEnabled()) {
+    if (logger.isDebugEnabled()) {
       logger.debug("classpath array has {} items : {}",
-           (null != classpathPrefixArr ? classpathPrefixArr.length : "0"), classpathPrefixArr);
+          (null != classpathPrefixArr ? classpathPrefixArr.length : "0"), classpathPrefixArr);
     }
     open = true;
   }
@@ -98,17 +95,17 @@ public class EntityManagerImpl implements EntityManager {
   }
 
   /**
-   * Load an entity instance. If the ID does not map to a persisted entity,
-   * then null is returned.
-   *
+   * Load an entity instance. If the ID does not map to a persisted entity, then
+   * null is returned.
+   * 
    * @param <T>
-   *            The type of entity to load for compile time type checking
+   *          The type of entity to load for compile time type checking
    * @param <I>
-   *            Type of the entity's ID
+   *          Type of the entity's ID
    * @param clazz
-   *            The type of entity to load for runtime instance creation
+   *          The type of entity to load for runtime instance creation
    * @param id
-   *            ID of the instance to load
+   *          ID of the instance to load
    * @return instance of Entity or null if can't be found
    */
   public <T, I> T load(Class<T> clazz, I id) {
@@ -121,26 +118,27 @@ public class EntityManagerImpl implements EntityManager {
 
     CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
     if (null == cfMapDef) {
-      throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
+      throw new HectorObjectMapperException("No class annotated with @"
+          + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
-    return (T)objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
+    return (T) objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
   }
 
   /**
    * Load an entity instance given the raw column slice. This is a stop gap
    * solution for instanting objects using entity manager while iterating over
    * rows.
-   *
+   * 
    * @param <T>
-   *            The type of entity to load for compile time type checking
+   *          The type of entity to load for compile time type checking
    * @param clazz
-   *            The type of entity to load for runtime instance creation
+   *          The type of entity to load for runtime instance creation
    * @param id
-   *            ID of the instance to load
+   *          ID of the instance to load
    * @param colSlice
-   *            Raw row slice as returned from Hector API, of the type
-   *            <code>ColumnSlice<String, byte[]></code>
+   *          Raw row slice as returned from Hector API, of the type
+   *          <code>ColumnSlice<String, byte[]></code>
    * @return Completely instantiated persisted object
    */
   public <T> T load(Class<T> clazz, Object id, ColumnSlice<String, byte[]> colSlice) {
@@ -153,7 +151,8 @@ public class EntityManagerImpl implements EntityManager {
 
     CFMappingDef<T> cfMapDef = cacheMgr.getCfMapDef(clazz, false);
     if (null == cfMapDef) {
-      throw new HectorObjectMapperException("No class annotated with @" + Entity.class.getSimpleName() + " for type, " + clazz.getName());
+      throw new HectorObjectMapperException("No class annotated with @"
+          + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
     T obj = objMapper.createObject(cfMapDef, id, colSlice);
@@ -162,7 +161,7 @@ public class EntityManagerImpl implements EntityManager {
 
   /**
    * Save the entity instance.
-   *
+   * 
    * @param <T>
    * @param obj
    * @return
@@ -179,12 +178,10 @@ public class EntityManagerImpl implements EntityManager {
     save(entity);
   }
 
-
   @Override
   public <T> T find(Class<T> entityClass, Object primaryKey) {
     return load(entityClass, primaryKey);
   }
-
 
   @Override
   public void clear() {
@@ -201,40 +198,39 @@ public class EntityManagerImpl implements EntityManager {
   @Override
   public boolean contains(Object entity) {
     throw new RuntimeException("Method is not implemented");
-//    return false;
+    // return false;
   }
 
   @Override
   public Query createNamedQuery(String name) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public Query createNativeQuery(String sqlString) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @SuppressWarnings("unchecked")
   @Override
   public Query createNativeQuery(String sqlString, Class resultClass) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public Query createNativeQuery(String sqlString, String resultSetMapping) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public Query createQuery(String qlString) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
-
 
   @Override
   public void flush() {
@@ -245,25 +241,25 @@ public class EntityManagerImpl implements EntityManager {
   @Override
   public Object getDelegate() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public FlushModeType getFlushMode() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public <T> T getReference(Class<T> entityClass, Object primaryKey) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public EntityTransaction getTransaction() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
@@ -286,9 +282,8 @@ public class EntityManagerImpl implements EntityManager {
   @Override
   public <T> T merge(T entity) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
-
 
   @Override
   public void refresh(Object entity) {
@@ -311,19 +306,19 @@ public class EntityManagerImpl implements EntityManager {
   @Override
   public <T> TypedQuery<T> createNamedQuery(String arg0, Class<T> arg1) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public <T> TypedQuery<T> createQuery(CriteriaQuery<T> arg0) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public <T> TypedQuery<T> createQuery(String arg0, Class<T> arg1) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
@@ -335,50 +330,49 @@ public class EntityManagerImpl implements EntityManager {
   @Override
   public <T> T find(Class<T> arg0, Object arg1, Map<String, Object> arg2) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
-  public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2,
-      Map<String, Object> arg3) {
+  public <T> T find(Class<T> arg0, Object arg1, LockModeType arg2, Map<String, Object> arg3) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public CriteriaBuilder getCriteriaBuilder() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public EntityManagerFactory getEntityManagerFactory() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public LockModeType getLockMode(Object arg0) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public Metamodel getMetamodel() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
   public Map<String, Object> getProperties() {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 
   @Override
@@ -414,6 +408,6 @@ public class EntityManagerImpl implements EntityManager {
   @Override
   public <T> T unwrap(Class<T> arg0) {
     throw new RuntimeException("Method is not implemented");
-//    return null;
+    // return null;
   }
 }
