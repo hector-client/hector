@@ -1,0 +1,193 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Intro &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="#" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+
+  <img src="_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/>
+
+  <div class="title">Hector. A high level Java client for Apache Cassandra.</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="#">Home</a>|&nbsp;</li>
+
+	<li><a href="documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Intro</a></li>
+<li><a class="reference internal" href="#some-features-provided-by-this-client">Some features provided by this client</a></li>
+<li><a class="reference internal" href="#sources-and-download">Sources and download</a></li>
+<li><a class="reference internal" href="#mailing-lists">Mailing lists</a></li>
+<li><a class="reference internal" href="#some-additional-pages-from-the-wiki-that-may-be-of-interest">Some additional pages from the wiki that may be of interest</a></li>
+<li><a class="reference internal" href="#example-projects-using-hector">Example projects using Hector</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="intro">
+<h1>Intro<a class="headerlink" href="#intro" title="Permalink to this headline">¶</a></h1>
+<p><strong>Hector</strong> is a high level Java client for Apache Cassandra currently in use on a number of production systems some of which have node counts into the hundreds. Issues generally are fixed as quickly as possbile and releases done frequently.</p>
+<p>Apache <a class="reference external" href="http://cassandra.apache.org">Cassandra</a> is a highly available column oriented database.</p>
+<p>Hector is the greatest warrior in the greek mythology, Troy&#8217;s builder and brother of Cassandra
+<a class="reference external" href="http://en.wikipedia.org/wiki/Hector">http://en.wikipedia.org/wiki/Hector</a>
+<a class="reference external" href="http://en.wikipedia.org/wiki/Cassandra">http://en.wikipedia.org/wiki/Cassandra</a></p>
+</div>
+<div class="section" id="some-features-provided-by-this-client">
+<h1>Some features provided by this client<a class="headerlink" href="#some-features-provided-by-this-client" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><ul class="simple">
+<li>high level, simple object oriented interface to cassandra</li>
+<li>failover behavior on the client side</li>
+<li>connection pooling for improved performance and scalability</li>
+<li>JMX conters for monitoring and management</li>
+<li>configurable and extensible load balancing (round robin (the default), least active, and a phi-accrural style response time detector)</li>
+<li>complete encapsulation of the underlying Thrift API and structs</li>
+<li>automatic retry of downed hosts</li>
+<li>automatic discovery of additional hosts in the cluster</li>
+<li>suspension of hosts for a short period of time after several timeouts</li>
+<li>simple ORM layer that works</li>
+<li>a type-safe approach to dealing with Apache Cassandra&#8217;s data model</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="sources-and-download">
+<h1>Sources and download<a class="headerlink" href="#sources-and-download" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://github.com/rantav/hector">https://github.com/rantav/hector</a>
+or clone it directly from <tt class="docutils literal"><span class="pre">`$</span> <span class="pre">git</span> <span class="pre">clone</span> <span class="pre">git://github.com/rantav/hector`</span></tt></p>
+</div>
+<div class="section" id="mailing-lists">
+<h1>Mailing lists<a class="headerlink" href="#mailing-lists" title="Permalink to this headline">¶</a></h1>
+<div class="line-block">
+<div class="line"><br /></div>
+<div class="line"><strong>Users</strong>: Ask questions and share your experience. Anyone can post messages and anyone may join.</div>
+<div class="line"><a class="reference external" href="mailto:hector-users&#37;&#52;&#48;googlegroups&#46;com">hector-users<span>&#64;</span>googlegroups<span>&#46;</span>com</a> (<a class="reference external" href="http://groups.google.com/group/hector-users">http://groups.google.com/group/hector-users</a>)</div>
+<div class="line"><br /></div>
+<div class="line"><strong>Developers</strong>: For cutting edge development of hector itself. Anyone can post messages, but join by invitation only.</div>
+<div class="line"><a class="reference external" href="mailto:hector-dev&#37;&#52;&#48;googlegroups&#46;com">hector-dev<span>&#64;</span>googlegroups<span>&#46;</span>com</a> (<a class="reference external" href="http://groups.google.com/group/hector-dev">http://groups.google.com/group/hector-dev</a>)</div>
+</div>
+</div>
+<div class="section" id="some-additional-pages-from-the-wiki-that-may-be-of-interest">
+<h1>Some additional pages from the wiki that may be of interest<a class="headerlink" href="#some-additional-pages-from-the-wiki-that-may-be-of-interest" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><ul class="simple">
+<li>Wiki: <a class="reference external" href="https://github.com/rantav/hector/wiki">https://github.com/rantav/hector/wiki</a></li>
+<li>SLF4J fun and hijinks: <a class="reference external" href="https://github.com/rantav/hector/wiki/SLF4J-in-Hector">https://github.com/rantav/hector/wiki/SLF4J-in-Hector</a>-</li>
+<li>Mailing Lists: <a class="reference external" href="https://github.com/rantav/hector/wiki/Mailing-Lists">https://github.com/rantav/hector/wiki/Mailing-Lists</a></li>
+<li>Maven Central location (includes javadoc): <a class="reference external" href="http://repo2.maven.org/maven2/me/prettyprint/">http://repo2.maven.org/maven2/me/prettyprint/</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="example-projects-using-hector">
+<h1>Example projects using Hector<a class="headerlink" href="#example-projects-using-hector" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="https://github.com/zznate/cassandra-tutorial">https://github.com/zznate/cassandra-tutorial</a></li>
+<li><a class="reference external" href="https://github.com/zznate/hector-examples">https://github.com/zznate/hector-examples</a></li>
+<li><a class="reference external" href="https://github.com/riptano/twissjava">https://github.com/riptano/twissjava</a></li>
+</ul>
+</div></blockquote>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="#">Home</a>|&nbsp;</li>
+
+	<li><a href="documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

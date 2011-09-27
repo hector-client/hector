@@ -1,0 +1,220 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+
+  <img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/>
+
+  <div class="title">Hector. A high level Java client for Apache Cassandra.</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#installing-your-doc-directory">Installing your doc directory</a><ul>
+<li><a class="reference internal" href="#fetching-the-data">Fetching the data</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/sampledoc_tut/getting_started.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started">
+<span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="installing-your-doc-directory">
+<span id="installing-docdir"></span><h2>Installing your doc directory<a class="headerlink" href="#installing-your-doc-directory" title="Permalink to this headline">¶</a></h2>
+<p>You may already have sphinx <a class="reference external" href="http://sphinx.pocoo.org/">sphinx</a>
+installed &#8211; you can check by doing:</p>
+<div class="highlight-python"><pre>python -c 'import sphinx'</pre>
+</div>
+<p>If that fails grab the latest version of and install it with:</p>
+<div class="highlight-python"><pre>&gt; sudo easy_install -U Sphinx</pre>
+</div>
+<p>Now you are ready to build a template for your docs, using
+sphinx-quickstart:</p>
+<div class="highlight-python"><pre>&gt; sphinx-quickstart</pre>
+</div>
+<p>accepting most of the defaults.  I choose &#8220;sampledoc&#8221; as the name of my
+project.  cd into your new directory and check the contents:</p>
+<div class="highlight-python"><pre>home:~/tmp/sampledoc&gt; ls
+Makefile      _static         conf.py
+_build                _templates      index.rst</pre>
+</div>
+<p>The index.rst is the master ReST for your project, but before adding
+anything, let&#8217;s see if we can build some html:</p>
+<div class="highlight-python"><pre>make html</pre>
+</div>
+<p>If you now point your browser to <tt class="file docutils literal"><span class="pre">_build/html/index.html</span></tt>, you
+should see a basic sphinx site.</p>
+<img alt="../_images/basic_screenshot.png" src="../_images/basic_screenshot.png" />
+<div class="section" id="fetching-the-data">
+<span id="id2"></span><h3>Fetching the data<a class="headerlink" href="#fetching-the-data" title="Permalink to this headline">¶</a></h3>
+<p>Now we will start to customize out docs.  Grab a couple of files from
+the <a class="reference external" href="http://matplotlib.svn.sourceforge.net/viewvc/matplotlib/trunk/sampledoc_tut/">web site</a>
+or svn.  You will need <tt class="file docutils literal"><span class="pre">getting_started.rst</span></tt> and
+<tt class="file docutils literal"><span class="pre">_static/basic_screenshot.png</span></tt>.  All of the files live in the
+&#8220;completed&#8221; version of this tutorial, but since this is a tutorial,
+we&#8217;ll just grab them one at a time, so you can learn what needs to be
+changed where.  Since we have more files to come, I&#8217;m going to grab
+the whole svn directory and just copy the files I need over for now.
+First, I&#8217;ll cd up back into the directory containing my project, check
+out the &#8220;finished&#8221; product from svn, and then copy in just the files I
+need into my <tt class="file docutils literal"><span class="pre">sampledoc</span></tt> directory:</p>
+<div class="highlight-python"><pre>home:~/tmp/sampledoc&gt; pwd
+/Users/jdhunter/tmp/sampledoc
+home:~/tmp/sampledoc&gt; cd ..
+home:~/tmp&gt; svn co https://matplotlib.svn.sourceforge.net/svnroot/\
+matplotlib/trunk/sampledoc_tut
+A    sampledoc_tut/cheatsheet.rst
+A    sampledoc_tut/_static
+A    sampledoc_tut/_static/basic_screenshot.png
+A    sampledoc_tut/conf.py
+A    sampledoc_tut/Makefile
+A    sampledoc_tut/_templates
+A    sampledoc_tut/_build
+A    sampledoc_tut/getting_started.rst
+A    sampledoc_tut/index.rst
+Checked out revision 7449.
+home:~/tmp&gt; cp sampledoc_tut/getting_started.rst sampledoc/
+home:~/tmp&gt; cp sampledoc_tut/_static/basic_screenshot.png \
+sampledoc/_static/</pre>
+</div>
+<p>The last step is to modify <tt class="file docutils literal"><span class="pre">index.rst</span></tt> to include the
+<tt class="file docutils literal"><span class="pre">getting_started.rst</span></tt> file (be careful with the indentation, the
+&#8220;g&#8221; in &#8220;getting_started&#8221; should line up with the &#8216;:&#8217; in <tt class="docutils literal"><span class="pre">:maxdepth</span></tt>:</p>
+<div class="highlight-python"><pre>Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   getting_started.rst</pre>
+</div>
+<p>and then rebuild the docs:</p>
+<div class="highlight-python"><pre>cd sampledoc
+make html</pre>
+</div>
+<p>When you reload the page by refreshing your browser pointing to
+<tt class="file docutils literal"><span class="pre">_build/html/index.html</span></tt>, you should see a link to the
+&#8220;Getting Started&#8221; docs, and in there this page with the screenshot.
+<cite>Voila!</cite></p>
+<p>Note we used the image directive to include to the screenshot above
+with:</p>
+<div class="highlight-python"><pre>.. image:: _static/basic_screenshot.png</pre>
+</div>
+<p>Next we&#8217;ll customize the look and feel of our site to give it a logo,
+some custom css, and update the navigation panels to look more like
+the <a class="reference external" href="http://sphinx.pocoo.org/">sphinx</a> site itself &#8211; see
+<em class="xref std std-ref">custom_look</em>.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

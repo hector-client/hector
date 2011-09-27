@@ -1,0 +1,256 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using CQL &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+
+  <img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/>
+
+  <div class="title">Hector. A high level Java client for Apache Cassandra.</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Using CQL</a><ul>
+<li><a class="reference internal" href="#comparator">Comparator</a></li>
+<li><a class="reference internal" href="#key-validator">Key Validator</a></li>
+<li><a class="reference internal" href="#default-validator">Default Validator</a></li>
+<li><a class="reference internal" href="#column-metadata">Column Metadata</a><ul>
+<li><a class="reference internal" href="#some-examples">Some Examples</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#basic-hector-api-usage">Basic Hector API Usage</a></li>
+<li><a class="reference internal" href="#configuring-the-column-family-for-ease-of-use">Configuring the Column Family for Ease of Use</a></li>
+<li><a class="reference internal" href="#dealing-with-conversion-manually">Dealing With Conversion Manually</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/cql_basics.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-cql">
+<span id="index-0"></span><h1>Using CQL<a class="headerlink" href="#using-cql" title="Permalink to this headline">¶</a></h1>
+<p>CQL queries are an interesting new feature for Apache Cassandra 0.8.0. The initial implementation in Hector deals simply with the single execute_cql_query thrift method and is largely intended as a means to test drive query functionality and behavior.</p>
+<p>As such, you are expected to know what you are getting into if you plan on using CQL queries in your application. Spend some time looking through the unit tests here in Hector and the Cassandra source tree. For a number of detailed examples, see test_cql.py in the test/system folder of the Apache Cassandra source distribution.</p>
+<p>Note: if you immediately get an exception such as:
+&#8220;InvalidRequestException(why:cannot parse &#8216;foo&#8217; as hex bytes)&#8221;
+It means one of two things:</p>
+<ul class="simple">
+<li>You have not formatted your query correctly</li>
+<li>You have not configured the correct validators (any combination of key, comparator, default, and column metadata) on your column family</li>
+</ul>
+<p>In both cases, even though the query is most likely a string, it is up to you to format
+this query according to the column family configuration. This can be a little confusing as only the comparator is required when defining a column family which itself will default to BytesType.</p>
+<p>If you get an exception such as: <tt class="docutils literal"><span class="pre">`InvalidRequestException(why:line</span> <span class="pre">1:22</span> <span class="pre">mismatched</span> <span class="pre">character</span> <span class="pre">'6'</span> <span class="pre">expecting</span> <span class="pre">'-')`</span></tt></p>
+<p>It means that cassandra thought your column family name looked like a hex string but it was not.  If you want to ensure that it is a literal string you have to single quote the column family name.</p>
+<p>The following break down details these configuration options and their usage in the Hector API and the Cassandra CLI respectively.</p>
+<div class="section" id="comparator">
+<h2>Comparator<a class="headerlink" href="#comparator" title="Permalink to this headline">¶</a></h2>
+<p>Defines how to store, compare and validate the column names</p>
+<ul class="simple">
+<li>BasicColumnFamilyDefinition#setComparatorType</li>
+<li>comparator</li>
+</ul>
+</div>
+<div class="section" id="key-validator">
+<h2>Key Validator<a class="headerlink" href="#key-validator" title="Permalink to this headline">¶</a></h2>
+<p>Validator to use for keys</p>
+<ul class="simple">
+<li>BasicColumnFamilyDefinition#setKeyValidationClass</li>
+<li>key_validation_class</li>
+</ul>
+</div>
+<div class="section" id="default-validator">
+<h2>Default Validator<a class="headerlink" href="#default-validator" title="Permalink to this headline">¶</a></h2>
+<p>Validator to use for values in columns</p>
+<ul class="simple">
+<li>BasicColumnFamilyDefinition#setDefaultValidationClass</li>
+<li>default_validation_class</li>
+</ul>
+</div>
+<div class="section" id="column-metadata">
+<h2>Column Metadata<a class="headerlink" href="#column-metadata" title="Permalink to this headline">¶</a></h2>
+<p>Validation and, optionally, index definition for known columns</p>
+<p><tt class="docutils literal"><span class="pre">`BasicColumnDefinition#setName`</span></tt> and <tt class="docutils literal"><span class="pre">`BasicColumnDefinition#setValidationClass`</span></tt> (both required)</p>
+<div class="highlight-java"><pre>column_metadata = [{
+    column_name : 'other_name',
+    validation_class : LongType
+}];</pre>
+</div>
+<div class="section" id="some-examples">
+<h3>Some Examples<a class="headerlink" href="#some-examples" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="basic-hector-api-usage">
+<h2>Basic Hector API Usage<a class="headerlink" href="#basic-hector-api-usage" title="Permalink to this headline">¶</a></h2>
+<p>The current implementation of the execute_cql_query thrift method follows a similar flow as the rest of the Hector API. The following is an example of constructing a basic query expression and retrieving the results:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">CqlQuery</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">,</span><span class="n">Long</span><span class="o">&gt;</span> <span class="n">cqlQuery</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CqlQuery</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">,</span><span class="n">Long</span><span class="o">&gt;(</span><span class="n">keyspace</span><span class="o">,</span> <span class="n">se</span><span class="o">,</span> <span class="n">se</span><span class="o">,</span> <span class="n">le</span><span class="o">);</span>
+<span class="n">cqlQuery</span><span class="o">.</span><span class="na">setQuery</span><span class="o">(</span><span class="s">&quot;select * from StandardLong1&quot;</span><span class="o">);</span>
+<span class="n">QueryResult</span><span class="o">&lt;</span><span class="n">CqlRows</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">,</span><span class="n">Long</span><span class="o">&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">cqlQuery</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+</pre></div>
+</div>
+<p>Like the other types of queries, CqlQuery provides a result of CqlRows (which itself extends OrderedRowsImpl) so columns are available via familiar operations. The only real difference revolves around the execution of count queries. The CqlRows provides a getAsCount method that will return the result directly when a query containing the &#8220;count()&#8221; function was executed. Here is an example from the CqlQuery test case:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">CqlQuery</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">,</span><span class="n">Long</span><span class="o">&gt;</span> <span class="n">cqlQuery</span> <span class="o">=</span> <span class="k">new</span> <span class="n">CqlQuery</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">,</span><span class="n">Long</span><span class="o">&gt;(</span><span class="n">keyspace</span><span class="o">,</span> <span class="n">se</span><span class="o">,</span> <span class="n">se</span><span class="o">,</span> <span class="n">le</span><span class="o">);</span>
+<span class="n">cqlQuery</span><span class="o">.</span><span class="na">setQuery</span><span class="o">(</span><span class="s">&quot;SELECT COUNT(*) FROM StandardLong1 WHERE KEY = &#39;cqlQueryTest_key1&#39;&quot;</span><span class="o">);</span>
+<span class="n">QueryResult</span><span class="o">&lt;</span><span class="n">CqlRows</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span><span class="n">String</span><span class="o">,</span><span class="n">Long</span><span class="o">&gt;&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">cqlQuery</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+<span class="n">assertEquals</span><span class="o">(</span><span class="mi">2</span><span class="o">,</span> <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">getAsCount</span><span class="o">());</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="configuring-the-column-family-for-ease-of-use">
+<h2>Configuring the Column Family for Ease of Use<a class="headerlink" href="#configuring-the-column-family-for-ease-of-use" title="Permalink to this headline">¶</a></h2>
+<p>To set a column with named &#8220;birthyear&#8221; to the value &#8220;1976&#8221; (treating these as a String and a long respectively) we would have following update statement:</p>
+<div class="highlight-java"><pre>update StandardLong1 set 'birthyear' = '1976' WHERE KEY = 'mykey1'</pre>
+</div>
+<p>We can pass this statement as a String to CqlQuery#setQuery if the Following conditions are true on the column family StandardLong1:</p>
+<ul class="simple">
+<li>Comparator is <em>UTF8Type</em></li>
+<li>Key validator is <em>UTF8Type</em></li>
+<li>We have column metadata which defines the column &#8220;birthyear&#8221; accepts values of <em>LongType</em></li>
+</ul>
+<p>Via the Hector API, this column family would be constructed thusly:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">BasicColumnFamilyDefinition</span> <span class="n">columnFamilyDefinition</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicColumnFamilyDefinition</span><span class="o">();</span>
+<span class="n">columnFamilyDefinition</span><span class="o">.</span><span class="na">setKeyspaceName</span><span class="o">(</span><span class="s">&quot;Keyspace1&quot;</span><span class="o">);</span>
+<span class="n">columnFamilyDefinition</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="s">&quot;StandardLong1&quot;</span><span class="o">);</span>
+<span class="n">columnFamilyDefinition</span><span class="o">.</span><span class="na">setKeyValidationClass</span><span class="o">(</span><span class="n">ComparatorType</span><span class="o">.</span><span class="na">UTF8TYPE</span><span class="o">.</span><span class="na">getClassName</span><span class="o">());</span>
+<span class="n">columnFamilyDefinition</span><span class="o">.</span><span class="na">setComparatorType</span><span class="o">(</span><span class="n">ComparatorType</span><span class="o">.</span><span class="na">UTF8TYPE</span><span class="o">.</span><span class="na">getClassName</span><span class="o">());</span>
+
+<span class="n">BasicColumnDefinition</span> <span class="n">columnDefinition</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicColumnDefinition</span><span class="o">();</span>
+<span class="n">columnDefinition</span><span class="o">.</span><span class="na">setName</span><span class="o">(</span><span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">().</span><span class="na">toByteBuffer</span><span class="o">(</span><span class="s">&quot;birthyear&quot;</span><span class="o">));</span>
+<span class="n">columnDefinition</span><span class="o">.</span><span class="na">setValidationClass</span><span class="o">(</span><span class="n">ComparatorType</span><span class="o">.</span><span class="na">LONGTYPE</span><span class="o">.</span><span class="na">getClassName</span><span class="o">());</span>
+
+<span class="n">columnFamilyDefinition</span><span class="o">.</span><span class="na">addColumnDefinition</span><span class="o">(</span><span class="n">columnDefinition</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>And via the Casssandra CLI, the script would be:</p>
+<div class="highlight-java"><pre>create column family StandardLong1
+    with comparator = 'UTF8Type'
+    and key_validation_class = 'UTF8Type'
+    and column_metadata = [{
+        column_name : 'birthyear',
+        validation_class : LongType
+    }];</pre>
+</div>
+</div>
+<div class="section" id="dealing-with-conversion-manually">
+<h2>Dealing With Conversion Manually<a class="headerlink" href="#dealing-with-conversion-manually" title="Permalink to this headline">¶</a></h2>
+<p>To insert the same values as a single CQL String into another column family with no additional configuration options, you are responsible for the bytes (hexadecimal) conversion yourself:</p>
+<div class="highlight-java"><pre>update Standard1 set '626972746879656172' = '31393736' WHERE KEY = '6d796b657931'</pre>
+</div>
+</div>
+<div class="section" id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference external" href="http://www.datastax.com/dev/blog/what%E2%80%99s-new-in-cassandra-0-8-part-1-cql-the-cassandra-query-language">http://www.datastax.com/dev/blog/what%E2%80%99s-new-in-cassandra-0-8-part-1-cql-the-cassandra-query-language</a>
+<a class="reference external" href="https://github.com/rantav/hector/blob/master/core/src/test/java/me/prettyprint/cassandra/model/CqlQueryTest.java">https://github.com/rantav/hector/blob/master/core/src/test/java/me/prettyprint/cassandra/model/CqlQueryTest.java</a>
+<a class="reference external" href="http://www.datastax.com/docs/0.8/api/using_cql">http://www.datastax.com/docs/0.8/api/using_cql</a>
+<a class="reference external" href="http://www.datastax.com/docs/0.8/api/cql_ref">http://www.datastax.com/docs/0.8/api/cql_ref</a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

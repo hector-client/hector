@@ -1,0 +1,244 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+
+  <img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/>
+
+  <div class="title">Hector. A high level Java client for Apache Cassandra.</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting started</a><ul>
+<li><a class="reference internal" href="#fully-mavenized">Fully Mavenized</a></li>
+<li><a class="reference internal" href="#initializing-a-cluster">Initializing a cluster</a></li>
+<li><a class="reference internal" href="#creating-a-template">Creating a template</a></li>
+<li><a class="reference internal" href="#accessing-data">Accessing data</a><ul>
+<li><a class="reference internal" href="#update">Update</a></li>
+<li><a class="reference internal" href="#read">Read</a></li>
+<li><a class="reference internal" href="#delete">Delete</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/getting_started.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started">
+<span id="index-0"></span><span id="id1"></span><h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="fully-mavenized">
+<h2>Fully Mavenized<a class="headerlink" href="#fully-mavenized" title="Permalink to this headline">¶</a></h2>
+<p>To make use of this repository, add the following dependency (modifying version as necessary) declaration to your POM file:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="o">&lt;</span><span class="n">dependency</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">groupId</span><span class="o">&gt;</span><span class="n">me</span><span class="o">.</span><span class="na">prettyprint</span><span class="o">&lt;/</span><span class="n">groupId</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">artifactId</span><span class="o">&gt;</span><span class="n">hector</span><span class="o">-</span><span class="n">core</span><span class="o">&lt;/</span><span class="n">artifactId</span><span class="o">&gt;</span>
+    <span class="o">&lt;</span><span class="n">version</span><span class="o">&gt;</span><span class="mf">0.8</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="mi">2</span><span class="o">&lt;/</span><span class="n">version</span><span class="o">&gt;</span>
+<span class="o">&lt;/</span><span class="n">dependency</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="initializing-a-cluster">
+<span id="id2"></span><h2>Initializing a cluster<a class="headerlink" href="#initializing-a-cluster" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s first create our Cluster object which represent a Cassandra cluster. Note that the name is only for Hector to identify it and it is not linked to the real Cassandra cluster name. In order to make the code clear, let&#8217;s also import the whole API package.:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.*</span><span class="o">;</span>
+
+    <span class="o">.....</span>
+
+<span class="n">Cluster</span> <span class="n">myCluster</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">getOrCreateCluster</span><span class="o">(</span><span class="s">&quot;test-cluster&quot;</span><span class="o">,</span><span class="s">&quot;localhost:9160&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>Let&#8217;s set up the schema:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">ColumnFamilyDefinition</span> <span class="n">cfDef</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createColumnFamilyDefinition</span><span class="o">(</span><span class="s">&quot;MyKeyspace&quot;</span><span class="o">,</span>
+                                                                     <span class="s">&quot;ColumnFamilyName&quot;</span><span class="o">,</span>
+                                                                     <span class="n">ComparatorType</span><span class="o">.</span><span class="na">BYTESTYPE</span><span class="o">);</span>
+
+<span class="n">KeyspaceDefinition</span> <span class="n">newKeyspace</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspaceDefinition</span><span class="o">(</span><span class="s">&quot;MyKeyspace&quot;</span><span class="o">,</span>
+                                                                   <span class="n">ThriftKsDef</span><span class="o">.</span><span class="na">DEF_STRATEGY_CLASS</span><span class="o">,</span>
+                                                                   <span class="n">replicationFactor</span><span class="o">,</span>
+                                                                   <span class="n">Arrays</span><span class="o">.</span><span class="na">asList</span><span class="o">(</span><span class="n">cfDef</span><span class="o">));</span>
+<span class="c1">// Add the schema to the cluster.</span>
+<span class="c1">// &quot;true&quot; as the second param means that Hector will block until all nodes see the change.</span>
+<span class="n">cluster</span><span class="o">.</span><span class="na">addKeyspace</span><span class="o">(</span><span class="n">newKeyspace</span><span class="o">,</span> <span class="kc">true</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>Once the schema is created, the previous call will throw an exception saying that the Keyspace we are trying to create already exists. In order to solve that, you can wrap the previous code in a method called for example: &#8220;createSchema();&#8221; and add the following lines:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">KeyspaceDefinition</span> <span class="n">keyspaceDef</span> <span class="o">=</span> <span class="n">cluster</span><span class="o">.</span><span class="na">describeKeyspace</span><span class="o">(</span><span class="s">&quot;MyKeyspace&quot;</span><span class="o">);</span>
+
+<span class="c1">// If keyspace does not exist, the CFs don&#39;t exist either. =&gt; create them.</span>
+<span class="k">if</span> <span class="o">(</span><span class="n">keyspaceDef</span> <span class="o">==</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">createSchema</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Finally, we&#8217;ll create a Keyspace object which is a long life component and represents the Cassandra keyspace under which we will perform operations:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">Keyspace</span> <span class="n">ksp</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;MyKeyspace&quot;</span><span class="o">,</span> <span class="n">myCluster</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>&#8220;MyKeyspace&#8221; must be the name you defined the keyspace name with previously.</p>
+</div>
+<div class="section" id="creating-a-template">
+<h2>Creating a template<a class="headerlink" href="#creating-a-template" title="Permalink to this headline">¶</a></h2>
+<p>Template like keyspace are both long life object. Ideally you would want to keep the template object in a DAO to facilitate the access to your business model:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">me.prettyprint.cassandra.service.template.ColumnFamilyTemplate</span><span class="o">;</span>
+
+    <span class="o">......</span>
+
+<span class="n">ColumnFamilyTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">template</span> <span class="o">=</span>
+                          <span class="k">new</span> <span class="n">ThriftColumnFamilyTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">ksp</span><span class="o">,</span>
+                                                                         <span class="n">columnFamily</span><span class="o">,</span>
+                                                                         <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span>
+                                                                         <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="accessing-data">
+<h2>Accessing data<a class="headerlink" href="#accessing-data" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="update">
+<h3>Update<a class="headerlink" href="#update" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-java"><div class="highlight"><pre><span class="c1">// &lt;String, String&gt; correspond to key and Column name.</span>
+<span class="n">ColumnFamilyUpdater</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">updater</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="na">createUpdater</span><span class="o">(</span><span class="s">&quot;a key&quot;</span><span class="o">);</span>
+<span class="n">updater</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="s">&quot;domain&quot;</span><span class="o">,</span> <span class="s">&quot;www.datastax.com&quot;</span><span class="o">);</span>
+<span class="n">updater</span><span class="o">.</span><span class="na">setLong</span><span class="o">(</span><span class="s">&quot;time&quot;</span><span class="o">,</span> <span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">());</span>
+
+<span class="k">try</span> <span class="o">{</span>
+    <span class="n">template</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">updater</span><span class="o">);</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// do something ...</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="read">
+<h3>Read<a class="headerlink" href="#read" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-java"><div class="highlight"><pre><span class="k">try</span> <span class="o">{</span>
+    <span class="n">ColumnFamilyResult</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">res</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="na">queryColumns</span><span class="o">(</span><span class="s">&quot;a key&quot;</span><span class="o">);</span>
+    <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="s">&quot;domain&quot;</span><span class="o">);</span>
+    <span class="c1">// value should be &quot;www.datastax.com&quot; as per our previous insertion.</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// do something ...</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="delete">
+<h3>Delete<a class="headerlink" href="#delete" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-java"><div class="highlight"><pre><span class="k">try</span> <span class="o">{</span>
+    <span class="n">template</span><span class="o">.</span><span class="na">deleteColumn</span><span class="o">(</span><span class="s">&quot;key&quot;</span><span class="o">,</span> <span class="s">&quot;column name&quot;</span><span class="o">);</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+    <span class="c1">// do something</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
