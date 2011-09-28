@@ -12,6 +12,7 @@ Hector documentation contents:
    content/getting_started
    content/cql_basics
    content/composite_with_templates.rst
+   content/speed4j.rst
 
 Indices and tables
 ==================

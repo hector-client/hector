@@ -1,0 +1,179 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Speed4j &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+
+  <img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/>
+
+  <div class="title">Hector. A high level Java client for Apache Cassandra.</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Speed4j</a><ul>
+<li><a class="reference internal" href="#how-to-enable-speed4j">How to enable Speed4j?</a><ul>
+<li><a class="reference internal" href="#step-1">Step 1</a></li>
+<li><a class="reference internal" href="#step-2">Step 2</a></li>
+<li><a class="reference internal" href="#step-3">Step 3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/speed4j.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="speed4j">
+<span id="index-0"></span><h1>Speed4j<a class="headerlink" href="#speed4j" title="Permalink to this headline">¶</a></h1>
+<p>Hector uses <a class="reference external" href="https://github.com/jalkanen/speed4j">Speed4j</a> to display performance metrics.</p>
+<p>Speed4j, a very simple (but fast) Java performance analysis library. It is
+designed using Perf4j as a model, but hopefully avoiding the pitfalls inherent
+in Perf4j&#8217;s design. Speed4j has a dependency on SLF4J (see <a class="reference external" href="http://slf4j.org">http://slf4j.org</a>), which it uses to log
+its workings, but no other dependencies.</p>
+<div class="section" id="how-to-enable-speed4j">
+<h2>How to enable Speed4j?<a class="headerlink" href="#how-to-enable-speed4j" title="Permalink to this headline">¶</a></h2>
+<p>Three steps are needed.</p>
+<div class="section" id="step-1">
+<h3>Step 1<a class="headerlink" href="#step-1" title="Permalink to this headline">¶</a></h3>
+<p>Set the OpTimer in your CassandraHostConfigurator class:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setOpTimer</span><span class="o">(</span><span class="k">new</span> <span class="n">SpeedForJOpTimer</span><span class="o">(</span><span class="s">&quot;&lt;cluster-name&gt;&quot;</span><span class="o">));</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-2">
+<h3>Step 2<a class="headerlink" href="#step-2" title="Permalink to this headline">¶</a></h3>
+<p>Speed4j will log at INFO level, so if needed add a logger entry for this logger class:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">me</span><span class="o">.</span><span class="na">prettyprint</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">hector</span><span class="o">.</span><span class="na">TimingLogger</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="step-3">
+<h3>Step 3<a class="headerlink" href="#step-3" title="Permalink to this headline">¶</a></h3>
+<p><tt class="docutils literal"><span class="pre">speed4j.properties</span></tt> file should be in the root of your classpath.  Pay attention to &#8220;&amp;lt;cluster-name&amp;gt;&#8221; used in step #1 and make sure it is used as illustrated below.  For instance, if you used &#8220;CustomerDB&#8221; as your cluster name in step #1, then you would use: speed4j.hector-CustomerDB = com.ecyrd.speed4j.log.PeriodicalLog in the properties file.</p>
+<p>Make sure this file is in the path before the hector JARs, as there is one provided by hector that will be used if found first:</p>
+<div class="highlight-properties"><div class="highlight"><pre><span class="c"># Which Log instance shall we use?</span>
+<span class="na">speed4j.hector-&lt;cluster-name&gt;</span> <span class="o">=</span> <span class="s">com.ecyrd.speed4j.log.PeriodicalLog</span>
+
+<span class="c"># How often shall this Log log (in seconds)?</span>
+<span class="na">speed4j.hector-&lt;cluster-name&gt;.period</span> <span class="o">=</span> <span class="s">10</span>
+
+<span class="c"># Which of these attributes shall be exposed in JMX?</span>
+  <span class="na">speed4j.hector-&lt;cluster-name&gt;.jmx</span><span class="o">=</span><span class="s">READ.success_,WRITE.success_,READ.fail_,WRITE.fail_,META_READ.success_,META_READ.fail_</span>
+
+<span class="c"># Which SLF4J log name shall we output to?  Speed4J uses the INFO log level.</span>
+<span class="c"># Note that this is slightly different from the old Log4J name just to ensure that we</span>
+<span class="c"># don&#39;t mess with any existing log4j configurations.</span>
+<span class="na">speed4j.hector.slf4jLogname</span><span class="o">=</span><span class="s">me.prettyprint.hector.TimingLogger</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
