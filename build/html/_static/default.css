@@ -15,8 +15,8 @@ body {
     padding: 0;
     border: 1px solid #aaa;
 
-    margin: 0px 80px 0px 80px;
-    min-width: 740px;
+    margin: 0px 50px 0px 50px;
+    min-width: 885px;
 }
 
 a {
@@ -27,12 +27,41 @@ a {
 a:hover {
     color: #2491CF;
 }
+.header-container {
+    background-color: white; 
+    padding: 5px 10px 5px 5px;
+    height: 170px;
+    min-width: 870px;
+}
 
-.title {
+.logo {
     margin: 0;
-    padding: 0.7em 0 0.3em 0;
+    padding: 5px 0 5px 0;
     font-size: 3em;
     color: #11557D;
+    width: 210px;
+    top: 15px;
+    float: left;
+}
+
+.title1 {
+    margin: 0;
+    padding: 0.7em 0 0.3em 0;
+    font-size: 3.3em;
+    text-align: center;
+    color: #11557D;
+    float: left;
+    width: 650px;
+}
+
+.title2 {
+    margin: 0;
+    padding: 0.7em 0 0.3em 0;
+    text-align: center;
+    font-size: 2.0em;
+    color: #11557D;
+    float: left;
+    width: 650px;
 }
 
 pre {
