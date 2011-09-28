@@ -6,7 +6,7 @@
 Intro
 -----
 
-**Hector** is a high level Java client for Apache Cassandra currently in use on a number of production systems some of which have node counts into the hundreds. Issues generally are fixed as quickly as possbile and releases done frequently.
+**Hector** is a high level Java client for Apache Cassandra currently in use on a number of production systems some of which have node counts into the hundreds. Issues generally are fixed as quickly as possbile and releases done frequently. 
 
 Apache `Cassandra <http://cassandra.apache.org>`_ is a highly available column oriented database.
 

@@ -1,0 +1,135 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Virtual Keyspaces &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div class="header-container">
+
+  <div class="logo"><img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/></div>
+
+  <div class="title1">Hector</div>
+  <div class="title2">A high level Java client for Apache Cassandra</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/virtual_keyspaces.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="virtual-keyspaces">
+<span id="index-0"></span><h1>Virtual Keyspaces<a class="headerlink" href="#virtual-keyspaces" title="Permalink to this headline">¶</a></h1>
+<p>One of the use cases for Keyspaces in Cassandra was for <a class="reference external" href="http://wiki.apache.org/cassandra/MultiTenant">multi-tenant</a> applications.  Unfortunately, Keyspaces use a lot of memory, to the degree that it&#8217;s unlikely that you&#8217;d be running with any significant number of them.  In the discussion on this topic on the Cassandra-user mailing list, the consensus was that if you needed Keyspace-like functionality but for a large number of Keyspaces (i.e. user can point and click to create a new Keyspace), that you would have to use a single static Keyspace and to simulate the idea of different keyspaces in the application layer.  Hector now has a feature that makes it much simpler to maintain these &#8220;virtual keyspaces&#8221; within your application.</p>
+<p>The approach used is similar to the <em>&#8220;Shared Database, Shared Schema&#8221;</em> approach to multi-tenancy often used with conventional RDBMS, where an additional column is added to all the tables in a database schema that contains some sort of tenant-id (see <a class="reference internal" href="#virtual-keyspaces-fn1"><em>[1]</em></a> and <a class="reference internal" href="#virtual-keyspaces-fn2"><em>[2]</em></a>).  With Cassandra, while adding an additional column may make sense for indexed queries, much of the time you&#8217;re working with row keys.  One potentially simple way to implement a virtual keyspace model in Cassandra, therefore, would be use a <em>&#8220;Shared Keyspace, Shared Column Families&#8221;</em> approach where we prepend the tenant-id to every CF row key value.  Hector does a good job of abstracting access to Cassandra away from Thrift and the native Thrift data structures, and it passes all operations through the KeyspaceService interface, which is implemented by KeyspaceServiceImpl.  Virtual keyspaces are implemented by a subclass of KeyspaceServiceImpl, called VirtualKeyspaceServiceImpl, which adds the tenant-id prefix to all row keys that are sent to Cassandra, and removes the tenant-id prefix from all keys that are returned, while discarding keys where the returned key doesn&#8217;t contain a matching tenant-id prefix.  This should have the effect of completely hiding rows that aren&#8217;t in your virtual keyspace.  Keep in mind, though, that you may very well want to still use an indexed tenant-id column in your CF if you&#8217;re doing things like lots of indexed queries.  While the virtual keyspace code will discard returned rows where the row key isn&#8217;t prefixed with the correct tenant-id, if you also have an indexed tenant-id column and it&#8217;s specified in your indexed query, then it&#8217;s going to be more efficient than relying on the virtual keyspace code to filter out a large number of returned rows.  Adding and using that tenant-id column is currently left up to you, the virtual keyspace code doesn&#8217;t handle that part.</p>
+<p>In order to make use of this, you call HFactory.createVirtualKeyspace rather than HFactory.createKeyspace, and you specify a prefix and a serializer for that prefix.  Unless you do this, none of new virtual keyspace code will be in your execution path, so there wont be any risk of effect to your existing applications.  You should ideally only use this with a clean empty <em>physical</em> keyspace.  You should make sure that you use prefixes that all serialize to byte arrays of equal length, the expectation is that typically the prefix will be a UUID.  Note that, although we do support any prefix type that we have a serializer for, that the OrderPreservingPartitioner does expect that row keys are UTF8 encoded, so if using that partitioner, your prefix should also be a UTF8 string or the OPP will reject your keys.  In this case, you may still want to use a UUID, but use uuid.toString() as your prefix and the StringSerializer, that way a fixed length UTF8 string representation of the UUID will be prepended, and the OPP will still be happy.</p>
+<p>The unit test for it is currently a subclass of ApiV2SystemTest that performs all the same tests but using a prefixed keyspace.  It&#8217;s in <a class="reference external" href="https://github.com/rantav/hector/blob/master/core/src/test/java/me/prettyprint/hector/api/VirtualKeyspaceTest.java">VirtualKeyspaceTest.java</a> and you can look at it as an example of all that&#8217;s required to get a keyspace operator that will preform the automatic prefixing.</p>
+<p>Note: Despite the name, neither HFactory.createKeyspace or HFactory.createVirtualKeyspace actually create a Cassandra keyspace.  These methods create a keyspace object that Hector uses for performing operations on the actual Cassandra keyspace.  Nothing special needs to be done to prepare a Cassandra keyspace for virtual keyspace usage beyond what you&#8217;d normally do to create a keyspace in Cassandra, and Hector provides an addKeyspace method in <a class="reference external" href="https://github.com/rantav/hector/blob/master/core/src/main/java/me/prettyprint/hector/api/Cluster.java">Cluster.java</a> that performs this operation.</p>
+<p><a class="reference external" href="http://iablog.sybase.com/kleisath/index.php/2009/11/multi-tenant-database-architecture-part-5/">[1]http://iablog.sybase.com/kleisath/index.php/2009/11/multi-tenant-database-architecture-part-5</a></p>
+<p><a class="reference external" href="http://msdn.microsoft.com/en-us/library/aa479086.aspx&quot;:http://msdn.microsoft.com/en-us/library/aa479086.aspx">[2] http://msdn.microsoft.com/en-us/library/aa479086.aspx&#8221;:http://msdn.microsoft.com/en-us/library/aa479086.aspx</a></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
