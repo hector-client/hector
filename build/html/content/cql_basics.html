@@ -123,7 +123,7 @@ It means one of two things:</p>
 </ul>
 <p>In both cases, even though the query is most likely a string, it is up to you to format
 this query according to the column family configuration. This can be a little confusing as only the comparator is required when defining a column family which itself will default to BytesType.</p>
-<p>If you get an exception such as: <tt class="docutils literal"><span class="pre">`InvalidRequestException(why:line</span> <span class="pre">1:22</span> <span class="pre">mismatched</span> <span class="pre">character</span> <span class="pre">'6'</span> <span class="pre">expecting</span> <span class="pre">'-')`</span></tt></p>
+<p>If you get an exception such as: <tt class="docutils literal"><span class="pre">InvalidRequestException(why:line</span> <span class="pre">1:22</span> <span class="pre">mismatched</span> <span class="pre">character</span> <span class="pre">'6'</span> <span class="pre">expecting</span> <span class="pre">'-')</span></tt></p>
 <p>It means that cassandra thought your column family name looked like a hex string but it was not.  If you want to ensure that it is a literal string you have to single quote the column family name.</p>
 <p>The following break down details these configuration options and their usage in the Hector API and the Cassandra CLI respectively.</p>
 <div class="section" id="comparator">
@@ -153,7 +153,7 @@ this query according to the column family configuration. This can be a little co
 <div class="section" id="column-metadata">
 <h2>Column Metadata<a class="headerlink" href="#column-metadata" title="Permalink to this headline">¶</a></h2>
 <p>Validation and, optionally, index definition for known columns</p>
-<p><tt class="docutils literal"><span class="pre">`BasicColumnDefinition#setName`</span></tt> and <tt class="docutils literal"><span class="pre">`BasicColumnDefinition#setValidationClass`</span></tt> (both required)</p>
+<p><tt class="docutils literal"><span class="pre">BasicColumnDefinition#setName</span></tt> and <tt class="docutils literal"><span class="pre">BasicColumnDefinition#setValidationClass</span></tt> (both required)</p>
 <div class="highlight-java"><pre>column_metadata = [{
     column_name : 'other_name',
     validation_class : LongType

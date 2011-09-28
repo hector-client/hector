@@ -19,7 +19,7 @@ It means one of two things:
 In both cases, even though the query is most likely a string, it is up to you to format
 this query according to the column family configuration. This can be a little confusing as only the comparator is required when defining a column family which itself will default to BytesType.
 
-If you get an exception such as: ```InvalidRequestException(why:line 1:22 mismatched character '6' expecting '-')```
+If you get an exception such as: ``InvalidRequestException(why:line 1:22 mismatched character '6' expecting '-')``
 
 It means that cassandra thought your column family name looked like a hex string but it was not.  If you want to ensure that it is a literal string you have to single quote the column family name.
 
@@ -52,7 +52,7 @@ Column Metadata
 ---------------
 Validation and, optionally, index definition for known columns
 
-```BasicColumnDefinition#setName``` and ```BasicColumnDefinition#setValidationClass``` (both required)
+``BasicColumnDefinition#setName`` and ``BasicColumnDefinition#setValidationClass`` (both required)
 
 ::
 

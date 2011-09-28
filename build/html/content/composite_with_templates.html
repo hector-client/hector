@@ -1,0 +1,233 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>DynamicCompositeType with Templates &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+
+  <img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/>
+
+  <div class="title">Hector. A high level Java client for Apache Cassandra.</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">DynamicCompositeType with Templates</a><ul>
+<li><a class="reference internal" href="#create-column-family">Create Column Family</a></li>
+<li><a class="reference internal" href="#create-template-object">Create Template Object</a></li>
+<li><a class="reference internal" href="#mutations">Mutations</a></li>
+<li><a class="reference internal" href="#how-does-it-look-in-the-cli">How does it look in the CLI</a></li>
+<li><a class="reference internal" href="#get-call">Get Call</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/composite_with_templates.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dynamiccompositetype-with-templates">
+<span id="index-0"></span><h1>DynamicCompositeType with Templates<a class="headerlink" href="#dynamiccompositetype-with-templates" title="Permalink to this headline">¶</a></h1>
+<p>To get a brief background see <a class="reference external" href="http://www.anuff.com/2010/07/secondary-indexes-in-cassandra.html">http://www.anuff.com/2010/07/secondary-indexes-in-cassandra.html</a>. <em>DynamicCompositeType</em> lets you create column name or value using multiple columns. You can also do it using
+String concatenation but it&#8217;s just stored as <em>UTF8Type</em> or <em>ByteType</em>. Better way is to create sub columns with it&#8217;s own comparators. <em>DynamicCompositeType</em> lets you do just that. You can do something like:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">c</span><span class="o">.</span><span class="na">addUTF8</span><span class="o">(</span><span class="s">&quot;john&quot;</span><span class="o">).</span><span class="na">addUTF8</span><span class="o">(</span><span class="s">&quot;smith&quot;</span><span class="o">).</span><span class="na">addLong</span><span class="o">(</span><span class="n">System</span><span class="o">.</span><span class="na">currentTimeMillis</span><span class="o">()).</span>
+</pre></div>
+</div>
+<p>Templates are easy representation of Hector API. It&#8217;s easy to use and you like it once you start using it and start comparing your existing code with template code.</p>
+<div class="section" id="create-column-family">
+<h2>Create Column Family<a class="headerlink" href="#create-column-family" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-java"><pre>create column family Composite with comparator ='DynamicCompositeType
+   (a=&gt;AsciiType,b=&gt;BytesType,i=&gt;IntegerType,x=&gt;LexicalUUIDType,l=&gt;LongType,t=&gt;TimeUUIDType,s=&gt;UTF8Type,u=&gt;UUIDType)'
+   and default_validation_class=UTF8Type and key_validation_class=UTF8Type;</pre>
+</div>
+<p>&#8220;a&#8221;,&#8221;b&#8221; are short notation which tells Thrift which comparatorType to use. You can use all the types as mentioned above or only the ones applicable to you.</p>
+<p>Let&#8217;s Code</p>
+</div>
+<div class="section" id="create-template-object">
+<h2>Create Template Object<a class="headerlink" href="#create-template-object" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">private</span> <span class="n">ColumnFamilyTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">DynamicComposite</span><span class="o">&gt;</span> <span class="n">compTemplate</span>  <span class="o">=</span>
+                 <span class="k">new</span> <span class="n">ThriftColumnFamilyTemplate</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">DynamicComposite</span><span class="o">&gt;(</span><span class="n">NoSQLDAOFactory</span><span class="o">.</span><span class="na">getInstance</span><span class="o">().</span><span class="na">getKeyspace</span><span class="o">(),</span>
+                <span class="s">&quot;CompositeTest&quot;</span><span class="o">,</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span> <span class="k">new</span> <span class="n">DynamicCompositeSerializer</span><span class="o">());</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mutations">
+<h2>Mutations<a class="headerlink" href="#mutations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">ColumnFamilyUpdater</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">DynamicComposite</span><span class="o">&gt;</span> <span class="n">updater</span> <span class="o">=</span> <span class="n">compTemplate</span>
+                <span class="o">.</span><span class="na">createUpdater</span><span class="o">(</span><span class="n">entity</span><span class="o">.</span><span class="na">getKey</span><span class="o">());</span> <span class="c1">//get Key and create updater object</span>
+
+<span class="n">DynamicComposite</span> <span class="n">ce</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+
+<span class="c1">// For all the columns for your entity</span>
+<span class="k">for</span> <span class="o">(</span><span class="n">String</span> <span class="n">col</span> <span class="o">:</span> <span class="n">entity</span><span class="o">.</span><span class="na">getCols</span><span class="o">().</span><span class="na">keySet</span><span class="o">())</span> <span class="o">{</span>
+        <span class="c1">//create DynamicComposite object. In this case UTF8Type, UUIDType</span>
+        <span class="n">ce</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicComposite</span><span class="o">(</span><span class="n">entity</span><span class="o">.</span><span class="na">getCols</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="n">col</span><span class="o">).</span><span class="na">getName</span><span class="o">(),</span> <span class="n">NoSQLUtils</span><span class="o">.</span><span class="na">newTimeUUID</span><span class="o">());</span>
+        <span class="n">updater</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="n">ce</span><span class="o">,</span> <span class="n">entity</span>
+                        <span class="o">.</span><span class="na">getCols</span><span class="o">().</span><span class="na">get</span><span class="o">(</span><span class="n">col</span><span class="o">).</span><span class="na">getValue</span><span class="o">());</span>
+<span class="o">}</span>
+                <span class="n">ce</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicComposite</span><span class="o">(</span><span class="n">ColumnNameType</span><span class="o">.</span><span class="na">ENTITY_TYPE</span><span class="o">.</span><span class="na">name</span><span class="o">());</span>
+                <span class="n">updater</span><span class="o">.</span><span class="na">setString</span><span class="o">(</span><span class="n">ce</span><span class="o">,</span>
+                                <span class="n">EntityType</span><span class="o">.</span><span class="na">COMPOSITE</span><span class="o">.</span><span class="na">name</span><span class="o">());</span>
+<span class="k">try</span> <span class="o">{</span>
+        <span class="n">compTemplate</span><span class="o">.</span><span class="na">update</span><span class="o">(</span><span class="n">updater</span><span class="o">);</span> <span class="c1">//Do Final Update</span>
+        <span class="n">Log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">&quot;Entity COMPOSITE &quot;</span> <span class="o">+</span> <span class="n">entity</span><span class="o">.</span><span class="na">getKey</span><span class="o">());</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">DataSourceException</span><span class="o">(</span><span class="n">Errors</span><span class="o">.</span><span class="na">HECTOR_EXCEPTION</span><span class="o">);</span>
+<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-does-it-look-in-the-cli">
+<h2>How does it look in the CLI<a class="headerlink" href="#how-does-it-look-in-the-cli" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-java"><div class="highlight"><pre><span class="o">=&gt;</span> <span class="o">(</span><span class="n">column</span><span class="o">=</span><span class="n">s</span><span class="nd">@DOB</span><span class="o">:</span><span class="n">u</span><span class="nd">@bed2e481</span><span class="o">-</span><span class="n">ba35</span><span class="o">-</span><span class="mi">11</span><span class="n">e0</span><span class="o">-</span><span class="n">b239</span><span class="o">-</span><span class="mi">005056</span><span class="n">c00008</span><span class="o">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">123456789</span><span class="o">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">1311980081864001</span><span class="o">)</span>
+<span class="o">=&gt;</span> <span class="o">(</span><span class="n">column</span><span class="o">=</span><span class="n">s</span><span class="nd">@ENTITY_TYPE</span><span class="o">,</span> <span class="n">value</span><span class="o">=</span><span class="n">COMPOSITE</span><span class="o">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">1311980081864002</span><span class="o">)</span>
+<span class="o">=&gt;</span> <span class="o">(</span><span class="n">column</span><span class="o">=</span><span class="n">s</span><span class="nd">@ENTITY_TYPE</span><span class="o">:</span><span class="n">u</span><span class="nd">@bed2e480</span><span class="o">-</span><span class="n">ba35</span><span class="o">-</span><span class="mi">11</span><span class="n">e0</span><span class="o">-</span><span class="n">b239</span><span class="o">-</span><span class="mi">005056</span><span class="n">c00008</span><span class="o">,</span> <span class="n">value</span><span class="o">=</span><span class="n">COMPOSITE</span><span class="o">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="mi">1311980081864000</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>Note how it prefixes with the types defined when column family was created.</p>
+</div>
+<div class="section" id="get-call">
+<h2>Get Call<a class="headerlink" href="#get-call" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-java"><div class="highlight"><pre><span class="k">try</span> <span class="o">{</span>
+        <span class="n">ColumnFamilyResult</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">DynamicComposite</span><span class="o">&gt;</span> <span class="n">res</span> <span class="o">=</span> <span class="n">compTemplate</span>
+                        <span class="o">.</span><span class="na">queryColumns</span><span class="o">(</span><span class="n">entity</span><span class="o">.</span><span class="na">getKey</span><span class="o">());</span>
+        <span class="k">if</span> <span class="o">(</span><span class="kc">null</span> <span class="o">==</span> <span class="n">res</span> <span class="o">||</span> <span class="o">!</span><span class="n">res</span><span class="o">.</span><span class="na">hasResults</span><span class="o">())</span> <span class="o">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nf">DataSourceException</span><span class="o">(</span><span class="n">Errors</span><span class="o">.</span><span class="na">NO_RESULT</span><span class="o">);</span>
+        <span class="o">}</span>
+        <span class="n">DynamicComposite</span> <span class="n">ce</span>  <span class="o">=</span> <span class="k">new</span> <span class="n">DynamicComposite</span><span class="o">(</span><span class="n">ColumnNameType</span><span class="o">.</span><span class="na">ENTITY_TYPE</span><span class="o">.</span><span class="na">name</span><span class="o">());</span>
+        <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="n">ce</span><span class="o">);</span>
+
+        <span class="k">if</span> <span class="o">(!</span><span class="n">EntityType</span><span class="o">.</span><span class="na">COMPOSITE</span><span class="o">.</span><span class="na">name</span><span class="o">().</span><span class="na">equalsIgnoreCase</span><span class="o">(</span><span class="n">value</span><span class="o">)){</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nf">DataSourceException</span><span class="o">(</span><span class="n">Errors</span><span class="o">.</span><span class="na">INALID_ENTITY_KEY</span><span class="o">);</span>
+        <span class="o">}</span>
+
+        <span class="n">entity</span><span class="o">.</span><span class="na">seteType</span><span class="o">(</span><span class="n">EntityType</span><span class="o">.</span><span class="na">COMPOSITE</span><span class="o">);</span>
+        <span class="n">String</span> <span class="n">name</span> <span class="o">=</span> <span class="kc">null</span><span class="o">;</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">DynamicComposite</span> <span class="n">dce</span> <span class="o">:</span> <span class="n">res</span><span class="o">.</span><span class="na">getColumnNames</span><span class="o">())</span> <span class="o">{</span>
+               <span class="n">value</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="na">getString</span><span class="o">(</span><span class="n">dce</span><span class="o">);</span>
+               <span class="n">name</span> <span class="o">=</span> <span class="n">dce</span><span class="o">.</span><span class="na">getComponent</span><span class="o">(</span><span class="mi">0</span><span class="o">).</span><span class="na">toString</span><span class="o">();</span>
+               <span class="n">Log</span><span class="o">.</span><span class="na">info</span><span class="o">(</span><span class="s">&quot;Composite Key &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="o">);</span>
+               <span class="n">entity</span><span class="o">.</span><span class="na">getCols</span><span class="o">().</span><span class="na">put</span><span class="o">(</span><span class="n">name</span><span class="o">,</span><span class="k">new</span> <span class="n">BigTableColumn</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;(</span><span class="n">name</span><span class="o">,</span> <span class="n">value</span><span class="o">));</span>
+        <span class="o">}</span>
+<span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+        <span class="c1">// do something ...</span>
+        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">DataSourceException</span><span class="o">(</span><span class="n">Errors</span><span class="o">.</span><span class="na">HECTOR_EXCEPTION</span><span class="o">);</span>
+<span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+
+<span class="o">}</span>
+</pre></div>
+</div>
+<p><tt class="docutils literal"><span class="pre">.getComponent(index)</span></tt> gets the sub column that was created in mutation step.</p>
+<p><strong>That&#8217;s it!!</strong></p>
+<p>If you are not using templates and want to use them with Hector&#8217;s mutators and Column Slice directly see <a class="reference external" href="https://github.com/edanuff/CassandraIndexedCollections">https://github.com/edanuff/CassandraIndexedCollections</a>. This will help you in understanding how it actually works.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

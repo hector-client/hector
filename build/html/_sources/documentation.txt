@@ -11,6 +11,7 @@ Hector documentation contents:
 
    content/getting_started
    content/cql_basics
+   content/composite_with_templates.rst
 
 Indices and tables
 ==================
