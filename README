@@ -1,1 +1,15 @@
-Hector documentation project build with Sphinx 1.0.8
+Hector documentation project build with Sphinx (http://sphinx.pocoo.org/) 1.0.8
+
+Installing Sphinx:
+-----------------
+
+  easy_install -U Sphinx
+
+Adding docs
+-----------
+
+The docs are written in .rst format and are available under /source
+In order to add more info to the docs you need to edit or add new files and
+build it by running:
+
+>make clean html
