@@ -37,25 +37,25 @@ or clone it directly from ``$ git clone git://github.com/rantav/hector``
 
 Mailing lists
 -------------
-| 
-| **Users**: Ask questions and share your experience. Anyone can post messages and anyone may join.
-| hector-users@googlegroups.com (http://groups.google.com/group/hector-users)
-| 
-| **Developers**: For cutting edge development of hector itself. Anyone can post messages, but join by invitation only.
-| hector-dev@googlegroups.com (http://groups.google.com/group/hector-dev)
+
+	* **Users**: Ask questions and share your experience. Anyone can post messages and anyone may join.
+		hector-users@googlegroups.com (http://groups.google.com/group/hector-users)
+
+	* **Developers**: For cutting edge development of hector itself. Anyone can post messages, but join by invitation only.
+		hector-dev@googlegroups.com (http://groups.google.com/group/hector-dev)
 
 
-Some additional pages from the wiki that may be of interest
-------------------------------------------------------------
+Build resources
+---------------
 
-	* Wiki: https://github.com/rantav/hector/wiki
-	* SLF4J fun and hijinks: https://github.com/rantav/hector/wiki/SLF4J-in-Hector-
-	* Mailing Lists: https://github.com/rantav/hector/wiki/Mailing-Lists
 	* Maven Central location (includes javadoc): http://repo2.maven.org/maven2/me/prettyprint/
+	* `Continuous Integration (Hudson/Jenkins) <https://hector-dev.ci.cloudbees.com>`_
+	* `Cloudbees maven repo with nightly snapshots <https://repository-hector-dev.forge.cloudbees.com/snapshot>`_
 
-Example projects using Hector
-------------------------------
 
-	* https://github.com/zznate/cassandra-tutorial
-	* https://github.com/zznate/hector-examples
-	* https://github.com/riptano/twissjava
+:ref:`FAQ`
+----------
+
+:ref:`Community`
+----------------
+

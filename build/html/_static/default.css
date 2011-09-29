@@ -234,7 +234,8 @@ div.related ul li a {
     margin: 0;
     padding: 0 5px 0 5px;
     line-height: 1.75em;
-    color: #EE9816;
+    /*color: #EE9816;*/
+    color: #ffffff;
 }
 
 div.related ul li a:hover {
@@ -312,7 +313,11 @@ h3 {
     font-size: 1.2em;
 }
 
-h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+h1 a {
+    
+}
+
+h2 a, h3 a, h4 a, h5 a, h6 a {
     color: black!important;
 }
 

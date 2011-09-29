@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>&lt;no title&gt; &mdash; Hector v0.8.x documentation</title>
+    <title>FAQ &mdash; Hector v0.8.x documentation</title>
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -74,9 +74,18 @@
   
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">FAQ</a><ul>
+<li><a class="reference internal" href="#slf4j-fun-and-hijinks-https-github-com-rantav-hector-wiki-slf4j-in-hector">SLF4J fun and hijinks: https://github.com/rantav/hector/wiki/SLF4J-in-Hector-</a></li>
+<li><a class="reference internal" href="#how-to-compile-hector-from-sources">How to compile Hector from sources ?</a></li>
+</ul>
+</li>
+</ul>
+
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="../_sources/content/user_guide.txt"
+    <li><a href="../_sources/content/FAQ.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -101,7 +110,30 @@
         <div class="bodywrapper">
           <div class="body">
             
-  
+  <div class="section" id="faq">
+<span id="id1"></span><h1>FAQ<a class="headerlink" href="#faq" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="slf4j-fun-and-hijinks-https-github-com-rantav-hector-wiki-slf4j-in-hector">
+<h2>SLF4J fun and hijinks: <a class="reference external" href="https://github.com/rantav/hector/wiki/SLF4J-in-Hector">https://github.com/rantav/hector/wiki/SLF4J-in-Hector</a>-<a class="headerlink" href="#slf4j-fun-and-hijinks-https-github-com-rantav-hector-wiki-slf4j-in-hector" title="Permalink to this headline">¶</a></h2>
+<p>If you are using Hector in your project and are getting a ClassNotFound exception for an SLF4J class, there is a reason for it. You must include the correct SLF4J binding in your project. Hector&#8217;s only SLF4J dependency is on the API itself, not the logging implementations. For us (or any library developer for that matter) to make assumptions about which logging library you are using is poor form.</p>
+<p>For more information <a class="reference external" href="http://groups.google.com/group/hector-users/browse_thread/thread/aa5d9d34aea0a9df/219acdeb9569b8ac">see this mail list thread</a> and <a class="reference external" href="http://www.slf4j.org/codes.html#StaticLoggerBinder">this description</a> from the SLF4J documentation.</p>
+<p><sub>Thanks to Stephen Connolly for getting are pom files straightened out to support this.</sub></p>
+</div>
+<div class="section" id="how-to-compile-hector-from-sources">
+<h2>How to compile Hector from sources ?<a class="headerlink" href="#how-to-compile-hector-from-sources" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ol class="arabic simple">
+<li>Install &#8220;Maven2&#8221; (<a class="reference external" href="http://maven.apache.org">http://maven.apache.org</a>) (it&#8217;s used as build tool)</li>
+<li>Install &#8220;Git&#8221; (<a class="reference external" href="http://git-scm.com">http://git-scm.com</a>) Setup proxy-server if need <tt class="docutils literal"><span class="pre">git</span> <span class="pre">config</span> <span class="pre">--global</span> <span class="pre">http.proxy</span> <span class="pre">&quot;http://username:password&#64;192.168.1.1:3128/&quot;</span></tt></li>
+<li>Create folder &#8220;github&#8221; and cd to it. Execute <tt class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/rantav/hector.git</span></tt></li>
+<li>cd to folder <em>hector</em></li>
+<li>Execute <tt class="docutils literal"><span class="pre">mvn</span> <span class="pre">install</span> <span class="pre">-Dmaven.test.skip=true</span> <span class="pre">-DperformRelease=true</span></tt></li>
+</ol>
+</div></blockquote>
+<p>At folder target you will find last build of Hector :)</p>
+<p>About needed runtime jars you find in Rapitano doc.</p>
+</div>
+</div>
+
 
           </div>
         </div>
