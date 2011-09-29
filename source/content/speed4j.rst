@@ -17,22 +17,22 @@ How to enable Speed4j?
 
 Three steps are needed.
 
-Step 1
------- 
+Step 1: Set the OpTimer
+-----------------------
 
 Set the OpTimer in your CassandraHostConfigurator class::
 
     cassandraHostConfigurator.setOpTimer(new SpeedForJOpTimer("<cluster-name>"));
 
-Step 2
-------
+Step 2: Setting logger
+----------------------
 
 Speed4j will log at INFO level, so if needed add a logger entry for this logger class::
 
     me.prettyprint.cassandra.hector.TimingLogger
 
-Step 3
-------
+Step 3: Configuring speed4j properties file
+-------------------------------------------
 
 .. highlight:: properties
 

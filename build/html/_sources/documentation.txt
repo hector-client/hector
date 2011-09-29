@@ -7,13 +7,14 @@ Hector documentation contents:
 ==================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    content/getting_started
    content/cql_basics
    content/composite_with_templates
    content/virtual_keyspaces
    content/speed4j
+   content/HOM/hector-object-mapper
 
 Indices and tables
 ==================

@@ -78,9 +78,9 @@
   <ul>
 <li><a class="reference internal" href="#">Speed4j</a><ul>
 <li><a class="reference internal" href="#how-to-enable-speed4j">How to enable Speed4j?</a><ul>
-<li><a class="reference internal" href="#step-1">Step 1</a></li>
-<li><a class="reference internal" href="#step-2">Step 2</a></li>
-<li><a class="reference internal" href="#step-3">Step 3</a></li>
+<li><a class="reference internal" href="#step-1-set-the-optimer">Step 1: Set the OpTimer</a></li>
+<li><a class="reference internal" href="#step-2-setting-logger">Step 2: Setting logger</a></li>
+<li><a class="reference internal" href="#step-3-configuring-speed4j-properties-file">Step 3: Configuring speed4j properties file</a></li>
 </ul>
 </li>
 </ul>
@@ -124,22 +124,22 @@ its workings, but no other dependencies.</p>
 <div class="section" id="how-to-enable-speed4j">
 <h2>How to enable Speed4j?<a class="headerlink" href="#how-to-enable-speed4j" title="Permalink to this headline">¶</a></h2>
 <p>Three steps are needed.</p>
-<div class="section" id="step-1">
-<h3>Step 1<a class="headerlink" href="#step-1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="step-1-set-the-optimer">
+<h3>Step 1: Set the OpTimer<a class="headerlink" href="#step-1-set-the-optimer" title="Permalink to this headline">¶</a></h3>
 <p>Set the OpTimer in your CassandraHostConfigurator class:</p>
 <div class="highlight-java"><div class="highlight"><pre><span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setOpTimer</span><span class="o">(</span><span class="k">new</span> <span class="n">SpeedForJOpTimer</span><span class="o">(</span><span class="s">&quot;&lt;cluster-name&gt;&quot;</span><span class="o">));</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="step-2">
-<h3>Step 2<a class="headerlink" href="#step-2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="step-2-setting-logger">
+<h3>Step 2: Setting logger<a class="headerlink" href="#step-2-setting-logger" title="Permalink to this headline">¶</a></h3>
 <p>Speed4j will log at INFO level, so if needed add a logger entry for this logger class:</p>
 <div class="highlight-java"><div class="highlight"><pre><span class="n">me</span><span class="o">.</span><span class="na">prettyprint</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">hector</span><span class="o">.</span><span class="na">TimingLogger</span>
 </pre></div>
 </div>
 </div>
-<div class="section" id="step-3">
-<h3>Step 3<a class="headerlink" href="#step-3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="step-3-configuring-speed4j-properties-file">
+<h3>Step 3: Configuring speed4j properties file<a class="headerlink" href="#step-3-configuring-speed4j-properties-file" title="Permalink to this headline">¶</a></h3>
 <p><tt class="docutils literal"><span class="pre">speed4j.properties</span></tt> file should be in the root of your classpath.  Pay attention to &#8220;&amp;lt;cluster-name&amp;gt;&#8221; used in step #1 and make sure it is used as illustrated below.  For instance, if you used &#8220;CustomerDB&#8221; as your cluster name in step #1, then you would use: speed4j.hector-CustomerDB = com.ecyrd.speed4j.log.PeriodicalLog in the properties file.</p>
 <p>Make sure this file is in the path before the hector JARs, as there is one provided by hector that will be used if found first:</p>
 <div class="highlight-properties"><div class="highlight"><pre><span class="c"># Which Log instance shall we use?</span>

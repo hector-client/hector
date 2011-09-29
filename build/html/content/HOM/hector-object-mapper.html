@@ -1,0 +1,551 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Hector Object Mapper &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div class="header-container">
+
+  <div class="logo"><img src="../../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/></div>
+
+  <div class="title1">Hector</div>
+  <div class="title2">A high level Java client for Apache Cassandra</div>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="../community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+  
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Hector Object Mapper</a><ul>
+<li><a class="reference internal" href="#overview">Overview</a></li>
+<li><a class="reference internal" href="#versioning">Versioning</a></li>
+<li><a class="reference internal" href="#using-entity-manager">Using Entity Manager</a></li>
+<li><a class="reference internal" href="#inheritance">Inheritance</a><ul>
+<li><a class="reference internal" href="#saving">Saving</a></li>
+<li><a class="reference internal" href="#loading">Loading</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#java-collections-mapping-a-pojo">Java collections: Mapping a POJO</a></li>
+<li><a class="reference internal" href="#custom-property-converters">Custom Property Converters</a></li>
+<li><a class="reference internal" href="#anonymous-properties">Anonymous Properties</a></li>
+<li><a class="reference internal" href="#hom-faq">HOM FAQ</a><ul>
+<li><a class="reference internal" href="#if-i-annotate-a-base-class-with-entity-will-a-derived-class-be-persisted">If I annotate a base class with &#64;Entity, will a derived class be persisted?</a></li>
+<li><a class="reference internal" href="#does-the-object-mapper-perform-any-locking">Does the object mapper perform any locking?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../../_sources/content/HOM/hector-object-mapper.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="hector-object-mapper">
+<span id="index-0"></span><h1>Hector Object Mapper<a class="headerlink" href="#hector-object-mapper" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The primary goal of this module is to map objects (POJOs) to/from Cassandra data storage.  I call it Hector Object Mapper, but we are striving and working toward a title of &#8220;JPA 1.0 Basic&#8221;.  Currently Inheritance is supported as well as some custom annotations that allow custom type conversion.</p>
+<p>Start with <a class="reference internal" href="#using-entity-manager"><em>Using the EntityManager</em></a> to get a basic idea of how to map objects to/from Cassandra.  The <a class="reference internal" href="#hom-faq"><em>HOM-FAQ</em></a> is, well, an FAQ.</p>
+<p>All code in the examples can be found in object-mapper module in hector&#8217;s source repository and is intended to work. so feel free to download and play.</p>
+</div>
+<div class="section" id="versioning">
+<h2>Versioning<a class="headerlink" href="#versioning" title="Permalink to this headline">¶</a></h2>
+<p>1.X-?? &#8211;&gt; 0.8.Y-??</p>
+<p>2.0-?? &#8211;&gt; master (no release yet)</p>
+</div>
+<div class="section" id="using-entity-manager">
+<span id="id1"></span><h2>Using Entity Manager<a class="headerlink" href="#using-entity-manager" title="Permalink to this headline">¶</a></h2>
+<p>The easiest way to use the library is to instantiate an EntityManagerImpl and call its persist and find methods.  The EntityManager will scan the package provided to the constructor looking for POJOs annotated with <tt class="docutils literal"><span class="pre">&#64;Entity</span></tt>.  Any POJO with <tt class="docutils literal"><span class="pre">&#64;Entity</span></tt> will be usable by the EntityManager for saving and loading objects.  This method of persistence is very much in line with the JPA standard.</p>
+<p>As an example consider the following POJO:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;TestColumnFamily&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyPojo</span> <span class="o">{</span>
+  <span class="nd">@Id</span>
+  <span class="kd">private</span> <span class="n">UUID</span> <span class="n">id</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;lp1&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">long</span> <span class="n">longProp1</span><span class="o">;</span>
+
+  <span class="nd">@me.prettyprint.hom.annotations.Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;color&quot;</span><span class="o">,</span> <span class="n">converter</span> <span class="o">=</span> <span class="n">ColorConverter</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">Colors</span> <span class="n">color</span><span class="o">;</span>
+
+  <span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">anonymousProps</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;();</span>
+
+  <span class="nd">@AnonymousPropertyAddHandler</span>
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAnonymousProp</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">,</span> <span class="n">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">anonymousProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">name</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="nd">@AnonymousPropertyCollectionGetter</span>
+  <span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;&gt;</span> <span class="n">getAnonymousProps</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">anonymousProps</span><span class="o">.</span><span class="na">entrySet</span><span class="o">();</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getAnonymousProp</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">anonymousProps</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">name</span><span class="o">);</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="n">UUID</span> <span class="nf">getId</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">id</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setId</span><span class="o">(</span><span class="n">UUID</span> <span class="n">id</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">id</span> <span class="o">=</span> <span class="n">id</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">long</span> <span class="nf">getLongProp1</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">longProp1</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setLongProp1</span><span class="o">(</span><span class="kt">long</span> <span class="n">longProp1</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">longProp1</span> <span class="o">=</span> <span class="n">longProp1</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="n">Colors</span> <span class="nf">getColor</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">color</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setColor</span><span class="o">(</span><span class="n">Colors</span> <span class="n">color</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">color</span> <span class="o">=</span> <span class="n">color</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>Notice the &#64;Entity and &#64;Table annotating MyPojo.  &#64;Entity merely signals the EntityManager to make the bean available for persistence management.  &#64;Table defines what ColumnFamily to use when loading and saving.  If &#64;Table is omitted the name of the class is used as the ColumnFamily.  Unlike JPA, properties are not mapped to a ColumnFamily column by default.  To persist a property it must be annotated with &#64;Column, and the name of the column is required.  Also notice I have used two &#64;Column annotations, one a part of JPA and a custom one that uses converters (See <a class="reference internal" href="#hom-custom-property-converters"><em>Custom Property Converters</em></a>) to provide custom type conversion to/from byte[], which is required by Cassandra.</p>
+<p>So with an annotated POJO it is very easy to save and load an object:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">MainProg</span> <span class="o">{</span>
+
+  <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">getOrCreateCluster</span><span class="o">(</span><span class="s">&quot;TestPool&quot;</span><span class="o">,</span> <span class="s">&quot;localhost:9160&quot;</span><span class="o">);</span>
+    <span class="n">Keyspace</span> <span class="n">keyspace</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;TestKeyspace&quot;</span><span class="o">,</span> <span class="n">cluster</span><span class="o">);</span>
+
+    <span class="k">try</span> <span class="o">{</span>
+      <span class="n">EntityManagerImpl</span> <span class="n">em</span> <span class="o">=</span> <span class="k">new</span> <span class="n">EntityManagerImpl</span><span class="o">(</span><span class="n">keyspace</span><span class="o">,</span> <span class="s">&quot;com.mycompany&quot;</span><span class="o">);</span>
+
+      <span class="n">MyPojo</span> <span class="n">pojo1</span> <span class="o">=</span> <span class="k">new</span> <span class="n">MyPojo</span><span class="o">();</span>
+      <span class="n">pojo1</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="n">UUID</span><span class="o">.</span><span class="na">randomUUID</span><span class="o">());</span>
+      <span class="n">pojo1</span><span class="o">.</span><span class="na">setLongProp1</span><span class="o">(</span><span class="mi">123L</span><span class="o">);</span>
+      <span class="n">pojo1</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="n">Colors</span><span class="o">.</span><span class="na">RED</span><span class="o">);</span>
+
+      <span class="n">em</span><span class="o">.</span><span class="na">save</span><span class="o">(</span><span class="n">pojo1</span><span class="o">);</span>
+
+      <span class="c1">// do some stuff</span>
+
+      <span class="n">MyPojo</span> <span class="n">pojo2</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">MyPojo</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="n">pojo1</span><span class="o">.</span><span class="na">getId</span><span class="o">());</span>
+
+      <span class="c1">// do some more stuff</span>
+
+      <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Color = &quot;</span> <span class="o">+</span> <span class="n">pojo2</span><span class="o">.</span><span class="na">getColor</span><span class="o">());</span>
+    <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+      <span class="n">cluster</span><span class="o">.</span><span class="na">getConnectionManager</span><span class="o">().</span><span class="na">shutdown</span><span class="o">();</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>That&#8217;s the basics!  Not much to it.  See <a class="reference internal" href="#hom-custom-property-converters"><em>Custom Property Converters</em></a> and <a class="reference internal" href="#hom-annonymous-properties"><em>Anonymous Properties</em></a> for advanced configuration.</p>
+</div>
+<div class="section" id="inheritance">
+<h2>Inheritance<a class="headerlink" href="#inheritance" title="Permalink to this headline">¶</a></h2>
+<p>Inheritance in <em>Hector Object Mapper</em> (HOM) is JPA style inheritance.  Where JPA has several ways to implement inheritance, HOM only works with &#8220;single table&#8221; - meaning all derivations of the base class are stored in a single ColumnFamily row.  At this time I feel this is sufficient because there is no rigid schema defined in Cassandra.  Each object only stores in a Cassandra &#8220;row&#8221; what it needs.  In traditional RDBMS there is a good argument for having multiple inheritance strategies because of wasting space or rows becoming too large to accommodate all possible derivations.</p>
+<p>So let&#8217;s start with an example modeling furniture.  We have a chair, a table, and a couch - each a type of furniture.  So we&#8217;ll create four classes; Chair, Table, and Couch, each derived from a base class, Furniture:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">.</span><span class="na">furniture</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@Table</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;Furniture&quot;</span><span class="o">)</span>
+<span class="nd">@Inheritance</span>
+<span class="nd">@DiscriminatorColumn</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;type&quot;</span><span class="o">,</span> <span class="n">discriminatorType</span> <span class="o">=</span> <span class="n">DiscriminatorType</span><span class="o">.</span><span class="na">STRING</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">abstract</span> <span class="kd">class</span> <span class="nc">Furniture</span> <span class="o">{</span>
+  <span class="nd">@Id</span>
+  <span class="kd">private</span> <span class="kt">int</span> <span class="n">id</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;material&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">String</span> <span class="n">material</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;color&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">String</span> <span class="n">color</span><span class="o">;</span>
+
+  <span class="c1">//  getters/setters required, but not showing to conserve space</span>
+
+<span class="o">}</span>
+
+<span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">.</span><span class="na">furniture</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@DiscriminatorValue</span><span class="o">(</span><span class="s">&quot;chair&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Chair</span> <span class="kd">extends</span> <span class="n">Furniture</span> <span class="o">{</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;recliner&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">recliner</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;arms&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">arms</span><span class="o">;</span>
+
+  <span class="c1">//  getters/setters required, but not showing to conserve space</span>
+
+<span class="o">}</span>
+
+<span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">.</span><span class="na">furniture</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@DiscriminatorValue</span><span class="o">(</span><span class="s">&quot;table&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">BasicTable</span> <span class="kd">extends</span> <span class="n">Furniture</span> <span class="o">{</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;extendable&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">extendable</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;shape&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">String</span> <span class="n">shape</span><span class="o">;</span>
+
+  <span class="c1">//  getters/setters required, but not showing to conserve space</span>
+
+<span class="o">}</span>
+
+<span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">.</span><span class="na">furniture</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@DiscriminatorValue</span><span class="o">(</span><span class="s">&quot;couch&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Couch</span> <span class="kd">extends</span> <span class="n">Furniture</span> <span class="o">{</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;foldOutBed&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">boolean</span> <span class="n">foldOutBed</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;numCushions&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">int</span> <span class="n">numCushions</span><span class="o">;</span>
+
+  <span class="c1">//  getters/setters required, but not showing to conserve space</span>
+
+<span class="o">}</span>
+
+<span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">mycompany</span><span class="o">.</span><span class="na">furniture</span><span class="o">;</span>
+
+<span class="c1">// imports omitted</span>
+
+<span class="nd">@Entity</span>
+<span class="nd">@DiscriminatorValue</span><span class="o">(</span><span class="s">&quot;table_desk&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Desk</span> <span class="kd">extends</span> <span class="n">BasicTable</span> <span class="o">{</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s">&quot;numDrawers&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="kt">int</span> <span class="n">numDrawers</span><span class="o">;</span>
+
+  <span class="c1">//  getters/setters required, but not showing to conserve space</span>
+
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>With single table inheritance all derivations of the class hierarchy are persisted in the same ColumnFamily.  The base class defines the ColumnFamily using &#64;Table, and it is illegal to define &#64;Table in any of its derived classes.  There can be multiple levels of inheritance as long as each is annotated with &#64;Entity and each defines a unique DiscriminatorValue (See class, Desk, above.)</p>
+<dl class="docutils">
+<dt>The new annotations to discuss are:</dt>
+<dd><ul class="first last simple">
+<li><strong>&#64;Inheritance</strong> : defines base class of inheritance hierarchy</li>
+<li><strong>&#64;DiscriminatorColumn</strong> : the column name to use for discriminating between class types</li>
+<li><strong>&#64;DiscriminatorValue</strong> : a unique value for each class in the hierarchy</li>
+</ul>
+</dd>
+</dl>
+<p><strong>&#64;Inheritance</strong> is required by the base class of the hierarchy and signals the mapper to persist the set of classes in the hierarchy based on the strategy.  &#64;Inheritance can specify an inheritance &#8220;strategy&#8221;, but at this moment, only JPA style &#8220;single table&#8221; storage is available.</p>
+<p><strong>&#64;DiscriminatorColumn</strong> is required by the base class of the hierarchy and defines the column name for storing a discriminator value.  A type can also be specified (see Furniture class) for the column value.  The acceptable values are defined by the enumeration, DiscriminatorType (STRING is the default.)  (You may notice that the discriminator column is not defined as a POJO property anywhere in the hierarchy, even though it <em>is</em> stored in the ColumnFamily.  This is by design because it is not needed from an application client perspective.)</p>
+<p><strong>&#64;DiscriminatorValue</strong> is required by all classes in the hierarchy and defines the class&#8217; unique value within the hierarchy.  The one exception is if the base class is abstract.  This value is stored in the DiscriminatorColumn when the object is saved.  It is used to determine the class type when loading data from Cassandra.</p>
+<div class="section" id="saving">
+<h3>Saving<a class="headerlink" href="#saving" title="Permalink to this headline">¶</a></h3>
+<p>Saving is no different than non-inheritance.  Use the EntityManager to save the object and as long as the classes are properly configured, everything will simply work!:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">Keyspace</span> <span class="n">keyspace</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;TestKeyspace&quot;</span><span class="o">,</span> <span class="n">cluster</span><span class="o">);</span>
+<span class="n">entityMgr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">EntityManagerImpl</span><span class="o">(</span><span class="n">keyspace</span><span class="o">,</span> <span class="s">&quot;com.mycompany.furniture&quot;</span><span class="o">);</span>
+<span class="n">Desk</span> <span class="n">desk</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Desk</span><span class="o">();</span>
+<span class="n">desk</span><span class="o">.</span><span class="na">setId</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+<span class="n">desk</span><span class="o">.</span><span class="na">setMaterial</span><span class="o">(</span><span class="s">&quot;pressBoard&quot;</span><span class="o">);</span>
+<span class="n">desk</span><span class="o">.</span><span class="na">setColor</span><span class="o">(</span><span class="s">&quot;black&quot;</span><span class="o">);</span>
+<span class="n">desk</span><span class="o">.</span><span class="na">setExtendable</span><span class="o">(</span><span class="kc">false</span><span class="o">);</span>
+<span class="n">desk</span><span class="o">.</span><span class="na">setShape</span><span class="o">(</span><span class="s">&quot;rectangle&quot;</span><span class="o">);</span>
+<span class="n">desk</span><span class="o">.</span><span class="na">setNumDrawers</span><span class="o">(</span><span class="mi">2</span><span class="o">);</span>
+<span class="n">entityMgr</span><span class="o">.</span><span class="na">persist</span><span class="o">(</span><span class="n">desk</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>The above code sample will save to the ColumnFamily Furniture, row key = 4, the following columns:  material, color, extendable, shape, numDrawers, and type.  The discriminator column, type, will have a value of &#8220;table_desk&#8221;.</p>
+</div>
+<div class="section" id="loading">
+<h3>Loading<a class="headerlink" href="#loading" title="Permalink to this headline">¶</a></h3>
+<p>To load the Desk object saved above is also very simple.  The following code will use the EntityManager to load a piece of furniture:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="n">Keyspace</span> <span class="n">keyspace</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;TestKeyspace&quot;</span><span class="o">,</span> <span class="n">cluster</span><span class="o">);</span>
+<span class="n">entityMgr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">EntityManagerImpl</span><span class="o">(</span><span class="n">keyspace</span><span class="o">,</span> <span class="s">&quot;com.mycompany.furniture&quot;</span><span class="o">);</span>
+<span class="n">Furniture</span> <span class="n">furniturePiece</span> <span class="o">=</span> <span class="n">entityMgr</span><span class="o">.</span><span class="na">load</span><span class="o">(</span><span class="n">Furniture</span><span class="o">.</span><span class="na">class</span><span class="o">,</span> <span class="mi">4</span><span class="o">);</span>
+<span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span> <span class="s">&quot;class type = &quot;</span> <span class="o">+</span> <span class="n">furniturePiece</span><span class="o">.</span><span class="na">getClass</span><span class="o">().</span><span class="na">getName</span><span class="o">());</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="java-collections-mapping-a-pojo">
+<h2>Java collections: Mapping a POJO<a class="headerlink" href="#java-collections-mapping-a-pojo" title="Permalink to this headline">¶</a></h2>
+<p>HOM can map a POJO property that is a Java Collection to columns.</p>
+<p>In previous versions of HOM, a POJO containing a Java Collection property could not be easily mapped to Cassandra columns using HOM.  You would have needed to create a custom converter that would handle the mapping ... until now.  Now you can annotate a collection property using &#64;Column just like any other property and HOM will do &#8220;the right thing&#8221;.</p>
+<p>How does it work?  Each element of the collection is mapped to a Cassandra column with a simple naming scheme, &#8220;&amp;lt;pojo-property-name&amp;gt;:&amp;lt;index&amp;gt;&#8221;.  There is also an &#8220;informational column&#8221; persisted, &#8220;&amp;lt;pojo-property-name&amp;gt;&#8221;, that contains the type of the Collection and its size.  The elements of the Collection are serialized using Java&#8217;s Object Serialization, so any type that implements Serializable should work just fine.</p>
+<p>A consequence of persisting Collections is that any previously persisted POJO properties are removed and persisted again.  This is because HOM tries to keep persisting fast, and for most cases (if not all) simply removing everything and persisting again, saves a read to get the existing Collection information.  When reading, all columns are read and the &#8220;informational column&#8221; tells HOM what Collection to to instantiate and how many columns exist.</p>
+<p>Let&#8217;s look at an example:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="nd">@Entity</span>
+<span class="nd">@DiscriminatorValue</span><span class="o">(</span><span class="s">&quot;table_desk&quot;</span><span class="o">)</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Desk</span> <span class="kd">extends</span> <span class="n">BasicTable</span> <span class="o">{</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;desk_type&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">String</span> <span class="n">deskType</span><span class="o">;</span>
+
+  <span class="nd">@Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;drawerList&quot;</span><span class="o">)</span>
+  <span class="kd">private</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">Drawer</span><span class="o">&gt;</span> <span class="n">drawerList</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Drawer</span><span class="o">&gt;();</span>
+
+  <span class="kd">public</span> <span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">getDrawerList</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">drawerList</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setDrawerList</span><span class="o">(</span><span class="n">List</span><span class="o">&lt;</span><span class="n">String</span><span class="o">&gt;</span> <span class="n">drawerList</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">drawerList</span> <span class="o">=</span> <span class="n">drawerList</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="n">String</span> <span class="nf">getDeskType</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">deskType</span><span class="o">;</span>
+  <span class="o">}</span>
+
+  <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setDeskType</span><span class="o">(</span><span class="n">String</span> <span class="n">deskType</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">this</span><span class="o">.</span><span class="na">deskType</span> <span class="o">=</span> <span class="n">deskType</span><span class="o">;</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>As you can see above, there is a &#8220;List&#8221; Collection property, drawerList.  Let&#8217;s assume there are three elements in the list.  HOM will persist four columns:  drawerList, drawerList:0, drawerList:1, drawerList:2.  drawerList contains <em>java.util.ArrayList</em> and size of 3.  A custom type, Drawer, is used and will be persisted property using Java Serialization.  Pretty simple!</p>
+<p>Note that the implementation does not implement relationships between objects, like many-to-one, etc ... at least not yet.  If you have a collection of custom typed objects, they will be persisted using Java&#8217;s Object Serialization and the type must implement <em>java.io.Serializable</em>.</p>
+<p>Also don&#8217;t forget to implement equals and hashCode for your custom types.  Since they will be in a Collection, you will probably want this functionality to insure proper handling by the Collection.</p>
+<p>(The implementation has been tested with Lists and Sets.)</p>
+</div>
+<div class="section" id="custom-property-converters">
+<span id="hom-custom-property-converters"></span><h2>Custom Property Converters<a class="headerlink" href="#custom-property-converters" title="Permalink to this headline">¶</a></h2>
+<p>In the above MyPojo example (listed in <a class="reference internal" href="#using-entity-manager"><em>Using the EntityManager</em></a>) you may have noticed the type, Colors, which is an enumeration.  (It is in src/test/java/com/mycompany in the code base).</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">real</span><span class="o">.</span><span class="na">hom</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">enum</span> <span class="n">Colors</span> <span class="o">{</span>
+    <span class="n">BLUE</span><span class="o">(</span><span class="s">&quot;Blue&quot;</span><span class="o">),</span>
+    <span class="n">RED</span><span class="o">(</span><span class="s">&quot;Red&quot;</span><span class="o">),</span>
+    <span class="n">GREEN</span><span class="o">(</span><span class="s">&quot;Green&quot;</span><span class="o">);</span>
+
+    <span class="kd">private</span> <span class="kd">final</span> <span class="n">String</span> <span class="n">name</span><span class="o">;</span>
+
+    <span class="n">Colors</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="n">String</span> <span class="nf">getName</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">name</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="n">Colors</span> <span class="nf">getInstance</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">)</span> <span class="o">{</span>
+        <span class="n">Colors</span><span class="o">[]</span> <span class="n">tidArr</span> <span class="o">=</span> <span class="n">values</span><span class="o">();</span>
+        <span class="k">for</span> <span class="o">(</span><span class="n">Colors</span> <span class="n">tid</span> <span class="o">:</span> <span class="n">tidArr</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">tid</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">name</span><span class="o">))</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="n">tid</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+
+        <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalArgumentException</span><span class="o">(</span><span class="s">&quot;No Color with name, &quot;</span> <span class="o">+</span> <span class="n">name</span><span class="o">);</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>As you probably already know, Cassandra stores all column values as byte[].  So all POJO properties must be converted to a byte[] before sending to Cassandra server.  The EntityManager can only convert basic java types &#8220;out of the box&#8221;.  However custom converters can be created and registered by using the &#64;me.prettyprint.hom.annotations.Column annotation&#8217;s &#8220;converter&#8221; property - note that the standard JPA &#64;Column cannot be used.  (This technique is very similar to XStream&#8217;s converter strategy.)  In MyPojo you can see the &#8220;colors&#8221; property is annotated like this:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="nd">@me.prettyprint.hom.annotations.Column</span><span class="o">(</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;color&quot;</span><span class="o">,</span> <span class="n">converter</span> <span class="o">=</span> <span class="n">ColorConverter</span><span class="o">.</span><span class="na">class</span><span class="o">)</span>
+</pre></div>
+</div>
+<p>This tells the EntityManager to use ColorConverter to convert to/from a byte[] for the &#8220;color&#8221; property in MyPojo:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">real</span><span class="o">.</span><span class="na">hom</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">com.real.hom.converters.Converter</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">ColorConverter</span> <span class="kd">implements</span> <span class="n">Converter</span><span class="o">&lt;</span><span class="n">Colors</span><span class="o">&gt;</span> <span class="o">{</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="n">Colors</span> <span class="nf">convertCassTypeToObjType</span><span class="o">(</span><span class="n">Class</span><span class="o">&lt;</span><span class="n">Colors</span><span class="o">&gt;</span> <span class="n">clazz</span><span class="o">,</span> <span class="kt">byte</span><span class="o">[]</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">Colors</span><span class="o">.</span><span class="na">getInstance</span><span class="o">(</span><span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">value</span><span class="o">));</span>
+  <span class="o">}</span>
+
+  <span class="nd">@Override</span>
+  <span class="kd">public</span> <span class="kt">byte</span><span class="o">[]</span> <span class="nf">convertObjTypeToCassType</span><span class="o">(</span><span class="n">Colors</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">value</span><span class="o">.</span><span class="na">getName</span><span class="o">().</span><span class="na">getBytes</span><span class="o">();</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<p>When saving a POJO the <tt class="docutils literal"><span class="pre">ColorConverter.ConvertObjTypeToCassType</span></tt> is called.  When loading a POJO the <tt class="docutils literal"><span class="pre">ColorConverter.ConvertCassTypeToObjType</span></tt> is called.</p>
+</div>
+<div class="section" id="anonymous-properties">
+<span id="hom-annonymous-properties"></span><h2>Anonymous Properties<a class="headerlink" href="#anonymous-properties" title="Permalink to this headline">¶</a></h2>
+<p>Anonymous properties are Cassandra columns that exist, but do not have an &#64;Column in the POJO.  Here are some reasons they are required (and useful):</p>
+<ul class="simple">
+<li>Your POJO could have the notion of &#8220;optional&#8221; properties or &#8220;dynamic&#8221; properties</li>
+<li>Legacy columns in the ColumnFamily that must be preserved, but don&#8217;t map directly to a POJO property</li>
+</ul>
+<p>Using the MyPojo example (listed in  <a class="reference internal" href="#using-entity-manager"><em>Using the EntityManager</em></a>), you can see:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="kd">private</span> <span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">anonymousProps</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;();</span>
+</pre></div>
+</div>
+<p>This is how MyPojo chooses to store its anonymous properties, but it could just as easily be with a Set or any other way that fits the need.  The only requirement is that a Collection&lt;Entry&lt;String, String&gt;&gt; must be provided to the EntityManager when persisting the data.  There are two annotations on methods in the POJO:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="nd">@AnonymousPropertyAddHandler</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">addAnonymousProp</span><span class="o">(</span><span class="n">String</span> <span class="n">name</span><span class="o">,</span> <span class="n">String</span> <span class="n">value</span><span class="o">)</span> <span class="o">{</span>
+    <span class="n">anonymousProps</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="n">name</span><span class="o">,</span> <span class="n">value</span><span class="o">);</span>
+<span class="o">}</span>
+
+<span class="nd">@AnonymousPropertyCollectionGetter</span>
+<span class="kd">public</span> <span class="n">Collection</span><span class="o">&lt;</span><span class="n">Entry</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;&gt;</span> <span class="n">getAnonymousProps</span><span class="o">()</span> <span class="o">{</span>
+    <span class="k">return</span> <span class="n">anonymousProps</span><span class="o">.</span><span class="na">entrySet</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">These two methods are how the EntityManager sets and gets the anonymous properties.</div>
+<div class="line">When saving a POJO the EntityManager will look for a method annotated with <tt class="docutils literal"><span class="pre">&#64;AnonymousPropertyCollectionGetter</span></tt>, and the POJO must return the Collection of properties.</div>
+<div class="line">When loading a POJO the EntityManager checks for a method annotated with <tt class="docutils literal"><span class="pre">&#64;AnonymousPropertyAddHandler</span></tt>.</div>
+<div class="line">If found, all columns will be retrieved from the ColumnFamily row and ones matching an <tt class="docutils literal"><span class="pre">&#64;Column</span></tt> will be set in the POJO using its setter.</div>
+<div class="line">All others are handled by the method that has <tt class="docutils literal"><span class="pre">&#64;AnonymousPropertyAddHandler</span></tt>.</div>
+<div class="line">If no <tt class="docutils literal"><span class="pre">&#64;AnonymousPropertyAddHandler</span></tt> is found, then only POJO properties annotated with <tt class="docutils literal"><span class="pre">&#64;Column</span></tt> will be retrieved from Cassandra, and any others will remain in the row.</div>
+</div>
+</div>
+<div class="section" id="hom-faq">
+<span id="id2"></span><h2>HOM FAQ<a class="headerlink" href="#hom-faq" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="if-i-annotate-a-base-class-with-entity-will-a-derived-class-be-persisted">
+<h3>If I annotate a base class with &#64;Entity, will a derived class be persisted?<a class="headerlink" href="#if-i-annotate-a-base-class-with-entity-will-a-derived-class-be-persisted" title="Permalink to this headline">¶</a></h3>
+<p>No, you must annotate the derived class with <tt class="docutils literal"><span class="pre">&#64;Entity</span></tt> and <tt class="docutils literal"><span class="pre">&#64;DiscriminatorValue</span></tt>.</p>
+</div>
+<div class="section" id="does-the-object-mapper-perform-any-locking">
+<h3>Does the object mapper perform any locking?<a class="headerlink" href="#does-the-object-mapper-perform-any-locking" title="Permalink to this headline">¶</a></h3>
+<p>No, you must handle synchronization yourself using java synchronization techniques or distributed tools, like ZooKeeper or Hazelcast.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="../community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
