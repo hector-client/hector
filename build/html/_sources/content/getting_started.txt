@@ -21,7 +21,7 @@ To make use of this repository, add the following dependency (modifying version 
         <version>0.8.0-2</version>
     </dependency>
 
-.. _Initializing-a-cluster:
+.. _initializing_a_cluster:
 
 Initializing a cluster
 ======================

@@ -1,0 +1,176 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Defining Consistency Levels &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div class="header-container">
+
+  <div class="logo"><img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/></div>
+  <div class="title-wrapper">
+    <div class="title1">Hector</div>
+    <div class="title2">A high level Java client for Apache Cassandra</div>
+  </div>
+</div>
+
+<a href="http://github.com/rantav/hector"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+  
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/consistency_level.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="defining-consistency-levels">
+<span id="index-0"></span><h1>Defining Consistency Levels<a class="headerlink" href="#defining-consistency-levels" title="Permalink to this headline">¶</a></h1>
+<p>Hector like Cassandra lets you use different consistency levels. These are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>ANY</strong>: Wait until some replica has responded.</li>
+<li><strong>ONE</strong>: Wait until one replica has responded.</li>
+<li><strong>TWO</strong>: Wait until two replicas have responded.</li>
+<li><strong>THREE</strong>: Wait until three replicas have responded.</li>
+<li><strong>LOCAL_QUORUM</strong>: Wait for quorum on the datacenter the connection was stablished.</li>
+<li><strong>EACH_QUORUM</strong>: Wait for quorum on each datacenter.</li>
+<li><strong>QUORUM</strong>: Wait for a quorum of replicas (no matter which datacenter).</li>
+<li><strong>ALL</strong>: Blocks for all the replicas before returning to the client.</li>
+</ul>
+</div></blockquote>
+<p>In Hector, the <em>Consistency Level</em> can be set per <em>Column Family</em> and per operation type (Read, Write)</p>
+<p><strong>Note</strong>: The default value is <strong>Quorum</strong> for both read and write operations.</p>
+<p>It is set by passing a <a class="reference external" href="https://github.com/rantav/hector/blob/master/core/src/main/java/me/prettyprint/cassandra/model/ConfigurableConsistencyLevel.java">ConfigurableConsistencyLevel</a> object right when the <em>Keyspace</em> is created.</p>
+<p>The following code assumes you have already created a <em>Cluster</em> like indicated at <a class="reference internal" href="getting_started.html#initializing-a-cluster"><em>Initializing a cluster</em></a>.</p>
+<p>Let&#8217;s see a sample code:</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="c1">// Create a customized Consistency Level</span>
+<span class="n">ConfigurableConsistencyLevel</span> <span class="n">configurableConsistencyLevel</span> <span class="o">=</span> <span class="k">new</span> <span class="n">ConfigurableConsistencyLevel</span><span class="o">();</span>
+<span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">HConsistencyLevel</span><span class="o">&gt;</span> <span class="n">clmap</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HashMap</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">HConsistencyLevel</span><span class="o">&gt;();</span>
+
+<span class="c1">// Define CL.ONE for ColumnFamily &quot;MyColumnFamily&quot;</span>
+<span class="n">clmap</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;MyColumnFamily&quot;</span><span class="o">,</span> <span class="n">HConsistencyLevel</span><span class="o">.</span><span class="na">ONE</span><span class="o">);</span>
+
+<span class="c1">// In this we use CL.ONE for read and writes. But you can use different CLs if needed.</span>
+<span class="n">configurableConsistencyLevel</span><span class="o">.</span><span class="na">setReadCfConsistencyLevels</span><span class="o">(</span><span class="n">clmap</span><span class="o">);</span>
+<span class="n">configurableConsistencyLevel</span><span class="o">.</span><span class="na">setWriteCfConsistencyLevels</span><span class="o">(</span><span class="n">clmap</span><span class="o">);</span>
+
+<span class="c1">// Then let the keyspace know</span>
+<span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;MyKeyspace&quot;</span><span class="o">,</span> <span class="n">myCluster</span><span class="o">,</span> <span class="n">configurableConsistencyLevel</span><span class="o">);</span>
+</pre></div>
+</div>
+<p>And that&#8217;s it.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

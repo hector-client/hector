@@ -10,6 +10,7 @@ Hector documentation contents:
    :maxdepth: 3
 
    content/getting_started
+   content/consistency_level
    content/cql_basics
    content/composite_with_templates
    content/virtual_keyspaces
