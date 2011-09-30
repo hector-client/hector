@@ -233,7 +233,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setComparator_type(comparatorType.getClassName() + comparatorTypeAlias);
     d.setDefault_validation_class(defaultValidationClass);
     d.setGc_grace_seconds(gcGraceSeconds);
-    d.setId(id);
+    if ( id != 0 )
+      d.setId(id);
     d.setKey_cache_size(keyCacheSize);
     d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds);
     d.setKey_validation_class(keyValidationClass);
