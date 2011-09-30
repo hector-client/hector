@@ -60,7 +60,7 @@ public final class CassandraHostConfigurator implements Serializable {
     String[] hostVals = hosts.split(",");
     CassandraHost[] cassandraHosts = new CassandraHost[hostVals.length];
     for (int x=0; x<hostVals.length; x++) {
-      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x]) : new CassandraHost(hostVals[x], this.port);
+      CassandraHost cassandraHost = this.port == CassandraHost.DEFAULT_PORT ? new CassandraHost(hostVals[x].trim()) : new CassandraHost(hostVals[x], this.port);
       applyConfig(cassandraHost);
       cassandraHosts[x] = cassandraHost;
     }
