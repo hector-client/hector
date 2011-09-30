@@ -63,14 +63,14 @@ public class HThriftClient {
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
       if ( log.isDebugEnabled() )
         log.debug("keyspace reseting from {} to {}", keyspaceName, keyspaceNameArg);
-      keyspaceName = keyspaceNameArg;
       try {
-        cassandraClient.set_keyspace(keyspaceName);        
+        cassandraClient.set_keyspace(keyspaceNameArg);        
       } catch (InvalidRequestException ire) {
         throw new HInvalidRequestException(ire);
       } catch (TException e) {
         throw new HectorTransportException(e);
       } 
+      keyspaceName = keyspaceNameArg;
 
     }
     return cassandraClient;
