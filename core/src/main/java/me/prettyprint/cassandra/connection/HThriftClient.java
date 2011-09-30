@@ -34,6 +34,8 @@ public class HThriftClient {
   private final int timeout;
   private String keyspaceName;
   private long useageStartTime;
+  private boolean authenticated;
+
 
   private TTransport transport;
   private Cassandra.Client cassandraClient;
@@ -196,4 +198,12 @@ public class HThriftClient {
 
 
   private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
+
+  public boolean isAuthenticated() {
+    return authenticated;
+  }
+  
+  public void setAuthenticated(boolean authenticated) {
+    this.authenticated = authenticated;
+  }
 }

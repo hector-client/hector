@@ -226,7 +226,7 @@ public class HConnectionManager {
         client = pool.borrowClient();
         Cassandra.Client c = client.getCassandra(op.keyspaceName);
         // Keyspace can be null for some system_* api calls
-        if ( op.credentials != null && !op.credentials.isEmpty() ) {
+        if (!client.isAuthenticated() && op.credentials != null && !op.credentials.isEmpty() ) {
           c.login(new AuthenticationRequest(op.credentials));
         }
 
@@ -239,6 +239,9 @@ public class HConnectionManager {
         HectorException he = exceptionsTranslator.translate(ex);
         if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException || he instanceof HUnavailableException) {
           // break out on HUnavailableException as well since we can no longer satisfy the CL
+          if(client.isAuthenticated()){
+              client.setAuthenticated(false);
+          }
           throw he;
         } else if ( he instanceof HectorTransportException) {
           // client can be null in this situation
