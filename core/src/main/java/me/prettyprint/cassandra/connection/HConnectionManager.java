@@ -228,6 +228,7 @@ public class HConnectionManager {
         // Keyspace can be null for some system_* api calls
         if (!client.isAuthenticated() && op.credentials != null && !op.credentials.isEmpty() ) {
           c.login(new AuthenticationRequest(op.credentials));
+          client.setAuthenticated(true);
         }
 
         op.executeAndSetResult(c, pool.getCassandraHost());
