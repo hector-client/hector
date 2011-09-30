@@ -13,6 +13,7 @@ import org.apache.cassandra.config.ColumnDefinition;
 import org.apache.cassandra.config.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.config.KSMetaData;
+import org.apache.cassandra.config.Schema;
 import org.apache.cassandra.db.ColumnFamilyType;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.AsciiType;
@@ -31,19 +32,17 @@ import com.google.common.base.Charsets;
 
 public class EmbeddedSchemaLoader {
   public static void loadSchema() {
-    try {
-      for (KSMetaData ksm : schemaDefinition()) {
-        for (CFMetaData cfm : ksm.cfMetaData().values())
-          CFMetaData.map(cfm);
-        DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor
-            .getDefsVersion());
-      }
-    } catch (ConfigurationException e) {
-      throw new RuntimeException(e);
+    try
+    {
+      Schema.instance.load(schemaDefinition(), Schema.instance.getVersion());
+    }
+    catch (ConfigurationException e)
+    {
+        throw new RuntimeException(e);
     }
   }
 
-  public static Collection<KSMetaData> schemaDefinition() {
+  public static Collection<KSMetaData> schemaDefinition() throws ConfigurationException {
     List<KSMetaData> schema = new ArrayList<KSMetaData>();
 
     // A whole bucket of shorthand
@@ -117,13 +116,14 @@ public class EmbeddedSchemaLoader {
   }
 
   private static CFMetaData indexCFMD(String ksName, String cfName, final Boolean withIdxType)
+    throws ConfigurationException
   {
       return standardCFMD(ksName, cfName)
               .columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
                   {{
                       ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
                       IndexType keys = withIdxType ? IndexType.KEYS : null;
-                      put(cName, new ColumnDefinition(cName, LongType.instance, keys, null));
+                      put(cName, new ColumnDefinition(cName, LongType.instance, keys, null, "birthyear_index"));
                   }});
   }
 
@@ -134,12 +134,14 @@ public class EmbeddedSchemaLoader {
   }
   
   private static CFMetaData cqlTestCf(String ksName, String cfName,
-      AbstractType comp) {
+      AbstractType comp)
+  throws ConfigurationException
+  {     
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
             {{
               ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
-              put(cName, new ColumnDefinition(cName, LongType.instance, null, null));
+              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null));
           }});
   }
 }

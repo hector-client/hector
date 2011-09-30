@@ -96,6 +96,11 @@
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-all</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.github.stephenc</groupId>
+      <artifactId>jamm</artifactId>
+      <scope>test</scope>
+    </dependency>    
     <!-- OSGi deps -->
     <dependency>
       <groupId>org.osgi</groupId>
