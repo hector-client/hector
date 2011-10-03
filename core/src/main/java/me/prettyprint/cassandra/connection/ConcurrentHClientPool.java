@@ -218,7 +218,7 @@ public void releaseClient(HThriftClient client) throws HectorException {
       }
     } else {
       try {
-        addClientToPoolGently(createClient());
+        addClientToPoolGently(new HThriftClient(cassandraHost).open());
       } catch (HectorTransportException e) {
         // if unable to open client then don't add one back to the pool
         log.error("Transport exception in re-opening client in release on {}", getName());
