@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
 
 import org.slf4j.Logger;
@@ -233,7 +234,12 @@ public void releaseClient(HThriftClient client) throws HectorException {
         client.close();
       }
     } else {
-      addClientToPoolGently(new HThriftClient(cassandraHost).open());
+      try {
+        addClientToPoolGently(createClient());
+      } catch (HectorTransportException e) {
+        // if unable to open client then don't add one back to the pool
+        log.error("Transport exception in re-opening client in release on {}", getName());
+      }
     }
 
     realActiveClientsCount.decrementAndGet();
