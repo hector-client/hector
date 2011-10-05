@@ -12,6 +12,7 @@ Move EmbeddedSchemaLoader and EmbeddedServerHelper into the hector-test module, 
 Threads started by hector are daemon threads, https://github.com/rantav/hector/issues/220
 Fixed speed4j setup - modified hector so it only uses speed4j.properties to configure logging.  the logger
   name must be of the form "hector-<cluster-name>".  Updating wiki page as well.
+Attemp to fix broken pipe in Discovery mechanism. https://github.com/rantav/hector/pull/295
 
 0.8.0-2
 =======
