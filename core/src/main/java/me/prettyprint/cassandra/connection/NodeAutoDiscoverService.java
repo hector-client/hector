@@ -11,6 +11,7 @@ import me.prettyprint.hector.api.Keyspace;
 
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
+import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +83,16 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     try {
       thriftClient = connectionManager.borrowClient();
 
-      for (KsDef keyspace : thriftClient.getCassandra().describe_keyspaces()) {
+      List<KsDef> ksDefList;
+
+      try {
+        ksDefList = thriftClient.getCassandra().describe_keyspaces();
+      } catch (TTransportException e) {
+        thriftClient.close();
+        throw e;
+      }
+
+      for (KsDef keyspace : ksDefList) {
         if (!keyspace.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
           List<TokenRange> tokenRanges = thriftClient.getCassandra().describe_ring(keyspace.getName());
           for (TokenRange tokenRange : tokenRanges) {
