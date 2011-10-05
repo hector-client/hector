@@ -16,6 +16,7 @@ import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CqlQueryTest extends BaseEmbededServerSetupTest {
@@ -57,6 +58,7 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
   }
   
   @Test
+  @Ignore
   public void testCountQuery() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("SELECT COUNT(*) FROM StandardLong1 WHERE KEY = 'cqlQueryTest_key1'");
