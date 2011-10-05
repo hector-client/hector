@@ -107,22 +107,11 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
           break;
         }
       }
-    } catch (TTransportException e) {
-      log.error("Discovery Service failed attempt to connect CassandraHost with TransportException", e);
-      closeClientQuietly(thriftClient);
     } catch (Exception e) {
       log.error("Discovery Service failed attempt to connect CassandraHost", e);
     }
-//    } finally {
-//      connectionManager.releaseClient(thriftClient);
-//    }
-    return foundHosts;
-  }
 
-  private void closeClientQuietly(HThriftClient thriftClient) {
-    if (thriftClient != null) {
-      thriftClient.close();
-    }
+    return foundHosts;
   }
 
 }
