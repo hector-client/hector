@@ -11,6 +11,7 @@ Hector documentation contents:
 
    content/getting_started
    content/consistency_level
+   content/spring_dependency_injection
    content/cql_basics
    content/composite_with_templates
    content/virtual_keyspaces

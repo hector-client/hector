@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Dependency injection through Spring &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div class="header-container">
+
+  <div class="logo"><img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/></div>
+  <div class="title-wrapper">
+    <div class="title1">Hector</div>
+    <div class="title2">A high level Java client for Apache Cassandra</div>
+  </div>
+</div>
+
+<a href="http://github.com/rantav/hector"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+  
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Dependency injection through Spring</a><ul>
+<li><a class="reference internal" href="#injecting-dependencies-for-api-v2">Injecting dependencies for API V2</a></li>
+<li><a class="reference internal" href="#injecting-dependencies-for-templates">Injecting dependencies for Templates</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/spring_dependency_injection.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="dependency-injection-through-spring">
+<span id="index-0"></span><h1>Dependency injection through Spring<a class="headerlink" href="#dependency-injection-through-spring" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="injecting-dependencies-for-api-v2">
+<h2>Injecting dependencies for API V2<a class="headerlink" href="#injecting-dependencies-for-api-v2" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-xml"><div class="highlight"><pre> <span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="nt">&lt;beans</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.springframework.org/schema/beans&quot;</span>
+    <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="na">xmlns:context=</span><span class="s">&quot;http://www.springframework.org/schema/context&quot;</span>
+    <span class="na">xsi:schemaLocation=</span><span class="s">&quot;http://www.springframework.org/schema/beans</span>
+<span class="s">           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd</span>
+<span class="s">           http://www.springframework.org/schema/context</span>
+<span class="s">           http://www.springframework.org/schema/context/spring-context-3.0.xsd&quot;</span><span class="nt">&gt;</span>
+
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">&quot;cassandraHostConfigurator&quot;</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.service.CassandraHostConfigurator&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">value=</span><span class="s">&quot;localhost:9170&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">&quot;cluster&quot;</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.service.ThriftCluster&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">value=</span><span class="s">&quot;TestCluster&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">ref=</span><span class="s">&quot;cassandraHostConfigurator&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">&quot;consistencyLevelPolicy&quot;</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.model.ConfigurableConsistencyLevel&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;defaultReadConsistencyLevel&quot;</span> <span class="na">value=</span><span class="s">&quot;ONE&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">&quot;keyspaceOperator&quot;</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.hector.api.factory.HFactory&quot;</span> <span class="na">factory-method=</span><span class="s">&quot;createKeyspace&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">value=</span><span class="s">&quot;Keyspace1&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">ref=</span><span class="s">&quot;cluster&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">ref=</span><span class="s">&quot;consistencyLevelPolicy&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+
+
+    <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">&quot;simpleCassandraDao&quot;</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.dao.SimpleCassandraDao&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;keyspace&quot;</span> <span class="na">ref=</span><span class="s">&quot;keyspaceOperator&quot;</span><span class="nt">/&gt;</span>
+        <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;columnFamilyName&quot;</span> <span class="na">value=</span><span class="s">&quot;Standard1&quot;</span><span class="nt">/&gt;</span>
+    <span class="nt">&lt;/bean&gt;</span>
+
+<span class="nt">&lt;/beans&gt;</span>
+</pre></div>
+</div>
+<p>The <tt class="docutils literal"><span class="pre">cassandraHostConfigurator</span></tt> bean is created first. The contructor parameters can be used as well as <tt class="docutils literal"><span class="pre">&lt;property</span> <span class="pre">name=&quot;...name...&quot;</span> <span class="pre">value=&quot;...value...&quot;/&gt;</span></tt> to set up more properties.
+The <tt class="docutils literal"><span class="pre">keyspaceOperator</span></tt> receives in this case, a name, the <tt class="docutils literal"><span class="pre">cluster</span></tt> object and the <tt class="docutils literal"><span class="pre">consistencyLevelPolicy</span></tt> bean.
+This model assumes you have a <em>DAO</em> object but that is not a restriction.</p>
+</div>
+<div class="section" id="injecting-dependencies-for-templates">
+<h2>Injecting dependencies for Templates<a class="headerlink" href="#injecting-dependencies-for-templates" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-xml"><div class="highlight"><pre><span class="cp">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</span>
+<span class="nt">&lt;beans</span> <span class="na">xmlns=</span><span class="s">&quot;http://www.springframework.org/schema/beans&quot;</span>
+  <span class="na">xmlns:xsi=</span><span class="s">&quot;http://www.w3.org/2001/XMLSchema-instance&quot;</span> <span class="na">xmlns:context=</span><span class="s">&quot;http://www.springframework.org/schema/context&quot;</span>
+  <span class="na">xsi:schemaLocation=</span><span class="s">&quot;http://www.springframework.org/schema/beans</span>
+<span class="s">           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd</span>
+<span class="s">           http://www.springframework.org/schema/context</span>
+<span class="s">           http://www.springframework.org/schema/context/spring-context-3.0.xsd&quot;</span><span class="nt">&gt;</span>
+
+  <span class="nt">&lt;bean</span> <span class="na">id=</span><span class="s">&quot;hectorTemplate&quot;</span>
+    <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.service.spring.HectorTemplateImpl&quot;</span>
+    <span class="na">init-method=</span><span class="s">&quot;init&quot;</span><span class="nt">&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;cluster&quot;</span><span class="nt">&gt;</span>
+      <span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.service.Cluster&quot;</span><span class="nt">&gt;</span>
+        <span class="nt">&lt;constructor-arg</span> <span class="na">value=</span><span class="s">&quot;TestCluster&quot;</span> <span class="nt">/&gt;</span>
+        <span class="nt">&lt;constructor-arg&gt;</span>
+          <span class="nt">&lt;bean</span> <span class="na">class=</span><span class="s">&quot;me.prettyprint.cassandra.service.CassandraHostConfigurator&quot;</span><span class="nt">&gt;</span>
+            <span class="nt">&lt;constructor-arg</span> <span class="na">value=</span><span class="s">&quot;localhost:9170&quot;</span> <span class="nt">/&gt;</span>
+          <span class="nt">&lt;/bean&gt;</span>
+        <span class="nt">&lt;/constructor-arg&gt;</span>
+      <span class="nt">&lt;/bean&gt;</span>
+    <span class="nt">&lt;/property&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;keyspace&quot;</span> <span class="na">value=</span><span class="s">&quot;Keyspace1&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;replicationStrategyClass&quot;</span> <span class="na">value=</span><span class="s">&quot;org.apache.cassandra.locator.SimpleStrategy&quot;</span> <span class="nt">/&gt;</span>
+    <span class="nt">&lt;property</span> <span class="na">name=</span><span class="s">&quot;replicationFactor&quot;</span> <span class="na">value=</span><span class="s">&quot;1&quot;</span> <span class="nt">/&gt;</span>
+  <span class="nt">&lt;/bean&gt;</span>
+<span class="nt">&lt;/beans&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>

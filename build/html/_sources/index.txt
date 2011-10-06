@@ -11,8 +11,8 @@ Intro
 Apache `Cassandra <http://cassandra.apache.org>`_ is a highly available column oriented database.
 
 Hector is the greatest warrior in the greek mythology, Troy's builder and brother of Cassandra
-http://en.wikipedia.org/wiki/Hector
-http://en.wikipedia.org/wiki/Cassandra
+        * http://en.wikipedia.org/wiki/Hector
+        * http://en.wikipedia.org/wiki/Cassandra
 
 Some features provided by this client
 --------------------------------------
