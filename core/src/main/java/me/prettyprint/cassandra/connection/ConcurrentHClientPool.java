@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
@@ -59,7 +60,7 @@ public class ConcurrentHClientPool implements HClientPool {
   @Override
   public HThriftClient borrowClient() throws HectorException {
     if ( !active.get() ) {
-      throw new HectorException("Attempt to borrow on in-active pool: " + getName());
+      throw new HInactivePoolException("Attempt to borrow on in-active pool: " + getName());
     }
 
     HThriftClient cassandraClient = availableClientQueue.poll();
