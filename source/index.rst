@@ -20,7 +20,7 @@ Some features provided by this client
 	* high level, simple object oriented interface to cassandra
 	* failover behavior on the client side
 	*  connection pooling for improved performance and scalability
-	* JMX conters for monitoring and management
+	* JMX counters for monitoring and management
 	* configurable and extensible load balancing (round robin (the default), least active, and a phi-accrural style response time detector)
 	* complete encapsulation of the underlying Thrift API and structs
 	* automatic retry of downed hosts
