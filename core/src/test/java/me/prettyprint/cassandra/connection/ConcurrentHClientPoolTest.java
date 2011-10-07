@@ -1,8 +1,10 @@
 package me.prettyprint.cassandra.connection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -33,6 +35,13 @@ public class ConcurrentHClientPoolTest extends BaseEmbededServerSetupTest {
     assertEquals(0, clientPool.getNumIdle());
     assertEquals(0, clientPool.getNumBlockedThreads());
     assertEquals(0, clientPool.getNumActive());
+    
+    try {
+      clientPool.borrowClient();
+      fail();
+    } catch (HInactivePoolException e) {
+      // Good !
+    }
   }
   
   @Test
