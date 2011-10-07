@@ -25,7 +25,7 @@ import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
-import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
@@ -262,7 +262,7 @@ public class HConnectionManager {
           client.close();
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
-        } else if ( he instanceof PoolExhaustedException ) {
+        } else if ( he instanceof HPoolExhaustedException ) {
           retryable = true;
           if ( hostPools.size() == 1 ) {
             throw he;

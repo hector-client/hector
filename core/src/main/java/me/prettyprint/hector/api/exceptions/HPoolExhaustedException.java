@@ -7,15 +7,15 @@ package me.prettyprint.hector.api.exceptions;
  * @author Ran Tavory (ran@outbain.com)
  *
  */
-public final class PoolExhaustedException extends HectorException {
+public final class HPoolExhaustedException extends HectorException {
 
   private static final long serialVersionUID = -6200999597951673383L;
 
-  public PoolExhaustedException(String msg) {
+  public HPoolExhaustedException(String msg) {
     super(msg);
   }
 
-  public PoolExhaustedException(Throwable t) {
+  public HPoolExhaustedException(Throwable t) {
     super(t);
   }
 }

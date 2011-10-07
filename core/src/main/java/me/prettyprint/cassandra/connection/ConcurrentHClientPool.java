@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
-import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +115,7 @@ public class ConcurrentHClientPool implements HClientPool {
         try {
           cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
           if (cassandraClient == null) {
-            throw new PoolExhaustedException(String.format(
+            throw new HPoolExhaustedException(String.format(
                 "maxWaitTimeWhenExhausted exceeded for thread %s on host %s",
                 new Object[] { Thread.currentThread().getName(), cassandraHost.getName() }));
           }

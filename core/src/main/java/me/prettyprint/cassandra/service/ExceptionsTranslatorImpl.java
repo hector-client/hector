@@ -10,7 +10,7 @@ import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
-import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.PoolIllegalStateException;
 
 import org.apache.thrift.TApplicationException;
@@ -50,8 +50,8 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
       HInvalidRequestException e = new HInvalidRequestException(original);
       e.setWhy(why);
       return e;
-    } else if (original instanceof PoolExhaustedException ) {
-      return (PoolExhaustedException)original;
+    } else if (original instanceof HPoolExhaustedException ) {
+      return (HPoolExhaustedException)original;
     } else if (original instanceof TProtocolException) {
       return new HInvalidRequestException(original);
     } else if (original instanceof org.apache.cassandra.thrift.NotFoundException) {
@@ -61,7 +61,7 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
     } else if (original instanceof TException) {
       return new HectorTransportException(original);
     } else if (original instanceof NoSuchElementException) {
-      return new PoolExhaustedException(original);
+      return new HPoolExhaustedException(original);
     } else if (original instanceof IllegalStateException) {
       return new PoolIllegalStateException(original);
     } else {
