@@ -8,8 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +60,7 @@ public class ConcurrentHClientPool implements HClientPool {
   @Override
   public HThriftClient borrowClient() throws HectorException {
     if ( !active.get() ) {
-      throw new HectorException("Attempt to borrow on in-active pool: " + getName());
+      throw new HInactivePoolException("Attempt to borrow on in-active pool: " + getName());
     }
 
     HThriftClient cassandraClient = availableClientQueue.poll();
@@ -114,7 +116,7 @@ public class ConcurrentHClientPool implements HClientPool {
         try {
           cassandraClient = availableClientQueue.poll(maxWaitTimeWhenExhausted, TimeUnit.MILLISECONDS);
           if (cassandraClient == null) {
-            throw new PoolExhaustedException(String.format(
+            throw new HPoolExhaustedException(String.format(
                 "maxWaitTimeWhenExhausted exceeded for thread %s on host %s",
                 new Object[] { Thread.currentThread().getName(), cassandraHost.getName() }));
           }
@@ -233,7 +235,12 @@ public void releaseClient(HThriftClient client) throws HectorException {
         client.close();
       }
     } else {
-      addClientToPoolGently(new HThriftClient(cassandraHost).open());
+      try {
+        addClientToPoolGently(createClient());
+      } catch (HectorTransportException e) {
+        // if unable to open client then don't add one back to the pool
+        log.error("Transport exception in re-opening client in release on {}", getName());
+      }
     }
 
     realActiveClientsCount.decrementAndGet();
