@@ -18,6 +18,7 @@ Fixed speed4j setup - modified hector so it only uses speed4j.properties to conf
   name must be of the form "hector-<cluster-name>".  Updating wiki page as well.
 Fix issue https://github.com/rantav/hector/issues/294. 
 Fix issue with non-rentrant mutators on ColumnFamilyTemplate hierarchy. See https://github.com/rantav/hector/issues/286
+Close client on HInvalidRequestException and on HCassandraInternalException (issue-299)
 
 0.8.0-2
 =======
