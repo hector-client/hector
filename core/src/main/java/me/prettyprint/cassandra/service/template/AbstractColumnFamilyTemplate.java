@@ -115,7 +115,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
     return result;
   }
 
-  public Mutator<K> getMutator() {
+  public Mutator<K> createMutator() {
     return HFactory.createMutator(keyspace, keySerializer);
   }
 
@@ -154,7 +154,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
    * @param key
    */
   public void deleteRow(K key) {    
-    getMutator().addDeletion(key, columnFamily, null, topSerializer).execute();
+    createMutator().addDeletion(key, columnFamily, null, topSerializer).execute();
   }
 
   /**
@@ -173,7 +173,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
    * @param columnName
    */
   public void deleteColumn(K key, N columnName) {
-    getMutator().addDeletion(key, columnFamily, columnName, topSerializer).execute();
+    createMutator().addDeletion(key, columnFamily, columnName, topSerializer).execute();
   }
   
   /**

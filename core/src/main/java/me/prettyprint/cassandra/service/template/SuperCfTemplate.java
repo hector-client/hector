@@ -202,7 +202,7 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
    */
   @Override
   public void deleteColumn(K key, SN sColumnName) {
-    getMutator().superDelete(key, getColumnFamily(), sColumnName, topSerializer);
+    createMutator().superDelete(key, getColumnFamily(), sColumnName, topSerializer);
   }
 
   /**
@@ -210,7 +210,7 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
    */
   @Override
   public void deleteRow(K key) {
-    getMutator().delete(key, getColumnFamily(), null, null);
+    createMutator().delete(key, getColumnFamily(), null, null);
   }
 
   protected abstract SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate);
