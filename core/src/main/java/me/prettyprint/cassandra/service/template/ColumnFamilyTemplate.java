@@ -54,11 +54,6 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     super(keyspace, columnFamily, keySerializer, topSerializer);
   }
 
-  public ColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
-      Serializer<K> keySerializer, Serializer<N> topSerializer,
-      Mutator<K> mutator) {
-    super(keyspace, columnFamily, keySerializer, topSerializer, mutator);
-  }
 
   // Just so method chaining will return this type instead of the parent class
   // for operations down the chain
@@ -67,12 +62,6 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     return this;
   }
 
-  // Just so method chaining will return this type instead of the parent class
-  // for operations down the chain
-  public ColumnFamilyTemplate<K, N> setMutator(Mutator<K> mutator) {
-    super.setMutator(mutator);
-    return this;
-  }
 
   public ColumnFamilyUpdater<K, N> createUpdater(K key) {
     ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>(this, columnFactory);
@@ -80,9 +69,15 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     return updater;
   }
   
+  public ColumnFamilyUpdater<K, N> createUpdater(K key, Mutator<K> mutator) {
+    ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>(this, columnFactory, mutator);
+    updater.addKey(key);
+    return updater;
+  }
+  
   public void update(ColumnFamilyUpdater<K, N> updater) {
     updater.update();
-    executeIfNotBatched();
+    executeIfNotBatched(updater);
   }
   
   

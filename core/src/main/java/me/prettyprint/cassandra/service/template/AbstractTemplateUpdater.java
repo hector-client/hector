@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.prettyprint.hector.api.ColumnFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
 
 public abstract class AbstractTemplateUpdater<K,N> {
 
@@ -11,10 +12,12 @@ public abstract class AbstractTemplateUpdater<K,N> {
   protected int keyPos = 0;
   protected ColumnFactory columnFactory;
   protected AbstractColumnFamilyTemplate<K,N> template;
+  protected Mutator<K> mutator;
   
-  public AbstractTemplateUpdater(AbstractColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory) {
+  public AbstractTemplateUpdater(AbstractColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory, Mutator<K> mutator) {
     this.template = template;
     this.columnFactory = columnFactory;
+    this.mutator = mutator;
   }
   
   public AbstractTemplateUpdater<K,N> addKey(K key) {
@@ -40,5 +43,9 @@ public abstract class AbstractTemplateUpdater<K,N> {
    */
   public void update() {
     
+  }
+  
+  public Mutator<K> getCurrentMutator() {
+    return mutator;
   }
 }

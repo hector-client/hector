@@ -34,12 +34,6 @@ public class AbstractColumnFamilyTemplate<K, N> {
   protected Serializer<N> topSerializer;
 
   /**
-   * Used for all updates. Can but passed in the constructor/reassigned to allow
-   * updates between multiple column families/CassandraTemplates to be batched
-   */
-  protected Mutator<K> mutator;
-
-  /**
    * By default, execute updates automatically at common-sense points such as
    * after queuing the updates of all an object's properties. Or, in the case of
    * multiple objects, at the end of the list. No Mutator executes() will be
@@ -55,22 +49,14 @@ public class AbstractColumnFamilyTemplate<K, N> {
   protected Long clock;
   
   protected ExceptionsTranslator exceptionsTranslator;
-
-  public AbstractColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
-      Serializer<K> keySerializer, Serializer<N> topSerializer) {
-    this(keyspace, columnFamily, keySerializer, topSerializer, HFactory
-        .createMutator(keyspace, keySerializer));
-  }
   
   public AbstractColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
-      Serializer<K> keySerializer, Serializer<N> topSerializer,
-      Mutator<K> mutator) {
+      Serializer<K> keySerializer, Serializer<N> topSerializer) {
     // ugly, but safe
     this.keyspace = keyspace;
     this.columnFamily = columnFamily;
     this.keySerializer = keySerializer;
     this.topSerializer = topSerializer;
-    this.mutator = mutator;
     columnValueSerializers = new HashMap<N, Serializer<?>>();
     this.columnParent = new ColumnParent(columnFamily);
     this.activeSlicePredicate = new HSlicePredicate<N>(topSerializer);
@@ -123,19 +109,14 @@ public class AbstractColumnFamilyTemplate<K, N> {
     return topSerializer;
   }
 
-  public MutationResult executeBatch() {    
+  public MutationResult executeBatch(Mutator<K> mutator) {    
     MutationResult result = mutator.execute();
     mutator.discardPendingMutations();
     return result;
   }
 
-  public Mutator<K> getMutator() {
-    return mutator;
-  }
-
-  public AbstractColumnFamilyTemplate<K, N> setMutator(Mutator<K> mutator) {
-    this.mutator = mutator;
-    return this;
+  public Mutator<K> createMutator() {
+    return HFactory.createMutator(keyspace, keySerializer);
   }
 
   public Long getClock() {
@@ -158,18 +139,52 @@ public class AbstractColumnFamilyTemplate<K, N> {
     this.columnFactory = columnFactory;
   }
 
-  protected MutationResult executeIfNotBatched() {    
-    return !isBatched() ? executeBatch() : null;
+  protected MutationResult executeIfNotBatched(Mutator<K> mutator) {    
+    return !isBatched() ? executeBatch(mutator) : null;
+  }
+  
+  protected MutationResult executeIfNotBatched(AbstractTemplateUpdater<K, N> updater) {    
+    return !isBatched() ? executeBatch(updater.getCurrentMutator()) : null;
+  }
+  
+  
+
+  /**
+   * Immediately delete this row in a single mutation operation
+   * @param key
+   */
+  public void deleteRow(K key) {    
+    createMutator().addDeletion(key, columnFamily, null, topSerializer).execute();
   }
 
-  public void deleteRow(K key) {
+  /**
+   * Stage this deletion into the provided mutator calling {@linkplain #executeIfNotBatched(Mutator)}
+   * @param mutator
+   * @param key
+   */
+  public void deleteRow(Mutator<K> mutator, K key) {    
     mutator.addDeletion(key, columnFamily, null, topSerializer);
-    executeIfNotBatched();
+    executeIfNotBatched(mutator);
   }
-
+   
+  /**
+   * Immediately delete this column as a single mutation operation
+   * @param key
+   * @param columnName
+   */
   public void deleteColumn(K key, N columnName) {
+    createMutator().addDeletion(key, columnFamily, columnName, topSerializer).execute();
+  }
+  
+  /**
+   * Stage this column deletion into the pending mutator. Calls {@linkplain #executeIfNotBatched(Mutator)}
+   * @param mutator
+   * @param key
+   * @param columnName
+   */
+  public void deleteColumn(Mutator<K> mutator, K key, N columnName) {
     mutator.addDeletion(key, columnFamily, columnName, topSerializer);
-    executeIfNotBatched();
+    executeIfNotBatched(mutator);
   }
 
   /**
