@@ -237,23 +237,23 @@ public class HConnectionManager {
 
       } catch (Exception ex) {
         HectorException he = exceptionsTranslator.translate(ex);
-        if ( he instanceof HInvalidRequestException || he instanceof HCassandraInternalException || he instanceof HUnavailableException) {
+        if ( he instanceof HUnavailableException) {
           // break out on HUnavailableException as well since we can no longer satisfy the CL
           throw he;
-        } else if ( he instanceof HectorTransportException) {
-          // client can be null in this situation
-          if ( client != null ) {            
-            client.close();
-          }
+        } else if (he instanceof HInvalidRequestException || he instanceof HCassandraInternalException) {
+          closeClient(client);
+          throw he;
+        } else if (he instanceof HectorTransportException) {
+          closeClient(client);
           markHostAsDown(pool.getCassandraHost());
           excludeHosts.add(pool.getCassandraHost());
           retryable = true;
-          
+
           monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
-                  
+
         } else if (he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
-          // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);          
+          // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);
           doTimeoutCheck(pool.getCassandraHost());
 
           retryable = true;
@@ -275,8 +275,9 @@ public class HConnectionManager {
           // that we don't add in time. 
           retryable = false;
         }
-        if ( retries <= 0 || retryable == false) throw he;
-        
+        if ( retries <= 0 || retryable == false)
+          throw he;
+
         log.warn("Could not fullfill request on this host {}", client);
         log.warn("Exception: ", he);
         monitor.incCounter(Counter.SKIP_HOST_SUCCESS);
@@ -291,15 +292,21 @@ public class HConnectionManager {
       }
     }
   }
-  
+
+  private void closeClient(HThriftClient client) {
+    if ( client != null ) {
+      client.close();
+    }
+  }
+
   public HOpTimer getTimer() {
-	return timer;
+    return timer;
   }
 
   public void setTimer(HOpTimer timer) {
-	this.timer = timer;
+    this.timer = timer;
   }
-  
+
   /**
    * Use the HostTimeoutCheck and initiate a suspend if and only if
    * we are configured for such AND there is more than one operating host pool
