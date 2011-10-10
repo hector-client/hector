@@ -50,7 +50,7 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
    * @param columnFactory
    */
   public ColumnFamilyUpdater(ColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory) {
-    super(template, columnFactory, template.getMutator());
+    super(template, columnFactory, template.createMutator());
   }
   
   /**

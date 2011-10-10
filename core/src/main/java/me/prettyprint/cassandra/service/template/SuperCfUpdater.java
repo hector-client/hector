@@ -64,7 +64,7 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   private List<HColumn> subColumns;
   
   public SuperCfUpdater(SuperCfTemplate<K,SN,N> sTemplate, ColumnFactory columnFactory) {
-    super((AbstractColumnFamilyTemplate<K, N>) sTemplate, columnFactory, sTemplate.getMutator());
+    super((AbstractColumnFamilyTemplate<K, N>) sTemplate, columnFactory, sTemplate.createMutator());
     this.template = sTemplate;
   }
   
