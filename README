@@ -1,15 +1,19 @@
-Hector documentation project build with Sphinx (http://sphinx.pocoo.org/) 1.0.8
+Hector uses *Sphinx* (http://sphinx.pocoo.org/ 1.0.8) to generate and parse the docs and it is based on the rST format (This page has the same format)
 
-Installing Sphinx:
------------------
+In order to be able to generate sphinx docs, please install Sphinx as indicated http://matplotlib.sourceforge.net/sampledoc/getting_started.html
 
-  easy_install -U Sphinx
+Hector docs live under the branch: **gh-pages**. So you need to do a checkout onto that branch:
 
-Adding docs
------------
+   ``git checkout gh-pages``
 
-The docs are written in .rst format and are available under /source
-In order to add more info to the docs you need to edit or add new files and
-build it by running:
+Once there, ``cd source/content`` is where we keep the source files with the content. 
 
->make clean html
+All you need to do is to find the right place to edit the file and create new ones.
+Once it's done and if you want to check how it looks::
+
+   cd <gh-pages base directory>
+   make clean html
+
+Point a browser to the index file in the same directory.
+
+For more information about how rst format, visit http://sphinx.pocoo.org/contents.html
