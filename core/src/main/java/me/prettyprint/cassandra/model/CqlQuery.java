@@ -103,9 +103,6 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
                 log.debug("Found CqlResult: {}", result);
               }
               switch (result.getType()) {
-              case INT:
-                rows = new CqlRows<K, N, V>(result.getNum());
-                break;
               case VOID:
                 rows = new CqlRows<K, N, V>();
                 break;
