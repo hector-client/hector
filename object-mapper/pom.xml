@@ -1,14 +1,19 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 
-    <parent>
-        <groupId>me.prettyprint</groupId>
-        <artifactId>hector</artifactId>
-        <version>1.0-1-SNAPSHOT</version>
-    </parent>
-    <artifactId>hector-object-mapper</artifactId>
-    <name>hector-object-mapper</name>
-    <version>2.0-01-SNAPSHOT</version>
+	<parent>
+		<groupId>me.prettyprint</groupId>
+		<artifactId>hector</artifactId>
+		<version>1.0-1-SNAPSHOT</version>
+	</parent>
+	<artifactId>hector-object-mapper</artifactId>
+	<name>hector-object-mapper</name>
+	<version>2.0-01-SNAPSHOT</version>
+
+<!-- 	<properties> -->
+<!-- 		<org.springframework.version>3.0.6.RELEASE</org.springframework.version> -->
+<!-- 	</properties> -->
 
 	<build>
 		<extensions>
@@ -17,107 +22,122 @@
 				<artifactId>wagon-ssh</artifactId>
 				<version>1.0-beta-6</version>
 			</extension>
-         </extensions>
-         <plugins>
-		     <plugin>
-		       <groupId>org.apache.maven.plugins</groupId>
-		       <artifactId>maven-surefire-plugin</artifactId>
-		       <configuration>
-		         <forkMode>always</forkMode>
-		         <argLine>-Xmx512M -Xms512M</argLine>
-		       </configuration>
-		     </plugin>
-         </plugins>
+		</extensions>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<forkMode>always</forkMode>
+					<argLine>-Xmx512M -Xms512M</argLine>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
-    <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>me.prettyprint</groupId>
-            <artifactId>hector-core</artifactId>
-            <version>0.8.0-3-SNAPSHOT</version>
-        </dependency> 
-        <dependency>
-           <groupId>me.prettyprint</groupId>
-           <artifactId>hector-test</artifactId>
-           <version>0.8.0-3-SNAPSHOT</version>
-           <scope>test</scope>      
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>joda-time</groupId>
-            <artifactId>joda-time</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cassandra</groupId>
-            <artifactId>cassandra-thrift</artifactId>
-            <exclusions>
-            	<exclusion>
-            		<artifactId>servlet-api</artifactId>
-            		<groupId>javax.servlet</groupId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <scope>test</scope>
-        </dependency>
+	<dependencies>
+		<dependency>
+			<groupId>me.prettyprint</groupId>
+			<artifactId>hector-core</artifactId>
+			<version>1.0-1-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>me.prettyprint</groupId>
+			<artifactId>hector-test</artifactId>
+			<version>1.0-1-SNAPSHOT</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+		</dependency>
       <dependency>
-        <groupId>junit</groupId>
-        <artifactId>junit</artifactId>
-        <version>4.8.1</version>
-        <scope>test</scope>
-      </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+          <groupId>com.github.stephenc</groupId>
+          <artifactId>jamm</artifactId>
+          <scope>test</scope>
+      </dependency>   
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>commons-lang</groupId> -->
+		<!-- <artifactId>commons-lang</artifactId> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>joda-time</groupId> -->
+		<!-- <artifactId>joda-time</artifactId> -->
+		<!-- <scope>provided</scope> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.apache.cassandra</groupId> -->
+		<!-- <artifactId>cassandra-thrift</artifactId> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <artifactId>servlet-api</artifactId> -->
+		<!-- <groupId>javax.servlet</groupId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>junit</groupId> -->
+		<!-- <artifactId>junit</artifactId> -->
+		<!-- <version>4.8.1</version> -->
+		<!-- <scope>test</scope> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.slf4j</groupId> -->
+		<!-- <artifactId>slf4j-api</artifactId> -->
+		<!-- </dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.slf4j</groupId> -->
+		<!-- <artifactId>slf4j-log4j12</artifactId> -->
+		<!-- <scope>test</scope> -->
+		<!-- <exclusions> -->
+		<!-- <exclusion> -->
+		<!-- <groupId>log4j</groupId> -->
+		<!-- <artifactId>log4j</artifactId> -->
+		<!-- </exclusion> -->
+		<!-- </exclusions> -->
+		<!-- </dependency> -->
 
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
-            <version>3.0.5.RELEASE</version>
-            <exclusions>
-            	<exclusion>
-            		<artifactId>spring-aop</artifactId>
-            		<groupId>org.springframework</groupId>
-            	</exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-test</artifactId>
-            <version>3.0.5.RELEASE</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>org.apache.openjpa</groupId>
-        	<artifactId>openjpa-persistence</artifactId>
-        	<version>2.1.0</version>
-        	<type>jar</type>
-        	<scope>compile</scope>
-        	<exclusions>
-        		<exclusion>
-        			<artifactId>openjpa-kernel</artifactId>
-        			<groupId>org.apache.openjpa</groupId>
-        		</exclusion>
-        	</exclusions>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${org.springframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>spring-aop</artifactId>
+					<groupId>org.springframework</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.openjpa</groupId>
+			<artifactId>openjpa-persistence</artifactId>
+			<version>2.1.0</version>
+			<type>jar</type>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>openjpa-kernel</artifactId>
+					<groupId>org.apache.openjpa</groupId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	</dependencies>
 
 </project>
