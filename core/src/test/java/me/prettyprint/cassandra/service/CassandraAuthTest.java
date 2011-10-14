@@ -40,9 +40,10 @@ import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
-
+@Ignore
 public class CassandraAuthTest {
   private static final String TMP = "tmp";
 
