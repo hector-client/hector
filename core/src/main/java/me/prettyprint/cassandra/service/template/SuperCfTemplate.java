@@ -24,13 +24,6 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
     this.subSerializer = subSerializer;
   }
 
-  public SuperCfTemplate(Keyspace keyspace, String columnFamily,
-      Serializer<K> keySerializer, Serializer<SN> topSerializer,
-      Serializer<N> subSerializer, Mutator<K> mutator) {
-    super(keyspace, columnFamily, keySerializer, topSerializer, mutator);
-    this.subSerializer = subSerializer;
-  }
-
   public Serializer<N> getSubSerializer() {
     return subSerializer;
   }
@@ -191,11 +184,17 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
     updater.addKey(key);
     return updater;
   }
-  
+   
+  /**
+   * Calls {@link SuperCfUpdater#updateInternal()} and {@link SuperCfUpdater#update()} 
+   * in that order before invoking {@link #executeIfNotBatched(Mutator)} on the underlying
+   * upater's {@link Mutator}
+   * @param updater
+   */
   public void update(SuperCfUpdater<K, SN, N> updater) {
     updater.updateInternal();
-    updater.update();
-    executeIfNotBatched();
+    updater.update();    
+    executeIfNotBatched(updater.getCurrentMutator());
   }
     
   /**
@@ -203,7 +202,7 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
    */
   @Override
   public void deleteColumn(K key, SN sColumnName) {
-    mutator.superDelete(key, getColumnFamily(), sColumnName, topSerializer);
+    createMutator().superDelete(key, getColumnFamily(), sColumnName, topSerializer);
   }
 
   /**
@@ -211,7 +210,7 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
    */
   @Override
   public void deleteRow(K key) {
-    mutator.delete(key, getColumnFamily(), null, null);
+    createMutator().delete(key, getColumnFamily(), null, null);
   }
 
   protected abstract SuperCfResult<K,SN,N> doExecuteSlice(K key, SN sColumnName, HSlicePredicate<SN> predicate);

@@ -1,23 +1,16 @@
 package com.mycompany.furniture;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hom.CassandraTestBase;
 import me.prettyprint.hom.EntityManagerImpl;
 
-import org.apache.cassandra.db.marshal.BytesType;
-import org.apache.cassandra.thrift.CfDef;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 
 public class FurnitureTest extends CassandraTestBase {
@@ -55,7 +48,8 @@ public class FurnitureTest extends CassandraTestBase {
     desk.setColor("black");
     desk.setExtendable(false);
     desk.setShape("rectangle");
-    desk.setNumDrawers(2);
+    desk.setDeskType("roll-top");
+    desk.addDrawer(new Drawer(true, true, "pencil")).addDrawer(new Drawer(false, true, "filing")).addDrawer(new Drawer(false, false, "upperLeft")).addDrawer(new Drawer(false, true, "lowerLeft"));
     entityMgr.persist(desk);
 
     Furniture f1 = entityMgr.find(Furniture.class, 1);
@@ -67,6 +61,13 @@ public class FurnitureTest extends CassandraTestBase {
     assertEquals( Couch.class, f2.getClass() );
     assertEquals( BasicTable.class, f3.getClass() );
     assertEquals( Desk.class, f4.getClass() );
+    
+    assertEquals( chair.isArms(), ((Chair)f1).isArms() );
+    
+    assertEquals( desk.getDrawerList().size(), ((Desk)f4).getDrawerList().size() );
+    for ( int i=0;i < desk.getDrawerList().size();i++ ) {
+      assertEquals( desk.getDrawerList().get(i), ((Desk)f4).getDrawerList().get(i));
+    }
   }
 
   // --------------

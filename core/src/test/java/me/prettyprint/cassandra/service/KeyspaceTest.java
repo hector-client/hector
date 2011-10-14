@@ -23,7 +23,7 @@ import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.PoolExhaustedException;
+import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
@@ -58,7 +58,7 @@ public class KeyspaceTest extends BaseEmbededServerSetupTest {
   private static final StringSerializer se = new StringSerializer();
 
   @Before
-  public void setupCase() throws IllegalStateException, PoolExhaustedException, Exception {
+  public void setupCase() throws IllegalStateException, HPoolExhaustedException, Exception {
     super.setupClient();
 
     keyspace = new KeyspaceServiceImpl("Keyspace1", new QuorumAllConsistencyLevelPolicy(),

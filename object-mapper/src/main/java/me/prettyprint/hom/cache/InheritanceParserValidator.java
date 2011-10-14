@@ -1,7 +1,6 @@
 package me.prettyprint.hom.cache;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Modifier;
 
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.DiscriminatorValue;
@@ -10,7 +9,6 @@ import javax.persistence.InheritanceType;
 
 import me.prettyprint.hom.CFMappingDef;
 import me.prettyprint.hom.ClassCacheMgr;
-
 
 /**
  * Parse, validate, and set defaults if needed for Inheritance functionality.
@@ -55,11 +53,11 @@ public class InheritanceParserValidator implements ParserValidator {
 
   @Override
   public <T> void validateAndSetDefaults(ClassCacheMgr cacheMgr, CFMappingDef<T> cfMapDef) {
-    if (cfMapDef.isBaseInheritanceClass()) {
+    if (cfMapDef.isBaseEntity()) {
       validateBaseClassInheritance(cfMapDef);
-    } else if (cfMapDef.isDerivedClassInheritance()) {
+    } else if (cfMapDef.isPersistableDerivedEntity()) {
       validateDerivedClassInheritance(cfMapDef);
-    } else {
+    } else if (!cfMapDef.isNonPersistableDerivedEntity()) {
       if (null != cacheMgr.findBaseClassViaMappings(cfMapDef))
         throw new HectorObjectMapperException("@" + Inheritance.class.getSimpleName()
             + " found in class hierarchy, but no @" + DiscriminatorValue.class.getSimpleName()
@@ -88,28 +86,24 @@ public class InheritanceParserValidator implements ParserValidator {
 
     // if it is abstract, cannot be instantiated and therefore should not have a
     // discriminator value defined
-    if (Modifier.isAbstract(cfMapDef.getEffectiveClass().getModifiers())
-        && null != cfMapDef.getDiscValue()) {
+    if (cfMapDef.isAbstract() && null != cfMapDef.getDiscValue()) {
       throw new HectorObjectMapperException("Abstract class, " + cfMapDef.getRealClass().getName()
           + ", has an @" + DiscriminatorValue.class.getSimpleName()
           + " annotation, but cannot be instantiated");
-    }
-
-    // since abstract, must have a discriminator column defined
-    if (!Modifier.isAbstract(cfMapDef.getEffectiveClass().getModifiers())
-        && null == cfMapDef.getDiscValue()) {
-      throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass().getName()
-          + ", is not abstract, so it must have an @" + DiscriminatorValue.class.getSimpleName()
-          + " annotation");
+    } else if (!cfMapDef.isAbstract() && null == cfMapDef.getDiscValue()) {
+      throw new HectorObjectMapperException("Class, "
+          + cfMapDef.getEffectiveClass().getName()
+          + ", is a part of inheritance hierarchy, but did not specify a "
+          + DiscriminatorValue.class.getSimpleName() + " annotation.  Should it be 'abstract'?");
     }
   }
 
   private <T> void validateDerivedClassInheritance(CFMappingDef<T> cfMapDef) {
     if (null == cfMapDef.getDiscValue()) {
       throw new HectorObjectMapperException("Base class "
-          + cfMapDef.getCfBaseMapDef().getClass().getName()
+          + cfMapDef.getCfBaseMapDef().getEffectiveClass().getName()
           + " requested single table inheritance, but this class, "
-          + cfMapDef.getRealClass().getName() + ", did not specify a "
+          + cfMapDef.getEffectiveClass().getName() + ", did not specify a "
           + DiscriminatorValue.class.getSimpleName() + " annotation");
     }
   }

@@ -45,7 +45,7 @@ public class ClassCacheMgr {
   /**
    * Examine class hierarchy using {@link CFMappingDef} objects to discover the
    * given class' "base inheritance" class. A base inheritance class is
-   * determined by {@link CFMappingDef#isBaseInheritanceClass()}
+   * determined by {@link CFMappingDef#isBaseEntity()}
    * 
    * @param <T>
    * 
@@ -56,7 +56,7 @@ public class ClassCacheMgr {
     CFMappingDef<? super T> tmpDef = cfMapDef;
     CFMappingDef<? super T> cfSuperDef;
     while (null != (cfSuperDef = tmpDef.getCfSuperMapDef())) {
-      if (cfSuperDef.isBaseInheritanceClass()) {
+      if (cfSuperDef.isBaseEntity()) {
         return cfSuperDef;
       }
       tmpDef = cfSuperDef;
@@ -136,7 +136,7 @@ public class ClassCacheMgr {
     checkMappingAndSetDefaults(cfMapDef);
 
     // if this class is not a derived class, then map the ColumnFamily name
-    if (!cfMapDef.isDerivedClassInheritance()) {
+    if (!cfMapDef.isDerivedEntity()) {
       cfMapByColFamName.put(cfMapDef.getEffectiveColFamName(), cfMapDef);
     }
 
@@ -172,7 +172,7 @@ public class ClassCacheMgr {
     Class<T> theType = cfMapDef.getEffectiveClass();
 
     Map<String, PropertyDescriptor> pdMap = getFieldPropertyDescriptorMap(theType);
-    if (pdMap.isEmpty() && !cfMapDef.isDerivedClassInheritance()) {
+    if (pdMap.isEmpty() && !cfMapDef.isPersistableDerivedEntity()) {
       throw new HectorObjectMapperException("could not find any properties annotated with @"
           + Column.class.getSimpleName());
     }
@@ -201,11 +201,14 @@ public class ClassCacheMgr {
         if (anno instanceof Column || anno instanceof me.prettyprint.hom.annotations.Column) {
           columnPar.parse(f, anno, pd, cfMapDef);
         } else if (anno instanceof Basic) {
-//          basicPar.parse(f, anno, pd, cfMapDef);
+          // basicPar.parse(f, anno, pd, cfMapDef);
         } else if (anno instanceof Id) {
           processIdAnnotation(f, (Id) anno, cfMapDef, pdMap);
         } else if (anno instanceof me.prettyprint.hom.annotations.Id) {
           processIdCustomAnnotation(f, (me.prettyprint.hom.annotations.Id) anno, cfMapDef, pdMap);
+//        } else if (anno instanceof me.prettyprint.hom.annotations.List) {
+//          processListCustomAnnotation(f, (me.prettyprint.hom.annotations.List) anno, cfMapDef,
+//              pdMap);
         }
       }
     }
@@ -328,22 +331,22 @@ public class ClassCacheMgr {
   }
 
   private void generateColumnSliceIfNeeded(CFMappingDef<?> cfMapDef) {
-    if (!cfMapDef.isAnonymousHandlerAvailable()) {
-      Collection<PropertyMappingDefinition> coll = cfMapDef.getAllProperties();
+    if (cfMapDef.isColumnSliceRequired()) {
+      Collection<PropertyMappingDefinition> propColl = cfMapDef.getAllProperties();
 
-      String[] daNames = new String[cfMapDef.isStandaloneClass() ? coll.size() : coll.size() + 1];
-      Iterator<PropertyMappingDefinition> iter = coll.iterator();
+      String[] columnNames = new String[cfMapDef.isPersistableEntity() ? propColl.size() : propColl.size() + 1];
+      Iterator<PropertyMappingDefinition> iter = propColl.iterator();
       int pos = 0;
       while (iter.hasNext()) {
-        daNames[pos++] = iter.next().getColName();
+        columnNames[pos++] = iter.next().getColName();
       }
 
       // if an inheritance hierarchy exists we need to add in the discriminator
       // column
-      if (!cfMapDef.isStandaloneClass()) {
-        daNames[pos] = cfMapDef.getDiscColumn();
+      if (!cfMapDef.isPersistableEntity()) {
+        columnNames[pos] = cfMapDef.getDiscColumn();
       }
-      cfMapDef.setSliceColumnNameArr(daNames);
+      cfMapDef.setSliceColumnNameArr(columnNames);
     }
   }
 

@@ -6,13 +6,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.Map.Entry;
+import java.util.UUID;
 
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Id;
@@ -35,6 +37,7 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
+import me.prettyprint.hom.annotations.Column;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.converters.Converter;
 import me.prettyprint.hom.converters.DefaultConverter;
@@ -62,6 +65,8 @@ public class HectorObjectMapper {
   private int maxNumColumns = MAX_NUM_COLUMNS;
   private ClassCacheMgr cacheMgr;
   private KeyConcatenationStrategy keyConcatStrategy = new KeyConcatenationDelimiterStrategyImpl();
+  private CollectionMapperHelper collMapperHelper = new CollectionMapperHelper();
+  private ReflectionHelper reflectionHelper = new ReflectionHelper();
 
   public HectorObjectMapper(ClassCacheMgr cacheMgr) {
     this.cacheMgr = cacheMgr;
@@ -71,7 +76,7 @@ public class HectorObjectMapper {
    * Retrieve columns from cassandra keyspace and column family, instantiate a
    * new object of required type, and then map them to the object's properties.
    * 
-   * @param <T> 
+   * @param <T>
    * 
    * @param keyspace
    * @param colFamName
@@ -93,7 +98,7 @@ public class HectorObjectMapper {
     q.setKey(colFamKey);
 
     // if no anonymous handler then use specific columns
-    if (cfMapDef.isSliceColumnArrayRequired()) {
+    if (cfMapDef.isColumnSliceRequired()) {
       q.setColumnNames(cfMapDef.getSliceColumnNameArr());
     } else {
       q.setRange("", "", false, maxNumColumns);
@@ -117,14 +122,24 @@ public class HectorObjectMapper {
     CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cacheMgr.getCfMapDef(obj.getClass(), true);
 
     byte[] colFamKey = generateColumnFamilyKeyFromPojo(obj, cfMapDef);
-
-    Collection<HColumn<String, byte[]>> colColl = createColumnSet(obj);
-
     String colFamName = cfMapDef.getEffectiveColFamName();
     Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
+
+    // if object contains collection, then must delete everything first - easier
+    // than reading the row and selectively deleting, which is an alternative if
+    // this is too destructive
+    if (cfMapDef.isAnyCollections()) {
+      m.addDeletion(colFamKey, colFamName);
+    }
+
+    // must create the "add" columns after the delete to insure proper processing order
+    Collection<HColumn<String, byte[]>> colColl = createColumnSet(obj);
+
     for (HColumn<String, byte[]> col : colColl) {
-      if ( null == col.getName() || col.getName().isEmpty() ) {
-        throw new HectorObjectMapperException("Column name cannot be null or empty - trying to persist to ColumnFamily, " + colFamName);
+      if (null == col.getName() || col.getName().isEmpty()) {
+        throw new HectorObjectMapperException(
+            "Column name cannot be null or empty - trying to persist to ColumnFamily, "
+                + colFamName);
       }
       m.addInsertion(colFamKey, colFamName, col);
     }
@@ -134,6 +149,24 @@ public class HectorObjectMapper {
     return obj;
   }
 
+  // private void addDeletionsIfNecessary(Keyspace keyspace, CFMappingDef<?>
+  // cfMapDef, Object obj, Mutator<byte[]> m ) {
+  // // get collection properties and convert to columns of "info" records so we
+  // know what can/if be deleted
+  // Collection<PropertyMappingDefinition> collColl =
+  // cfMapDef.getCollectionProperties();
+  //
+  //
+  // SliceQuery<byte[], String, byte[]> q = HFactory.createSliceQuery(keyspace,
+  // BytesArraySerializer.get(), StringSerializer.get(),
+  // BytesArraySerializer.get());
+  // q.setColumnFamily(cfMapDef.getColFamName());
+  // q.setColumnNames(columnNames);
+  // q.setKey(key);
+  //
+  // }
+
+  @SuppressWarnings("unchecked")
   private byte[] generateColumnFamilyKeyFromPkObj(CFMappingDef<?> cfMapDef, Object pkObj) {
     List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
 
@@ -142,9 +175,9 @@ public class HectorObjectMapper {
         segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(),
             new DefaultConverter()));
       }
-    }
-    else {
-      PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator().next();
+    } else {
+      PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator()
+                                             .next();
       segmentList.add(md.getConverter().convertObjTypeToCassType(pkObj));
     }
 
@@ -162,7 +195,9 @@ public class HectorObjectMapper {
     return keyConcatStrategy.concat(segmentList);
   }
 
-  private byte[] callMethodAndConvertToCassandraType(Object obj, Method meth, Converter converter) {
+  @SuppressWarnings("unchecked")
+  private byte[] callMethodAndConvertToCassandraType(Object obj, Method meth,
+      @SuppressWarnings("rawtypes") Converter converter) {
     try {
       Object retVal = meth.invoke(obj, (Object[]) null);
       return converter.convertObjTypeToCassType(retVal);
@@ -211,9 +246,16 @@ public class HectorObjectMapper {
         String colName = col.getName();
         PropertyMappingDefinition md = cfMapDefInstance.getPropMapByColumnName(colName);
         if (null != md && null != md.getPropDesc()) {
-          setPropertyUsingColumn(obj, col, md);
+          if (!md.isCollectionType()) {
+            setPropertyUsingColumn(obj, col, md);
+          } else {
+            collMapperHelper.instantiateCollection(obj, col, md);
+          }
+        } else if (collMapperHelper.addColumnToCollection(cfMapDefInstance, obj, colName,
+            col.getValue())) {
+          continue;
         }
-        // if this is a derived class then don't need to save disc
+        // if this is a derived class then don't need to save discriminator
         // column value
         else if (null != cfMapDef.getDiscColumn() && colName.equals(cfMapDef.getDiscColumn())) {
           continue;
@@ -270,9 +312,11 @@ public class HectorObjectMapper {
       Map<String, HColumn<String, byte[]>> colSet = new HashMap<String, HColumn<String, byte[]>>();
       Collection<PropertyMappingDefinition> coll = cfMapDef.getAllProperties();
       for (PropertyMappingDefinition md : coll) {
-        HColumn<String, byte[]> col = createColumnFromProperty(obj, md);
-        if (null != col) {
-          colSet.put(col.getName(), col);
+        Collection<HColumn<String, byte[]>> colColl = createColumnsFromProperty(obj, md);
+        if (null != colColl) {
+          for (HColumn<String, byte[]> col : colColl) {
+            colSet.put(col.getName(), col);
+          }
         }
       }
 
@@ -322,33 +366,63 @@ public class HectorObjectMapper {
     }
   }
 
-  private <T> HColumn<String, byte[]> createColumnFromProperty(T obj, PropertyMappingDefinition md)
-      throws SecurityException, NoSuchFieldException, IllegalArgumentException,
-      IllegalAccessException, InvocationTargetException {
-    byte[] colValue = createBytesFromPropertyValue(obj, md);
-    if (null == colValue) {
-      return null;
+  @SuppressWarnings({ "unchecked" })
+  private <T> Collection<HColumn<String, byte[]>> createColumnsFromProperty(T obj,
+      PropertyMappingDefinition md) throws SecurityException, NoSuchFieldException,
+      IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    if (!md.isCollectionType()) {
+      byte[] colValue = createBytesFromPropertyValue(obj, md);
+      if (null == colValue) {
+        return null;
+      }
+      return Arrays.asList(createHColumn(md.getColName(), colValue));
+    } else {
+      return createColumnsFromCollectionProperty(obj, md);
     }
-    HColumn<String, byte[]> col = createHColumn(md.getColName(), colValue);
-    return col;
   }
 
-  private <P> byte[] createBytesFromPropertyValue(Object obj, PropertyMappingDefinition md)
-      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-    PropertyDescriptor pd = md.getPropDesc();
-    Method getter = pd.getReadMethod();
-    if (null == getter) {
-      throw new RuntimeException("missing getter method for property, " + pd.getName());
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private <T> Collection<HColumn<String, byte[]>> createColumnsFromCollectionProperty(T obj,
+      PropertyMappingDefinition md) throws SecurityException, NoSuchFieldException,
+      IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    // get collection
+    Object tmpColl = reflectionHelper.invokeGetter(obj, md);
+    if (!(tmpColl instanceof Collection)) {
+      throw new HectorObjectMapperException("property, " + md.getColName()
+          + ", is marked as a collection type, but not actually a Collection.  Property is type, "
+          + md.getPropDesc().getPropertyType());
     }
 
-    @SuppressWarnings("unchecked")
-    P retVal = (P) getter.invoke(obj, (Object[]) null);
+    LinkedList<HColumn<String, byte[]>> colList = new LinkedList<HColumn<String, byte[]>>();
+
+    // save collection info
+    Collection coll = (Collection) tmpColl;
+    colList.add(createHColumn(md.getColName(), collMapperHelper.createCollectionInfoColValue(coll)));
+
+    // iterate over collection applying converter to its elements
+    int count = 0;
+    for (Object elem : coll) {
+      byte[] bytes = collMapperHelper.serializeCollectionValue(elem);
+      if (null == bytes) {
+        return null;
+      }
+      colList.add(createHColumn(
+          collMapperHelper.createCollectionItemColName(md.getColName(), count), bytes));
+      count++;
+    }
+    return colList;
+  }
+
+  private byte[] createBytesFromPropertyValue(Object obj, PropertyMappingDefinition md)
+      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+    Object retVal = reflectionHelper.invokeGetter(obj, md);
 
     // if no value, then signal with null bytes
     if (null == retVal) {
       return null;
     }
 
+    @SuppressWarnings("unchecked")
     byte[] bytes = md.getConverter().convertObjTypeToCassType(retVal);
     return bytes;
   }
@@ -480,7 +554,7 @@ public class HectorObjectMapper {
             + md.getPropDesc().getName());
       }
 
-      meth.invoke(obj, pd.getReadMethod().invoke(pkObj, null));
+      meth.invoke(obj, pd.getReadMethod().invoke(pkObj, (Object[]) null));
     }
   }
 
@@ -490,7 +564,7 @@ public class HectorObjectMapper {
     PropertyDescriptor pd = md.getPropDesc();
     if (null == pd.getWriteMethod()) {
       throw new RuntimeException("property, " + pd.getName()
-          + ", does not have a setter and therefore cannot be set");
+          + ", on class, " + obj.getClass().getName() + ", does not have a setter and therefore cannot be set");
     }
 
     @SuppressWarnings("unchecked")

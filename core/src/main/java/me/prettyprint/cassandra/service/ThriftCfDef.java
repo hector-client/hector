@@ -22,6 +22,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private ColumnType columnType;
   private ComparatorType comparatorType;
   private ComparatorType subComparatorType;
+	private String comparatorTypeAlias = "";
+	private String subComparatorTypeAlias = "";
   private String comment;
   private double rowCacheSize;
   private int rowCacheSavePeriodInSeconds;
@@ -78,6 +80,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     columnType = columnFamilyDefinition.getColumnType();
     comparatorType = columnFamilyDefinition.getComparatorType();
     subComparatorType = columnFamilyDefinition.getSubComparatorType();
+		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
+		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
@@ -171,6 +175,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     return subComparatorType;
   }
 
+	public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
+
+	public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
 
   @Override
   public String getComment() {
@@ -223,10 +230,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setColumn_metadata(ThriftColumnDef.toThriftList(columnMetadata));
     d.setColumn_type(columnType.getValue());
     d.setComment(comment);
-    d.setComparator_type(comparatorType.getClassName());
+    d.setComparator_type(comparatorType.getClassName() + comparatorTypeAlias);
     d.setDefault_validation_class(defaultValidationClass);
     d.setGc_grace_seconds(gcGraceSeconds);
-    d.setId(id);
+    if ( id != 0 )
+      d.setId(id);
     d.setKey_cache_size(keyCacheSize);
     d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds);
     d.setKey_validation_class(keyValidationClass);
@@ -240,7 +248,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setReplicate_on_write(replicateOnWrite);
 
     if (subComparatorType != null) {
-      d.setSubcomparator_type(subComparatorType.getClassName());
+      d.setSubcomparator_type(subComparatorType.getClassName() + subComparatorTypeAlias);
     }
     return d;
   }
@@ -281,6 +289,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   public void setSubComparatorType(ComparatorType subComparatorType) {
     this.subComparatorType = subComparatorType;
   }
+
+	public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
+
+	public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
 
   public void setComment(String comment) {
     this.comment = comment;

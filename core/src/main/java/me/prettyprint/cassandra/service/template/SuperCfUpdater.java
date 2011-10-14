@@ -64,7 +64,7 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   private List<HColumn> subColumns;
   
   public SuperCfUpdater(SuperCfTemplate<K,SN,N> sTemplate, ColumnFactory columnFactory) {
-    super((AbstractColumnFamilyTemplate<K, N>) sTemplate, columnFactory);
+    super((AbstractColumnFamilyTemplate<K, N>) sTemplate, columnFactory, sTemplate.createMutator());
     this.template = sTemplate;
   }
   
@@ -112,7 +112,7 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
       log.debug("Adding column {} for key {} and cols {}", new Object[]{getCurrentSuperColumn(), getCurrentKey(), subColumns});
       HSuperColumnImpl<SN, N, ?> column = new HSuperColumnImpl(getCurrentSuperColumn(), subColumns, 
           0, template.getTopSerializer(), template.getSubSerializer(), TypeInferringSerializer.get());
-      template.getMutator().addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+      mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
     }
 
   }
@@ -123,12 +123,12 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   public void deleteSuperColumn() {
     //template.getMutator().addDeletion(getCurrentKey(), template.getColumnFamily(), 
     //    getCurrentSuperColumn(), template.getTopSerializer());    
-    template.getMutator().addSuperDelete(getCurrentKey(), template.getColumnFamily(), 
+    mutator.addSuperDelete(getCurrentKey(), template.getColumnFamily(), 
         getCurrentSuperColumn(), template.getTopSerializer());  
   }
   
   public void deleteSubColumn(N columnName) {
-    template.getMutator().addSubDelete(getCurrentKey(), template.getColumnFamily(), 
+    mutator.addSubDelete(getCurrentKey(), template.getColumnFamily(), 
         getCurrentSuperColumn(), columnName, template.getTopSerializer(), template.getSubSerializer());
   }
 

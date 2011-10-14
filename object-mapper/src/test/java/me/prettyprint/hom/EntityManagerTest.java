@@ -1,26 +1,25 @@
 package me.prettyprint.hom;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
 import java.util.UUID;
 
-import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
-import me.prettyprint.hom.EntityManagerImpl;
+import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCompositePK;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
 import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
 
-import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class EntityManagerTest extends CassandraTestBase {
 
@@ -114,4 +113,57 @@ public class EntityManagerTest extends CassandraTestBase {
     assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
     assertNull( entity2.getStrProp3() );
   }
+  
+  @Test
+  public void testPojoWithListCollection() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyBlueTestBean b1 = new MyBlueTestBean();
+    b1.setBaseId(UUID.randomUUID());
+    b1.addToList(100).addToList(200).addToList(300);
+    em.persist(b1);
+    
+    MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    
+    assertEquals( b1.getMySet().size(), b2.getMySet().size());
+    for ( Integer myInt : b1.getMySet()) {
+      assertTrue( b2.getMySet().remove(myInt));
+    }
+  }
+  
+  @Test
+  public void testPojoWithListUpdateCollection() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyBlueTestBean b1 = new MyBlueTestBean();
+    b1.setBaseId(UUID.randomUUID());
+    b1.addToList(100).addToList(200).addToList(300);
+    em.persist(b1);
+    
+    MyBlueTestBean b2 = new MyBlueTestBean();
+    b2.setBaseId(b1.getBaseId());
+    b2.addToList(400);
+    em.persist(b2);
+    
+    MyBlueTestBean b3 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    assertEquals( b2.getMySet().size(), b3.getMySet().size());
+    for ( Integer myInt : b2.getMySet()) {
+      assertTrue( b3.getMySet().remove(myInt));
+    }
+  }
+  
+  @Test
+  public void testPojoWithSetCollection() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyBlueTestBean b1 = new MyBlueTestBean();
+    b1.setBaseId(UUID.randomUUID());
+    b1.addToList(100).addToList(200).addToList(300);
+    em.persist(b1);
+    
+    MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    
+    assertEquals( b1.getMySet().size(), b2.getMySet().size());
+    for ( Integer myInt : b1.getMySet()) {
+      assertTrue( b2.getMySet().remove(myInt));
+    }
+  }
+
 }

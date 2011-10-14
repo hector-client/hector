@@ -1,10 +1,10 @@
 package me.prettyprint.hom;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,9 +12,9 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.InheritanceType;
 
-import com.google.common.collect.Sets;
-
 import me.prettyprint.hom.cache.HectorObjectMapperException;
+
+import com.google.common.collect.Sets;
 
 /**
  * Holder for the mapping between a Class annotated with {@link Entity} and the
@@ -22,7 +22,7 @@ import me.prettyprint.hom.cache.HectorObjectMapperException;
  * 
  * @author Todd Burruss
  * 
- * @param <T> 
+ * @param <T>
  */
 public class CFMappingDef<T> {
   private Class<T> realClass;
@@ -34,6 +34,7 @@ public class CFMappingDef<T> {
   private String discColumn;
   private DiscriminatorType discType;
   private Object discValue; // this can be a variety of types
+
   private String[] sliceColumnNameArr;
   private Method anonymousPropertyAddHandler;
   private KeyDefinition keyDef;
@@ -57,6 +58,7 @@ public class CFMappingDef<T> {
    * 
    * @param realClass
    */
+  @SuppressWarnings("unchecked")
   public void setDefaults(Class<T> realClass) {
     this.realClass = realClass;
     this.keyDef = new KeyDefinition();
@@ -75,9 +77,29 @@ public class CFMappingDef<T> {
 
     // if class is missing @Entity, then proceed no further
     if (!entityFound) {
-      throw new HomMissingEntityAnnotationException("class, " + realClass.getName() + ", not annotated with @"
-          + Entity.class.getSimpleName());
+      throw new HomMissingEntityAnnotationException("class, " + realClass.getName()
+          + ", not annotated with @" + Entity.class.getSimpleName());
     }
+  }
+
+  public boolean isColumnSliceRequired() {
+    return null == getAnonymousPropertyAddHandler()
+        && !isAnyCollections()
+        && !isAbstract()
+        && !isDerivedEntity();
+  }
+
+  public boolean isAnyCollections() {
+    if ( null == getAllProperties() ) {
+      return false;
+    }
+    
+    for (PropertyMappingDefinition md : getAllProperties()) {
+      if (md.isCollectionType()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public void addDerivedClassMap(CFMappingDef<? extends T> cfDerivedMapDef) {
@@ -107,16 +129,15 @@ public class CFMappingDef<T> {
   public String getColFamName() {
     return colFamName;
   }
-  
+
   public String getEffectiveColFamName() {
-    if ( null != colFamName ) {
+    if (null != colFamName) {
       return colFamName;
-    }
-    else if ( null != cfBaseMapDef ) {
+    } else if (null != cfBaseMapDef) {
       return cfBaseMapDef.getColFamName();
-    }
-    else {
-      throw new HectorObjectMapperException("trying to get ColumnFamily name, but is missing for mapping, " + this.toString());
+    } else {
+      throw new HectorObjectMapperException(
+          "trying to get ColumnFamily name, but is missing for mapping, " + this.toString());
     }
   }
 
@@ -172,7 +193,7 @@ public class CFMappingDef<T> {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Collection<PropertyMappingDefinition> getAllProperties() {
     if (null == allMappedProps) {
       Set<PropertyMappingDefinition> propSet = new HashSet<PropertyMappingDefinition>();
@@ -183,9 +204,7 @@ public class CFMappingDef<T> {
       if (null == cfSuperMapDef) {
         allMappedProps = propSet;
       } else {
-        allMappedProps = Sets.union(
-                propSet, (Set) cfSuperMapDef.getAllProperties()
-                );
+        allMappedProps = Sets.union(propSet, (Set) cfSuperMapDef.getAllProperties());
       }
     }
 
@@ -226,18 +245,30 @@ public class CFMappingDef<T> {
         + ", effectiveClass=" + effectiveClass + "]";
   }
 
-  public boolean isBaseInheritanceClass() {
+  public boolean isAbstract() {
+    return Modifier.isAbstract(effectiveClass.getModifiers());
+  }
+  
+  public boolean isBaseEntity() {
     return null != inheritanceType;
   }
 
-  public boolean isDerivedClassInheritance() {
-    return !isBaseInheritanceClass() && null != getDiscValue();
+  public boolean isPersistableEntity() {
+    return !isAbstract();
   }
 
-  public boolean isStandaloneClass() {
-    return !isBaseInheritanceClass() && !isDerivedClassInheritance();
+  public boolean isPersistableDerivedEntity() {
+    return !isBaseEntity() && null != getDiscValue() && !isAbstract();
   }
 
+  public boolean isNonPersistableDerivedEntity() {
+    return !isBaseEntity() && !isPersistableDerivedEntity() && isAbstract();
+  }
+
+  public boolean isDerivedEntity() {
+    return isPersistableDerivedEntity() || isNonPersistableDerivedEntity();
+  }
+  
   public String[] getSliceColumnNameArr() {
     return sliceColumnNameArr;
   }
@@ -257,8 +288,19 @@ public class CFMappingDef<T> {
   public boolean isAnonymousHandlerAvailable() {
     return null != getAnonymousPropertyAddHandler();
   }
+//
+//  public boolean isSliceColumnArrayRequired() {
+//    return null != sliceColumnNameArr && 0 < sliceColumnNameArr.length;
+//  }
 
-  public boolean isSliceColumnArrayRequired() {
-    return null != sliceColumnNameArr && 0 < sliceColumnNameArr.length;
+  public Collection<PropertyMappingDefinition> getCollectionProperties() {
+    Set<PropertyMappingDefinition> collSet = new HashSet<PropertyMappingDefinition>();
+    for ( PropertyMappingDefinition md : getAllProperties() ) {
+      if ( md.isCollectionType() ) {
+        collSet.add(md);
+      }
+    }
+    
+    return collSet;
   }
 }

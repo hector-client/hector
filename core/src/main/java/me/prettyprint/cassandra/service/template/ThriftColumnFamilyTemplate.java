@@ -36,12 +36,6 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
       Serializer<K> keySerializer, Serializer<N> topSerializer) {
     super(keyspace, columnFamily, keySerializer, topSerializer);
   }
-
-  public ThriftColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
-      Serializer<K> keySerializer, Serializer<N> topSerializer,
-      Mutator<K> mutator) {
-    super(keyspace, columnFamily, keySerializer, topSerializer, mutator);
-  }
   
   public <T> T doExecuteSlice(K key, HSlicePredicate<N> predicate, ColumnFamilyRowMapper<K, N, T> mapper) {
     return mapper.mapRow(doExecuteSlice(key,predicate));

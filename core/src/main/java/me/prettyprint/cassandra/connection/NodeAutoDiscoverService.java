@@ -7,10 +7,17 @@ import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.ThriftCluster;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
+import me.prettyprint.hector.api.factory.HFactory;
 
+import org.apache.cassandra.thrift.AuthenticationRequest;
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.TokenRange;
+import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -77,14 +84,17 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     Set<CassandraHost> existingHosts = connectionManager.getHosts();
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
 
-    HThriftClient thriftClient = null;
     log.info("using existing hosts {}", existingHosts);
     try {
-      thriftClient = connectionManager.borrowClient();
+      
+      String clusterName = connectionManager.getClusterName();
+      
+      //this could be suspect, but we need this 
+      ThriftCluster cluster = (ThriftCluster) HFactory.getCluster(clusterName);
 
-      for (KsDef keyspace : thriftClient.getCassandra().describe_keyspaces()) {
-        if (!keyspace.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
-          List<TokenRange> tokenRanges = thriftClient.getCassandra().describe_ring(keyspace.getName());
+      for(KeyspaceDefinition keyspaceDefinition: cluster.describeKeyspaces()) {    	  
+        if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
+          List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
           for (TokenRange tokenRange : tokenRanges) {
             for (String host : tokenRange.getEndpoints()) {
               CassandraHost foundHost = new CassandraHost(host,cassandraHostConfigurator.getPort());
@@ -99,11 +109,13 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
       }
     } catch (Exception e) {
       log.error("Discovery Service failed attempt to connect CassandraHost", e);
-    } finally {
-      connectionManager.releaseClient(thriftClient);
     }
+//    } finally {
+//      connectionManager.releaseClient(thriftClient);
+//    }
     return foundHosts;
   }
+
 
 }
 

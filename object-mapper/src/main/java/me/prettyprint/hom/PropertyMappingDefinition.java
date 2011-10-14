@@ -8,9 +8,19 @@ import me.prettyprint.hom.converters.Converter;
 public class PropertyMappingDefinition {
   private PropertyDescriptor propDesc;
   private String colName;
+  @SuppressWarnings("rawtypes")
   private Converter converter;
+  private Class<?> collectionType;
 
-  public PropertyMappingDefinition(PropertyDescriptor propDesc, String colName, Class<? extends Converter> converter)
+  public Class<?> getCollectionType() {
+    return collectionType;
+  }
+
+  public void setCollectionType(Class<?> collectionType) {
+    this.collectionType = collectionType;
+  }
+
+  public PropertyMappingDefinition(PropertyDescriptor propDesc, String colName, @SuppressWarnings("rawtypes") Class<? extends Converter> converter)
   throws InstantiationException, IllegalAccessException {
     this.propDesc = propDesc;
     this.colName = colName;
@@ -31,8 +41,13 @@ public class PropertyMappingDefinition {
     return colName;
   }
 
+  @SuppressWarnings("rawtypes")
   public Converter getConverter() {
     return converter;
+  }
+
+  public boolean isCollectionType() {
+    return null != collectionType;
   }
 }
 

@@ -16,7 +16,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testCreateSelect() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
         
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
@@ -30,7 +30,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testCreateSelectMultiColumn() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
     
     ColumnFamilyUpdater<String,String> updater = template.createUpdater("cskey1"); 
     updater.setString("stringval","value1");
@@ -50,7 +50,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
 
   @Test
   public void testCreateSelectTemplate() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     template.update(updater);
@@ -67,7 +67,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testOverloadedMapRowCallback() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
     ColumnFamilyUpdater updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     updater.addKey("key2");
@@ -92,7 +92,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testQueryMultiget() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);    
     ColumnFamilyUpdater updater = template.createUpdater("mg_key1"); 
     updater.setString("column1","value1");
     updater.addKey("mg_key2");
@@ -112,7 +112,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
   @Test
   public void testHasNoResults() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);    
     assertFalse(template.queryColumns("noresults").hasResults());
     assertFalse(template.queryColumns("noresults").hasNext());
     assertEquals("noresults",template.queryColumns("noresults").getKey());
@@ -120,7 +120,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
 
   @Test
   public void testGetKeyTwiceCall() {
-    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se, HFactory.createMutator(keyspace, se));    
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);    
     ColumnFamilyResult<String, String> results = template.queryColumns("noresults");    
     assertEquals("noresults",results.getKey());
     assertEquals("noresults",results.getKey());

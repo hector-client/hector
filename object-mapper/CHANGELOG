@@ -1,0 +1,9 @@
+Changes by version:
+===================
+
+2.0-01
+=======
+- bumped version to 2.0-01 for cassandra 1.0 release, just in case any specific ties to cassandra 1.0
+- fixing inheritance issues (Issue #256).  thx rrotmark
+- updating to support Collection properties.  This is implemented by saving the list elements within same Cassandra row as POJO.
+

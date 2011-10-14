@@ -3,6 +3,8 @@ package me.prettyprint.hom.cache;
 import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.List;
 
 import javax.persistence.Column;
 
@@ -48,6 +50,12 @@ public class ColumnParser implements ColumnParserValidator {
       PropertyDescriptor pd, CFMappingDef<?> cfMapDef) throws InstantiationException,
       IllegalAccessException {
     PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), anno.converter());
+    
+    // if List type then make note of collection type for later use
+    if (Collection.class.isAssignableFrom(pd.getPropertyType())) {
+      md.setCollectionType(pd.getPropertyType());
+    }
+    
     cfMapDef.addPropertyDefinition(md);
   }
 }
