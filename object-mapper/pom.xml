@@ -11,10 +11,6 @@
 	<name>hector-object-mapper</name>
 	<version>2.0-01-SNAPSHOT</version>
 
-<!-- 	<properties> -->
-<!-- 		<org.springframework.version>3.0.6.RELEASE</org.springframework.version> -->
-<!-- 	</properties> -->
-
 	<build>
 		<extensions>
 			<extension>
@@ -67,46 +63,6 @@
 			<artifactId>log4j</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!-- <dependency> -->
-		<!-- <groupId>commons-lang</groupId> -->
-		<!-- <artifactId>commons-lang</artifactId> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>joda-time</groupId> -->
-		<!-- <artifactId>joda-time</artifactId> -->
-		<!-- <scope>provided</scope> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.apache.cassandra</groupId> -->
-		<!-- <artifactId>cassandra-thrift</artifactId> -->
-		<!-- <exclusions> -->
-		<!-- <exclusion> -->
-		<!-- <artifactId>servlet-api</artifactId> -->
-		<!-- <groupId>javax.servlet</groupId> -->
-		<!-- </exclusion> -->
-		<!-- </exclusions> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>junit</groupId> -->
-		<!-- <artifactId>junit</artifactId> -->
-		<!-- <version>4.8.1</version> -->
-		<!-- <scope>test</scope> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.slf4j</groupId> -->
-		<!-- <artifactId>slf4j-api</artifactId> -->
-		<!-- </dependency> -->
-		<!-- <dependency> -->
-		<!-- <groupId>org.slf4j</groupId> -->
-		<!-- <artifactId>slf4j-log4j12</artifactId> -->
-		<!-- <scope>test</scope> -->
-		<!-- <exclusions> -->
-		<!-- <exclusion> -->
-		<!-- <groupId>log4j</groupId> -->
-		<!-- <artifactId>log4j</artifactId> -->
-		<!-- </exclusion> -->
-		<!-- </exclusions> -->
-		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>org.springframework</groupId>
