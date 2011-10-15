@@ -90,7 +90,7 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
       if ((first - next) / first > DYNAMIC_BADNESS_THRESHOLD) {
         Collections.sort(poolList, new SortByScoreComparator());
         if (log.isDebugEnabled())
-          log.debug(String.format("According to score we have chosen %s vs first %s", poolList.get(0), fp));
+          log.debug("According to score we have chosen {} vs first {}", poolList.get(0), fp);
         break;
       }
     }
