@@ -86,18 +86,15 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
     return ((ExecutingKeyspace)keyspace).doExecuteOperation(new Operation<Map<ByteBuffer,List<ColumnOrSuperColumn>>>(OperationType.READ) {
       @Override
       public Map<ByteBuffer,List<ColumnOrSuperColumn>> execute(Cassandra.Client cassandra) throws HectorException {
-        Map<ByteBuffer,List<ColumnOrSuperColumn>> cosc = new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>();
         try {          
           List<K> keyList = new ArrayList<K>();
           Iterators.addAll(keyList, keys.iterator());
-          cosc = cassandra.multiget_slice(keySerializer.toBytesList(keyList), columnParent,
+          return cassandra.multiget_slice(keySerializer.toBytesList(keyList), columnParent,
               (workingSlicePredicate == null ? activeSlicePredicate.setColumnNames(columnValueSerializers.keySet()).toThrift() : workingSlicePredicate.toThrift()),              
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
         }        
-
-        return cosc;
       }
     });
   }
