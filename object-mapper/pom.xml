@@ -4,11 +4,11 @@
     <parent>
         <groupId>me.prettyprint</groupId>
         <artifactId>hector</artifactId>
-        <version>0.8.0-3-SNAPSHOT</version>
+        <version>0.8.0-3</version>
     </parent>
     <artifactId>hector-object-mapper</artifactId>
     <name>hector-object-mapper</name>
-    <version>1.1-03-SNAPSHOT</version>
+    <version>1.1-03</version>
 
 	<build>
 		<extensions>
@@ -38,12 +38,12 @@
         <dependency>
             <groupId>me.prettyprint</groupId>
             <artifactId>hector-core</artifactId>
-            <version>0.8.0-3-SNAPSHOT</version>
+            <version>0.8.0-3</version>
         </dependency> 
         <dependency>
            <groupId>me.prettyprint</groupId>
            <artifactId>hector-test</artifactId>
-           <version>0.8.0-3-SNAPSHOT</version>
+           <version>0.8.0-3</version>
            <scope>test</scope>      
         </dependency>
         <dependency>
