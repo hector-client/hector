@@ -20,6 +20,7 @@ public class BasicKeyspaceDefinition implements KeyspaceDefinition {
   private String name;
   private String strategyClass;
   private int replicationFactor;
+  private boolean durableWrites = true;
   private Map<String, String> strategyOptions;
   private List<ColumnFamilyDefinition> columnFamilyList;
 
@@ -79,6 +80,14 @@ public class BasicKeyspaceDefinition implements KeyspaceDefinition {
 
   public void removeStrategyOption( String field ){
     this.strategyOptions.remove( field );
+  }
+  
+  public boolean isDurableWrites() {
+    return durableWrites;
+  }
+
+  public void setDurableWrites(boolean durableWrites) {
+    this.durableWrites = durableWrites;
   }
 
 }

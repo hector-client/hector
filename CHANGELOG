@@ -1,6 +1,10 @@
 Changes by version:
 ===================
 
+0.8.0-4
+=======
+Add durable_writes support. #293
+
 0.8.0-3
 =======
 
