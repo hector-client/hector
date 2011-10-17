@@ -2,7 +2,7 @@ package me.prettyprint.cassandra.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
 
   public CassandraClientMonitor(HConnectionManager connectionManager) {
     this.connectionManager = connectionManager;
-    counters = new HashMap<Counter, AtomicLong>();
+    counters = new EnumMap<Counter, AtomicLong>(Counter.class);
     for (Counter counter: Counter.values()) {
       counters.put(counter, new AtomicLong(0));
     }
