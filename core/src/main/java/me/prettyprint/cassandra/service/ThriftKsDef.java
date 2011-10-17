@@ -24,12 +24,14 @@ public class ThriftKsDef implements KeyspaceDefinition {
   private String strategyClass;
   private Map<String, String> strategyOptions = new HashMap<String, String>();
   private final List<ColumnFamilyDefinition> cfDefs;
+  private boolean durableWrites = true;
 
   public ThriftKsDef(KsDef k) {
     Assert.notNull(k, "KsDef is null");
     name = k.name;
     strategyClass = k.strategy_class;
     strategyOptions = k.strategy_options != null ? k.strategy_options : new HashMap<String, String>();
+    durableWrites = k.durable_writes;
     setReplicationFactor(NumberUtils.toInt(strategyOptions.get(REPLICATION_FACTOR), 1));
     cfDefs = ThriftCfDef.fromThriftList(k.cf_defs);
   }
@@ -104,6 +106,7 @@ public class ThriftKsDef implements KeyspaceDefinition {
   public KsDef toThrift() {
     KsDef def =  new KsDef(name, strategyClass, ThriftCfDef.toThriftList(cfDefs));    
     def.setStrategy_options(strategyOptions);
+    def.setDurable_writes(durableWrites );
     return def;
   }
 
@@ -123,6 +126,14 @@ public class ThriftKsDef implements KeyspaceDefinition {
   @Override
   public String toString() {
     return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
+  }
+
+  public boolean isDurableWrites() {
+    return durableWrites;
+  }
+
+  public void setDurableWrites(boolean durableWrites) {
+    this.durableWrites = durableWrites;
   }
 
 }
