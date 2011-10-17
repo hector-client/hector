@@ -15,5 +15,6 @@ public interface KeyspaceDefinition {
   String getStrategyClass();
   Map<String, String> getStrategyOptions();
   int getReplicationFactor();
+  boolean isDurableWrites();
   List<ColumnFamilyDefinition> getCfDefs();
 }
