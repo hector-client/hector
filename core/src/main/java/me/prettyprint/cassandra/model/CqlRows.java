@@ -57,7 +57,7 @@ public final class CqlRows<K, N, V> extends OrderedRowsImpl<K, N, V> {
    * @return
    */
   public int getAsCount() {
-    if ( !resultType.equals(CqlResultType.INT)) 
+    if (resultType != CqlResultType.INT) 
       throw new IllegalArgumentException("Attempted to extract count from the wrong type of CQL query: " + resultType.toString());
     return count;
   }
