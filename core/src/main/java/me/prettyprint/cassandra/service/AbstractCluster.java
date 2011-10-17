@@ -307,17 +307,19 @@ public abstract class AbstractCluster implements Cluster {
     int waited = 0;
     int versions = 0;
     while (versions != 1) {
-      ArrayList<String> liveschemas = new ArrayList<String>();
+      versions = 0;
       Map<String, List<String>> schema = cassandra.describe_schema_versions();
       for (Map.Entry<String, List<String>> entry : schema.entrySet()) {
         if (!entry.getKey().equals("UNREACHABLE"))
-          liveschemas.add(entry.getKey());
+          versions++;
       }
-      versions = liveschemas.size();
-      Thread.sleep(1000);
-      waited += 1000;
-      if (waited > RING_DELAY)
-        throw new RuntimeException("Could not reach schema agreement in " + RING_DELAY + "ms");
+
+      if (versions != 1) {
+        Thread.sleep(1000);
+        waited += 1000;
+        if (waited > RING_DELAY)
+          throw new RuntimeException("Could not reach schema agreement in " + RING_DELAY + "ms");
+      }
     }
   }
 
