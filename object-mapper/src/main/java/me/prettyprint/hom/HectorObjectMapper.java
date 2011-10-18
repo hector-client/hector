@@ -526,6 +526,9 @@ public class HectorObjectMapper {
     if (null == meth) {
       logger.debug("@Id annotation found - but can't find setter for property, "
           + md.getPropDesc().getName());
+      throw new HectorObjectMapperException(
+          "Trying to build new object but can't find setter for property, " 
+              + md.getPropDesc().getName());
     }
 
     meth.invoke(obj, pkObj);
