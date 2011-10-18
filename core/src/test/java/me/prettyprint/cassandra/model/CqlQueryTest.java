@@ -16,6 +16,7 @@ import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class CqlQueryTest extends BaseEmbededServerSetupTest {
@@ -59,12 +60,12 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
   @Test
   public void testCountQuery() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
-    cqlQuery.setQuery("SELECT COUNT(*) FROM StandardLong1 WHERE KEY = 'cqlQueryTest_key1'");
+    cqlQuery.setQuery("SELECT COUNT(*) FROM StandardLong1 WHERE KEY in ('cqlQueryTest_key1', 'cqlQueryTest_key2')");
     QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
     assertEquals(2, result.get().getAsCount());
   }
 
-  @Test(expected=HCassandraInternalException.class)
+  @Test(expected=HInvalidRequestException.class)
   public void testSyntaxFailQuery() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("SELECT COUNT(*) FROM Standard1 WHERE KEY = 'cqlQueryTest_key1'");

@@ -60,7 +60,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testDescribeThriftVersion() throws Exception {
-    assertEquals("19.10.0",cassandraCluster.describeThriftVersion());
+    assertEquals("19.17.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test
