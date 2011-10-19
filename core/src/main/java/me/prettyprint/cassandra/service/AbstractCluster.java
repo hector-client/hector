@@ -48,8 +48,9 @@ public abstract class AbstractCluster implements Cluster {
   /**
    * Linked to Cassandra StorageProxy.
    */
-  private static final int RING_DELAY = 30 * 1000; // delay after which we assume ring has stablized
-
+  public static final int RING_DELAY_DEF = 30 * 1000; // delay after which we assume ring has stablized
+  public static final int WAIT_FOR_SCHEMA_AGREEMENT_SLEEP_TIME = 1000;
+  
   protected final HConnectionManager connectionManager;
   private final String name;
   private final CassandraHostConfigurator configurator;
@@ -60,6 +61,9 @@ public abstract class AbstractCluster implements Cluster {
   private Set<CassandraHost> knownPoolHosts;
   protected final ExceptionsTranslator xtrans;
   private final Map<String, String> credentials;
+  private final int ringDelay;
+  private final int schemaAgreementSleepTime;
+  
 
   public AbstractCluster(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
     this(clusterName, cassandraHostConfigurator, EMPTY_CREDENTIALS);
@@ -74,6 +78,8 @@ public abstract class AbstractCluster implements Cluster {
     xtrans = new ExceptionsTranslatorImpl();
     clockResolution = cassandraHostConfigurator.getClockResolution();
     this.credentials = Collections.unmodifiableMap(credentials);
+    ringDelay = cassandraHostConfigurator.getRingDelay();
+    schemaAgreementSleepTime = cassandraHostConfigurator.getSchemaAgreementSleepTime();
   }
 
   @Override
@@ -303,7 +309,7 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   
-  protected static void waitForSchemaAgreement(Cassandra.Client cassandra) throws InvalidRequestException, TException, InterruptedException {
+  protected void waitForSchemaAgreement(Cassandra.Client cassandra) throws InvalidRequestException, TException, InterruptedException {
     int waited = 0;
     int versions = 0;
     while (versions != 1) {
@@ -315,10 +321,10 @@ public abstract class AbstractCluster implements Cluster {
       }
 
       if (versions != 1) {
-        Thread.sleep(1000);
-        waited += 1000;
-        if (waited > RING_DELAY)
-          throw new RuntimeException("Could not reach schema agreement in " + RING_DELAY + "ms");
+        Thread.sleep(schemaAgreementSleepTime);
+        waited += schemaAgreementSleepTime;
+        if (waited > ringDelay)
+          throw new RuntimeException("Could not reach schema agreement in " + ringDelay + "ms");
       }
     }
   }

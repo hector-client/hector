@@ -44,6 +44,8 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean runAutoDiscoveryAtStartup = false;
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
+  private int ringDelay = AbstractCluster.RING_DELAY_DEF;
+  private int schemaAgreementSleepTime = AbstractCluster.WAIT_FOR_SCHEMA_AGREEMENT_SLEEP_TIME;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -314,6 +316,30 @@ public final class CassandraHostConfigurator implements Serializable {
    */
   public void setUseSocketKeepalive(boolean useSocketKeepalive) {
     this.useSocketKeepalive = useSocketKeepalive;
+  }
+
+  /**
+   * Delay in ms for which we will assume the ring has stabilized after a schema modification
+   * @return
+   */
+  public int getRingDelay() {
+    return ringDelay;
+  }
+  
+  public void setRingDelay(int ringDelay) {
+    this.ringDelay = ringDelay;
+  }
+
+  /**
+   * The amount of time in ms to wait for schema agreements
+   * @return
+   */
+  public int getSchemaAgreementSleepTime() {
+    return schemaAgreementSleepTime;
+  }
+
+  public void setSchemaAgreementSleepTime(int schemaAgreementSleepTime) {
+    this.schemaAgreementSleepTime = schemaAgreementSleepTime;
   }
 
   
