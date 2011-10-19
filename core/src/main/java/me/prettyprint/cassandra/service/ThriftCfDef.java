@@ -64,12 +64,6 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
         CFMetaDataDefaults.DEFAULT_MIN_COMPACTION_THRESHOLD : d.min_compaction_threshold;
     maxCompactionThreshold = d.max_compaction_threshold == 0 ?
         CFMetaDataDefaults.DEFAULT_MAX_COMPACTION_THRESHOLD : d.max_compaction_threshold;
-    memtableOperationsInMillions = d.memtable_operations_in_millions == 0 ?
-        CFMetaDataDefaults.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : d.memtable_operations_in_millions;
-    memtableFlushAfterMins = d.memtable_flush_after_mins == 0 ?
-        CFMetaDataDefaults.DEFAULT_MEMTABLE_LIFETIME_IN_MINS : d.memtable_flush_after_mins;
-    memtableThroughputInMb = d.memtable_throughput_in_mb == 0 ?
-        CFMetaDataDefaults.DEFAULT_MEMTABLE_THROUGHPUT_IN_MB : d.memtable_throughput_in_mb;
 
     replicateOnWrite = d.replicate_on_write;
   }
@@ -233,23 +227,22 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setComparator_type(comparatorType.getClassName() + comparatorTypeAlias);
     d.setDefault_validation_class(defaultValidationClass);
     d.setGc_grace_seconds(gcGraceSeconds);
-    if ( id != 0 )
+    if ( id != 0)
       d.setId(id);
+    
     d.setKey_cache_size(keyCacheSize);
     d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds);
     d.setKey_validation_class(keyValidationClass);
     d.setMax_compaction_threshold(maxCompactionThreshold);
     d.setMin_compaction_threshold(minCompactionThreshold);
     d.setRead_repair_chance(readRepairChance);
-    d.setRow_cache_size(rowCacheSize);
-    d.setMemtable_operations_in_millions(memtableOperationsInMillions);
-    d.setMemtable_throughput_in_mb(memtableThroughputInMb);
-    d.setMemtable_flush_after_mins(memtableFlushAfterMins);        
+    d.setRow_cache_size(rowCacheSize);        
     d.setReplicate_on_write(replicateOnWrite);
 
     if (subComparatorType != null) {
       d.setSubcomparator_type(subComparatorType.getClassName() + subComparatorTypeAlias);
     }
+    
     return d;
   }
 

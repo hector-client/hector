@@ -1,9 +1,13 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
+import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.Row;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.CqlResultType;
@@ -31,17 +35,17 @@ public final class CqlRows<K, N, V> extends OrderedRowsImpl<K, N, V> {
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     super(thriftRet, nameSerializer, valueSerializer);
     this.resultType = CqlResultType.ROWS;
+    // test for a count object. eeewww.
+    
+    if ( getCount() == 1 ) {
+      Row row = iterator().next();
+      if ( row.getColumnSlice().getColumnByName("count") != null ) {   
+        count = LongSerializer.get().fromByteBuffer(row.getColumnSlice().getColumnByName("count").getValueBytes()).intValue();
+      }
+    }
   }
   
-  /**
-   * Constructed with only a count for {@link CqlResultType#INT}
-   * @param count
-   */
-  public CqlRows(int count) {
-    super();
-    this.resultType = CqlResultType.INT;
-    this.count = count;
-  }
+
   
   /**
    * Constructed as empty for {@link CqlResultType#VOID}
@@ -57,8 +61,7 @@ public final class CqlRows<K, N, V> extends OrderedRowsImpl<K, N, V> {
    * @return
    */
   public int getAsCount() {
-    if (resultType != CqlResultType.INT) 
-      throw new IllegalArgumentException("Attempted to extract count from the wrong type of CQL query: " + resultType.toString());
+    
     return count;
   }
   
