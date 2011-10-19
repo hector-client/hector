@@ -119,7 +119,7 @@ public abstract class AbstractSerializer<T> implements Serializer<T> {
   }
 
   public int computeInitialHashSize(int initialSize) {
-    return Double.valueOf(Math.floor(initialSize / 0.75)).intValue() + 1;
+    return ((int) (initialSize / 0.75)) + 1;
   }
 
   public ComparatorType getComparatorType() {

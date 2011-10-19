@@ -24,12 +24,12 @@ public class ConfigurableConsistencyLevel implements ConsistencyLevelPolicy {
 
   @Override
   public HConsistencyLevel get(OperationType op) {
-    return op.equals(OperationType.READ) ? defaultReadConsistencyLevel : defaultWriteConsistencyLevel;
+    return (op == OperationType.READ) ? defaultReadConsistencyLevel : defaultWriteConsistencyLevel;
   }
 
   @Override
   public HConsistencyLevel get(OperationType op, String cfName) {
-    if (op.equals(OperationType.READ)) {
+    if (op == OperationType.READ) {
       HConsistencyLevel rcf = readCfConsistencyLevels.get(cfName);
       return rcf != null ? rcf : defaultReadConsistencyLevel;
     } else {
@@ -49,7 +49,7 @@ public class ConfigurableConsistencyLevel implements ConsistencyLevelPolicy {
   public void setConsistencyLevelForCfOperation(HConsistencyLevel consistencyLevel,
       String columnFamily,
       OperationType operationType) {
-    if ( operationType.equals(OperationType.READ)) {
+    if (operationType == OperationType.READ) {
       readCfConsistencyLevels.put(columnFamily, consistencyLevel);
     } else {
       writeCfConsistencyLevels.put(columnFamily, consistencyLevel);

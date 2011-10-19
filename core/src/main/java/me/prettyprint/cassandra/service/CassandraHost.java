@@ -104,7 +104,7 @@ public final class CassandraHost {
   public boolean isPerformNameResolution() {
     String sysprop = System.getProperty(
         SystemProperties.HECTOR_PERFORM_NAME_RESOLUTION.toString());
-    return sysprop != null && Boolean.valueOf(sysprop);
+    return sysprop != null && Boolean.parseBoolean(sysprop);
 
   }
 
@@ -199,7 +199,7 @@ public final class CassandraHost {
   }
 
   public static int parsePortFromUrl(String urlPort) {
-    return urlPort.lastIndexOf(':') > 0 ? Integer.valueOf(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length())) : DEFAULT_PORT;
+    return urlPort.lastIndexOf(':') > 0 ? Integer.parseInt(urlPort.substring(urlPort.lastIndexOf(':')+1, urlPort.length())) : DEFAULT_PORT;
   }
 
   public boolean getLifo() {

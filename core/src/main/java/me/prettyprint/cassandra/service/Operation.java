@@ -42,7 +42,7 @@ public abstract class Operation<T> {
   public final OperationType operationType;
   
   public Operation(OperationType operationType) {
-    this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
+    this.failCounter = (operationType == OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
     this.operationType = operationType;
     this.stopWatchTagName = operationType.name();
@@ -53,7 +53,7 @@ public abstract class Operation<T> {
   }
   
   public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
-    this.failCounter = operationType.equals(OperationType.READ) ? Counter.READ_FAIL :
+    this.failCounter = (operationType == OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
     this.operationType = operationType;
     this.stopWatchTagName = operationType.name();

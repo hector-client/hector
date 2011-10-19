@@ -47,7 +47,7 @@ public class IdClassParserValidator implements ParserValidator {
     }
     
     for ( String idFieldName : pdMap.keySet() ) {
-      if ( !keyDef.getIdPropertyMap().keySet().contains(idFieldName)) {
+      if ( !keyDef.getIdPropertyMap().containsKey(idFieldName)) {
         throw new HectorObjectMapperException("Each field in the primary key class, " + keyDef.getPkClazz().getName()
             + ", must have a corresponding property in the entity, " + cfMapDef.getRealClass().getName() + ", annotated with @" + Id.class.getSimpleName() + " : missing ID field, " + idFieldName);
       }
