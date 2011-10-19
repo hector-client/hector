@@ -7,11 +7,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import me.prettyprint.cassandra.connection.client.HClient;
+import me.prettyprint.cassandra.connection.client.HThriftClient;
+import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HInactivePoolException;
+import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
-import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +23,7 @@ public class ConcurrentHClientPool implements HClientPool {
 
   private static final Logger log = LoggerFactory.getLogger(ConcurrentHClientPool.class);
 
-  private final ArrayBlockingQueue<HThriftClient> availableClientQueue;
+  private final ArrayBlockingQueue<HClient> availableClientQueue;
   private final AtomicInteger activeClientsCount;
   private final AtomicInteger realActiveClientsCount;
 
@@ -32,10 +35,13 @@ public class ConcurrentHClientPool implements HClientPool {
 
   private final long maxWaitTimeWhenExhausted;
 
-  public ConcurrentHClientPool(CassandraHost host) {
+  private final HClientFactory clientFactory;
+
+  public ConcurrentHClientPool(HClientFactory clientFactory, CassandraHost host) {
+    this.clientFactory = clientFactory;
     this.cassandraHost = host;
 
-    availableClientQueue = new ArrayBlockingQueue<HThriftClient>(cassandraHost.getMaxActive(), true);
+    availableClientQueue = new ArrayBlockingQueue<HClient>(cassandraHost.getMaxActive(), true);
     // This counter can be offset by as much as the number of threads.
     activeClientsCount = new AtomicInteger(0);
     realActiveClientsCount = new AtomicInteger(0);
@@ -45,7 +51,7 @@ public class ConcurrentHClientPool implements HClientPool {
     maxWaitTimeWhenExhausted = cassandraHost.getMaxWaitTimeWhenExhausted() < 0 ? 0 : cassandraHost.getMaxWaitTimeWhenExhausted();
 
     for (int i = 0; i < cassandraHost.getMaxActive() / 3; i++) {
-      availableClientQueue.add(new HThriftClient(cassandraHost).open());
+      availableClientQueue.add(createClient());
     }
 
     if ( log.isDebugEnabled() ) {
@@ -58,12 +64,12 @@ public class ConcurrentHClientPool implements HClientPool {
 
 
   @Override
-  public HThriftClient borrowClient() throws HectorException {
+  public HClient borrowClient() throws HectorException {
     if ( !active.get() ) {
       throw new HInactivePoolException("Attempt to borrow on in-active pool: " + getName());
     }
 
-    HThriftClient cassandraClient = availableClientQueue.poll();
+    HClient cassandraClient = availableClientQueue.poll();
     int currentActiveClients = activeClientsCount.incrementAndGet();
 
     try {
@@ -92,8 +98,8 @@ public class ConcurrentHClientPool implements HClientPool {
   }
 
 
-  private HThriftClient waitForConnection() {
-    HThriftClient cassandraClient = null;
+  private HClient waitForConnection() {
+    HClient cassandraClient = null;
     numBlocked.incrementAndGet();
 
     // blocked take on the queue if we are configured to wait forever
@@ -138,16 +144,13 @@ public class ConcurrentHClientPool implements HClientPool {
    * having to wait on polling logic. (But still increment all the counters)
    * @return
    */
-  private HThriftClient createClient() {
-    if ( log.isDebugEnabled() ) {
-      log.debug("Creation of new client");
-    }
-    return new HThriftClient(cassandraHost).open();
+  private HClient createClient() {
+    return clientFactory.createClient(cassandraHost).open();
   }
 
   /**
    * Controlled shutdown of pool. Go through the list of available clients
-   * in the queue and call {@link HThriftClient#close()} on each. Toggles
+   * in the queue and call {@link HClient#close()} on each. Toggles
    * a flag to indicate we are going into shutdown mode. Any subsequent calls
    * will throw an IllegalArgumentException.
    *
@@ -159,11 +162,11 @@ public class ConcurrentHClientPool implements HClientPool {
       throw new IllegalArgumentException("shutdown() called for inactive pool: " + getName());
     }
     log.info("Shutdown triggered on {}", getName());
-    Set<HThriftClient> clients = new HashSet<HThriftClient>();
+    Set<HClient> clients = new HashSet<HClient>();
     availableClientQueue.drainTo(clients);
     if ( clients.size() > 0 ) {
-      for (HThriftClient hThriftClient : clients) {
-        hThriftClient.close();
+      for (HClient hClient : clients) {
+        hClient.close();
       }
     }
     log.info("Shutdown complete on {}", getName());
@@ -225,7 +228,7 @@ public String getStatusAsString() {
   }
 
 @Override
-public void releaseClient(HThriftClient client) throws HectorException {
+public void releaseClient(HClient client) throws HectorException {
     boolean open = client.isOpen();
     if ( open ) {
       if ( active.get() ) {
@@ -257,7 +260,7 @@ public void releaseClient(HThriftClient client) throws HectorException {
    * are releasing at the same time).
    * @param client
    */
-  private void addClientToPoolGently(HThriftClient client) {
+  private void addClientToPoolGently(HClient client) {
     try {
       availableClientQueue.add(client);
     } catch (IllegalStateException ise) {
