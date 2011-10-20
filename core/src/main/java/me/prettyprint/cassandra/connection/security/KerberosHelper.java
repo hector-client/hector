@@ -11,9 +11,16 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 
-import org.ietf.jgss.*;
+import org.ietf.jgss.GSSContext;
+import org.ietf.jgss.GSSCredential;
+import org.ietf.jgss.GSSException;
+import org.ietf.jgss.GSSManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class KerberosHelper {
+  
+  private static Logger log = LoggerFactory.getLogger(KerberosHelper.class);
 
   public static Subject loginService(String serviceName) throws LoginException {
     LoginContext loginCtx = new LoginContext(serviceName,
@@ -52,7 +59,7 @@ public class KerberosHelper {
 
           return context;
         } catch (Exception e) {
-          e.printStackTrace();
+          log.error("Unable to authenticate client against Kerberos", e);
           return null;
         }
       }

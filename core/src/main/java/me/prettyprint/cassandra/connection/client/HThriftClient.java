@@ -32,12 +32,12 @@ public class HThriftClient implements HClient {
   final CassandraHost cassandraHost;
 
   private final long mySerial;
-  private final int timeout;
-  private String keyspaceName;
+  protected final int timeout;
+  protected String keyspaceName;
   private long useageStartTime;
 
-  private TTransport transport;
-  private Cassandra.Client cassandraClient;
+  protected TTransport transport;
+  protected Cassandra.Client cassandraClient;
 
   /**
    * Constructor

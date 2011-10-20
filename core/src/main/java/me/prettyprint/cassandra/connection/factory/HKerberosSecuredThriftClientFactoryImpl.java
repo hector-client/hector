@@ -4,29 +4,39 @@ import javax.security.auth.Subject;
 import javax.security.auth.login.LoginException;
 
 import me.prettyprint.cassandra.connection.client.HClient;
-import me.prettyprint.cassandra.connection.client.HThriftClient;
+import me.prettyprint.cassandra.connection.client.HKerberosThriftClient;
 import me.prettyprint.cassandra.connection.security.KerberosHelper;
 import me.prettyprint.cassandra.service.CassandraHost;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
- * Client Factory that provides Secure sockets using Kerberos as authentication mechanism.
+ * Client Factory that provides Secure sockets using Kerberos as authentication
+ * mechanism.
+ * 
+ * It expects few system properties to be set up:
+ * <ul>
+ * <li><code>java.security.auth.login.config</code>: location of the "jaas.conf"
+ * file. Default is <code>jaas.conf</code> at the root of the classpath.
+ * <li><code>java.security.krb5.conf</code>: location of the "krb5.conf"
+ * file. Default is <code>krb5.conf</code> at the root of the classpath.
+ * <li><code>sun.security.krb5.debug</code>. Set to <code>TRUE</code> for debug. Default is <code>FALSE</code>.
+ * <li><code>kerberos.service.name</code>
+ * </ul>
  * 
  * @author patricioe (Patricio Echague - patricioe@gmail.com)
- *
+ * 
  */
 public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
-  
+
   private static final Logger log = LoggerFactory.getLogger(HKerberosSecuredThriftClientFactoryImpl.class);
-  
+
   public static final String JAAS_CONFIG = "./jaas.conf";
   public static final String KRB5_CONFIG = "./krb5.conf";
-  
+
   private final Subject kerberosTicket;
-  
+
   public HKerberosSecuredThriftClientFactoryImpl() {
     String jaasConf = System.getProperty("java.security.auth.login.config");
     String krb5Conf = System.getProperty("java.security.krb5.conf");
@@ -34,14 +44,14 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
     String krbServiceName = System.getProperty("kerberos.service.name");
 
     if (krbDebug == null)
-        System.setProperty("sun.security.krb5.debug", "false");
+      System.setProperty("sun.security.krb5.debug", "false");
 
     if (jaasConf == null)
-        System.setProperty("java.security.auth.login.config", JAAS_CONFIG);
+      System.setProperty("java.security.auth.login.config", JAAS_CONFIG);
 
     if (krb5Conf == null)
-        System.setProperty("java.security.krb5.conf", KRB5_CONFIG);
-    
+      System.setProperty("java.security.krb5.conf", KRB5_CONFIG);
+
     if (krbServiceName == null)
       krbServiceName = "Client";
 
@@ -49,20 +59,20 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
 
     log.info("Kerberos V5 was enabled for client<->server communications.");
     log.info("Properties:");
-    log.info("  sun.security.krb5.debug = {}", System.getProperty("sun.security.krb5.debug"));
-    log.info("  java.security.auth.login.config = {}", System.getProperty("java.security.auth.login.config"));
-    log.info("  java.security.krb5.conf = {}", System.getProperty("java.security.krb5.conf"));
+    log.info("  sun.security.krb5.debug = {}",
+        System.getProperty("sun.security.krb5.debug"));
+    log.info("  java.security.auth.login.config = {}",
+        System.getProperty("java.security.auth.login.config"));
+    log.info("  java.security.krb5.conf = {}",
+        System.getProperty("java.security.krb5.conf"));
     log.info("  javax.security.auth.useSubjectCredsOnly = true");
 
     log.info("Trying to login to the KDC...");
 
-    try
-    {
-        kerberosTicket = KerberosHelper.loginService(krbServiceName);
-    }
-    catch (LoginException e)
-    {
-        throw new RuntimeException(e);
+    try {
+      kerberosTicket = KerberosHelper.loginService(krbServiceName);
+    } catch (LoginException e) {
+      throw new RuntimeException(e);
     }
     log.info("Kerberos authenticated successfully against KDC");
   }
@@ -71,10 +81,10 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
    * {@inheritDoc}
    */
   public HClient createClient(CassandraHost ch) {
-    if ( log.isDebugEnabled() ) {
+    if (log.isDebugEnabled()) {
       log.debug("Creation of new client");
     }
-    return new HThriftClient(ch);
+    return new HKerberosThriftClient(kerberosTicket, ch);
   }
 
 }
