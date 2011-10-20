@@ -23,7 +23,7 @@ public class HThriftClientFactoryImpl implements HClientFactory {
    */
   public HClient createClient(CassandraHost ch) {
     if ( log.isDebugEnabled() ) {
-      log.debug("Creation of new client");
+      log.debug("Creation of new client for host: " + ch.getIp());
     }
     return new HThriftClient(ch);
   }

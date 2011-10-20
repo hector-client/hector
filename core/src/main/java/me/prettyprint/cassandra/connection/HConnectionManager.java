@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentMap;
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.client.HThriftClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
+import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
 import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
@@ -57,8 +58,8 @@ public class HConnectionManager {
   private HOpTimer timer;
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
-    // TODO (patricioe) Subject to change. Better creation of factory impls.
-    clientFactory = new HThriftClientFactoryImpl();
+
+    clientFactory = HClientFactoryProvider.createFactory(cassandraHostConfigurator);
 
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
