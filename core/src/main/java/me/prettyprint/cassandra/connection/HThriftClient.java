@@ -159,7 +159,7 @@ public class HThriftClient {
           SystemProperties.CASSANDRA_THRIFT_SOCKET_TIMEOUT.toString());
       if (timeoutStr != null && timeoutStr.length() > 0) {
         try {
-          timeoutVar = Integer.valueOf(timeoutStr);
+          timeoutVar = Integer.parseInt(timeoutStr);
         } catch (NumberFormatException e) {
           log.error("Invalid value for CASSANDRA_THRIFT_SOCKET_TIMEOUT", e);
         }
