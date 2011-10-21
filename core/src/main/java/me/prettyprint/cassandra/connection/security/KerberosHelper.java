@@ -7,6 +7,8 @@ import java.security.PrivilegedAction;
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.NameCallback;
+import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
@@ -22,18 +24,36 @@ public class KerberosHelper {
   
   private static Logger log = LoggerFactory.getLogger(KerberosHelper.class);
 
+  /**
+   * Log in using the service name for jaas.conf file and .keytab instead of specifying username and password
+   * 
+   * @param serviceName service name defined in jass.conf file
+   * @return the authenticated Subject or <code>null</code> is the authentication failed
+   * @throws LoginException if there is any error during the login
+   */
   public static Subject loginService(String serviceName) throws LoginException {
-    LoginContext loginCtx = new LoginContext(serviceName,
-        new CallbackHandler() {
-          // as we use .keytab file there is no need to specify any options in
-          // callback
+    LoginContext loginCtx = new LoginContext(serviceName, new CallbackHandler() {
+          // as we use .keytab file there is no need to specify any options in callback
           public void handle(Callback[] callbacks) throws IOException,
               UnsupportedCallbackException {
           }
         });
 
     loginCtx.login();
-
+    return loginCtx.getSubject();
+  }
+  
+  /**
+   * 
+   * @param serviceName service name defined in jass.conf file
+   * @param username username
+   * @param password password
+   * @return the authenticated Subject or <code>null</code> is the authentication failed
+   * @throws LoginException if there is any error during the login
+   */
+  public static Subject loginService(String serviceName, String username, String password) throws LoginException {
+    LoginContext loginCtx = new LoginContext(serviceName, new LoginCallbackHandler(username, password));
+    loginCtx.login();
     return loginCtx.getSubject();
   }
 
@@ -72,5 +92,56 @@ public class KerberosHelper {
     } catch (GSSException e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  /**
+   * Password callback handler for resolving password/usernames for a JAAS login.
+   * 
+   * @author patricioe (Patricio Echague - patricioe@gmail.com)
+   */
+  static class LoginCallbackHandler implements CallbackHandler {
+
+    public LoginCallbackHandler() { 
+      super();
+    }
+    
+    public LoginCallbackHandler( String name, String password) { 
+      super();
+      this.username = name;
+      this.password = password;
+    }
+    
+    public LoginCallbackHandler( String password) { 
+      super();
+      this.password = password;
+    }
+    
+    private String password;
+    private String username;
+
+    /**
+     * Handles the callbacks, and sets the user/password.
+     * @param callbacks the callbacks to handle
+     * @throws IOException if an input or output error occurs.
+     */
+    public void handle( Callback[] callbacks) throws IOException, UnsupportedCallbackException {
+
+      for ( int i=0; i<callbacks.length; i++) {
+        if ( callbacks[i] instanceof NameCallback && username != null) {
+          NameCallback nc = (NameCallback) callbacks[i];
+          nc.setName( username);
+        } 
+        else if ( callbacks[i] instanceof PasswordCallback) {
+          PasswordCallback pc = (PasswordCallback) callbacks[i];
+          pc.setPassword( password.toCharArray());
+        } 
+        else {
+          /*throw new UnsupportedCallbackException(
+          callbacks[i], "Unrecognized Callback");*/
+        }
+      }
+    }
+    
+
   }
 }
