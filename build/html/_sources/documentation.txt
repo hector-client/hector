@@ -15,6 +15,7 @@ Hector documentation contents:
    content/cql_basics
    content/composite_with_templates
    content/virtual_keyspaces
+   content/security
    content/speed4j
    content/HOM/hector-object-mapper
 

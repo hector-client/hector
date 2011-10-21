@@ -1,0 +1,233 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Security &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+
+  </head>
+  <body>
+
+<div class="header-container">
+
+  <div class="logo"><img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/></div>
+  <div class="title-wrapper">
+    <div class="title1">Hector</div>
+    <div class="title2">A high level Java client for Apache Cassandra</div>
+  </div>
+</div>
+
+<a href="http://github.com/rantav/hector"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="api.html">API</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+  
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Security</a><ul>
+<li><a class="reference internal" href="#secure-connection-kerberos">Secure connection - Kerberos</a><ul>
+<li><a class="reference internal" href="#jaas-conf-sample">jaas.conf sample</a></li>
+<li><a class="reference internal" href="#krb5-conf-sample">krb5.conf sample</a></li>
+<li><a class="reference internal" href="#setting-up-kerberos">Setting up Kerberos</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/security.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="security">
+<span id="index-0"></span><h1>Security<a class="headerlink" href="#security" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="secure-connection-kerberos">
+<h2>Secure connection - Kerberos<a class="headerlink" href="#secure-connection-kerberos" title="Permalink to this headline">¶</a></h2>
+<p>The JAAS framework defines the term <strong>subject</strong> to represent the source of a request. A subject may be any entity, such as a person or service.</p>
+<p><em>Authentication</em> represents the process by which the identity of a subject is verified, and must be performed in a secure fashion; otherwise a perpetrator may impersonate others to gain access to a system. Authentication typically involves the subject demonstrating some form of evidence to prove its identity. Such evidence may be information only the subject would likely know or have (such as a password or fingerprint), or it may be information only the subject could produce (such as signed data using a private key).</p>
+<p>A Subject is populated with associated identities, or <strong>Principals</strong> such as name (&#8220;John Doe&#8221;) which distinguish it from other Subjects.</p>
+<p>In addition to associated Principals, a Subject may own security-related attributes, which are referred to as <strong>credentials</strong>. A credential may contain information used to authenticate the subject to new services. Such credentials include passwords, Kerberos tickets, and public key certificates.</p>
+<p><strong>Kerberos</strong> is a known authentication mechanism that lets clients authenticate against a single Key Distribution Center (KDC).</p>
+<p>In order to do that, some files are required.</p>
+<blockquote>
+<div><ul class="simple">
+<li><tt class="docutils literal"><span class="pre">jaas.conf</span></tt> (Login configuration file) and</li>
+<li><tt class="docutils literal"><span class="pre">krb5.conf</span></tt> Kerberos congif file</li>
+<li><tt class="docutils literal"><span class="pre">.keytab</span></tt> config binary file to avoid specifing a system property with a password</li>
+</ul>
+</div></blockquote>
+<p><tt class="docutils literal"><span class="pre">jaas.conf</span></tt> can be used for both <em>Server</em> and <em>Client</em> as long as it has one entry for the client side and one for the server side.</p>
+<div class="section" id="jaas-conf-sample">
+<h3>jaas.conf sample<a class="headerlink" href="#jaas-conf-sample" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-properties"><pre>Client {
+  com.sun.security.auth.module.Krb5LoginModule required
+                useKeyTab=true
+                keyTab="&lt;path_to_file&gt;/&lt;file_name&gt;.keytab"
+                useTicketCache=true
+                renewTGT=true
+                storeKey=true
+                principal="&lt;user_name&gt;@your_realm";
+};
+
+Server {
+        com.sun.security.auth.module.Krb5LoginModule required
+                useKeyTab=false
+                storeKey=true
+                useTicketCache=false
+                principal="service_principal@your_realm";
+};</pre>
+</div>
+<p><em>Client</em> specifies a <em>principal</em> so that all clients authenticate using the same user name. Your Kerberos-style <strong>user name</strong> is simply the user name you were assigned for Kerberos authentication. It consists of a base user name (like &#8220;mjones&#8221;) followed by an &#8220;&#64;&#8221; and your realm (like &#8220;<a class="reference external" href="mailto:mjones&#37;&#52;&#48;KRBNT-OPERATIONS&#46;ABC&#46;COM">mjones<span>&#64;</span>KRBNT-OPERATIONS<span>&#46;</span>ABC<span>&#46;</span>COM</a>&#8221;).</p>
+</div>
+<div class="section" id="krb5-conf-sample">
+<h3>krb5.conf sample<a class="headerlink" href="#krb5-conf-sample" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-properties"><pre>[libdefaults]
+        default_realm = &lt;realm&gt;
+        default_checksum = rsa-md5
+
+[realms]
+        DATASTAX.COM = {
+                kdc = &lt;ip_address&gt;
+        }</pre>
+</div>
+</div>
+<div class="section" id="setting-up-kerberos">
+<h3>Setting up Kerberos<a class="headerlink" href="#setting-up-kerberos" title="Permalink to this headline">¶</a></h3>
+<p>First we need to tell Hector that we want to use Kerberos authentication:</p>
+<div class="highlight-properties"><pre>CassandraHostConfigurator.setUseKerberosAuthentication(true);</pre>
+</div>
+<p>Second, we need to let Hector know where the <em>jaas.conf</em> and <em>krb5.conf</em> files are. In order to do that, let&#8217;s set the following properties:</p>
+<div class="highlight-properties"><div class="highlight"><pre><span class="na">-Djava.security.auth.login.config</span><span class="o">=</span><span class="s">&lt;path_to_the_file&gt;/jaas.conf</span>
+<span class="na">-Djava.security.krb5.conf</span><span class="o">=</span><span class="s">&lt;path_to_the_file&gt;/krb5.conf</span>
+<span class="na">-Dkerberos.client.reference.name</span><span class="o">=</span><span class="s">HectorClient</span>
+</pre></div>
+</div>
+<p>If <em>java.security.auth.login.config</em> and <em>java.security.krb5.conf</em> two properties are not set, the default is <em>./jaas.conf</em> and <em>./krb5.conf</em> respectively from the root of the classpath.</p>
+<p>If <em>kerberos.client.reference.name</em> is not set, the default is <em>Client</em>. This is the reference in the <em>jaas.conf</em> file for the client.</p>
+<p>Finally, we need to point <em>jaas.conf</em> to the right <em>.keytab</em> file. Edit the property <strong>keyTab=&#8221;...&#8221;</strong> in <em>jaas.conf</em> file.</p>
+<p>For more Information, visit:</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Kerberos_%28protocol%29">http://en.wikipedia.org/wiki/Kerberos_%28protocol%29</a></li>
+<li><a class="reference external" href="http://download.oracle.com/javase/1.5.0/docs/guide/security/jgss/tutorials/glossary.html">http://download.oracle.com/javase/1.5.0/docs/guide/security/jgss/tutorials/glossary.html</a></li>
+<li><a class="reference external" href="http://download.oracle.com/javase/1.5.0/docs/guide/security/jgss/tutorials/ClientServer.html">http://download.oracle.com/javase/1.5.0/docs/guide/security/jgss/tutorials/ClientServer.html</a></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="api.html">API</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
