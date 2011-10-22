@@ -22,6 +22,7 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
+import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -155,6 +156,25 @@ public class HectorObjectMapperTest {
     assertFalse(HectorObjectMapper.isSerializable(HectorObjectMapper.class));
   }
   
+  @Test
+  public void testCustomConvertedCollectionIsOneColumn() {
+    MyConvertedCollectionBean b1 = new MyConvertedCollectionBean();
+    
+    int first = 111;
+    int second = 0;
+    int third = -1;
+    
+    b1.addToList(first).addToList(second).addToList(third);
+    
+    Map<String, HColumn<String, byte[]>> colMap =
+        new HectorObjectMapper(cacheMgr).createColumnMap(b1);
+    
+    CFMappingDef<MyConvertedCollectionBean> cfMapping = cacheMgr.getCfMapDef(MyConvertedCollectionBean.class, false);
+    
+    assertEquals("collections with custom converters should be skipped by default collection mapping", colMap.size(),
+        cfMapping.getAllProperties().size());
+  }
+  
   // --------------------
 
   @Before
@@ -162,5 +182,6 @@ public class HectorObjectMapperTest {
     cacheMgr.initializeCacheForClass(MyTestBean.class);
     cacheMgr.initializeCacheForClass(MyCustomIdBean.class);
     cacheMgr.initializeCacheForClass(MyComplexEntity.class);
+    cacheMgr.initializeCacheForClass(MyConvertedCollectionBean.class);
   }
 }

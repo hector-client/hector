@@ -51,8 +51,8 @@ public class ColumnParser implements ColumnParserValidator {
       IllegalAccessException {
     PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), anno.converter());
     
-    // if List type then make note of collection type for later use
-    if (Collection.class.isAssignableFrom(pd.getPropertyType())) {
+    // if collection type and default converter then make note of collection type for later use
+    if (Collection.class.isAssignableFrom(pd.getPropertyType()) && md.isDefaultConverter()) {
       md.setCollectionType(pd.getPropertyType());
     }
     

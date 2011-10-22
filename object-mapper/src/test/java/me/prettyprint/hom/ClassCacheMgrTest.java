@@ -144,7 +144,7 @@ public class ClassCacheMgrTest {
     CFMappingDef<Desk> cfMapDef = cacheMgr.initializeCacheForClass(Desk.class);
     CFMappingDef<Furniture> cfBaseMapDef = cacheMgr.getCfMapDef(Furniture.class, true);
 
-    assertEquals(6, cfMapDef.getAllProperties().size());
+    assertEquals(7, cfMapDef.getAllProperties().size());
     assertNotNull(cfMapDef.getCfSuperMapDef());
     assertNotNull(cfMapDef.getCfBaseMapDef());
     assertEquals(Desk.class.getSuperclass(), cfMapDef.getCfSuperMapDef().getEffectiveClass());
@@ -262,6 +262,17 @@ public class ClassCacheMgrTest {
     assertEquals( "mySet", md.getColName());
     assertNull( "should not be using slice query with List collection", cfMapDef.getSliceColumnNameArr());
   }
+  
+  @Test
+  public void testCollectionWithCustomConverterPropertyHandling() {
+    ClassCacheMgr cacheMgr = new ClassCacheMgr();
+    CFMappingDef<CustomConvertedCollectionBean> cfMapDef = cacheMgr.initializeCacheForClass(CustomConvertedCollectionBean.class);
+    
+    PropertyMappingDefinition md = cfMapDef.getPropMapByPropName("mySet");
+    assertEquals( null, md.getCollectionType() );
+    assertEquals( "mySet", md.getColName());
+    assertNotNull( "should be using slice query with custom converted collection", cfMapDef.getSliceColumnNameArr());
+  }
 }
 
 // --------------
@@ -285,6 +296,27 @@ class CollectionBean {
   }
 
   public CollectionBean addItem(Integer myInt) {
+    mySet.add(myInt);
+    return this;
+  }
+
+}
+
+@Entity
+@Table(name = "MyCustomCollectionBean")
+class CustomConvertedCollectionBean {
+  @Column(name="mySet", converter=ObjectConverter.class)
+  private Set<Integer> mySet = new HashSet<Integer>();
+
+  public Set<Integer> getMySet() {
+    return mySet;
+  }
+
+  public void setMySet(Set<Integer> mySet) {
+    this.mySet = mySet;
+  }
+
+  public CustomConvertedCollectionBean addItem(Integer myInt) {
     mySet.add(myInt);
     return this;
   }

@@ -3,6 +3,7 @@ package me.prettyprint.hom;
 import java.beans.PropertyDescriptor;
 
 import me.prettyprint.hom.converters.Converter;
+import me.prettyprint.hom.converters.DefaultConverter;
 
 
 public class PropertyMappingDefinition {
@@ -48,6 +49,10 @@ public class PropertyMappingDefinition {
 
   public boolean isCollectionType() {
     return null != collectionType;
+  }
+
+  public boolean isDefaultConverter() {
+    return converter instanceof DefaultConverter;
   }
 }
 
