@@ -50,6 +50,7 @@ public class FurnitureTest extends CassandraTestBase {
     desk.setShape("rectangle");
     desk.setDeskType("roll-top");
     desk.addDrawer(new Drawer(true, true, "pencil")).addDrawer(new Drawer(false, true, "filing")).addDrawer(new Drawer(false, false, "upperLeft")).addDrawer(new Drawer(false, true, "lowerLeft"));
+    desk.getOneColumnDrawerList().addAll(desk.getDrawerList());
     entityMgr.persist(desk);
 
     Furniture f1 = entityMgr.find(Furniture.class, 1);
@@ -67,6 +68,10 @@ public class FurnitureTest extends CassandraTestBase {
     assertEquals( desk.getDrawerList().size(), ((Desk)f4).getDrawerList().size() );
     for ( int i=0;i < desk.getDrawerList().size();i++ ) {
       assertEquals( desk.getDrawerList().get(i), ((Desk)f4).getDrawerList().get(i));
+    }
+    assertEquals( desk.getOneColumnDrawerList().size(), ((Desk)f4).getOneColumnDrawerList().size() );
+    for ( int i=0;i < desk.getOneColumnDrawerList().size();i++ ) {
+      assertEquals( desk.getOneColumnDrawerList().get(i), ((Desk)f4).getOneColumnDrawerList().get(i));
     }
   }
 

@@ -13,6 +13,7 @@ import me.prettyprint.hom.beans.MyCompositePK;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
 import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
+import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 
 import org.junit.Test;
 
@@ -163,6 +164,22 @@ public class EntityManagerTest extends CassandraTestBase {
     assertEquals( b1.getMySet().size(), b2.getMySet().size());
     for ( Integer myInt : b1.getMySet()) {
       assertTrue( b2.getMySet().remove(myInt));
+    }
+  }
+  
+  @Test
+  public void testPojoWithCustomCollection() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyConvertedCollectionBean b1 = new MyConvertedCollectionBean();
+    b1.setId("me");
+    b1.addToList(100).addToList(200).addToList(300);
+    em.persist(b1);
+    
+    MyConvertedCollectionBean b2 = em.load(MyConvertedCollectionBean.class, b1.getId());
+    
+    assertEquals( b1.getMyCollection().size(), b2.getMyCollection().size());
+    for ( Integer myInt : b1.getMyCollection()) {
+      assertTrue( b2.getMyCollection().remove(myInt));
     }
   }
 

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyComplexEntity;
+import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyGreenTestBean;
 import me.prettyprint.hom.beans.MyPurpleTestBean;
@@ -46,6 +47,8 @@ public class AnnotationScannerTest {
     assertTrue(classSet.contains(MyComplexEntity.class));
     count++;
     assertTrue(classSet.contains(SimpleRelationshipBean.class));
+    count++;
+    assertTrue(classSet.contains(MyConvertedCollectionBean.class));
     count++;
 
     assertEquals(count, classSet.size());
