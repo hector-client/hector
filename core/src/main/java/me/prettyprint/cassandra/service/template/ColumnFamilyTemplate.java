@@ -182,6 +182,9 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   public <V> ColumnFamilyResult<K,N> queryColumns(IndexedSlicesPredicate<K,N,V> predicate) {
     return doExecuteIndexedSlices(predicate);
   }
+  public <V> ColumnFamilyResult<K,N> queryColumns(IndexedSlicesPredicate<K,N,V> predicate, HSlicePredicate<N> slicePredicate) {
+    return doExecuteIndexedSlices(predicate, slicePredicate);
+  }
   public <V> ColumnFamilyResult<K,N> queryColumns(IndexedSlicesPredicate<K,N,V> predicate, List<N> columns) {
     HSlicePredicate<N> slicePredicate = new HSlicePredicate<N>(topSerializer);
     slicePredicate.setColumnNames(columns);
@@ -189,6 +192,9 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   }
   public <R,V> MappedColumnFamilyResult<K,N,R> queryColumns(IndexedSlicesPredicate<K,N,V> predicate, ColumnFamilyRowMapper<K, N, R> mapper) {
     return doExecuteIndexedSlices(predicate, mapper);
+  }
+  public <R,V> MappedColumnFamilyResult<K,N,R> queryColumns(IndexedSlicesPredicate<K,N,V> predicate, HSlicePredicate<N> slicePredicate, ColumnFamilyRowMapper<K, N, R> mapper) {
+    return doExecuteIndexedSlices(predicate, slicePredicate, mapper);
   }
   public <R,V> MappedColumnFamilyResult<K,N,R> queryColumns(IndexedSlicesPredicate<K,N,V> predicate, List<N> columns, ColumnFamilyRowMapper<K, N, R> mapper) {
     HSlicePredicate<N> slicePredicate = new HSlicePredicate<N>(topSerializer);
