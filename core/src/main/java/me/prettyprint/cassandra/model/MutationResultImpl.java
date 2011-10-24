@@ -10,7 +10,7 @@ public final class MutationResultImpl extends ExecutionResult<Void> implements M
   }
 
   /*package*/ MutationResultImpl(ExecutionResult<Void> res) {
-    super(null, res.getExecutionTimeMicro(), res.getHostUsed());
+    super(null, res.getExecutionTimeNano(), res.getHostUsed());
   }
 
 
