@@ -4,6 +4,7 @@ Changes by version:
 0.8.0-4
 =======
 Add durable_writes support. #293
+Make sleep time when waiting for schema agreement customizable #302
 
 0.8.0-3
 =======
