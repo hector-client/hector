@@ -52,4 +52,4 @@ Make sure this file is in the path before the hector JARs, as there is one provi
     # Which SLF4J log name shall we output to?  Speed4J uses the INFO log level.
     # Note that this is slightly different from the old Log4J name just to ensure that we
     # don't mess with any existing log4j configurations.
-    speed4j.hector.slf4jLogname=me.prettyprint.hector.TimingLogger
+    speed4j.hector-<cluster-name>.slf4jLogname=me.prettyprint.hector.TimingLogger
