@@ -11,6 +11,7 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
+import me.prettyprint.cassandra.model.BasicKeyspaceDefinition;           
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -197,4 +198,71 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     assertNotNull(ksid2);
   }
   
+  @Test
+  public void testAddEmptyBasicKeyspaceDefinition() throws Exception {
+    BasicKeyspaceDefinition ksDef = new BasicKeyspaceDefinition();
+    ksDef.setName("DynKeyspaceEmpty");
+    ksDef.setReplicationFactor(1);
+    ksDef.setStrategyClass("SimpleStrategy");
+    
+    cassandraCluster.addKeyspace(ksDef);
+    assertNotNull(cassandraCluster.describeKeyspace("DynKeyspaceEmpty"));
+    String ksid2 = cassandraCluster.dropKeyspace("DynKeyspaceEmpty");
+    assertNotNull(ksid2);
+  }
+  
+  @Test
+  public void testEditBasicKeyspaceDefinition() throws Exception {
+    BasicKeyspaceDefinition ksDef = new BasicKeyspaceDefinition();
+    ksDef.setName("DynKeyspace4");
+    ksDef.setReplicationFactor(1);
+    ksDef.setStrategyClass("SimpleStrategy");
+    
+    cassandraCluster.addKeyspace(ksDef);
+    assertNotNull(cassandraCluster.describeKeyspace("DynKeyspace4"));
+    
+    ksDef.setReplicationFactor(2);
+    
+    cassandraCluster.updateKeyspace(ksDef);
+    
+    KeyspaceDefinition fromCluster = cassandraCluster.describeKeyspace("DynKeyspace4");
+    assertEquals(2, fromCluster.getReplicationFactor());
+    cassandraCluster.dropKeyspace("DynKeyspace4");
+  }
+  
+  @Test
+  public void testAddDropBasicColumnFamilyDefinition() throws Exception {
+    BasicColumnFamilyDefinition cfDef = new BasicColumnFamilyDefinition();
+    cfDef.setName("DynCf");
+    cfDef.setKeyspaceName("Keyspace1");
+
+    cassandraCluster.addColumnFamily(cfDef);
+    String cfid2 = cassandraCluster.dropColumnFamily("Keyspace1", "DynCf");
+    assertNotNull(cfid2);
+  }
+  
+  @Test
+  public void testEditBasicColumnFamilyDefinition() throws Exception {
+    BasicKeyspaceDefinition ksDef = new BasicKeyspaceDefinition();
+    ksDef.setName("Keyspace2");
+    ksDef.setReplicationFactor(1);
+    ksDef.setStrategyClass("SimpleStrategy");
+    
+    cassandraCluster.addKeyspace(ksDef);
+    
+    BasicColumnFamilyDefinition cfDef = new BasicColumnFamilyDefinition();
+    cfDef.setName("DynCf2");
+    cfDef.setKeyspaceName("Keyspace2");
+
+    cassandraCluster.addColumnFamily(cfDef);
+    
+    KeyspaceDefinition fromCluster = cassandraCluster.describeKeyspace("Keyspace2");    
+    cfDef = new BasicColumnFamilyDefinition(fromCluster.getCfDefs().get(0));
+    
+    cfDef.setDefaultValidationClass(ComparatorType.LONGTYPE.getClassName());
+    cassandraCluster.updateColumnFamily(cfDef);
+    
+    String cfid2 = cassandraCluster.dropColumnFamily("Keyspace2", "DynCf2");
+    assertNotNull(cfid2);
+  }
 }
