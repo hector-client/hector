@@ -34,26 +34,15 @@ public final class CassandraHost {
    */
   public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
 
-  /**
-   * The default max idle number determines how many idle connections may reside in the pool.
-   * If -1 then it's infinity.
-   */
-  public static final int DEFAULT_MAX_IDLE = -1;
-
   public static final boolean DEFAULT_LIFO = true;
-  public static final long DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS = 18000000;
-  public static final long DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS = -1;
 
   private final String host, ip, url;
   private final int port;
   private final String name;
 
   private int maxActive = DEFAULT_MAX_ACTIVE;
-  private int maxIdle = DEFAULT_MAX_IDLE;
 
   private boolean lifo = DEFAULT_LIFO;
-  private long minEvictableIdleTimeMillis = DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-  private long timeBetweenEvictionRunsMillis = DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
 
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
@@ -154,14 +143,6 @@ public final class CassandraHost {
     this.maxActive = maxActive;
   }
 
-  public int getMaxIdle() {
-    return maxIdle;
-  }
-
-  public void setMaxIdle(int maxIdle) {
-    this.maxIdle = maxIdle;
-  }
-
   public long getMaxWaitTimeWhenExhausted() {
     return maxWaitTimeWhenExhausted;
   }
@@ -208,22 +189,6 @@ public final class CassandraHost {
 
   public void setLifo(boolean lifo) {
     this.lifo = lifo;
-  }
-
-  public long getMinEvictableIdleTimeMillis() {
-    return minEvictableIdleTimeMillis;
-  }
-
-  public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
-    this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
-  }
-
-  public long getTimeBetweenEvictionRunsMillis() {
-    return timeBetweenEvictionRunsMillis;
-  }
-
-  public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
-    this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
   }
 
   public boolean getUseSocketKeepalive() {
