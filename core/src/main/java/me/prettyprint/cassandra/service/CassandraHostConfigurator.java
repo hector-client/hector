@@ -20,10 +20,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private String hosts;
   private int port = CassandraHost.DEFAULT_PORT;
   private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
-  private int maxIdle = CassandraHost.DEFAULT_MAX_IDLE;
   private boolean lifo = CassandraHost.DEFAULT_LIFO;
-  private long minEvictableIdleTimeMillis = CassandraHost.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS;
-  private long timeBetweenEvictionRunsMillis = CassandraHost.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS;
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private ExhaustedPolicy exhaustedPolicy;
@@ -70,10 +67,7 @@ public final class CassandraHostConfigurator implements Serializable {
   public void applyConfig(CassandraHost cassandraHost) {
 
     cassandraHost.setMaxActive(maxActive);
-    cassandraHost.setMaxIdle(maxIdle);
     cassandraHost.setLifo(lifo);
-    cassandraHost.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
-    cassandraHost.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
     cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
     cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
@@ -95,9 +89,6 @@ public final class CassandraHostConfigurator implements Serializable {
     this.maxActive = maxActive;
   }
 
-  public void setMaxIdle(int maxIdle) {
-    this.maxIdle = maxIdle;
-  }
 
   public void setMaxWaitTimeWhenExhausted(long maxWaitTimeWhenExhausted) {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
@@ -166,8 +157,6 @@ public final class CassandraHostConfigurator implements Serializable {
     s.append(cassandraThriftSocketTimeout);
     s.append("&maxWaitTimeWhenExhausted=");
     s.append(maxWaitTimeWhenExhausted);
-    s.append("&maxIdle=");
-    s.append(maxIdle);
     s.append("&maxActive=");
     s.append(maxActive);
     s.append("&hosts=");
@@ -188,22 +177,6 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setLifo(boolean lifo) {
     this.lifo = lifo;
-  }
-
-  public long getMinEvictableIdleTimeMillis() {
-    return minEvictableIdleTimeMillis;
-  }
-
-  public void setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
-    this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
-  }
-
-  public long getTimeBetweenEvictionRunsMillis() {
-    return timeBetweenEvictionRunsMillis;
-  }
-
-  public void setTimeBetweenEvictionRunsMillis(long timeBetweenEvictionRunsMillis) {
-    this.timeBetweenEvictionRunsMillis = timeBetweenEvictionRunsMillis;
   }
 
   public int getPort() {
