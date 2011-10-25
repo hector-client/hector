@@ -62,7 +62,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          String schemaId = cassandra.system_update_keyspace(((ThriftKsDef) ksdef).toThrift());
+          String schemaId = cassandra.system_update_keyspace(toThriftImplementation(ksdef).toThrift());
           if (blockUntilComplete) {
             waitForSchemaAgreement(cassandra);
           }
@@ -90,8 +90,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-        	
-          String schemaId = cassandra.system_add_column_family(((ThriftCfDef) cfdef).toThrift());
+          String schemaId = cassandra.system_add_column_family(toThriftImplementation(cfdef).toThrift());
           if (blockUntilComplete) {
             waitForSchemaAgreement(cassandra);
           }
@@ -119,7 +118,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          String schemaId = cassandra.system_update_column_family(((ThriftCfDef) cfdef).toThrift());
+          String schemaId = cassandra.system_update_column_family(toThriftImplementation(cfdef).toThrift());
           if (blockUntilComplete) {
             waitForSchemaAgreement(cassandra);
           }
@@ -144,7 +143,7 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
-          String schemaId = cassandra.system_add_keyspace(((ThriftKsDef) ksdef).toThrift());
+          String schemaId = cassandra.system_add_keyspace(toThriftImplementation(ksdef).toThrift());
           if (blockUntilComplete) {
             waitForSchemaAgreement(cassandra);
           }
@@ -157,5 +156,20 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
     connectionManager.operateWithFailover(op);
     return op.getResult();
   }
-
+  
+  private ThriftCfDef toThriftImplementation(final ColumnFamilyDefinition cfdef) {
+  	if(cfdef instanceof ThriftCfDef) {
+  	  return (ThriftCfDef) cfdef;
+  	} else {
+  	  return new ThriftCfDef(cfdef);
+  	}
+  }
+  
+  private ThriftKsDef toThriftImplementation(final KeyspaceDefinition cfdef) {
+  	if(cfdef instanceof ThriftKsDef) {
+  	  return (ThriftKsDef) cfdef;
+  	} else {
+  	  return new ThriftKsDef(cfdef);
+  	}
+  }
 }

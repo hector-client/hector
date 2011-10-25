@@ -6,9 +6,12 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+
 0.8.0-4
 =======
 Add durable_writes support. #293
+Make sleep time when waiting for schema agreement customizable #302
+Fix MutatorResult wrong result time. #273
 
 0.8.0-3
 =======

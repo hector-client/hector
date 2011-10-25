@@ -100,6 +100,8 @@ public class CassandraTestBase {
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "Furniture").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
+        cfDefList.add(new CfDef("TestKeyspace", "MyConvertedCollectionFamily").setComparator_type(BytesType.class.getSimpleName())
+            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cluster = HFactory.getOrCreateCluster("TestPool", "localhost:9170");
         createKeyspace(cluster, "TestKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, cfDefList);
         keyspace = HFactory.createKeyspace("TestKeyspace", cluster);

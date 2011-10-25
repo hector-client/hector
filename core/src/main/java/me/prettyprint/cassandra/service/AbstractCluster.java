@@ -48,7 +48,8 @@ public abstract class AbstractCluster implements Cluster {
   /**
    * Linked to Cassandra StorageProxy.
    */
-  private static final int RING_DELAY = 30 * 1000; // delay after which we assume ring has stablized
+  public static final int RING_DELAY = 30 * 1000; // delay after which we assume ring has stablized
+  public static final int WAIT_FOR_SCHEMA_AGREEMENT_SLEEP_TIME = 1000;
 
   protected final HConnectionManager connectionManager;
   private final String name;
@@ -314,8 +315,8 @@ public abstract class AbstractCluster implements Cluster {
       }
 
       if (versions != 1) {
-        Thread.sleep(1000);
-        waited += 1000;
+        Thread.sleep(WAIT_FOR_SCHEMA_AGREEMENT_SLEEP_TIME);
+        waited += WAIT_FOR_SCHEMA_AGREEMENT_SLEEP_TIME;
         if (waited > RING_DELAY)
           throw new RuntimeException("Could not reach schema agreement in " + RING_DELAY + "ms");
       }

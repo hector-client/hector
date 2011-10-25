@@ -1,6 +1,10 @@
 Changes by version:
 ===================
 
+2.0-02
+======
+- issue-310 : Collections Should Respect Converters
+
 2.0-01
 =======
 - bumped version to 2.0-01 for cassandra 1.0 release, just in case any specific ties to cassandra 1.0
