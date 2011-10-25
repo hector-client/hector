@@ -20,8 +20,6 @@ import org.apache.cassandra.thrift.Cassandra;
  *          Oh closures, how I wish you were here...
  */
 public abstract class Operation<T> {
-  private static final Map<String, String> EMPTY_CREDENTIALS = Collections.emptyMap();
-
   /** Counts failed attempts */
   public final Counter failCounter;
 
