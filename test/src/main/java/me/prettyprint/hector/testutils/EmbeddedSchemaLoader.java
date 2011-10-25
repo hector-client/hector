@@ -63,7 +63,7 @@ public class EmbeddedSchemaLoader {
     subComparators.add(IntegerType.instance);
     
     // Keyspace 1
-    schema.add(new KSMetaData(
+    schema.add(KSMetaData.testMetadata(
         ks1,
         simple,
         opts,

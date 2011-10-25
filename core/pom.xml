@@ -220,19 +220,13 @@
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <profiles>
-    <profile>
-      <id>riptano</id>
-      <distributionManagement>
-        <repository>
-          <id>riptano</id>
-          <name>riptano</name>
-          <url>http://mvn.riptano.com/content/repositories/public/</url>
-        </repository>
-      </distributionManagement>
-    </profile>
-  </profiles>
+
   <repositories>
+    <repository>
+      <id>riptano-snapshot</id>
+      <name>riptano-snapshot</name>
+      <url>http://mvn.riptano.com/content/repositories/snapshots/</url>
+    </repository>
     <repository>
       <id>riptano</id>
       <name>riptano</name>
