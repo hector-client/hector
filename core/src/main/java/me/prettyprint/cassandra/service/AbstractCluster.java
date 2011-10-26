@@ -57,7 +57,6 @@ public abstract class AbstractCluster implements Cluster {
   private final ClockResolution clockResolution;
   private final FailoverPolicy failoverPolicy;
   private final CassandraClientMonitor cassandraClientMonitor;
-  private Set<String> knownClusterHosts;
   private Set<CassandraHost> knownPoolHosts;
   protected final ExceptionsTranslator xtrans;
   private final Map<String, String> credentials;
