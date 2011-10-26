@@ -8,16 +8,12 @@ import java.util.concurrent.TimeUnit;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
-import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 
-import org.apache.cassandra.thrift.AuthenticationRequest;
-import org.apache.cassandra.thrift.Cassandra;
-import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.EndpointDetails;
 import org.apache.cassandra.thrift.TokenRange;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +24,15 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
 
   public static final int DEF_AUTO_DISCOVERY_DELAY = 30;
 
+  private DataCenterValidator dataCenterValidator;
+
 
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
       CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
     this.retryDelayInSeconds = cassandraHostConfigurator.getAutoDiscoveryDelayInSeconds();
-    sf = executor.scheduleWithFixedDelay(new QueryRing(), retryDelayInSeconds,retryDelayInSeconds, TimeUnit.SECONDS);
+    this.dataCenterValidator = new DataCenterValidator(cassandraHostConfigurator.getAutoDiscoveryDataCenters());
+    sf = executor.scheduleWithFixedDelay(new QueryRing(), retryDelayInSeconds, retryDelayInSeconds, TimeUnit.SECONDS);
   }
 
   @Override
@@ -84,25 +83,34 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     Set<CassandraHost> existingHosts = connectionManager.getHosts();
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
 
-    log.info("using existing hosts {}", existingHosts);
+    if (log.isDebugEnabled()) {
+      log.debug("using existing hosts {}", existingHosts);
+    }
+
     try {
-      
+
       String clusterName = connectionManager.getClusterName();
-      
+
       //this could be suspect, but we need this 
       ThriftCluster cluster = (ThriftCluster) HFactory.getCluster(clusterName);
 
-      for(KeyspaceDefinition keyspaceDefinition: cluster.describeKeyspaces()) {    	  
+      for(KeyspaceDefinition keyspaceDefinition: cluster.describeKeyspaces()) {
         if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
           List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
           for (TokenRange tokenRange : tokenRanges) {
-            for (String host : tokenRange.getEndpoints()) {
-              CassandraHost foundHost = new CassandraHost(host,cassandraHostConfigurator.getPort());
-              if ( !existingHosts.contains(foundHost) ) {
-                log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
-                foundHosts.add(foundHost);
+
+              for (EndpointDetails endPointDetail : tokenRange.getEndpoint_details()) {
+                // Check if we are allowed to include this Data Center.
+                if (dataCenterValidator.validate(endPointDetail.getDatacenter())) {
+                  // Maybe add this host if it's a new host.
+                  CassandraHost foundHost = new CassandraHost(endPointDetail.getHost(), cassandraHostConfigurator.getPort());
+                  if ( !existingHosts.contains(foundHost) ) {
+                    log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
+                    foundHosts.add(foundHost);
+                  }
+                }
               }
-            }
+
           }
           break;
         }
@@ -110,12 +118,34 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     } catch (Exception e) {
       log.error("Discovery Service failed attempt to connect CassandraHost", e);
     }
-//    } finally {
-//      connectionManager.releaseClient(thriftClient);
-//    }
+
     return foundHosts;
   }
 
 
+  /**
+   * Abstraction to validate that the discovered nodes belong to a specific datacenters.
+   * 
+   * @author patricioe (Patricio Echague - patricio@datastax.com)
+   *
+   */
+  class DataCenterValidator {
+
+    Set<String> dataCenters;
+
+    public DataCenterValidator(List<String> dataCenters) {
+      if (dataCenters != null)
+        this.dataCenters = new HashSet<String>(dataCenters);
+    }
+
+    public boolean validate(String dcName) {
+      // If the DC is not defined (i.e: single cluster) always returns TRUE.
+      if (dataCenters == null || dcName == null)
+        return true;
+
+      return dataCenters.contains(dcName);
+    }
+  }
+  
 }
 
