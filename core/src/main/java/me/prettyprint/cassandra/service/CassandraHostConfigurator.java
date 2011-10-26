@@ -1,6 +1,10 @@
 package me.prettyprint.cassandra.service;
 
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.List;
+
+import com.google.common.collect.Lists;
 
 import me.prettyprint.cassandra.connection.CassandraHostRetryService;
 import me.prettyprint.cassandra.connection.HOpTimer;
@@ -26,11 +30,15 @@ public final class CassandraHostConfigurator implements Serializable {
   private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution = DEF_CLOCK_RESOLUTION;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  
   private boolean retryDownedHosts = true;
-  private boolean autoDiscoverHosts = false;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
+
+  private boolean autoDiscoverHosts = false;
   private int autoDiscoveryDelayInSeconds = NodeAutoDiscoverService.DEF_AUTO_DISCOVERY_DELAY;
+  private List<String> autoDiscoveryDataCenters;
+
   private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
   public static final ClockResolution DEF_CLOCK_RESOLUTION = HFactory.createClockResolution(ClockResolution.MICROSECONDS_SYNC);
   private int hostTimeoutCounter = HostTimeoutTracker.DEF_TIMEOUT_COUNTER;
@@ -41,6 +49,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean runAutoDiscoveryAtStartup = false;
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
+
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -213,6 +222,32 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setAutoDiscoveryDelayInSeconds(int autoDiscoveryDelayInSeconds) {
     this.autoDiscoveryDelayInSeconds = autoDiscoveryDelayInSeconds;
+  }
+
+  /**
+   * Sets the local datacenter for the DiscoveryService. Nodes out of this 
+   * datacenter will be discarded.
+   * @param dataCenter DataCenter name
+   */
+  public void setAutoDiscoveryDataCenter(String dataCenter) {
+    this.autoDiscoveryDataCenters = Arrays.asList(dataCenter);
+  }
+
+  /**
+   * Sets the datacenters for the DiscoveryService. Nodes out of these 
+   * datacenters will be discarded.
+   */
+  public void setAutoDiscoveryDataCenter(List<String> dataCenters) {
+    this.autoDiscoveryDataCenters = dataCenters;
+  }
+
+  /**
+   * Retrieves the 'local' datacenter names that the DiscoveryService recognizes as valid 
+   * in order to discover new hosts.
+   * @return a list of 'local' datacenter names
+   */
+  public List<String> getAutoDiscoveryDataCenters() {
+    return autoDiscoveryDataCenters;
   }
 
   public LoadBalancingPolicy getLoadBalancingPolicy() {
