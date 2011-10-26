@@ -52,8 +52,9 @@ public class ColumnParser implements ColumnParserValidator {
     PropertyMappingDefinition md = new PropertyMappingDefinition(pd, anno.name(), anno.converter());
     
     // if collection type and default converter then make note of collection type for later use
-    if (Collection.class.isAssignableFrom(pd.getPropertyType()) && md.isDefaultConverter()) {
-      md.setCollectionType(pd.getPropertyType());
+    Class<?> type = pd.getPropertyType();
+    if (Collection.class.isAssignableFrom(type) && md.isDefaultConverter()) {
+      md.setCollectionType(type);
     }
     
     cfMapDef.addPropertyDefinition(md);

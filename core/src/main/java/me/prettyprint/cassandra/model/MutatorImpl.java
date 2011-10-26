@@ -138,9 +138,9 @@ public final class MutatorImpl<K> implements Mutator<K> {
   }
   
   public <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc, long clock) {
-    SlicePredicate pred = new SlicePredicate();
     Deletion d = new Deletion().setTimestamp(clock);
     if ( sc.getColumns() != null ) {      
+      SlicePredicate pred = new SlicePredicate();
       for (HColumn<N, V> col : sc.getColumns()) {
         pred.addToColumn_names(col.getNameSerializer().toByteBuffer(col.getName()));
       }
@@ -218,9 +218,9 @@ public final class MutatorImpl<K> implements Mutator<K> {
    */
   @Override
   public <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer, long clock) {
-    SlicePredicate sp = new SlicePredicate();
     Deletion d;
     if ( columnName != null ) {
+      SlicePredicate sp = new SlicePredicate();
       sp.addToColumn_names(nameSerializer.toByteBuffer(columnName));
       d = new Deletion().setTimestamp(clock).setPredicate(sp);
     } else { 
@@ -345,9 +345,9 @@ public final class MutatorImpl<K> implements Mutator<K> {
 
   @Override
   public <N> Mutator<K> addCounterDeletion(K key, String cf, N counterColumnName, Serializer<N> nameSerializer) {
-    SlicePredicate sp = new SlicePredicate();
     Deletion d;
     if ( counterColumnName != null ) {
+      SlicePredicate sp = new SlicePredicate();
       sp.addToColumn_names(nameSerializer.toByteBuffer(counterColumnName));
       d = new Deletion().setPredicate(sp);
     } else { 
@@ -365,9 +365,9 @@ public final class MutatorImpl<K> implements Mutator<K> {
 
   @Override
   public <SN, N> Mutator<K> addCounterSubDeletion(K key, String cf, HCounterSuperColumn<SN, N> sc) {
-    SlicePredicate pred = new SlicePredicate();
     Deletion d = new Deletion();
     if ( sc.getColumns() != null ) {      
+      SlicePredicate pred = new SlicePredicate();
       for (HCounterColumn<N> col : sc.getColumns()) {
         pred.addToColumn_names(col.getNameSerializer().toByteBuffer(col.getName()));
       }
