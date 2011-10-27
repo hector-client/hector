@@ -17,6 +17,7 @@ import org.ietf.jgss.GSSContext;
 import org.ietf.jgss.GSSCredential;
 import org.ietf.jgss.GSSException;
 import org.ietf.jgss.GSSManager;
+import org.ietf.jgss.GSSName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,18 +65,23 @@ public class KerberosHelper {
    *          The socket used for communication
    * @param subject
    *          The Kerberos service subject
+   * @param servicePrincipalName
+   *          Service principal name
    * 
    * @return context if authorized or null
    */
-  public static GSSContext authenticateClient(final Socket socket, Subject subject) {
+  public static GSSContext authenticateClient(final Socket socket, Subject subject, final String servicePrincipalName) {
     return Subject.doAs(subject, new PrivilegedAction<GSSContext>() {
       public GSSContext run() {
         try {
           GSSManager manager = GSSManager.getInstance();
-          GSSContext context = manager.createContext((GSSCredential) null);
+          GSSName peerName = manager.createName(servicePrincipalName, GSSName.NT_HOSTBASED_SERVICE);
+          GSSContext context = manager.createContext(peerName, null, null, GSSContext.DEFAULT_LIFETIME);
 
-          while (!context.isEstablished())
-            context.acceptSecContext(socket.getInputStream(), socket.getOutputStream());
+          // Loop while the context is still not established
+          while (!context.isEstablished()) {
+            context.initSecContext(socket.getInputStream(), socket.getOutputStream());
+          }
 
           return context;
         } catch (Exception e) {

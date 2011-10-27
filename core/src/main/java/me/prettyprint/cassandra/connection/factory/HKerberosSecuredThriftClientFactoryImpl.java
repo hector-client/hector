@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
  * <li><code>sun.security.krb5.debug</code>. Set to <code>TRUE</code> for debug. Default is <code>FALSE</code>.
  * <li><code>kerberos.client.reference.name</code> Kerberos client reference name specified in <code>jaas.conf</code>. 
  * Default: "Client".
+ * <li><code>kerberos.service.principal.name</code> Kerberos Service principal name without the domain. Default: "cassandra".
  * <li><code>kerberos.client.principal.name</code> Username for when .keytab file is not specified.
  * <li><code>kerberos.client.password</code> Password for then .keytab file is not specified.
  * </ul>
@@ -57,6 +58,9 @@ import org.slf4j.LoggerFactory;
  * };
  * </pre>
  * 
+ * <code>useKeyTab</code> and <code>keytab</code> can be omitted if <code>kerberos.client.principal.name</code>
+ * and <code>kerberos.client.password</code> are specified.
+ * 
  * @see HKerberosThriftClient
  * 
  * @author patricioe (Patricio Echague - patricioe@gmail.com)
@@ -66,10 +70,11 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
 
   private static final Logger log = LoggerFactory.getLogger(HKerberosSecuredThriftClientFactoryImpl.class);
 
-  public static final String JAAS_CONFIG = "./jaas.conf";
-  public static final String KRB5_CONFIG = "./krb5.conf";
+  public static final String JAAS_CONFIG = "jaas.conf";
+  public static final String KRB5_CONFIG = "krb5.conf";
 
   private final Subject kerberosTicket;
+  private String krbServicePrincipalName;
 
   public HKerberosSecuredThriftClientFactoryImpl() {
     String jaasConf = System.getProperty("java.security.auth.login.config");
@@ -78,6 +83,7 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
     String krbClientReferenceName = System.getProperty("kerberos.client.reference.name");
     String krbClientUsername = System.getProperty("kerberos.client.principal.name");
     String krbClientPassword = System.getProperty("kerberos.client.password");
+    krbServicePrincipalName = System.getProperty("kerberos.service.principal.name");
 
     if (krbDebug == null)
       System.setProperty("sun.security.krb5.debug", "false");
@@ -90,6 +96,9 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
 
     if (krbClientReferenceName == null)
       krbClientReferenceName = "Client";
+    
+    if (krbServicePrincipalName == null)
+      krbServicePrincipalName = "cassandra";
 
     System.setProperty("javax.security.auth.useSubjectCredsOnly", "true");
 
@@ -98,7 +107,8 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
     log.info("  sun.security.krb5.debug = {}", System.getProperty("sun.security.krb5.debug"));
     log.info("  java.security.auth.login.config = {}", System.getProperty("java.security.auth.login.config"));
     log.info("  java.security.krb5.conf = {}", System.getProperty("java.security.krb5.conf"));
-    log.info("  kerberos.client.reference.name = {}", System.getProperty("kerberos.client.reference.name"));
+    log.info("  kerberos.client.reference.name = {}", System.getProperty("kerberos.client.reference.name", krbClientReferenceName));
+    log.info("  kerberos.service.principal.name = {}", System.getProperty("kerberos.service.principal.name", krbServicePrincipalName));
     log.info("  kerberos.client.principal.name = {}", System.getProperty("kerberos.client.principal.name"));
     log.info("  kerberos.client.password = {}", System.getProperty("kerberos.client.password"));
     log.info("  javax.security.auth.useSubjectCredsOnly = true");
@@ -124,7 +134,7 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
     if (log.isDebugEnabled()) {
       log.debug("Creation of new client");
     }
-    return new HKerberosThriftClient(kerberosTicket, ch);
+    return new HKerberosThriftClient(kerberosTicket, ch, krbServicePrincipalName);
   }
 
 }

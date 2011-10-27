@@ -26,15 +26,17 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
   private static Logger log = LoggerFactory.getLogger(HKerberosThriftClient.class);
   
   private Subject kerberosTicket;
+  private String servicePrincipalName;
 
   /**
    * Constructor
    * @param kerberosTicket 
    * @param cassandraHost
    */
-  public HKerberosThriftClient(Subject kerberosTicket, CassandraHost cassandraHost) {
+  public HKerberosThriftClient(Subject kerberosTicket, CassandraHost cassandraHost, String servicePrincipalName) {
     super(cassandraHost);
     this.kerberosTicket = kerberosTicket;
+    this.servicePrincipalName = servicePrincipalName;
   }
 
   /**
@@ -57,14 +59,6 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
       }
     }
 
-    // Kerberos authentication
-    Socket internalSocket = socket.getSocket();
-
-    final GSSContext clientContext = KerberosHelper.authenticateClient(internalSocket, kerberosTicket);
-
-    if (clientContext == null)
-        throw new HectorTransportException("Kerberos context couldn't be established with client.");
-
     // TODO (patricioe) What should I do with it ?
     // KerberosHelper.getSourcePrinciple(clientContext));
 
@@ -84,6 +78,17 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
       throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
           e.getLocalizedMessage(), e);
     }
+    
+    // Kerberos authentication
+    Socket internalSocket = socket.getSocket();
+
+    final GSSContext clientContext = KerberosHelper.authenticateClient(internalSocket, kerberosTicket, servicePrincipalName);
+
+    if (clientContext == null) {
+      close();
+      throw new HectorTransportException("Kerberos context couldn't be established with client.");
+    }
+
     return this;
   }
 
