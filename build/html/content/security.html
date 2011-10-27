@@ -172,7 +172,10 @@ Server {
 [realms]
         DATASTAX.COM = {
                 kdc = &lt;ip_address&gt;
-        }</pre>
+        }
+
+[domain_realm]
+        datastax.com = DATASTAX.COM</pre>
 </div>
 </div>
 <div class="section" id="setting-up-kerberos">
@@ -183,9 +186,11 @@ Server {
 <p>Second, we need to let Hector know where the <em>jaas.conf</em> and <em>krb5.conf</em> files are. In order to do that, let&#8217;s set the following properties:</p>
 <div class="highlight-properties"><div class="highlight"><pre><span class="na">-Djava.security.auth.login.config</span><span class="o">=</span><span class="s">&lt;path_to_the_file&gt;/jaas.conf</span>
 <span class="na">-Djava.security.krb5.conf</span><span class="o">=</span><span class="s">&lt;path_to_the_file&gt;/krb5.conf</span>
-<span class="na">-Dkerberos.client.reference.name</span><span class="o">=</span><span class="s">HectorClient</span>
+<span class="na">-Dkerberos.client.reference.name</span><span class="o">=</span><span class="s">Client</span>
+<span class="na">-Dkerberos.service.principal.name</span><span class="o">=</span><span class="s">service_principal</span>
 </pre></div>
 </div>
+<p><strong>Note:</strong> <tt class="docutils literal"><span class="pre">service_principal</span></tt> should be just the name. I.e: <a class="reference external" href="mailto:cassandra/host&#37;&#52;&#48;REALM">cassandra/host<span>&#64;</span>REALM</a> you should use <em>cassandra</em>.</p>
 <p>If <em>java.security.auth.login.config</em> and <em>java.security.krb5.conf</em> two properties are not set, the default is <em>./jaas.conf</em> and <em>./krb5.conf</em> respectively from the root of the classpath.</p>
 <p>If <em>kerberos.client.reference.name</em> is not set, the default is <em>Client</em>. This is the reference in the <em>jaas.conf</em> file for the client.</p>
 <p>Finally, we need to point <em>jaas.conf</em> to the right <em>.keytab</em> file. Edit the property <strong>keyTab=&#8221;...&#8221;</strong> in <em>jaas.conf</em> file.</p>

@@ -68,6 +68,9 @@ krb5.conf sample
 			kdc = <ip_address>
 		}
 
+	[domain_realm]
+		datastax.com = DATASTAX.COM
+
 ===================
 Setting up Kerberos
 ===================
@@ -80,7 +83,10 @@ Second, we need to let Hector know where the *jaas.conf* and *krb5.conf* files a
 
 	-Djava.security.auth.login.config=<path_to_the_file>/jaas.conf
 	-Djava.security.krb5.conf=<path_to_the_file>/krb5.conf
-	-Dkerberos.client.reference.name=HectorClient
+	-Dkerberos.client.reference.name=Client
+	-Dkerberos.service.principal.name=service_principal
+
+**Note:** ``service_principal`` should be just the name. I.e: cassandra/host@REALM you should use *cassandra*. 
 
 If *java.security.auth.login.config* and *java.security.krb5.conf* two properties are not set, the default is *./jaas.conf* and *./krb5.conf* respectively from the root of the classpath.
 
