@@ -81,4 +81,27 @@ public class DynamicCompositeTest {
 
 	}
 
+	
+	/**
+	 * Tests that when compared in memory, values are correctly sorted using the correct comparator
+	 */
+	@Test
+	public void correctComparatorsUsed(){
+		
+		long minLong = 1311163200000l;
+		long maxLong = 1313928000000l;
+		
+		DynamicComposite min = new DynamicComposite();
+		min.addComponent(minLong, LongSerializer.get());
+		
+		
+		DynamicComposite max = new DynamicComposite();
+		max.addComponent(maxLong, LongSerializer.get());
+		
+		
+		int compare = max.compareTo(min);
+		
+		assertTrue(compare > 0);
+		
+	}
 }
