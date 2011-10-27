@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,11 +25,4 @@ public class MappedColumnFamilyResultWrapper<K, N, V> extends ColumnFamilyResult
     return rowMapper.mapRow(this);
   }
 
-  @Override
-  public Iterator<V> iterator() {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  
 }
