@@ -49,6 +49,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean runAutoDiscoveryAtStartup = false;
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
+  private boolean useKerberosAuthentication = false;
 
 
   public CassandraHostConfigurator() {
@@ -324,6 +325,20 @@ public final class CassandraHostConfigurator implements Serializable {
     this.useSocketKeepalive = useSocketKeepalive;
   }
 
-  
+  /**
+   * Retrieves whether Kerberos authentication is enabled or not.
+   * @return <code>TRUE</code> if Kerberos in enabled. <code>FALSE</code> otherwise.
+   */
+  public boolean isUseKerberosAuthentication() {
+    return useKerberosAuthentication;
+  }
+
+  /**
+   * Set Kerberos Authentication.
+   * @param useKerberosAuthentication 
+   */
+  public void setUseKerberosAuthentication(boolean useKerberosAuthentication) {
+    this.useKerberosAuthentication = useKerberosAuthentication;
+  }
 
 }

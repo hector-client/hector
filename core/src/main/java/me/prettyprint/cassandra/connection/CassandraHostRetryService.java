@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import me.prettyprint.cassandra.connection.client.HClient;
+import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
@@ -26,11 +28,16 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   public static final int DEF_QUEUE_SIZE = -1;
   public static final int DEF_RETRY_DELAY = 10;
+  
+  private final HClientFactory clientFactory;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
 
-  public CassandraHostRetryService(HConnectionManager connectionManager,
+  public CassandraHostRetryService(HConnectionManager connectionManager, HClientFactory clientFactory,
       CassandraHostConfigurator cassandraHostConfigurator) {
+
     super(connectionManager, cassandraHostConfigurator);
+    this.clientFactory = clientFactory;
+
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1 
         ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());
@@ -170,7 +177,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       return false;
     }
     boolean found = false;
-    HThriftClient client = new HThriftClient(cassandraHost);
+    HClient client = clientFactory.createClient(cassandraHost);
     try {
       client.open();
       found = client.getCassandra().describe_cluster_name() != null;

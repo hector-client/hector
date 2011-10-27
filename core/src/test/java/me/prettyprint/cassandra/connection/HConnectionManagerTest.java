@@ -1,12 +1,10 @@
 package me.prettyprint.cassandra.connection;
 
-import static org.junit.Assert.*;
-
-import org.apache.cassandra.thrift.Cassandra.Client;
-import org.junit.Before;
-import org.junit.Test;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.FailoverPolicy;
@@ -14,13 +12,12 @@ import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorTransportException;
+
+import org.apache.cassandra.thrift.Cassandra.Client;
+import org.junit.Test;
 
 public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
 
-  
- 
-  
   @Test
   public void testRemoveHost() {
     setupClient();
@@ -51,8 +48,8 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     cassandraHostConfigurator.setRetryDownedHosts(false);
     connectionManager = new HConnectionManager(clusterName, cassandraHostConfigurator);
     CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);    
-    HThriftClient client = connectionManager.borrowClient();
-    connectionManager.markHostAsDown(client.cassandraHost);
+    HClient client = connectionManager.borrowClient();
+    connectionManager.markHostAsDown(client.getCassandraHost());
     assertEquals(0,connectionManager.getActivePools().size());
   }
   

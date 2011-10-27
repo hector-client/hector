@@ -1,6 +1,5 @@
-package me.prettyprint.cassandra.connection;
+package me.prettyprint.cassandra.connection.client;
 
-import java.net.Socket;
 import java.net.SocketException;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -22,31 +21,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class HThriftClient {
+public class HThriftClient implements HClient {
 
   private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
+
+  private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
 
   private static final AtomicLong serial = new AtomicLong(0);
 
   final CassandraHost cassandraHost;
 
   private final long mySerial;
-  private final int timeout;
-  private String keyspaceName;
+  protected final int timeout;
+  protected String keyspaceName;
   private long useageStartTime;
 
-  private TTransport transport;
-  private Cassandra.Client cassandraClient;
+  protected TTransport transport;
+  protected Cassandra.Client cassandraClient;
 
-  HThriftClient(CassandraHost cassandraHost) {
+  /**
+   * Constructor
+   * @param cassandraHost
+   */
+  public HThriftClient(CassandraHost cassandraHost) {
     this.cassandraHost = cassandraHost;
     this.timeout = getTimeout(cassandraHost);
     mySerial = serial.incrementAndGet();
   }
 
   /**
-   * Returns a new Cassandra.Client on each invocation using the underlying transport
-   *
+   * {@inheritDoc}
    */
   public Cassandra.Client getCassandra() {
     if ( !isOpen() ) {
@@ -58,13 +62,16 @@ public class HThriftClient {
     return cassandraClient;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public Cassandra.Client getCassandra(String keyspaceNameArg) {
     getCassandra();    
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
       if ( log.isDebugEnabled() )
         log.debug("keyspace reseting from {} to {}", keyspaceName, keyspaceNameArg);
       try {
-        cassandraClient.set_keyspace(keyspaceNameArg);        
+        cassandraClient.set_keyspace(keyspaceNameArg);
       } catch (InvalidRequestException ire) {
         throw new HInvalidRequestException(ire);
       } catch (TException e) {
@@ -75,7 +82,10 @@ public class HThriftClient {
     return cassandraClient;
   }
 
-  HThriftClient close() {
+  /**
+   * {@inheritDoc}
+   */
+  public HThriftClient close() {
     if ( log.isDebugEnabled() ) {
       log.debug("Closing client {}", this);
     }
@@ -95,8 +105,10 @@ public class HThriftClient {
     return this;
   }
 
-
-  HThriftClient open() {
+  /**
+   * {@inheritDoc}
+   */
+  public HThriftClient open() {
     if ( isOpen() ) {
       throw new IllegalStateException("Open called on already open connection. You should not have gotten here.");
     }
@@ -131,8 +143,10 @@ public class HThriftClient {
     return this;
   }
 
-
-  boolean isOpen() {
+  /**
+   * {@inheritDoc}
+   */
+  public boolean isOpen() {
     boolean open = false;
     if (transport != null) {
       open = transport.isOpen();
@@ -168,12 +182,15 @@ public class HThriftClient {
     return timeoutVar;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   public void startToUse() {
       useageStartTime = System.currentTimeMillis();
   }
   
   /**
-   * @return Time in MS since it was used.
+   * {@inheritDoc}
    */
   public long getSinceLastUsed() {
 	  return System.currentTimeMillis() - useageStartTime;
@@ -192,7 +209,11 @@ public class HThriftClient {
     return this.toString().equals(obj.toString());
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public CassandraHost getCassandraHost() {
+    return cassandraHost;
+  }
 
-
-  private static final String NAME_FORMAT = "CassandraClient<%s-%d>";
 }

@@ -3,6 +3,9 @@ package me.prettyprint.cassandra.connection;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import me.prettyprint.cassandra.connection.client.HClient;
+import me.prettyprint.cassandra.connection.client.HThriftClient;
+import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
@@ -20,20 +23,20 @@ public class LatencyAwareHClientPool extends ConcurrentHClientPool {
   private static final double SENTINEL_COMPARE = 0.768;
   private final LinkedBlockingDeque<Double> latencies;
 
-  public LatencyAwareHClientPool(CassandraHost host) {
-    super(host);
+  public LatencyAwareHClientPool(HClientFactory clientFactory, CassandraHost host) {
+    super(clientFactory, host);
     latencies = new LinkedBlockingDeque<Double>(WINDOW_QUEUE_SIZE);
   }
 
   @Override
-  public HThriftClient borrowClient() throws HectorException {
-    HThriftClient client = super.borrowClient();
+  public HClient borrowClient() throws HectorException {
+    HClient client = super.borrowClient();
     client.startToUse();
     return client;
   }
 
   @Override
-  public void releaseClient(HThriftClient client) throws HectorException {
+  public void releaseClient(HClient client) throws HectorException {
     add(client.getSinceLastUsed());
     super.releaseClient(client);
   }

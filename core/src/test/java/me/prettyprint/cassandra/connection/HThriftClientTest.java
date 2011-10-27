@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.connection;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
+import me.prettyprint.cassandra.connection.client.HThriftClient;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
