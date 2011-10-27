@@ -9,6 +9,7 @@ See object-mapper/CHANGELOG for HOM specifics
 1.0-2
 =====
 Add TopolyAware AutoDiscoveryService (#311)
+Add Kerberos support (Experimental) (#296))
 
 0.8.0-4
 =======
