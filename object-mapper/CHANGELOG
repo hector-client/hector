@@ -4,6 +4,8 @@ Changes by version:
 2.0-02
 ======
 - issue-310 : Collections Should Respect Converters
+- issue-227 : BREAKS EXISTING CONVERTERS!!! changed Converter interface so convertCassTypeToObjType takes a PropertyMappingDefinition
+
 
 2.0-01
 =======
