@@ -4,6 +4,7 @@ import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,10 +20,12 @@ import java.util.UUID;
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Id;
 
+import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
 import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
@@ -132,7 +135,8 @@ public class HectorObjectMapper {
       m.addDeletion(colFamKey, colFamName);
     }
 
-    // must create the "add" columns after the delete to insure proper processing order
+    // must create the "add" columns after the delete to insure proper
+    // processing order
     Collection<HColumn<String, byte[]>> colColl = createColumnSet(obj);
 
     for (HColumn<String, byte[]> col : colColl) {
@@ -527,7 +531,7 @@ public class HectorObjectMapper {
       logger.debug("@Id annotation found - but can't find setter for property, "
           + md.getPropDesc().getName());
       throw new HectorObjectMapperException(
-          "Trying to build new object but can't find setter for property, " 
+          "Trying to build new object but can't find setter for property, "
               + md.getPropDesc().getName());
     }
 
@@ -566,13 +570,12 @@ public class HectorObjectMapper {
       InvocationTargetException {
     PropertyDescriptor pd = md.getPropDesc();
     if (null == pd.getWriteMethod()) {
-      throw new RuntimeException("property, " + pd.getName()
-          + ", on class, " + obj.getClass().getName() + ", does not have a setter and therefore cannot be set");
+      throw new RuntimeException("property, " + pd.getName() + ", on class, "
+          + obj.getClass().getName() + ", does not have a setter and therefore cannot be set");
     }
 
     @SuppressWarnings("unchecked")
-    Object value = md.getConverter().convertCassTypeToObjType((Class<?>) pd.getPropertyType(),
-        col.getValue());
+    Object value = md.getConverter().convertCassTypeToObjType(md, col.getValue());
     pd.getWriteMethod().invoke(obj, value);
   }
 
@@ -580,6 +583,8 @@ public class HectorObjectMapper {
     Serializer<?> s = null;
     if (theType == Long.class || theType == long.class) {
       s = LongSerializer.get();
+    } else if (theType == BigInteger.class) {
+      s = BigIntegerSerializer.get();
     } else if (theType == String.class) {
       s = StringSerializer.get();
     } else if (theType == Integer.class || theType == int.class) {
@@ -592,17 +597,15 @@ public class HectorObjectMapper {
       s = DateSerializer.get();
     } else if (theType == byte[].class) {
       s = BytesArraySerializer.get();
-    }
-    // no float serializer at the moment
-    // else if ( theType== Float.class) {
-    // s = FloatSerializer.get();
-    // }
-    else if (theType == Double.class || theType == double.class) {
+    } else if (theType == Float.class) {
+      s = FloatSerializer.get();
+    } else if (theType == Double.class || theType == double.class) {
       s = DoubleSerializer.get();
     } else if (isSerializable(theType)) {
       s = ObjectSerializer.get();
     } else {
-      throw new RuntimeException("unsupported property type, " + theType.getName());
+      throw new RuntimeException("unsupported property type, " + theType.getName()
+          + ". create custom converter or petition Hector team to add another converter");
     }
     return s;
   }
