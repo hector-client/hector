@@ -5,7 +5,7 @@ import me.prettyprint.hom.converters.Converter;
 public class ColorConverter implements Converter<Colors> {
 
   @Override
-  public Colors convertCassTypeToObjType(Class<Colors> clazz, byte[] value) {
+  public Colors convertCassTypeToObjType(PropertyMappingDefinition md, byte[] value) {
     return Colors.getInstance(new String(value));
   }
 

@@ -2,6 +2,7 @@ package me.prettyprint.hom.converters;
 
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hom.HectorObjectMapper;
+import me.prettyprint.hom.PropertyMappingDefinition;
 import me.prettyprint.hom.annotations.Column;
 
 
@@ -14,8 +15,8 @@ import me.prettyprint.hom.annotations.Column;
 public class DefaultConverter implements Converter<Object> {
 
   @Override
-  public Object convertCassTypeToObjType(Class<Object> clazz, byte[] value) {
-    Serializer<?> s = HectorObjectMapper.determineSerializer(clazz);
+  public Object convertCassTypeToObjType(PropertyMappingDefinition md, byte[] value) {
+    Serializer<?> s = HectorObjectMapper.determineSerializer(md.getPropDesc().getPropertyType());
     return s.fromBytes(value);
   }
 

@@ -1,5 +1,7 @@
 package me.prettyprint.hom.converters;
 
+import me.prettyprint.hom.PropertyMappingDefinition;
+
 
 /**
  * Interface defining a custom object mapper conversion. For instance, from an
@@ -16,7 +18,7 @@ public interface Converter<T> {
    * @param value
    * @return Type of object
    */
-  abstract T convertCassTypeToObjType(Class<T> clazz, byte[] value);
+  T convertCassTypeToObjType(PropertyMappingDefinition md, byte[] value);
 
   /**
    * Convert Java type to byte[].
@@ -24,5 +26,5 @@ public interface Converter<T> {
    * @param value
    * @return Type of object converted to byte[]
    */
-  abstract byte[] convertObjTypeToCassType(T value);
+  byte[] convertObjTypeToCassType(T value);
 }
