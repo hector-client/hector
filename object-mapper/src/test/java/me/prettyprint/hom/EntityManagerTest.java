@@ -17,6 +17,8 @@ import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 
 import org.junit.Test;
 
+import com.mycompany.furniture.Drawer;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -84,6 +86,7 @@ public class EntityManagerTest extends CassandraTestBase {
     entity1.setIntProp1(pkKey.getIntProp1());
     entity1.setStrProp1(pkKey.getStrProp1());
     entity1.setStrProp2("str-prop-two");
+    entity1.setDrawer(new Drawer(true, false, "a very nice drawer"));
 
     em.persist(entity1);
     
@@ -92,6 +95,7 @@ public class EntityManagerTest extends CassandraTestBase {
     assertEquals( entity1.getIntProp1(), entity2.getIntProp1() );
     assertEquals( entity1.getStrProp1(), entity2.getStrProp1() );
     assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
+    assertEquals( entity1.getDrawer(), entity2.getDrawer() );
   }
 
   @Test
