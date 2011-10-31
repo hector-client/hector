@@ -8,6 +8,7 @@ import java.io.Serializable;
  * 
  * @author B. Todd Burruss
  */
+@SuppressWarnings("serial")
 public class MyCompositePK implements Serializable {
 
   private int intProp1;

@@ -26,6 +26,7 @@ public class IdClassParserValidatorTest {
         return IdClass.class;
       }
       
+      @SuppressWarnings("rawtypes")
       @Override
       public Class value() {
         return MyCompositePK.class;

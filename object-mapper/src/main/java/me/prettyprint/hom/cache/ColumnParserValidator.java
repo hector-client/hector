@@ -5,7 +5,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 
 import me.prettyprint.hom.CFMappingDef;
-import me.prettyprint.hom.ClassCacheMgr;
 
 public interface ColumnParserValidator {
 

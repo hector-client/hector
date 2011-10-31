@@ -2,6 +2,7 @@ package com.mycompany.furniture;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class Drawer implements Serializable {
   private boolean pencilHolder;
   private boolean divided;
