@@ -122,7 +122,7 @@ public class EntityManagerImpl implements EntityManager {
           + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
-    return (T) objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
+    return objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
   }
 
   /**
@@ -213,9 +213,8 @@ public class EntityManagerImpl implements EntityManager {
     // return null;
   }
 
-  @SuppressWarnings("unchecked")
   @Override
-  public Query createNativeQuery(String sqlString, Class resultClass) {
+  public Query createNativeQuery(String sqlString, @SuppressWarnings("rawtypes") Class resultClass) {
     throw new RuntimeException("Method is not implemented");
     // return null;
   }

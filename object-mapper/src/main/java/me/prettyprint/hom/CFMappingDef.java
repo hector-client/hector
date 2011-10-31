@@ -12,6 +12,7 @@ import javax.persistence.DiscriminatorType;
 import javax.persistence.Entity;
 import javax.persistence.InheritanceType;
 
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 
 import com.google.common.collect.Sets;
@@ -35,8 +36,13 @@ public class CFMappingDef<T> {
   private DiscriminatorType discType;
   private Object discValue; // this can be a variety of types
 
-  private String[] sliceColumnNameArr;
   private Method anonymousPropertyAddHandler;
+  private Method anonymousPropertyGetHandler;
+  private Class<?> anonymousValueType;
+  @SuppressWarnings("rawtypes")
+  private Serializer anonymousValueSerializer;
+
+  private String[] sliceColumnNameArr;
   private KeyDefinition keyDef;
 
   private Map<Object, CFMappingDef<? extends T>> derivedClassMap = new HashMap<Object, CFMappingDef<? extends T>>();
@@ -83,17 +89,15 @@ public class CFMappingDef<T> {
   }
 
   public boolean isColumnSliceRequired() {
-    return null == getAnonymousPropertyAddHandler()
-        && !isAnyCollections()
-        && !isAbstract()
+    return !isAnonymousHandlerAvailable() && !isAnyCollections() && !isAbstract()
         && !isDerivedEntity();
   }
 
   public boolean isAnyCollections() {
-    if ( null == getAllProperties() ) {
+    if (null == getAllProperties()) {
       return false;
     }
-    
+
     for (PropertyMappingDefinition md : getAllProperties()) {
       if (md.isCollectionType()) {
         return true;
@@ -248,7 +252,7 @@ public class CFMappingDef<T> {
   public boolean isAbstract() {
     return Modifier.isAbstract(effectiveClass.getModifiers());
   }
-  
+
   public boolean isBaseEntity() {
     return null != inheritanceType;
   }
@@ -268,7 +272,7 @@ public class CFMappingDef<T> {
   public boolean isDerivedEntity() {
     return isPersistableDerivedEntity() || isNonPersistableDerivedEntity();
   }
-  
+
   public String[] getSliceColumnNameArr() {
     return sliceColumnNameArr;
   }
@@ -278,7 +282,54 @@ public class CFMappingDef<T> {
   }
 
   public Method getAnonymousPropertyAddHandler() {
-    return anonymousPropertyAddHandler;
+    if (null != anonymousPropertyAddHandler) {
+      return anonymousPropertyAddHandler;
+    } else if (null != cfSuperMapDef) {
+      return cfSuperMapDef.getAnonymousPropertyAddHandler();
+    } else {
+      return null;
+    }
+  }
+
+  public Method getAnonymousPropertyGetHandler() {
+    if (null != anonymousPropertyGetHandler) {
+      return anonymousPropertyGetHandler;
+    } else if (null != cfSuperMapDef) {
+      return cfSuperMapDef.getAnonymousPropertyGetHandler();
+    } else {
+      return null;
+    }
+  }
+
+  public Class<?> getAnonymousValueType() {
+    if (null != anonymousValueType) {
+      return anonymousValueType;
+    } else if (null != cfSuperMapDef) {
+      return cfSuperMapDef.getAnonymousValueType();
+    } else {
+      return null;
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  public Serializer getAnonymousValueSerializer() {
+    if (null != anonymousValueSerializer) {
+      return anonymousValueSerializer;
+    } else if (null != cfSuperMapDef) {
+      return cfSuperMapDef.getAnonymousValueSerializer();
+    } else {
+      return null;
+    }
+
+  }
+
+  public void setAnonymousValueType(Class<?> anonymousValueType) {
+    this.anonymousValueType = anonymousValueType;
+  }
+
+  public void setAnonymousValueSerializer(
+      @SuppressWarnings("rawtypes") Serializer anonymousValueSerializer) {
+    this.anonymousValueSerializer = anonymousValueSerializer;
   }
 
   public void setAnonymousPropertyAddHandler(Method anonymousPropertyAddHandler) {
@@ -286,21 +337,26 @@ public class CFMappingDef<T> {
   }
 
   public boolean isAnonymousHandlerAvailable() {
-    return null != getAnonymousPropertyAddHandler();
+    return null != anonymousValueSerializer;
   }
-//
-//  public boolean isSliceColumnArrayRequired() {
-//    return null != sliceColumnNameArr && 0 < sliceColumnNameArr.length;
-//  }
+
+  //
+  // public boolean isSliceColumnArrayRequired() {
+  // return null != sliceColumnNameArr && 0 < sliceColumnNameArr.length;
+  // }
 
   public Collection<PropertyMappingDefinition> getCollectionProperties() {
     Set<PropertyMappingDefinition> collSet = new HashSet<PropertyMappingDefinition>();
-    for ( PropertyMappingDefinition md : getAllProperties() ) {
-      if ( md.isCollectionType() ) {
+    for (PropertyMappingDefinition md : getAllProperties()) {
+      if (md.isCollectionType()) {
         collSet.add(md);
       }
     }
-    
+
     return collSet;
+  }
+
+  public void setAnonymousPropertyGetHandler(Method anonymousPropertyGetHandler) {
+    this.anonymousPropertyGetHandler = anonymousPropertyGetHandler;
   }
 }

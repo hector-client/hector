@@ -2,6 +2,7 @@ package me.prettyprint.hom.annotations;
 
 import java.util.Set;
 
+import me.prettyprint.hom.beans.AnonymousWithCustomType;
 import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyConvertedCollectionBean;
@@ -49,6 +50,8 @@ public class AnnotationScannerTest {
     assertTrue(classSet.contains(SimpleRelationshipBean.class));
     count++;
     assertTrue(classSet.contains(MyConvertedCollectionBean.class));
+    count++;
+    assertTrue(classSet.contains(AnonymousWithCustomType.class));
     count++;
 
     assertEquals(count, classSet.size());

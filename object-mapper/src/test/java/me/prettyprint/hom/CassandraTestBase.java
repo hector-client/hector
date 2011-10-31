@@ -86,6 +86,8 @@ public class CassandraTestBase {
         startCassandraInstance("tmp/var/lib/cassandra");
 
         ArrayList<CfDef> cfDefList = new ArrayList<CfDef>(2);
+        cfDefList.add(new CfDef("TestKeyspace", "AnonumousColumnFamily").setComparator_type(BytesType.class.getSimpleName())
+            .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "TestBeanColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "CustomIdColumnFamily").setComparator_type(BytesType.class.getSimpleName())

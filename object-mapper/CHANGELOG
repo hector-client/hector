@@ -5,6 +5,9 @@ Changes by version:
 ======
 - issue-310 : Collections Should Respect Converters
 - issue-227 : BREAKS EXISTING CONVERTERS!!! changed Converter interface so convertCassTypeToObjType takes a PropertyMappingDefinition
+- issue-246 : BREAKS EXISTING ANONYMOUS HANDLERS!!! changed anonymous property handling so the property value can be
+              any type.  Also removed @Anonymous... method annotations in favor of a single
+              @AnonymousPropertyHandling at class level
 
 
 2.0-01

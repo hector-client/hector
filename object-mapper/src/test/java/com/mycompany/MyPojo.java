@@ -13,12 +13,12 @@ import javax.persistence.Table;
 
 import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
-import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
-import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
+import me.prettyprint.hom.annotations.AnonymousPropertyHandling;
 
 
 @Entity
 @Table(name="TestColumnFamily")
+@AnonymousPropertyHandling(adder="addAnonymousProp", getter="getAnonymousProps")
 public class MyPojo {
   @Id
   private UUID id;
@@ -29,20 +29,18 @@ public class MyPojo {
   @me.prettyprint.hom.annotations.Column(name = "color", converter = ColorConverter.class)
   private Colors color;
 
-  private Map<String, String> anonymousProps = new HashMap<String, String>();
+  private Map<String, byte[]> anonymousProps = new HashMap<String, byte[]>();
 
-  @AnonymousPropertyAddHandler
-  public void addAnonymousProp(String name, String value) {
+  public void addAnonymousProp(String name, byte[] value) {
     anonymousProps.put(name, value);
   }
 
-  @AnonymousPropertyCollectionGetter
-  public Collection<Entry<String, String>> getAnonymousProps() {
+  public Collection<Entry<String, byte[]>> getAnonymousProps() {
     return anonymousProps.entrySet();
   }
 
   public String getAnonymousProp(String name) {
-    return anonymousProps.get(name);
+    return new String(anonymousProps.get(name));
   }
 
   public UUID getId() {

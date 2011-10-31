@@ -1,5 +1,6 @@
 package me.prettyprint.hom;
 
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -7,13 +8,15 @@ import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hom.beans.AnonymousWithCustomType;
 import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCompositePK;
+import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 import me.prettyprint.hom.beans.MyCustomIdBean;
+import me.prettyprint.hom.beans.MyRedTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
 import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
-import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 
 import org.junit.Test;
 
@@ -89,19 +92,20 @@ public class EntityManagerTest extends CassandraTestBase {
     entity1.setDrawer(new Drawer(true, false, "a very nice drawer"));
 
     em.persist(entity1);
-    
+
     MyComplexEntity entity2 = em.find(MyComplexEntity.class, pkKey);
-    
-    assertEquals( entity1.getIntProp1(), entity2.getIntProp1() );
-    assertEquals( entity1.getStrProp1(), entity2.getStrProp1() );
-    assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
-    assertEquals( entity1.getDrawer(), entity2.getDrawer() );
+
+    assertEquals(entity1.getIntProp1(), entity2.getIntProp1());
+    assertEquals(entity1.getStrProp1(), entity2.getStrProp1());
+    assertEquals(entity1.getStrProp2(), entity2.getStrProp2());
+    assertEquals(entity1.getDrawer(), entity2.getDrawer());
   }
 
   @Test
   public void testMissingColumnsForPojoProps() {
-//  Mutator<Long> m = HFactory.createMutator(keyspace, LongSerializer.get());
-//  m.insert(1, "SimpleTestBeanColumnFamily", HFactory.createColumn(name, value, nameSerializer, valueSerializer))
+    // Mutator<Long> m = HFactory.createMutator(keyspace, LongSerializer.get());
+    // m.insert(1, "SimpleTestBeanColumnFamily", HFactory.createColumn(name,
+    // value, nameSerializer, valueSerializer))
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
     MyCompositePK pkKey = new MyCompositePK(1, "str-prop");
     MyComplexEntity entity1 = new MyComplexEntity();
@@ -110,15 +114,15 @@ public class EntityManagerTest extends CassandraTestBase {
     entity1.setStrProp2("str-prop-two");
 
     em.persist(entity1);
-    
+
     MyComplexEntity entity2 = em.find(MyComplexEntity.class, pkKey);
-    
-    assertEquals( entity1.getIntProp1(), entity2.getIntProp1() );
-    assertEquals( entity1.getStrProp1(), entity2.getStrProp1() );
-    assertEquals( entity1.getStrProp2(), entity2.getStrProp2() );
-    assertNull( entity2.getStrProp3() );
+
+    assertEquals(entity1.getIntProp1(), entity2.getIntProp1());
+    assertEquals(entity1.getStrProp1(), entity2.getStrProp1());
+    assertEquals(entity1.getStrProp2(), entity2.getStrProp2());
+    assertNull(entity2.getStrProp3());
   }
-  
+
   @Test
   public void testPojoWithListCollection() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
@@ -126,15 +130,15 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.setBaseId(UUID.randomUUID());
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
-    
+
     MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
-    
-    assertEquals( b1.getMySet().size(), b2.getMySet().size());
-    for ( Integer myInt : b1.getMySet()) {
-      assertTrue( b2.getMySet().remove(myInt));
+
+    assertEquals(b1.getMySet().size(), b2.getMySet().size());
+    for (Integer myInt : b1.getMySet()) {
+      assertTrue(b2.getMySet().remove(myInt));
     }
   }
-  
+
   @Test
   public void testPojoWithListUpdateCollection() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
@@ -142,19 +146,19 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.setBaseId(UUID.randomUUID());
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
-    
+
     MyBlueTestBean b2 = new MyBlueTestBean();
     b2.setBaseId(b1.getBaseId());
     b2.addToList(400);
     em.persist(b2);
-    
+
     MyBlueTestBean b3 = em.load(MyBlueTestBean.class, b1.getBaseId());
-    assertEquals( b2.getMySet().size(), b3.getMySet().size());
-    for ( Integer myInt : b2.getMySet()) {
-      assertTrue( b3.getMySet().remove(myInt));
+    assertEquals(b2.getMySet().size(), b3.getMySet().size());
+    for (Integer myInt : b2.getMySet()) {
+      assertTrue(b3.getMySet().remove(myInt));
     }
   }
-  
+
   @Test
   public void testPojoWithSetCollection() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
@@ -162,15 +166,15 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.setBaseId(UUID.randomUUID());
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
-    
+
     MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
-    
-    assertEquals( b1.getMySet().size(), b2.getMySet().size());
-    for ( Integer myInt : b1.getMySet()) {
-      assertTrue( b2.getMySet().remove(myInt));
+
+    assertEquals(b1.getMySet().size(), b2.getMySet().size());
+    for (Integer myInt : b1.getMySet()) {
+      assertTrue(b2.getMySet().remove(myInt));
     }
   }
-  
+
   @Test
   public void testPojoWithCustomCollection() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
@@ -178,13 +182,54 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.setId("me");
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
-    
+
     MyConvertedCollectionBean b2 = em.load(MyConvertedCollectionBean.class, b1.getId());
-    
-    assertEquals( b1.getMyCollection().size(), b2.getMyCollection().size());
-    for ( Integer myInt : b1.getMyCollection()) {
-      assertTrue( b2.getMyCollection().remove(myInt));
+
+    assertEquals(b1.getMyCollection().size(), b2.getMyCollection().size());
+    for (Integer myInt : b1.getMyCollection()) {
+      assertTrue(b2.getMyCollection().remove(myInt));
     }
   }
+
+  @Test
+  public void testAnonymousCustomValuesObjectSerializer() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+
+    AnonymousWithCustomType b1 = new AnonymousWithCustomType();
+    b1.setId(123);
+    b1.addAnonymousProp("one", new Drawer(true, false, "one"));
+    b1.addAnonymousProp("two", new Drawer(false, true, "two"));
+    b1.addAnonymousProp("three", new Drawer(true, true, "three"));
+
+    em.persist(b1);
+    AnonymousWithCustomType b2 = em.load(AnonymousWithCustomType.class, b1.getId());
+
+    assertEquals(b1.getId(), b2.getId());
+    assertEquals(b1.getAnonymousProps().size(), b2.getAnonymousProps().size());
+    for (Entry<String, Drawer> entry : b1.getAnonymousProps()) {
+      assertTrue("anonymous prop is in b1, but not b2", b2.getAnonymousProps().contains(entry));
+    }
+  }
+
+  @Test
+  public void testAnonymousHandlerOnBaseClass() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+
+    MyRedTestBean b1 = new MyRedTestBean();
+    b1.setBaseId(UUID.randomUUID());
+    b1.addAnonymousProp("one", "1");
+    b1.addAnonymousProp("two", "2");
+    b1.addAnonymousProp("three", "3");
+
+    em.persist(b1);
+    MyRedTestBean b2 = em.load(MyRedTestBean.class, b1.getBaseId());
+
+    assertEquals(b1.getBaseId(), b2.getBaseId());
+    assertEquals(b1.getAnonymousProps().size(), b2.getAnonymousProps().size());
+    for (Entry<String, String> entry : b1.getAnonymousProps()) {
+      assertTrue("anonymous prop is in b1, but not b2", b2.getAnonymousProps().contains(entry));
+    }
+  }
+  // --------------------
 
 }

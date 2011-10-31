@@ -17,10 +17,10 @@ import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.Table;
 
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hom.ColorConverter;
 import me.prettyprint.hom.Colors;
-import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
-import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
+import me.prettyprint.hom.annotations.AnonymousPropertyHandling;
 
 import com.mycompany.MySerial;
 
@@ -30,6 +30,7 @@ import com.mycompany.MySerial;
 @DiscriminatorColumn(name = "myType", discriminatorType = DiscriminatorType.STRING)
 @DiscriminatorValue("NoColor")
 @Table(name = "TestBeanColumnFamily")
+@AnonymousPropertyHandling(type=String.class, serializer=StringSerializer.class, adder="addAnonymousProp", getter="getAnonymousProps")
 public class MyTestBean {
   @Id
   private UUID baseId;
@@ -75,12 +76,10 @@ public class MyTestBean {
 
   private Map<String, String> anonymousProps = new HashMap<String, String>();
 
-  @AnonymousPropertyAddHandler
   public void addAnonymousProp(String name, String value) {
     anonymousProps.put(name, value);
   }
 
-  @AnonymousPropertyCollectionGetter
   public Collection<Entry<String, String>> getAnonymousProps() {
     return anonymousProps.entrySet();
   }

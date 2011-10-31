@@ -20,7 +20,8 @@ import javax.persistence.IdClass;
 import javax.persistence.Inheritance;
 import javax.persistence.Table;
 
-import me.prettyprint.hom.annotations.AnonymousPropertyAddHandler;
+import me.prettyprint.hom.annotations.AnonymousPropertyHandling;
+import me.prettyprint.hom.cache.AnonymousParserValidator;
 import me.prettyprint.hom.cache.ColumnParser;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.cache.IdClassParserValidator;
@@ -41,6 +42,7 @@ public class ClassCacheMgr {
   private TableParserValidator tableParVal = new TableParserValidator();
   private IdClassParserValidator idClassParVal = new IdClassParserValidator();
   private ColumnParser columnPar = new ColumnParser();
+  private AnonymousParserValidator anonymousParVal = new AnonymousParserValidator();
 
   /**
    * Examine class hierarchy using {@link CFMappingDef} objects to discover the
@@ -206,9 +208,10 @@ public class ClassCacheMgr {
           processIdAnnotation(f, (Id) anno, cfMapDef, pdMap);
         } else if (anno instanceof me.prettyprint.hom.annotations.Id) {
           processIdCustomAnnotation(f, (me.prettyprint.hom.annotations.Id) anno, cfMapDef, pdMap);
-//        } else if (anno instanceof me.prettyprint.hom.annotations.List) {
-//          processListCustomAnnotation(f, (me.prettyprint.hom.annotations.List) anno, cfMapDef,
-//              pdMap);
+          // } else if (anno instanceof me.prettyprint.hom.annotations.List) {
+          // processListCustomAnnotation(f,
+          // (me.prettyprint.hom.annotations.List) anno, cfMapDef,
+          // pdMap);
         }
       }
     }
@@ -282,6 +285,8 @@ public class ClassCacheMgr {
         inheritanceParVal.parse(this, anno, cfMapDef);
       } else if (anno instanceof DiscriminatorValue) {
         inheritanceParVal.parse(this, anno, cfMapDef);
+      } else if (anno instanceof AnonymousPropertyHandling) {
+        anonymousParVal.parse(this, anno, cfMapDef);
       }
     }
 
@@ -292,11 +297,12 @@ public class ClassCacheMgr {
     inheritanceParVal.validateAndSetDefaults(this, cfMapDef);
     tableParVal.validateAndSetDefaults(this, cfMapDef);
     idClassParVal.validateAndSetDefaults(this, cfMapDef);
+    anonymousParVal.validateAndSetDefaults(this, cfMapDef);
 
     // must do this after tabeParVal validate
     checkForPojoPrimaryKey(cfMapDef);
 
-    checkForAnonymousHandler(cfMapDef);
+//    checkForAnonymousHandler(cfMapDef);
 
     generateColumnSliceIfNeeded(cfMapDef);
   }
@@ -317,24 +323,31 @@ public class ClassCacheMgr {
     // }
   }
 
-  private <T> void checkForAnonymousHandler(CFMappingDef<T> cfMapDef) {
-    CFMappingDef<? super T> tmpDef = cfMapDef;
-    while (null != tmpDef) {
-      Method meth = findAnnotatedMethod(cfMapDef.getEffectiveClass(),
-          AnonymousPropertyAddHandler.class);
-      if (null != meth) {
-        cfMapDef.setAnonymousPropertyAddHandler(meth);
-        return;
-      }
-      tmpDef = tmpDef.getCfSuperMapDef();
-    }
-  }
+//  private <T> void checkForAnonymousHandler(CFMappingDef<T> cfMapDef) {
+//    CFMappingDef<? super T> tmpDef = cfMapDef;
+//    while (null != tmpDef) {
+//      Method meth = findAnnotatedMethod(cfMapDef.getEffectiveClass(),
+//          AnonymousPropertyAddHandler.class);
+//      if (null != meth) {
+//        Class<?>[] typeArr = meth.getParameterTypes();
+//        if (2 != typeArr.length || !(typeArr[0] == String.class) || !(typeArr[1] == byte[].class)) {
+//          throw new HectorObjectMapperException(AnonymousPropertyAddHandler.class.getSimpleName()
+//              + " expects a method with exactly two paramters of types, String and byte[]");
+//        }
+//
+//        cfMapDef.setAnonymousPropertyAddHandler(meth);
+//        return;
+//      }
+//      tmpDef = tmpDef.getCfSuperMapDef();
+//    }
+//  }
 
   private void generateColumnSliceIfNeeded(CFMappingDef<?> cfMapDef) {
     if (cfMapDef.isColumnSliceRequired()) {
       Collection<PropertyMappingDefinition> propColl = cfMapDef.getAllProperties();
 
-      String[] columnNames = new String[cfMapDef.isPersistableEntity() ? propColl.size() : propColl.size() + 1];
+      String[] columnNames = new String[cfMapDef.isPersistableEntity() ? propColl.size()
+                                                                      : propColl.size() + 1];
       Iterator<PropertyMappingDefinition> iter = propColl.iterator();
       int pos = 0;
       while (iter.hasNext()) {

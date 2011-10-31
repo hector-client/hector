@@ -39,7 +39,6 @@ import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
-import me.prettyprint.hom.annotations.AnonymousPropertyCollectionGetter;
 import me.prettyprint.hom.annotations.Column;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 import me.prettyprint.hom.converters.Converter;
@@ -334,7 +333,7 @@ public class HectorObjectMapper {
             createHColumn(discColName, convertDiscTypeToColValue(discType, cfMapDef.getDiscValue())));
       }
 
-      addAnonymousProperties(obj, colSet);
+      addAnonymousProperties(obj, cfMapDef, colSet);
       return colSet;
     } catch (SecurityException e) {
       throw new RuntimeException(e);
@@ -349,23 +348,32 @@ public class HectorObjectMapper {
     }
   }
 
-  private void addAnonymousProperties(Object obj, Map<String, HColumn<String, byte[]>> colSet)
-      throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-    Method meth = cacheMgr.findAnnotatedMethod(obj.getClass(),
-        AnonymousPropertyCollectionGetter.class);
+  @SuppressWarnings("unchecked")
+  private <T> void addAnonymousProperties(T obj, CFMappingDef<T> cfMapDef,
+      Map<String, HColumn<String, byte[]>> colSet) throws IllegalArgumentException,
+      IllegalAccessException, InvocationTargetException {
+    Method meth = cfMapDef.getAnonymousPropertyGetHandler();
     if (null == meth) {
       return;
     }
 
-    @SuppressWarnings("unchecked")
-    Collection<Entry<String, String>> propColl = (Collection<Entry<String, String>>) meth.invoke(
+    Collection<Entry<String, Object>> propColl = (Collection<Entry<String, Object>>) meth.invoke(
         obj, (Object[]) null);
     if (null == propColl || propColl.isEmpty()) {
       return;
     }
 
-    for (Entry<String, String> entry : propColl) {
-      colSet.put(entry.getKey(), HFactory.createColumn(entry.getKey(), entry.getValue().getBytes(),
+    for (Entry<String, Object> entry : propColl) {
+      if (!(entry.getKey() instanceof String) || !entry.getValue().getClass().equals(cfMapDef.getAnonymousValueType())) {
+        throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass()
+            + ",  anonymous properties must have entry.key of type, " + String.class.getName()
+            + ", and entry.value of type, " + cfMapDef.getAnonymousValueType().getName()
+            + ", to properly map to Cassandra column name/value");
+      }
+    }
+
+    for (Entry<String, Object> entry : propColl) {
+      colSet.put(entry.getKey(), HFactory.createColumn(entry.getKey(), cfMapDef.getAnonymousValueSerializer().toBytes(entry.getValue()),
           StringSerializer.get(), BytesArraySerializer.get()));
     }
   }
@@ -574,7 +582,6 @@ public class HectorObjectMapper {
           + obj.getClass().getName() + ", does not have a setter and therefore cannot be set");
     }
 
-    @SuppressWarnings("unchecked")
     Object value = md.getConverter().convertCassTypeToObjType(md, col.getValue());
     pd.getWriteMethod().invoke(obj, value);
   }
@@ -645,7 +652,7 @@ public class HectorObjectMapper {
               + ".  either add a setter for this property or use @AnonymousPropertyHandler to annotate a method for handling anonymous properties");
     }
 
-    meth.invoke(obj, col.getName(), StringSerializer.get().fromBytes(col.getValue()));
+    meth.invoke(obj, col.getName(), cfMapDef.getAnonymousValueSerializer().fromBytes(col.getValue()));
   }
 
   public void setKeyConcatStrategy(KeyConcatenationStrategy keyConcatStrategy) {
