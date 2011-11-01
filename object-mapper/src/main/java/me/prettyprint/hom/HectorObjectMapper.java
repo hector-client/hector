@@ -115,17 +115,58 @@ public class HectorObjectMapper {
     return obj;
   }
 
+
+  /**
+   * 
+   * @param keyspace
+   * @param obj
+   * @return
+   */
   public <T> T saveObj(Keyspace keyspace, T obj) {
+    if (null == obj) {
+      throw new IllegalArgumentException("object cannot be null");
+    }
+    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
+    saveObj(keyspace, m, obj);
+    m.execute();
+    return obj;
+  }
+  
+  /**
+   * Persists the object collection using a single batch mutate.  It is up to the client to partition large
+   * collections appropriately so not to cause timeout or buffer overflow issues.  The objects can be heterogenous
+   * (mapping to multiple column families, etc.)   
+   * 
+   * @param keyspace
+   * @param objColl
+   * @return
+   */
+  public Collection<Object> saveObjList( Keyspace keyspace, Collection<Object> objColl) {
+    if (null == objColl) {
+      throw new IllegalArgumentException("object cannot be null");
+    }
+    if ( objColl.isEmpty() ) {
+      return objColl;
+    }
+    
+    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
+    for ( Object obj : objColl ) {
+      saveObj(keyspace, m, obj);
+    }
+    m.execute();
+    return objColl;
+  }
+  
+  private void saveObj(Keyspace keyspace, Mutator<byte[]> m, Object obj) {
     if (null == obj) {
       throw new IllegalArgumentException("object cannot be null");
     }
 
     @SuppressWarnings("unchecked")
-    CFMappingDef<T> cfMapDef = (CFMappingDef<T>) cacheMgr.getCfMapDef(obj.getClass(), true);
+    CFMappingDef<Object> cfMapDef = (CFMappingDef<Object>) cacheMgr.getCfMapDef(obj.getClass(), true);
 
     byte[] colFamKey = generateColumnFamilyKeyFromPojo(obj, cfMapDef);
     String colFamName = cfMapDef.getEffectiveColFamName();
-    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
 
     // if object contains collection, then must delete everything first - easier
     // than reading the row and selectively deleting, which is an alternative if
@@ -146,10 +187,6 @@ public class HectorObjectMapper {
       }
       m.addInsertion(colFamKey, colFamName, col);
     }
-
-    m.execute();
-
-    return obj;
   }
 
   // private void addDeletionsIfNecessary(Keyspace keyspace, CFMappingDef<?>

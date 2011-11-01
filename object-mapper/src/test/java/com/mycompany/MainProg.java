@@ -22,11 +22,11 @@ public class MainProg {
       pojo1.setLongProp1(123L);
       pojo1.setColor(Colors.RED);
 
-      em.save(pojo1);
+      em.persist(pojo1);
 
       // do some stuff
 
-      MyPojo pojo2 = em.load(MyPojo.class, pojo1.getId());
+      MyPojo pojo2 = em.find(MyPojo.class, pojo1.getId());
 
       // do some more stuff
 

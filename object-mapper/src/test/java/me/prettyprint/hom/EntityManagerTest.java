@@ -1,5 +1,7 @@
 package me.prettyprint.hom;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.UUID;
 
@@ -14,6 +16,8 @@ import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCompositePK;
 import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 import me.prettyprint.hom.beans.MyCustomIdBean;
+import me.prettyprint.hom.beans.MyGreenTestBean;
+import me.prettyprint.hom.beans.MyPurpleTestBean;
 import me.prettyprint.hom.beans.MyRedTestBean;
 import me.prettyprint.hom.beans.MyTestBean;
 import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
@@ -47,13 +51,44 @@ public class EntityManagerTest extends CassandraTestBase {
   }
 
   @Test
+  public void testInitializeSaveLoadCollection() {
+    List<Object> objList = new ArrayList<Object>(3);
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+
+    MyGreenTestBean green = new MyGreenTestBean();
+    green.setBaseId(UUID.randomUUID());
+    green.setIntProp1(1);
+    objList.add(green);
+    
+    MyBlueTestBean blue = new MyBlueTestBean();
+    blue.setBaseId(UUID.randomUUID());
+    blue.setIntProp1(2);
+    objList.add(blue);
+    
+    MyPurpleTestBean purple = new MyPurpleTestBean();
+    purple.setId("purple");
+    purple.setLongProp1(3);
+    objList.add(purple);
+    
+    em.persist(objList);
+    
+    MyGreenTestBean green2 = em.find(MyGreenTestBean.class, green.getBaseId());
+    MyBlueTestBean blue2 = em.find(MyBlueTestBean.class, blue.getBaseId());
+    MyPurpleTestBean purple2 = em.find(MyPurpleTestBean.class, purple.getId());
+    
+    assertEquals( green, green2);
+    assertEquals(blue, blue2);
+    assertEquals( purple, purple2);
+  }
+
+  @Test
   public void testInitializeSaveLoadCustomId() {
     EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
     MyCustomIdBean o1 = new MyCustomIdBean();
     o1.setId(Colors.GREEN);
     o1.setLongProp1(111L);
-    em.save(o1);
-    MyCustomIdBean o2 = em.load(MyCustomIdBean.class, Colors.GREEN);
+    em.persist(o1);
+    MyCustomIdBean o2 = em.find(MyCustomIdBean.class, Colors.GREEN);
 
     assertEquals(o1.getId(), o2.getId());
     assertEquals(o1.getLongProp1(), o2.getLongProp1());
@@ -131,7 +166,7 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
 
-    MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    MyBlueTestBean b2 = em.find(MyBlueTestBean.class, b1.getBaseId());
 
     assertEquals(b1.getMySet().size(), b2.getMySet().size());
     for (Integer myInt : b1.getMySet()) {
@@ -152,7 +187,7 @@ public class EntityManagerTest extends CassandraTestBase {
     b2.addToList(400);
     em.persist(b2);
 
-    MyBlueTestBean b3 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    MyBlueTestBean b3 = em.find(MyBlueTestBean.class, b1.getBaseId());
     assertEquals(b2.getMySet().size(), b3.getMySet().size());
     for (Integer myInt : b2.getMySet()) {
       assertTrue(b3.getMySet().remove(myInt));
@@ -167,7 +202,7 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
 
-    MyBlueTestBean b2 = em.load(MyBlueTestBean.class, b1.getBaseId());
+    MyBlueTestBean b2 = em.find(MyBlueTestBean.class, b1.getBaseId());
 
     assertEquals(b1.getMySet().size(), b2.getMySet().size());
     for (Integer myInt : b1.getMySet()) {
@@ -183,7 +218,7 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.addToList(100).addToList(200).addToList(300);
     em.persist(b1);
 
-    MyConvertedCollectionBean b2 = em.load(MyConvertedCollectionBean.class, b1.getId());
+    MyConvertedCollectionBean b2 = em.find(MyConvertedCollectionBean.class, b1.getId());
 
     assertEquals(b1.getMyCollection().size(), b2.getMyCollection().size());
     for (Integer myInt : b1.getMyCollection()) {
@@ -202,7 +237,7 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.addAnonymousProp("three", new Drawer(true, true, "three"));
 
     em.persist(b1);
-    AnonymousWithCustomType b2 = em.load(AnonymousWithCustomType.class, b1.getId());
+    AnonymousWithCustomType b2 = em.find(AnonymousWithCustomType.class, b1.getId());
 
     assertEquals(b1.getId(), b2.getId());
     assertEquals(b1.getAnonymousProps().size(), b2.getAnonymousProps().size());
@@ -222,7 +257,7 @@ public class EntityManagerTest extends CassandraTestBase {
     b1.addAnonymousProp("three", "3");
 
     em.persist(b1);
-    MyRedTestBean b2 = em.load(MyRedTestBean.class, b1.getBaseId());
+    MyRedTestBean b2 = em.find(MyRedTestBean.class, b1.getBaseId());
 
     assertEquals(b1.getBaseId(), b2.getBaseId());
     assertEquals(b1.getAnonymousProps().size(), b2.getAnonymousProps().size());
@@ -230,6 +265,7 @@ public class EntityManagerTest extends CassandraTestBase {
       assertTrue("anonymous prop is in b1, but not b2", b2.getAnonymousProps().contains(entry));
     }
   }
+
   // --------------------
 
 }

@@ -8,6 +8,10 @@ Changes by version:
 - issue-246 : BREAKS EXISTING ANONYMOUS HANDLERS!!! changed anonymous property handling so the property value can be
               any type.  Also removed @Anonymous... method annotations in favor of a single
               @AnonymousPropertyHandling at class level
+- BREAKS EXISTING EntityManager (possibly) : It implemented javax.persistence.EntityManager, which has been removed - none of
+  the methods were implemented. deprecated save and load in favor of find and persist (because probably popular methods)
+- added EntityManagerImpl.persist(Collection<Object> objColl) - the main advantage over persist(Object obj) is that
+  a single batch mutation will be used for performance             
 
 
 2.0-01

@@ -1,5 +1,6 @@
 package me.prettyprint.hom.beans;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -198,6 +199,94 @@ public class MyTestBean {
 
   public void setSerialProp(MySerial serialProp) {
     this.serialProp = serialProp;
+  }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((anonymousProps == null) ? 0 : anonymousProps.hashCode());
+    result = prime * result + ((baseId == null) ? 0 : baseId.hashCode());
+    result = prime * result + (boolProp1 ? 1231 : 1237);
+    result = prime * result + ((boolProp2 == null) ? 0 : boolProp2.hashCode());
+    result = prime * result + Arrays.hashCode(bytesProp);
+    result = prime * result + ((color == null) ? 0 : color.hashCode());
+    result = prime * result + ((dateProp == null) ? 0 : dateProp.hashCode());
+    result = prime * result + intProp1;
+    result = prime * result + ((intProp2 == null) ? 0 : intProp2.hashCode());
+    result = prime * result + (int) (longProp1 ^ (longProp1 >>> 32));
+    result = prime * result + ((longProp2 == null) ? 0 : longProp2.hashCode());
+    result = prime * result + ((serialProp == null) ? 0 : serialProp.hashCode());
+    result = prime * result + ((strProp == null) ? 0 : strProp.hashCode());
+    result = prime * result + ((uuidProp == null) ? 0 : uuidProp.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    MyTestBean other = (MyTestBean) obj;
+    if (anonymousProps == null) {
+      if (other.anonymousProps != null)
+        return false;
+    } else if (!anonymousProps.equals(other.anonymousProps))
+      return false;
+    if (baseId == null) {
+      if (other.baseId != null)
+        return false;
+    } else if (!baseId.equals(other.baseId))
+      return false;
+    if (boolProp1 != other.boolProp1)
+      return false;
+    if (boolProp2 == null) {
+      if (other.boolProp2 != null)
+        return false;
+    } else if (!boolProp2.equals(other.boolProp2))
+      return false;
+    if (!Arrays.equals(bytesProp, other.bytesProp))
+      return false;
+    if (color != other.color)
+      return false;
+    if (dateProp == null) {
+      if (other.dateProp != null)
+        return false;
+    } else if (!dateProp.equals(other.dateProp))
+      return false;
+    if (intProp1 != other.intProp1)
+      return false;
+    if (intProp2 == null) {
+      if (other.intProp2 != null)
+        return false;
+    } else if (!intProp2.equals(other.intProp2))
+      return false;
+    if (longProp1 != other.longProp1)
+      return false;
+    if (longProp2 == null) {
+      if (other.longProp2 != null)
+        return false;
+    } else if (!longProp2.equals(other.longProp2))
+      return false;
+    if (serialProp == null) {
+      if (other.serialProp != null)
+        return false;
+    } else if (!serialProp.equals(other.serialProp))
+      return false;
+    if (strProp == null) {
+      if (other.strProp != null)
+        return false;
+    } else if (!strProp.equals(other.strProp))
+      return false;
+    if (uuidProp == null) {
+      if (other.uuidProp != null)
+        return false;
+    } else if (!uuidProp.equals(other.uuidProp))
+      return false;
+    return true;
   }
 
 }
