@@ -45,7 +45,6 @@ public final class CqlRows<K, N, V> extends OrderedRowsImpl<K, N, V> {
     }
   }
   
-
   
   /**
    * Constructed as empty for {@link CqlResultType#VOID}
