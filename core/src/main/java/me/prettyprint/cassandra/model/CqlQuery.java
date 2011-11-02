@@ -58,6 +58,7 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
   private Serializer<V> valueSerializer;
   private ByteBuffer query;
   private boolean useCompression;
+  private boolean suppressKeyInColumns;
   
   public CqlQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -78,6 +79,11 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
   
   public CqlQuery<K, N, V> setQuery(ByteBuffer qeury) {
     this.query = qeury;
+    return this;
+  }
+  
+  public CqlQuery<K, N, V> setSuppressKeyInColumns(boolean suppressKeyInColumns) {
+    this.suppressKeyInColumns = suppressKeyInColumns;
     return this;
   }
   
@@ -113,7 +119,7 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
                   
                   for (Iterator<CqlRow> rowsIter = result.getRowsIterator(); rowsIter.hasNext(); ) {
                     CqlRow row = rowsIter.next();
-                    ret.put(ByteBuffer.wrap(row.getKey()), row.getColumns());
+                    ret.put(ByteBuffer.wrap(row.getKey()), filterKeyColumn(row));
                   }
                   Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ret);
                   rows = new CqlRows<K, N, V>((LinkedHashMap<K, List<Column>>)thriftRet, columnNameSerializer, valueSerializer);
@@ -127,6 +133,21 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
           }
         
         }), this);
+  }  
+  
+  /*
+   * Trims the first column from the row if it's name is equal to "KEY"
+   */
+  private List<Column> filterKeyColumn(CqlRow row) {
+    if ( suppressKeyInColumns && row.isSetColumns() && row.columns.size() > 0) {
+      Iterator<Column> columnsIterator = row.getColumnsIterator();
+      Column column = columnsIterator.next();
+      if ( column.name.duplicate().equals(KEY_BB) ) {
+        columnsIterator.remove();  
+      }      
+    }
+    return row.getColumns();
   }
 
+  private static ByteBuffer KEY_BB = StringSerializer.get().toByteBuffer("KEY");
 }
