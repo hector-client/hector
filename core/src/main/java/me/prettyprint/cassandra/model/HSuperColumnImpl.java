@@ -5,7 +5,6 @@ import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.hector.api.Serializer;
@@ -14,7 +13,6 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
-import org.mortbay.log.Log;
 
 /**
  * Models a SuperColumn in a protocol independant manner
@@ -121,7 +119,6 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
   @Override
   public HColumn<N, V> getSubColumnByName(N subColumnName) {
     for (HColumn<N,V> column : columns ) {
-      Log.info("checkingcol {} against {}", column, subColumnName);
       if ( nameSerializer.toByteBuffer(subColumnName).equals(column.getNameBytes()) ) {
         return column;
       }
