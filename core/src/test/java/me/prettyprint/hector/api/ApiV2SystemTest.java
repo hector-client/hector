@@ -856,7 +856,6 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
           fail("A columns with unexpected column name returned: "
               + column.getName());
         }
-        log.info("HSuperCOl: {}",column);
         if ( column.getSubColumnByName("c001") != null )
           assertEquals("v001",column.getSubColumnByName("c001").getValue());
       }
