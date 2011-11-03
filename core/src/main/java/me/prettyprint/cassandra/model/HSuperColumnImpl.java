@@ -14,6 +14,7 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.SuperColumn;
+import org.mortbay.log.Log;
 
 /**
  * Models a SuperColumn in a protocol independant manner
@@ -115,6 +116,17 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
   @Override
   public HColumn<N, V> get(int i) {
     return columns.get(i);
+  }    
+
+  @Override
+  public HColumn<N, V> getSubColumnByName(N subColumnName) {
+    for (HColumn<N,V> column : columns ) {
+      Log.info("checkingcol {} against {}", column, subColumnName);
+      if ( nameSerializer.toByteBuffer(subColumnName).equals(column.getNameBytes()) ) {
+        return column;
+      }
+    }    
+    return null;
   }
 
   @Override
@@ -169,3 +181,4 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
     return String.format("HSuperColumn(%s,%s)", superName, columns);
   }
 }
+
