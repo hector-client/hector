@@ -8,6 +8,7 @@ import javax.persistence.Table;
 
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hom.annotations.AnnotationScanner;
 import me.prettyprint.hom.cache.HectorObjectMapperException;
 
@@ -190,7 +191,22 @@ public class EntityManagerImpl {
       throw new IllegalArgumentException("object to save cannot be null");
     }
     
-    objMapper.saveObjList(keyspace, objColl);
+    objMapper.saveObjCollection(keyspace, objColl);
+    return objColl;
+  }
+
+  /**
+   * Save the list of entity intances.
+   * 
+   * @param objColl
+   * @return
+   */
+  public Collection<?> persist(Collection<?> objColl, Mutator<byte[]> m) {
+    if (null == objColl) {
+      throw new IllegalArgumentException("object to save cannot be null");
+    }
+    
+    objMapper.saveObjCollection(keyspace, objColl, m);
     return objColl;
   }
 

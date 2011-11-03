@@ -115,7 +115,6 @@ public class HectorObjectMapper {
     return obj;
   }
 
-
   /**
    * 
    * @param keyspace
@@ -131,39 +130,46 @@ public class HectorObjectMapper {
     m.execute();
     return obj;
   }
-  
+
   /**
-   * Persists the object collection using a single batch mutate.  It is up to the client to partition large
-   * collections appropriately so not to cause timeout or buffer overflow issues.  The objects can be heterogenous
-   * (mapping to multiple column families, etc.)   
+   * Persists the object collection using a single batch mutate. It is up to the
+   * client to partition large collections appropriately so not to cause timeout
+   * or buffer overflow issues. The objects can be heterogenous (mapping to
+   * multiple column families, etc.)
    * 
    * @param keyspace
    * @param objColl
    * @return
    */
-  public Collection<Object> saveObjList( Keyspace keyspace, Collection<Object> objColl) {
+  public Collection<?> saveObjCollection(Keyspace keyspace, Collection<?> objColl) {
+    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
+    Collection<?> retColl = saveObjCollection(keyspace, objColl, m);
+    m.execute();
+    return retColl;
+  }
+
+  public Collection<?> saveObjCollection(Keyspace keyspace, Collection<?> objColl, Mutator<byte[]> m) {
     if (null == objColl) {
       throw new IllegalArgumentException("object cannot be null");
     }
-    if ( objColl.isEmpty() ) {
+    if (objColl.isEmpty()) {
       return objColl;
     }
-    
-    Mutator<byte[]> m = HFactory.createMutator(keyspace, BytesArraySerializer.get());
-    for ( Object obj : objColl ) {
+
+    for (Object obj : objColl) {
       saveObj(keyspace, m, obj);
     }
-    m.execute();
     return objColl;
   }
-  
+
   private void saveObj(Keyspace keyspace, Mutator<byte[]> m, Object obj) {
     if (null == obj) {
       throw new IllegalArgumentException("object cannot be null");
     }
 
     @SuppressWarnings("unchecked")
-    CFMappingDef<Object> cfMapDef = (CFMappingDef<Object>) cacheMgr.getCfMapDef(obj.getClass(), true);
+    CFMappingDef<Object> cfMapDef = (CFMappingDef<Object>) cacheMgr.getCfMapDef(obj.getClass(),
+        true);
 
     byte[] colFamKey = generateColumnFamilyKeyFromPojo(obj, cfMapDef);
     String colFamName = cfMapDef.getEffectiveColFamName();
@@ -277,9 +283,15 @@ public class HectorObjectMapper {
 
     CFMappingDef<? extends T> cfMapDefInstance = determineClassType(cfMapDef, slice);
 
+    T obj;
     try {
-      T obj = cfMapDefInstance.getEffectiveClass().newInstance();
-
+      try {
+        obj = cfMapDefInstance.getEffectiveClass().newInstance();
+      } catch (InstantiationException e) {
+        throw new HectorObjectMapperException(cfMapDefInstance.getEffectiveClass().getName()
+            + ", must have default constructor", e);
+      }
+      
       setIdIfCan(cfMapDef, obj, pkObj);
 
       for (HColumn<String, byte[]> col : slice.getColumns()) {
@@ -305,8 +317,6 @@ public class HectorObjectMapper {
       }
 
       return obj;
-    } catch (InstantiationException e) {
-      throw new RuntimeException(e);
     } catch (IllegalAccessException e) {
       throw new RuntimeException(e);
     } catch (IllegalArgumentException e) {
@@ -401,7 +411,8 @@ public class HectorObjectMapper {
     }
 
     for (Entry<String, Object> entry : propColl) {
-      if (!(entry.getKey() instanceof String) || !entry.getValue().getClass().equals(cfMapDef.getAnonymousValueType())) {
+      if (!(entry.getKey() instanceof String)
+          || !entry.getValue().getClass().equals(cfMapDef.getAnonymousValueType())) {
         throw new HectorObjectMapperException("Class, " + cfMapDef.getRealClass()
             + ",  anonymous properties must have entry.key of type, " + String.class.getName()
             + ", and entry.value of type, " + cfMapDef.getAnonymousValueType().getName()
@@ -410,8 +421,11 @@ public class HectorObjectMapper {
     }
 
     for (Entry<String, Object> entry : propColl) {
-      colSet.put(entry.getKey(), HFactory.createColumn(entry.getKey(), cfMapDef.getAnonymousValueSerializer().toBytes(entry.getValue()),
-          StringSerializer.get(), BytesArraySerializer.get()));
+      colSet.put(
+          entry.getKey(),
+          HFactory.createColumn(entry.getKey(),
+              cfMapDef.getAnonymousValueSerializer().toBytes(entry.getValue()),
+              StringSerializer.get(), BytesArraySerializer.get()));
     }
   }
 
@@ -689,7 +703,8 @@ public class HectorObjectMapper {
               + ".  either add a setter for this property or use @AnonymousPropertyHandler to annotate a method for handling anonymous properties");
     }
 
-    meth.invoke(obj, col.getName(), cfMapDef.getAnonymousValueSerializer().fromBytes(col.getValue()));
+    meth.invoke(obj, col.getName(), cfMapDef.getAnonymousValueSerializer()
+                                            .fromBytes(col.getValue()));
   }
 
   public void setKeyConcatStrategy(KeyConcatenationStrategy keyConcatStrategy) {

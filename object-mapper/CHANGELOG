@@ -11,7 +11,8 @@ Changes by version:
 - BREAKS EXISTING EntityManager (possibly) : It implemented javax.persistence.EntityManager, which has been removed - none of
   the methods were implemented. deprecated save and load in favor of find and persist (because probably popular methods)
 - added EntityManagerImpl.persist(Collection<Object> objColl) - the main advantage over persist(Object obj) is that
-  a single batch mutation will be used for performance             
+  a single batch mutation will be used for performance
+- added better exception handling when entity does not have default constructor          
 
 
 2.0-01
