@@ -176,6 +176,25 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   }
   
   @Test
+  public void testCountSubColumns() {
+    SuperCfTemplate<String, String, String> sTemplate = 
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    for (int i = 0; i < 500; i++) {
+      sUpdater.setString("sub1_col_"+i, "sub1_val_"+i);            
+    }
+    
+    sTemplate.update(sUpdater);
+    
+    int countVal = sTemplate.countSubColumns("skey3", "super1");
+    
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey3","super1");
+    assertEquals(countVal, result.getColumnNames().size());
+    
+    
+  }
+  
+  @Test
   public void testTemplateLevelDeleteSuper() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
