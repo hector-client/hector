@@ -264,7 +264,7 @@ public void releaseClient(HClient client) throws HectorException {
     try {
       availableClientQueue.add(client);
     } catch (IllegalStateException ise) {
-      log.error("Capacity hit adding client back to queue. Closing extra");
+      log.warn("Capacity hit adding client back to queue. Closing extra");
       client.close();
     }
   }
