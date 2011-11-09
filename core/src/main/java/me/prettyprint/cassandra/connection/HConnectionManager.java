@@ -235,8 +235,9 @@ public class HConnectionManager {
         client = pool.borrowClient();
         Cassandra.Client c = client.getCassandra(op.keyspaceName);
         // Keyspace can be null for some system_* api calls
-        if ( op.credentials != null && !op.credentials.isEmpty() ) {
+        if ( op.credentials != null && !op.credentials.isEmpty() && !client.isAlreadyAuthenticated(op.credentials)) {
           c.login(new AuthenticationRequest(op.credentials));
+          client.setAuthenticated(op.credentials);
         }
 
         op.executeAndSetResult(c, pool.getCassandraHost());
@@ -305,6 +306,7 @@ public class HConnectionManager {
   private void closeClient(HClient client) {
     if ( client != null ) {
       client.close();
+      client.clearAuthentication();
     }
   }
 
