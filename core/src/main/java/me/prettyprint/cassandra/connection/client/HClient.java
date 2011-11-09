@@ -4,6 +4,8 @@
 package me.prettyprint.cassandra.connection.client;
 
 
+import java.util.Map;
+
 import me.prettyprint.cassandra.service.CassandraHost;
 
 import org.apache.cassandra.thrift.Cassandra;
@@ -88,5 +90,25 @@ public interface HClient {
    * @return the @link {@link CassandraHost} object for this client
    */
   CassandraHost getCassandraHost();
+  
+  /**
+   * Sets authentication credentials to the client.
+   * @param credentials credentials to be set.
+   */
+  void setAuthenticated(Map<String, String> credentials);
+
+ /**
+   * Retrieves whether client has been authenticated with the given credentials.
+   * 
+   * @param credentials authentication credentials 
+   * @return <code>TRUE</code> if the client has previously been authenticated using the
+   * credentials, <code>FALSE<code> otherwise (wrong credentials or not authenticated)
+   */
+  boolean isAlreadyAuthenticated(Map<String, String> credentials);
+
+  /**
+   * Clears current authentication
+   */
+  void clearAuthentication();
 
 }
