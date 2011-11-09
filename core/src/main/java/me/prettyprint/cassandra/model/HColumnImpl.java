@@ -106,7 +106,6 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
 
   @Override
   public N getName() {
-//    return column.isSetName() ? nameSerializer.fromByteBuffer(column.name.duplicate()) : null;
     if ( column.isSetName() ) {
       if ( null == cachedName) {
         cachedName = nameSerializer.fromByteBuffer(column.name.duplicate());
@@ -120,7 +119,6 @@ public final class HColumnImpl<N,V> implements HColumn<N, V> {
 
   @Override
   public V getValue() {
-//    return column.isSetValue() ? valueSerializer.fromByteBuffer(column.value.duplicate()) : null;
     if ( column.isSetValue() ) {
       if ( null == cachedValue) {
         cachedValue = valueSerializer.fromByteBuffer(column.value.duplicate());
