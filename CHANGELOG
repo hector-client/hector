@@ -11,6 +11,7 @@ See object-mapper/CHANGELOG for HOM specifics
 Add TopolyAware AutoDiscoveryService (#311)
 Add Kerberos support (Experimental) (#296))
 Remove unused fields in CassandraHostConfigurator - maxIdle, minEvictableIdleTimeMillis, timeBetweenEvictionRunsMillis (#244)
+improve performance of ColumnSliceImpl instantiation and HColumnImpl getName()/getValue() (#332)
 
 0.8.0-4
 =======
