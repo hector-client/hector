@@ -1,6 +1,8 @@
 package me.prettyprint.cassandra.connection.client;
 
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.service.CassandraHost;
@@ -39,6 +41,8 @@ public class HThriftClient implements HClient {
   protected TTransport transport;
   protected Cassandra.Client cassandraClient;
 
+  private final Map<String, String> credentials = new HashMap<String, String>();
+  
   /**
    * Constructor
    * @param cassandraHost
@@ -212,8 +216,33 @@ public class HThriftClient implements HClient {
   /**
    * {@inheritDoc}
    */
+  @Override
   public CassandraHost getCassandraHost() {
     return cassandraHost;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public boolean isAlreadyAuthenticated(Map<String, String> credentials) {
+    return credentials != null && this.credentials.equals(credentials);
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void clearAuthentication() {
+    credentials.clear();
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void setAuthenticated(Map<String, String> credentials) {
+    clearAuthentication();
+    this.credentials.putAll(credentials);
+  }
 }
