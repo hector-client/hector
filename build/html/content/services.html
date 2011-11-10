@@ -1,0 +1,209 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Services &mdash; Hector v0.8.x documentation</title>
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.8.x',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Hector v0.8.x documentation" href="../index.html" />
+ 
+
+  <!-- Google Analytics -->
+  <script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-25977718-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+  </script>
+
+  <!-- Google Webmaster tag -->
+  <meta name="google-site-verification" content="nY8ge80wfD5ujVpdoL83T29MNw3kuoUtXnKWVR5xnX0" />
+
+
+  </head>
+  <body>
+
+<div class="header-container">
+
+  <div class="logo"><img src="../_static/hector-logo.jpg" width="200" height="150" border="0" alt="Hector"/></div>
+  <div class="title-wrapper">
+    <div class="title1">Hector</div>
+    <div class="title2">A high level Java client for Apache Cassandra</div>
+  </div>
+</div>
+
+<a href="http://github.com/rantav/hector"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/30f550e0d38ceb6ef5b81500c64d970b7fb0f028/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub"></a>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="api.html">API</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+
+  
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Services</a><ul>
+<li><a class="reference internal" href="#cassandrahostretryservice">CassandraHostRetryService</a></li>
+<li><a class="reference internal" href="#nodeautodiscoverservice">NodeAutoDiscoverService</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/content/services.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="services">
+<span id="index-0"></span><span id="id1"></span><h1>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h1>
+<p>Hector has two backgroud services that let it discover new hosts as they join the ring as well as detect when a host is temporarily down (a host that is down but still belongs to the ring) and keep trying to connect to them until they either come back up or get decommisioned (leave the ring).</p>
+<p>These two services are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>CassandraHostRetryService, and</li>
+<li>NodeAutoDiscoverService</li>
+</ul>
+</div></blockquote>
+<p>Both services are configured through <tt class="docutils literal"><span class="pre">CassandraHostConfigurator</span></tt>.</p>
+<div class="section" id="cassandrahostretryservice">
+<h2>CassandraHostRetryService<a class="headerlink" href="#cassandrahostretryservice" title="Permalink to this headline">¶</a></h2>
+<p>This service is in charge to check when a host marked as down has come back.
+By default this service is <strong>enabled</strong> and has few other parameters that can be set:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>retryDownedHosts</strong>: whether this service is enabled or not (true/false). Default is true.</li>
+<li><strong>retryDownedHostsQueueSize</strong>: it&#8217;s the amount of host to monitor. The default is -1 which means unlimited.</li>
+<li><strong>retryDownedHostsDelayInSeconds</strong>: How frequently to run the service. The default is 10 seconds.</li>
+</ul>
+</div></blockquote>
+<p>An example to set up this service with just space to check 10 hosts and check those every 30 seconds would be</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="c1">// This first line is not really needed but it makes things clear :)</span>
+<span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setRetryDownedHosts</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+<span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setRetryDownedHostsQueueSize</span><span class="o">(</span><span class="mi">10</span><span class="o">);</span>
+<span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">retryDownedHostsDelayInSeconds</span><span class="o">(</span><span class="mi">30</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="nodeautodiscoverservice">
+<h2>NodeAutoDiscoverService<a class="headerlink" href="#nodeautodiscoverservice" title="Permalink to this headline">¶</a></h2>
+<p>This service takes care off adding new host to the pool as soon as they join the ring. By default this service is <strong>disabled</strong>.</p>
+<p>The parameters are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><strong>autoDiscoverHosts</strong>: whether this service is enabled or not (true/false). Default is false.</li>
+<li><strong>autoDiscoveryDelayInSeconds</strong>: How frequently to run the service. The default is 30 seconds.</li>
+<li><strong>autoDiscoveryDataCenters</strong>: Specifies what datacenters(DC) should be consider as valid  <strong>(1)</strong></li>
+</ul>
+</div></blockquote>
+<p><strong>(1)</strong> Sometimes a deployment may involved several DCs but only the nodes that are part of a certain DC should be consider as valid in order to be added to the pool. A typical example is having a cluster or ring composed by two DCs one on each continent, and you want that Hector connects to nodes that are in the same region.</p>
+<p>In order to enable this service for a DC called <em>&#8220;WEST-COAST&#8221;</em> and with a frequency of 1 minute, we do</p>
+<div class="highlight-java"><div class="highlight"><pre><span class="c1">// Enable the service</span>
+<span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setAutoDiscoverHosts</span><span class="o">(</span><span class="kc">true</span><span class="o">);</span>
+<span class="c1">// 60 seconds == 1 minute</span>
+<span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setAutoDiscoveryDelayInSeconds</span><span class="o">(</span><span class="mi">60</span><span class="o">);</span>
+<span class="c1">// It can alse receive a list of DCs</span>
+<span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setAutoDiscoveryDataCenter</span><span class="o">(</span><span class="s">&quot;WEST-COAST&quot;</span><span class="o">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+	<li><a href="../index.html">Home</a>|&nbsp;</li>
+
+	<li><a href="../documentation.html">Documentation</a>|&nbsp;</li>
+
+  <li><a href="api.html">API</a>|&nbsp;</li>
+
+  <li><a href="https://github.com/rantav/hector/wiki">Wiki</a>|&nbsp;</li>
+
+    <li><a href="community.html">Community</a>|&nbsp;</li>
+
+  <li><a href="../search.html">Search</a>|&nbsp;</li>
+
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+    </div>
+  </body>
+</html>
