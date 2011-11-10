@@ -64,7 +64,7 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
     assertEquals(2, result.get().getAsCount());
   }
 
-  @Test(expected=HCassandraInternalException.class)
+  @Test(expected=HInvalidRequestException.class)
   public void testSyntaxFailQuery() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("SELECT COUNT(*) FROM Standard1 WHERE KEY = 'cqlQueryTest_key1'");
