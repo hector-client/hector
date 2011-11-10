@@ -46,6 +46,7 @@ a:hover {
 
 .title-wrapper {
     width: 1300px;
+    min-width: 400px;
 }
 .title1 {
     margin: 0;
