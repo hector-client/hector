@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.model;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,17 +14,15 @@ import org.apache.cassandra.thrift.Column;
 
 public final class ColumnSliceImpl<N,V> implements ColumnSlice<N, V> {
 
-  private final Map<N,HColumn<N,V>> columnsMap;
+  private Map<N,HColumn<N,V>> columnsMap;
   private final List<HColumn<N,V>> columnsList;
 
   public ColumnSliceImpl(List<Column> tColumns, Serializer<N> nameSerializer,
       Serializer<V> valueSerializer) {
     Assert.noneNull(tColumns, nameSerializer, valueSerializer);
-    columnsMap = new HashMap<N,HColumn<N,V>>(tColumns.size());
     List<HColumn<N,V>> list = new ArrayList<HColumn<N,V>>(tColumns.size());
     for (Column c: tColumns) {
       HColumn<N, V> column = new HColumnImpl<N,V>(c, nameSerializer, valueSerializer);
-      columnsMap.put(column.getName(), column);
       list.add(column);
     }
     columnsList = list;
@@ -42,6 +39,13 @@ public final class ColumnSliceImpl<N,V> implements ColumnSlice<N, V> {
 
   @Override
   public HColumn<N, V> getColumnByName(N columnName) {
+    if ( null == columnsMap) {
+      columnsMap = new HashMap<N,HColumn<N,V>>(columnsList.size());
+      for (HColumn<N, V> column : columnsList) {
+        columnsMap.put(column.getName(), column);
+      }
+
+    }
     return columnsMap.get(columnName);
   }
 
