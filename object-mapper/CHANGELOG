@@ -13,6 +13,7 @@ Changes by version:
 - added EntityManagerImpl.persist(Collection<Object> objColl) - the main advantage over persist(Object obj) is that
   a single batch mutation will be used for performance
 - added better exception handling when entity does not have default constructor          
+- fix bug: when mapping java collections, if property name different from column name, would not map correctly
 
 
 2.0-01

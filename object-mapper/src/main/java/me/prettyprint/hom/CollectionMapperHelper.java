@@ -90,7 +90,7 @@ public class CollectionMapperHelper {
 
     // get property from mapping def - if not there, then isn't a collection
     // (but probably a problem elsewhere)
-    PropertyMappingDefinition md = cfMapDef.getPropMapByPropName(collColumnName.getPropertyName());
+    PropertyMappingDefinition md = cfMapDef.getPropMapByColumnName(collColumnName.getPropertyName());
     if (null == md) {
       return false;
     }
