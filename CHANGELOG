@@ -7,6 +7,7 @@ Add durable_writes support. #293
 Make sleep time when waiting for schema agreement customizable #302
 Fix MutatorResult wrong result time. #273
 Remove node from Retry Service that do not participate in the ring anymore #216
+Remove speed4j.properties from main/resources (#343)
 
 0.8.0-3
 =======
