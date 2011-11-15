@@ -13,7 +13,7 @@ Add Kerberos support (Experimental) (#296))
 Remove unused fields in CassandraHostConfigurator - maxIdle, minEvictableIdleTimeMillis, timeBetweenEvictionRunsMillis (#244)
 Improve performance of ColumnSliceImpl instantiation and HColumnImpl getName()/getValue() (#332)
 Add relevant serializers to SerializerTypeInferer (#341)
-
+Remove speed4j.properties from main/resources (#343)
 
 0.8.0-4
 =======
