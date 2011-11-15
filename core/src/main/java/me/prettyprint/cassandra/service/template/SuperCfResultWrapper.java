@@ -107,7 +107,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
 
   @Override
   public K getKey() {
-    return keySerializer.fromByteBuffer(entry.getKey()); 
+    return keySerializer.fromByteBuffer(entry.getKey().duplicate());
   }
 
 
