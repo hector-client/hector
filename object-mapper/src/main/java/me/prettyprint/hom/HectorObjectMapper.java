@@ -29,6 +29,7 @@ import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.ObjectSerializer;
+import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.Keyspace;
@@ -291,7 +292,7 @@ public class HectorObjectMapper {
         throw new HectorObjectMapperException(cfMapDefInstance.getEffectiveClass().getName()
             + ", must have default constructor", e);
       }
-      
+
       setIdIfCan(cfMapDef, obj, pkObj);
 
       for (HColumn<String, byte[]> col : slice.getColumns()) {
@@ -638,32 +639,12 @@ public class HectorObjectMapper {
   }
 
   public static Serializer<?> determineSerializer(Class<?> theType) {
-    Serializer<?> s = null;
-    if (theType == Long.class || theType == long.class) {
-      s = LongSerializer.get();
-    } else if (theType == BigInteger.class) {
-      s = BigIntegerSerializer.get();
-    } else if (theType == String.class) {
-      s = StringSerializer.get();
-    } else if (theType == Integer.class || theType == int.class) {
-      s = IntegerSerializer.get();
-    } else if (theType == UUID.class) {
-      s = UUIDSerializer.get();
-    } else if (theType == Boolean.class || theType == boolean.class) {
-      s = BooleanSerializer.get();
-    } else if (theType == Date.class) {
-      s = DateSerializer.get();
-    } else if (theType == byte[].class) {
-      s = BytesArraySerializer.get();
-    } else if (theType == Float.class) {
-      s = FloatSerializer.get();
-    } else if (theType == Double.class || theType == double.class) {
-      s = DoubleSerializer.get();
-    } else if (isSerializable(theType)) {
-      s = ObjectSerializer.get();
-    } else {
-      throw new RuntimeException("unsupported property type, " + theType.getName()
-          + ". create custom converter or petition Hector team to add another converter");
+    Serializer<?> s = SerializerTypeInferer.getSerializer(theType);
+    if (null == s) {
+      throw new RuntimeException(
+          "unsupported property type, "
+              + theType.getName()
+              + ".  Create custom converter or petition Hector Core team to add another converter to SerializerTypeInferer");
     }
     return s;
   }

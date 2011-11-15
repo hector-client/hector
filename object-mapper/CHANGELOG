@@ -14,6 +14,7 @@ Changes by version:
   a single batch mutation will be used for performance
 - added better exception handling when entity does not have default constructor          
 - fix bug: when mapping java collections, if property name different from column name, would not map correctly
+- issue-326 : determineSerializer now uses SerializerTypeInferer from hector-core to pickup standard hector serializers
 
 
 2.0-01
