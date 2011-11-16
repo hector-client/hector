@@ -38,7 +38,10 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
       ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult) {
     super(keySerializer, columnNameSerializer, executionResult);    
     this.rows = executionResult.get().entrySet().iterator();    
-    next();
+		if(hasNext()) {
+			next();
+		}
+
     hasEntries = getColumnNames() != null && getColumnNames().size() > 0;
   }
    
