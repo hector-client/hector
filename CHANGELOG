@@ -14,6 +14,7 @@ Remove unused fields in CassandraHostConfigurator - maxIdle, minEvictableIdleTim
 Improve performance of ColumnSliceImpl instantiation and HColumnImpl getName()/getValue() (#332)
 Add relevant serializers to SerializerTypeInferer (#341)
 Remove speed4j.properties from main/resources (#343)
+Fix for NSEE being thrown on ColumnFamilyTemplate#queryColumns becuase hasNext was not being called before nexts
 
 0.8.0-4
 =======
