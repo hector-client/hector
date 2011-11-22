@@ -50,7 +50,7 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
    * @return
    */
   public Collection<N> getColumnNames() {
-    return columns.keySet();
+    return columns == null ? null : columns.keySet();
   }
   
   public ByteBuffer getColumnValue( N columnName) {
