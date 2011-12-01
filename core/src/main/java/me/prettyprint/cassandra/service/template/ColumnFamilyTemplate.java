@@ -47,13 +47,17 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     return this;
   }
 
+  public ColumnFamilyUpdater<K, N> createUpdater() {
+    ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>(this, columnFactory);
+    return updater;
+  }
 
   public ColumnFamilyUpdater<K, N> createUpdater(K key) {
     ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>(this, columnFactory);
     updater.addKey(key);
     return updater;
   }
-  
+
   public ColumnFamilyUpdater<K, N> createUpdater(K key, Mutator<K> mutator) {
     ColumnFamilyUpdater<K, N> updater = new ColumnFamilyUpdater<K, N>(this, columnFactory, mutator);
     updater.addKey(key);
@@ -112,7 +116,7 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
   public ColumnFamilyResult<K, N> queryColumns(Iterable<K> keys) {
     return doExecuteMultigetSlice(keys, activeSlicePredicate);
   }
-  
+
   @SuppressWarnings("unchecked")
   public <T> T queryColumns(K key, ColumnFamilyRowMapper<K, N, T> mapper) {
     return queryColumns(key, activeSlicePredicate, mapper);
@@ -124,8 +128,8 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
    * 
    * @param <T>
    * @param key
-   * @param start
-   * @param end
+   * @param predicate The {@link HSlicePredicate} which can hold specific column names
+   * or a range of columns
    * @param mapper
    * @return
    */
