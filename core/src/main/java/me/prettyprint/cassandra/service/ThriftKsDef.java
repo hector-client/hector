@@ -12,6 +12,7 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang.math.NumberUtils;
@@ -20,6 +21,7 @@ public class ThriftKsDef implements KeyspaceDefinition {
 
   private static final String REPLICATION_FACTOR = "replication_factor";
   public static final String DEF_STRATEGY_CLASS = "org.apache.cassandra.locator.SimpleStrategy";
+  public static final String NETWORK_TOPOLOGY_STRATEGY = "org.apache.cassandra.locator.NetworkTopologyStrategy";
   private final String name;
   private String strategyClass;
   private Map<String, String> strategyOptions = new HashMap<String, String>();
@@ -47,8 +49,8 @@ public class ThriftKsDef implements KeyspaceDefinition {
   public ThriftKsDef(String keyspaceName) {
     this.name = keyspaceName;
     this.cfDefs = new ArrayList<ColumnFamilyDefinition>();
-    setReplicationFactor(1);
     this.strategyClass = DEF_STRATEGY_CLASS;
+    setReplicationFactor(1);
   }
   
   public ThriftKsDef(KeyspaceDefinition keyspaceDefinition) {
@@ -119,8 +121,9 @@ public class ThriftKsDef implements KeyspaceDefinition {
   }
 
   public void setReplicationFactor(int replicationFactor) {
-    // Compensate for CASSANDRA-1263 (wasnt my idea)
-    strategyOptions.put(REPLICATION_FACTOR,Integer.toString(replicationFactor));
+    if ( !StringUtils.equals(strategyClass, NETWORK_TOPOLOGY_STRATEGY) ) {
+      strategyOptions.put(REPLICATION_FACTOR,Integer.toString(replicationFactor));
+    }
   }
 
   @Override
