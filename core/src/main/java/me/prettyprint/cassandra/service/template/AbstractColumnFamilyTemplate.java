@@ -8,6 +8,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnFactory;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.hector.api.ColumnFactory;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -29,6 +30,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
   protected ColumnParent columnParent;
   protected HSlicePredicate<N> activeSlicePredicate;
   protected ColumnFactory columnFactory;
+  protected ConsistencyLevelPolicy consistencyLevelPolicy;
   
   /** The serializer for a standard column name or a super-column name */
   protected Serializer<N> topSerializer;
