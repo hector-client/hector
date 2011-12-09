@@ -1,9 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +7,7 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
-import me.prettyprint.cassandra.model.BasicKeyspaceDefinition;           
+import me.prettyprint.cassandra.model.BasicKeyspaceDefinition;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -21,14 +17,13 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
-
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 public class CassandraClusterTest extends BaseEmbededServerSetupTest {
@@ -125,6 +120,14 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     cassandraCluster.addKeyspace(new ThriftKsDef("DynKeyspace", "org.apache.cassandra.locator.SimpleStrategy", 1, Arrays.asList(cfDef)), true);
     ksid2 = cassandraCluster.dropKeyspace("DynKeyspace", true);
     assertNotNull(ksid2);
+  }
+
+    @Test
+  public void testAddKeyspaceNTS() throws Exception {
+    ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition("DynKeyspaceNTS", "DynCf");
+    cassandraCluster.addKeyspace(
+        new ThriftKsDef("DynKeyspaceNTS", "org.apache.cassandra.locator.NetworkTopologyStrategy", 1, Arrays.asList(cfDef)));
+
   }
 
   @Test
