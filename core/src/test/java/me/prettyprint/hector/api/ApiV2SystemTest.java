@@ -12,6 +12,7 @@ import static me.prettyprint.hector.api.factory.HFactory.createMultigetSuperSlic
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSubSlicesQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createRangeSubSlicesCounterQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSliceQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createCounterSliceQuery;
@@ -38,11 +39,13 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.beans.CounterRow;
 import me.prettyprint.hector.api.beans.CounterSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.beans.OrderedCounterRows;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.beans.Row;
@@ -60,6 +63,7 @@ import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
+import me.prettyprint.hector.api.query.RangeSubSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 import me.prettyprint.hector.api.query.SliceCounterQuery;
@@ -1014,6 +1018,40 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     // Test slice.getColumnByName
     assertEquals("v021", slice.getColumnByName("c021").getValue());
     assertEquals("v121", slice.getColumnByName("c111").getValue());
+    assertNull(slice.getColumnByName("c033"));
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
+  public void testRangeSubSlicesCounterQuery() {
+    String cf = "SuperCounter1";
+
+    TestCleanupDescriptor cleanup = insertSuperCountColumns(cf, 4,
+        "testRangeSubSlicesCounterQuery", 3, "testRangeSubSlicesCounterQuery");
+
+    // get value
+    RangeSubSlicesCounterQuery<String, String, String> q = createRangeSubSlicesCounterQuery(
+        ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKeys("testRangeSubSlicesCounterQuery2", "testRangeSubSlicesCounterQuery3");
+    // try with column name first
+    q.setSuperColumn("testRangeSubSlicesCounterQuery1");
+    q.setColumnNames("c021", "c111");
+    QueryResult<OrderedCounterRows<String, String>> r = q.execute();
+    assertNotNull(r);
+    OrderedCounterRows<String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    CounterRow<String, String> row = rows.getList().get(0);
+    assertNotNull(row);
+    assertEquals("testRangeSubSlicesCounterQuery2", row.getKey());
+    CounterSlice<String> slice = row.getColumnSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals(Long.valueOf(3), slice.getColumnByName("c021").getValue());
+    assertEquals(Long.valueOf(3), slice.getColumnByName("c111").getValue());
     assertNull(slice.getColumnByName("c033"));
 
     // Delete values
