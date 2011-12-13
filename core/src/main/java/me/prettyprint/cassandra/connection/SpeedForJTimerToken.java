@@ -5,6 +5,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Operation;
 
 /**
+ * A {@link TimerToken} implementation for the SpeedForJ API
  * @author zznate
  */
 public class SpeedForJTimerToken implements TimerToken {

@@ -1,16 +1,12 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.connection.TimerToken;
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
 import org.apache.cassandra.thrift.Cassandra;
 
 /**
@@ -45,7 +41,6 @@ public abstract class Operation<T> {
   private CassandraHost cassandraHost;
   protected long execTime;
   public final OperationType operationType;
-  public final List<TimerToken> timerTokens = new ArrayList<TimerToken>();
   
   public Operation(OperationType operationType) {
     this.failCounter = (operationType == OperationType.READ) ? Counter.READ_FAIL :

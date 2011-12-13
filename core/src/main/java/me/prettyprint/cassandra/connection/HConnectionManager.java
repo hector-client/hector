@@ -285,7 +285,6 @@ public class HConnectionManager {
         }
         op.setExecutionStatus(success);
         timer.stop(op, timerToken);
-        op.timerTokens.add(timerToken);
         releaseClient(client);
         if ( retryable ) {
           timerToken = timer.start();
