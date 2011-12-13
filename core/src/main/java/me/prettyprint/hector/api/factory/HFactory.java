@@ -30,6 +30,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSubSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
@@ -77,6 +78,7 @@ import me.prettyprint.hector.api.query.SliceCounterQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
+import me.prettyprint.hector.api.query.SubSliceCounterQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 import me.prettyprint.hector.api.query.SuperCountQuery;
@@ -502,6 +504,13 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new ThriftSubSliceQuery<K, SN, N, V>(keyspace, keySerializer,
         sNameSerializer, nameSerializer, valueSerializer);
+  }
+
+  public static <K, SN, N> SubSliceCounterQuery<K, SN, N> createSubSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftSubSliceCounterQuery<K, SN, N>(keyspace, keySerializer,
+        sNameSerializer, nameSerializer);
   }
 
   public static <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(
