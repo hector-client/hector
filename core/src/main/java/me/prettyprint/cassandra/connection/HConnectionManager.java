@@ -1,37 +1,16 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import me.prettyprint.cassandra.connection.client.HClient;
-import me.prettyprint.cassandra.connection.client.HThriftClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
-import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.*;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
-import me.prettyprint.cassandra.service.FailoverPolicy;
-import me.prettyprint.cassandra.service.JmxMonitor;
-import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
-import me.prettyprint.hector.api.exceptions.HPoolRecoverableException;
-import me.prettyprint.hector.api.exceptions.HTimedOutException;
-import me.prettyprint.hector.api.exceptions.HUnavailableException;
-import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorTransportException;
-
+import me.prettyprint.hector.api.exceptions.*;
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.slf4j.Logger;
@@ -56,6 +35,7 @@ public class HConnectionManager {
   final ExceptionsTranslator exceptionsTranslator;
   private final CassandraClientMonitor monitor;
   private HOpTimer timer;
+  private final HOpTimerTracker timerTracker;
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
 
@@ -96,6 +76,7 @@ public class HConnectionManager {
     }
     
     timer = cassandraHostConfigurator.getOpTimer();
+    timerTracker = cassandraHostConfigurator.getTimerTracker();
 
   }
 
@@ -220,7 +201,7 @@ public class HConnectionManager {
 
 
   public void operateWithFailover(Operation<?> op) throws HectorException {
-    final Object timerToken = timer.start(); 
+    TimerToken timerToken = timer.start();
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HClient client = null;
     HClientPool pool = null;
@@ -242,7 +223,7 @@ public class HConnectionManager {
 
         op.executeAndSetResult(c, pool.getCassandraHost());
         success = true;
-        timer.stop(timerToken, op.stopWatchTagName, true);
+
         break;
 
       } catch (Exception ex) {
@@ -296,9 +277,15 @@ public class HConnectionManager {
         --retries;
         if ( !success ) {
           monitor.incCounter(op.failCounter);
-          timer.stop(timerToken, op.stopWatchTagName, false);
         }
+        op.setExecutionStatus(success);
+        timer.stop(op, timerToken);
+        op.timerTokens.add(timerToken);
         releaseClient(client);
+        if ( retryable ) {
+          timerToken = timer.start();
+        }
+        timerTracker.processTimerToken(timerToken);
       }
     }
   }
