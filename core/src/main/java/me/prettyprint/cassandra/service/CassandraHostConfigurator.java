@@ -48,6 +48,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
   private boolean useKerberosAuthentication = false;
+  private HOpTimerTracker timerTracker = new NoOpTimerTracker();
 
 
   public CassandraHostConfigurator() {
@@ -339,4 +340,16 @@ public final class CassandraHostConfigurator implements Serializable {
     this.useKerberosAuthentication = useKerberosAuthentication;
   }
 
+  public HOpTimerTracker getTimerTracker() {
+    return timerTracker;
+  }
+
+  /**
+   * Set the HOpTimerTracker implementation for use in this cluster. By default
+   * we use {@link NoOpTimerTracker} which does nothing
+   * @param timerTracker
+   */
+  public void setTimerTracker(HOpTimerTracker timerTracker) {
+    this.timerTracker = timerTracker;
+  }
 }

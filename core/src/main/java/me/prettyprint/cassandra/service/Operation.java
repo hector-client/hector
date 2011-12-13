@@ -1,8 +1,11 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.connection.TimerToken;
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
@@ -23,7 +26,10 @@ public abstract class Operation<T> {
   /** Counts failed attempts */
   public final Counter failCounter;
 
-  /** The stopwatch used to measure operation performance */
+  /**
+   * The stopwatch used to measure operation performance. By default, this
+   * is simply {@link OperationType#toString()} of the underlying OperationType
+   */
   public final String stopWatchTagName;
 
   public FailoverPolicy failoverPolicy = FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE;
@@ -32,18 +38,22 @@ public abstract class Operation<T> {
   public String keyspaceName;
 
   public Map<String, String> credentials;
+  private boolean executionStatus = false;
   
   protected T result;
   private HectorException exception;
   private CassandraHost cassandraHost;
   protected long execTime;
   public final OperationType operationType;
+  public final List<TimerToken> timerTokens = new ArrayList<TimerToken>();
   
   public Operation(OperationType operationType) {
     this.failCounter = (operationType == OperationType.READ) ? Counter.READ_FAIL :
       Counter.WRITE_FAIL;
+    // TODO replace failCounter with list.size() of some sort
     this.operationType = operationType;
     this.stopWatchTagName = operationType.name();
+    // TODO tagname enhancement, vector of hosts - successful host is last
   }
 
   public Operation(OperationType operationType, Map<String, String> credentials) {
@@ -64,7 +74,6 @@ public abstract class Operation<T> {
     this.credentials = Collections.unmodifiableMap(credentials);
   }
   
-  
   public void applyConnectionParams(String keyspace, ConsistencyLevelPolicy consistencyLevelPolicy,
       FailoverPolicy failoverPolicy, Map<String,String> credentials) {
     // TODO this is a first step. must be cleaned up.
@@ -78,6 +87,20 @@ public abstract class Operation<T> {
     result = executionResult;
   }
 
+  public void setExecutionStatus(boolean success) {
+    this.executionStatus = success;
+  }
+
+  /**
+   * The current status of this operation.
+   *
+   * @return true if and only if this operation has completed
+   * successfully against a CassandraHost
+   */
+  public boolean getExecutionStatus() {
+    return executionStatus;
+  }
+  
   /**
    *
    * @return The result of the operation, if this is an operation that has a
