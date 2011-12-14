@@ -79,9 +79,9 @@
 
   <!-- Hector submodules -->
   <modules>
-    <module>core</module>
-    <module>object-mapper</module>
-    <module>test</module>
+    <module>hector-core</module>
+    <module>hector-object-mapper</module>
+    <module>hector-test</module>
   </modules>
 
   <dependencyManagement>
