@@ -1,37 +1,27 @@
 package me.prettyprint.hom;
 
+
 import java.beans.PropertyDescriptor;
 import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import javax.persistence.DiscriminatorType;
 import javax.persistence.Id;
 
-import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
-import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
-import me.prettyprint.cassandra.serializers.DateSerializer;
-import me.prettyprint.cassandra.serializers.DoubleSerializer;
-import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
@@ -216,12 +206,22 @@ public class HectorObjectMapper {
   @SuppressWarnings("unchecked")
   private byte[] generateColumnFamilyKeyFromPkObj(CFMappingDef<?> cfMapDef, Object pkObj) {
     List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
-
+    
+    List<String> rm1 = new ArrayList<String>();
+    List<String> rm2 = new ArrayList<String>();
+    
     if (cfMapDef.getKeyDef().isComplexKey()) {
-      for (PropertyDescriptor pd : cfMapDef.getKeyDef().getPropertyDescriptorMap().values()) {
-        segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(),
-            new DefaultConverter()));
+    	
+      Map<String, PropertyDescriptor> propertyDescriptorMap = cfMapDef.getKeyDef().getPropertyDescriptorMap(); 	
+      Map<String, PropertyMappingDefinition> idPropertyMap =  cfMapDef.getKeyDef().getIdPropertyMap();
+    	
+      for (String key : cfMapDef.getKeyDef().getIdPropertyMap().keySet()) {
+    	  PropertyDescriptor pd = propertyDescriptorMap.get(key);
+    	  segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(),
+    	            new DefaultConverter()));
       }
+     
+    	 
     } else {
       PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator()
                                              .next();
