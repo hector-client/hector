@@ -55,7 +55,8 @@ public class EmbeddedServerHelper {
     // make a tmp dir and copy cassandra.yaml and log4j.properties to it
     copy("/log4j.properties", TMP);
     copy(yamlFile, TMP);
-    System.setProperty("cassandra.config", "file:" + TMP + yamlFile);
+		// yamlFile may be user defined; make sure to grab the copy directly from TMP
+    System.setProperty("cassandra.config", "file:" + TMP + "/" + yamlFile.substring(yamlFile.lastIndexOf("/") + 1));
     System.setProperty("log4j.configuration", "file:" + TMP + "/log4j.properties");
     System.setProperty("cassandra-foreground","true");
 
