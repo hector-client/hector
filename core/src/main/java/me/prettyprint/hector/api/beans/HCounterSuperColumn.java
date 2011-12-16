@@ -19,6 +19,8 @@ public interface HCounterSuperColumn<SN, N> {
 
   HCounterSuperColumn<SN, N> setName(SN name);
 
+  HCounterSuperColumn<SN, N> addSubCounterColumn(HCounterColumn<N> column);
+
   HCounterSuperColumn<SN, N> setSubcolumns(List<HCounterColumn<N>> subcolumns);
 
   int getSize();

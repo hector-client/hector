@@ -46,8 +46,8 @@ public class VirtualKeyspaceOperation<T> extends Operation<T> {
 
   @Override
   public void executeAndSetResult(Client cassandra, CassandraHost cassandraHost)
-      throws HectorException {
-    operation.executeAndSetResult(cassandra, cassandraHost);
+      throws Exception {
+    operation.executeAndSetResult(new VirtualKeyspaceCassandraClient(cassandra, prefixBytes), cassandraHost);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class VirtualKeyspaceOperation<T> extends Operation<T> {
   }
 
   @Override
-  public T execute(Client cassandra) throws HectorException {
+  public T execute(Client cassandra) throws Exception {
     return operation.execute(new VirtualKeyspaceCassandraClient(cassandra,
         prefixBytes));
   }

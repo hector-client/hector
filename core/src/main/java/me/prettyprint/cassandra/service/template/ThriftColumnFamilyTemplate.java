@@ -94,7 +94,7 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
           ByteBuffer sKey = keySerializer.toByteBuffer(key);
           cosc.put(sKey, cassandra.get_slice(sKey, columnParent,
               workingSlicePredicate.toThrift(), 
-              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType))));
+              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType, columnFamily))));
 
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
@@ -115,7 +115,7 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
           Iterators.addAll(keyList, keys.iterator());
           return cassandra.multiget_slice(keySerializer.toBytesList(keyList), columnParent,
               (workingSlicePredicate == null ? activeSlicePredicate.setColumnNames(columnValueSerializers.keySet()).toThrift() : workingSlicePredicate.toThrift()),              
-            ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
+            ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType, columnFamily)));
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);
         }
@@ -134,7 +134,7 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
               columnParent,
               predicate.toThrift(), 
               workingSlicePredicate.toThrift(),
-              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
+              ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType, columnFamily)));
           if (keySlices == null || keySlices.isEmpty()) {
             return new LinkedHashMap<ByteBuffer, List<ColumnOrSuperColumn>>(0);
           }
