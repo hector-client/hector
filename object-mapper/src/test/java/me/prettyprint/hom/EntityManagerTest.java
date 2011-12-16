@@ -1,5 +1,10 @@
 package me.prettyprint.hom;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -13,6 +18,8 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hom.beans.AnonymousWithCustomType;
 import me.prettyprint.hom.beans.MyBlueTestBean;
 import me.prettyprint.hom.beans.MyComplexEntity;
+import me.prettyprint.hom.beans.MyComposite2PK;
+import me.prettyprint.hom.beans.MyCompositeEntity;
 import me.prettyprint.hom.beans.MyCompositePK;
 import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 import me.prettyprint.hom.beans.MyCustomIdBean;
@@ -25,11 +32,6 @@ import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
 import org.junit.Test;
 
 import com.mycompany.furniture.Drawer;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class EntityManagerTest extends CassandraTestBase {
 
@@ -136,6 +138,26 @@ public class EntityManagerTest extends CassandraTestBase {
     assertEquals(entity1.getDrawer(), entity2.getDrawer());
   }
 
+  @Test
+  public void testPersistAndFindCompositeType() {
+    EntityManagerImpl em = new EntityManagerImpl(keyspace, "me.prettyprint.hom.beans");
+    MyComposite2PK pkKey = new MyComposite2PK("str-prop", 1);
+    MyCompositeEntity entity1 = new MyCompositeEntity();
+    entity1.setIntProp1(pkKey.getIntProp1());
+    entity1.setStrProp1(pkKey.getStrProp1());
+    entity1.setStrProp2("str-prop-two");
+    entity1.setDrawer(new Drawer(true, false, "a very nice drawer"));
+
+    em.persist(entity1);
+
+    MyCompositeEntity entity2 = em.find(MyCompositeEntity.class, pkKey);
+
+    assertEquals(entity1.getIntProp1(), entity2.getIntProp1());
+    assertEquals(entity1.getStrProp1(), entity2.getStrProp1());
+    assertEquals(entity1.getStrProp2(), entity2.getStrProp2());
+    assertEquals(entity1.getDrawer(), entity2.getDrawer());
+  }
+  
   @Test
   public void testMissingColumnsForPojoProps() {
     // Mutator<Long> m = HFactory.createMutator(keyspace, LongSerializer.get());
