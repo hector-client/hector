@@ -21,6 +21,7 @@ import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hom.annotations.AnonymousPropertyHandling;
 import me.prettyprint.hom.beans.MyComplexEntity;
+import me.prettyprint.hom.beans.MyCompositeEntity;
 import me.prettyprint.hom.beans.MyConvertedCollectionBean;
 import me.prettyprint.hom.beans.MyCustomIdBean;
 import me.prettyprint.hom.beans.MyTestBean;
@@ -207,6 +208,7 @@ public class HectorObjectMapperTest {
     cacheMgr.initializeCacheForClass(MyTestBean.class);
     cacheMgr.initializeCacheForClass(MyCustomIdBean.class);
     cacheMgr.initializeCacheForClass(MyComplexEntity.class);
+    cacheMgr.initializeCacheForClass(MyCompositeEntity.class);
     cacheMgr.initializeCacheForClass(MyConvertedCollectionBean.class);
     cacheMgr.initializeCacheForClass(AnonymousWithLongSerializer.class);
   }

@@ -207,21 +207,13 @@ public class HectorObjectMapper {
   private byte[] generateColumnFamilyKeyFromPkObj(CFMappingDef<?> cfMapDef, Object pkObj) {
     List<byte[]> segmentList = new ArrayList<byte[]>(cfMapDef.getKeyDef().getIdPropertyMap().size());
     
-    List<String> rm1 = new ArrayList<String>();
-    List<String> rm2 = new ArrayList<String>();
-    
-    if (cfMapDef.getKeyDef().isComplexKey()) {
-    	
-      Map<String, PropertyDescriptor> propertyDescriptorMap = cfMapDef.getKeyDef().getPropertyDescriptorMap(); 	
-      Map<String, PropertyMappingDefinition> idPropertyMap =  cfMapDef.getKeyDef().getIdPropertyMap();
-    	
+    if (cfMapDef.getKeyDef().isComplexKey()) {	
+      Map<String, PropertyDescriptor> propertyDescriptorMap = cfMapDef.getKeyDef().getPropertyDescriptorMap(); 	 
       for (String key : cfMapDef.getKeyDef().getIdPropertyMap().keySet()) {
     	  PropertyDescriptor pd = propertyDescriptorMap.get(key);
     	  segmentList.add(callMethodAndConvertToCassandraType(pkObj, pd.getReadMethod(),
     	            new DefaultConverter()));
-      }
-     
-    	 
+      }	 
     } else {
       PropertyMappingDefinition md = cfMapDef.getKeyDef().getIdPropertyMap().values().iterator()
                                              .next();
