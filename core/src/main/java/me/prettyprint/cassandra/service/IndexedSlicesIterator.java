@@ -35,7 +35,7 @@ public class IndexedSlicesIterator<K, N, V> implements Iterator {
 			
 			if (iterator.hasNext()) {
 				// First element is startKey which was the last element on the previous query result - skip it
-				iterator.next();
+				next();
 			}
 		}
 

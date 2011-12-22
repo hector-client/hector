@@ -65,7 +65,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator {
 
 			// First element is start which was the last element on the previous query result - skip it
 			if (iterator.hasNext()) {
-				iterator.next();
+				next();
 			}
 		}
 
