@@ -1,6 +1,8 @@
 package me.prettyprint.hector.api.ddl;
 
+import java.nio.ByteBuffer;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Hector's implementation independent CfDef version.
@@ -82,4 +84,28 @@ public interface ColumnFamilyDefinition {
   boolean isReplicateOnWrite();
   void setReplicateOnWrite(boolean replicateOnWrite);
 
+  String getCompactionStrategy();
+  void setCompactionStrategy(String strategy);
+
+  Map<String,String> getCompactionStrategyOptions();
+  void setCompactionStrategyOptions(Map<String,String> compactionStrategyOptions);
+
+  Map<String,String> getCompressionOptions();
+  void setCompressionOptions(Map<String,String> compressionOptions);
+
+  double getMergeShardsChance();
+
+  void setMergeShardsChance(double mergeShardsChance);
+
+  String getRowCacheProvider();
+
+  void setRowCacheProvider(String rowCacheProvider);
+
+  ByteBuffer getKeyAlias();
+
+  void setKeyAlias(ByteBuffer keyAlias);
+
+  int getRowCacheKeysToSave();
+
+  void setRowCacheKeysToSave(int rowCacheKeysToSave);
 }
