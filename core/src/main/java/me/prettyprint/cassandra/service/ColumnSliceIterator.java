@@ -5,6 +5,7 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.SliceQuery;
 
 /**
+ * Iterates over the column slice, refreshing until all qualifing columns are retrieved.
  *
  * @author thrykol
  */
@@ -16,6 +17,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator {
 	private ColumnSliceFinish<N> finish;
 	private boolean reversed;
 	private int count = 100;
+	private int columns = 0;
 
 	/**
 	 * Constructor
@@ -28,6 +30,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator {
 	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed) {
 		this(query, start, new ColumnSliceFinish<N>() {
 
+			@Override
 			public N function() {
 				return finish;
 			}
@@ -51,29 +54,34 @@ public class ColumnSliceIterator<K, N, V> implements Iterator {
 		this.query.setRange(this.start, this.finish.function(), this.reversed, count);
 	}
 
+	@Override
 	public boolean hasNext() {
 		if (iterator == null) {
 			iterator = query.execute().get().getColumns().iterator();
-		} else if (!iterator.hasNext()) {
+		} else if (!iterator.hasNext() && columns == count) {  // only need to do another query if maximum columns were retrieved
 			query.setRange(start, finish.function(), reversed, count);
 			iterator = query.execute().get().getColumns().iterator();
+			columns = 0;
 
 			// First element is start which was the last element on the previous query result - skip it
 			if (iterator.hasNext()) {
-				iterator.next();
+				next();
 			}
 		}
 
 		return iterator.hasNext();
 	}
 
+	@Override
 	public HColumn<N, V> next() {
 		HColumn<N, V> column = iterator.next();
 		start = column.getName();
+		columns++;
 
 		return column;
 	}
 
+	@Override
 	public void remove() {
 		iterator.remove();
 	}
