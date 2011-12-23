@@ -1,7 +1,9 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -37,6 +39,15 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int memtableThroughputInMb;
   private int memtableFlushAfterMins;
   private boolean replicateOnWrite;
+
+  private String compactionStrategy;
+  private Map<String,String> compactionStrategyOptions;
+  private Map<String,String> compressionOptions;
+  private double mergeShardsChance;
+  private String rowCacheProvider;
+  private ByteBuffer keyAlias;
+  private int rowCacheKeysToSave;
+
 
   private final List<ColumnDefinition> columnDefinitions;
 
@@ -75,6 +86,14 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     memtableThroughputInMb = columnFamilyDefinition.getMemtableThroughputInMb();
     memtableFlushAfterMins = columnFamilyDefinition.getMemtableFlushAfterMins();
     replicateOnWrite = columnFamilyDefinition.isReplicateOnWrite();
+    compactionStrategy = columnFamilyDefinition.getCompactionStrategy();
+    compactionStrategyOptions = columnFamilyDefinition.getCompactionStrategyOptions();
+    compressionOptions = columnFamilyDefinition.getCompressionOptions();
+    mergeShardsChance = columnFamilyDefinition.getMergeShardsChance();
+    rowCacheProvider = columnFamilyDefinition.getRowCacheProvider();
+    keyAlias = columnFamilyDefinition.getKeyAlias();
+    rowCacheKeysToSave = columnFamilyDefinition.getRowCacheKeysToSave();
+
   }
 
   public void setKeyspaceName(String keyspaceName) {
@@ -285,4 +304,65 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
       return keyValidationClass;
   }
 
+  @Override
+  public String getCompactionStrategy() {
+    return compactionStrategy;
+  }
+
+  @Override
+  public void setCompactionStrategy(String compactionStrategy) {
+    this.compactionStrategy = compactionStrategy;
+  }
+
+  @Override
+  public Map<String, String> getCompactionStrategyOptions() {
+    return compactionStrategyOptions;
+  }
+
+  @Override
+  public void setCompactionStrategyOptions(Map<String, String> compactionStrategyOptions) {
+    this.compactionStrategyOptions = compactionStrategyOptions;
+  }
+
+  @Override
+  public Map<String, String> getCompressionOptions() {
+    return compressionOptions;
+  }
+
+  @Override
+  public void setCompressionOptions(Map<String, String> compressionOptions) {
+    this.compressionOptions = compressionOptions;
+  }
+
+  public double getMergeShardsChance() {
+    return mergeShardsChance;
+  }
+
+  public void setMergeShardsChance(double mergeShardsChance) {
+    this.mergeShardsChance = mergeShardsChance;
+  }
+
+  public String getRowCacheProvider() {
+    return rowCacheProvider;
+  }
+
+  public void setRowCacheProvider(String rowCacheProvider) {
+    this.rowCacheProvider = rowCacheProvider;
+  }
+
+  public ByteBuffer getKeyAlias() {
+    return keyAlias;
+  }
+
+  public void setKeyAlias(ByteBuffer keyAlias) {
+    this.keyAlias = keyAlias;
+  }
+
+  public int getRowCacheKeysToSave() {
+    return rowCacheKeysToSave;
+  }
+
+  public void setRowCacheKeysToSave(int rowCacheKeysToSave) {
+    this.rowCacheKeysToSave = rowCacheKeysToSave;
+  }
 }
