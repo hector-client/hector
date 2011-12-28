@@ -172,10 +172,7 @@ public final class HFactory {
    */
   public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    synchronized (clusters) {
-      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-          cassandraHostConfigurator) : clusters.get(clusterName);
-    }
+    return createCluster(clusterName, cassandraHostConfigurator, null);
   }
 
   /**
@@ -193,8 +190,13 @@ public final class HFactory {
       CassandraHostConfigurator cassandraHostConfigurator,
       Map<String, String> credentials) {
     synchronized (clusters) {
-      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-          cassandraHostConfigurator, credentials) : clusters.get(clusterName);
+      Cluster cluster = clusters.get(clusterName);
+      if ( cluster == null ) {
+        cluster = new ThriftCluster(clusterName,
+          cassandraHostConfigurator, credentials);
+        clusters.put(clusterName, cluster);
+      }
+      return cluster;
     }
   }
   
@@ -603,8 +605,8 @@ public final class HFactory {
    * defined in {@link CassandraHostConfigurator}. Notice that this is a
    * convenient method. Be aware that there might be multiple
    * {@link CassandraHostConfigurator} each of them with different clock
-   * resolutions, in which case the result of {@link HFactory.createClock} will
-   * not be consistent. {@link Keyspace.createClock()} should be used instead.
+   * resolutions, in which case the result of {@link HFactory#createClock} will
+   * not be consistent. {@link Keyspace#createClock()} should be used instead.
    */
   public static long createClock() {
     return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
@@ -630,7 +632,7 @@ public final class HFactory {
    * HFactory.createKeyspaceDefinition(testKeyspace);
    * cluster.addKeyspace(newKeyspace);
    * 
-   * @param keyspace
+   * @param keyspaceName
    * @param strategyClass
    *          - example:
    *          org.apache.cassandra.locator.SimpleStrategy.class.getName()
@@ -657,7 +659,7 @@ public final class HFactory {
    * cluster.addKeyspace(testKeyspace);
    * 
    * @param keyspace
-   * @param columnFamilyName
+   * @param cfName
    */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(
       String keyspace, String cfName) {
@@ -677,7 +679,7 @@ public final class HFactory {
    * cluster.addKeyspace(testKeyspace);
    * 
    * @param keyspace
-   * @param columnFamilyName
+   * @param cfName
    * @param comparatorType
    */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(
