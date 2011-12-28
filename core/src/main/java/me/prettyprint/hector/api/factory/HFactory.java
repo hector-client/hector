@@ -130,44 +130,41 @@ public final class HFactory {
   }
 
   /**
+   * Calls the three argument version with a null credentials map. 
+   * {@link #getOrCreateCluster(String, me.prettyprint.cassandra.service.CassandraHostConfigurator, java.util.Map)}
+   * for details.
+   */
+  public static Cluster getOrCreateCluster(String clusterName,
+      CassandraHostConfigurator cassandraHostConfigurator) {
+    return createCluster(clusterName, cassandraHostConfigurator, null);
+  }
+
+  /**
    * Method tries to create a Cluster instance for an existing Cassandra
    * cluster. If another class already called getOrCreateCluster, the factory
    * returns the cached instance. If the instance doesn't exist in memory, a new
    * ThriftCluster is created and cached.
-   * 
+   *
    * Example usage for a default installation of Cassandra.
-   * 
+   *
    * String clusterName = "Test Cluster"; String host = "localhost:9160";
    * Cluster cluster = HFactory.getOrCreateCluster(clusterName, new
    * CassandraHostConfigurator(host));
-   * 
+   *
    * @param clusterName
    *          The cluster name. This is an identifying string for the cluster,
    *          e.g. "production" or "test" etc. Clusters will be created on
    *          demand per each unique clusterName key.
    * @param cassandraHostConfigurator
+   * @param credentials The credentials map for authenticating a Keyspace
    */
   public static Cluster getOrCreateCluster(String clusterName,
-      CassandraHostConfigurator cassandraHostConfigurator) {
-    synchronized (clusters) {
-      Cluster c = clusters.get(clusterName);
-      if (c == null) {
-        c = createCluster(clusterName, cassandraHostConfigurator);
-        clusters.put(clusterName, c);
-      }
-      return c;
-    }
+      CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
+    return createCluster(clusterName, cassandraHostConfigurator, credentials);
   }
 
   /**
-   * Method looks in the cache for the cluster by name. If none exists, a new
-   * ThriftCluster instance is created.
-   * 
-   * @param clusterName
-   *          The cluster name. This is an identifying string for the cluster,
-   *          e.g. "production" or "test" etc. Clusters will be created on
-   *          demand per each unique clusterName key.
-   * @param cassandraHostConfigurator
+   * @deprecated use getOrCreateCluster instead
    * 
    */
   public static Cluster createCluster(String clusterName,
@@ -177,7 +174,7 @@ public final class HFactory {
 
   /**
    * Method looks in the cache for the cluster by name. If none exists, a new
-   * ThriftCluster instance is created.
+   * ThriftCluster instance is created and added to the map of known clusters
    * 
    * @param clusterName
    *          The cluster name. This is an identifying string for the cluster,
