@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.thrift.TException;
@@ -73,7 +71,7 @@ public abstract class AbstractCluster implements Cluster {
     cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
     xtrans = new ExceptionsTranslatorImpl();
     clockResolution = cassandraHostConfigurator.getClockResolution();
-    this.credentials = Collections.unmodifiableMap(credentials);
+    this.credentials = Collections.unmodifiableMap(credentials == null? EMPTY_CREDENTIALS : credentials);
   }
 
   @Override

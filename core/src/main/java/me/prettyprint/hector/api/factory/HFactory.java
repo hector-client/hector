@@ -130,57 +130,51 @@ public final class HFactory {
   }
 
   /**
+   * Calls the three argument version with a null credentials map. 
+   * {@link #getOrCreateCluster(String, me.prettyprint.cassandra.service.CassandraHostConfigurator, java.util.Map)}
+   * for details.
+   */
+  public static Cluster getOrCreateCluster(String clusterName,
+      CassandraHostConfigurator cassandraHostConfigurator) {
+    return createCluster(clusterName, cassandraHostConfigurator, null);
+  }
+
+  /**
    * Method tries to create a Cluster instance for an existing Cassandra
    * cluster. If another class already called getOrCreateCluster, the factory
    * returns the cached instance. If the instance doesn't exist in memory, a new
    * ThriftCluster is created and cached.
-   * 
+   *
    * Example usage for a default installation of Cassandra.
-   * 
+   *
    * String clusterName = "Test Cluster"; String host = "localhost:9160";
    * Cluster cluster = HFactory.getOrCreateCluster(clusterName, new
    * CassandraHostConfigurator(host));
-   * 
+   *
    * @param clusterName
    *          The cluster name. This is an identifying string for the cluster,
    *          e.g. "production" or "test" etc. Clusters will be created on
    *          demand per each unique clusterName key.
    * @param cassandraHostConfigurator
+   * @param credentials The credentials map for authenticating a Keyspace
    */
   public static Cluster getOrCreateCluster(String clusterName,
-      CassandraHostConfigurator cassandraHostConfigurator) {
-    synchronized (clusters) {
-      Cluster c = clusters.get(clusterName);
-      if (c == null) {
-        c = createCluster(clusterName, cassandraHostConfigurator);
-        clusters.put(clusterName, c);
-      }
-      return c;
-    }
+      CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
+    return createCluster(clusterName, cassandraHostConfigurator, credentials);
   }
 
   /**
-   * Method looks in the cache for the cluster by name. If none exists, a new
-   * ThriftCluster instance is created.
-   * 
-   * @param clusterName
-   *          The cluster name. This is an identifying string for the cluster,
-   *          e.g. "production" or "test" etc. Clusters will be created on
-   *          demand per each unique clusterName key.
-   * @param cassandraHostConfigurator
+   * @deprecated use getOrCreateCluster instead
    * 
    */
   public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    synchronized (clusters) {
-      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-          cassandraHostConfigurator) : clusters.get(clusterName);
-    }
+    return createCluster(clusterName, cassandraHostConfigurator, null);
   }
 
   /**
    * Method looks in the cache for the cluster by name. If none exists, a new
-   * ThriftCluster instance is created.
+   * ThriftCluster instance is created and added to the map of known clusters
    * 
    * @param clusterName
    *          The cluster name. This is an identifying string for the cluster,
@@ -193,8 +187,13 @@ public final class HFactory {
       CassandraHostConfigurator cassandraHostConfigurator,
       Map<String, String> credentials) {
     synchronized (clusters) {
-      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-          cassandraHostConfigurator, credentials) : clusters.get(clusterName);
+      Cluster cluster = clusters.get(clusterName);
+      if ( cluster == null ) {
+        cluster = new ThriftCluster(clusterName,
+          cassandraHostConfigurator, credentials);
+        clusters.put(clusterName, cluster);
+      }
+      return cluster;
     }
   }
   
@@ -603,8 +602,8 @@ public final class HFactory {
    * defined in {@link CassandraHostConfigurator}. Notice that this is a
    * convenient method. Be aware that there might be multiple
    * {@link CassandraHostConfigurator} each of them with different clock
-   * resolutions, in which case the result of {@link HFactory.createClock} will
-   * not be consistent. {@link Keyspace.createClock()} should be used instead.
+   * resolutions, in which case the result of {@link HFactory#createClock} will
+   * not be consistent. {@link Keyspace#createClock()} should be used instead.
    */
   public static long createClock() {
     return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
@@ -630,7 +629,7 @@ public final class HFactory {
    * HFactory.createKeyspaceDefinition(testKeyspace);
    * cluster.addKeyspace(newKeyspace);
    * 
-   * @param keyspace
+   * @param keyspaceName
    * @param strategyClass
    *          - example:
    *          org.apache.cassandra.locator.SimpleStrategy.class.getName()
@@ -657,7 +656,7 @@ public final class HFactory {
    * cluster.addKeyspace(testKeyspace);
    * 
    * @param keyspace
-   * @param columnFamilyName
+   * @param cfName
    */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(
       String keyspace, String cfName) {
@@ -677,7 +676,7 @@ public final class HFactory {
    * cluster.addKeyspace(testKeyspace);
    * 
    * @param keyspace
-   * @param columnFamilyName
+   * @param cfName
    * @param comparatorType
    */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(

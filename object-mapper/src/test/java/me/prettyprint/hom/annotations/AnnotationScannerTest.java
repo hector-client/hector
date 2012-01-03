@@ -2,18 +2,7 @@ package me.prettyprint.hom.annotations;
 
 import java.util.Set;
 
-import me.prettyprint.hom.beans.AnonymousWithCustomType;
-import me.prettyprint.hom.beans.MyBlueTestBean;
-import me.prettyprint.hom.beans.MyComplexEntity;
-import me.prettyprint.hom.beans.MyConvertedCollectionBean;
-import me.prettyprint.hom.beans.MyCustomIdBean;
-import me.prettyprint.hom.beans.MyGreenTestBean;
-import me.prettyprint.hom.beans.MyPurpleTestBean;
-import me.prettyprint.hom.beans.MyRedTestBean;
-import me.prettyprint.hom.beans.MyTestBean;
-import me.prettyprint.hom.beans.MyTestBeanNoAnonymous;
-import me.prettyprint.hom.beans.SimpleRelationshipBean;
-import me.prettyprint.hom.beans.SimpleTestBean;
+import me.prettyprint.hom.beans.*;
 
 import org.junit.Test;
 
@@ -52,6 +41,8 @@ public class AnnotationScannerTest {
     assertTrue(classSet.contains(MyConvertedCollectionBean.class));
     count++;
     assertTrue(classSet.contains(AnonymousWithCustomType.class));
+    count++;
+    assertTrue(classSet.contains(MyCompositeEntity.class));
     count++;
 
     assertEquals(count, classSet.size());

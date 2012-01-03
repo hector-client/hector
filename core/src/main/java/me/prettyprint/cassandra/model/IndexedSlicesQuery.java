@@ -124,6 +124,10 @@ public class IndexedSlicesQuery<K, N, V> extends
     return this;
   }
 
+	public int getRowCount() {
+		return indexClause.getCount();
+	}
+
   @Override
   public QueryResult<OrderedRows<K, N, V>> execute() {
 

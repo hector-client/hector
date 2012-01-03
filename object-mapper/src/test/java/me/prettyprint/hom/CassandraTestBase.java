@@ -102,6 +102,8 @@ public class CassandraTestBase {
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "ComplexColumnFamily").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
+        cfDefList.add(new CfDef("TestKeyspace", "CompositeColumnFamily").setComparator_type(BytesType.class.getSimpleName())
+                .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "Furniture").setComparator_type(BytesType.class.getSimpleName())
             .setKey_cache_size(0).setRow_cache_size(0).setGc_grace_seconds(86400));
         cfDefList.add(new CfDef("TestKeyspace", "MyConvertedCollectionFamily").setComparator_type(BytesType.class.getSimpleName())

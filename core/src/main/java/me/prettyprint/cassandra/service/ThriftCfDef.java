@@ -1,8 +1,10 @@
 package me.prettyprint.cassandra.service;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ddl.ColumnDefinition;
@@ -42,6 +44,18 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private int keyCacheSavePeriodInSeconds;
   private boolean replicateOnWrite;
 
+  private String compactionStrategy;
+  private Map<String,String> compactionStrategyOptions;
+  private Map<String,String> compressionOptions;
+  private double mergeShardsChance;
+  private String rowCacheProvider;
+  private ByteBuffer keyAlias;
+  private int rowCacheKeysToSave;
+
+
+
+
+
   public ThriftCfDef(CfDef d) {
     Assert.notNull(d, "CfDef is null");
     keyspace = d.keyspace;
@@ -66,6 +80,16 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
         CFMetaDataDefaults.DEFAULT_MAX_COMPACTION_THRESHOLD : d.max_compaction_threshold;
 
     replicateOnWrite = d.replicate_on_write;
+
+    compactionStrategy = d.compaction_strategy;
+    compactionStrategyOptions = d.compaction_strategy_options;
+    compressionOptions = d.compression_options;
+
+    mergeShardsChance = d.merge_shards_chance;
+    rowCacheProvider = d.row_cache_provider;
+    keyAlias = d.key_alias;
+    rowCacheKeysToSave = d.row_cache_keys_to_save;
+
   }
 
   public ThriftCfDef(ColumnFamilyDefinition columnFamilyDefinition) {
@@ -98,6 +122,16 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     memtableOperationsInMillions = columnFamilyDefinition.getMemtableOperationsInMillions() == 0 ?
         CFMetaDataDefaults.DEFAULT_MEMTABLE_OPERATIONS_IN_MILLIONS : columnFamilyDefinition.getMemtableOperationsInMillions();
     replicateOnWrite = columnFamilyDefinition.isReplicateOnWrite();
+
+    compactionStrategy = columnFamilyDefinition.getCompactionStrategy();
+    compactionStrategyOptions = columnFamilyDefinition.getCompactionStrategyOptions();
+    compressionOptions = columnFamilyDefinition.getCompressionOptions();
+
+    mergeShardsChance = columnFamilyDefinition.getMergeShardsChance();
+    rowCacheProvider = columnFamilyDefinition.getRowCacheProvider();
+    keyAlias = columnFamilyDefinition.getKeyAlias();
+    rowCacheKeysToSave = columnFamilyDefinition.getRowCacheKeysToSave();
+
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
@@ -243,6 +277,15 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
       d.setSubcomparator_type(subComparatorType.getClassName() + subComparatorTypeAlias);
     }
     
+    d.setCompaction_strategy(compactionStrategy);
+    d.setCompaction_strategy_options(compactionStrategyOptions);
+    d.setCompression_options(compressionOptions);
+
+    d.setMerge_shards_chance(mergeShardsChance);
+    d.setRow_cache_provider(rowCacheProvider);
+    d.setKey_alias(keyAlias);
+    d.setRow_cache_keys_to_save(rowCacheKeysToSave);
+
     return d;
   }
 
@@ -381,10 +424,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
   }
 
+  @Override
   public boolean isReplicateOnWrite() {
     return replicateOnWrite;
   }
 
+  @Override
   public void setReplicateOnWrite(boolean replicateOnWrite) {
     this.replicateOnWrite = replicateOnWrite;
   }
@@ -399,4 +444,73 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.name = name;
   }
 
+  @Override
+  public String getCompactionStrategy() {
+    return this.compactionStrategy;
+  }
+
+  @Override
+  public void setCompactionStrategy(String strategy) {
+    this.compactionStrategy = strategy;
+  }
+
+  @Override
+  public Map<String, String> getCompactionStrategyOptions() {
+    return compactionStrategyOptions;
+  }
+
+  @Override
+  public void setCompactionStrategyOptions(Map<String, String> compactionStrategyOptions) {
+    this.compactionStrategyOptions = compactionStrategyOptions;
+  }
+
+  @Override
+  public Map<String, String> getCompressionOptions() {
+    return this.compressionOptions;
+  }
+
+  @Override
+  public void setCompressionOptions(Map<String, String> compressionOptions) {
+    this.compressionOptions = compressionOptions;
+  }
+
+  @Override
+  public double getMergeShardsChance() {
+    return mergeShardsChance;
+  }
+
+  @Override
+  public void setMergeShardsChance(double mergeShardsChance) {
+    this.mergeShardsChance = mergeShardsChance;
+  }
+
+  @Override
+  public String getRowCacheProvider() {
+    return rowCacheProvider;
+  }
+
+  @Override
+  public void setRowCacheProvider(String rowCacheProvider) {
+    this.rowCacheProvider = rowCacheProvider;
+  }
+
+  @Override
+  public ByteBuffer getKeyAlias() {
+    return keyAlias;
+  }
+
+  @Override
+  public void setKeyAlias(ByteBuffer keyAlias) {
+    this.keyAlias = keyAlias;
+  }
+
+  @Override
+  public int getRowCacheKeysToSave() {
+    return rowCacheKeysToSave;
+  }
+
+  @Override
+  public void setRowCacheKeysToSave(int rowCacheKeysToSave) {
+    this.rowCacheKeysToSave = rowCacheKeysToSave;
+  }
 }

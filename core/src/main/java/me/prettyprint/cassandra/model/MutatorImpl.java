@@ -2,11 +2,10 @@ package me.prettyprint.cassandra.model;
 
 import java.util.Arrays;
 
+import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
-import me.prettyprint.cassandra.service.BatchMutation;
-import me.prettyprint.cassandra.service.BatchSizeHint;
-import me.prettyprint.cassandra.service.KeyspaceService;
+import me.prettyprint.cassandra.service.*;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -16,8 +15,7 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
-
-import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 
@@ -242,13 +240,15 @@ public final class MutatorImpl<K> implements Mutator<K> {
     }
     final BatchMutation<K> mutations = pendingMutations.makeCopy();
     pendingMutations = null;
-    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
+    return new MutationResultImpl(keyspace.doExecuteOperation(new Operation<Void>(OperationType.WRITE) {
       @Override
-      public Void doInKeyspace(KeyspaceService ks) throws HectorException {
-        ks.batchMutate(mutations);
+      public Void execute(Cassandra.Client cassandra) throws Exception {
+        cassandra.batch_mutate(mutations.getMutationMap(),
+          ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
         return null;
       }
     }));
+
   }
 
   /**
@@ -276,13 +276,8 @@ public final class MutatorImpl<K> implements Mutator<K> {
 
   @Override
   public <N> MutationResult insertCounter(final K key, final String cf, final HCounterColumn<N> c) {
-    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
-        @Override
-        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
-          ks.addCounter(keySerializer.toByteBuffer(key), new ColumnParent(cf), ((HCounterColumnImpl<N>) c).toThrift());
-          return null;
-        }
-    }));
+    addCounter(key,cf, c);
+    return execute();
   }
   
   @Override
@@ -306,27 +301,18 @@ public final class MutatorImpl<K> implements Mutator<K> {
   @Override
   public <N> MutationResult deleteCounter(final K key, final String cf, final N counterColumnName, 
       final Serializer<N> nameSerializer) {
-    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
-        @Override
-        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
-          ks.removeCounter(keySerializer.toByteBuffer(key), ThriftFactory.createColumnPath(cf, counterColumnName, 
-              nameSerializer));
-          return null;
-        }
-    }));
+    addCounterDeletion(key,cf,counterColumnName,nameSerializer);
+    return execute();
   }
 
   @Override
   public <SN, N> MutationResult subDeleteCounter(final K key, final String cf, final SN supercolumnName, 
       final N columnName, final Serializer<SN> sNameSerializer, final Serializer<N> nameSerializer) {
-    return new MutationResultImpl(keyspace.doExecute(new KeyspaceOperationCallback<Void>() {
-        @Override
-        public Void doInKeyspace(KeyspaceService ks) throws HectorException {
-          ks.removeCounter(keySerializer.toByteBuffer(key), ThriftFactory.createSuperColumnPath(cf,
-              supercolumnName, columnName, sNameSerializer, nameSerializer));
-          return null;
-        }
-      }));
+      addCounterSubDeletion(key,cf,
+        new HCounterSuperColumnImpl<SN,N>(sNameSerializer,nameSerializer)
+          .setName(supercolumnName)
+          .addSubCounterColumn(new HCounterColumnImpl(nameSerializer)));
+    return execute();
   }
 
   @Override
