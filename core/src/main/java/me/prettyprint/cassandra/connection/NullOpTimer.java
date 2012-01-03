@@ -19,7 +19,10 @@ public class NullOpTimer implements HOpTimer, Serializable {
   }
 
   @Override
-  public void stop(Operation op, TimerToken timerToken, boolean success) {
+  public void stop(Operation op, TimerToken timerToken) {
+    //To change body of implemented methods use File | Settings | File Templates.
   }
+
+
 
 }
