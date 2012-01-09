@@ -44,22 +44,26 @@ public interface KeyspaceService {
    *
    * @throws HNotFoundException
    *           if no value exists for the column
+   * @ throws HectorException 
+   *           if any other error occurs
    */
-  Column getColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  Column getColumn(ByteBuffer key, ColumnPath columnPath) throws HNotFoundException;
 
-  Column getColumn(String key, ColumnPath columnPath) throws HectorException;
+  Column getColumn(String key, ColumnPath columnPath) throws HNotFoundException;
   
   /**
-   * Get the Counter  at the given columnPath.
+   * Get the Counter Column at the given columnPath.
    *
    * If no value is present, NotFoundException is thrown.
    *
    * @throws HNotFoundException
-   *           if no value exists for the counter
+   *           if no value exists for the counter column
+   * @ throws HectorException 
+   *           if any other error occurs
    */
-  CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath) throws HNotFoundException;
   
-  CounterColumn getCounter(String key, ColumnPath columnPath) throws HectorException;
+  CounterColumn getCounter(String key, ColumnPath columnPath) throws HNotFoundException;
 
   /**
    * Get the SuperColumn at the given columnPath.
@@ -71,15 +75,17 @@ public interface KeyspaceService {
    *
    * @throws HNotFoundException
    *           when a supercolumn is not found
+   * @ throws HectorException 
+   *           if any other error occurs
    */
-  SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
+  SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath) throws HNotFoundException;
 
-  SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HectorException;
+  SuperColumn getSuperColumn(String key, ColumnPath columnPath) throws HNotFoundException;
 
   /**
    * Get the SuperColumn at the given columnPath.
    *
-   * If no value is present, NotFoundException is thrown.
+   * If no value is present, HNotFoundException is thrown.
    *
    * by default will return column with native order and the size of the list is
    * unlimited (so be careful...)
@@ -90,9 +96,11 @@ public interface KeyspaceService {
    *          the result column size
    * @throws HNotFoundException
    *           when a supercolumn is not found
+   * @ throws HectorException 
+   *           if any other error occurs
    */
   SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath, boolean reversed, int size)
-      throws HectorException;
+      throws HNotFoundException;
 
   /**
    * Get the group of columns contained by columnParent.
