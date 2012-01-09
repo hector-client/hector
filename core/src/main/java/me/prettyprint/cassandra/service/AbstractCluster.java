@@ -300,7 +300,15 @@ public abstract class AbstractCluster implements Cluster {
     connectionManager.operateWithFailover(op);
   }
 
-  
+  @Override
+  public void onStartup() {
+    // default implementation does nothing
+  }
+
+  public CassandraHostConfigurator getConfigurator() {
+    return configurator;
+  }
+
   protected static void waitForSchemaAgreement(Cassandra.Client cassandra) throws InvalidRequestException, TException, InterruptedException {
     int waited = 0;
     int versions = 0;

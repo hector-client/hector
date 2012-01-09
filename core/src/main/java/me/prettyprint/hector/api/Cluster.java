@@ -125,4 +125,10 @@ public interface Cluster {
   void truncate(final String keyspaceName, final String columnFamily) throws HectorException;
 
   Map<String, String> getCredentials();
+
+  /**
+   * called after the cluster has been initialized.  Default implementation
+   * is to do nothing
+   */
+  void onStartup();
 }

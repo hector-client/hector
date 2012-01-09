@@ -156,7 +156,14 @@ public class ThriftCluster extends AbstractCluster implements Cluster {
     connectionManager.operateWithFailover(op);
     return op.getResult();
   }
-  
+
+  @Override
+  public void onStartup() {
+    if (getConfigurator().getRunAutoDiscoveryAtStartup()) {
+      connectionManager.doAddNodes();
+    }
+  }
+
   private ThriftCfDef toThriftImplementation(final ColumnFamilyDefinition cfdef) {
   	if(cfdef instanceof ThriftCfDef) {
   	  return (ThriftCfDef) cfdef;
