@@ -3,13 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
+
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
     <title>Getting started &mdash; Hector - Java Client for Cassandra</title>
+    
     <link rel="stylesheet" href="../_static/default.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
@@ -98,6 +101,7 @@
 <li><a class="reference internal" href="#update">Update</a></li>
 <li><a class="reference internal" href="#read">Read</a></li>
 <li><a class="reference internal" href="#delete">Delete</a></li>
+<li><a class="reference internal" href="#column-iteration">Column Iteration</a></li>
 </ul>
 </li>
 </ul>
@@ -237,6 +241,22 @@
 </pre></div>
 </div>
 </div>
+<div class="section" id="column-iteration">
+<h3>Column Iteration<a class="headerlink" href="#column-iteration" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-java"><div class="highlight"><pre><span class="c1">// Iterates over all columns for the row identified by key &quot;a key&quot;</span>
+<span class="n">SliceQuery</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">query</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createSliceQuery</span><span class="o">(</span><span class="n">ksp</span><span class="o">,</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span>
+    <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">(),</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">()).</span>
+    <span class="n">setKey</span><span class="o">(</span><span class="s">&quot;a key&quot;</span><span class="o">).</span><span class="na">setColumnFamily</span><span class="o">(</span><span class="n">columnFamily</span><span class="o">);</span>
+
+<span class="n">ColumnSliceIterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;</span> <span class="n">iterator</span> <span class="o">=</span>
+    <span class="k">new</span> <span class="n">ColumnSliceIterator</span><span class="o">&lt;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&gt;(</span><span class="n">query</span><span class="o">,</span> <span class="kc">null</span><span class="o">,</span> <span class="s">&quot;\uFFFF&quot;</span><span class="o">,</span> <span class="kc">false</span><span class="o">);</span>
+
+<span class="k">while</span> <span class="o">(</span><span class="n">iterator</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+    <span class="c1">// do something</span>
+<span class="o">}</span>
+</pre></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -270,7 +290,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2011, Patricio Echague (patricioe), Nate McCall (zznate).
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.8.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>
