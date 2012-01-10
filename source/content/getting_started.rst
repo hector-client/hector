@@ -127,3 +127,22 @@ Delete
         // do something
     }
 
+
+Column Iteration
+------
+
+::
+
+  // Iterates over all columns for the row identified by key "a key"
+  SliceQuery<String, String, String> query = HFactory.createSliceQuery(ksp, StringSerializer.get(),
+      StringSerializer.get(), StringSerializer.get()).
+      setKey("a key").setColumnFamily(columnFamily);
+
+  ColumnSliceIterator<String, String, String> iterator = 
+      new ColumnSliceIterator<String, String, String>(query, null, "\uFFFF", false);
+        
+  while (iterator.hasNext()) {
+      // do something
+  }
+
+
