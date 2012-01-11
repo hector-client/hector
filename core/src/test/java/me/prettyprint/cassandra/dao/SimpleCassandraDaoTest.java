@@ -6,13 +6,13 @@ import javax.annotation.Resource;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+//import org.springframework.test.context.ContextConfiguration;
+//import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations="/cassandra-context-test-v2.xml")
+//@RunWith(SpringJUnit4ClassRunner.class)
+//@ContextConfiguration(locations="/cassandra-context-test-v2.xml")
 public class SimpleCassandraDaoTest extends BaseEmbededServerSetupTest {
 
   @Resource

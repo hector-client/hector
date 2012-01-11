@@ -80,7 +80,7 @@ public class EmbeddedSchemaLoader {
         superCFMD(ks1, "Super5", bytes),
         indexCFMD(ks1, "Indexed1", true),
         indexCFMD(ks1, "Indexed2", false),
-        new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),        
+        new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null),        
         new CFMetaData(ks1, "Counter1", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
         new CFMetaData(ks1, "Counter2", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
         new CFMetaData(ks1, "SuperCounter1", su, bytes, bytes).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
@@ -106,13 +106,13 @@ public class EmbeddedSchemaLoader {
   
   private static CFMetaData standardCFMD(String ksName, String cfName) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard,
-        BytesType.instance, null).keyCacheSize(0);
+        BytesType.instance, null);
   }
 
   private static CFMetaData superCFMD(String ksName, String cfName,
       AbstractType subcc) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Super,
-        BytesType.instance, subcc).keyCacheSize(0);
+        BytesType.instance, subcc);
   }
 
   private static CFMetaData indexCFMD(String ksName, String cfName, final Boolean withIdxType)

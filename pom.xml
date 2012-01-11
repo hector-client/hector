@@ -86,10 +86,15 @@
 
   <dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>edu.stanford.ppl</groupId>
+                <artifactId>snaptree</artifactId>
+                    <version>0.1</version>
+                      </dependency>
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>1.0.6</version>
+        <version>1.1-dev-SNAPSHOT</version>
         <exclusions>
           <exclusion>
 	    <groupId>com.github.stephenc</groupId>
@@ -100,7 +105,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
-        <version>1.0.6</version>
+        <version>1.1-dev-SNAPSHOT</version>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
