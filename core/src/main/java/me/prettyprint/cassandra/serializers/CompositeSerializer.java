@@ -16,6 +16,12 @@ import me.prettyprint.hector.api.ddl.ComparatorType;
  */
 public class CompositeSerializer extends AbstractSerializer<Composite> {
 
+  private static final CompositeSerializer INSTANCE = new CompositeSerializer();
+  
+  public static CompositeSerializer get() {
+    return INSTANCE;
+  }
+  
   @Override
   public ByteBuffer toByteBuffer(Composite obj) {
 
