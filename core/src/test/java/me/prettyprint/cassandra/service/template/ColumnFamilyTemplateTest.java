@@ -1,19 +1,12 @@
 package me.prettyprint.cassandra.service.template;
 
-import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Date;
 
-import me.prettyprint.cassandra.model.HSlicePredicate;
-import me.prettyprint.cassandra.model.IndexedSlicesQuery;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.hector.api.beans.Composite;
-import me.prettyprint.hector.api.beans.OrderedRows;
-import me.prettyprint.hector.api.factory.HFactory;
-import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.thrift.IndexOperator;
 import org.junit.Test;

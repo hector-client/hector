@@ -15,8 +15,6 @@ import me.prettyprint.cassandra.serializers.TimeUUIDSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
 
-import org.apache.cassandra.db.marshal.AsciiType;
-import org.apache.cassandra.db.marshal.LexicalUUIDType;
 import org.junit.Test;
 
 public class DynamicCompositeTest {

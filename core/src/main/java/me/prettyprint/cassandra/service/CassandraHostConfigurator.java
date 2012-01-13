@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
 import me.prettyprint.cassandra.connection.CassandraHostRetryService;
 import me.prettyprint.cassandra.connection.HOpTimer;
 import me.prettyprint.cassandra.connection.HostTimeoutTracker;

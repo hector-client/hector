@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
-import java.util.Collection;
 import java.util.List;
 
 import me.prettyprint.cassandra.model.HColumnImpl;

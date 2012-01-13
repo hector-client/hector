@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.nio.ByteBuffer;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
-import org.apache.cassandra.utils.FBUtilities;
 import org.junit.Test;
 
 public class LongSerializerTest {
