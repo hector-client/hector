@@ -79,7 +79,7 @@ public class CassandraAuthTest {
 
   @AfterClass
   public static void teardown() throws IOException {
-    embedded.teardown();
+    EmbeddedServerHelper.teardown();
     embedded = null;
   }
 

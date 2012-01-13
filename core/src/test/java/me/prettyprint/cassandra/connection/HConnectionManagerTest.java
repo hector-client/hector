@@ -39,7 +39,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
   
   @Test(expected=IllegalArgumentException.class)
   public void testNullHostList() {
-    HConnectionManager hcm = new HConnectionManager(clusterName, new CassandraHostConfigurator());
+    new HConnectionManager(clusterName, new CassandraHostConfigurator());
   }
   
   @Test
@@ -47,7 +47,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
     cassandraHostConfigurator.setRetryDownedHosts(false);
     connectionManager = new HConnectionManager(clusterName, cassandraHostConfigurator);
-    CassandraHost cassandraHost = new CassandraHost("127.0.0.1", 9170);    
+    new CassandraHost("127.0.0.1", 9170);    
     HClient client = connectionManager.borrowClient();
     connectionManager.markHostAsDown(client.getCassandraHost());
     assertEquals(0,connectionManager.getActivePools().size());

@@ -17,12 +17,12 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testCreateSelect() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
         
-    ColumnFamilyUpdater updater = template.createUpdater("key1"); 
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     template.update(updater);
     
     template.addColumn("column1", se);
-    ColumnFamilyResult wrapper = template.queryColumns("key1");    
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("key1");    
     assertEquals("value1",wrapper.getString("column1"));
         
   }
@@ -41,7 +41,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     template.addColumn("stringval", se);
     template.addColumn("curdate", DateSerializer.get());
     template.addColumn("longval", LongSerializer.get());
-    ColumnFamilyResult wrapper = template.queryColumns("cskey1");    
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("cskey1");    
     assertEquals("value1",wrapper.getString("stringval"));
     assertEquals(date,wrapper.getDate("curdate"));
     assertEquals(new Long(5),wrapper.getLong("longval"));
@@ -50,7 +50,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   @Test
   public void testCreateSelectTemplate() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
-    ColumnFamilyUpdater updater = template.createUpdater("key1"); 
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     template.update(updater);
     template.setCount(10);
@@ -67,13 +67,13 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   @Test
   public void testOverloadedMapRowCallback() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
-    ColumnFamilyUpdater updater = template.createUpdater("key1"); 
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("key1"); 
     updater.setString("column1","value1");
     updater.addKey("key2");
     updater.setString("column1", "value2");
     template.update(updater);
     template.setCount(10);
-    MappedColumnFamilyResult result = template.queryColumns(Arrays.asList("key1","key2"), new ColumnFamilyRowMapper<String, String, String>() {
+    MappedColumnFamilyResult<String,String,String> result = template.queryColumns(Arrays.asList("key1","key2"), new ColumnFamilyRowMapper<String, String, String>() {
       @Override
       public String mapRow(ColumnFamilyResult<String, String> results) {
 
@@ -92,7 +92,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   @Test
   public void testQueryMultiget() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);    
-    ColumnFamilyUpdater updater = template.createUpdater("mg_key1"); 
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("mg_key1"); 
     updater.setString("column1","value1");
     updater.addKey("mg_key2");
     updater.setString("column1","value2");
@@ -101,7 +101,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     template.update(updater);
     
     template.addColumn("column1", se);
-    ColumnFamilyResult wrapper = template.queryColumns(Arrays.asList("mg_key1", "mg_key2", "mg_key3"));
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns(Arrays.asList("mg_key1", "mg_key2", "mg_key3"));
     assertEquals("value1",wrapper.getString("column1"));    
     wrapper.next();
     assertEquals("value2",wrapper.getString("column1"));
@@ -128,7 +128,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   @Test
   public void testQueryIndexedSlices() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Indexed1", se, se);    
-    ColumnFamilyUpdater updater = template.createUpdater("index_key1"); 
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("index_key1"); 
     updater.setLong("birthyear", 1974L);
     updater.setLong("birthmonth", 4L);
     updater.addKey("index_key2");

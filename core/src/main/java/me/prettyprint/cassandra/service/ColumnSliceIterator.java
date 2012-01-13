@@ -9,7 +9,7 @@ import me.prettyprint.hector.api.query.SliceQuery;
  *
  * @author thrykol
  */
-public class ColumnSliceIterator<K, N, V> implements Iterator {
+public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 
 	private SliceQuery<K, N, V> query;
 	private Iterator<HColumn<N, V>> iterator;

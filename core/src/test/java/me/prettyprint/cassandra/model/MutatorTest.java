@@ -99,7 +99,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     columnList.add(createColumn("col_3","val_3",se,se));
     HSuperColumn<String, String, String> superColumn =
         createSuperColumn("super_name", columnList, se, se, se);
-    MutationResult r = m.insert("sk1", "Super1", superColumn);
+    m.insert("sk1", "Super1", superColumn);
     
     SuperColumnQuery<String, String, String, String> scq = HFactory.createSuperColumnQuery(keyspace, se, se, se, se);
     scq.setColumnFamily("Super1");
@@ -124,7 +124,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     columnList.add(createColumn("col_3","val_3",se,se));
     HSuperColumn<String, String, String> superColumn =
         createSuperColumn("super_name", columnList, se, se, se);
-    MutationResult r = m.insert("sk1", "Super1", superColumn);
+    m.insert("sk1", "Super1", superColumn);
     
     SuperColumnQuery<String, String, String, String> scq = HFactory.createSuperColumnQuery(keyspace, se, se, se, se);
     scq.setColumnFamily("Super1");

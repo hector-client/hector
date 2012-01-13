@@ -9,7 +9,7 @@ import me.prettyprint.hector.api.beans.Row;
  *
  * @author thrykol
  */
-public class IndexedSlicesIterator<K, N, V> implements Iterator {
+public class IndexedSlicesIterator<K, N, V> implements Iterator<Row<K, N, V>> {
 
 	private IndexedSlicesQuery<K, N, V> query;
 	private K startKey;
