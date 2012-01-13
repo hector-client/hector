@@ -1,18 +1,16 @@
 package me.prettyprint.cassandra.model;
 
-import me.prettyprint.cassandra.utils.Assert;
-import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.CounterSuperRow;
-import me.prettyprint.hector.api.beans.CounterSuperRows;
-import me.prettyprint.hector.api.beans.SuperRow;
-import me.prettyprint.hector.api.beans.SuperRows;
-import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.SuperColumn;
-
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.CounterSuperRow;
+import me.prettyprint.hector.api.beans.CounterSuperRows;
+
+import org.apache.cassandra.thrift.CounterSuperColumn;
 
 /**
  * Returned by a MultigetSuperSliceQuery (multiget_slice for supercolumns)

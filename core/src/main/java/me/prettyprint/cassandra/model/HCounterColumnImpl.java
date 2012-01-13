@@ -6,10 +6,8 @@ import java.nio.ByteBuffer;
 
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 
-import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.CounterColumn;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;

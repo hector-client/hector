@@ -1,10 +1,8 @@
 package me.prettyprint.cassandra.model;
 
-import java.nio.ByteBuffer;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.Row;

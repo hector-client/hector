@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import me.prettyprint.hector.api.ResultStatus;
-import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 
 /**

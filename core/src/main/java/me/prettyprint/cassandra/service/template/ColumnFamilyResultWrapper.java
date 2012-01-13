@@ -2,7 +2,6 @@ package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,7 +11,6 @@ import java.util.NoSuchElementException;
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 

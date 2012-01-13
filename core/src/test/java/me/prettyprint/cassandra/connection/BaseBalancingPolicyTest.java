@@ -1,7 +1,6 @@
 package me.prettyprint.cassandra.connection;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import me.prettyprint.cassandra.service.CassandraHost;
