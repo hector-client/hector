@@ -1,15 +1,13 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.List;
+
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.CounterSuperRow;
 import me.prettyprint.hector.api.beans.CounterSuperSlice;
-import me.prettyprint.hector.api.beans.SuperRow;
-import me.prettyprint.hector.api.beans.SuperSlice;
-import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.SuperColumn;
 
-import java.util.List;
+import org.apache.cassandra.thrift.CounterSuperColumn;
 
 /**
  * A SuperRow is a touple consisting of a Key and a SuperSlice.

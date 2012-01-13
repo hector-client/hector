@@ -3,10 +3,8 @@ package me.prettyprint.cassandra.service.template;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 
 /**

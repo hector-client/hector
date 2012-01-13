@@ -4,7 +4,6 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import me.prettyprint.cassandra.connection.client.HClient;
-import me.prettyprint.cassandra.connection.client.HThriftClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorException;
