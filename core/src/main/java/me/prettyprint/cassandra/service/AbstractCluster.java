@@ -214,13 +214,16 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   @Override
-  public String dropKeyspace(final String keyspace, final boolean blockUntilComplete) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
+  public String dropKeyspace(final String keyspace, final boolean waitForSchemaAgreement) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
+          if (waitForSchemaAgreement) {
+            waitForSchemaAgreement(cassandra);
+          }
           String schemaId = cassandra.system_drop_keyspace(keyspace);
-          if (blockUntilComplete) {
+          if (waitForSchemaAgreement) {
             waitForSchemaAgreement(cassandra);
           }
           return schemaId;
@@ -259,13 +262,16 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   @Override
-  public String dropColumnFamily(final String keyspaceName, final String columnFamily,  final boolean blockUntilComplete) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
+  public String dropColumnFamily(final String keyspaceName, final String columnFamily,  final boolean waitForSchemaAgreement) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, keyspaceName, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {          
+        try {
+          if (waitForSchemaAgreement) {
+            waitForSchemaAgreement(cassandra);
+          }
           String schemaId = cassandra.system_drop_column_family(columnFamily);
-          if (blockUntilComplete) {
+          if (waitForSchemaAgreement) {
             waitForSchemaAgreement(cassandra);
           }
           return schemaId;
@@ -286,7 +292,7 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public void truncate(final String keyspaceName, final String columnFamily) throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
+    Operation<Void> op = new Operation<Void>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, keyspaceName, getCredentials()) {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
