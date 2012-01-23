@@ -25,3 +25,5 @@ HOM
 `1.1-02 <http://hector-client.org/source/content/API/HOM/1.1-02/index.html>`_
 
 `2.0-01 <http://hector-client.org/source/content/API/HOM/2.0-01/index.html>`_
+
+`3.0-01 <http://hector-client.org/source/content/API/HOM/3.0-01/index.html>`_
