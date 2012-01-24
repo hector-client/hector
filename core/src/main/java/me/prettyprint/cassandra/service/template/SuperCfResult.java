@@ -34,6 +34,8 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   Integer getInteger(SN sColumnName, N columnName);
 
   Boolean getBoolean(SN sColumnName, N columnName);
+  
+  Double getDouble(SN sColumnName, N columnName);
 
   byte[] getByteArray(SN sColumnName, N columnName);
   
