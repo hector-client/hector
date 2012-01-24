@@ -28,7 +28,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   public static final int DEF_QUEUE_SIZE = -1;
   public static final int DEF_RETRY_DELAY = 10;
-  
+
   private final HClientFactory clientFactory;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
 
@@ -39,9 +39,9 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     this.clientFactory = clientFactory;
 
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
-    downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1 
+    downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1
         ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());
-          
+
     sf = executor.scheduleWithFixedDelay(new RetryRunner(), this.retryDelayInSeconds,this.retryDelayInSeconds, TimeUnit.SECONDS);
 
     log.info("Downed Host Retry service started with queue size {} and retry delay {}s",
@@ -66,7 +66,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     if ( log.isInfoEnabled() ) {
       log.info("Host detected as down was added to retry queue: {}", cassandraHost.getName());
     }
-    
+
     //schedule a check of this host immediately,
     executor.submit(new Runnable() {
       @Override
@@ -83,7 +83,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
   public boolean remove(CassandraHost cassandraHost) {
       return downedHostQueue.remove(cassandraHost);
   }
-  
+
   public boolean contains(CassandraHost cassandraHost) {
     return downedHostQueue.contains(cassandraHost);
   }
@@ -114,8 +114,13 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           return;
       }
 
-      // Let's check the ring just once per cycle.
-      Set<CassandraHost> ringInfo = buildRingInfo();
+      // we only check the ring if we have nodes in the cluster to query
+      boolean checkRing = connectionManager.getHosts().size() > 0 ? true : false;
+      Set<CassandraHost> ringInfo = null;
+      if( checkRing) {
+        // Let's check the ring just once per cycle.
+        ringInfo = buildRingInfo();
+      }
 
       Iterator<CassandraHost> iter = downedHostQueue.iterator();
       while( iter.hasNext() ) {
@@ -125,9 +130,13 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           continue;
         }
 
+        if ( !checkRing) {
+          log.info("Not checking that {} is a member of the ring since there are no live hosts", cassandraHost);
+        }
+
         // The host may have been removed from the ring. It makes no sense to keep trying
         // to connect to it.
-        if (!ringInfo.contains(cassandraHost)) {
+        if ( checkRing && !ringInfo.contains(cassandraHost)) {
           log.info("Removing host " + cassandraHost.getName() + " - It does no longer exist in the ring.");
           iter.remove();
           continue;
