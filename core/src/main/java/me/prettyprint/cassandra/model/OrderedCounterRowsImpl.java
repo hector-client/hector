@@ -3,9 +3,6 @@ package me.prettyprint.cassandra.model;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.CounterRow;
 import me.prettyprint.hector.api.beans.OrderedCounterRows;
-import me.prettyprint.hector.api.beans.OrderedRows;
-import me.prettyprint.hector.api.beans.Row;
-import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.CounterColumn;
 
 import java.util.ArrayList;

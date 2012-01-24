@@ -1,15 +1,13 @@
 package me.prettyprint.cassandra.model;
 
+import java.util.List;
+
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
-import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.CounterRow;
 import me.prettyprint.hector.api.beans.CounterSlice;
-import me.prettyprint.hector.api.beans.Row;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.CounterColumn;
 
-import java.util.List;
+import org.apache.cassandra.thrift.CounterColumn;
 
 /**
  * A Row is a touple consisting of a Key and a Column Slice.
