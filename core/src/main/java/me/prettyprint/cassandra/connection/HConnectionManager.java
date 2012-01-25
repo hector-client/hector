@@ -88,13 +88,18 @@ public class HConnectionManager {
     hostPoolValues = hostPools.values();
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
-      if ( cassandraHostConfigurator.getRunAutoDiscoveryAtStartup() ) {
-        nodeAutoDiscoverService.doAddNodes();
-      }
     }
-    
-    timer = cassandraHostConfigurator.getOpTimer();
 
+    timer = cassandraHostConfigurator.getOpTimer();
+  }
+
+  public void doAddNodes() {
+    if (nodeAutoDiscoverService != null) {
+      nodeAutoDiscoverService.doAddNodes();
+    } else {
+      log.warn("unable to add nodes, nodeAutoDiscoverService was null.  " +
+              "CassandraHostConfigurator.autoDiscoverHosts is {}", cassandraHostConfigurator.getAutoDiscoverHosts());
+    }
   }
 
   /**
