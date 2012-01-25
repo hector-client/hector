@@ -192,6 +192,7 @@ public final class HFactory {
         cluster = new ThriftCluster(clusterName,
           cassandraHostConfigurator, credentials);
         clusters.put(clusterName, cluster);
+        cluster.onStartup();
       }
       return cluster;
     }
