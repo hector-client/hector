@@ -44,7 +44,6 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
    * 
    * @param key
    * @param superColumnName
-   * @param subSerializer
    *          the column name serializer of the child columns
    * @return true if columns exist
    */
@@ -96,14 +95,12 @@ public abstract class SuperCfTemplate<K, SN, N> extends AbstractColumnFamilyTemp
   /**
    * Counts child columns in the specified range of a children in a specified
    * super column
-   * 
-   * @param <SUBCOL>
+   *
    * @param key
    * @param superColumnName
    * @param start
    * @param end
    * @param max
-   * @param subSerializer
    * @return
    */
   public int countSubColumns(K key, SN superColumnName, N start,

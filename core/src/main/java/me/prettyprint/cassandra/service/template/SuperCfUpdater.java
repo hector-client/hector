@@ -50,8 +50,6 @@ import me.prettyprint.hector.api.beans.HColumn;
  *          the standard or super column's data type
  * @param <N>
  *          the child column name type in a super column
- * @param <V>
- *          the object instance to persist
  */
 public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   private static final Logger log = LoggerFactory.getLogger(SuperCfUpdater.class);
@@ -131,52 +129,52 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   }
 
   public void setString(N subColumnName, String value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), StringSerializer.get() ));
   }
 
   public void setUUID(N subColumnName, UUID value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), UUIDSerializer.get()));
   }
 
   public void setLong(N subColumnName, Long value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), LongSerializer.get()));
   }
 
   public void setInteger(N subColumnName, Integer value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), IntegerSerializer.get()));
   }
 
   public void setBoolean(N subColumnName, Boolean value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), BooleanSerializer.get())); 
   }
 
   public void setByteArray(N subColumnName, byte[] value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), BytesArraySerializer.get()));
   }
 
   public void setByteBuffer(N subColumnName, ByteBuffer value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), ByteBufferSerializer.get()));
   }
   
   public void setDate(N subColumnName, Date value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), DateSerializer.get()));
   }
   
   public void setDouble(N subColumnName, Double value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), DoubleSerializer.get()));
   }
   
   public <V> void setValue(N subColumnName, V value, Serializer<V> serializer) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, template.getEffectiveClock(),
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
         template.getSubSerializer(), serializer));
   }
 }
