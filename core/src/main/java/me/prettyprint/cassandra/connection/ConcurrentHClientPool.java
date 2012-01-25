@@ -248,8 +248,8 @@ public void releaseClient(HClient client) throws HectorException {
     realActiveClientsCount.decrementAndGet();
     activeClientsCount.decrementAndGet();
 
-    if ( log.isDebugEnabled() ) {
-      log.debug("Status of releaseClient {} to queue: {}", client.toString(), open);
+    if ( log.isTraceEnabled() ) {
+      log.trace("Status of releaseClient {} to queue: {}", client.toString(), open);
     }
   }
 

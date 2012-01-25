@@ -42,7 +42,7 @@ public class HThriftClient implements HClient {
   protected Cassandra.Client cassandraClient;
 
   private final Map<String, String> credentials = new HashMap<String, String>();
-  
+
   /**
    * Constructor
    * @param cassandraHost
@@ -70,7 +70,7 @@ public class HThriftClient implements HClient {
    * {@inheritDoc}
    */
   public Cassandra.Client getCassandra(String keyspaceNameArg) {
-    getCassandra();    
+    getCassandra();
     if ( keyspaceNameArg != null && !StringUtils.equals(keyspaceName, keyspaceNameArg)) {
       if ( log.isDebugEnabled() )
         log.debug("keyspace reseting from {} to {}", keyspaceName, keyspaceNameArg);
@@ -80,7 +80,7 @@ public class HThriftClient implements HClient {
         throw new HInvalidRequestException(ire);
       } catch (TException e) {
         throw new HectorTransportException(e);
-      } 
+      }
       keyspaceName = keyspaceNameArg;
     }
     return cassandraClient;
@@ -133,7 +133,7 @@ public class HThriftClient implements HClient {
     } else {
       transport = socket;
     }
-    
+
     try {
       transport.open();
     } catch (TTransportException e) {
@@ -155,8 +155,8 @@ public class HThriftClient implements HClient {
     if (transport != null) {
       open = transport.isOpen();
     }
-    if ( log.isDebugEnabled() ) {
-      log.debug("Transport open status {} for client {}", open, this);
+    if ( log.isTraceEnabled() ) {
+      log.trace("Transport open status {} for client {}", open, this);
     }
     return open;
   }
@@ -192,7 +192,7 @@ public class HThriftClient implements HClient {
   public void startToUse() {
       useageStartTime = System.currentTimeMillis();
   }
-  
+
   /**
    * {@inheritDoc}
    */
@@ -228,7 +228,7 @@ public class HThriftClient implements HClient {
   public boolean isAlreadyAuthenticated(Map<String, String> credentials) {
     return credentials != null && this.credentials.equals(credentials);
   }
-  
+
   /**
    * {@inheritDoc}
    */
