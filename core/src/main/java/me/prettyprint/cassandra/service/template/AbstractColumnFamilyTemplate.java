@@ -121,16 +121,30 @@ public class AbstractColumnFamilyTemplate<K, N> {
     return HFactory.createMutator(keyspace, keySerializer);
   }
 
-  public Long getClock() {
-    return clock;
+  /**
+   * Wrapped call to keyspace.createClock
+   * To Specify a clock for a group of operations, use {@link AbstractTemplateUpdater} instead
+   * @return
+   */
+  public long getClock() {
+    return keyspace.createClock();
   }
 
+  /**
+   * @deprecated (and not thread-safe). Set clocks on the {@link AbstractTemplateUpdater}
+   * implementation as needed. 
+   * @param clock
+   */
   public void setClock(Long clock) {
     this.clock = clock;
   }
 
+  /**
+   * @deprecated does the same thing as getClock() will be removed in a future release
+   * @return
+   */
   public long getEffectiveClock() {
-    return clock != null ? clock.longValue() : keyspace.createClock();
+    return keyspace.createClock();
   }  
 
   public void setExceptionsTranslator(ExceptionsTranslator exceptionsTranslator) {
