@@ -23,6 +23,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceCounterQuer
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesQuery;
@@ -30,6 +31,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSubSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
@@ -70,6 +72,7 @@ import me.prettyprint.hector.api.query.MultigetSuperSliceCounterQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
+import me.prettyprint.hector.api.query.RangeSubSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
@@ -77,6 +80,7 @@ import me.prettyprint.hector.api.query.SliceCounterQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
+import me.prettyprint.hector.api.query.SubSliceCounterQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 import me.prettyprint.hector.api.query.SuperCountQuery;
@@ -484,6 +488,13 @@ public final class HFactory {
         sNameSerializer, nameSerializer, valueSerializer);
   }
 
+  public static <K, SN, N> RangeSubSlicesCounterQuery<K, SN, N> createRangeSubSlicesCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftRangeSubSlicesCounterQuery<K, SN, N>(keyspace, keySerializer,
+        sNameSerializer, nameSerializer);
+  }
+
   public static <K, N, V> SliceQuery<K, N, V> createSliceQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -502,6 +513,13 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new ThriftSubSliceQuery<K, SN, N, V>(keyspace, keySerializer,
         sNameSerializer, nameSerializer, valueSerializer);
+  }
+
+  public static <K, SN, N> SubSliceCounterQuery<K, SN, N> createSubSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftSubSliceCounterQuery<K, SN, N>(keyspace, keySerializer,
+        sNameSerializer, nameSerializer);
   }
 
   public static <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(
