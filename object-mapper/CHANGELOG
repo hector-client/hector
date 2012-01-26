@@ -1,6 +1,9 @@
 Changes by version:
 ===================
 
+3.0-02
+- issue-402 : fix single collection instantiation
+
 2.0-02
 ======
 - issue-310 : Collections Should Respect Converters

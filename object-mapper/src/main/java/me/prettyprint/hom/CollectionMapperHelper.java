@@ -32,7 +32,18 @@ public class CollectionMapperHelper {
   }
 
   public byte[] createCollectionInfoColValue(Collection<Object> coll) {
-    return String.valueOf(coll.getClass().getName() + ":" + coll.size()).getBytes();
+    // translate some classes that don't make as much sense when loaded
+    String className = coll.getClass().getName();
+    if ( className.endsWith("$SingletonList")) {
+      className = "java.util.ArrayList";
+    }
+    else if ( className.endsWith("$SingletonMap")) {
+      className = "java.util.HashMap";
+    }
+    else if ( className.endsWith("$SingletonSet")) {
+      className = "java.util.HashSet";
+    }
+    return String.valueOf(className + ":" + coll.size()).getBytes();
   }
 
   public CollectionInfoColValue parseCollectionInfoColValue(byte[] val) {
@@ -40,7 +51,8 @@ public class CollectionMapperHelper {
       String tmp = new String(val);
       Iterable<String> split = Splitter.on(':').split(tmp);
       Iterator<String> iter = split.iterator();
-      return new CollectionInfoColValue(iter.next(), Integer.parseInt(iter.next()));
+      String className = iter.next();
+      return new CollectionInfoColValue(className, Integer.parseInt(iter.next()));
     } catch (Throwable e) {
       throw new HectorObjectMapperException("exception while parsing collection info column value",
           e);
