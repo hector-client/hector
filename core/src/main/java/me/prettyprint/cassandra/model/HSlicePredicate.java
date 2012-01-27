@@ -20,7 +20,7 @@ import org.apache.cassandra.thrift.SliceRange;
  * @author Ran Tavory
  * @author zznate
  */
-public final class HSlicePredicate<N> {
+public final class HSlicePredicate<N> implements Cloneable {
   
   protected Collection<N> columnNames;
   protected N start;
@@ -34,6 +34,8 @@ public final class HSlicePredicate<N> {
   protected PredicateType predicateType = PredicateType.Unknown;
 
   private static final ByteBuffer EMPTY_BYTE_BUFFER = ByteBuffer.wrap(new byte[0]);
+  /** The default count size of a range (100) */
+  public static final int DEF_COUNT = 100;
   
   public HSlicePredicate(Serializer<N> columnNameSerializer) {
     Assert.notNull(columnNameSerializer, "columnNameSerializer can't be null");
@@ -43,13 +45,35 @@ public final class HSlicePredicate<N> {
   /**
    * Sets the column names to be retrieved by this query
    *
-   * @param columns
+   * @param columnNames
    *          a list of column names
    */
   public HSlicePredicate<N> setColumnNames(N... columnNames) {
     return setColumnNames(Arrays.asList(columnNames));
   }
-  
+
+  /**
+   * Provide a complete copy of this HSlicePredicate. We go through the setter
+   * methods to correctly flip the state. Thus, if you set a start/end and
+   * have not set a count, this will be in an incomplete state.
+   * @return
+   */
+  @Override
+  public HSlicePredicate<N> clone() {
+    HSlicePredicate<N> pred = new HSlicePredicate(columnNameSerializer);
+    if ( this.predicateType == PredicateType.ColumnNames ) {
+      pred.setColumnNames(columnNames);
+    } else {
+      pred.setStartOn(start);
+      pred.setEndOn(finish);
+      pred.setReversed(reversed);
+      if ( countSet ) {
+       pred.setCount(count);
+      }
+    }
+    return pred;
+  }
+
   public HSlicePredicate<N> addColumnName(N columnName) {
     if ( columnNames == null )
       columnNames = new ArrayList<N>();
@@ -61,7 +85,7 @@ public final class HSlicePredicate<N> {
   /**
    * Same as varargs signature, except we take a collection
    *
-   * @param columns
+   * @param columnNames
    *          a list of column names
    */
   public HSlicePredicate<N> setColumnNames(Collection<N> columnNames) {
@@ -146,6 +170,50 @@ public final class HSlicePredicate<N> {
     countSet = true;
     predicateType = PredicateType.Range;
     return this;
+  }
+
+  /**
+   * Short-hand form of the four argument version above. We use 'false' and {@link #DEF_COUNT}
+   * as the 'reversed' and 'count' parameters respectively (matching the defaults in the Thrift
+   * SlicePredicate struct).
+   * @param start
+   * @param finish
+   * @return
+   */
+  public HSlicePredicate<N> setRange(N start, N finish) {
+    return setRange(start, finish, false, DEF_COUNT);
+  }
+
+  /**
+   * Convienice method to say: 'give me just the next countAsPageSize columns'. Best used
+   * for paging over results
+   * @param countAsPageSize
+   * @return
+   */
+  public HSlicePredicate<N> setRangeForCountOnly(int countAsPageSize) {
+    return setRange(null,null,false,countAsPageSize);
+  }
+
+  /**
+   * Returns a copy of this predicate, except we use startWith as the start and set the finish to
+   * null. This method should be used by taking the last result from the previous slice execution
+   * and using that as the 'startWith' argument. It is up to the caller to remove the first result
+   * as it will be a duplicate of the previous slice's end result. (In a truly distributed system,
+   * there is no way to know what you have until you have it). 
+   *
+   * This pattern is used to page over columns at the count size.
+   * Consider using {@link me.prettyprint.cassandra.service.ColumnSliceIterator} to encapsulate
+   * this functionality.
+   * @return
+   */
+  public HSlicePredicate<N> getForNextPage(N startWith) {
+    if ( this.predicateType == PredicateType.ColumnNames ) {
+      throw new IllegalArgumentException("Attemted to construct a 'next page' predicate with column names defined. You can only do this with a range predicate.");
+    }
+    HSlicePredicate<N> pred = clone();
+    pred.setStartOn(startWith);
+    pred.setEndOn(null);
+    return pred;
   }
 
   public Collection<N> getColumnNames() {

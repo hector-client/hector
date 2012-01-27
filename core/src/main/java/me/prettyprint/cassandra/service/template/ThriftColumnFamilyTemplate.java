@@ -114,7 +114,7 @@ public class ThriftColumnFamilyTemplate<K, N> extends ColumnFamilyTemplate<K, N>
           List<K> keyList = new ArrayList<K>();
           Iterators.addAll(keyList, keys.iterator());
           return cassandra.multiget_slice(keySerializer.toBytesList(keyList), columnParent,
-              (workingSlicePredicate == null ? activeSlicePredicate.setColumnNames(columnValueSerializers.keySet()).toThrift() : workingSlicePredicate.toThrift()),              
+              (workingSlicePredicate == null ? activeSlicePredicate.clone().setColumnNames(columnValueSerializers.keySet()).toThrift() : workingSlicePredicate.toThrift()),
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType, columnFamily)));
         } catch (Exception e) {
           throw exceptionsTranslator.translate(e);

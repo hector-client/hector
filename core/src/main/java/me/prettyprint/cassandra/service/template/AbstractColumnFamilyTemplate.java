@@ -8,29 +8,26 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnFactory;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.hector.api.ColumnFactory;
-import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
-
 import org.apache.cassandra.thrift.ColumnParent;
 
-public class AbstractColumnFamilyTemplate<K, N> {
+public abstract class AbstractColumnFamilyTemplate<K, N> {
   // Used for queries where we just ask for all columns
   public static final int ALL_COLUMNS_COUNT = Integer.MAX_VALUE;
   public static final Object ALL_COLUMNS_START = null;
   public static final Object ALL_COLUMNS_END = null;
 
-  protected Keyspace keyspace;
-  protected String columnFamily;
-  protected Serializer<K> keySerializer;
-  protected Map<N, Serializer<?>> columnValueSerializers;
-  protected ColumnParent columnParent;
-  protected HSlicePredicate<N> activeSlicePredicate;
-  protected ColumnFactory columnFactory;
-  protected ConsistencyLevelPolicy consistencyLevelPolicy;
+  protected final Keyspace keyspace;
+  protected final String columnFamily;
+  protected final Serializer<K> keySerializer;
+  protected final Map<N, Serializer<?>> columnValueSerializers;
+  protected final ColumnParent columnParent;
+  protected final HSlicePredicate<N> activeSlicePredicate;
+  protected final ColumnFactory columnFactory;
   
   /** The serializer for a standard column name or a super-column name */
   protected Serializer<N> topSerializer;
@@ -51,9 +48,17 @@ public class AbstractColumnFamilyTemplate<K, N> {
   protected Long clock;
   
   protected ExceptionsTranslator exceptionsTranslator;
-  
+
+  /**
+   * Creates a template with the specified columnFactory. Count defaults to 100.
+   * @param keyspace
+   * @param columnFamily
+   * @param keySerializer
+   * @param topSerializer
+   * @param columnFactory
+   */
   public AbstractColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
-      Serializer<K> keySerializer, Serializer<N> topSerializer) {
+      Serializer<K> keySerializer, Serializer<N> topSerializer, ColumnFactory columnFactory) {
     // ugly, but safe
     this.keyspace = keyspace;
     this.columnFamily = columnFamily;
@@ -63,8 +68,13 @@ public class AbstractColumnFamilyTemplate<K, N> {
     this.columnParent = new ColumnParent(columnFamily);
     this.activeSlicePredicate = new HSlicePredicate<N>(topSerializer);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
-    this.columnFactory = new ThriftColumnFactory();
+    this.columnFactory = columnFactory;
     setCount(100);
+  }
+
+  public AbstractColumnFamilyTemplate(Keyspace keyspace, String columnFamily,
+      Serializer<K> keySerializer, Serializer<N> topSerializer) {
+    this(keyspace, columnFamily, keySerializer, topSerializer, new ThriftColumnFactory());
   }
 
 
@@ -149,10 +159,6 @@ public class AbstractColumnFamilyTemplate<K, N> {
 
   public void setExceptionsTranslator(ExceptionsTranslator exceptionsTranslator) {
     this.exceptionsTranslator = exceptionsTranslator;
-  }    
-
-  public void setColumnFactory(ColumnFactory columnFactory) {
-    this.columnFactory = columnFactory;
   }
 
   protected MutationResult executeIfNotBatched(Mutator<K> mutator) {    
