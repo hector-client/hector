@@ -1,7 +1,5 @@
 package me.prettyprint.cassandra.connection;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.connection.client.HThriftClient;
 import me.prettyprint.cassandra.service.CassandraHost;
@@ -10,10 +8,11 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.factory.HFactory;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HThriftClientTest extends BaseEmbededServerSetupTest {
 
@@ -93,7 +92,7 @@ public class HThriftClientTest extends BaseEmbededServerSetupTest {
     hThriftClient.open();
 
     // this keyspace won't exist
-    String ksname = "test_ks_" + Thread.currentThread().getName() + Thread.currentThread().getId();
+    String ksname = "test_ks_2_" + Thread.currentThread().getName() + Thread.currentThread().getId();
     Exception caughtException = null;
     try {
       hThriftClient.getCassandra(ksname);
