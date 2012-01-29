@@ -1,6 +1,11 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -9,8 +14,23 @@ import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
+import me.prettyprint.cassandra.service.FailoverPolicy;
+import me.prettyprint.cassandra.service.HOpTimerTracker;
+import me.prettyprint.cassandra.service.JmxMonitor;
+import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.*;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HPoolRecoverableException;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
+import me.prettyprint.hector.api.exceptions.HUnavailableException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
+
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.slf4j.Logger;
