@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import java.io.Serializable;
+
 import me.prettyprint.cassandra.connection.TimerToken;
 
 /**
@@ -7,7 +9,7 @@ import me.prettyprint.cassandra.connection.TimerToken;
  * 
  * @author zznate
  */
-public class NoOpTimerTracker implements HOpTimerTracker {
+public class NoOpTimerTracker implements HOpTimerTracker, Serializable {
 
 
   /**
