@@ -4,7 +4,10 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.Operation;
 
 /**
- * Hold execution information about an individual op timing event
+ * Hold execution information about an individual op timing event. TimerToken impls
+ * will populate their state information when {@link #stop(me.prettyprint.cassandra.service.Operation)}
+ * is invoked.
+ * 
  * @author zznate
  */
 public interface TimerToken {

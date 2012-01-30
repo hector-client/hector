@@ -306,10 +306,10 @@ public class HConnectionManager {
         op.setExecutionStatus(success);
         timer.stop(op, timerToken);
         releaseClient(client);
+        timerTracker.processTimerToken(timerToken);
         if ( retryable ) {
           timerToken = timer.start();
         }
-        timerTracker.processTimerToken(timerToken);
       }
     }
   }

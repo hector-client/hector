@@ -3,14 +3,14 @@ package me.prettyprint.cassandra.connection;
 import me.prettyprint.cassandra.service.Operation;
 
 /**
- * Timer For Cassandra operations
+ * Control the life cyle of the HOpTimer
  */
 public interface HOpTimer {
 
   /**
    * Start timing an operation.
    * 
-   * @return - a token that will be returned to the timer when stop(...) in
+   * @return - a token that will be returned to the timer when stop(...) is
    *         invoked
    */
   TimerToken start();
