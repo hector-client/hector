@@ -561,12 +561,20 @@ public final class HFactory {
     return new HCounterSuperColumnImpl<SN, N>(name, columns, superNameSerializer, nameSerializer);
   }
 
+  /**
+   * Creates a column with a user-specified clock. You probably want to pass in
+   * {@link me.prettyprint.hector.api.Keyspace#createClock()} for the value.
+   */
   public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new HColumnImpl<N, V>(name, value, clock, nameSerializer,
         valueSerializer);
   }
 
+  /**
+   * Create a column with a user-defined clock and TTL (DEFINED IN SECONDS SINCE THE TIMESTAMP [aka "clock"]).
+   * You probably want to use {@link me.prettyprint.hector.api.Keyspace#createClock()} for the clock
+   */
   public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock, int ttl,
 	      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
 	    return new HColumnImpl<N, V>(name, value, clock, ttl, nameSerializer,
@@ -574,7 +582,9 @@ public final class HFactory {
   }
 
   /**
-   * Creates a column with the clock of now.
+   * Creates a column with the clock as defined by {@link #createClock()}
+   * If you want to define a clock explicitly, use one of the overloaded forms
+   * below which take a clock, and call {@link me.prettyprint.hector.api.Keyspace#createClock()}
    */
   public static <N, V> HColumn<N, V> createColumn(N name, V value,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -583,7 +593,8 @@ public final class HFactory {
   }
 
   /**
-   * Creates a column with the clock of now
+   * Similar to the four argument version (including the clock creation) except
+   * we accept a TTL (DEFINED IN SECONDS SINCE THE TIMESTAMP [aka "clock"])
    */
   public static <N, V> HColumn<N, V> createColumn(N name, V value, int ttl,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -619,10 +630,8 @@ public final class HFactory {
   /**
    * Creates a clock of now with the default clock resolution (micorosec) as
    * defined in {@link CassandraHostConfigurator}. Notice that this is a
-   * convenient method. Be aware that there might be multiple
-   * {@link CassandraHostConfigurator} each of them with different clock
-   * resolutions, in which case the result of {@link HFactory#createClock} will
-   * not be consistent. {@link Keyspace#createClock()} should be used instead.
+   * convenience method. To specify explicit time,
+   * {@link Keyspace#createClock()} should be used instead.
    */
   public static long createClock() {
     return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();

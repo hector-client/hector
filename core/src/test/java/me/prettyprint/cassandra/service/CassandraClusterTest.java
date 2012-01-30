@@ -175,6 +175,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     columnFamilyDefinition = new BasicColumnFamilyDefinition(cfDef);
     BasicColumnDefinition columnDefinition = new BasicColumnDefinition();
     columnDefinition.setName(StringSerializer.get().toByteBuffer("birthdate"));
+    columnDefinition.setIndexName("birthdate_idx");
     columnDefinition.setIndexType(ColumnIndexType.KEYS);
     columnDefinition.setValidationClass(ComparatorType.LONGTYPE.getClassName());
     columnFamilyDefinition.addColumnDefinition(columnDefinition);
@@ -189,6 +190,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     fromCluster = cassandraCluster.describeKeyspace("DynKeyspace3");
     
     assertEquals("birthdate",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(0).getName()));
+    assertEquals("birthdate_idx",fromCluster.getCfDefs().get(0).getColumnMetadata().get(0).getIndexName());
     assertEquals("nonindexed_field",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(1).getName()));
   }
   
