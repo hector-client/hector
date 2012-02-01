@@ -3,6 +3,7 @@ Changes by version:
 
 3.0-02
 - issue-402 : fix single collection instantiation
+- issue-207 : added VariableIntegerConverter
 
 2.0-02
 ======
