@@ -34,7 +34,7 @@
 		<dependency>
 			<groupId>me.prettyprint</groupId>
 			<artifactId>hector-core</artifactId>
-			<version>1.0-4-SNAPSHOT</version>
+			<version>1.0-3-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -45,7 +45,7 @@
 		<dependency>
 			<groupId>me.prettyprint</groupId>
 			<artifactId>hector-test</artifactId>
-			<version>1.0-4-SNAPSHOT</version>
+			<version>1.0-3-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
