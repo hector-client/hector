@@ -12,12 +12,15 @@ import static me.prettyprint.hector.api.factory.HFactory.createMultigetSuperSlic
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSubSlicesQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createRangeSubSlicesCounterQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createRangeSuperSlicesQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSliceQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createCounterSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createCounterSuperColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createSubColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSubCountQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSubSliceQuery;
+import static me.prettyprint.hector.api.factory.HFactory.createSubSliceCounterQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSuperColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createSuperColumnQuery;
 import static me.prettyprint.hector.api.factory.HFactory.createSuperCountQuery;
@@ -36,10 +39,13 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
+import me.prettyprint.hector.api.beans.CounterRow;
 import me.prettyprint.hector.api.beans.CounterSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
+import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.beans.OrderedCounterRows;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.OrderedSuperRows;
 import me.prettyprint.hector.api.beans.Row;
@@ -57,12 +63,14 @@ import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
+import me.prettyprint.hector.api.query.RangeSubSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
 import me.prettyprint.hector.api.query.SliceCounterQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
+import me.prettyprint.hector.api.query.SubSliceCounterQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 import me.prettyprint.hector.api.query.SuperCountQuery;
@@ -640,6 +648,62 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     assertTrue(slice.getColumns().isEmpty());
   }
 
+  /**
+   * Tests the SubSliceQuery, a query on columns within a supercolumn
+   */
+  @Test
+  public void testSubSliceCounterQuery() {
+    String cf = "SuperCounter1";
+
+    // insert
+    TestCleanupDescriptor cleanup = insertSuperCountColumns(cf, 1,
+        "testSliceCounterQueryOnSubcolumns", 1, "testSliceCounterQueryOnSubcolumns_column");
+
+    // get value
+    SubSliceCounterQuery<String, String, String> q = createSubSliceCounterQuery(ko,
+        se, se, se);
+    q.setColumnFamily(cf);
+    q.setSuperColumn("testSliceCounterQueryOnSubcolumns_column0");
+    q.setKey("testSliceCounterQueryOnSubcolumns0");
+    // try with column name first
+    q.setColumnNames("c000", "c110", "c_doesn't_exist");
+    QueryResult<CounterSlice<String>> r = q.execute();
+    assertNotNull(r);
+    CounterSlice<String> slice = r.get();
+    assertNotNull(slice);
+    assertEquals(2, slice.getColumns().size());
+    // Test slice.getColumnByName
+    assertEquals(Long.valueOf(0), slice.getColumnByName("c000").getValue());
+
+    // now try with start/finish
+    q = createSubSliceCounterQuery(ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKey("testSliceCounterQueryOnSubcolumns0");
+    q.setSuperColumn("testSliceCounterQueryOnSubcolumns_column0");
+    // try reversed this time
+    q.setRange("c000", "c110", false, 2);
+    r = q.execute();
+    assertNotNull(r);
+    slice = r.get();
+    assertNotNull(slice);
+    for (HCounterColumn<String> column : slice.getColumns()) {
+      if (!column.getName().equals("c000") && !column.getName().equals("c110")) {
+        fail("A columns with unexpected column name returned: "
+            + column.getName());
+      }
+    }
+
+    // Delete values
+    deleteColumns(cleanup);
+
+    // Test after deletion
+    r = q.execute();
+    assertNotNull(r);
+    slice = r.get();
+    assertNotNull(slice);
+    assertTrue(slice.getColumns().isEmpty());
+  }
+
   @Test
   public void testMultigetSuperSliceQuery() {
     String cf = "Super1";
@@ -856,6 +920,8 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
           fail("A columns with unexpected column name returned: "
               + column.getName());
         }
+        if ( column.getSubColumnByName("c001") != null )
+          assertEquals("v001",column.getSubColumnByName("c001").getValue());
       }
     }
     {
@@ -959,6 +1025,40 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
+  public void testRangeSubSlicesCounterQuery() {
+    String cf = "SuperCounter1";
+
+    TestCleanupDescriptor cleanup = insertSuperCountColumns(cf, 4,
+        "testRangeSubSlicesCounterQuery", 3, "testRangeSubSlicesCounterQuery");
+
+    // get value
+    RangeSubSlicesCounterQuery<String, String, String> q = createRangeSubSlicesCounterQuery(
+        ko, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKeys("testRangeSubSlicesCounterQuery2", "testRangeSubSlicesCounterQuery3");
+    // try with column name first
+    q.setSuperColumn("testRangeSubSlicesCounterQuery1");
+    q.setColumnNames("c021", "c111");
+    QueryResult<OrderedCounterRows<String, String>> r = q.execute();
+    assertNotNull(r);
+    OrderedCounterRows<String, String> rows = r.get();
+    assertNotNull(rows);
+    assertEquals(2, rows.getCount());
+    CounterRow<String, String> row = rows.getList().get(0);
+    assertNotNull(row);
+    assertEquals("testRangeSubSlicesCounterQuery2", row.getKey());
+    CounterSlice<String> slice = row.getColumnSlice();
+    assertNotNull(slice);
+    // Test slice.getColumnByName
+    assertEquals(Long.valueOf(3), slice.getColumnByName("c021").getValue());
+    assertEquals(Long.valueOf(3), slice.getColumnByName("c111").getValue());
+    assertNull(slice.getColumnByName("c033"));
+
+    // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
   public void testCountQuery() {
     String cf = "Standard1";
 
@@ -1042,6 +1142,23 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
             createColumn("c0" + i + j, "v0" + i + j, se, se),
             createColumn("c1" + 1 + j, "v1" + i + j, se, se)), se, se, se);
         m.addInsertion(rowPrefix + i, cf, sc);
+      }
+    }
+    m.execute();
+    return new TestCleanupDescriptor(cf, rowCount, rowPrefix, scCount, scPrefix);
+  }
+
+  private TestCleanupDescriptor insertSuperCountColumns(String cf, int rowCount,
+      String rowPrefix, int scCount, String scPrefix) {
+    Mutator<String> m = createMutator(ko, se);
+    for (int i = 0; i < rowCount; ++i) {
+      for (int j = 0; j < scCount; ++j) {
+        @SuppressWarnings("unchecked")
+        HCounterSuperColumn<String, String> sc = createCounterSuperColumn(scPrefix
+            + j, Arrays.asList(
+                    createCounterColumn("c0" + i + j, i + j),
+                    createCounterColumn("c1" + 1 + j, i + j)), se, se);
+        m.addCounter(rowPrefix + i, cf, sc);
       }
     }
     m.execute();

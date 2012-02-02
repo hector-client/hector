@@ -4,10 +4,7 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.CounterSuperSlice;
 import me.prettyprint.hector.api.beans.HCounterSuperColumn;
-import me.prettyprint.hector.api.beans.HSuperColumn;
-import me.prettyprint.hector.api.beans.SuperSlice;
 import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.SuperColumn;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -212,9 +212,6 @@ public class VirtualKeyspaceServiceImpl extends KeyspaceServiceImpl {
       ColumnParent columnParent, IndexClause indexClause,
       SlicePredicate predicate) throws HectorException {
 
-      if (indexClause.isSetStart_key())
-        indexClause.setStart_key(ps.toByteBuffer(indexClause.start_key));
-
     return ps.fromBytesMap(super.getIndexedSlices(columnParent, indexClause,
         predicate));
   }

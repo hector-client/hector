@@ -13,11 +13,13 @@ public abstract class AbstractTemplateUpdater<K,N> {
   protected ColumnFactory columnFactory;
   protected AbstractColumnFamilyTemplate<K,N> template;
   protected Mutator<K> mutator;
+  protected long clock;
   
   public AbstractTemplateUpdater(AbstractColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory, Mutator<K> mutator) {
     this.template = template;
     this.columnFactory = columnFactory;
     this.mutator = mutator;
+    this.clock = template.getClock();
   }
   
   public AbstractTemplateUpdater<K,N> addKey(K key) {
@@ -47,5 +49,18 @@ public abstract class AbstractTemplateUpdater<K,N> {
   
   public Mutator<K> getCurrentMutator() {
     return mutator;
+  }
+
+  /**
+   * Reset the clock used for column creation. By default, we hold a reference to a single
+   * clock value created at construction from {@link AbstractColumnFamilyTemplate#getClock()}
+   *
+   * Since updater implementations are instance-based (and thus should not be shared among threads),
+   * call this as often as you need to apply the clock to the underlying columns. 
+   *
+   * @param clock
+   */
+  public void setClock(long clock) {
+    this.clock = clock;
   }
 }

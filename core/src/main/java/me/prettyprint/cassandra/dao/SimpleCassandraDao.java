@@ -1,9 +1,5 @@
 package me.prettyprint.cassandra.dao;
 
-import static me.prettyprint.hector.api.factory.HFactory.createColumn;
-import static me.prettyprint.hector.api.factory.HFactory.createMultigetSliceQuery;
-import static me.prettyprint.hector.api.factory.HFactory.createMutator;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,11 +13,15 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.QueryResult;
+import static me.prettyprint.hector.api.factory.HFactory.*;
 
+/**
+ * Really easy way to get started when you are just dealing with String data
+ */
 public class SimpleCassandraDao {
 
-  private String columnFamilyName;
-  private Keyspace keyspace;
+  protected String columnFamilyName;
+  protected Keyspace keyspace;
   private final StringSerializer serializer = StringSerializer.get();
 
   /**

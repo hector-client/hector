@@ -1,16 +1,14 @@
 package me.prettyprint.cassandra.service.template;
 
-import static org.junit.Assert.*;
-
 import java.util.Arrays;
 import java.util.Date;
 
-import me.prettyprint.cassandra.model.HSlicePredicate;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.hector.api.factory.HFactory;
-
+import org.apache.cassandra.thrift.IndexOperator;
 import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
@@ -46,7 +44,37 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals("value1",wrapper.getString("stringval"));
     assertEquals(date,wrapper.getDate("curdate"));
     assertEquals(new Long(5),wrapper.getLong("longval"));
+    assertEquals(3,wrapper.getColumnNames().size());
   }
+
+    @Test
+  public void testCompareClocks() {
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
+    long ts1 = 1001;
+    long ts2 = 1002;
+    long ts3 = 1003;
+
+
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("compare_clock_key1");
+    updater.setClock(ts1);
+    updater.setString("stringval","value1");
+    Date date = new Date();
+    updater.setClock(ts2);
+    updater.setDate("curdate", date);
+    updater.setClock(ts3);
+    updater.setLong("longval", 5L);
+    template.update(updater);
+    template.addColumn("stringval", se);
+    template.addColumn("curdate", DateSerializer.get());
+    template.addColumn("longval", LongSerializer.get());
+
+    ColumnFamilyResult wrapper = template.queryColumns("compare_clock_key1");
+    assertEquals(ts1,wrapper.getColumn("stringval").getClock());
+    assertEquals(ts2,wrapper.getColumn("curdate").getClock());
+    assertEquals(ts3,wrapper.getColumn("longval").getClock());
+    assertEquals(3,wrapper.getColumnNames().size());
+  }
+
 
   @Test
   public void testCreateSelectTemplate() {
@@ -125,5 +153,49 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals("noresults",results.getKey());
     assertEquals("noresults",results.getKey());
     assertEquals("noresults",results.getKey());        
+  }
+  @Test
+  public void testQueryIndexedSlices() {
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Indexed1", se, se);    
+    ColumnFamilyUpdater updater = template.createUpdater("index_key1"); 
+    updater.setLong("birthyear", 1974L);
+    updater.setLong("birthmonth", 4L);
+    updater.addKey("index_key2");
+    updater.setLong("birthyear", 1975L);
+    updater.setLong("birthmonth", 4L);
+    updater.addKey("index_key3");
+    updater.setLong("birthyear", 1975L);
+    updater.setLong("birthmonth", 5L);
+    updater.addKey("index_key4");
+    updater.setLong("birthyear", 1975L);
+    updater.setLong("birthmonth", 6L);
+    updater.addKey("index_key5");
+    updater.setLong("birthyear", 1975L);
+    updater.setLong("birthmonth", 7L);
+    updater.addKey("index_key6");
+    updater.setLong("birthyear", 1976L);
+    updater.setLong("birthmonth", 6L);
+    template.update(updater);
+
+    IndexedSlicesPredicate<String, String, Long> predicate = 
+        new IndexedSlicesPredicate<String, String, Long>(se, se, LongSerializer.get());
+    predicate.startKey("");
+    predicate.addExpression("birthyear", IndexOperator.EQ, 1975L);
+
+    ColumnFamilyResult<String, String> result = 
+        template.queryColumns(predicate);
+    int cnt = result.getColumnNames().size();
+    while (result.hasNext()) {
+      cnt += result.next().getColumnNames().size();
+    }
+    assertEquals(8, cnt);
+
+    result = 
+        template.queryColumns(predicate, Arrays.asList(new String[]{"birthmonth"}));
+    cnt = result.getColumnNames().size();
+    while (result.hasNext()) {
+      cnt += result.next().getColumnNames().size();
+    }
+    assertEquals(4, cnt);
   }
 }

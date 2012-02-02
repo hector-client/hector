@@ -18,6 +18,7 @@ import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -78,7 +79,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
     superColumns = new ArrayList<SN>(cosclist.size());
     for (Iterator<ColumnOrSuperColumn> iterator = cosclist.iterator(); iterator.hasNext();) {
       ColumnOrSuperColumn cosc = iterator.next();
-      SN sColName = sNameSerializer.fromByteBuffer(cosc.super_column.name);
+      SN sColName = sNameSerializer.fromByteBuffer(cosc.super_column.name.duplicate());
       log.debug("cosc {}", cosc.super_column);
        
       superColumns.add(sColName);
@@ -86,7 +87,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
       Map<N,HColumn<N,ByteBuffer>> subColMap = new LinkedHashMap<N, HColumn<N,ByteBuffer>>();
       while ( tcolumns.hasNext() ) {
         Column col = tcolumns.next();
-        subColMap.put(columnNameSerializer.fromByteBuffer(col.name), new HColumnImpl<N, ByteBuffer>(col, columnNameSerializer, ByteBufferSerializer.get()));
+        subColMap.put(columnNameSerializer.fromByteBuffer(col.name.duplicate()), new HColumnImpl<N, ByteBuffer>(col, columnNameSerializer, ByteBufferSerializer.get()));
       }
       columns.put(sColName, subColMap);
     }
@@ -107,7 +108,7 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
 
   @Override
   public K getKey() {
-    return keySerializer.fromByteBuffer(entry.getKey()); 
+    return keySerializer.fromByteBuffer(entry.getKey().duplicate());
   }
 
 
@@ -167,6 +168,11 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
   @Override
   public Long getLong(SN sColumnName, N columnName) {
     return extractType(sColumnName, columnName, LongSerializer.get());
+  }
+  
+  @Override
+  public Double getDouble(SN sColumnName, N columnName) {
+    return extractType(sColumnName, columnName, DoubleSerializer.get());
   }
 
 

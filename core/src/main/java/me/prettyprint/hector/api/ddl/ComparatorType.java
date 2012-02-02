@@ -1,38 +1,56 @@
 package me.prettyprint.hector.api.ddl;
 
-/**
- * @author: peter
- */
-public class ComparatorType {
+import java.util.Map;
 
-  public static ComparatorType ASCIITYPE = new ComparatorType(
+import com.google.common.collect.ImmutableMap;
+
+/**
+ * @author peter
+ * @author Mikhail Mazursky
+ */
+public final class ComparatorType {
+
+  public static final ComparatorType ASCIITYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.AsciiType");
-  public static ComparatorType BYTESTYPE = new ComparatorType(
+  public static final ComparatorType BYTESTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.BytesType");
-  public static ComparatorType INTEGERTYPE = new ComparatorType(
+  public static final ComparatorType INTEGERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.IntegerType");
-  public static ComparatorType LEXICALUUIDTYPE = new ComparatorType(
+  public static final ComparatorType LEXICALUUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LexicalUUIDType");
-  public static ComparatorType LOCALBYPARTITIONERTYPE = new ComparatorType(
+  public static final ComparatorType LOCALBYPARTITIONERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LocalByPartionerType");
-  public static ComparatorType LONGTYPE = new ComparatorType(
+  public static final ComparatorType LONGTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LongType");
-  public static ComparatorType TIMEUUIDTYPE = new ComparatorType(
+  public static final ComparatorType TIMEUUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.TimeUUIDType");
-  public static ComparatorType UTF8TYPE = new ComparatorType(
+  public static final ComparatorType UTF8TYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.UTF8Type");
-  public static ComparatorType COMPOSITETYPE = new ComparatorType(
+  public static final ComparatorType COMPOSITETYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CompositeType");
-  public static ComparatorType DYNAMICCOMPOSITETYPE = new ComparatorType(
+  public static final ComparatorType DYNAMICCOMPOSITETYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.DynamicCompositeType");
-  public static ComparatorType UUIDTYPE = new ComparatorType(
+  public static final ComparatorType UUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.UUIDType");
-  public static ComparatorType COUNTERTYPE = new ComparatorType(
+  public static final ComparatorType COUNTERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CounterColumnType");
 
-  private static ComparatorType[] values = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
-      LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-      UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
+  private static final Map<String, ComparatorType> valuesMap;
+
+  static {
+    ComparatorType[] types = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
+        LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
+        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
+
+    ImmutableMap.Builder<String, ComparatorType> builder =
+        new ImmutableMap.Builder<String, ComparatorType>();
+
+    for (ComparatorType type : types){
+      builder.put(type.getClassName(), type).put(type.getTypeName(), type);
+    }
+
+    valuesMap = builder.build();
+  }
 
   private final String className;
   private final String typeName;
@@ -59,16 +77,33 @@ public class ComparatorType {
     if (className == null) {
       return null;
     }
-    for (int a = 0; a < values.length; a++) {
-      ComparatorType type = values[a];
-      if (type.getClassName().equals(className)) {
-        return type;
-      }
-      if (type.getClassName().equals(
-          "org.apache.cassandra.db.marshal." + className)) {
-        return type;
-      }
+    ComparatorType type = valuesMap.get(className);
+    if (type == null) {
+      return new ComparatorType(className);
     }
-    return new ComparatorType(className);
+    return type;
+  }
+
+  @Override
+  public int hashCode() {
+    return className.hashCode();
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    ComparatorType other = (ComparatorType) obj;
+    if (!className.equals(other.className)) {
+      return false;
+    }
+    return true;
   }
 }

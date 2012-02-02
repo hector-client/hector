@@ -1,21 +1,13 @@
 package me.prettyprint.cassandra.service.template;
 
 import java.nio.ByteBuffer;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 import me.prettyprint.cassandra.model.ExecutionResult;
 import me.prettyprint.cassandra.model.HColumnImpl;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
-
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 
@@ -38,7 +30,10 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
       ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult) {
     super(keySerializer, columnNameSerializer, executionResult);    
     this.rows = executionResult.get().entrySet().iterator();    
-    next();
+		if(hasNext()) {
+			next();
+		}
+
     hasEntries = getColumnNames() != null && getColumnNames().size() > 0;
   }
    
@@ -47,12 +42,12 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
    * @return
    */
   public Collection<N> getColumnNames() {
-    return columns.keySet();
+    return columns == null ? null : columns.keySet();
   }
   
   public ByteBuffer getColumnValue( N columnName) {
     HColumn<N,ByteBuffer> col = getColumn( columnName );
-    return col != null ? col.getValue() : null;
+    return col != null ? col.getValue().duplicate() : null;
   }
 
   public HColumn<N,ByteBuffer> getColumn( N columnName ) {

@@ -39,6 +39,7 @@ public class ExecutingVirtualKeyspace<E> extends ExecutingKeyspace {
 
     this.keyPrefix = keyPrefix;
     this.keyPrefixSerializer = keyPrefixSerializer;
+    prefixBytes = keyPrefixSerializer.toByteBuffer(keyPrefix);
   }
 
   @Override

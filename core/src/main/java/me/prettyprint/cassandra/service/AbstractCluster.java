@@ -1,6 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +10,6 @@ import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.thrift.TException;
@@ -73,7 +71,7 @@ public abstract class AbstractCluster implements Cluster {
     cassandraClientMonitor = JmxMonitor.getInstance().getCassandraMonitor(connectionManager);
     xtrans = new ExceptionsTranslatorImpl();
     clockResolution = cassandraHostConfigurator.getClockResolution();
-    this.credentials = Collections.unmodifiableMap(credentials);
+    this.credentials = Collections.unmodifiableMap(credentials == null? EMPTY_CREDENTIALS : credentials);
   }
 
   @Override
@@ -216,13 +214,16 @@ public abstract class AbstractCluster implements Cluster {
   }
   
   @Override
-  public String dropKeyspace(final String keyspace, final boolean blockUntilComplete) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE, getCredentials()) {
+  public String dropKeyspace(final String keyspace, final boolean waitForSchemaAgreement) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
         try {
+          if (waitForSchemaAgreement) {
+            waitForSchemaAgreement(cassandra);
+          }
           String schemaId = cassandra.system_drop_keyspace(keyspace);
-          if (blockUntilComplete) {
+          if (waitForSchemaAgreement) {
             waitForSchemaAgreement(cassandra);
           }
           return schemaId;
@@ -261,13 +262,16 @@ public abstract class AbstractCluster implements Cluster {
   }
 
   @Override
-  public String dropColumnFamily(final String keyspaceName, final String columnFamily,  final boolean blockUntilComplete) throws HectorException {
-    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
+  public String dropColumnFamily(final String keyspaceName, final String columnFamily,  final boolean waitForSchemaAgreement) throws HectorException {
+    Operation<String> op = new Operation<String>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, keyspaceName, getCredentials()) {
       @Override
       public String execute(Cassandra.Client cassandra) throws HectorException {
-        try {          
+        try {
+          if (waitForSchemaAgreement) {
+            waitForSchemaAgreement(cassandra);
+          }
           String schemaId = cassandra.system_drop_column_family(columnFamily);
-          if (blockUntilComplete) {
+          if (waitForSchemaAgreement) {
             waitForSchemaAgreement(cassandra);
           }
           return schemaId;
@@ -288,7 +292,7 @@ public abstract class AbstractCluster implements Cluster {
 
   @Override
   public void truncate(final String keyspaceName, final String columnFamily) throws HectorException {
-    Operation<Void> op = new Operation<Void>(OperationType.META_WRITE, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, keyspaceName, getCredentials()) {
+    Operation<Void> op = new Operation<Void>(OperationType.META_WRITE, FailoverPolicy.FAIL_FAST, keyspaceName, getCredentials()) {
       @Override
       public Void execute(Cassandra.Client cassandra) throws HectorException {
         try {
@@ -302,7 +306,15 @@ public abstract class AbstractCluster implements Cluster {
     connectionManager.operateWithFailover(op);
   }
 
-  
+  @Override
+  public void onStartup() {
+    // default implementation does nothing
+  }
+
+  public CassandraHostConfigurator getConfigurator() {
+    return configurator;
+  }
+
   protected static void waitForSchemaAgreement(Cassandra.Client cassandra) throws InvalidRequestException, TException, InterruptedException {
     int waited = 0;
     int versions = 0;

@@ -23,6 +23,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceCounterQuer
 import me.prettyprint.cassandra.model.thrift.ThriftMultigetSuperSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSlicesQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSubSlicesQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftRangeSuperSlicesQuery;
@@ -30,6 +31,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubCountQuery;
+import me.prettyprint.cassandra.model.thrift.ThriftSubSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSubSliceQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
@@ -70,6 +72,7 @@ import me.prettyprint.hector.api.query.MultigetSuperSliceCounterQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
+import me.prettyprint.hector.api.query.RangeSubSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesCounterQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
@@ -77,6 +80,7 @@ import me.prettyprint.hector.api.query.SliceCounterQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubColumnQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
+import me.prettyprint.hector.api.query.SubSliceCounterQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
 import me.prettyprint.hector.api.query.SuperColumnQuery;
 import me.prettyprint.hector.api.query.SuperCountQuery;
@@ -130,57 +134,51 @@ public final class HFactory {
   }
 
   /**
+   * Calls the three argument version with a null credentials map. 
+   * {@link #getOrCreateCluster(String, me.prettyprint.cassandra.service.CassandraHostConfigurator, java.util.Map)}
+   * for details.
+   */
+  public static Cluster getOrCreateCluster(String clusterName,
+      CassandraHostConfigurator cassandraHostConfigurator) {
+    return createCluster(clusterName, cassandraHostConfigurator, null);
+  }
+
+  /**
    * Method tries to create a Cluster instance for an existing Cassandra
    * cluster. If another class already called getOrCreateCluster, the factory
    * returns the cached instance. If the instance doesn't exist in memory, a new
    * ThriftCluster is created and cached.
-   * 
+   *
    * Example usage for a default installation of Cassandra.
-   * 
+   *
    * String clusterName = "Test Cluster"; String host = "localhost:9160";
    * Cluster cluster = HFactory.getOrCreateCluster(clusterName, new
    * CassandraHostConfigurator(host));
-   * 
+   *
    * @param clusterName
    *          The cluster name. This is an identifying string for the cluster,
    *          e.g. "production" or "test" etc. Clusters will be created on
    *          demand per each unique clusterName key.
    * @param cassandraHostConfigurator
+   * @param credentials The credentials map for authenticating a Keyspace
    */
   public static Cluster getOrCreateCluster(String clusterName,
-      CassandraHostConfigurator cassandraHostConfigurator) {
-    synchronized (clusters) {
-      Cluster c = clusters.get(clusterName);
-      if (c == null) {
-        c = createCluster(clusterName, cassandraHostConfigurator);
-        clusters.put(clusterName, c);
-      }
-      return c;
-    }
+      CassandraHostConfigurator cassandraHostConfigurator, Map<String, String> credentials) {
+    return createCluster(clusterName, cassandraHostConfigurator, credentials);
   }
 
   /**
-   * Method looks in the cache for the cluster by name. If none exists, a new
-   * ThriftCluster instance is created.
-   * 
-   * @param clusterName
-   *          The cluster name. This is an identifying string for the cluster,
-   *          e.g. "production" or "test" etc. Clusters will be created on
-   *          demand per each unique clusterName key.
-   * @param cassandraHostConfigurator
+   * @deprecated use getOrCreateCluster instead
    * 
    */
   public static Cluster createCluster(String clusterName,
       CassandraHostConfigurator cassandraHostConfigurator) {
-    synchronized (clusters) {
-      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-          cassandraHostConfigurator) : clusters.get(clusterName);
-    }
+    return createCluster(clusterName, cassandraHostConfigurator, null);
   }
 
   /**
    * Method looks in the cache for the cluster by name. If none exists, a new
-   * ThriftCluster instance is created.
+   * ThriftCluster instance is created and added to the map of known clusters
    * 
    * @param clusterName
    *          The cluster name. This is an identifying string for the cluster,
@@ -193,8 +191,14 @@ public final class HFactory {
       CassandraHostConfigurator cassandraHostConfigurator,
       Map<String, String> credentials) {
     synchronized (clusters) {
-      return clusters.get(clusterName) == null ? new ThriftCluster(clusterName,
-          cassandraHostConfigurator, credentials) : clusters.get(clusterName);
+      Cluster cluster = clusters.get(clusterName);
+      if ( cluster == null ) {
+        cluster = new ThriftCluster(clusterName,
+          cassandraHostConfigurator, credentials);
+        clusters.put(clusterName, cluster);
+        cluster.onStartup();
+      }
+      return cluster;
     }
   }
   
@@ -484,6 +488,13 @@ public final class HFactory {
         sNameSerializer, nameSerializer, valueSerializer);
   }
 
+  public static <K, SN, N> RangeSubSlicesCounterQuery<K, SN, N> createRangeSubSlicesCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftRangeSubSlicesCounterQuery<K, SN, N>(keyspace, keySerializer,
+        sNameSerializer, nameSerializer);
+  }
+
   public static <K, N, V> SliceQuery<K, N, V> createSliceQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -502,6 +513,13 @@ public final class HFactory {
       Serializer<V> valueSerializer) {
     return new ThriftSubSliceQuery<K, SN, N, V>(keyspace, keySerializer,
         sNameSerializer, nameSerializer, valueSerializer);
+  }
+
+  public static <K, SN, N> SubSliceCounterQuery<K, SN, N> createSubSliceCounterQuery(
+      Keyspace keyspace, Serializer<K> keySerializer,
+      Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+    return new ThriftSubSliceCounterQuery<K, SN, N>(keyspace, keySerializer,
+        sNameSerializer, nameSerializer);
   }
 
   public static <K, SN, N, V> SuperSliceQuery<K, SN, N, V> createSuperSliceQuery(
@@ -543,12 +561,20 @@ public final class HFactory {
     return new HCounterSuperColumnImpl<SN, N>(name, columns, superNameSerializer, nameSerializer);
   }
 
+  /**
+   * Creates a column with a user-specified clock. You probably want to pass in
+   * {@link me.prettyprint.hector.api.Keyspace#createClock()} for the value.
+   */
   public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new HColumnImpl<N, V>(name, value, clock, nameSerializer,
         valueSerializer);
   }
 
+  /**
+   * Create a column with a user-defined clock and TTL (DEFINED IN SECONDS SINCE THE TIMESTAMP [aka "clock"]).
+   * You probably want to use {@link me.prettyprint.hector.api.Keyspace#createClock()} for the clock
+   */
   public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock, int ttl,
 	      Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
 	    return new HColumnImpl<N, V>(name, value, clock, ttl, nameSerializer,
@@ -556,7 +582,9 @@ public final class HFactory {
   }
 
   /**
-   * Creates a column with the clock of now.
+   * Creates a column with the clock as defined by {@link #createClock()}
+   * If you want to define a clock explicitly, use one of the overloaded forms
+   * below which take a clock, and call {@link me.prettyprint.hector.api.Keyspace#createClock()}
    */
   public static <N, V> HColumn<N, V> createColumn(N name, V value,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -565,7 +593,8 @@ public final class HFactory {
   }
 
   /**
-   * Creates a column with the clock of now
+   * Similar to the four argument version (including the clock creation) except
+   * we accept a TTL (DEFINED IN SECONDS SINCE THE TIMESTAMP [aka "clock"])
    */
   public static <N, V> HColumn<N, V> createColumn(N name, V value, int ttl,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
@@ -601,10 +630,8 @@ public final class HFactory {
   /**
    * Creates a clock of now with the default clock resolution (micorosec) as
    * defined in {@link CassandraHostConfigurator}. Notice that this is a
-   * convenient method. Be aware that there might be multiple
-   * {@link CassandraHostConfigurator} each of them with different clock
-   * resolutions, in which case the result of {@link HFactory.createClock} will
-   * not be consistent. {@link Keyspace.createClock()} should be used instead.
+   * convenience method. To specify explicit time,
+   * {@link Keyspace#createClock()} should be used instead.
    */
   public static long createClock() {
     return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
@@ -630,7 +657,7 @@ public final class HFactory {
    * HFactory.createKeyspaceDefinition(testKeyspace);
    * cluster.addKeyspace(newKeyspace);
    * 
-   * @param keyspace
+   * @param keyspaceName
    * @param strategyClass
    *          - example:
    *          org.apache.cassandra.locator.SimpleStrategy.class.getName()
@@ -657,7 +684,7 @@ public final class HFactory {
    * cluster.addKeyspace(testKeyspace);
    * 
    * @param keyspace
-   * @param columnFamilyName
+   * @param cfName
    */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(
       String keyspace, String cfName) {
@@ -677,7 +704,7 @@ public final class HFactory {
    * cluster.addKeyspace(testKeyspace);
    * 
    * @param keyspace
-   * @param columnFamilyName
+   * @param cfName
    * @param comparatorType
    */
   public static ColumnFamilyDefinition createColumnFamilyDefinition(

@@ -8,7 +8,7 @@ public class ObjectConverter implements Converter<Object> {
   private static final ObjectSerializer OBJ_SER = ObjectSerializer.get();
   
   @Override
-  public Object convertCassTypeToObjType(Class<Object> clazz, byte[] value) {
+  public Object convertCassTypeToObjType(PropertyMappingDefinition md, byte[] value) {
     return OBJ_SER.fromBytes(value);
   }
 

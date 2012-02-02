@@ -1,8 +1,6 @@
 package me.prettyprint.cassandra.service;
 
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -96,7 +94,10 @@ public class JmxMonitor {
    * @return A string representing the current context path or null if it cannot be determined.
    */
   private String getContextPath() {
-    URL url = getClass().getClassLoader().getResource("/");
+    ClassLoader loader = getClass().getClassLoader();
+    if(loader == null)
+     return null;
+    URL url = loader.getResource("/");
     if (url != null) {
       String[] elements = url.toString().split("/");
       for (int i = elements.length - 1; i > 0; --i) {

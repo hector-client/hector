@@ -33,7 +33,7 @@ public final class HCounterSuperColumnImpl<SN,N> implements HCounterSuperColumn<
   private final Serializer<N> nameSerializer;
 
   /**
-   * @param <SN> CounterSuperColumn name type
+   * @param sName<SN> CounterSuperColumn name type
    * @param List<HCounterColumn<N,V>> CounterColumn values
    * @param Serializer<SN> the serializer type
    */
@@ -54,10 +54,17 @@ public final class HCounterSuperColumnImpl<SN,N> implements HCounterSuperColumn<
     counterColumns = fromThriftColumns(thriftCounterSuperColumn.getColumns());
   }
 
-  /*package*/ HCounterSuperColumnImpl(Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
+  public HCounterSuperColumnImpl(Serializer<SN> sNameSerializer, Serializer<N> nameSerializer) {
     noneNull(sNameSerializer, nameSerializer);
     this.superNameSerializer = sNameSerializer;
     this.nameSerializer = nameSerializer;
+  }
+
+  public HCounterSuperColumn<SN, N> addSubCounterColumn(HCounterColumn<N> counterColumn) {
+    if ( counterColumns == null )
+      counterColumns = new ArrayList<HCounterColumn<N>>();
+    counterColumns.add(counterColumn);
+    return this;
   }
 
   @Override

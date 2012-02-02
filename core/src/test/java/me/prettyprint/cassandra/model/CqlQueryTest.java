@@ -4,22 +4,24 @@ import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createKeyspace;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.query.QueryResult;
 
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CqlQueryTest extends BaseEmbededServerSetupTest {
+  
+  private Logger log = LoggerFactory.getLogger(CqlQueryTest.class);
   
   private final static String KEYSPACE = "Keyspace1";
   private static final StringSerializer se = new StringSerializer();
@@ -53,8 +55,24 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("select * from StandardLong1");
     QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
-    assertEquals(6,result.get().getCount());
+    CqlRows<String, String, Long> rows = result.get();
+    // check that we contain a 'key' column
+    assertNotNull(rows.getList().get(0).getColumnSlice().getColumnByName("KEY"));
+    assertEquals(6,rows.getCount());    
+  }
     
+  @Test
+  public void testSelectAllSuppressesKeyColumn() {
+    CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
+    cqlQuery.setQuery("select * from StandardLong1");
+    cqlQuery.setSuppressKeyInColumns(true);
+    QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
+    CqlRows<String, String, Long> rows = result.get();
+    // check that we contain a 'key' column
+    assertNull(rows.getList().get(0).getColumnSlice().getColumnByName("KEY"));
+    // arbitrary row check
+    assertNull(rows.getList().get(3).getColumnSlice().getColumnByName("KEY"));
+    assertEquals(6,rows.getCount());    
   }
   
   @Test

@@ -136,7 +136,7 @@ public final class BatchMutation<K> {
     return innerMutationMap;
   }
   
-  Map<ByteBuffer,Map<String,List<Mutation>>> getMutationMap() {
+  public Map<ByteBuffer,Map<String,List<Mutation>>> getMutationMap() {
     return mutationMap;
   }
 

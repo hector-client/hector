@@ -8,6 +8,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftColumnFactory;
 import me.prettyprint.cassandra.service.ExceptionsTranslator;
 import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.hector.api.ColumnFactory;
+import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -29,6 +30,7 @@ public class AbstractColumnFamilyTemplate<K, N> {
   protected ColumnParent columnParent;
   protected HSlicePredicate<N> activeSlicePredicate;
   protected ColumnFactory columnFactory;
+  protected ConsistencyLevelPolicy consistencyLevelPolicy;
   
   /** The serializer for a standard column name or a super-column name */
   protected Serializer<N> topSerializer;
@@ -119,16 +121,30 @@ public class AbstractColumnFamilyTemplate<K, N> {
     return HFactory.createMutator(keyspace, keySerializer);
   }
 
-  public Long getClock() {
-    return clock;
+  /**
+   * Wrapped call to keyspace.createClock
+   * To Specify a clock for a group of operations, use {@link AbstractTemplateUpdater} instead
+   * @return
+   */
+  public long getClock() {
+    return keyspace.createClock();
   }
 
+  /**
+   * @deprecated (and not thread-safe). Set clocks on the {@link AbstractTemplateUpdater}
+   * implementation as needed. 
+   * @param clock
+   */
   public void setClock(Long clock) {
     this.clock = clock;
   }
 
+  /**
+   * @deprecated does the same thing as getClock() will be removed in a future release
+   * @return
+   */
   public long getEffectiveClock() {
-    return clock != null ? clock.longValue() : keyspace.createClock();
+    return keyspace.createClock();
   }  
 
   public void setExceptionsTranslator(ExceptionsTranslator exceptionsTranslator) {

@@ -6,22 +6,27 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 
+import com.mycompany.furniture.Drawer;
+
 @Entity
-@IdClass( MyCompositePK.class )
-@Table(name="ComplexColumnFamily")
+@IdClass(MyCompositePK.class)
+@Table(name = "ComplexColumnFamily")
 public class MyComplexEntity {
 
   @Id
   private int intProp1;
-  
+
   @Id
   private String strProp1;
-  
-  @Column( name ="strProp2")
+
+  @Column(name = "strProp2")
   private String strProp2;
-  
-  @Column( name ="strProp3")
+
+  @Column(name = "strProp3")
   private String strProp3;
+
+  @Column(name = "drawer")
+  private Drawer drawer;
 
   public int getIntProp1() {
     return intProp1;
@@ -53,6 +58,14 @@ public class MyComplexEntity {
 
   public void setStrProp3(String strProp3) {
     this.strProp3 = strProp3;
+  }
+
+  public Drawer getDrawer() {
+    return drawer;
+  }
+
+  public void setDrawer(Drawer drawer) {
+    this.drawer = drawer;
   }
 
 }

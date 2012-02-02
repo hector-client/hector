@@ -3,10 +3,8 @@ package me.prettyprint.cassandra.service.template;
 import java.nio.ByteBuffer;
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.UUID;
 
-import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 
 /**
@@ -36,6 +34,8 @@ public interface SuperCfResult<K, SN, N> extends ColumnFamilyResult<K, N> {
   Integer getInteger(SN sColumnName, N columnName);
 
   Boolean getBoolean(SN sColumnName, N columnName);
+  
+  Double getDouble(SN sColumnName, N columnName);
 
   byte[] getByteArray(SN sColumnName, N columnName);
   

@@ -1,9 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
@@ -11,7 +7,7 @@ import java.util.List;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
-import me.prettyprint.cassandra.model.BasicKeyspaceDefinition;           
+import me.prettyprint.cassandra.model.BasicKeyspaceDefinition;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.ColumnFamilyDefinition;
@@ -21,14 +17,13 @@ import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
-
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TokenRange;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 public class CassandraClusterTest extends BaseEmbededServerSetupTest {
@@ -61,7 +56,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
    */
   @Test
   public void testDescribeThriftVersion() throws Exception {
-    assertEquals("19.18.0",cassandraCluster.describeThriftVersion());
+    assertEquals("19.19.0",cassandraCluster.describeThriftVersion());
   }
 
   @Test
@@ -127,6 +122,14 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     assertNotNull(ksid2);
   }
 
+    @Test
+  public void testAddKeyspaceNTS() throws Exception {
+    ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition("DynKeyspaceNTS", "DynCf");
+    cassandraCluster.addKeyspace(
+        new ThriftKsDef("DynKeyspaceNTS", "org.apache.cassandra.locator.NetworkTopologyStrategy", 1, Arrays.asList(cfDef)));
+
+  }
+
   @Test
   public void testEditKeyspace() throws Exception {
         
@@ -172,6 +175,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     columnFamilyDefinition = new BasicColumnFamilyDefinition(cfDef);
     BasicColumnDefinition columnDefinition = new BasicColumnDefinition();
     columnDefinition.setName(StringSerializer.get().toByteBuffer("birthdate"));
+    columnDefinition.setIndexName("birthdate_idx");
     columnDefinition.setIndexType(ColumnIndexType.KEYS);
     columnDefinition.setValidationClass(ComparatorType.LONGTYPE.getClassName());
     columnFamilyDefinition.addColumnDefinition(columnDefinition);
@@ -186,6 +190,7 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     fromCluster = cassandraCluster.describeKeyspace("DynKeyspace3");
     
     assertEquals("birthdate",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(0).getName()));
+    assertEquals("birthdate_idx",fromCluster.getCfDefs().get(0).getColumnMetadata().get(0).getIndexName());
     assertEquals("nonindexed_field",StringSerializer.get().fromByteBuffer(fromCluster.getCfDefs().get(0).getColumnMetadata().get(1).getName()));
   }
   

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import me.prettyprint.hom.Colors;
 
+@SuppressWarnings("serial")
 public class ColorEmbedded implements Serializable {
 
   private Colors color;

@@ -42,4 +42,35 @@ public class MyPurpleTestBean extends MyNonEntityTestBean {
     this.longProp2 = longProp2;
   }
 
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((id == null) ? 0 : id.hashCode());
+    result = prime * result + (int) (longProp1 ^ (longProp1 >>> 32));
+    result = prime * result + (int) (longProp2 ^ (longProp2 >>> 32));
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    MyPurpleTestBean other = (MyPurpleTestBean) obj;
+    if (id == null) {
+      if (other.id != null)
+        return false;
+    } else if (!id.equals(other.id))
+      return false;
+    if (longProp1 != other.longProp1)
+      return false;
+    if (longProp2 != other.longProp2)
+      return false;
+    return true;
+  }
+
 }

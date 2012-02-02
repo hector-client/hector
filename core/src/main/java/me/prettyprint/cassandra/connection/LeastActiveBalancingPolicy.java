@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.connection;
 
+import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
 
 import java.util.*;
@@ -7,7 +8,6 @@ import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 /**
@@ -55,7 +55,7 @@ public class LeastActiveBalancingPolicy implements LoadBalancingPolicy {
   }
   
   @Override
-  public HClientPool createConnection(CassandraHost host) {
-	  return new ConcurrentHClientPool(host);
+  public HClientPool createConnection(HClientFactory clientFactory, CassandraHost host) {
+	  return new ConcurrentHClientPool(clientFactory, host);
   }
 }

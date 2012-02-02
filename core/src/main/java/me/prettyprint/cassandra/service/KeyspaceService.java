@@ -5,19 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import me.prettyprint.hector.api.HConsistencyLevel;
-import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HectorException;
-
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnParent;
-import org.apache.cassandra.thrift.ColumnPath;
-import org.apache.cassandra.thrift.CounterColumn;
-import org.apache.cassandra.thrift.CounterSuperColumn;
-import org.apache.cassandra.thrift.IndexClause;
-import org.apache.cassandra.thrift.KeyRange;
-import org.apache.cassandra.thrift.Mutation;
-import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.thrift.SuperColumn;
+import org.apache.cassandra.thrift.*;
 
 /**
  * The keyspace is a high level handle to all read/write operations to cassandra.
@@ -40,22 +29,22 @@ public interface KeyspaceService {
   /**
    * Get the Column at the given columnPath.
    *
-   * If no value is present, NotFoundException is thrown.
+   * If no value is present, HNotFoundException is thrown (which is a sub-type of HectorException)
    *
-   * @throws HNotFoundException
-   *           if no value exists for the column
+   * @throws HectorException
+   *           if any other error occurs (including HNotFoundException if no value is present)
    */
   Column getColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
 
   Column getColumn(String key, ColumnPath columnPath) throws HectorException;
   
   /**
-   * Get the Counter  at the given columnPath.
+   * Get the Counter Column at the given columnPath.
    *
-   * If no value is present, NotFoundException is thrown.
+   * If no value is present, HNotFoundException is thrown (which is a sub-type of HectorException)
    *
-   * @throws HNotFoundException
-   *           if no value exists for the counter
+   * @throws HectorException
+   *           if any other error occurs (including HNotFoundException if no value is present)
    */
   CounterColumn getCounter(ByteBuffer key, ColumnPath columnPath) throws HectorException;
   
@@ -64,13 +53,13 @@ public interface KeyspaceService {
   /**
    * Get the SuperColumn at the given columnPath.
    *
-   * If no value is present, NotFoundException is thrown.
-   *
    * by default will return column with native order and the size of the list is
    * unlimited (so be careful...)
    *
-   * @throws HNotFoundException
-   *           when a supercolumn is not found
+   * If no value is present, HNotFoundException is thrown (which is a sub-type of HectorException)
+   *
+   * @throws HectorException
+   *           if any other error occurs (including HNotFoundException if no value is present)
    */
   SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath) throws HectorException;
 
@@ -79,7 +68,7 @@ public interface KeyspaceService {
   /**
    * Get the SuperColumn at the given columnPath.
    *
-   * If no value is present, NotFoundException is thrown.
+   * If no value is present, HNotFoundException is thrown (which is a sub-type of HectorException)
    *
    * by default will return column with native order and the size of the list is
    * unlimited (so be careful...)
@@ -88,8 +77,8 @@ public interface KeyspaceService {
    *          the result Column sort
    * @param size
    *          the result column size
-   * @throws HNotFoundException
-   *           when a supercolumn is not found
+   * @throws HectorException
+   *           if any other error occurs (including HNotFoundException if no value is present)
    */
   SuperColumn getSuperColumn(ByteBuffer key, ColumnPath columnPath, boolean reversed, int size)
       throws HectorException;

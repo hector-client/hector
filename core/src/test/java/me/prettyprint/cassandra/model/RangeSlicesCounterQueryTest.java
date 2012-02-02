@@ -1,18 +1,14 @@
 package me.prettyprint.cassandra.model;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
-import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.CounterRow;
 import me.prettyprint.hector.api.beans.OrderedCounterRows;
-import me.prettyprint.hector.api.beans.OrderedRows;
-import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesCounterQuery;
-import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
 import org.junit.Before;
 import org.junit.Test;

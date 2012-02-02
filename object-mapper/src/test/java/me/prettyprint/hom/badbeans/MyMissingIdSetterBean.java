@@ -9,6 +9,7 @@ import javax.persistence.Table;
 @Entity
 @Table(name="MyMissingIdSetterBean")
 public class MyMissingIdSetterBean {
+  @SuppressWarnings("unused")
   @Id
   private String id;
 

@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.UUID;
 
 import me.prettyprint.hector.api.ResultStatus;
-import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 
 /**
@@ -31,6 +30,8 @@ public interface ColumnFamilyResult<K, N> extends Iterator<ColumnFamilyResult<K,
   Long getLong(N columnName);
 
   Integer getInteger(N columnName);
+  
+  Double getDouble(N columnName);
 
   Boolean getBoolean(N columnName);
 

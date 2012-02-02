@@ -6,6 +6,8 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import javax.persistence.Table;
 
+import me.prettyprint.hom.beans.MyCompositePK;
+
 @Entity
 @IdClass( MyCompositePK.class )
 @Table(name="ComplexColumnFamily")

@@ -49,6 +49,10 @@ public abstract class Operation<T> {
   public Operation(OperationType operationType, Map<String, String> credentials) {
     this(operationType, FailoverPolicy.ON_FAIL_TRY_ALL_AVAILABLE, null, credentials);
   }
+
+  public Operation(OperationType operationType, FailoverPolicy failoverPolicy, Map<String, String> credentials) {
+    this(operationType, failoverPolicy, null, credentials);
+  }
   
   public Operation(OperationType operationType, FailoverPolicy failoverPolicy, String keyspaceName, Map<String, String> credentials) {
     this.failCounter = (operationType == OperationType.READ) ? Counter.READ_FAIL :
@@ -91,9 +95,9 @@ public abstract class Operation<T> {
   /**
    * Performs the operation on the given cassandra instance.
    */
-  public abstract T execute(Cassandra.Client cassandra) throws HectorException;
+  public abstract T execute(Cassandra.Client cassandra) throws Exception;
 
-  public void executeAndSetResult(Cassandra.Client cassandra, CassandraHost cassandraHost) throws HectorException {
+  public void executeAndSetResult(Cassandra.Client cassandra, CassandraHost cassandraHost) throws Exception {
     this.cassandraHost = cassandraHost;
     long startTime = System.nanoTime();
     setResult(execute(cassandra));

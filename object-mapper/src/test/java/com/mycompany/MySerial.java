@@ -2,6 +2,7 @@ package com.mycompany;
 
 import java.io.Serializable;
 
+@SuppressWarnings("serial")
 public class MySerial implements Serializable {
 
   private int prop1;

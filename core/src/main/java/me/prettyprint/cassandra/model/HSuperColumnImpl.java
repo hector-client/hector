@@ -5,7 +5,6 @@ import static me.prettyprint.cassandra.utils.Assert.notNull;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import me.prettyprint.hector.api.Serializer;
@@ -115,6 +114,16 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
   @Override
   public HColumn<N, V> get(int i) {
     return columns.get(i);
+  }    
+
+  @Override
+  public HColumn<N, V> getSubColumnByName(N subColumnName) {
+    for (HColumn<N,V> column : columns ) {
+      if ( nameSerializer.toByteBuffer(subColumnName).equals(column.getNameBytes()) ) {
+        return column;
+      }
+    }    
+    return null;
   }
 
   @Override
@@ -169,3 +178,4 @@ public final class HSuperColumnImpl<SN,N,V> implements HSuperColumn<SN, N, V> {
     return String.format("HSuperColumn(%s,%s)", superName, columns);
   }
 }
+

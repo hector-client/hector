@@ -38,6 +38,8 @@ public interface HSuperColumn<SN, N, V> {
   List<HColumn<N, V>> getColumns();
 
   HColumn<N, V> get(int i);
+  
+  HColumn<N, V> getSubColumnByName(N subColumnName);
 
   Serializer<SN> getNameSerializer();
 

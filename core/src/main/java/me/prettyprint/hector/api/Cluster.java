@@ -60,10 +60,10 @@ public interface Cluster {
   String dropKeyspace(final String keyspace) throws HectorException;
   
   /**
-   * Drops a Keyspace and wait for schema cluster agreement if <code>blockUntilComplete</code>
+   * Drops a Keyspace and waits for schema cluster agreement if <code>waitForSchemaAgreement</code>
    * is set to true. Otherwise it behaves exactly like: {@link #dropKeyspace(String)}
    */
-  String dropKeyspace(final String keyspace, boolean blockUntilComplete) throws HectorException;
+  String dropKeyspace(final String keyspace, boolean waitForSchemaAgreement) throws HectorException;
 
   /**
    * Updates the Keyspace from the cluster without waiting for schema agreement.
@@ -71,10 +71,10 @@ public interface Cluster {
   String updateKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
   
   /**
-   * Updates the Keyspace and wait for schema cluster agreement if <code>blockUntilComplete</code>
+   * Updates the Keyspace and waitz for schema cluster agreement if <code>waitForSchemaAgreement</code>
    * is set to true. Otherwise it behaves exactly like: {@link #updateKeyspace(KeyspaceDefinition)}
    */
-  String updateKeyspace(final KeyspaceDefinition ksdef, boolean blockUntilComplete) throws HectorException;
+  String updateKeyspace(final KeyspaceDefinition ksdef, boolean waitForSchemaAgreement) throws HectorException;
 
   String describePartitioner() throws HectorException;
 
@@ -84,10 +84,10 @@ public interface Cluster {
   String addColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException;
 
   /**
-   * Add a column family and wait for schema cluster agreement if <code>blockUntilComplete</code>
+   * Add a column family and wait for schema cluster agreement if <code>waitForSchemaAgreement</code>
    * is set to true. Otherwise it behaves exactly like: {@link #addColumnFamily(ColumnFamilyDefinition)}
    */
-  String addColumnFamily(final ColumnFamilyDefinition cfdef, boolean blockUntilComplete) throws HectorException;
+  String addColumnFamily(final ColumnFamilyDefinition cfdef, boolean waitForSchemaAgreement) throws HectorException;
 
   /**
    * Drops a column family and does not wait for schema agreement.
@@ -95,10 +95,10 @@ public interface Cluster {
   String dropColumnFamily(final String keyspaceName, final String columnFamily) throws HectorException;
   
   /**
-   * Drops a column family and wait for schema cluster agreement if <code>blockUntilComplete</code>
+   * Drops a column family and waits for schema cluster agreement if <code>waitForSchemaAgreement</code>
    * is set to true. Otherwise it behaves exactly like: {@link #dropColumnFamily(String, String)}
    */
-  String dropColumnFamily(final String keyspaceName, final String columnFamily, boolean blockUntilComplete) throws HectorException;
+  String dropColumnFamily(final String keyspaceName, final String columnFamily, boolean waitForSchemaAgreement) throws HectorException;
   
   /**
    * Updates a column family and does not wait for schema agreement.
@@ -106,10 +106,10 @@ public interface Cluster {
   String updateColumnFamily(final ColumnFamilyDefinition cfdef) throws HectorException;
   
   /**
-   * Update a column family and wait for schema cluster agreement if <code>blockUntilComplete</code>
-   * is set to true. Otherwise it behaves exactly like: {@link #updateColumnFamily(String)}
+   * Update a column family and wait for schema cluster agreement if <code>waitForSchemaAgreement</code>
+   * is set to true. Otherwise it behaves exactly like: {@link #updateColumnFamily(me.prettyprint.hector.api.ddl.ColumnFamilyDefinition)}
    */
-  String updateColumnFamily(final ColumnFamilyDefinition cfdef, boolean blockUntilComplete) throws HectorException;
+  String updateColumnFamily(final ColumnFamilyDefinition cfdef, boolean waitForSchemaAgreement) throws HectorException;
 
   /**
    * Add a keyspace and does not wait for schema agreement.
@@ -117,12 +117,18 @@ public interface Cluster {
   String addKeyspace(final KeyspaceDefinition ksdef) throws HectorException;
   
   /**
-   * Add a keyspace and wait for schema cluster agreement if <code>blockUntilComplete</code>
-   * is set to true. Otherwise it behaves exactly like: {@link #addKeyspace(String)}
+   * Add a keyspace and wait for schema cluster agreement if <code>waitForSchemaAgreement</code>
+   * is set to true. Otherwise it behaves exactly like: {@link #addKeyspace(me.prettyprint.hector.api.ddl.KeyspaceDefinition)}
    */
-  String addKeyspace(final KeyspaceDefinition ksdef, boolean blockUntilComplete) throws HectorException;
+  String addKeyspace(final KeyspaceDefinition ksdef, boolean waitForSchemaAgreement) throws HectorException;
   
   void truncate(final String keyspaceName, final String columnFamily) throws HectorException;
 
   Map<String, String> getCredentials();
+
+  /**
+   * called after the cluster has been initialized.  Default implementation
+   * is to do nothing
+   */
+  void onStartup();
 }

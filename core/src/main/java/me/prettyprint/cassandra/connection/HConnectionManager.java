@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import me.prettyprint.cassandra.connection.client.HClient;
+import me.prettyprint.cassandra.connection.factory.HClientFactory;
+import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.cassandra.service.CassandraHost;
@@ -44,6 +47,7 @@ public class HConnectionManager {
   private NodeAutoDiscoverService nodeAutoDiscoverService;
   private final LoadBalancingPolicy loadBalancingPolicy;
   private final CassandraHostConfigurator cassandraHostConfigurator;
+  private final HClientFactory clientFactory;
   private HostTimeoutTracker hostTimeoutTracker;
   private final ClockResolution clock;
 
@@ -52,17 +56,20 @@ public class HConnectionManager {
   private HOpTimer timer;
 
   public HConnectionManager(String clusterName, CassandraHostConfigurator cassandraHostConfigurator) {
+
+    clientFactory = HClientFactoryProvider.createFactory(cassandraHostConfigurator);
+
     loadBalancingPolicy = cassandraHostConfigurator.getLoadBalancingPolicy();
     clock = cassandraHostConfigurator.getClockResolution();
     hostPools = new ConcurrentHashMap<CassandraHost, HClientPool>();
     suspendedHostPools = new ConcurrentHashMap<CassandraHost, HClientPool>();
     this.clusterName = clusterName;
     if ( cassandraHostConfigurator.getRetryDownedHosts() ) {
-      cassandraHostRetryService = new CassandraHostRetryService(this, cassandraHostConfigurator);
+      cassandraHostRetryService = new CassandraHostRetryService(this, clientFactory, cassandraHostConfigurator);
     }    
     for ( CassandraHost host : cassandraHostConfigurator.buildCassandraHosts()) {
       try {
-        HClientPool hcp = loadBalancingPolicy.createConnection(host);
+        HClientPool hcp = loadBalancingPolicy.createConnection(clientFactory, host);
         hostPools.put(host,hcp);
       } catch (HectorTransportException hte) {
         log.error("Could not start connection pool for host {}", host);
@@ -81,13 +88,18 @@ public class HConnectionManager {
     hostPoolValues = hostPools.values();
     if ( cassandraHostConfigurator.getAutoDiscoverHosts() ) {
       nodeAutoDiscoverService = new NodeAutoDiscoverService(this, cassandraHostConfigurator);
-      if ( cassandraHostConfigurator.getRunAutoDiscoveryAtStartup() ) {
-        nodeAutoDiscoverService.doAddNodes();
-      }
     }
-    
-    timer = cassandraHostConfigurator.getOpTimer();
 
+    timer = cassandraHostConfigurator.getOpTimer();
+  }
+
+  public void doAddNodes() {
+    if (nodeAutoDiscoverService != null) {
+      nodeAutoDiscoverService.doAddNodes();
+    } else {
+      log.warn("unable to add nodes, nodeAutoDiscoverService was null.  " +
+              "CassandraHostConfigurator.autoDiscoverHosts is {}", cassandraHostConfigurator.getAutoDiscoverHosts());
+    }
   }
 
   /**
@@ -101,7 +113,7 @@ public class HConnectionManager {
       HClientPool pool = null;
       try {
         cassandraHostConfigurator.applyConfig(cassandraHost);
-        pool = cassandraHostConfigurator.getLoadBalancingPolicy().createConnection(cassandraHost);
+        pool = cassandraHostConfigurator.getLoadBalancingPolicy().createConnection(clientFactory, cassandraHost);
         hostPools.putIfAbsent(cassandraHost, pool);
         log.info("Added host {} to pool", cassandraHost.getName());
         return true;
@@ -213,7 +225,7 @@ public class HConnectionManager {
   public void operateWithFailover(Operation<?> op) throws HectorException {
     final Object timerToken = timer.start(); 
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
-    HThriftClient client = null;
+    HClient client = null;
     HClientPool pool = null;
     boolean success = false;
     boolean retryable = false;
@@ -226,8 +238,9 @@ public class HConnectionManager {
         client = pool.borrowClient();
         Cassandra.Client c = client.getCassandra(op.keyspaceName);
         // Keyspace can be null for some system_* api calls
-        if ( op.credentials != null && !op.credentials.isEmpty() ) {
+        if ( op.credentials != null && !op.credentials.isEmpty() && !client.isAlreadyAuthenticated(op.credentials)) {
           c.login(new AuthenticationRequest(op.credentials));
+          client.setAuthenticated(op.credentials);
         }
 
         op.executeAndSetResult(c, pool.getCassandraHost());
@@ -293,9 +306,10 @@ public class HConnectionManager {
     }
   }
 
-  private void closeClient(HThriftClient client) {
+  private void closeClient(HClient client) {
     if ( client != null ) {
       client.close();
+      client.clearAuthentication();
     }
   }
 
@@ -345,11 +359,11 @@ public class HConnectionManager {
     return loadBalancingPolicy.getPool(hostPoolValues, excludeHosts);    
   }
 
-  void releaseClient(HThriftClient client) {
+  void releaseClient(HClient client) {
     if ( client == null ) return;
-    HClientPool pool = hostPools.get(client.cassandraHost);
+    HClientPool pool = hostPools.get(client.getCassandraHost());
     if ( pool == null ) {
-      pool = suspendedHostPools.get(client.cassandraHost);
+      pool = suspendedHostPools.get(client.getCassandraHost());
     }
     if ( pool != null ) {
       pool.releaseClient(client);
@@ -359,7 +373,7 @@ public class HConnectionManager {
     }
   }
 
-  HThriftClient borrowClient() {
+  HClient borrowClient() {
     HClientPool pool = getClientFromLBPolicy(null);
     if ( pool != null ) {
       return pool.borrowClient();
