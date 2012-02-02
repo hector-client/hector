@@ -35,7 +35,7 @@
   <distributionManagement>
     <site>
       <id>github.com</id>
-      <url>git@github.com/rantav/hector.git</url>
+      <url>gitsite:git@github.com/rantav/hector.git</url>
     </site>
   </distributionManagement>
 
