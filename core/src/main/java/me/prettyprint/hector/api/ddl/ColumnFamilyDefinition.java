@@ -35,19 +35,7 @@ public interface ColumnFamilyDefinition {
 
   String getComment();
   void setComment(String comment);
-  
-  double getRowCacheSize();
-  void setRowCacheSize(double rowCacheSize);
-  
-  int getRowCacheSavePeriodInSeconds();
-  void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds);
-  
-  int getKeyCacheSavePeriodInSeconds();
-  void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds);
-  
-  double getKeyCacheSize();
-  void setKeyCacheSize(double keyCacheSize);
-  
+    
   String getKeyValidationClass();
   void setKeyValidationClass(String keyValidationClass);
   
@@ -97,15 +85,10 @@ public interface ColumnFamilyDefinition {
 
   void setMergeShardsChance(double mergeShardsChance);
 
-  String getRowCacheProvider();
-
-  void setRowCacheProvider(String rowCacheProvider);
-
   ByteBuffer getKeyAlias();
 
   void setKeyAlias(ByteBuffer keyAlias);
 
-  int getRowCacheKeysToSave();
-
-  void setRowCacheKeysToSave(int rowCacheKeysToSave);
+  void setCaching(String caching);
+  String getCaching();
 }

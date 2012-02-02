@@ -388,8 +388,9 @@ public abstract class AbstractThriftClientWrapper extends Client {
 
   @Override
   public void recv_truncate() throws InvalidRequestException,
-      UnavailableException, TException {
+      UnavailableException, TException ,TimedOutException{
     client.recv_truncate();
+
   }
 
   @Override
@@ -632,7 +633,7 @@ public abstract class AbstractThriftClientWrapper extends Client {
 
   @Override
   public void truncate(String cfname) throws InvalidRequestException,
-      UnavailableException, TException {
+      UnavailableException, TException, TimedOutException {
     client.truncate(cfname);
   }
 }

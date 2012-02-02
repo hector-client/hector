@@ -27,9 +27,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 	private String comparatorTypeAlias = "";
 	private String subComparatorTypeAlias = "";
   private String comment;
-  private double rowCacheSize;
-  private int rowCacheSavePeriodInSeconds;
-  private double keyCacheSize;
+  //private double rowCacheSize;
+  //private int rowCacheSavePeriodInSeconds;
+  //private double keyCacheSize;
   private double readRepairChance;
   private List<ColumnDefinition> columnMetadata;
   private int gcGraceSeconds;
@@ -48,10 +48,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private Map<String,String> compactionStrategyOptions;
   private Map<String,String> compressionOptions;
   private double mergeShardsChance;
-  private String rowCacheProvider;
+  //private String rowCacheProvider;
   private ByteBuffer keyAlias;
-  private int rowCacheKeysToSave;
-
+  //private int rowCacheKeysToSave;
+  private String caching;
 
 
 
@@ -64,10 +64,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     comparatorType = ComparatorType.getByClassName(d.comparator_type);
     subComparatorType = ComparatorType.getByClassName(d.subcomparator_type);
     comment = d.comment;
-    rowCacheSize = d.row_cache_size;
-    rowCacheSavePeriodInSeconds = d.row_cache_save_period_in_seconds;
-    keyCacheSize = d.key_cache_size;
-    keyCacheSavePeriodInSeconds = d.key_cache_save_period_in_seconds;
+    //rowCacheSize = d.row_cache_size;
+    //rowCacheSavePeriodInSeconds = d.row_cache_save_period_in_seconds;
+    //keyCacheSize = d.key_cache_size;
+    caching = d.caching;
+    //keyCacheSavePeriodInSeconds = d.key_cache_save_period_in_seconds;
     keyValidationClass = d.key_validation_class;
     readRepairChance = d.read_repair_chance;
     columnMetadata = ThriftColumnDef.fromThriftList(d.column_metadata);
@@ -86,9 +87,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     compressionOptions = d.compression_options;
 
     mergeShardsChance = d.merge_shards_chance;
-    rowCacheProvider = d.row_cache_provider;
+    //rowCacheProvider = d.row_cache_provider;
     keyAlias = d.key_alias;
-    rowCacheKeysToSave = d.row_cache_keys_to_save;
+    //rowCacheKeysToSave = d.row_cache_keys_to_save;
+    caching = d.caching;
 
   }
 
@@ -101,10 +103,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
 		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
-    rowCacheSize = columnFamilyDefinition.getRowCacheSize();
-    rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
-    keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
-    keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
+    //rowCacheSize = columnFamilyDefinition.getRowCacheSize();
+    //rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
+    //keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
+    //keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
     keyValidationClass = columnFamilyDefinition.getKeyValidationClass();
     readRepairChance = columnFamilyDefinition.getReadRepairChance();
     columnMetadata = columnFamilyDefinition.getColumnMetadata();
@@ -128,10 +130,10 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     compressionOptions = columnFamilyDefinition.getCompressionOptions();
 
     mergeShardsChance = columnFamilyDefinition.getMergeShardsChance();
-    rowCacheProvider = columnFamilyDefinition.getRowCacheProvider();
+    //rowCacheProvider = columnFamilyDefinition.getRowCacheProvider();
     keyAlias = columnFamilyDefinition.getKeyAlias();
-    rowCacheKeysToSave = columnFamilyDefinition.getRowCacheKeysToSave();
-
+    //rowCacheKeysToSave = columnFamilyDefinition.getRowCacheKeysToSave();
+    caching = columnFamilyDefinition.getCaching();
   }
 
   public ThriftCfDef(String keyspace, String columnFamilyName) {
@@ -142,7 +144,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     columnType = ColumnType.STANDARD;
     comparatorType = ComparatorType.BYTESTYPE;
     readRepairChance = CFMetaDataDefaults.DEFAULT_READ_REPAIR_CHANCE;
-    keyCacheSize = CFMetaDataDefaults.DEFAULT_KEY_CACHE_SIZE;
+    //keyCacheSize = CFMetaDataDefaults.DEFAULT_KEY_CACHE_SIZE;
     keyCacheSavePeriodInSeconds = CFMetaDataDefaults.DEFAULT_KEY_CACHE_SAVE_PERIOD_IN_SECONDS;
     gcGraceSeconds = CFMetaDataDefaults.DEFAULT_GC_GRACE_SECONDS;
     minCompactionThreshold = CFMetaDataDefaults.DEFAULT_MIN_COMPACTION_THRESHOLD;
@@ -212,20 +214,6 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     return comment;
   }
 
-  @Override
-  public double getRowCacheSize() {
-    return rowCacheSize;
-  }
-
-  @Override
-  public int getRowCacheSavePeriodInSeconds() {
-    return rowCacheSavePeriodInSeconds;
-  }
-
-  @Override
-  public double getKeyCacheSize() {
-    return keyCacheSize;
-  }
 
   @Override
   public double getReadRepairChance() {
@@ -264,13 +252,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     if ( id != 0)
       d.setId(id);
     
-    d.setKey_cache_size(keyCacheSize);
-    d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds);
+  
     d.setKey_validation_class(keyValidationClass);
     d.setMax_compaction_threshold(maxCompactionThreshold);
     d.setMin_compaction_threshold(minCompactionThreshold);
     d.setRead_repair_chance(readRepairChance);
-    d.setRow_cache_size(rowCacheSize);        
+   
     d.setReplicate_on_write(replicateOnWrite);
 
     if (subComparatorType != null) {
@@ -282,9 +269,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     d.setCompression_options(compressionOptions);
 
     d.setMerge_shards_chance(mergeShardsChance);
-    d.setRow_cache_provider(rowCacheProvider);
+    
     d.setKey_alias(keyAlias);
-    d.setRow_cache_keys_to_save(rowCacheKeysToSave);
+    
 
     return d;
   }
@@ -334,17 +321,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.comment = comment;
   }
 
-  public void setRowCacheSize(double rowCacheSize) {
-    this.rowCacheSize = rowCacheSize;
-  }
 
-  public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
-    this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
-  }
 
-  public void setKeyCacheSize(double keyCacheSize) {
-    this.keyCacheSize = keyCacheSize;
-  }
+
 
   public void setReadRepairChance(double readRepairChance) {
     this.readRepairChance = readRepairChance;
@@ -403,11 +382,6 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     return memtableThroughputInMb;
   }
 
-  @Override
-  public int getKeyCacheSavePeriodInSeconds() {
-    return keyCacheSavePeriodInSeconds;
-  }
-
   public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
     this.memtableOperationsInMillions = memtableOperationsInMillions;
   }
@@ -418,10 +392,6 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 
   public void setMemtableFlushAfterMins(int memtableFlushAfterMins) {
     this.memtableFlushAfterMins = memtableFlushAfterMins;
-  }
-
-  public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
-    this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
   }
 
   @Override
@@ -485,16 +455,6 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public String getRowCacheProvider() {
-    return rowCacheProvider;
-  }
-
-  @Override
-  public void setRowCacheProvider(String rowCacheProvider) {
-    this.rowCacheProvider = rowCacheProvider;
-  }
-
-  @Override
   public ByteBuffer getKeyAlias() {
     return keyAlias;
   }
@@ -505,12 +465,14 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   @Override
-  public int getRowCacheKeysToSave() {
-    return rowCacheKeysToSave;
+  public void setCaching(String caching) {
+    this.caching=caching;
   }
 
   @Override
-  public void setRowCacheKeysToSave(int rowCacheKeysToSave) {
-    this.rowCacheKeysToSave = rowCacheKeysToSave;
+  public String getCaching() {
+    return caching;
   }
+
+
 }

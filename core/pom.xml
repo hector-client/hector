@@ -105,6 +105,16 @@
       <artifactId>cassandra-thrift</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.apache.cassandra</groupId>
+      <artifactId>cassandra-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>edu.stanford.ppl</groupId>
+      <artifactId>snaptree</artifactId>
+      <version>0.1</version>
+    </dependency>
+
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>

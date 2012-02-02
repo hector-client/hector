@@ -24,8 +24,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 	private String comparatorTypeAlias = "";
 	private String subComparatorTypeAlias = "";
   private String comment;
-  private double rowCacheSize;
-  private double keyCacheSize;
+
   private double readRepairChance;
   private int gcGraceSeconds;
   private String defaultValidationClass;
@@ -33,8 +32,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int id;
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
-  private int rowCacheSavePeriodInSeconds;
-  private int keyCacheSavePeriodInSeconds;
+
   private double memtableOperationsInMillions;
   private int memtableThroughputInMb;
   private int memtableFlushAfterMins;
@@ -46,7 +44,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private double mergeShardsChance;
   private String rowCacheProvider;
   private ByteBuffer keyAlias;
-  private int rowCacheKeysToSave;
+  private String caching;
 
 
   private final List<ColumnDefinition> columnDefinitions;
@@ -68,10 +66,6 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
 		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
-    rowCacheSize = columnFamilyDefinition.getRowCacheSize();
-    rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
-    keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
-    keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
     readRepairChance = columnFamilyDefinition.getReadRepairChance();
     columnDefinitions = columnFamilyDefinition.getColumnMetadata() != null
     ? new ArrayList<ColumnDefinition>(columnFamilyDefinition.getColumnMetadata())
@@ -90,9 +84,6 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     compactionStrategyOptions = columnFamilyDefinition.getCompactionStrategyOptions();
     compressionOptions = columnFamilyDefinition.getCompressionOptions();
     mergeShardsChance = columnFamilyDefinition.getMergeShardsChance();
-    rowCacheProvider = columnFamilyDefinition.getRowCacheProvider();
-    keyAlias = columnFamilyDefinition.getKeyAlias();
-    rowCacheKeysToSave = columnFamilyDefinition.getRowCacheKeysToSave();
 
   }
 
@@ -124,13 +115,6 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.comment = comment;
   }
 
-  public void setRowCacheSize(double rowCacheSize) {
-    this.rowCacheSize = rowCacheSize;
-  }
-
-  public void setKeyCacheSize(double keyCacheSize) {
-    this.keyCacheSize = keyCacheSize;
-  }
 
   public void setReadRepairChance(double readRepairChance) {
     this.readRepairChance = readRepairChance;
@@ -156,9 +140,6 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.minCompactionThreshold = minCompactionThreshold;
   }
 
-  public void setRowCacheSavePeriodInSeconds(int rowCacheSavePeriodInSeconds) {
-    this.rowCacheSavePeriodInSeconds = rowCacheSavePeriodInSeconds;
-  }
 
   public void setMemtableOperationsInMillions(double memtableOperationsInMillions) {
     this.memtableOperationsInMillions = memtableOperationsInMillions;
@@ -180,9 +161,6 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.columnDefinitions.add( columnDefinition );
   }
 
-  public void setKeyCacheSavePeriodInSeconds(int keyCacheSavePeriodInSeconds) {
-    this.keyCacheSavePeriodInSeconds = keyCacheSavePeriodInSeconds;
-  }
 
   public void setKeyValidationClass(String keyValidationClass){
       this.keyValidationClass = keyValidationClass;
@@ -226,21 +204,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     return this.comment;
   }
 
-  @Override
-  public double getRowCacheSize() {
-    return this.rowCacheSize;
-  }
-
-  @Override
-  public int getRowCacheSavePeriodInSeconds() {
-    return this.rowCacheSavePeriodInSeconds;
-  }
-
-  @Override
-  public double getKeyCacheSize() {
-    return this.keyCacheSize;
-  }
-
+  
   @Override
   public double getReadRepairChance() {
     return this.readRepairChance;
@@ -293,10 +257,6 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   public boolean isReplicateOnWrite() {
     return replicateOnWrite;
-  }
-
-  public int getKeyCacheSavePeriodInSeconds() {
-    return keyCacheSavePeriodInSeconds;
   }
 
   @Override
@@ -358,11 +318,14 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.keyAlias = keyAlias;
   }
 
-  public int getRowCacheKeysToSave() {
-    return rowCacheKeysToSave;
+
+  @Override
+  public void setCaching(String caching) {
+    this.caching=caching;
   }
 
-  public void setRowCacheKeysToSave(int rowCacheKeysToSave) {
-    this.rowCacheKeysToSave = rowCacheKeysToSave;
+  @Override
+  public String getCaching() {
+    return this.caching;
   }
 }
