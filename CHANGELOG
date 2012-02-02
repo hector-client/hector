@@ -6,6 +6,22 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.0-3
+=====
+Additional utility methods on ComparatorType. Thanks to ash2k for the patch.
+Remove libthrift dependency reference directly in favor of transitive reference from Apache Cassandra libs. Thanks to #jfarrell for the patch (#349)
+Fix bytebuffer munge on SuperCfResultWrapper (#381)
+Bunch of package and code cleanups from @normanmaurer
+Add additional convinience methods to ColumnFamilyResult. Thanks to @amrik for the patch. 
+Don't check for ring membership if no hosts are alive. Thanks to Nick Bailey for the patch.
+Fix NPE on NodeAutoDiscoveryService. Thanks to Matt Abrams for the patch (https://github.com/rantav/hector/pull/383)
+Expose keyspace and columnFamilyName in SimpleCassandraDao (#395)
+Support RangeSubSlicesCounterQuery and SubSliceCounterQuery. Thanks to @nlalevee for the code. 
+Operations effecting schema (OperationType#META_WRITE) no longer retry on timeout. Thanks to Chris Herron for the fix.
+Change test instance gossip port to 7001 to not conflict with Cassandra defaults (#342)
+Updated CassandraClusterTest to show correctly setting index_name field. Thanks to @quorg for pointing this out (#405)
+
+
 1.0-2
 =====
 Add TopolyAware AutoDiscoveryService (#311)
