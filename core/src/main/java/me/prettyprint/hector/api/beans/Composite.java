@@ -1,9 +1,10 @@
 package me.prettyprint.hector.api.beans;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class Composite extends AbstractComposite {
+public class Composite extends AbstractComposite implements Serializable {
 
   public Composite() {
     super(false);
