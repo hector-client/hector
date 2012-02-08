@@ -6,6 +6,11 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.0-4
+=====
+Made Composite Serializable
+Added Composite to TypeInferringSerializer
+
 1.0-3
 =====
 Additional utility methods on ComparatorType. Thanks to ash2k for the patch.
