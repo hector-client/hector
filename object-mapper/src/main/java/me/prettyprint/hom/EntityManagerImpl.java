@@ -129,7 +129,7 @@ public class EntityManagerImpl {
           + Entity.class.getSimpleName() + " for type, " + clazz.getName());
     }
 
-    return objMapper.getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
+    return objMapper.<T, I>getObject(keyspace, cfMapDef.getEffectiveColFamName(), id);
   }
   
   /**
