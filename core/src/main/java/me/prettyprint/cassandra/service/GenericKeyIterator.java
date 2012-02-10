@@ -1,0 +1,114 @@
+package me.prettyprint.cassandra.service;
+
+import java.util.Iterator;
+
+import me.prettyprint.cassandra.serializers.AbstractSerializer;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.beans.OrderedRows;
+import me.prettyprint.hector.api.beans.Row;
+import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.query.QueryResult;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
+
+
+/**
+ * This class returns each key in the specified Column Family as an Iterator.  You 
+ * can use this class in a for loop without the overhead of first storing each
+ * key in a large array.  See StringKeyIterator for a convenience class if the key
+ * is a String.
+ * @author Tim Koop
+ * @author Patricio Echague
+ * @param <K>	the type of the row key
+ * @see StringKeyIterator
+ */
+public class GenericKeyIterator<K, N, V> implements Iterable<K> {
+
+  private static final int MAX_ROW_COUNT_DEFAULT = 500;
+
+  private int maxColumnCount = 2;	// we only need this to tell if there are any columns in the row (to test for tombstones)
+
+  private Iterator<Row<K, N, V>> rowsIterator = null;
+
+  private RangeSlicesQuery<K, N, V> query = null;
+
+  private K nextValue = null;
+  private K lastReadValue = null;
+
+  private Iterator<K> keyIterator = new Iterator<K>() {
+    @Override
+    public boolean hasNext() {
+      return nextValue != null;
+    }
+
+    @Override
+    public K next() {
+      K next = nextValue;
+      findNext(false);
+      return next;
+    }
+
+    @Override
+    public void remove() {
+      throw new UnsupportedOperationException();
+    }
+  };
+
+  private void findNext(boolean fromRunQuery) {
+    nextValue = null;
+    if (rowsIterator == null) {
+      return;
+    }
+    while (rowsIterator.hasNext() && nextValue == null) {
+      Row<K, N, V> row = rowsIterator.next();
+      lastReadValue = row.getKey();
+      if (!row.getColumnSlice().getColumns().isEmpty()) {
+        nextValue = lastReadValue;
+      }
+    }
+    if (!rowsIterator.hasNext() && nextValue == null) {
+      runQuery(lastReadValue);
+    }
+  }
+  
+  public GenericKeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> keySerializer, AbstractSerializer<N> nameSerializer,
+      AbstractSerializer<V> valueSerializer) {
+
+     this(keyspace, columnFamily, keySerializer, nameSerializer, valueSerializer, null, null, MAX_ROW_COUNT_DEFAULT);
+  }
+
+  public GenericKeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> keySerializer, AbstractSerializer<N> nameSerializer,
+		  AbstractSerializer<V> valueSerializer, K start, K end, int maxRowCount) {
+    query = HFactory
+      .createRangeSlicesQuery(keyspace, keySerializer, nameSerializer, valueSerializer)
+      .setColumnFamily(columnFamily)
+      .setKeys(start, end)
+      .setRange(null, null, false, maxColumnCount)
+      .setRowCount(maxRowCount);
+
+    runQuery(null);
+  }
+
+  private void runQuery(K start) {
+    query.setKeys(start, null);
+
+    rowsIterator = null;
+    QueryResult<OrderedRows<K, N, V>> result = query.execute();
+    OrderedRows<K, N, V> rows = (result != null) ? result.get() : null;
+    rowsIterator = (rows != null) ? rows.iterator() : null;
+
+    // we'll skip this first one, since it is the same as the last one from previous time we executed
+    if (start != null && rowsIterator != null) rowsIterator.next();   
+
+    if (!rowsIterator.hasNext()) {
+      nextValue = null;    // all done.  our iterator's hasNext() will now return false;
+    } else {
+      findNext(true);
+    }
+  }
+
+  @Override
+  public Iterator<K> iterator() {
+    return keyIterator;
+  }
+}
+
