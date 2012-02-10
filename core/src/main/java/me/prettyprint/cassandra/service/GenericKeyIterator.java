@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.util.Iterator;
 
 import me.prettyprint.cassandra.serializers.AbstractSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
@@ -23,13 +24,15 @@ import me.prettyprint.hector.api.query.RangeSlicesQuery;
  */
 public class GenericKeyIterator<K, N, V> implements Iterable<K> {
 
+  private static StringSerializer stringSerializer = StringSerializer.get();
+
   private static final int MAX_ROW_COUNT_DEFAULT = 500;
 
   private int maxColumnCount = 2;	// we only need this to tell if there are any columns in the row (to test for tombstones)
 
-  private Iterator<Row<K, N, V>> rowsIterator = null;
+  private Iterator<Row<K, String, String>> rowsIterator = null;
 
-  private RangeSlicesQuery<K, N, V> query = null;
+  private RangeSlicesQuery<K, String, String> query = null;
 
   private K nextValue = null;
   private K lastReadValue = null;
@@ -59,7 +62,7 @@ public class GenericKeyIterator<K, N, V> implements Iterable<K> {
       return;
     }
     while (rowsIterator.hasNext() && nextValue == null) {
-      Row<K, N, V> row = rowsIterator.next();
+      Row<K, String, String> row = rowsIterator.next();
       lastReadValue = row.getKey();
       if (!row.getColumnSlice().getColumns().isEmpty()) {
         nextValue = lastReadValue;
@@ -70,16 +73,14 @@ public class GenericKeyIterator<K, N, V> implements Iterable<K> {
     }
   }
   
-  public GenericKeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> keySerializer, AbstractSerializer<N> nameSerializer,
-      AbstractSerializer<V> valueSerializer) {
+  public GenericKeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> keySerializer) {
 
-     this(keyspace, columnFamily, keySerializer, nameSerializer, valueSerializer, null, null, MAX_ROW_COUNT_DEFAULT);
+     this(keyspace, columnFamily, keySerializer, null, null, MAX_ROW_COUNT_DEFAULT);
   }
 
-  public GenericKeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> keySerializer, AbstractSerializer<N> nameSerializer,
-		  AbstractSerializer<V> valueSerializer, K start, K end, int maxRowCount) {
+  public GenericKeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> keySerializer, K start, K end, int maxRowCount) {
     query = HFactory
-      .createRangeSlicesQuery(keyspace, keySerializer, nameSerializer, valueSerializer)
+      .createRangeSlicesQuery(keyspace, keySerializer, stringSerializer, stringSerializer)
       .setColumnFamily(columnFamily)
       .setKeys(start, end)
       .setRange(null, null, false, maxColumnCount)
@@ -92,8 +93,8 @@ public class GenericKeyIterator<K, N, V> implements Iterable<K> {
     query.setKeys(start, null);
 
     rowsIterator = null;
-    QueryResult<OrderedRows<K, N, V>> result = query.execute();
-    OrderedRows<K, N, V> rows = (result != null) ? result.get() : null;
+    QueryResult<OrderedRows<K, String, String>> result = query.execute();
+    OrderedRows<K, String, String> rows = (result != null) ? result.get() : null;
     rowsIterator = (rows != null) ? rows.iterator() : null;
 
     // we'll skip this first one, since it is the same as the last one from previous time we executed
