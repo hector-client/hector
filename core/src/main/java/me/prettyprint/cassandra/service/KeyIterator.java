@@ -24,7 +24,7 @@ import me.prettyprint.hector.api.query.RangeSlicesQuery;
 public class KeyIterator<K> implements Iterable<K> {
   private static StringSerializer stringSerializer = new StringSerializer();
 
-  private int maxRowCount = 500;
+  private static int MAX_ROW_COUNT_DEFAULT = 500;
   private int maxColumnCount = 2;	// we only need this to tell if there are any columns in the row (to test for tombstones)
 
   private Iterator<Row<K, String, String>> rowsIterator = null;
@@ -33,6 +33,8 @@ public class KeyIterator<K> implements Iterable<K> {
 
   private K nextValue = null;
   private K lastReadValue = null;
+  private K endKey;
+  private boolean firstRun = true;
 
   private Iterator<K> keyIterator = new Iterator<K>() {
     @Override
@@ -66,22 +68,35 @@ public class KeyIterator<K> implements Iterable<K> {
       }
     }
     if (!rowsIterator.hasNext() && nextValue == null) {
-      runQuery(lastReadValue);
+      runQuery(lastReadValue, endKey);
     }
   }
 
   public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer) {
+    this(keyspace, columnFamily, serializer, null, null, MAX_ROW_COUNT_DEFAULT);
+  }
+
+  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer, int maxRowCount) {
+    this(keyspace, columnFamily, serializer, null, null, maxRowCount);
+  }
+  
+  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer, K start, K end) {
+    this(keyspace, columnFamily, serializer, start, end, MAX_ROW_COUNT_DEFAULT);
+  }
+
+  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer, K start, K end, int maxRowCount) {
     query = HFactory
       .createRangeSlicesQuery(keyspace, serializer, stringSerializer, stringSerializer)
       .setColumnFamily(columnFamily)
       .setRange(null, null, false, maxColumnCount)
       .setRowCount(maxRowCount);
 
-    runQuery(null);
+    endKey = end;
+    runQuery(start, end);
   }
 
-  private void runQuery(K start) {
-    query.setKeys(start, null);
+  private void runQuery(K start, K end) {
+    query.setKeys(start, end);
 
     rowsIterator = null;
     QueryResult<OrderedRows<K, String, String>> result = query.execute();
@@ -89,7 +104,10 @@ public class KeyIterator<K> implements Iterable<K> {
     rowsIterator = (rows != null) ? rows.iterator() : null;
 
     // we'll skip this first one, since it is the same as the last one from previous time we executed
-    if (start != null && rowsIterator != null) rowsIterator.next();   
+    if (!firstRun  && rowsIterator != null) 
+      rowsIterator.next();
+
+    firstRun = false;
 
     if (!rowsIterator.hasNext()) {
       nextValue = null;    // all done.  our iterator's hasNext() will now return false;
