@@ -10,6 +10,7 @@ See object-mapper/CHANGELOG for HOM specifics
 =====
 Made Composite Serializable
 Added Composite to TypeInferringSerializer
+Add start key to KeyIterator #419
 
 1.0-3
 =====
