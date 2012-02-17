@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.service;
 
 import java.util.Iterator;
+
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.SliceQuery;
 
@@ -9,14 +10,15 @@ import me.prettyprint.hector.api.query.SliceQuery;
  *
  * @author thrykol
  */
-public class ColumnSliceIterator<K, N, V> implements Iterator {
+public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 
+	private static final int DEFAULT_COUNT = 100;
 	private SliceQuery<K, N, V> query;
 	private Iterator<HColumn<N, V>> iterator;
 	private N start;
 	private ColumnSliceFinish<N> finish;
 	private boolean reversed;
-	private int count = 100;
+	private int count = DEFAULT_COUNT;
 	private int columns = 0;
 
 	/**
@@ -28,13 +30,26 @@ public class ColumnSliceIterator<K, N, V> implements Iterator {
 	 * @param reversed  Whether or not the columns should be reversed
 	 */
 	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed) {
+		this(query, start, finish, reversed, DEFAULT_COUNT);
+	}
+	
+	/**
+	 * Constructor
+	 *
+	 * @param query Base SliceQuery to execute
+	 * @param start Starting point of the range
+	 * @param finish Finish point of the range.
+	 * @param reversed  Whether or not the columns should be reversed
+	 * @param count the amount of columns to retrieve per batch
+	 */
+	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed, int count) {
 		this(query, start, new ColumnSliceFinish<N>() {
 
 			@Override
 			public N function() {
 				return finish;
 			}
-		}, reversed);
+		}, reversed, count);
 	}
 
 	/**
@@ -46,12 +61,25 @@ public class ColumnSliceIterator<K, N, V> implements Iterator {
 	 * @param reversed  Whether or not the columns should be reversed
 	 */
 	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed) {
+		this(query, start, finish, reversed, DEFAULT_COUNT);
+	}
+	
+	/**
+	 * Constructor
+	 *
+	 * @param query Base SliceQuery to execute
+	 * @param start Starting point of the range
+	 * @param finish Finish point of the range.  Allows for a dynamically determined point
+	 * @param reversed  Whether or not the columns should be reversed
+	 * @param count the amount of columns to retrieve per batch
+	 */
+	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed, int count) {
 		this.query = query;
 		this.start = start;
 		this.finish = finish;
 		this.reversed = reversed;
-
-		this.query.setRange(this.start, this.finish.function(), this.reversed, count);
+		this.count = count;
+		this.query.setRange(this.start, this.finish.function(), this.reversed, this.count);
 	}
 
 	@Override
