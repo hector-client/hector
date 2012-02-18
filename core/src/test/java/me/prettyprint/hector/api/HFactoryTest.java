@@ -12,15 +12,18 @@
 package me.prettyprint.hector.api;
 
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
+import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.clock.MicrosecondsClockResolution;
 import me.prettyprint.cassandra.service.clock.MicrosecondsSyncClockResolution;
 import me.prettyprint.cassandra.service.clock.MillisecondsClockResolution;
 import me.prettyprint.cassandra.service.clock.SecondsClockResolution;
+import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 
 /**
@@ -43,5 +46,15 @@ public class HFactoryTest {
     assertTrue(HFactory.createClockResolution(ClockResolution.MICROSECONDS) instanceof MicrosecondsClockResolution);
     assertTrue(HFactory.createClockResolution(ClockResolution.MICROSECONDS_SYNC)
             instanceof MicrosecondsSyncClockResolution);
+  }
+  
+  @Test
+  public void testCreateColumn() {
+	  long clock = HFactory.createClock();
+	  HColumn<String, Long> col = HFactory.createColumn("nameString", new Long("345"), clock);
+	  HColumn<String, Long> col2 = HFactory.createColumn("nameString", new Long("345"), clock, StringSerializer.get(), LongSerializer.get());
+	  assertEquals(col.getName(), col2.getName());
+	  assertEquals(col.getValue(), col2.getValue());
+	  assertEquals(col.getClock(), col2.getClock());
   }
 }
