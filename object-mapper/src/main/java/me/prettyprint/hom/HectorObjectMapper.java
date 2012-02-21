@@ -76,7 +76,7 @@ public class HectorObjectMapper {
    * @param pkObj
    * @return
    */
-  public <T> T getObject(Keyspace keyspace, String colFamName, Object pkObj) {
+  public <T, I> T getObject(Keyspace keyspace, String colFamName, I pkObj) {
     if (null == pkObj) {
       throw new IllegalArgumentException("object ID cannot be null or empty");
     }

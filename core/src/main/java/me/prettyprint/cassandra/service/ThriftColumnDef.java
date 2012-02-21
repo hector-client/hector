@@ -41,6 +41,8 @@ public class ThriftColumnDef implements ColumnDefinition {
     switch (tIndexType) {
     case KEYS:
       return ColumnIndexType.KEYS;
+    case CUSTOM:
+      return ColumnIndexType.CUSTOM;
     default:
       throw new RuntimeException("Unknown thrift IndexType: " + tIndexType);
     }

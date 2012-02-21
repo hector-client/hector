@@ -37,6 +37,7 @@ import me.prettyprint.cassandra.model.thrift.ThriftSuperColumnQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperCountQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceCounterQuery;
 import me.prettyprint.cassandra.model.thrift.ThriftSuperSliceQuery;
+import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.BatchSizeHint;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
@@ -569,6 +570,22 @@ public final class HFactory {
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
     return new HColumnImpl<N, V>(name, value, clock, nameSerializer,
         valueSerializer);
+  }
+
+  /**
+   * Creates a column without specifying serializers. 
+   */
+  @SuppressWarnings("unchecked")
+  public static <N, V> HColumn<N, V> createColumn(N name, V value, long clock) {
+    return new HColumnImpl<N, V>(name, value, clock, (Serializer<N>) SerializerTypeInferer.getSerializer(name.getClass()), 
+        (Serializer<V>) SerializerTypeInferer.getSerializer(value.getClass()));
+  }
+
+  /**
+   * Creates a column without specifying serializers. 
+   */
+  public static <N, V> HColumn<N, V> createColumn(N name, V value) {
+    return createColumn(name, value, createClock());
   }
 
   /**
