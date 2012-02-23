@@ -109,11 +109,19 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
     @Override
     public void run() {
-      if( downedHostQueue.isEmpty()) {
-          log.debug("Retry service fired... nothing to do.");
-          return;
+      if(!downedHostQueue.isEmpty()) {
+        log.debug("Retry service fired, checking {} downed hosts.", downedHostQueue.size());
+        try {
+          retryDownedHosts();
+        } catch (Throwable t) {
+          log.error("An error occurred while retrying one or more downed hosts", t);
+        }
+      } else {
+        log.debug("Retry service fired... nothing to do.");
       }
-
+    }
+    
+    private void retryDownedHosts() {
       // we only check the ring if we have nodes in the cluster to query
       boolean checkRing = connectionManager.getHosts().size() > 0 ? true : false;
       Set<CassandraHost> ringInfo = null;
@@ -135,8 +143,9 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
         }
 
         // The host may have been removed from the ring. It makes no sense to keep trying
-        // to connect to it.
-        if ( checkRing && !ringInfo.contains(cassandraHost)) {
+        // to connect to it. If the ThriftCluster is unknown to HFactory, ringInfo may not be available,
+        // in which case we have no choice but to continue checking.
+        if ( checkRing && ringInfo != null && !ringInfo.contains(cassandraHost)) {
           log.info("Removing host " + cassandraHost.getName() + " - It does no longer exist in the ring.");
           iter.remove();
           continue;
@@ -152,31 +161,35 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
             iter.remove();
           }
         }
-      }
+      }      
     }
 
 
     private Set<CassandraHost> buildRingInfo() {
-      Set<CassandraHost> ringInfo = new HashSet<CassandraHost>();
 
       ThriftCluster cluster = (ThriftCluster) HFactory.getCluster(connectionManager.getClusterName());
 
-      for(KeyspaceDefinition keyspaceDefinition: cluster.describeKeyspaces()) {
-        if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
-          List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
-          for (TokenRange tokenRange : tokenRanges) {
-            for (String host : tokenRange.getEndpoints()) {
-              CassandraHost aHost = new CassandraHost(host, cassandraHostConfigurator.getPort());
-              if (!ringInfo.contains(aHost) ) {
-                ringInfo.add(aHost);
+      // ThriftCluster is not exclusively created & cached by HFactory. E.g. Some users instantiate directly via Spring.
+      if(cluster != null) {
+        Set<CassandraHost> ringInfo = new HashSet<CassandraHost>();
+        for(KeyspaceDefinition keyspaceDefinition: cluster.describeKeyspaces()) {
+          if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
+            List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
+            for (TokenRange tokenRange : tokenRanges) {
+              for (String host : tokenRange.getEndpoints()) {
+                CassandraHost aHost = new CassandraHost(host, cassandraHostConfigurator.getPort());
+                if (!ringInfo.contains(aHost) ) {
+                  ringInfo.add(aHost);
+                }
               }
             }
+            break;
           }
-          break;
         }
+        return ringInfo;
+      } else {
+        return null;
       }
-
-      return ringInfo;
     }
   }
 
@@ -193,8 +206,8 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       client.close();
     } catch (HectorTransportException he) {
       log.warn("Downed {} host still appears to be down: {}", cassandraHost, he.getMessage());
-    } catch (Exception ex) {
-      log.error("Downed Host retry failed attempt to verify CassandraHost", ex);
+    } catch (Throwable t) {
+      log.error("Downed Host retry failed attempt to verify CassandraHost", t);
     }
     return found;
   }
