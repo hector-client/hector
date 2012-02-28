@@ -69,6 +69,16 @@ public class TimeUUIDUtilsTest {
   }
   
   @Test
+  public void testDateUUIDConversion() {
+    long originalTime = System.currentTimeMillis();
+    Date originalDate = new Date(originalTime);
+    UUID originalUUID = TimeUUIDUtils.getTimeUUID(originalTime);
+    long currentTime = TimeUUIDUtils.getTimeFromUUID(originalUUID);
+    assertEquals(originalTime, currentTime);
+    assertEquals(originalDate, new Date(currentTime));
+  }
+  
+  @Test
   public void testTimestampConsistency() {
     final long originalTime = System.currentTimeMillis();
 
