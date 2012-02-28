@@ -1,7 +1,7 @@
 The currently active branches are 0.7.0 and 0.8.0. The master has been switched to tracking Apache Cassandra trunk. Current releases on the downloads section should be cosidered production ready. You should always choose the most recent release for your version of Apache Cassandra.
 
 For the impatient: 
-https://github.com/rantav/hector/wiki/Getting-started-%285-minutes%29
+http://rantav.github.com/hector/build/html/content/getting_started.html
 
 As of version 0.7.0-23, Hector artificats are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
 ----------------------------------------------------------------------------------------------------
@@ -28,15 +28,14 @@ Some features provided by this client:
  o simple ORM layer that works
  o a type-safe approach to dealing with Apache Cassandra's data model
 
-Detailed documentation of Hector features and usage can be found on the wiki: 
-https://github.com/rantav/hector/wiki/User-Guide
-https://github.com/rantav/hector/wiki/Getting-started-%285-minutes%29
+Detailed documentation of Hector features and usage can be found on Hector web site:
+http://hector-client.org (hosted in github pages)
+http://rantav.github.com/hector/build/html/content/getting_started.html
+http://rantav.github.com/hector/build/html/documentation.html
 
 Some additional pages from the wiki that may be of interest:
 
- o Wiki: https://github.com/rantav/hector/wiki
- o SLF4J fun and hijinks: https://github.com/rantav/hector/wiki/SLF4J-in-Hector-
- o Mailing Lists: https://github.com/rantav/hector/wiki/Mailing-Lists
+ o Mailing Lists: hector-users@googlegroups.com , hector-dev@googlegroups.com
  o Maven Central location (includes javadoc): http://repo2.maven.org/maven2/me/prettyprint/
 
 Example projects using Hector:
