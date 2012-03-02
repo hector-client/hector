@@ -23,6 +23,7 @@ Step 1: Set the OpTimer
 Set the OpTimer in your CassandraHostConfigurator class::
 
     cassandraHostConfigurator.setOpTimer(new SpeedForJOpTimer("<cluster-name>"));
+    Cluster cluster = HFactory.getOrCreateCluster("<cluster-name>", cassandraHostConfigurator);
 
 Step 2: Setting logger
 ----------------------
