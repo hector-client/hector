@@ -145,6 +145,7 @@ its workings, but no other dependencies.</p>
 <h3>Step 1: Set the OpTimer<a class="headerlink" href="#step-1-set-the-optimer" title="Permalink to this headline">¶</a></h3>
 <p>Set the OpTimer in your CassandraHostConfigurator class:</p>
 <div class="highlight-java"><div class="highlight"><pre><span class="n">cassandraHostConfigurator</span><span class="o">.</span><span class="na">setOpTimer</span><span class="o">(</span><span class="k">new</span> <span class="n">SpeedForJOpTimer</span><span class="o">(</span><span class="s">&quot;&lt;cluster-name&gt;&quot;</span><span class="o">));</span>
+<span class="n">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">getOrCreateCluster</span><span class="o">(</span><span class="s">&quot;&lt;cluster-name&gt;&quot;</span><span class="o">,</span> <span class="n">cassandraHostConfigurator</span><span class="o">);</span>
 </pre></div>
 </div>
 </div>
