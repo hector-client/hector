@@ -82,6 +82,7 @@
     <module>core</module>
     <module>object-mapper</module>
     <module>test</module>
+    <module>lcp</module>
   </modules>
 
   <dependencyManagement>
