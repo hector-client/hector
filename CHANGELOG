@@ -11,6 +11,7 @@ See object-mapper/CHANGELOG for HOM specifics
 Made Composite Serializable
 Added Composite to TypeInferringSerializer
 Add start key to KeyIterator #419
+Fix losing a host during Retry Down host service #439
 
 1.0-3
 =====

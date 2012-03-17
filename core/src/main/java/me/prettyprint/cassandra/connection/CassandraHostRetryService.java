@@ -72,8 +72,9 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       @Override
       public void run() {
         if(downedHostQueue.contains(cassandraHost) && verifyConnection(cassandraHost)) {
-          connectionManager.addCassandraHost(cassandraHost);
-          downedHostQueue.remove(cassandraHost);
+          if (connectionManager.addCassandraHost(cassandraHost)) {
+            downedHostQueue.remove(cassandraHost);
+          }
           return;
         }
       }
