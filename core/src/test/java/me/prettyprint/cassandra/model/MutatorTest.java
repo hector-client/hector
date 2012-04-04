@@ -150,6 +150,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 5; i++) {
       m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
     }
+    assertEquals(5, m.getPendingMutationCount());
     MutationResult r = m.execute();
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", r.getHostUsed() != null);
