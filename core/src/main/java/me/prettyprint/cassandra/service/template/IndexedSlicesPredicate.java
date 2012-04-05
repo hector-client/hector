@@ -40,6 +40,9 @@ public class IndexedSlicesPredicate<K,N,V> {
     return this;
   }
   public IndexClause toThrift() {
+    if (!indexClause.isSetStart_key()) {
+        indexClause.setStart_key(new byte[0]);
+    }
     return indexClause;
   }
 }
