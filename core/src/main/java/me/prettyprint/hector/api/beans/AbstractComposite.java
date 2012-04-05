@@ -142,9 +142,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       }
       if ((value == null) && (bytes != null) && (s != null)) {
         ByteBuffer cb = bytes.duplicate();
-        if (cb.hasRemaining()) {
-          return s.fromByteBuffer(cb);
-        }
+        return s.fromByteBuffer(cb);
       }
       if (value instanceof ByteBuffer) {
         return (A) ((ByteBuffer) value).duplicate();
@@ -457,6 +455,10 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       Serializer<T> s, String comparator, ComponentEquality equality) {
     serialized = null;
 
+    if (value == null) {
+        throw new NullPointerException("Unable able to add null component");
+    }
+        
     if (index < 0) {
       index = components.size();
     }
