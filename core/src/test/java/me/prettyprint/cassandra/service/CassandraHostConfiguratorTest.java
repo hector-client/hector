@@ -87,7 +87,8 @@ public class CassandraHostConfiguratorTest {
   @Test
   public void testConfiguratorClockResolution() {
     // Define my own clock resolution.
-    class SequentialClockResolution implements ClockResolution {
+    @SuppressWarnings("serial")
+	class SequentialClockResolution implements ClockResolution {
       @Override
       public long createClock() {
         return System.currentTimeMillis() * -1;

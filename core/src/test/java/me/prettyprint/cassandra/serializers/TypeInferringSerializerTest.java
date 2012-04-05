@@ -31,7 +31,7 @@ public class TypeInferringSerializerTest {
 
   @Test
   public void testByteConversions() {
-     TypeInferringSerializer ext = TypeInferringSerializer.get();
+     TypeInferringSerializer<Object> ext = TypeInferringSerializer.get();
      ByteBuffer byteBuffer = ext.toByteBuffer("bytes".getBytes());
      Assert.assertTrue(byteBuffer != null);
    }
@@ -39,14 +39,15 @@ public class TypeInferringSerializerTest {
 
   @SuppressWarnings("rawtypes")
   private void test(Object object) {
-    TypeInferringSerializer ext = TypeInferringSerializer.get();
+    TypeInferringSerializer<Object> ext = TypeInferringSerializer.get();
     ByteBuffer bytes = ext.toByteBuffer(object);
     Serializer ser = SerializerTypeInferer.getSerializer(object.getClass());
     Object target = ser.fromByteBuffer(bytes);
     assertEquals(object, target);
   }
 
-  private static class SampleObject implements Serializable {
+  @SuppressWarnings("serial")
+private static class SampleObject implements Serializable {
     private final String a = "test";
     private final List<Void> b = new ArrayList<Void>();
     private final Calendar c = Calendar.getInstance();

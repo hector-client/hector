@@ -316,7 +316,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
       addCounterSubDeletion(key,cf,
         new HCounterSuperColumnImpl<SN,N>(sNameSerializer,nameSerializer)
           .setName(supercolumnName)
-          .addSubCounterColumn(new HCounterColumnImpl(nameSerializer)));
+          .addSubCounterColumn(new HCounterColumnImpl<N>(nameSerializer)));
     return execute();
   }
 
