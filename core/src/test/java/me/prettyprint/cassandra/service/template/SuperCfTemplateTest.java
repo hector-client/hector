@@ -17,7 +17,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfInsertReadTemplate() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey1","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey1","super1");
     sUpdater.setString("sub_col_1", "sub_val_1");
     sTemplate.update(sUpdater);
 
@@ -37,7 +37,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfMultiSc() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey2","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey2","super1");
     sUpdater.setString("sub1_col_1", "sub1_val_1");
     sUpdater.addSuperColumn("super2");
     sUpdater.setString("sub2_col_1", "sub2_val_1");
@@ -58,7 +58,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testQuerySingleSubColumn() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey3","super1");
     sUpdater.setString("sub1_col_1", "sub1_val_1");
     sTemplate.update(sUpdater);
     
@@ -70,7 +70,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testQuerySingleSubColumnExtractSuper() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey3","super1");
     sUpdater.setString("sub1_col_1", "sub1_val_1");
     sUpdater.setString("sub1_col_2", "sub1_val_2");
     sTemplate.update(sUpdater);
@@ -86,7 +86,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testQuerySingleSubColumnEmpty() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey3","super1");
     sUpdater.setString("sub1_col_1", "sub1_val_1");
     sTemplate.update(sUpdater);
     
@@ -98,7 +98,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfInsertReadMultiKey() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("s_multi_key1","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("s_multi_key1","super1");
     sUpdater.setString("sub_col_1", "sub_val_1");
     sUpdater.addKey("s_multi_key2");
     sUpdater.addSuperColumn("super1");
@@ -116,7 +116,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfInsertReadMultiKeyNoSc() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("s_multi_key1","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("s_multi_key1","super1");
     sUpdater.setString("sub_col_1", "sub_val_1");
     sUpdater.addKey("s_multi_key2");
     sUpdater.addSuperColumn("super1");
@@ -134,7 +134,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testSuperCfKeyOnly() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey1","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey1","super1");
     sUpdater.setString("sub_col_1", "sub_val_1");
     sUpdater.addSuperColumn("super2");
     sUpdater.setString("sub_col_1", "sub_val_2");
@@ -159,7 +159,7 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
   public void testDeleteSubColumns() {
     SuperCfTemplate<String, String, String> sTemplate = 
       new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
-    SuperCfUpdater sUpdater = sTemplate.createUpdater("skey3","super1");
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey3","super1");
     sUpdater.setString("sub1_col_1", "sub1_val_1");
     sUpdater.setString("sub1_col_2", "sub1_val_2");
     sUpdater.setString("sub1_col_3", "sub1_val_3");

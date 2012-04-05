@@ -38,7 +38,8 @@ public class JaxbSerializerTest extends SerializerBaseTest<Object> {
     }
 
     /** private constructor for JAXB compatibility. */
-    private JaxbString() {
+    @SuppressWarnings("unused")
+	private JaxbString() {
     }
 
     @Override

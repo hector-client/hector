@@ -29,7 +29,7 @@ public class FastInfosetSerializer extends JaxbSerializer {
    *          that concrete classes directly referenced by any class in the list
    *          will also be serializable through this instance.
    */
-  public FastInfosetSerializer(final Class... serializableClasses) {
+  public FastInfosetSerializer(final Class<?>... serializableClasses) {
     super(serializableClasses);
   }
 
