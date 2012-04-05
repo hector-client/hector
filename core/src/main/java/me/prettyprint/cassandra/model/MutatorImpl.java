@@ -265,6 +265,11 @@ public final class MutatorImpl<K> implements Mutator<K> {
     return "Mutator(" + keyspace.toString() + ")";
   }
 
+  @Override
+  public int getPendingMutationCount() {
+    return getPendingMutations().getSize();
+  }
+
   private BatchMutation<K> getPendingMutations() {
     if (pendingMutations == null) {
       pendingMutations = new BatchMutation<K>(keySerializer, sizeHint);
