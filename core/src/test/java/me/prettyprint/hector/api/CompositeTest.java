@@ -2,8 +2,8 @@ package me.prettyprint.hector.api;
 
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -14,7 +14,6 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
@@ -161,21 +160,31 @@ public class CompositeTest {
     // test correct serialization with null values and user specified
     // serialization
     DynamicComposite c = new DynamicComposite();
-    c.addComponent(null, StringSerializer.get());
-
-    DynamicCompositeSerializer serializer = new DynamicCompositeSerializer();
-
-    ByteBuffer buff = serializer.toByteBuffer(c);
-
-    DynamicComposite result = serializer.fromByteBuffer(buff);
-
-    assertNull(result.get(0));
+    try {
+        c.addComponent(null, StringSerializer.get());
+        fail("Null values not allowed");
+    } catch (NullPointerException e) {
+    }
   }
 
   @Test
   public void testStaticSerialization() throws Exception {
 
     ByteBuffer b = createCompositeKey("Hello",
+        TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
+    Composite c = new Composite();
+    c.setSerializersByPosition(StringSerializer.get(), UUIDSerializer.get(),
+        BigIntegerSerializer.get());
+    c.deserialize(b.slice());
+    assertTrue(c.get(0) instanceof String);
+    assertTrue(c.get(1) instanceof UUID);
+    assertTrue(c.get(2) instanceof BigInteger);
+  }
+
+  @Test
+  public void testEmptyStringSerialization() throws Exception {
+
+    ByteBuffer b = createCompositeKey("",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
     Composite c = new Composite();
     c.setSerializersByPosition(StringSerializer.get(), UUIDSerializer.get(),
