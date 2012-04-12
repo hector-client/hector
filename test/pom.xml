@@ -8,6 +8,7 @@
   <artifactId>hector-test</artifactId>
   <packaging>jar</packaging>
   <name>test</name>
+  
   <properties>
     <!-- OSGi bundle properties -->
     <bundle.symbolicName>me.prettyprint.hector-test</bundle.symbolicName>
