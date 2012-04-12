@@ -6,6 +6,10 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.0-5
+=====
+Remove ExhaustedPolicy as it doesn't seem to be used anymore.  This will probably break some folks' configuration - watch out for spring config!
+
 1.0-4
 =====
 Made Composite Serializable

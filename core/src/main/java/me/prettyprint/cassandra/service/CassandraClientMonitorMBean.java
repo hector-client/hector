@@ -93,8 +93,6 @@ public interface CassandraClientMonitorMBean {
 
   /**
    * Number of threads that are currently blocked, waiting for a free connection.
-   * This number may be greater than 0 only if the {@link ExhaustedPolicy} is
-   * {@link ExhaustedPolicy#WHEN_EXHAUSTED_BLOCK}
    */
   int getNumBlockedThreads();
 
