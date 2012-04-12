@@ -14,3 +14,4 @@ out
 *.iml
 .springBeans
 *.swp
+.pmd

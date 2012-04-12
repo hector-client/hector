@@ -46,7 +46,6 @@ public final class CassandraHost {
 
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
-  private ExhaustedPolicy exhaustedPolicy = ExhaustedPolicy.WHEN_EXHAUSTED_BLOCK;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private boolean useSocketKeepalive;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
@@ -149,14 +148,6 @@ public final class CassandraHost {
 
   public void setMaxWaitTimeWhenExhausted(long maxWaitTimeWhenExhausted) {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
-  }
-
-  public ExhaustedPolicy getExhaustedPolicy() {
-    return exhaustedPolicy;
-  }
-
-  public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
-    this.exhaustedPolicy = exhaustedPolicy;
   }
 
   public int getCassandraThriftSocketTimeout() {
