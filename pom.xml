@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
@@ -92,10 +93,10 @@
         <version>1.0.8</version>
         <exclusions>
           <exclusion>
-	    <groupId>com.github.stephenc</groupId>
-	    <artifactId>jamm</artifactId>
+            <groupId>com.github.stephenc</groupId>
+            <artifactId>jamm</artifactId>
           </exclusion>
-	</exclusions>
+        </exclusions>
       </dependency>
       <dependency>
         <groupId>org.apache.cassandra</groupId>
@@ -107,12 +108,12 @@
         <artifactId>commons-lang</artifactId>
         <version>2.4</version>
       </dependency>
-        <dependency>
+      <dependency>
         <groupId>commons-pool</groupId>
         <artifactId>commons-pool</artifactId>
         <version>1.5.3</version>
       </dependency>
-       <dependency>
+      <dependency>
         <groupId>commons-collections</groupId>
         <artifactId>commons-collections</artifactId>
         <version>3.2.1</version>
@@ -147,7 +148,7 @@
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.16</version>
-      </dependency>      
+      </dependency>
       <!-- common test dependencies -->
       <dependency>
         <groupId>junit</groupId>
@@ -178,16 +179,16 @@
         <version>0.9</version>
       </dependency>
       <dependency>
-          <groupId>joda-time</groupId>
-          <artifactId>joda-time</artifactId>
-          <version>1.6.1</version>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.6.1</version>
       </dependency>
       <dependency>
-          <groupId>com.github.stephenc</groupId>
-          <artifactId>jamm</artifactId>
-          <version>0.2.5</version>
-          <scope>test</scope>
-      </dependency>   
+        <groupId>com.github.stephenc</groupId>
+        <artifactId>jamm</artifactId>
+        <version>0.2.5</version>
+        <scope>test</scope>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 
@@ -210,67 +211,44 @@
       </extension>
     </extensions>
     <plugins>
+      <!-- always attach sources -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.2</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-          <executions>
-          <!--
-          The following plugin definition will create a test-jar for any
-          project at compile time. This is useful for reusing test code b/w
-          project. Taken from:
-          http://www.waltercedric.com/java-j2ee-mainmenu-53/361-maven-build-system/1307-maven2-unit-test-code-reuse-and-dependencies.html
-
-          For example, if project A reuses test code from project core, in
-          A/pom.xml you should have:
-          <dependency>
-            <groupId>me.prettyprint</groupId>
-            <artifactId>hector-core</artifactId>
-            <version>hector-version-here</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-          </dependency>
-          -->
-            <execution>
-              <goals>
-                <goal>test-jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-       	<!-- always attach sources -->
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-source-plugin</artifactId>
-            <executions>
-               <execution>
-                   	<id>attach-sources</id>
-                   	<goals>
-               		   <goal>jar</goal>
-                   	</goals>
-               </execution>
-            </executions>
-		</plugin>
-		<!-- attach sources -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>test-jar</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-      </plugins>
+        <version>2.3.2</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-clean-plugin</artifactId>
           <version>2.4</version>
         </plugin>
         <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>2.3</version>
+          <version>2.3.2</version>
           <configuration>
             <source>1.6</source>
             <target>1.6</target>
@@ -314,7 +292,7 @@
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <version>2.1</version>
-	</plugin>
+        </plugin>
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
           <version>2.4.2</version>
