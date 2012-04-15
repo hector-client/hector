@@ -92,6 +92,12 @@
 			<version>${org.springframework.version}</version>
 			<scope>test</scope>
 		</dependency>
+    <dependency> <!-- for a JPA EE test -->
+      <groupId>org.apache.openejb</groupId>
+      <artifactId>openejb-core</artifactId>
+      <version>4.0.0-beta-2</version>
+      <scope>test</scope>
+    </dependency>
 	</dependencies>
 
 </project>
