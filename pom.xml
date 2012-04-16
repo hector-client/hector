@@ -89,7 +89,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
         <exclusions>
           <exclusion>
 	    <groupId>com.github.stephenc</groupId>
@@ -100,7 +100,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
@@ -396,12 +396,5 @@
     <org.springframework.version>3.0.6.RELEASE</org.springframework.version>
     <slf4j.version>1.6.1</slf4j.version>
   </properties>
-  <repositories>
-    <repository>
-      <id>apache-staging</id>
-      <name>apache-staging</name>
-      <url>https://repository.apache.org/content/repositories/orgapachecassandra-055</url>
-    </repository>
-  </repositories>
 
 </project>
