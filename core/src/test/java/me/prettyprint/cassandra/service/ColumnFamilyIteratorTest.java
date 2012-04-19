@@ -32,6 +32,15 @@ public class ColumnFamilyIteratorTest extends BaseEmbededServerSetupTest {
   public void setupCase() {
     cluster = getOrCreateCluster("Test Cluster", "127.0.0.1:9170");
     keyspace = createKeyspace("Keyspace1", cluster);
+    // Insert 10 rows
+    Mutator<String> m = createMutator(keyspace, se);
+    for (int i = 1; i <= 10; i++) {
+      // For each row insert 1000 columns
+      for (int j = 0; j < 1000; j++) {
+          m.addInsertion("k" + i, CF, createColumn(String.format("c%03d", j), new Integer(j), se, is));
+      }
+    }
+    m.execute();
   }
 
   @After
@@ -42,16 +51,7 @@ public class ColumnFamilyIteratorTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testIterator() {
-    // Insert 10 rows
-    Mutator<String> m = createMutator(keyspace, se);
-    for (int i = 1; i <= 10; i++) {
-        // For each row insert 1000 columns
-        for (int j = 1; j <= 1000; j++) {
-            m.addInsertion("k" + i, CF, createColumn("c" + j, new Integer(j), se, is));
-        }
-    }
-    m.execute();
-
+    // Iterate over all the columns in all rows
     ColumnFamilyIterator<String, String, Integer> it =
       new ColumnFamilyIterator<String, String, Integer>(keyspace, CF, se,
                                                          HFactory.createSliceQuery(keyspace, se, se, is),
@@ -63,4 +63,37 @@ public class ColumnFamilyIteratorTest extends BaseEmbededServerSetupTest {
     assertEquals(it.getTotalColumnsCount(), 10000);
   }
 
+  @Test
+  public void testRangeSliceIterator() {
+    // Iterate over all the columns in rows in range [k2:k7]
+    String start = "k2";
+    String end = "k7";
+    KeyIterator<String> keyIterator = new KeyIterator<String>(keyspace, CF, se, start, end, 2);
+    ColumnFamilyIterator<String, String, Integer> it =
+      new ColumnFamilyIterator<String, String, Integer>(keyIterator, CF,
+                                                        HFactory.createSliceQuery(keyspace, se, se, is),
+                                                        100);
+    while(it.hasNext()) {
+      it.next();
+    }
+    assertEquals(it.getTotalRowsCount(), 6);
+    assertEquals(it.getTotalColumnsCount(), 6000);
+  }
+
+  @Test
+  public void testColumnSliceIterator() {
+    // Iterate over columns in the range [c100:c199] in rows in range [k2:k7]
+    String start = "k2";
+    String end = "k7";
+    KeyIterator<String> keyIterator = new KeyIterator<String>(keyspace, CF, se, start, end, 2);
+    ColumnFamilyIterator<String, String, Integer> it =
+        new ColumnFamilyIterator<String, String, Integer>(keyIterator, CF,
+                                                          HFactory.createSliceQuery(keyspace, se, se, is),
+                                                          "c100", "c199", 10);
+    while(it.hasNext()) {
+        it.next();
+    }
+    assertEquals(it.getTotalRowsCount(), 6);
+    assertEquals(it.getTotalColumnsCount(), 600);
+  }
 }
