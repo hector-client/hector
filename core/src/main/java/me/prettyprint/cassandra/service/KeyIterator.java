@@ -2,9 +2,9 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Iterator;
 
-import me.prettyprint.cassandra.serializers.AbstractSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.beans.Row;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -72,19 +72,19 @@ public class KeyIterator<K> implements Iterable<K> {
     }
   }
 
-  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer) {
+  public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer) {
     this(keyspace, columnFamily, serializer, null, null, MAX_ROW_COUNT_DEFAULT);
   }
 
-  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer, int maxRowCount) {
+  public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer, int maxRowCount) {
     this(keyspace, columnFamily, serializer, null, null, maxRowCount);
   }
   
-  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer, K start, K end) {
+  public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer, K start, K end) {
     this(keyspace, columnFamily, serializer, start, end, MAX_ROW_COUNT_DEFAULT);
   }
 
-  public KeyIterator(Keyspace keyspace, String columnFamily, AbstractSerializer<K> serializer, K start, K end, int maxRowCount) {
+  public KeyIterator(Keyspace keyspace, String columnFamily, Serializer<K> serializer, K start, K end, int maxRowCount) {
     query = HFactory
       .createRangeSlicesQuery(keyspace, serializer, stringSerializer, stringSerializer)
       .setColumnFamily(columnFamily)
