@@ -5,7 +5,7 @@ import java.util.Iterator;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.SliceQuery;
-import me.prettyprint.cassandra.serializers.AbstractSerializer;
+import me.prettyprint.hector.api.Serializer;
 
 /**
  * Iterate all the columns in all the rows in the specified column family. It uses
@@ -38,7 +38,7 @@ public class ColumnFamilyIterator<K, N, V> implements Iterator<HColumn<N, V>> {
    * @param maxCols    Max number of columns to retrieve per slice query
    */
   public ColumnFamilyIterator(final Keyspace ks, final String cf,
-                              final AbstractSerializer<K> serializer,
+                              final Serializer<K> serializer,
                               SliceQuery<K, N, V> query,
                               final int maxRows, final int maxCols) {
     this(ks, cf, serializer, null, null, query, maxRows, maxCols);
@@ -57,7 +57,7 @@ public class ColumnFamilyIterator<K, N, V> implements Iterator<HColumn<N, V>> {
    * @param maxCols    Max number of columns to retrieve per slice query
    */
   public ColumnFamilyIterator(final Keyspace ks, final String cf,
-                              final AbstractSerializer<K> serializer,
+                              final Serializer<K> serializer,
                               final K start, final K finish,
                               SliceQuery<K, N, V> query,
                               final int maxRows, final int maxCols) {
