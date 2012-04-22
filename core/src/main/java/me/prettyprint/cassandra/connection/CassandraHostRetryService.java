@@ -1,13 +1,5 @@
 package me.prettyprint.cassandra.connection;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
-
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
@@ -17,10 +9,17 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import me.prettyprint.hector.api.factory.HFactory;
-
 import org.apache.cassandra.thrift.TokenRange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
@@ -31,13 +30,15 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
   private final HClientFactory clientFactory;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
+  private ConnectionManagerListenersHandler listenerHandler;
 
   public CassandraHostRetryService(HConnectionManager connectionManager, HClientFactory clientFactory,
-      CassandraHostConfigurator cassandraHostConfigurator) {
+      CassandraHostConfigurator cassandraHostConfigurator, ConnectionManagerListenersHandler listenerHandler) {
 
     super(connectionManager, cassandraHostConfigurator);
     this.clientFactory = clientFactory;
 
+    this.listenerHandler = listenerHandler;
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1
         ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());
@@ -73,6 +74,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       public void run() {
         if(downedHostQueue.contains(cassandraHost) && verifyConnection(cassandraHost)) {
           if (connectionManager.addCassandraHost(cassandraHost)) {
+            listenerHandler.fireOnHostRestored(cassandraHost);
             downedHostQueue.remove(cassandraHost);
           }
           return;
@@ -140,6 +142,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
         }
 
         if ( !checkRing) {
+          listenerHandler.fireOnAllHostsDown();
           log.info("Not checking that {} is a member of the ring since there are no live hosts", cassandraHost);
         }
 
@@ -159,6 +162,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           //we can't call iter.remove() based on return value of connectionManager.addCassandraHost, since
           //that returns false if an error occurs, or if the host already exists
           if(connectionManager.getHosts().contains(cassandraHost)) {
+            listenerHandler.fireOnHostRestored(cassandraHost);
             iter.remove();
           }
         }
