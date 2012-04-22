@@ -36,4 +36,9 @@ public abstract class ConnectionManagerEmptyListener implements ConnectionManage
     @Override
     public void onRemoveHost(CassandraHost cassandraHost, boolean removed, String message) {
     }
+
+    @Override
+    public String getName() {
+        return null;
+    }
 }

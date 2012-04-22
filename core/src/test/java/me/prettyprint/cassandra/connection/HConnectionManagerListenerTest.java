@@ -5,17 +5,19 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
+    private String listenerName = "test-listener";
 
     @Test
     public void testOnRemoveHost() {
         setupClient();
         final boolean[] eventFired = {false};
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
             @Override
             public void onRemoveHost(CassandraHost cassandraHost, boolean removed, String message) {
                 assertEquals(cassandraHost, host);
@@ -33,7 +35,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         setupClient();
         final CassandraHost host = new CassandraHost("127.0.0.1", 9180);
         final boolean[] eventFired = {false};
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
 
             @Override
             public void onAddHost(CassandraHost cassandraHost, boolean added, String errorMessage, Exception e) {
@@ -51,7 +53,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         setupClient();
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
         final boolean[] eventFired = {false};
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
 
             @Override
             public void onAddHost(CassandraHost cassandraHost, boolean added, String errorMessage, Exception e) {
@@ -69,7 +71,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         setupClient();
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
         final boolean[] eventFired = {false};
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
 
             @Override
             public void onAddHost(CassandraHost cassandraHost, boolean added, String errorMessage, Exception e) {
@@ -88,7 +90,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         setupClient();
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
         final boolean[] eventFired = {false};
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
             @Override
             public void onHostDown(CassandraHost cassandraHost) {
                 assertEquals(cassandraHost, host);
@@ -108,7 +110,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
         final boolean[] eventFired = {false};
 
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
             @Override
             public void onHostRestored(CassandraHost cassandraHost) {
                 assertEquals(cassandraHost, host);
@@ -126,7 +128,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
         assertTrue(connectionManager.suspendCassandraHost(host));
         final boolean[] eventFired = {false};
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
 
             @Override
             public void onSuspendHost(CassandraHost cassandraHost, boolean removed) {
@@ -143,7 +145,7 @@ public class HConnectionManagerListenerTest extends BaseEmbededServerSetupTest {
         final CassandraHost host = new CassandraHost("127.0.0.1", 9170);
         assertTrue(connectionManager.suspendCassandraHost(host));
         final boolean[] eventFired = {false};
-        connectionManager.addListener(new ConnectionManagerEmptyListener() {
+        connectionManager.addListener(listenerName, new ConnectionManagerEmptyListener() {
 
             @Override
             public void onUnSuspendHost(CassandraHost cassandraHost, boolean readded) {

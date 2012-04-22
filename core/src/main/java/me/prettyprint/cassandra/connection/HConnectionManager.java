@@ -3,10 +3,23 @@ package me.prettyprint.cassandra.connection;
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
-import me.prettyprint.cassandra.service.*;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraHostConfigurator;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
+import me.prettyprint.cassandra.service.FailoverPolicy;
+import me.prettyprint.cassandra.service.JmxMonitor;
+import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.*;
+import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
+import me.prettyprint.hector.api.exceptions.HPoolRecoverableException;
+import me.prettyprint.hector.api.exceptions.HTimedOutException;
+import me.prettyprint.hector.api.exceptions.HUnavailableException;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.exceptions.HectorTransportException;
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.slf4j.Logger;
@@ -322,18 +335,19 @@ public class HConnectionManager {
 
   /**
    * adds a listener in order to execute some operations when a status of a host changes
-   * @param listener - a {@link ConnectionManagerListener} listener
+   * @param listenerName - a name identifier for the listener
+   * @param listener - a {@link me.prettyprint.cassandra.connection.ConnectionManagerListener} listener
    */
-  public void addListener(ConnectionManagerListener listener){
-      listenerHandler.add(listener);
+  public void addListener(String listenerName, ConnectionManagerListener listener){
+      listenerHandler.put(listenerName, listener);
   }
 
   /**
    * removes a listener from the connectionManager
-   * @param listener - a {@link ConnectionManagerListener} listener
+   * @param listenerName - the name of the listener to remove
    */
-  public void removeListener(ConnectionManagerListener listener){
-      listenerHandler.remove(listener);
+  public void removeListener(String listenerName){
+      listenerHandler.remove(listenerName);
   }
 
   /**

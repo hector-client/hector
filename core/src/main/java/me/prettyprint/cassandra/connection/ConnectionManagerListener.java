@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Listener for the status of CassandraHosts
  * in order to use it - simply implement it and apply your own actions on the events
- * Use {@link HConnectionManager#addListener(ConnectionManagerListener)}
+ * Use {@link HConnectionManager#addListener(String, ConnectionManagerListener)}
  * You can also extend the empty implementation {@link ConnectionManagerEmptyListener} if you only need some of the events
  * @author Elyran Kogan
  */
@@ -61,4 +61,9 @@ public interface ConnectionManagerListener extends Serializable {
      * @param message - the message received with the action
      */
     void onRemoveHost(CassandraHost cassandraHost, boolean removed, String message);
+
+    /**
+     * @return  the name of the listener
+     */
+    String getName();
 }
