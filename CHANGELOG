@@ -6,6 +6,10 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.0-6
+=====
+changed storage_port from 7000 to 7070 so as not to conflict with a "normal" running cassandra instance on same machine
+
 1.0-5
 =====
 ************
