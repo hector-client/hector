@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.io.Externalizable;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -99,7 +100,7 @@ public class SerializerTypeInferer {
   }
 
   public static boolean isSerializable(Class<?> clazz) {
-    return isImplementedBy(clazz, Serializable.class);
+    return isImplementedBy(clazz, Serializable.class) || isImplementedBy(clazz, Externalizable.class);
   }
 
   public static boolean isImplementedBy(Class<?> clazz, Class<?> target) {
@@ -116,6 +117,9 @@ public class SerializerTypeInferer {
       if (interfa.equals(target)) {
         return true;
       }
+    }
+    if(clazz.getSuperclass()!=null) {
+      return isImplementedBy(clazz.getSuperclass(), target);
     }
     return false;
   }
