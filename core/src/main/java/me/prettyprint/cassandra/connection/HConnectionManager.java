@@ -463,5 +463,9 @@ public class HConnectionManager {
     }
   }
 
+  public void setCassandraHostRetryDelay(int retryDelay) {
+    cassandraHostRetryService.setRetryDelayInSeconds(retryDelay);
+    cassandraHostRetryService.applyRetryDelay();
+  }
 
 }
