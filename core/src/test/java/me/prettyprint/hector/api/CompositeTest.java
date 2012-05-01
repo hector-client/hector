@@ -1,5 +1,6 @@
 package me.prettyprint.hector.api;
 
+import java.util.UUID;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -20,7 +21,6 @@ import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
 import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.beans.DynamicComposite;
-
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.AsciiType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -33,6 +33,7 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
+
 import org.junit.Test;
 
 public class CompositeTest {
@@ -245,6 +246,7 @@ public class CompositeTest {
       if (uuid != null) {
         bb.putShort((short) (0x8000 | 't'));
         bb.putShort((short) 16);
+
         bb.put(UUIDGen.decompose(uuid));
         bb.put((i == -1) && lastIsOne ? (byte) 1 : (byte) 0);
         if (i != -1) {
@@ -306,7 +308,8 @@ public class CompositeTest {
 
   @SuppressWarnings("rawtypes")
   public DynamicCompositeType getDefaultDynamicComparator() {
-    Map<Byte, AbstractType> aliases = new HashMap<Byte, AbstractType>();
+    //Well if ? makes you happy then :) Generics FTWhatever
+    Map<Byte, AbstractType<?>> aliases = new HashMap<Byte, AbstractType<?>>();
     aliases.put((byte) 'a', AsciiType.instance);
     aliases.put((byte) 'b', BytesType.instance);
     aliases.put((byte) 'i', IntegerType.instance);

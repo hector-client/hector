@@ -33,7 +33,7 @@ public class EmbeddedSchemaLoader {
   public static void loadSchema() {
     try
     {
-      Schema.instance.load(schemaDefinition(), Schema.instance.getVersion());
+      Schema.instance.load(schemaDefinition());
     }
     catch (ConfigurationException e)
     {
@@ -79,7 +79,7 @@ public class EmbeddedSchemaLoader {
         superCFMD(ks1, "Super5", bytes),
         indexCFMD(ks1, "Indexed1", true),
         indexCFMD(ks1, "Indexed2", false),
-        new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),        
+        //new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),
         new CFMetaData(ks1, "Counter1", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
         new CFMetaData(ks1, "Counter2", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
         new CFMetaData(ks1, "SuperCounter1", su, bytes, bytes).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
@@ -94,24 +94,19 @@ public class EmbeddedSchemaLoader {
     return schema;
   }
 
-  private static CFMetaData compositeCFMD(String ksName, String cfName, AbstractType... types) {
-    try {
+  private static CFMetaData compositeCFMD(String ksName, String cfName, AbstractType<?>... types) {
       return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, CompositeType.getInstance(Arrays.asList(types)), null);      
-    } catch (ConfigurationException e) {
-      
-    }
-    return null;
   }
   
   private static CFMetaData standardCFMD(String ksName, String cfName) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard,
-        BytesType.instance, null).keyCacheSize(0);
+        BytesType.instance, null);
   }
 
   private static CFMetaData superCFMD(String ksName, String cfName,
       AbstractType subcc) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Super,
-        BytesType.instance, subcc).keyCacheSize(0);
+        BytesType.instance, subcc);
   }
 
   private static CFMetaData indexCFMD(String ksName, String cfName, final Boolean withIdxType)
@@ -122,7 +117,9 @@ public class EmbeddedSchemaLoader {
                   {{
                       ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
                       IndexType keys = withIdxType ? IndexType.KEYS : null;
-                      put(cName, new ColumnDefinition(cName, LongType.instance, keys, null, "birthyear_index"));
+                      //TODO: that last null is for composites. Need to understand that better, but null is reasonable
+                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null);
+                      put (cName,def);
                   }});
   }
 
@@ -140,7 +137,7 @@ public class EmbeddedSchemaLoader {
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
             {{
               ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
-              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null));
+              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null));
           }});
   }
 }
