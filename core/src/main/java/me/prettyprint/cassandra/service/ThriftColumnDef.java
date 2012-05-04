@@ -106,7 +106,7 @@ public class ThriftColumnDef implements ColumnDefinition {
     case KEYS:
       return IndexType.KEYS;
     case CUSTOM:
-      return ColumnIndexType.CUSTOM;
+      return IndexType.CUSTOM;
     default:
       throw new RuntimeException("Unknown ColumnIndexType value: " + indexType2);
     }
