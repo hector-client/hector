@@ -25,7 +25,6 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean lifo = CassandraHost.DEFAULT_LIFO;
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
-  private ExhaustedPolicy exhaustedPolicy;
   private ClockResolution clockResolution = DEF_CLOCK_RESOLUTION;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   
@@ -84,9 +83,6 @@ public final class CassandraHostConfigurator implements Serializable {
     if (cassandraThriftSocketTimeout > 0) {
       cassandraHost.setCassandraThriftSocketTimeout(cassandraThriftSocketTimeout);
     }
-    if (exhaustedPolicy != null) {
-      cassandraHost.setExhaustedPolicy(exhaustedPolicy);
-    }
   }
 
   public void setHosts(String hosts) {
@@ -108,10 +104,6 @@ public final class CassandraHostConfigurator implements Serializable {
    */
   public void setCassandraThriftSocketTimeout(int cassandraThriftSocketTimeout) {
     this.cassandraThriftSocketTimeout = cassandraThriftSocketTimeout;
-  }
-
-  public void setExhaustedPolicy(ExhaustedPolicy exhaustedPolicy) {
-    this.exhaustedPolicy = exhaustedPolicy;
   }
 
   public boolean getRetryDownedHosts() {
@@ -159,8 +151,6 @@ public final class CassandraHostConfigurator implements Serializable {
     s.append("CassandraHostConfigurator<");
     s.append("clockResolution=");
     s.append(clockResolution);
-    s.append("&exhaustedPolicy=");
-    s.append(exhaustedPolicy);
     s.append("&cassandraThriftSocketTimeout=");
     s.append(cassandraThriftSocketTimeout);
     s.append("&maxWaitTimeWhenExhausted=");

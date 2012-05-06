@@ -40,7 +40,7 @@ public class ExampleDaoV2Test {
 
   @AfterClass
   public static void teardown() throws IOException {
-    embedded.teardown();
+    EmbeddedServerHelper.teardown();
   }
 
   @Test

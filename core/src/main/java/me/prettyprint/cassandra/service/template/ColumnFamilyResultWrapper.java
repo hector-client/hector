@@ -22,7 +22,6 @@ public class ColumnFamilyResultWrapper<K,N> extends AbstractResultWrapper<K,N> {
   private Map<N,HColumn<N,ByteBuffer>> columns;
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
-  private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
   private boolean hasEntries;
   
   public ColumnFamilyResultWrapper(Serializer<K> keySerializer,

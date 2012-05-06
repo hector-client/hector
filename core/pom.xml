@@ -3,8 +3,9 @@
   <parent>
     <groupId>me.prettyprint</groupId>
     <artifactId>hector</artifactId>
-    <version>1.0-4-SNAPSHOT</version>
+    <version>1.0-6-SNAPSHOT</version>
   </parent>
+  
   <artifactId>hector-core</artifactId>
   <packaging>bundle</packaging>
   <name>hector-core</name>
