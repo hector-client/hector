@@ -7,7 +7,7 @@
   </parent>
   
   <artifactId>hector-core</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
   <name>hector-core</name>
   <properties>
     <!-- OSGi bundle properties -->
@@ -61,7 +61,7 @@
 
             <Export-Package>
               <!-- !${bundle.namespace}.internal.*, -->
-              ${bundle.namespace}.*;version="${pom.version}"
+              me.prettyprint.*;version="${pom.version}"
             </Export-Package>
 
             <Import-Package>
