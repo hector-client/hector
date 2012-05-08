@@ -1,9 +1,9 @@
-The currently active branches are 0.7.0 and 0.8.0. The master has been switched to tracking Apache Cassandra trunk. Current releases on the downloads section should be cosidered production ready. You should always choose the most recent release for your version of Apache Cassandra.
+The currently active branch is 1.0. The master tracks Apache Cassandra active development which is 1.1.x presently. Current releases on the downloads section should be cosidered production ready. You should always choose the most recent release for your version of Apache Cassandra.
 
 For the impatient: 
-http://rantav.github.com/hector/build/html/content/getting_started.html
+http://hector-client.github.com/hector/build/html/index.html
 
-As of version 0.7.0-23, Hector artificats are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
+All Hector artificats are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
 ----------------------------------------------------------------------------------------------------
 
 Hector is a high level Java client for Apache Cassandra.
@@ -30,21 +30,19 @@ Some features provided by this client:
 
 Detailed documentation of Hector features and usage can be found on Hector web site:
 http://hector-client.org (hosted in github pages)
-http://rantav.github.com/hector/build/html/content/getting_started.html
-http://rantav.github.com/hector/build/html/documentation.html
+https://github.com/hector-client/hector/wiki 
 
 Some additional pages from the wiki that may be of interest:
 
  o Mailing Lists: hector-users@googlegroups.com , hector-dev@googlegroups.com
- o Maven Central location (includes javadoc): http://repo2.maven.org/maven2/me/prettyprint/
+ o Maven Central location (includes javadoc): http://repo2.maven.org/maven2/org/hectorclient/
 
 Example projects using Hector:
 
  o https://github.com/zznate/cassandra-tutorial
  o https://github.com/zznate/hector-examples
- o https://github.com/riptano/twissjava
+ o https://github.com/apigee/usergrid-stack
 
-The work was initially inspired by http://code.google.com/p/cassandra-java-client/ but has taken off to different directions since.
 
 ----------------------------------------------------------------------------------------------------
 Building Hector from sources
