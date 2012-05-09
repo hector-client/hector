@@ -129,7 +129,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
     
     // remove value
     m = createMutator(ko, se);
-    MutationResult mr2 = m.deleteCounter("testInsertGetRemoveCounter", COUNTER_CF, "testInsertGetRemoveCounter_name", se);
+    m.deleteCounter("testInsertGetRemoveCounter", COUNTER_CF, "testInsertGetRemoveCounter_name", se);
 
     // get already removed value
     CounterQuery<String, String> q2 = createCounterColumnQuery(ko, se, se);
@@ -226,7 +226,7 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
 
     // remove value
     m = createMutator(ko, se);
-    MutationResult mr2 = m.delete("testInsertGetRemove", cf,
+    m.delete("testInsertGetRemove", cf,
         "testInsertGetRemove", se);
     
 

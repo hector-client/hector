@@ -7,35 +7,35 @@
     <version>5</version>
   </parent>
 
-  <groupId>me.prettyprint</groupId>
+  <groupId>org.hectorclient</groupId>
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-4-SNAPSHOT</version>
+  <version>1.1-1-SNAPSHOT</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
-  <url>http://github.com/rantav/hector</url>
+  <url>http://github.com/hector-client/hector</url>
   <licenses>
     <license>
       <name>MIT License</name>
       <distribution>repo</distribution>
-      <url>https://github.com/rantav/hector/wiki/License</url>
+      <url>https://github.com/hector/hector-client/wiki/License</url>
     </license>
   </licenses>
   <scm>
-    <connection>scm:git:git://github.com/rantav/hector.git</connection>
-    <developerConnection>scm:git:git@github.com:rantav/hector.git</developerConnection>
-    <url>http://github.com/rantav/hector/tree/master/</url>
+    <connection>scm:git:git://github.com/hector-client/hector.git</connection>
+    <developerConnection>scm:git:git@github.com:hector-client/hector.git</developerConnection>
+    <url>http://github.com/hector-client/hector/tree/master/</url>
   </scm>
 
   <issueManagement>
     <system>github</system>
-    <url>http://github.com/rantav/hector/issues</url>
+    <url>http://github.com/hector-client/hector/issues</url>
   </issueManagement>
 
   <distributionManagement>
     <site>
       <id>github.com</id>
-      <url>gitsite:git@github.com/rantav/hector.git</url>
+      <url>gitsite:git@github.com/hector-client/hector.git</url>
     </site>
   </distributionManagement>
 
@@ -89,7 +89,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>1.0.6</version>
+        <version>1.1.0</version>
         <exclusions>
           <exclusion>
 	    <groupId>com.github.stephenc</groupId>
@@ -100,7 +100,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
-        <version>1.0.6</version>
+        <version>1.1.0</version>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
@@ -396,12 +396,5 @@
     <org.springframework.version>3.0.6.RELEASE</org.springframework.version>
     <slf4j.version>1.6.1</slf4j.version>
   </properties>
-  <repositories>
-    <repository>
-      <id>apache-staging</id>
-      <name>apache-staging</name>
-      <url>https://repository.apache.org/content/repositories/orgapachecassandra-055</url>
-    </repository>
-  </repositories>
 
 </project>

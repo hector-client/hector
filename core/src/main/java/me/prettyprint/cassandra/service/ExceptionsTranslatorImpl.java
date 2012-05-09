@@ -30,14 +30,7 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
     } else if (original instanceof TApplicationException) {
       return new HCassandraInternalException(((TApplicationException)original).getType(), original.getMessage());    
     } else if (original instanceof TTransportException) {
-      // if the underlying cause is a scoket timeout, reflect that directly
-      // TODO this may be an issue on the Cassandra side which warrants ivestigation.
-      // I seem to remember these coming back as TimedOutException previously
-      if ( ((TTransportException)original).getCause() instanceof SocketTimeoutException ) {
-        return new HTimedOutException(original);
-      } else {
-        return new HectorTransportException(original);
-      }
+      return new HectorTransportException(original);
     } else if (original instanceof org.apache.cassandra.thrift.TimedOutException) {
       return new HTimedOutException(original);
     } else if (original instanceof org.apache.cassandra.thrift.InvalidRequestException) {

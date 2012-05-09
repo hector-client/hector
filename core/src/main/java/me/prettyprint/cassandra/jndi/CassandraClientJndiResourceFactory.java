@@ -123,7 +123,7 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
     if ( log.isDebugEnabled() )
       log.debug("JNDI resource created with CassandraHostConfiguration: {}", cassandraHostConfigurator.getAutoDiscoverHosts());
     
-    cluster = HFactory.createCluster((String)clusterNameRef.getContent(), cassandraHostConfigurator);
+    cluster = HFactory.getOrCreateCluster((String)clusterNameRef.getContent(), cassandraHostConfigurator);
     keyspace = HFactory.createKeyspace((String)keyspaceNameRef.getContent(), cluster);
   }
 }

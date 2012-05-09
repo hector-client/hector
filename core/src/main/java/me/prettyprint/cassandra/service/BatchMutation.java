@@ -155,4 +155,12 @@ public final class BatchMutation<K> {
   public boolean isEmpty() {
     return mutationMap.isEmpty() ;
   }
+
+  /**
+   * Return the current size of the underlying map
+   * @return
+   */
+  public int getSize() {
+    return mutationMap.size();
+  }
 }

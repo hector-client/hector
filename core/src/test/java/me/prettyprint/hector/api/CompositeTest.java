@@ -1,9 +1,10 @@
 package me.prettyprint.hector.api;
 
+import java.util.UUID;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -14,14 +15,12 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.BigIntegerSerializer;
 import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
-import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
 import me.prettyprint.hector.api.beans.Composite;
 import me.prettyprint.hector.api.beans.DynamicComposite;
-
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.AsciiType;
 import org.apache.cassandra.db.marshal.BytesType;
@@ -34,6 +33,7 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.db.marshal.UUIDType;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.UUIDGen;
+
 import org.junit.Test;
 
 public class CompositeTest {
@@ -161,21 +161,31 @@ public class CompositeTest {
     // test correct serialization with null values and user specified
     // serialization
     DynamicComposite c = new DynamicComposite();
-    c.addComponent(null, StringSerializer.get());
-
-    DynamicCompositeSerializer serializer = new DynamicCompositeSerializer();
-
-    ByteBuffer buff = serializer.toByteBuffer(c);
-
-    DynamicComposite result = serializer.fromByteBuffer(buff);
-
-    assertNull(result.get(0));
+    try {
+        c.addComponent(null, StringSerializer.get());
+        fail("Null values not allowed");
+    } catch (NullPointerException e) {
+    }
   }
 
   @Test
   public void testStaticSerialization() throws Exception {
 
     ByteBuffer b = createCompositeKey("Hello",
+        TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
+    Composite c = new Composite();
+    c.setSerializersByPosition(StringSerializer.get(), UUIDSerializer.get(),
+        BigIntegerSerializer.get());
+    c.deserialize(b.slice());
+    assertTrue(c.get(0) instanceof String);
+    assertTrue(c.get(1) instanceof UUID);
+    assertTrue(c.get(2) instanceof BigInteger);
+  }
+
+  @Test
+  public void testEmptyStringSerialization() throws Exception {
+
+    ByteBuffer b = createCompositeKey("",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis(), 10, false);
     Composite c = new Composite();
     c.setSerializersByPosition(StringSerializer.get(), UUIDSerializer.get(),
@@ -236,6 +246,7 @@ public class CompositeTest {
       if (uuid != null) {
         bb.putShort((short) (0x8000 | 't'));
         bb.putShort((short) 16);
+
         bb.put(UUIDGen.decompose(uuid));
         bb.put((i == -1) && lastIsOne ? (byte) 1 : (byte) 0);
         if (i != -1) {
@@ -297,7 +308,8 @@ public class CompositeTest {
 
   @SuppressWarnings("rawtypes")
   public DynamicCompositeType getDefaultDynamicComparator() {
-    Map<Byte, AbstractType> aliases = new HashMap<Byte, AbstractType>();
+    //Well if ? makes you happy then :) Generics FTWhatever
+    Map<Byte, AbstractType<?>> aliases = new HashMap<Byte, AbstractType<?>>();
     aliases.put((byte) 'a', AsciiType.instance);
     aliases.put((byte) 'b', BytesType.instance);
     aliases.put((byte) 'i', IntegerType.instance);

@@ -99,7 +99,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     columnList.add(createColumn("col_3","val_3",se,se));
     HSuperColumn<String, String, String> superColumn =
         createSuperColumn("super_name", columnList, se, se, se);
-    MutationResult r = m.insert("sk1", "Super1", superColumn);
+    m.insert("sk1", "Super1", superColumn);
     
     SuperColumnQuery<String, String, String, String> scq = HFactory.createSuperColumnQuery(keyspace, se, se, se, se);
     scq.setColumnFamily("Super1");
@@ -124,7 +124,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     columnList.add(createColumn("col_3","val_3",se,se));
     HSuperColumn<String, String, String> superColumn =
         createSuperColumn("super_name", columnList, se, se, se);
-    MutationResult r = m.insert("sk1", "Super1", superColumn);
+    m.insert("sk1", "Super1", superColumn);
     
     SuperColumnQuery<String, String, String, String> scq = HFactory.createSuperColumnQuery(keyspace, se, se, se, se);
     scq.setColumnFamily("Super1");
@@ -150,6 +150,7 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     for (int i = 0; i < 5; i++) {
       m.addInsertion("k" + i, cf, createColumn("name", "value" + i, se, se));
     }
+    assertEquals(5, m.getPendingMutationCount());
     MutationResult r = m.execute();
     assertTrue("Execute time should be > 0", r.getExecutionTimeMicro() > 0);
     assertTrue("Should have operated on a host", r.getHostUsed() != null);

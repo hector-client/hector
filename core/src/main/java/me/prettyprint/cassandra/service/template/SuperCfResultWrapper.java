@@ -45,7 +45,6 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
   private Map<SN,Map<N,HColumn<N,ByteBuffer>>> columns = new LinkedHashMap<SN,Map<N,HColumn<N,ByteBuffer>>>();
   private Iterator<Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>>> rows;
   private Map.Entry<ByteBuffer, List<ColumnOrSuperColumn>> entry;
-  private ExecutionResult<Map<ByteBuffer,List<ColumnOrSuperColumn>>> executionResult;
   private List<SN> superColumns;
   private Map<N,HColumn<N,ByteBuffer>> subColumns = new LinkedHashMap<N,HColumn<N,ByteBuffer>>();
   private SN currentSuperColumn;

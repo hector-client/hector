@@ -20,12 +20,16 @@ public class DoubleSerializer extends AbstractSerializer<Double> {
   
   @Override
   public ByteBuffer toByteBuffer(Double obj) {
+    if (obj == null) {
+      return null;
+    }
     return LongSerializer.get().toByteBuffer(Double.doubleToRawLongBits(obj));
   }
 
   @Override
   public Double fromByteBuffer(ByteBuffer bytes) {
-    return Double.longBitsToDouble (LongSerializer.get().fromByteBuffer(bytes));
+    Long l = LongSerializer.get().fromByteBuffer(bytes);
+    return l == null ? null : Double.longBitsToDouble (l);
   }
 
 }

@@ -40,12 +40,10 @@ public class CassandraHostConfiguratorTest {
     cassandraHostConfigurator.setMaxActive(20);
     cassandraHostConfigurator.setCassandraThriftSocketTimeout(3000);
     cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(4000);
-    cassandraHostConfigurator.setExhaustedPolicy(ExhaustedPolicy.WHEN_EXHAUSTED_GROW);
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
     // no need to test all, just a smattering
     assertEquals(20, cassandraHosts[1].getMaxActive());
     assertEquals(20, cassandraHosts[0].getMaxActive());
-    assertEquals(ExhaustedPolicy.WHEN_EXHAUSTED_GROW, cassandraHosts[1].getExhaustedPolicy());
     assertEquals(4000, cassandraHosts[1].getMaxWaitTimeWhenExhausted());
     assertEquals(3000, cassandraHosts[2].getCassandraThriftSocketTimeout());
     assertEquals(3000, cassandraHosts[0].getCassandraThriftSocketTimeout());
@@ -87,7 +85,8 @@ public class CassandraHostConfiguratorTest {
   @Test
   public void testConfiguratorClockResolution() {
     // Define my own clock resolution.
-    class SequentialClockResolution implements ClockResolution {
+    @SuppressWarnings("serial")
+	class SequentialClockResolution implements ClockResolution {
       @Override
       public long createClock() {
         return System.currentTimeMillis() * -1;

@@ -218,4 +218,9 @@ public interface Mutator<K> {
    */
   <SN,N> Mutator<K> addCounterSubDeletion(K key, String cf, HCounterSuperColumn<SN,N> sc);
 
+  /**
+   * Get the size of the pending mutations map
+   */
+  int getPendingMutationCount();
+
 }

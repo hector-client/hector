@@ -117,7 +117,6 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
     return doExecuteMultigetSlice(keys, activeSlicePredicate);
   }
 
-  @SuppressWarnings("unchecked")
   public <T> T queryColumns(K key, ColumnFamilyRowMapper<K, N, T> mapper) {
     return queryColumns(key, activeSlicePredicate, mapper);
   }
@@ -148,7 +147,6 @@ public abstract class ColumnFamilyTemplate<K, N> extends AbstractColumnFamilyTem
    * @param mapper
    * @return
    */
-  @SuppressWarnings("unchecked")
   public <T> T queryColumns(K key, List<N> columns,
       ColumnFamilyRowMapper<K, N, T> mapper) {
     HSlicePredicate<N> predicate = new HSlicePredicate<N>(topSerializer);

@@ -51,7 +51,7 @@ public class JaxbSerializer extends AbstractSerializer<Object> {
    *          that concrete classes directly referenced by any class in the list
    *          will also be serializable through this instance.
    */
-  public JaxbSerializer(final Class... serializableClasses) {
+  public JaxbSerializer(final Class<?>... serializableClasses) {
     marshaller = new ThreadLocal<Marshaller>() {
       @Override
       protected Marshaller initialValue() {
