@@ -16,6 +16,8 @@ public interface RangeSlicesQuery<K, N, V> extends Query<OrderedRows<K, N,V>>{
 
   RangeSlicesQuery<K, N, V> setKeys(K start, K end);
 
+  RangeSlicesQuery<K, N, V> setTokens(String start, String end);
+
   RangeSlicesQuery<K, N, V> setRowCount(int rowCount);
 
   RangeSlicesQuery<K, N, V> setColumnNames(N... columnNames);

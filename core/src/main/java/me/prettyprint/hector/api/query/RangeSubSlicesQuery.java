@@ -12,6 +12,8 @@ public interface RangeSubSlicesQuery<K, SN, N, V> extends Query<OrderedRows<K,N,
 
   RangeSubSlicesQuery<K, SN, N, V> setKeys(K start, K end);
 
+  RangeSubSlicesQuery<K, SN, N, V> setTokens(String start, String end);
+
   RangeSubSlicesQuery<K, SN, N, V> setRowCount(int rowCount);
 
   RangeSubSlicesQuery<K, SN, N, V> setSuperColumn(SN sc);

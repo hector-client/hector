@@ -53,6 +53,11 @@ public final class ThriftRangeSuperSlicesQuery<K, SN, N, V> extends
     return this;
   }
 
+  public RangeSuperSlicesQuery<K, SN, N, V> setTokens(String start, String end) {
+    keyRange.setTokens(start, end);
+    return this;
+  }
+
   @Override
   public RangeSuperSlicesQuery<K, SN, N, V> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
