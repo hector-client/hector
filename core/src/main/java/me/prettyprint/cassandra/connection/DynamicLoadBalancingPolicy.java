@@ -77,13 +77,12 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
       HClientPool np = poolList.get(i);
       Double next = scores.get(np);
       if ((first - next) / first > DYNAMIC_BADNESS_THRESHOLD) {
-        Collections.sort(poolList, new SortByScoreComparator());
-        if (log.isDebugEnabled())
-          log.debug(String.format("According to score we have chosen {} vs first {}", poolList.get(0), fp));
-        break;
+        // This server is better by a big enough margin that we should pick it instead.
+        first = next;
+        fp = np;
       }
     }
-    return poolList.get(0);
+    return fp;
   }
 
   private void filter(List<HClientPool> from, Set<CassandraHost> subList) {
