@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>me.prettyprint</groupId>
+    <groupId>org.hectorclient</groupId>
     <artifactId>hector</artifactId>
-    <version>1.0-6-SNAPSHOT</version>
+    <version>1.1-1-SNAPSHOT</version>
   </parent>
   
   <artifactId>hector-core</artifactId>
@@ -11,8 +11,8 @@
   <name>hector-core</name>
   <properties>
     <!-- OSGi bundle properties -->
-    <bundle.symbolicName>me.prettyprint.hector</bundle.symbolicName>
-    <bundle.namespace>me.prettyprint</bundle.namespace>
+    <bundle.symbolicName>org.hectorclient.hector</bundle.symbolicName>
+    <bundle.namespace>org.hectorclient</bundle.namespace>
   </properties>
 
   <build>
@@ -61,7 +61,7 @@
 
             <Export-Package>
               <!-- !${bundle.namespace}.internal.*, -->
-              ${bundle.namespace}.*;version="${pom.version}"
+              me.prettyprint.*;version="${pom.version}"
             </Export-Package>
 
             <Import-Package>
@@ -101,6 +101,13 @@
       <groupId>commons-pool</groupId>
       <artifactId>commons-pool</artifactId>
     </dependency>
+
+   <!--for abstract types? -->
+        <dependency>
+              <groupId>org.apache.cassandra</groupId>
+                    <artifactId>cassandra-all</artifactId>
+                        </dependency>
+
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-thrift</artifactId>
@@ -147,7 +154,7 @@
 
     <!-- test dependencies -->
     <dependency>
-      <groupId>me.prettyprint</groupId>
+      <groupId>org.hectorclient</groupId>
       <artifactId>hector-test</artifactId>
       <version>${pom.version}</version>
       <scope>test</scope>      
@@ -208,16 +215,4 @@
     </dependency>
   </dependencies>
 
-  <repositories>
-    <repository>
-      <id>riptano-snapshot</id>
-      <name>riptano-snapshot</name>
-      <url>http://mvn.riptano.com/content/repositories/snapshots/</url>
-    </repository>
-    <repository>
-      <id>riptano</id>
-      <name>riptano</name>
-      <url>http://mvn.riptano.com/content/repositories/public/</url>
-    </repository>
-  </repositories>
 </project>
