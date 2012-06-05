@@ -4,11 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import me.prettyprint.cassandra.model.AbstractSliceQuery;
-import me.prettyprint.cassandra.model.HKeyRange;
-import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
-import me.prettyprint.cassandra.model.OrderedRowsImpl;
-import me.prettyprint.cassandra.model.QueryResultImpl;
+import me.prettyprint.cassandra.model.*;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
@@ -18,13 +14,13 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.*;
 
 /**
  * A query for the thrift call get_range_slices.
  *
  * @author Ran Tavory
+ * @author Javier A. Sotelo
  *
  * @param <N>
  * @param <V>
@@ -98,9 +94,39 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
     super.setReturnKeysOnly();
     return this;
   }
+  
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addEqualsExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.EQ, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
 
-  
-  
-  
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addLteExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.LTE, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
 
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addGteExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.GTE, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
+
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addLtExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.LT, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
+
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addGtExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.GT, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
 }
