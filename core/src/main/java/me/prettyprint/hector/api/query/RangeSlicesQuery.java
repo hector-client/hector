@@ -5,7 +5,9 @@ import java.util.Collection;
 import me.prettyprint.hector.api.beans.OrderedRows;
 
 /**
- * A query for the call get_range_slices.
+ * A query for the call get_range_slices.<br>
+ * <br>
+ * In order to use comparison expressions (i.e addEqualsExpression) your CF must be configured to use secondary indexes.
  *
  * @author Ran Tavory
  * @author Javier A. Sotelo
