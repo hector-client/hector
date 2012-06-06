@@ -1,12 +1,15 @@
 package me.prettyprint.cassandra.model;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Serializer;
 
-import org.apache.cassandra.thrift.*;
+import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.KeyRange;
 
 /**
  * A helper class for range queries.
