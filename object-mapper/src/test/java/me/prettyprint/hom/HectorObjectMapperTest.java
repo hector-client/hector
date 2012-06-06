@@ -19,6 +19,7 @@ import me.prettyprint.cassandra.serializers.ObjectSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hom.annotations.AnonymousPropertyHandling;
 import me.prettyprint.hom.beans.MyComplexEntity;
 import me.prettyprint.hom.beans.MyCompositeEntity;
@@ -141,6 +142,55 @@ public class HectorObjectMapperTest {
     assertEquals(obj.getAnonymousProp("foo"), new String(colMap.get("foo").getValue()));
     assertEquals(obj.getAnonymousProp("rice"), new String(colMap.get("rice").getValue()));
   }
+  
+  @Test
+  public void testCreateColumnSetWithTtl() {
+     MyTestBean obj = new MyTestBean();
+     obj.setBaseId(UUID.randomUUID());
+     obj.setLongProp1(111L);
+     obj.setLongProp2(222L);
+     obj.setIntProp1(333);
+     obj.setIntProp2(444);
+     obj.setBoolProp1(false);
+     obj.setBoolProp2(true);
+     obj.setStrProp("aStr");
+     obj.setUuidProp(UUID.randomUUID());
+     obj.setDateProp(new Date());
+     obj.setBytesProp("somebytes".getBytes());
+     obj.setColor(Colors.BLUE);
+     obj.setSerialProp(new MySerial(1, 2L));
+     obj.addAnonymousProp("foo", "bar");
+     obj.addAnonymousProp("rice", "beans");
+     
+     HectorObjectMapper hom = new HectorObjectMapper(cacheMgr);
+     
+     int expectedTtl = 5;
+     hom.setTtl(expectedTtl);
+     
+     Map<String, HColumn<String, byte[]>> colMap = hom.createColumnMap(obj);
+     
+     for (HColumn<String, byte[]> column : colMap.values())
+     {
+    	 assertEquals(expectedTtl, column.getTtl());
+     }
+     
+     // now we test for no ttl
+     hom.setTtl(0);
+     expectedTtl = HFactory.createColumn("", new byte[0], StringSerializer.get(), BytesArraySerializer.get()).getTtl();
+     
+     colMap = hom.createColumnMap(obj);
+     
+     for (HColumn<String, byte[]> column : colMap.values())
+     {
+    	 assertEquals(expectedTtl, column.getTtl());
+     }
+  }
+  
+  @Test(expected = IllegalArgumentException.class)
+  public void testInvalidTtl()
+  {
+    new HectorObjectMapper(cacheMgr).setTtl(-1);
+  }
 
   @Test
   public void testCreateInstanceCustomIdType() {
@@ -200,7 +250,7 @@ public class HectorObjectMapperTest {
     assertEquals("should have added all props as anonymous", colMap.size(), b1.getAnonymousProps()
                                                                               .size());
   }
-
+  
   // --------------------
 
   @Before

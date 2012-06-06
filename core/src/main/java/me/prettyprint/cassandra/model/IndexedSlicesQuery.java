@@ -12,6 +12,7 @@ import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.OrderedRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
@@ -20,6 +21,8 @@ import org.apache.cassandra.thrift.IndexExpression;
 import org.apache.cassandra.thrift.IndexOperator;
 
 /**
+ * This class will soon be removed, use {@link RangeSlicesQuery} instead.<br>
+ * <br>
  * Uses new secondary indexes. Your CF must be configured for such to use this.
  * The following creates an Indexed CF with the "birthday" column indexed (where
  * birthdate represents a timestamp as it is validated by the LongType):
@@ -34,6 +37,7 @@ import org.apache.cassandra.thrift.IndexOperator;
  * 
  * @author zznate (nate@riptano.com)
  */
+@Deprecated
 public class IndexedSlicesQuery<K, N, V> extends
     AbstractSliceQuery<K, N, V, OrderedRows<K, N, V>> {
 
