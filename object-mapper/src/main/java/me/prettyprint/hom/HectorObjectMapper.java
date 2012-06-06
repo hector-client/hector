@@ -55,23 +55,11 @@ public class HectorObjectMapper {
 
   private static final int MAX_NUM_COLUMNS = 100;
 
-  private interface HColumnFactory {
-    HColumn<String, byte[]> createHColumn(String name, byte[] value);
-  }
-
-  private static final HColumnFactory DEFAULT_COLUMN_FACTORY = new HColumnFactory() {
-    @Override
-    public HColumn<String, byte[]> createHColumn(String name, byte[] value) {
-      return HFactory.createColumn(name, value, StringSerializer.get(), BytesArraySerializer.get());
-    }
-  };
-
   private int maxNumColumns = MAX_NUM_COLUMNS;
   private ClassCacheMgr cacheMgr;
   private KeyConcatenationStrategy keyConcatStrategy = new KeyConcatenationDelimiterStrategyImpl();
   private CollectionMapperHelper collMapperHelper = new CollectionMapperHelper();
   private ReflectionHelper reflectionHelper = new ReflectionHelper();
-  private HColumnFactory columnFactory = DEFAULT_COLUMN_FACTORY;
 
   public HectorObjectMapper(ClassCacheMgr cacheMgr) {
     this.cacheMgr = cacheMgr;
@@ -163,32 +151,6 @@ public class HectorObjectMapper {
       saveObj(keyspace, m, obj);
     }
     return objColl;
-  }
-  
-  /**
-   * Sets the time-to-live of every object persisted after this call.
-   * 
-   * @param ttl
-   *          the time to live in seconds, zero for no expiration
-   * @throws IllegalArgumentException
-   *           if negative {@code ttl}
-   */
-  public void setTtl(final int ttl) {
-    if (ttl > 0) {
-      columnFactory = new HColumnFactory() {
-        @Override
-        public HColumn<String, byte[]> createHColumn(String name, byte[] value) {
-          HColumn<String, byte[]> column = HFactory.createColumn(name, value, StringSerializer.get(),
-              BytesArraySerializer.get());
-          column.setTtl(ttl);
-          return column;
-        }
-      };
-    } else if (ttl == 0) {
-      columnFactory = DEFAULT_COLUMN_FACTORY;
-    } else {
-      throw new IllegalArgumentException("ttl must not be negative, ttl: " + ttl);
-    }
   }
 
   private void saveObj(Keyspace keyspace, Mutator<byte[]> m, Object obj) {
@@ -454,7 +416,9 @@ public class HectorObjectMapper {
     for (Entry<String, Object> entry : propColl) {
       colSet.put(
           entry.getKey(),
-          createHColumn(entry.getKey(), cfMapDef.getAnonymousValueSerializer().toBytes(entry.getValue())));
+          HFactory.createColumn(entry.getKey(),
+              cfMapDef.getAnonymousValueSerializer().toBytes(entry.getValue()),
+              StringSerializer.get(), BytesArraySerializer.get()));
     }
   }
 
@@ -520,7 +484,7 @@ public class HectorObjectMapper {
   }
 
   private HColumn<String, byte[]> createHColumn(String name, byte[] value) {
-    return columnFactory.createHColumn(name, value);
+    return HFactory.createColumn(name, value, StringSerializer.get(), BytesArraySerializer.get());
   }
 
   private <T> CFMappingDef<? extends T> determineClassType(CFMappingDef<T> cfMapDef,
@@ -528,7 +492,7 @@ public class HectorObjectMapper {
     if (null == cfMapDef.getInheritanceType()) {
       return cfMapDef;
     }
-    
+
     // if no columns we assume base class
     if (null == slice || null == slice.getColumns() || slice.getColumns().isEmpty()) {
       return cfMapDef;
@@ -719,5 +683,5 @@ public class HectorObjectMapper {
   public void setKeyConcatStrategy(KeyConcatenationStrategy keyConcatStrategy) {
     this.keyConcatStrategy = keyConcatStrategy;
   }
-  
+
 }
