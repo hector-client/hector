@@ -2,24 +2,26 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Iterator;
 import java.util.List;
-import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.query.SliceQuery;
+
+import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.query.SuperSliceQuery;
 
 /**
- * Iterates over the column slice, refreshing until all qualifing columns are
+ * Iterates over the super-column slice, refreshing until all qualifing columns are
  * retrieved.
- * If column deletion can occur synchronously with calls to {@link #hasNext hasNext()},
- * the column name object type must override Object.equals().
+ * If super-column deletion can occur synchronously with calls to {@link #hasNext hasNext()},
+ * the super-column name object type must override Object.equals().
  *
  * @author thrykol
+ * @author pescuma
  */
-public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
+public class SuperSliceIterator<K, SN, N, V> implements Iterator<HSuperColumn<SN, N, V>> {
 
 	private static final int DEFAULT_COUNT = 100;
-	private SliceQuery<K, N, V> query;
-	private Iterator<HColumn<N, V>> iterator;
-	private N start;
-	private ColumnSliceFinish<N> finish;
+	private SuperSliceQuery<K, SN, N, V> query;
+	private Iterator<HSuperColumn<SN, N, V>> iterator;
+	private SN start;
+	private ColumnSliceFinish<SN> finish;
 	private boolean reversed;
 	private int count = DEFAULT_COUNT;
 	private int columns = 0;
@@ -32,7 +34,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param finish Finish point of the range.
 	 * @param reversed Whether or not the columns should be reversed
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed) {
+	public SuperSliceIterator(SuperSliceQuery<K, SN, N, V> query, SN start, final SN finish, boolean reversed) {
 		this(query, start, finish, reversed, DEFAULT_COUNT);
 	}
 
@@ -45,11 +47,11 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param reversed Whether or not the columns should be reversed
 	 * @param count the amount of columns to retrieve per batch
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed, int count) {
-		this(query, start, new ColumnSliceFinish<N>() {
+	public SuperSliceIterator(SuperSliceQuery<K, SN, N, V> query, SN start, final SN finish, boolean reversed, int count) {
+		this(query, start, new ColumnSliceFinish<SN>() {
 
 			@Override
-			public N function() {
+			public SN function() {
 				return finish;
 			}
 		}, reversed, count);
@@ -64,7 +66,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * determined point
 	 * @param reversed Whether or not the columns should be reversed
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed) {
+	public SuperSliceIterator(SuperSliceQuery<K, SN, N, V> query, SN start, ColumnSliceFinish<SN> finish, boolean reversed) {
 		this(query, start, finish, reversed, DEFAULT_COUNT);
 	}
 
@@ -78,7 +80,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param reversed Whether or not the columns should be reversed
 	 * @param count the amount of columns to retrieve per batch
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed, int count) {
+	public SuperSliceIterator(SuperSliceQuery<K, SN, N, V> query, SN start, ColumnSliceFinish<SN> finish, boolean reversed, int count) {
 		this.query = query;
 		this.start = start;
 		this.finish = finish;
@@ -90,18 +92,18 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	@Override
 	public boolean hasNext() {
 		if (iterator == null) {
-			iterator = query.execute().get().getColumns().iterator();
+			iterator = query.execute().get().getSuperColumns().iterator();
 		} else if (!iterator.hasNext() && columns == count) {  // only need to do another query if maximum columns were retrieved
 			query.setRange(start, finish.function(), reversed, count);
 			columns = 0;
-			List<HColumn<N, V>> list = query.execute().get().getColumns();
+			List<HSuperColumn<SN, N, V>> list = query.execute().get().getSuperColumns();
 			iterator = list.iterator();
 
 			if (iterator.hasNext()) {
 				// The lower bound column may have been removed prior to the query executing,
 				// so check to see if the first column returned by the current query is the same
 				// as the lower bound column.  If both columns are the same, skip the column
-				N first = list.get(0).getName();
+				SN first = list.get(0).getName();
 				if (first.equals(start)) {
 					iterator.next();
 				}
@@ -112,8 +114,8 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	}
 
 	@Override
-	public HColumn<N, V> next() {
-		HColumn<N, V> column = iterator.next();
+	public HSuperColumn<SN, N, V> next() {
+		HSuperColumn<SN, N, V> column = iterator.next();
 		start = column.getName();
 		columns++;
 

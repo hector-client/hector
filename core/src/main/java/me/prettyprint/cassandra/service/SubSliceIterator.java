@@ -2,21 +2,23 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Iterator;
 import java.util.List;
+
 import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.query.SliceQuery;
+import me.prettyprint.hector.api.query.SubSliceQuery;
 
 /**
- * Iterates over the column slice, refreshing until all qualifing columns are
+ * Iterates over the sub-column slice, refreshing until all qualifing columns are
  * retrieved.
- * If column deletion can occur synchronously with calls to {@link #hasNext hasNext()},
- * the column name object type must override Object.equals().
+ * If sub-column deletion can occur synchronously with calls to {@link #hasNext hasNext()},
+ * the sub-column name object type must override Object.equals().
  *
  * @author thrykol
+ * @author pescuma
  */
-public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
+public class SubSliceIterator<K, SN, N, V> implements Iterator<HColumn<N, V>> {
 
 	private static final int DEFAULT_COUNT = 100;
-	private SliceQuery<K, N, V> query;
+	private SubSliceQuery<K, SN, N, V> query;
 	private Iterator<HColumn<N, V>> iterator;
 	private N start;
 	private ColumnSliceFinish<N> finish;
@@ -32,7 +34,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param finish Finish point of the range.
 	 * @param reversed Whether or not the columns should be reversed
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed) {
+	public SubSliceIterator(SubSliceQuery<K, SN, N, V> query, N start, final N finish, boolean reversed) {
 		this(query, start, finish, reversed, DEFAULT_COUNT);
 	}
 
@@ -45,7 +47,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param reversed Whether or not the columns should be reversed
 	 * @param count the amount of columns to retrieve per batch
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed, int count) {
+	public SubSliceIterator(SubSliceQuery<K, SN, N, V> query, N start, final N finish, boolean reversed, int count) {
 		this(query, start, new ColumnSliceFinish<N>() {
 
 			@Override
@@ -64,7 +66,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * determined point
 	 * @param reversed Whether or not the columns should be reversed
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed) {
+	public SubSliceIterator(SubSliceQuery<K, SN, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed) {
 		this(query, start, finish, reversed, DEFAULT_COUNT);
 	}
 
@@ -78,7 +80,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param reversed Whether or not the columns should be reversed
 	 * @param count the amount of columns to retrieve per batch
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed, int count) {
+	public SubSliceIterator(SubSliceQuery<K, SN, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed, int count) {
 		this.query = query;
 		this.start = start;
 		this.finish = finish;

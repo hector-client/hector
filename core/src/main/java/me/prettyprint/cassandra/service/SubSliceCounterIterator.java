@@ -2,22 +2,24 @@ package me.prettyprint.cassandra.service;
 
 import java.util.Iterator;
 import java.util.List;
-import me.prettyprint.hector.api.beans.HColumn;
-import me.prettyprint.hector.api.query.SliceQuery;
+
+import me.prettyprint.hector.api.beans.HCounterColumn;
+import me.prettyprint.hector.api.query.SubSliceCounterQuery;
 
 /**
- * Iterates over the column slice, refreshing until all qualifing columns are
+ * Iterates over the sub-column slice, refreshing until all qualifing columns are
  * retrieved.
- * If column deletion can occur synchronously with calls to {@link #hasNext hasNext()},
- * the column name object type must override Object.equals().
+ * If sub-column deletion can occur synchronously with calls to {@link #hasNext hasNext()},
+ * the sub-column name object type must override Object.equals().
  *
  * @author thrykol
+ * @author pescuma
  */
-public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
+public class SubSliceCounterIterator<K, SN, N> implements Iterator<HCounterColumn<N>> {
 
 	private static final int DEFAULT_COUNT = 100;
-	private SliceQuery<K, N, V> query;
-	private Iterator<HColumn<N, V>> iterator;
+	private SubSliceCounterQuery<K, SN, N> query;
+	private Iterator<HCounterColumn<N>> iterator;
 	private N start;
 	private ColumnSliceFinish<N> finish;
 	private boolean reversed;
@@ -32,7 +34,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param finish Finish point of the range.
 	 * @param reversed Whether or not the columns should be reversed
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed) {
+	public SubSliceCounterIterator(SubSliceCounterQuery<K, SN, N> query, N start, final N finish, boolean reversed) {
 		this(query, start, finish, reversed, DEFAULT_COUNT);
 	}
 
@@ -45,7 +47,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param reversed Whether or not the columns should be reversed
 	 * @param count the amount of columns to retrieve per batch
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, final N finish, boolean reversed, int count) {
+	public SubSliceCounterIterator(SubSliceCounterQuery<K, SN, N> query, N start, final N finish, boolean reversed, int count) {
 		this(query, start, new ColumnSliceFinish<N>() {
 
 			@Override
@@ -64,7 +66,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * determined point
 	 * @param reversed Whether or not the columns should be reversed
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed) {
+	public SubSliceCounterIterator(SubSliceCounterQuery<K, SN, N> query, N start, ColumnSliceFinish<N> finish, boolean reversed) {
 		this(query, start, finish, reversed, DEFAULT_COUNT);
 	}
 
@@ -78,7 +80,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	 * @param reversed Whether or not the columns should be reversed
 	 * @param count the amount of columns to retrieve per batch
 	 */
-	public ColumnSliceIterator(SliceQuery<K, N, V> query, N start, ColumnSliceFinish<N> finish, boolean reversed, int count) {
+	public SubSliceCounterIterator(SubSliceCounterQuery<K, SN, N> query, N start, ColumnSliceFinish<N> finish, boolean reversed, int count) {
 		this.query = query;
 		this.start = start;
 		this.finish = finish;
@@ -94,7 +96,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		} else if (!iterator.hasNext() && columns == count) {  // only need to do another query if maximum columns were retrieved
 			query.setRange(start, finish.function(), reversed, count);
 			columns = 0;
-			List<HColumn<N, V>> list = query.execute().get().getColumns();
+			List<HCounterColumn<N>> list = query.execute().get().getColumns();
 			iterator = list.iterator();
 
 			if (iterator.hasNext()) {
@@ -112,8 +114,8 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	}
 
 	@Override
-	public HColumn<N, V> next() {
-		HColumn<N, V> column = iterator.next();
+	public HCounterColumn<N> next() {
+		HCounterColumn<N> column = iterator.next();
 		start = column.getName();
 		columns++;
 
