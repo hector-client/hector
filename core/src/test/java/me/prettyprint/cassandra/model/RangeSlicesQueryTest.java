@@ -26,7 +26,7 @@ public class RangeSlicesQueryTest extends BaseEmbededServerSetupTest {
   private static final LongSerializer le = new LongSerializer();
   private Cluster cluster;
   private Keyspace keyspace;
-  private String cf = "Standard1";
+  private String cf = "Indexed1";
 
   @Before
   public void setupCase() {
@@ -63,5 +63,45 @@ public class RangeSlicesQueryTest extends BaseEmbededServerSetupTest {
     row = orderedRows.iterator().next();
     assertNotNull(row.getKey());
     assertEquals(2,row.getColumnSlice().getColumns().size());
+  }
+  
+  @Test
+  public void testInsertGetRemove() {        
+    RangeSlicesQuery<String, String, Long> rangeSlicesQuery = HFactory.createRangeSlicesQuery(keyspace, se, se, le);
+    rangeSlicesQuery.addEqualsExpression("birthyear", 1975L);
+    rangeSlicesQuery.setColumnNames("birthmonth");
+    rangeSlicesQuery.setReturnKeysOnly();
+    rangeSlicesQuery.setColumnFamily(cf);
+    rangeSlicesQuery.setKeys("", "");
+    QueryResult<OrderedRows<String, String, Long>> result = rangeSlicesQuery.execute();
+    assertEquals(4, result.get().getList().size());
+  }
+  
+  @Test
+  public void testMultiClause() {        
+    QueryResult<OrderedRows<String, String, Long>> result = 
+      new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le)
+    .addEqualsExpression("birthyear", 1975L)
+    .addGteExpression("birthmonth", 4L)
+    .addLteExpression("birthmonth", 6L)
+    .setColumnNames("birthyear")
+    .setColumnFamily(cf)
+    .setStartKey("")
+    .execute();
+    assertEquals(3, result.get().getList().size());
+  }
+
+  @Test
+  public void testEqClauseMiss() {        
+    QueryResult<OrderedRows<String, String, Long>> result = 
+      new IndexedSlicesQuery<String, String, Long>(keyspace, se, se, le)
+    .addEqualsExpression("birthyear", 5L)
+    .addGteExpression("birthmonth", 4L)
+    .addLteExpression("birthmonth", 6L)    
+    .setColumnNames("birthyear")
+    .setColumnFamily(cf)
+    .setStartKey("")
+    .execute();
+    assertEquals(0, result.get().getList().size());
   }
 }

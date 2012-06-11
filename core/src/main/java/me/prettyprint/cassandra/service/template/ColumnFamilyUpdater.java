@@ -119,16 +119,19 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
   public <V> void setFloat(N columnName, float value) {
     HColumn<N, Float> column = columnFactory.createColumn(columnName, value, clock,
         template.getTopSerializer(), FloatSerializer.get());
+    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public <V> void setComposite(N columnName, Composite composite) {
     HColumn<N, Composite> column = columnFactory.createColumn(columnName, composite, clock,
         template.getTopSerializer(), CompositeSerializer.get());
+    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public <V> void setDynamicComposite(N columnName, DynamicComposite composite) {
     HColumn<N, DynamicComposite> column = columnFactory.createColumn(columnName, composite, clock,
         template.getTopSerializer(), DynamicCompositeSerializer.get());
+    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
 
   public <V> void setValue(N columnName, V value, Serializer<V> serializer) {
