@@ -651,7 +651,7 @@ public final class HFactory {
    * {@link Keyspace#createClock()} should be used instead.
    */
   public static long createClock() {
-    return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
+    return CassandraHostConfigurator.getClockResolution().createClock();
   }
 
   /**
