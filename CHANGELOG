@@ -6,6 +6,10 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.1-1
+=====
+set the ClockResolution for all clusters in a static way #479
+
 1.1-0
 =====
 *** First release directly compatible with Apache Cassandra 1.1 ***
