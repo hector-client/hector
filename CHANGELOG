@@ -6,20 +6,9 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
-1.1-1
-=====
-set the ClockResolution for all clusters in a static way #479
-
-1.1-0
-=====
-*** First release directly compatible with Apache Cassandra 1.1 ***
-There has not been extensive testing done on this release yet. Though we do not anticipate any major issues, particularly given the 
-commitment of the Apache Cassandra team with maintaining compatibility, it is highly advised that you *thoroughly* test all your 
-code after any upgrade.
-*** Maven coordinates have been changed to org.hectorclient from me.prettyprint (coordinates, not package names).  
-
 1.0-6
 =====
+set the ClockResolution for all clusters in a static way #479
 changed storage_port from 7000 to 7070 so as not to conflict with a "normal" running cassandra instance on same machine
 
 1.0-5
