@@ -20,11 +20,14 @@ import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnParent;
+import org.apache.cassandra.thrift.IndexExpression;
+import org.apache.cassandra.thrift.IndexOperator;
 
 /**
  * A query for the thrift call get_range_slices.
  *
  * @author Ran Tavory
+ * @author Javier A. Sotelo
  *
  * @param <N>
  * @param <V>
@@ -98,9 +101,39 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
     super.setReturnKeysOnly();
     return this;
   }
+  
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addEqualsExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.EQ, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
 
-  
-  
-  
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addLteExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.LTE, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
 
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addGteExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.GTE, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
+
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addLtExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.LT, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
+
+  @Override
+  public ThriftRangeSlicesQuery<K, N, V> addGtExpression(N columnName, V columnValue) {
+    keyRange.addToExpressions(new IndexExpression(columnNameSerializer.toByteBuffer(columnName),
+        IndexOperator.GT, valueSerializer.toByteBuffer(columnValue)));
+    return this;
+  }
 }

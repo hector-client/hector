@@ -18,6 +18,9 @@ import me.prettyprint.hector.api.factory.HFactory;
 public final class CassandraHostConfigurator implements Serializable {
   // update this if you make changes
   private static final long serialVersionUID = -5798876803582956262L;
+  
+  public static final ClockResolution DEF_CLOCK_RESOLUTION = HFactory.createClockResolution(ClockResolution.MICROSECONDS_SYNC);
+  private static ClockResolution clockResolution = DEF_CLOCK_RESOLUTION;
 
   private String hosts;
   private int port = CassandraHost.DEFAULT_PORT;
@@ -25,7 +28,6 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean lifo = CassandraHost.DEFAULT_LIFO;
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
-  private ClockResolution clockResolution = DEF_CLOCK_RESOLUTION;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   
   private boolean retryDownedHosts = true;
@@ -37,7 +39,6 @@ public final class CassandraHostConfigurator implements Serializable {
   private List<String> autoDiscoveryDataCenters;
 
   private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
-  public static final ClockResolution DEF_CLOCK_RESOLUTION = HFactory.createClockResolution(ClockResolution.MICROSECONDS_SYNC);
   private int hostTimeoutCounter = HostTimeoutTracker.DEF_TIMEOUT_COUNTER;
   private int hostTimeoutWindow = HostTimeoutTracker.DEF_TIMEOUT_WINDOW;
   private int hostTimeoutSuspensionDurationInSeconds = HostTimeoutTracker.DEF_NODE_SUSPENSION_DURATION_IN_SECONDS;
@@ -131,9 +132,12 @@ public final class CassandraHostConfigurator implements Serializable {
   }
 
   /**
+   * Sets this Clock for all clusters administered by Hector.
+   * Notice this is a class method and ideally should be called from the CHC class just once.
+   * 
    * @param resolutionString one of "SECONDS", "MILLISECONDS", "MICROSECONDS" or "MICROSECONDS_SYNC"
    */
-  public void setClockResolution(String resolutionString) {
+  public static void setClockResolution(String resolutionString) {
     clockResolution = HFactory.createClockResolution(resolutionString);
   }
 
@@ -189,12 +193,17 @@ public final class CassandraHostConfigurator implements Serializable {
     this.useThriftFramedTransport = useThriftFramedTransport;
   }
 
-  public ClockResolution getClockResolution() {
-    return clockResolution;
+  public static ClockResolution getClockResolution() {
+    return CassandraHostConfigurator.clockResolution;
   }
 
-  public void setClockResolution(ClockResolution clockResolution) {
-    this.clockResolution = clockResolution;
+  /**
+   * Sets this Clock for all clusters administered by Hector.
+   * Notice this is a class method and ideally should be called from the CHC class just once.
+   * @param clockResolution a specific ClockResolution
+   */
+  public static void setClockResolution(ClockResolution clockResolution) {
+    CassandraHostConfigurator.clockResolution = clockResolution;
   }
 
   public boolean getAutoDiscoverHosts() {
