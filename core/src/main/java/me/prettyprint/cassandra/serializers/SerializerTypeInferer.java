@@ -86,7 +86,7 @@ public class SerializerTypeInferer {
     } else if (valueClass.equals(Long.class) || valueClass.equals(long.class)) {
       serializer = LongSerializer.get();
     } else if (valueClass.equals(Short.class) || valueClass.equals(short.class)) {
-      serializer = LongSerializer.get();
+      serializer = ShortSerializer.get();
     } else if (valueClass.equals(String.class)) {
       serializer = StringSerializer.get();
     } else if (valueClass.equals(UUID.class)) {
