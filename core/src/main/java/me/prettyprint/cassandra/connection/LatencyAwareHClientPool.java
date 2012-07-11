@@ -86,4 +86,9 @@ public class LatencyAwareHClientPool extends ConcurrentHClientPool {
   public boolean equals(Object obj) {
     return ((LatencyAwareHClientPool) obj).getCassandraHost().equals(getCassandraHost());
   }
+
+  @Override
+  public int hashCode() {
+    return getCassandraHost().hashCode();
+  }
 }

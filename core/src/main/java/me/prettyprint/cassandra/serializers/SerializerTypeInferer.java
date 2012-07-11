@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.DynamicComposite;
 import me.prettyprint.hector.api.beans.Composite;
 
 /**
@@ -36,6 +37,8 @@ public class SerializerTypeInferer {
       serializer = CharSerializer.get();
     } else if (value instanceof Composite) {
       serializer = CompositeSerializer.get();
+    } else if (value instanceof DynamicComposite) {
+      serializer = DynamicCompositeSerializer.get();
     } else if (value instanceof Date) {
       serializer = DateSerializer.get();
     } else if (value instanceof Double) {
@@ -75,6 +78,8 @@ public class SerializerTypeInferer {
       serializer = CharSerializer.get();
     } else if (valueClass.equals(Composite.class)) {
       serializer = CompositeSerializer.get();
+    } else if (valueClass.equals(DynamicComposite.class)) {
+      serializer = DynamicCompositeSerializer.get();
     } else if (valueClass.equals(Date.class)) {
       serializer = DateSerializer.get();
     } else if (valueClass.equals(Double.class) || valueClass.equals(double.class)) {

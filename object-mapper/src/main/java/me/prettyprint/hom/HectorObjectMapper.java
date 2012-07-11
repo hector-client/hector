@@ -611,6 +611,9 @@ public class HectorObjectMapper {
       if (null == meth) {
         logger.debug("@Id annotation found - but can't find setter for property, "
             + md.getPropDesc().getName());
+        throw new HectorObjectMapperException(
+          "Failed setting complex id but can't find setter for property, " 
+              + md.getPropDesc().getName());
       }
 
       meth.invoke(obj, pd.getReadMethod().invoke(pkObj, (Object[]) null));
