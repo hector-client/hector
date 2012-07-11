@@ -224,7 +224,7 @@ public class HectorTemplateImpl implements HectorTemplate {
 
   @Override
   public long createClock() {
-    return CassandraHostConfigurator.DEF_CLOCK_RESOLUTION.createClock();
+    return HFactory.createClock();
   }
 
   // probably should be typed for thrift vs. avro
