@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,7 +29,7 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
 
 
   public NodeAutoDiscoverService(HConnectionManager connectionManager,
-      CassandraHostConfigurator cassandraHostConfigurator) {
+                                 CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
     this.retryDelayInSeconds = cassandraHostConfigurator.getAutoDiscoveryDelayInSeconds();
     this.dataCenterValidator = new DataCenterValidator(cassandraHostConfigurator.getAutoDiscoveryDataCenters());
@@ -38,10 +39,10 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
   @Override
   void shutdown() {
     log.error("Auto Discovery retry shutdown hook called");
-    if ( sf != null ) {
+    if (sf != null) {
       sf.cancel(true);
     }
-    if ( executor != null ) {
+    if (executor != null) {
       executor.shutdownNow();
     }
     log.error("AutoDiscovery retry shutdown complete");
@@ -60,13 +61,13 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
     }
 
   }
-  
+
   public void doAddNodes() {
-    if ( log.isDebugEnabled() ) {
+    if (log.isDebugEnabled()) {
       log.debug("Auto discovery service running...");
     }
     Set<CassandraHost> foundHosts = discoverNodes();
-    if ( foundHosts != null && foundHosts.size() > 0 ) {
+    if (foundHosts != null && foundHosts.size() > 0) {
       log.info("Found {} new host(s) in Ring", foundHosts.size());
       for (CassandraHost cassandraHost : foundHosts) {
         log.info("Addding found host {} to pool", cassandraHost);
@@ -74,60 +75,68 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
         connectionManager.addCassandraHost(cassandraHost);
       }
     }
-    if ( log.isDebugEnabled() ) {
+    if (log.isDebugEnabled()) {
       log.debug("Auto discovery service run complete.");
     }
   }
 
   public Set<CassandraHost> discoverNodes() {
     Set<CassandraHost> existingHosts = connectionManager.getHosts();
-    Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
-
-    if (log.isDebugEnabled()) {
+    if (log.isDebugEnabled())
       log.debug("using existing hosts {}", existingHosts);
-    }
+    return discoverNodesFromCluster(existingHosts);
+  }
 
+  private Set<CassandraHost> discoverNodesFromCluster(Set<CassandraHost> existingHosts) {
     try {
-
-      String clusterName = connectionManager.getClusterName();
-
-      //this could be suspect, but we need this 
-      ThriftCluster cluster = (ThriftCluster) HFactory.getCluster(clusterName);
-
-      for(KeyspaceDefinition keyspaceDefinition: cluster.describeKeyspaces()) {
-        if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
-          List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
-          for (TokenRange tokenRange : tokenRanges) {
-
-              for (EndpointDetails endPointDetail : tokenRange.getEndpoint_details()) {
-                // Check if we are allowed to include this Data Center.
-                if (dataCenterValidator.validate(endPointDetail.getDatacenter())) {
-                  // Maybe add this host if it's a new host.
-                  CassandraHost foundHost = new CassandraHost(endPointDetail.getHost(), cassandraHostConfigurator.getPort());
-                  if ( !existingHosts.contains(foundHost) ) {
-                    log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
-                    foundHosts.add(foundHost);
-                  }
-                }
-              }
-
-          }
-          break;
+      //this could be suspect, but we need this
+      ThriftCluster cluster = (ThriftCluster) HFactory.getCluster(connectionManager.getClusterName());
+      for (KeyspaceDefinition keyspaceDefinition : cluster.describeKeyspaces()){
+        if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)){
+          return processSystemTokenRangesForNewNodes(existingHosts, cluster.describeRing(keyspaceDefinition.getName()));
         }
       }
     } catch (Exception e) {
       log.error("Discovery Service failed attempt to connect CassandraHost", e);
     }
+    return Collections.emptySet();
+  }
 
+  private Set<CassandraHost> processSystemTokenRangesForNewNodes(Set<CassandraHost> existingHosts, List<TokenRange> tokenRanges) {
+    Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
+    for (TokenRange tokenRange : tokenRanges)
+      processTokenRangeForNewNodes(existingHosts, foundHosts, tokenRange);
     return foundHosts;
   }
 
+  private void processTokenRangeForNewNodes(Set<CassandraHost> existingHosts, Set<CassandraHost> foundHosts, TokenRange tokenRange) {
+    List<EndpointDetails> endpointDetails = tokenRange.getEndpoint_details();
+    List<String> rpcEndpoints = tokenRange.getRpc_endpoints();
+
+    //Sanity check. Assumes that endpointDetails and rpcEndpoints are in the same order and therefor the same length.
+    if (endpointDetails.size() == rpcEndpoints.size()){
+      processTokenRangeForNewNodesWithinValidDCs(existingHosts, foundHosts, tokenRange, endpointDetails, rpcEndpoints);
+    }
+  }
+
+  private void processTokenRangeForNewNodesWithinValidDCs(Set<CassandraHost> existingHosts, Set<CassandraHost> foundHosts, TokenRange tokenRange, List<EndpointDetails> endpointDetails, List<String> rpcEndpoints) {
+    for (int i = 0; i < endpointDetails.size(); i++) {
+      // Check if we are allowed to include this Data Center.
+      if (dataCenterValidator.validate(endpointDetails.get(i).getDatacenter())){
+        CassandraHost foundHost = new CassandraHost(rpcEndpoints.get(i), cassandraHostConfigurator.getPort());
+        // Maybe add this host if it's a new host.
+        if (!existingHosts.contains(foundHost)) {
+          log.info("Found a node we don't know about {} for TokenRange {}", foundHost, tokenRange);
+          foundHosts.add(foundHost);
+        }
+      }
+    }
+  }
 
   /**
    * Abstraction to validate that the discovered nodes belong to a specific datacenters.
-   * 
-   * @author patricioe (Patricio Echague - patricio@datastax.com)
    *
+   * @author patricioe (Patricio Echague - patricio@datastax.com)
    */
   class DataCenterValidator {
 
@@ -146,6 +155,6 @@ public class NodeAutoDiscoverService extends BackgroundCassandraHostService {
       return dataCenters.contains(dcName);
     }
   }
-  
+
 }
 

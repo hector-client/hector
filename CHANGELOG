@@ -10,6 +10,7 @@ See object-mapper/CHANGELOG for HOM specifics
 =====
 set the ClockResolution for all clusters in a static way #479
 changed buildRingInfo to uses rpc_endpoint to build ringInfo instead of listen_address #486
+changed NodeAutoDiscoverService to rpc_address instead of listen_address to discover
 
 1.1-0
 =====
