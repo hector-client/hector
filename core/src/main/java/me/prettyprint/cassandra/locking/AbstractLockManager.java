@@ -19,119 +19,125 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractLockManager implements HLockManager {
 
-	private static final Logger log = LoggerFactory.getLogger(AbstractLockManager.class);
+  private static final Logger log = LoggerFactory
+      .getLogger(AbstractLockManager.class);
 
-	protected Cluster cluster;
-	protected Keyspace keyspace;
-	protected HLockManagerConfigurator lockManagerConfigurator;
+  protected Cluster cluster;
+  protected Keyspace keyspace;
+  protected HLockManagerConfigurator lockManagerConfigurator;
 
-	public AbstractLockManager(Cluster cluster, Keyspace keyspace, HLockManagerConfigurator lockManagerConfigurator) {
-		if (cluster == null)
-			throw new RuntimeException("Cluster cannot be null for LockManager");
+  public AbstractLockManager(Cluster cluster, Keyspace keyspace,
+      HLockManagerConfigurator lockManagerConfigurator) {
+    if (cluster == null)
+      throw new RuntimeException("Cluster cannot be null for LockManager");
 
-		this.cluster = cluster;
+    this.cluster = cluster;
 
-		if (lockManagerConfigurator == null) {
-			this.lockManagerConfigurator = new HLockManagerConfigurator();
-		}
+    if (lockManagerConfigurator == null) {
+      this.lockManagerConfigurator = new HLockManagerConfigurator();
+    }
 
-		if (keyspace == null) {
-			this.keyspace = HFactory.createKeyspace(lockManagerConfigurator.getKeyspaceName(), cluster);
-		} else {
-			// Set the Keyspace name in order to keep the info consistent
-			lockManagerConfigurator.setKeyspaceName(keyspace.getKeyspaceName());
-		}
+    if (keyspace == null) {
+      this.keyspace = HFactory.createKeyspace(
+          this.lockManagerConfigurator.getKeyspaceName(), cluster);
+    } else {
+      // Set the Keyspace name in order to keep the info consistent
+      this.lockManagerConfigurator.setKeyspaceName(keyspace.getKeyspaceName());
+    }
 
-	}
+  }
 
-	public AbstractLockManager(Cluster cluster) {
-		this(cluster, null, null);
-	}
+  public AbstractLockManager(Cluster cluster) {
+    this(cluster, null, null);
+  }
 
-	public AbstractLockManager(Cluster cluster, Keyspace keyspace) {
-		this(cluster, keyspace, null);
-	}
+  public AbstractLockManager(Cluster cluster, Keyspace keyspace) {
+    this(cluster, keyspace, null);
+  }
 
-	@Override
-	public void init() {
-		checkCreateLockSchema();
-	}
+  @Override
+  public void init() {
+    log.info(this.lockManagerConfigurator.toString());
+    checkCreateLockSchema();
+  }
 
-	private void checkCreateLockSchema() {
+  private void checkCreateLockSchema() {
 
-		KeyspaceDefinition keyspaceDef = cluster.describeKeyspace(keyspace.getKeyspaceName());
+    KeyspaceDefinition keyspaceDef = cluster.describeKeyspace(keyspace
+        .getKeyspaceName());
 
-		if (keyspaceDef == null) {
+    if (keyspaceDef == null) {
 
-			ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
+      ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
 
-			KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(keyspace.getKeyspaceName(),
-					ThriftKsDef.DEF_STRATEGY_CLASS,
-					lockManagerConfigurator.getReplicationFactor(),
-					Arrays.asList(cfDef));
+      KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(
+          keyspace.getKeyspaceName(), ThriftKsDef.DEF_STRATEGY_CLASS,
+          lockManagerConfigurator.getReplicationFactor(), Arrays.asList(cfDef));
 
-			log.info("Creating Keyspace and Column Family for LockManager with name (KSPS/CF): (" + newKeyspace.getName() + " / " + cfDef.getName());
-			cluster.addKeyspace(newKeyspace, true);
-		} else {
-			log.info("Keyspace for LockManager already exists. Skipping creation.");
+      log.info("Creating Keyspace and Column Family for LockManager with name (KSPS/CF): ("
+          + newKeyspace.getName() + " / " + cfDef.getName());
+      cluster.addKeyspace(newKeyspace, true);
+    } else {
+      log.info("Keyspace for LockManager already exists. Skipping creation.");
 
-			// The Keyspace exists but we don't know anything about the CF yet.
-			if (!doesLockCFExist(keyspaceDef)) {
-				// create it
-				ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
-				log.info("Creating Column Family for LockManager with name: " + cfDef.getName());
-				cluster.addColumnFamily(cfDef, true);
-			} else {
-				log.info("Column Family for LockManager already exists. Skipping creation.");
-			}
-		}
+      // The Keyspace exists but we don't know anything about the CF yet.
+      if (!doesLockCFExist(keyspaceDef)) {
+        // create it
+        ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
+        log.info("Creating Column Family for LockManager with name: "
+            + cfDef.getName());
+        cluster.addColumnFamily(cfDef, true);
+      } else {
+        log.info("Column Family for LockManager already exists. Skipping creation.");
+      }
+    }
 
-	}
+  }
 
-	private ColumnFamilyDefinition createColumnFamilyDefinition() {
-		return HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(),
-				lockManagerConfigurator.getLockManagerCF(),
-				ComparatorType.BYTESTYPE);
-	}
+  private ColumnFamilyDefinition createColumnFamilyDefinition() {
+    return HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(),
+        lockManagerConfigurator.getLockManagerCF(), ComparatorType.BYTESTYPE);
+  }
 
-	private boolean doesLockCFExist(KeyspaceDefinition keyspaceDef) {
-		for (ColumnFamilyDefinition cfdef : keyspaceDef.getCfDefs()) {
-			if (cfdef.getName().equals(lockManagerConfigurator.getLockManagerCF())) {
-				return true;
-			}
-		}
-		return false;
-	}
+  private boolean doesLockCFExist(KeyspaceDefinition keyspaceDef) {
+    for (ColumnFamilyDefinition cfdef : keyspaceDef.getCfDefs()) {
+      if (cfdef.getName().equals(lockManagerConfigurator.getLockManagerCF())) {
+        return true;
+      }
+    }
+    return false;
+  }
 
-	private CassandraHostConfigurator getConfigurator() {
-		return ((AbstractCluster) cluster).getConfigurator();
-	}
+  private CassandraHostConfigurator getConfigurator() {
+    return ((AbstractCluster) cluster).getConfigurator();
+  }
 
-	@Override
-	public Cluster getCluster() {
-		return cluster;
-	}
+  @Override
+  public Cluster getCluster() {
+    return cluster;
+  }
 
-	public void setCluster(Cluster cluster) {
-		this.cluster = cluster;
-	}
+  public void setCluster(Cluster cluster) {
+    this.cluster = cluster;
+  }
 
-	@Override
-	public Keyspace getKeyspace() {
-		return keyspace;
-	}
+  @Override
+  public Keyspace getKeyspace() {
+    return keyspace;
+  }
 
-	public void setKeyspace(Keyspace keyspace) {
-		this.keyspace = keyspace;
-	}
+  public void setKeyspace(Keyspace keyspace) {
+    this.keyspace = keyspace;
+  }
 
-	@Override
-	public HLockManagerConfigurator getLockManagerConfigurator() {
-		return lockManagerConfigurator;
-	}
+  @Override
+  public HLockManagerConfigurator getLockManagerConfigurator() {
+    return lockManagerConfigurator;
+  }
 
-	public void setLockManagerConfigurator(HLockManagerConfigurator lockManagerConfigurator) {
-		this.lockManagerConfigurator = lockManagerConfigurator;
-	}
+  public void setLockManagerConfigurator(
+      HLockManagerConfigurator lockManagerConfigurator) {
+    this.lockManagerConfigurator = lockManagerConfigurator;
+  }
 
 }
