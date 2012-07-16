@@ -38,6 +38,7 @@ public abstract class AbstractLockManager implements HLockManager {
 
     this.cluster = cluster;
 
+    this.lockManagerConfigurator = lockManagerConfigurator;
     if (lockManagerConfigurator == null) {
       this.lockManagerConfigurator = new HLockManagerConfigurator();
     }
@@ -45,6 +46,7 @@ public abstract class AbstractLockManager implements HLockManager {
     if (keyspace == null) {
       this.keyspace = HFactory.createKeyspace(this.lockManagerConfigurator.getKeyspaceName(), cluster);
     } else {
+      this.keyspace = keyspace;
       // Set the Keyspace name in order to keep the info consistent
       this.lockManagerConfigurator.setKeyspaceName(keyspace.getKeyspaceName());
     }
@@ -53,6 +55,10 @@ public abstract class AbstractLockManager implements HLockManager {
 
   public AbstractLockManager(Cluster cluster) {
     this(cluster, null, null);
+  }
+  
+  public AbstractLockManager(Cluster cluster,  HLockManagerConfigurator hlmc) {
+    this(cluster, null, hlmc);
   }
 
   public AbstractLockManager(Cluster cluster, Keyspace keyspace) {
@@ -97,8 +103,8 @@ public abstract class AbstractLockManager implements HLockManager {
 
   private ColumnFamilyDefinition createColumnFamilyDefinition() {
     ColumnFamilyDefinition cfDef =  HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(),
-        lockManagerConfigurator.getLockManagerCF(), ComparatorType.UUIDTYPE);
-    cfDef.setKeyValidationClass(ComparatorType.BYTESTYPE.getClassName());
+        lockManagerConfigurator.getLockManagerCF(), ComparatorType.UTF8TYPE);
+    cfDef.setKeyValidationClass(ComparatorType.UTF8TYPE.getClassName());
     cfDef.setRowCacheSize(lockManagerConfigurator.isRowsCacheEnabled() ? 10000 : 0);
     return cfDef;
   }

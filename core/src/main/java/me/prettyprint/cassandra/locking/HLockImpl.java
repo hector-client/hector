@@ -12,7 +12,8 @@ public class HLockImpl implements HLock {
 
   private String lockPath;
   private String lockId;
-  
+  private boolean acquired = false;
+
   public HLockImpl(String lockPath, String lockId) {
     this.lockPath = lockPath;
     this.lockId = lockId;
@@ -36,6 +37,16 @@ public class HLockImpl implements HLock {
   @Override
   public void setLockId(String lockId) {
     this.lockId = lockId;
+  }
+
+  @Override
+  public boolean isAcquired() {
+
+    return acquired;
+  }
+
+  public void setAcquired(boolean acquired) {
+    this.acquired = acquired;
   }
 
 }

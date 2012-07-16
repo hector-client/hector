@@ -40,4 +40,10 @@ public interface HLock {
    */
   void setLockId(String lockId);
 
+  /**
+   * 
+   * @return whether this lock as been successfully acquired or not
+   */
+  boolean isAcquired();
+
 }
