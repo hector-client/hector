@@ -14,7 +14,7 @@ public class HLockManagerConfigurator {
   private String lockManagerCF = DEFAUT_LOCK_MANAGER_CF;
   private boolean rowsCacheEnabled = true;
   private long locksTTLInMillis = 5000L;
-  private long backOffRetryDelayInMillis = 500L;
+  private long backOffRetryDelayInMillis = 100L;
   private int replicationFactor = 3;
 
   public String getLockManagerCF() {

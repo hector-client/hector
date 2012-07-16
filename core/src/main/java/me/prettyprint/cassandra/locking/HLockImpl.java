@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.locking;
 
+import java.util.Comparator;
+
 import me.prettyprint.hector.api.locking.HLock;
 
 /**
@@ -48,5 +50,38 @@ public class HLockImpl implements HLock {
   public void setAcquired(boolean acquired) {
     this.acquired = acquired;
   }
+
+  @Override
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + ((lockId == null) ? 0 : lockId.hashCode());
+    result = prime * result + ((lockPath == null) ? 0 : lockPath.hashCode());
+    return result;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj)
+      return true;
+    if (obj == null)
+      return false;
+    if (getClass() != obj.getClass())
+      return false;
+    HLockImpl other = (HLockImpl) obj;
+    if (lockId == null) {
+      if (other.lockId != null)
+        return false;
+    } else if (!lockId.equals(other.lockId))
+      return false;
+    if (lockPath == null) {
+      if (other.lockPath != null)
+        return false;
+    } else if (!lockPath.equals(other.lockPath))
+      return false;
+    return true;
+  }
+  
+  
 
 }
