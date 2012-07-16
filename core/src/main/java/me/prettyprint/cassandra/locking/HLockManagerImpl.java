@@ -86,39 +86,35 @@ public class HLockManagerImpl extends AbstractLockManager {
           recv_all_acks = false;
           break;
         }
-
-        // If everyone acknowledged to have seen me then ...
-        if (recv_all_acks) {
-          List<String> canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
-          // sort them
-          Collections.sort(canBeEarlierSortedList);
-          nextWaitingClientId = canBeEarlierSortedList.get(0);
-          // check if we are the first ones
-          if (nextWaitingClientId.equals(lock.getLockId())) {
-            break;
-          }
-        }
-
-        // Let everyone know what I have already seen
-        if (System.currentTimeMillis() - last_write_acks > SAY_CONTINUE) {
-          // Write this lock again with the list of Lock Id I have seen
-          writeLock(lock, canBeEarlier.keySet());
-          // Set the flag so we don't do it again
-          last_write_acks = System.currentTimeMillis();
-        }
-
-        smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
-
-        // Refresh the list
-        canBeEarlier = readExistingLocks(lock.getPath());
-
       }
+
+      // If everyone acknowledged to have seen me then ...
+      if (recv_all_acks) {
+        List<String> canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
+        // sort them
+        Collections.sort(canBeEarlierSortedList);
+        nextWaitingClientId = canBeEarlierSortedList.get(0);
+        // check if we are the first ones
+        if (nextWaitingClientId.equals(lock.getLockId())) {
+          break;
+        }
+      }
+
+      // Let everyone know what I have already seen
+      if (System.currentTimeMillis() - last_write_acks > SAY_CONTINUE) {
+        // Write this lock again with the list of Lock Id I have seen
+        writeLock(lock, canBeEarlier.keySet());
+        // Set the flag so we don't do it again
+        last_write_acks = System.currentTimeMillis();
+      }
+
+      smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
+
+      // Refresh the list
+      canBeEarlier = readExistingLocks(lock.getPath());
     }
 
-    // Continue the development here.
-
-    // throw new HLockTimeoutException("dummy ex for now");
-
+    ((HLockImpl) lock).setAcquired(true);
   }
 
   private void smartWait(long sleepTime) {
