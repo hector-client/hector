@@ -88,9 +88,11 @@ public class HLockManagerImpl extends AbstractLockManager {
         }
       }
 
+      List<String> canBeEarlierSortedList = null;
+      
       // If everyone acknowledged to have seen me then ...
       if (recv_all_acks) {
-        List<String> canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
+        canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
         // sort them
         Collections.sort(canBeEarlierSortedList);
         nextWaitingClientId = canBeEarlierSortedList.get(0);
@@ -111,11 +113,12 @@ public class HLockManagerImpl extends AbstractLockManager {
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
 
       // Refresh the list
-      canBeEarlier = readExistingLocks(lock.getPath());
+      canBeEarlier = readExistingLocks(lock.getPath(), canBeEarlierSortedList);
     }
 
     ((HLockImpl) lock).setAcquired(true);
   }
+
 
   private void smartWait(long sleepTime) {
     try {
@@ -202,11 +205,16 @@ public class HLockManagerImpl extends AbstractLockManager {
    *          a lock path
    * @return a list of locks waiting on this lockpath
    */
-  private Map<String, String> readExistingLocks(String lockPath) {
+  private Map<String, String> readExistingLocks(String lockPath, List<String> columnNames) {
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
-        .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lockPath)
-        .setRange(null, null, false, Integer.MAX_VALUE);
+        .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lockPath);
+    
+    if (columnNames == null) {
+      sliceQuery.setRange(null, null, false, Integer.MAX_VALUE);
+    } else {
+      sliceQuery.setColumnNames(columnNames.toArray(new String[columnNames.size()]));
+    }
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
@@ -217,6 +225,10 @@ public class HLockManagerImpl extends AbstractLockManager {
     }
 
     return result;
+  }
+
+  private Map<String, String> readExistingLocks(String path) {
+    return readExistingLocks(path, null);
   }
 
   private HColumn<String, String> createColumnForLock(String name, String value) {
