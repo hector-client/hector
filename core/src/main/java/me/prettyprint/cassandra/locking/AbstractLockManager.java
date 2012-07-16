@@ -17,17 +17,22 @@ import me.prettyprint.hector.api.locking.HLockManagerConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * 
+ * @author patricioe (Patricio Echague - patricioe@gmail.com)
+ *
+ */
 public abstract class AbstractLockManager implements HLockManager {
+  
+  protected static final String DUMMY_VALUE = "v";
 
-  private static final Logger log = LoggerFactory
-      .getLogger(AbstractLockManager.class);
+  private static final Logger log = LoggerFactory.getLogger(AbstractLockManager.class);
 
   protected Cluster cluster;
   protected Keyspace keyspace;
   protected HLockManagerConfigurator lockManagerConfigurator;
 
-  public AbstractLockManager(Cluster cluster, Keyspace keyspace,
-      HLockManagerConfigurator lockManagerConfigurator) {
+  public AbstractLockManager(Cluster cluster, Keyspace keyspace, HLockManagerConfigurator lockManagerConfigurator) {
     if (cluster == null)
       throw new RuntimeException("Cluster cannot be null for LockManager");
 
@@ -38,8 +43,7 @@ public abstract class AbstractLockManager implements HLockManager {
     }
 
     if (keyspace == null) {
-      this.keyspace = HFactory.createKeyspace(
-          this.lockManagerConfigurator.getKeyspaceName(), cluster);
+      this.keyspace = HFactory.createKeyspace(this.lockManagerConfigurator.getKeyspaceName(), cluster);
     } else {
       // Set the Keyspace name in order to keep the info consistent
       this.lockManagerConfigurator.setKeyspaceName(keyspace.getKeyspaceName());
@@ -63,19 +67,17 @@ public abstract class AbstractLockManager implements HLockManager {
 
   private void checkCreateLockSchema() {
 
-    KeyspaceDefinition keyspaceDef = cluster.describeKeyspace(keyspace
-        .getKeyspaceName());
+    KeyspaceDefinition keyspaceDef = cluster.describeKeyspace(keyspace.getKeyspaceName());
 
     if (keyspaceDef == null) {
 
       ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
 
-      KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(
-          keyspace.getKeyspaceName(), ThriftKsDef.DEF_STRATEGY_CLASS,
-          lockManagerConfigurator.getReplicationFactor(), Arrays.asList(cfDef));
+      KeyspaceDefinition newKeyspace = HFactory.createKeyspaceDefinition(keyspace.getKeyspaceName(),
+          ThriftKsDef.DEF_STRATEGY_CLASS, lockManagerConfigurator.getReplicationFactor(), Arrays.asList(cfDef));
 
-      log.info("Creating Keyspace and Column Family for LockManager with name (KSPS/CF): ("
-          + newKeyspace.getName() + " / " + cfDef.getName());
+      log.info("Creating Keyspace and Column Family for LockManager with name (KSPS/CF): (" + newKeyspace.getName()
+          + " / " + cfDef.getName());
       cluster.addKeyspace(newKeyspace, true);
     } else {
       log.info("Keyspace for LockManager already exists. Skipping creation.");
@@ -84,8 +86,7 @@ public abstract class AbstractLockManager implements HLockManager {
       if (!doesLockCFExist(keyspaceDef)) {
         // create it
         ColumnFamilyDefinition cfDef = createColumnFamilyDefinition();
-        log.info("Creating Column Family for LockManager with name: "
-            + cfDef.getName());
+        log.info("Creating Column Family for LockManager with name: " + cfDef.getName());
         cluster.addColumnFamily(cfDef, true);
       } else {
         log.info("Column Family for LockManager already exists. Skipping creation.");
@@ -95,8 +96,11 @@ public abstract class AbstractLockManager implements HLockManager {
   }
 
   private ColumnFamilyDefinition createColumnFamilyDefinition() {
-    return HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(),
-        lockManagerConfigurator.getLockManagerCF(), ComparatorType.BYTESTYPE);
+    ColumnFamilyDefinition cfDef =  HFactory.createColumnFamilyDefinition(keyspace.getKeyspaceName(),
+        lockManagerConfigurator.getLockManagerCF(), ComparatorType.UUIDTYPE);
+    cfDef.setKeyValidationClass(ComparatorType.BYTESTYPE.getClassName());
+    cfDef.setRowCacheSize(lockManagerConfigurator.isRowsCacheEnabled() ? 10000 : 0);
+    return cfDef;
   }
 
   private boolean doesLockCFExist(KeyspaceDefinition keyspaceDef) {
@@ -135,8 +139,7 @@ public abstract class AbstractLockManager implements HLockManager {
     return lockManagerConfigurator;
   }
 
-  public void setLockManagerConfigurator(
-      HLockManagerConfigurator lockManagerConfigurator) {
+  public void setLockManagerConfigurator(HLockManagerConfigurator lockManagerConfigurator) {
     this.lockManagerConfigurator = lockManagerConfigurator;
   }
 
