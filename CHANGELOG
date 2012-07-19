@@ -8,8 +8,10 @@ See object-mapper/CHANGELOG for HOM specifics
 
 1.1-1
 =====
+add DynamicComposites to the list of types supported by SerializerTypeInferer
 set the ClockResolution for all clusters in a static way #479
 changed buildRingInfo to uses rpc_endpoint to build ringInfo instead of listen_address #486
+Hector should support range queries that include indexed clauses (#474)
 
 1.1-0
 =====
