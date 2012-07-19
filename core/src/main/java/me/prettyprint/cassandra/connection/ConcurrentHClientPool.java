@@ -64,6 +64,9 @@ public class ConcurrentHClientPool implements HClientPool {
 
   @Override
   public HClient borrowClient() throws HectorException {
+    if ( cassandraHost.getMaxActive() == 0 ) {
+      return createClient();
+    }
     if ( !active.get() ) {
       throw new HInactivePoolException("Attempt to borrow on in-active pool: " + getName());
     }
@@ -228,6 +231,9 @@ public String getStatusAsString() {
 
 @Override
 public void releaseClient(HClient client) throws HectorException {
+    if ( cassandraHost.getMaxActive() == 0 ) {
+      client.close();
+    }
     boolean open = client.isOpen();
     if ( open ) {
       if ( active.get() ) {
