@@ -22,6 +22,8 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.LocalByPartionerType");
   public static final ComparatorType LONGTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LongType");
+  public static final ComparatorType DOUBLETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DoubleType");
   public static final ComparatorType TIMEUUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.TimeUUIDType");
   public static final ComparatorType UTF8TYPE = new ComparatorType(
@@ -39,7 +41,7 @@ public final class ComparatorType {
 
   static {
     ComparatorType[] types = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
-        LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
+        LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE,DOUBLETYPE, TIMEUUIDTYPE,
         UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
 
     ImmutableMap.Builder<String, ComparatorType> builder =

@@ -5,14 +5,7 @@ import static org.junit.Assert.*;
 import java.nio.ByteBuffer;
 import java.util.UUID;
 
-import me.prettyprint.cassandra.serializers.AsciiSerializer;
-import me.prettyprint.cassandra.serializers.BytesArraySerializer;
-import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.TimeUUIDSerializer;
-import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.serializers.*;
 import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
 
 import org.junit.Test;
@@ -47,6 +40,8 @@ public class DynamicCompositeTest {
 		composite.addComponent(14, "UTF8Text", StringSerializer.get(), "UTF8Type(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(15,  lexUUID, UUIDSerializer.get(), "UUIDType(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(16, "My element", ComponentEquality.EQUAL);
+                composite.addComponent(17, 234.324,DoubleSerializer.get(),"DoubleType", ComponentEquality.EQUAL);
+		composite.addComponent(18, 234.324,DoubleSerializer.get(),"DoubleType(reversed=true)", ComponentEquality.EQUAL);
 		
 		//serialize to the native bytes value
 		
@@ -64,6 +59,7 @@ public class DynamicCompositeTest {
 		assertEquals(timeUUID, parsed.get(5, TimeUUIDSerializer.get()));
 		assertEquals("UTF8Text", parsed.get(6, StringSerializer.get()));
 		assertEquals(lexUUID, parsed.get(7, UUIDSerializer.get()));
+                assertEquals((Double)234.324,parsed.get(17,DoubleSerializer.get()));
 		
 		//now test all the reversed values
 		assertEquals("AsciiText", parsed.get(8, AsciiSerializer.get()));
@@ -75,6 +71,7 @@ public class DynamicCompositeTest {
 		assertEquals("UTF8Text", parsed.get(14, StringSerializer.get()));
 		assertEquals(lexUUID, parsed.get(15, UUIDSerializer.get()));
 		assertEquals("My element", parsed.get(16, StringSerializer.get()));
+                assertEquals((Double)234.324,parsed.get(18,DoubleSerializer.get()));
 		
 
 	}

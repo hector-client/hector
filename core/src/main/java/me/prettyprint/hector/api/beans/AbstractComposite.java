@@ -5,6 +5,7 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.DOUBLETYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
@@ -37,6 +38,7 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
 
 /**
  * Parent class of Composite and DynamicComposite. Acts as a list of objects
@@ -93,6 +95,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put(BigIntegerSerializer.class, BigIntegerSerializer.get())
       .put(ByteBufferSerializer.class, ByteBufferSerializer.get())
       .put(LongSerializer.class, LongSerializer.get())
+      .put(DoubleSerializer.class, DoubleSerializer.get())
       .put(StringSerializer.class, StringSerializer.get())
       .put(UUIDSerializer.class, UUIDSerializer.get()).build();
 
@@ -102,6 +105,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put((byte) 'i', INTEGERTYPE.getTypeName())
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
+      .put((byte) 'd', DOUBLETYPE.getTypeName())
       .put((byte) 't', TIMEUUIDTYPE.getTypeName())
       .put((byte) 's', UTF8TYPE.getTypeName())
       .put((byte) 'u', UUIDTYPE.getTypeName()).build();
