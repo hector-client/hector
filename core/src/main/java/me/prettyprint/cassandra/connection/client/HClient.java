@@ -111,4 +111,10 @@ public interface HClient {
    */
   void clearAuthentication();
 
+  /**
+   * Test if the client connection is working
+   * @param timeout the timeout to wait for a response (e.g. 100 ms)
+   * @return true iff the client received a response from Cassandra within the specified timeout, otherwise false
+   */
+  boolean testClient(int timeout);
 }
