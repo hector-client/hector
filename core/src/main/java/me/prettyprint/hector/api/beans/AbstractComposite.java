@@ -87,6 +87,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           LongSerializer.get().getComparatorType().getTypeName())
       .put(StringSerializer.class,
           StringSerializer.get().getComparatorType().getTypeName())
+      .put(DoubleSerializer.class,
+          DoubleSerializer.get().getComparatorType().getTypeName())
       .put(UUIDSerializer.class,
           UUIDSerializer.get().getComparatorType().getTypeName()).build();
 
@@ -409,7 +411,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @SuppressWarnings("unchecked")
   public <T> AbstractComposite addComponent(int index, T element, ComponentEquality equality) {
     serialized = null;
-
+    
     if (element instanceof Component) {
       components.add(index, (Component<?>) element);
       return this;
@@ -418,6 +420,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     Serializer s = serializerForPosition(index);
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);
+       setSerializerByPosition(index, s);
     }
     String c = comparatorForPosition(index);
     if (c == null) {
@@ -458,7 +461,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public <T> AbstractComposite addComponent(int index, T value,
       Serializer<T> s, String comparator, ComponentEquality equality) {
     serialized = null;
-
+    
     if (value == null) {
         throw new NullPointerException("Unable able to add null component");
     }
@@ -470,6 +473,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     while (components.size() < index) {
       components.add(null);
     }
+    setSerializerByPosition(index, s);
     components.add(index, new Component(value, null, s, comparator, equality));
 
     return this;
