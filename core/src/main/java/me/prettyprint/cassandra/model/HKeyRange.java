@@ -44,7 +44,11 @@ public final class HKeyRange<K> {
     this.rowCount = rowCount;
     return this;
   }
-  
+
+	public int getRowCount() {
+		return this.rowCount;
+	}
+
   public void addToExpressions(IndexExpression elem) {
     if (this.rowFilters == null) {
       this.rowFilters = new ArrayList<IndexExpression>();
