@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.serializers;
 
 import java.nio.ByteBuffer;
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * Converts bytes to Integer and vice versa
@@ -42,5 +43,10 @@ public final class IntegerSerializer extends AbstractSerializer<Integer> {
     bb.rewind();
     return bb.getInt();
   }
+
+    @Override
+    public ComparatorType getComparatorType() {
+        return ComparatorType.INT32TYPE;
+    }
 
 }

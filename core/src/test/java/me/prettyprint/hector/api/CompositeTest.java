@@ -122,7 +122,7 @@ public class CompositeTest {
     b = DynamicComposite.toByteBuffer(1, "string",
         TimeUUIDUtils.getUniqueTimeUUIDinMillis());
     c = DynamicComposite.fromByteBuffer(b);
-    assertTrue(c.get(0) instanceof BigInteger);
+    assertTrue(c.get(0) instanceof Integer);
     assertTrue(c.get(1) instanceof String);
     assertTrue(c.get(2) instanceof UUID);
 
@@ -144,8 +144,8 @@ public class CompositeTest {
     c = DynamicComposite.fromByteBuffer(b);
     for (int i = 0; i < 9; i++) {
       o = c.get(i);
-      assertTrue(o instanceof BigInteger);
-      assertEquals(i, ((BigInteger) o).intValue());
+      assertTrue(o instanceof Integer);
+      assertEquals(i,  o);
     }
 
     b = DynamicComposite.toByteBuffer("foo");

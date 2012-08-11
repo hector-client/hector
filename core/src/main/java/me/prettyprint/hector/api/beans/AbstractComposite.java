@@ -2,6 +2,7 @@ package me.prettyprint.hector.api.beans;
 
 import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.INT32TYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
@@ -39,6 +40,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
 
 /**
  * Parent class of Composite and DynamicComposite. Acts as a list of objects
@@ -81,6 +83,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
       .put(AsciiSerializer.class,
           AsciiSerializer.get().getComparatorType().getTypeName())
+      .put(IntegerSerializer.class,
+          IntegerSerializer.get().getComparatorType().getTypeName())
       .put(BigIntegerSerializer.class,
           BigIntegerSerializer.get().getComparatorType().getTypeName())
       .put(LongSerializer.class,
@@ -94,6 +98,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
 
   static final ImmutableClassToInstanceMap<Serializer> SERIALIZERS = new ImmutableClassToInstanceMap.Builder<Serializer>()
       .put(AsciiSerializer.class, AsciiSerializer.get())
+      .put(IntegerSerializer.class, IntegerSerializer.get())
       .put(BigIntegerSerializer.class, BigIntegerSerializer.get())
       .put(ByteBufferSerializer.class, ByteBufferSerializer.get())
       .put(LongSerializer.class, LongSerializer.get())
@@ -104,7 +109,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
       .put((byte) 'a', ASCIITYPE.getTypeName())
       .put((byte) 'b', BYTESTYPE.getTypeName())
-      .put((byte) 'i', INTEGERTYPE.getTypeName())
+      .put((byte) 'm', INTEGERTYPE.getTypeName())
+      .put((byte) 'i', INT32TYPE.getTypeName())
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
       .put((byte) 'd', DOUBLETYPE.getTypeName())
@@ -481,7 +487,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   private static Object mapIfNumber(Object o) {
-    if ((o instanceof Byte) || (o instanceof Integer) || (o instanceof Short)) {
+    if ((o instanceof Byte) ||  (o instanceof Short)) {
       return BigInteger.valueOf(((Number) o).longValue());
     }
     return o;
