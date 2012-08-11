@@ -2,8 +2,8 @@ package me.prettyprint.hector.api.beans;
 
 import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.BIGINTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.INT32TYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.DOUBLETYPE;
@@ -109,7 +109,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
       .put((byte) 'a', ASCIITYPE.getTypeName())
       .put((byte) 'b', BYTESTYPE.getTypeName())
-      .put((byte) 'm', INTEGERTYPE.getTypeName())
+      .put((byte) 'm', BIGINTEGERTYPE.getTypeName())
       .put((byte) 'i', INT32TYPE.getTypeName())
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
