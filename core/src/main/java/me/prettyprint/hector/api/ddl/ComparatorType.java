@@ -42,7 +42,7 @@ public final class ComparatorType {
   private static final Map<String, ComparatorType> valuesMap;
 
   static {
-    ComparatorType[] types = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
+    ComparatorType[] types = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,INT32TYPE,
         LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE,DOUBLETYPE, TIMEUUIDTYPE,
         UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
 
