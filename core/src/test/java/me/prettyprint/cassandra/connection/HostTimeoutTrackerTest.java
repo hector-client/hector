@@ -10,38 +10,128 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 
 public class HostTimeoutTrackerTest {
 
-  private HostTimeoutTracker hostTimeoutTracker;
-  @Before
-  public void setup() {
-    // map cassandraHost --> arrayBlockingQueue of timestamp Longs
-    // - if abq.size > size, && peekLast.get > time, add host to excludedMap<cassandraHost,timestampOfExclusion> for <suspendTime> ms
-    // - background thread to sweep for exclusion time expiration every <sweepInterval> seconds
-    // - getExcludedHosts calls excludedMap.keySet
-    //
-    // HTL with a three timeout trigger durring 500ms intervals
-    CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
-    cassandraHostConfigurator.setHostTimeoutCounter(3);
-    HConnectionManager connectionManager = new HConnectionManager("TestCluster", cassandraHostConfigurator);
-    hostTimeoutTracker = new HostTimeoutTracker(connectionManager, cassandraHostConfigurator);
-  }
-    
-  @Test
-  public void testTrackHostLatency() {
-    CassandraHost cassandraHost = new CassandraHost("localhost:9170");
-    assertFalse(hostTimeoutTracker.checkTimeout(cassandraHost));
-    assertFalse(hostTimeoutTracker.checkTimeout(cassandraHost));
-    assertFalse(hostTimeoutTracker.checkTimeout(cassandraHost));
-    try {
-      Thread.currentThread().sleep(501);
-    } catch (InterruptedException e) {
+    @Test
+    public void testRegularLimit() {
+      CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+      cassandraHostConfigurator.setHostTimeoutCounter(3);
+      cassandraHostConfigurator.setHostTimeoutWindow(500);  
+      HConnectionManager connectionManager = new HConnectionManager("TestCluster", cassandraHostConfigurator);
+      HostTimeoutTracker hostTimeoutTracker = new HostTimeoutTracker(connectionManager, cassandraHostConfigurator);  
+      CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+      
+      assertFalse(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertFalse(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      try {
+        Thread.currentThread().sleep(450);
+      } catch (InterruptedException e) {
 
+      }
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      try {
+          Thread.currentThread().sleep(550);
+        } catch (InterruptedException e) {
+
+        }
+      assertFalse(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertFalse(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
     }
-    assertTrue(hostTimeoutTracker.checkTimeout(cassandraHost));
-    // ... 
-    // in HConnectionManager: 
-    // - if ( hostLatencyTracker.checkTimeout(cassandraHost) )
-    //        markHostAsDown(cassandraHost);
-    //        excludeHosts.add(cassandraHost);
+
+    @Test
+    public void testNegtiveTimeoutCounter() {
+      CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+      cassandraHostConfigurator.setHostTimeoutCounter(-1);
+      cassandraHostConfigurator.setHostTimeoutWindow(500);  
+      HConnectionManager connectionManager = new HConnectionManager("TestCluster", cassandraHostConfigurator);
+      HostTimeoutTracker hostTimeoutTracker = new HostTimeoutTracker(connectionManager, cassandraHostConfigurator);  
+      CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+
+      try {
+        Thread.currentThread().sleep(450);
+      } catch (InterruptedException e) {
+
+      }
+      
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      
+      try {
+          Thread.currentThread().sleep(550);
+        } catch (InterruptedException e) {
+
+        }
+
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+    }
+
+    @Test
+    public void testZeroTimeoutCounter() {
+      CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+      cassandraHostConfigurator.setHostTimeoutCounter(0);
+      cassandraHostConfigurator.setHostTimeoutWindow(500);  
+      HConnectionManager connectionManager = new HConnectionManager("TestCluster", cassandraHostConfigurator);
+      HostTimeoutTracker hostTimeoutTracker = new HostTimeoutTracker(connectionManager, cassandraHostConfigurator);  
+      CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+
+      try {
+        Thread.currentThread().sleep(450);
+      } catch (InterruptedException e) {
+
+      }
+      
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      
+      try {
+          Thread.currentThread().sleep(550);
+        } catch (InterruptedException e) {
+
+        }
+
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+    }
     
-  }
+    @Test
+    public void testOneTimeoutCounter() {
+      CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
+      cassandraHostConfigurator.setHostTimeoutCounter(1);
+      cassandraHostConfigurator.setHostTimeoutWindow(500);  
+      HConnectionManager connectionManager = new HConnectionManager("TestCluster", cassandraHostConfigurator);
+      HostTimeoutTracker hostTimeoutTracker = new HostTimeoutTracker(connectionManager, cassandraHostConfigurator);  
+      CassandraHost cassandraHost = new CassandraHost("localhost:9170");
+
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+
+      try {
+        Thread.currentThread().sleep(450);
+      } catch (InterruptedException e) {
+
+      }
+      
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      
+      try {
+          Thread.currentThread().sleep(550);
+        } catch (InterruptedException e) {
+
+        }
+
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+      assertTrue(hostTimeoutTracker.penalizeTimeout(cassandraHost));
+    }
+    
 }

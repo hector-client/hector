@@ -11,6 +11,7 @@ import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
 import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
 import me.prettyprint.cassandra.connection.NullOpTimer;
 import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
+import me.prettyprint.cassandra.connection.SocketTimeoutTracker;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.factory.HFactory;
 
@@ -41,9 +42,12 @@ public final class CassandraHostConfigurator implements Serializable {
   private LoadBalancingPolicy loadBalancingPolicy = new RoundRobinBalancingPolicy();
   private int hostTimeoutCounter = HostTimeoutTracker.DEF_TIMEOUT_COUNTER;
   private int hostTimeoutWindow = HostTimeoutTracker.DEF_TIMEOUT_WINDOW;
+  private int socketTimeoutCounter = SocketTimeoutTracker.DEF_SOCKET_TIMEOUT_COUNTER;
+  private int socketTimeoutWindow = SocketTimeoutTracker.DEF_SOCKET_TIMEOUT_WINDOW;
   private int hostTimeoutSuspensionDurationInSeconds = HostTimeoutTracker.DEF_NODE_SUSPENSION_DURATION_IN_SECONDS;
   private int hostTimeoutUnsuspendCheckDelay = HostTimeoutTracker.DEF_NODE_UNSUSPEND_CHECK_DELAY_IN_SECONDS;
   private boolean useHostTimeoutTracker = false;
+  private boolean useSocketTimeoutTracker = false;
   private boolean runAutoDiscoveryAtStartup = false;
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
@@ -272,6 +276,22 @@ public final class CassandraHostConfigurator implements Serializable {
     this.hostTimeoutWindow = hostTimeoutWindow;
   }
 
+  public int getSocketTimeoutCounter() {
+    return socketTimeoutCounter;
+  }
+
+  public void setSocketTimeoutCounter(int socketTimeoutCounter) {
+    this.socketTimeoutCounter = socketTimeoutCounter;
+  }
+
+  public int getSocketTimeoutWindow() {
+    return socketTimeoutWindow;
+  }
+
+  public void setSocketTimeoutWindow(int socketTimeoutWindow) {
+    this.socketTimeoutWindow = socketTimeoutWindow;
+  }
+  
   public int getHostTimeoutSuspensionDurationInSeconds() {
     return hostTimeoutSuspensionDurationInSeconds;
   }
@@ -296,6 +316,14 @@ public final class CassandraHostConfigurator implements Serializable {
     this.useHostTimeoutTracker = useHostTimeoutTracker;
   }
 
+  public boolean getUseSocketTimeoutTracker() {
+    return useSocketTimeoutTracker;
+  }
+
+  public void setUseSocketTimeoutTracker(boolean useSocketTimeoutTracker) {
+    this.useSocketTimeoutTracker = useSocketTimeoutTracker;
+  }  
+  
   public boolean getRunAutoDiscoveryAtStartup() {
     return runAutoDiscoveryAtStartup;
   }

@@ -43,6 +43,7 @@ public class HConnectionManager {
   private final CassandraHostConfigurator cassandraHostConfigurator;
   private final HClientFactory clientFactory;
   private HostTimeoutTracker hostTimeoutTracker;
+  private SocketTimeoutTracker socketTimeoutTracker;
   private final ClockResolution clock;
 
   final ExceptionsTranslator exceptionsTranslator;
@@ -78,6 +79,11 @@ public class HConnectionManager {
     if ( cassandraHostConfigurator.getUseHostTimeoutTracker() ) {
       hostTimeoutTracker = new HostTimeoutTracker(this, cassandraHostConfigurator);
     }
+
+    if ( cassandraHostConfigurator.getUseSocketTimeoutTracker() ) {
+      socketTimeoutTracker = new SocketTimeoutTracker(this, cassandraHostConfigurator);
+    }
+
     monitor = JmxMonitor.getInstance().getCassandraMonitor(this);
     exceptionsTranslator = new ExceptionsTranslatorImpl();
     this.cassandraHostConfigurator = cassandraHostConfigurator;
@@ -270,16 +276,13 @@ public class HConnectionManager {
           throw he;
         } else if (he instanceof HectorTransportException) {
           closeClient(client);
-          markHostAsDown(pool.getCassandraHost());
-          excludeHosts.add(pool.getCassandraHost());
+          doSocketTimeoutCheck(pool.getCassandraHost(), excludeHosts); 
           retryable = true;
-
           monitor.incCounter(Counter.RECOVERABLE_TRANSPORT_EXCEPTIONS);
-
         } else if (he instanceof HTimedOutException ) {
           // DO NOT drecrement retries, we will be keep retrying on timeouts until it comes back
           // if HLT.checkTimeout(cassandraHost): suspendHost(cassandraHost);
-          doTimeoutCheck(pool.getCassandraHost());
+          doHostTimeoutCheck(pool.getCassandraHost());
 
           retryable = true;
 
@@ -362,14 +365,34 @@ public class HConnectionManager {
    * we are configured for such AND there is more than one operating host pool
    * @param cassandraHost
    */
-  private void doTimeoutCheck(CassandraHost cassandraHost) {
+  private void doHostTimeoutCheck(final CassandraHost cassandraHost) {
     if ( hostTimeoutTracker != null && hostPools.size() > 1) {
-      if (hostTimeoutTracker.checkTimeout(cassandraHost) ) {
+      if (hostTimeoutTracker.penalizeTimeout(cassandraHost) ) {
         suspendCassandraHost(cassandraHost);
       }
     }
   }
 
+  /**
+   * If useHostTimeoutTracker is enabled, initiate a pool shutdown only if 
+   * socketTimeoutTracker consider the Cassandra host is down.
+   *  
+   * If SocketTimeoutCheck is disabled, initiate a pool shutdown immediately.
+   *  
+   * @param cassandraHost
+   */
+  private void doSocketTimeoutCheck(final CassandraHost cassandraHost, final Set<CassandraHost> excludeHosts) {
+    if ( socketTimeoutTracker != null ) {
+      if (socketTimeoutTracker.penalizeTimeout(cassandraHost) ) {
+        markHostAsDown(cassandraHost);
+        excludeHosts.add(cassandraHost);
+      }
+    } else {
+      markHostAsDown(cassandraHost);
+      excludeHosts.add(cassandraHost);
+    }
+  }
+  
   /**
   * Sleeps for the specified time as determined by sleepBetweenHostsMilli.
   * In many cases failing over to other hosts is done b/c the cluster is too busy, so the sleep b/w
