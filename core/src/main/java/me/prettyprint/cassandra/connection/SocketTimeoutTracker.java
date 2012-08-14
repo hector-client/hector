@@ -35,7 +35,7 @@ public class SocketTimeoutTracker {
   }
 
   public boolean penalizeTimeout(CassandraHost cassandraHost) {
-    if (socketTimeoutCounter <= 1 )
+    if ( socketTimeoutCounter <= 1 )
     {
       return true;  
     }

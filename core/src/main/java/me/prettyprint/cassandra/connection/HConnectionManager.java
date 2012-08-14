@@ -380,14 +380,11 @@ public class HConnectionManager {
    * If SocketTimeoutCheck is disabled, initiate a pool shutdown immediately.
    *  
    * @param cassandraHost
+   * @param excludeHosts
+   * 
    */
   private void doSocketTimeoutCheck(final CassandraHost cassandraHost, final Set<CassandraHost> excludeHosts) {
-    if ( socketTimeoutTracker != null ) {
-      if (socketTimeoutTracker.penalizeTimeout(cassandraHost) ) {
-        markHostAsDown(cassandraHost);
-        excludeHosts.add(cassandraHost);
-      }
-    } else {
+    if (socketTimeoutTracker == null || socketTimeoutTracker.penalizeTimeout(cassandraHost) ) {
       markHostAsDown(cassandraHost);
       excludeHosts.add(cassandraHost);
     }

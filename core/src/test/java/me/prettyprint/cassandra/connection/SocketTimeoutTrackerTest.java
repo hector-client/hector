@@ -14,7 +14,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 public class SocketTimeoutTrackerTest {
   
   @Test
-  public void testRegularLimit() {
+  public void testRegularLimit() throws Exception {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraHostConfigurator.setSocketTimeoutCounter(3);
     cassandraHostConfigurator.setSocketTimeoutWindow(500);  
@@ -26,18 +26,14 @@ public class SocketTimeoutTrackerTest {
     assertFalse(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
-    try {
-      Thread.currentThread().sleep(450);
-    } catch (InterruptedException e) {
-
-    }
+    
+    Thread.sleep(450);
+    
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
-    try {
-        Thread.currentThread().sleep(550);
-      } catch (InterruptedException e) {
-
-      }
+    
+    Thread.sleep(550);
+    
     assertFalse(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertFalse(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
@@ -45,7 +41,7 @@ public class SocketTimeoutTrackerTest {
   }
 
   @Test
-  public void testNegtiveTimeoutCounter() {
+  public void testNegtiveTimeoutCounter() throws Exception {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraHostConfigurator.setSocketTimeoutCounter(-1);
     cassandraHostConfigurator.setSocketTimeoutWindow(500);  
@@ -56,27 +52,20 @@ public class SocketTimeoutTrackerTest {
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
 
-    try {
-      Thread.currentThread().sleep(450);
-    } catch (InterruptedException e) {
-
-    }
-    
+    Thread.sleep(450);
+        
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     
-    try {
-        Thread.currentThread().sleep(550);
-      } catch (InterruptedException e) {
-
-      }
-
+    
+    Thread.sleep(550);
+    
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
   }
 
   @Test
-  public void testZeroTimeoutCounter() {
+  public void testZeroTimeoutCounter() throws Exception {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraHostConfigurator.setSocketTimeoutCounter(0);
     cassandraHostConfigurator.setSocketTimeoutWindow(500);  
@@ -87,27 +76,19 @@ public class SocketTimeoutTrackerTest {
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
 
-    try {
-      Thread.currentThread().sleep(450);
-    } catch (InterruptedException e) {
-
-    }
-    
+    Thread.sleep(450);
+        
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
-    
-    try {
-        Thread.currentThread().sleep(550);
-      } catch (InterruptedException e) {
 
-      }
+    Thread.sleep(550);
 
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
   }
   
   @Test
-  public void testOneTimeoutCounter() {
+  public void testOneTimeoutCounter() throws Exception {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraHostConfigurator.setSocketTimeoutCounter(1);
     cassandraHostConfigurator.setSocketTimeoutWindow(500);  
@@ -118,21 +99,13 @@ public class SocketTimeoutTrackerTest {
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
 
-    try {
-      Thread.currentThread().sleep(450);
-    } catch (InterruptedException e) {
-
-    }
-    
+    Thread.sleep(450);
+        
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
+     
+    Thread.sleep(550);
     
-    try {
-        Thread.currentThread().sleep(550);
-      } catch (InterruptedException e) {
-
-      }
-
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
     assertTrue(socketTimeoutTracker.penalizeTimeout(cassandraHost));
   }
