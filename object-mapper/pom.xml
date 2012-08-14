@@ -4,11 +4,11 @@
 	<parent>
 		<groupId>org.hectorclient</groupId>
 		<artifactId>hector</artifactId>
-		<version>1.1-2-SNAPSHOT</version>
+		<version>1.1-2-AMG</version>
 	</parent>
 	<artifactId>hector-object-mapper</artifactId>
 	<name>hector-object-mapper</name>
-	<version>3.1-07-SNAPSHOT</version>
+	<version>3.1-07-AMG</version>
 
 	<build>
 		<extensions>
@@ -50,7 +50,7 @@
 		<dependency>
 			<groupId>org.hectorclient</groupId>
 			<artifactId>hector-core</artifactId>
-			<version>1.1-2-SNAPSHOT</version>
+			<version>1.1-2-AMG</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -61,7 +61,7 @@
 		<dependency>
 			<groupId>org.hectorclient</groupId>
 			<artifactId>hector-test</artifactId>
-			<version>1.1-2-SNAPSHOT</version>
+			<version>1.1-2-AMG</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

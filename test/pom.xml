@@ -3,7 +3,7 @@
   <parent>
     <groupId>org.hectorclient</groupId>
     <artifactId>hector</artifactId>
-    <version>1.1-2-SNAPSHOT</version>
+    <version>1.1-2-AMG</version>
   </parent>
   <artifactId>hector-test</artifactId>
   <packaging>jar</packaging>
