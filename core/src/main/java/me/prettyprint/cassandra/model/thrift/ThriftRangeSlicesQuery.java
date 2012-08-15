@@ -45,6 +45,11 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
     keyRange = new HKeyRange<K>(keySerializer);
   }
 
+	@Override
+	public int getRowCount() {
+		return keyRange.getRowCount();
+	}
+
   @Override
   public RangeSlicesQuery<K, N, V> setKeys(K start, K end) {
     keyRange.setKeys(start, end);
