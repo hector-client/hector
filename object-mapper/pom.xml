@@ -111,7 +111,7 @@
     <dependency>
       <groupId>org.apache.openejb</groupId>
       <artifactId>openejb-core</artifactId>
-      <version>4.1.0-SNAPSHOT</version>
+      <version>4.0.0</version>
       <scope>test</scope>
     </dependency>
 	</dependencies>
