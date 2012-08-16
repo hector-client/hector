@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.io.Externalizable;
 import java.io.Serializable;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -7,6 +8,7 @@ import java.util.Date;
 import java.util.UUID;
 
 import me.prettyprint.hector.api.Serializer;
+import me.prettyprint.hector.api.beans.DynamicComposite;
 import me.prettyprint.hector.api.beans.Composite;
 
 /**
@@ -35,6 +37,8 @@ public class SerializerTypeInferer {
       serializer = CharSerializer.get();
     } else if (value instanceof Composite) {
       serializer = CompositeSerializer.get();
+    } else if (value instanceof DynamicComposite) {
+      serializer = DynamicCompositeSerializer.get();
     } else if (value instanceof Date) {
       serializer = DateSerializer.get();
     } else if (value instanceof Double) {
@@ -74,6 +78,8 @@ public class SerializerTypeInferer {
       serializer = CharSerializer.get();
     } else if (valueClass.equals(Composite.class)) {
       serializer = CompositeSerializer.get();
+    } else if (valueClass.equals(DynamicComposite.class)) {
+      serializer = DynamicCompositeSerializer.get();
     } else if (valueClass.equals(Date.class)) {
       serializer = DateSerializer.get();
     } else if (valueClass.equals(Double.class) || valueClass.equals(double.class)) {
@@ -85,7 +91,7 @@ public class SerializerTypeInferer {
     } else if (valueClass.equals(Long.class) || valueClass.equals(long.class)) {
       serializer = LongSerializer.get();
     } else if (valueClass.equals(Short.class) || valueClass.equals(short.class)) {
-      serializer = LongSerializer.get();
+      serializer = ShortSerializer.get();
     } else if (valueClass.equals(String.class)) {
       serializer = StringSerializer.get();
     } else if (valueClass.equals(UUID.class)) {
@@ -99,7 +105,7 @@ public class SerializerTypeInferer {
   }
 
   public static boolean isSerializable(Class<?> clazz) {
-    return isImplementedBy(clazz, Serializable.class);
+    return isImplementedBy(clazz, Serializable.class) || isImplementedBy(clazz, Externalizable.class);
   }
 
   public static boolean isImplementedBy(Class<?> clazz, Class<?> target) {
@@ -116,6 +122,9 @@ public class SerializerTypeInferer {
       if (interfa.equals(target)) {
         return true;
       }
+    }
+    if(clazz.getSuperclass()!=null) {
+      return isImplementedBy(clazz.getSuperclass(), target);
     }
     return false;
   }

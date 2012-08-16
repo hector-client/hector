@@ -231,7 +231,22 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     return connectionManager.unsuspendCassandraHost(new CassandraHost(hostStr));
   }
   
-  
+  @Override
+  public boolean setCassandraHostRetryDelay(String retryDelay) {
+    int delay;
+    try {
+      delay = Integer.parseInt(retryDelay);
+      if (delay > 0) {
+        connectionManager.setCassandraHostRetryDelay(delay);
+        return true;
+      } else {
+        return false;
+      }
+    } catch (NumberFormatException e) {
+      log.error("Invalid number entered: " + retryDelay);
+      return false;
+    }
+  }
   
   
 

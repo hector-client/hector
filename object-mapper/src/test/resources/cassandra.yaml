@@ -159,10 +159,10 @@ memtable_flush_queue_size: 4
 
 # Buffer size to use when performing contiguous column slices.
 # Increase this to the size of the column slices you typically perform
-sliced_buffer_size_in_kb: 64
+#sliced_buffer_size_in_kb: 64
 
 # TCP port, for commands and data
-storage_port: 7001
+storage_port: 7070
 
 # Address to bind to and tell other Cassandra nodes to connect to. You
 # _must_ change this if you want multiple nodes to be able to

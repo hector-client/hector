@@ -149,5 +149,7 @@ public interface CassandraClientMonitorMBean {
    */
   boolean unsuspendCassandraHost(String hostStr);
   
-  Set<String> getSuspendedCassandraHosts(); 
+  Set<String> getSuspendedCassandraHosts();
+
+  boolean setCassandraHostRetryDelay(String retryDelay);
 }

@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>me.prettyprint</groupId>
+    <groupId>org.hectorclient</groupId>
     <artifactId>hector</artifactId>
-    <version>1.0-5-SNAPSHOT</version>
+    <version>1.1-2-SNAPSHOT</version>
   </parent>
   <artifactId>hector-test</artifactId>
   <packaging>jar</packaging>
@@ -11,8 +11,8 @@
   
   <properties>
     <!-- OSGi bundle properties -->
-    <bundle.symbolicName>me.prettyprint.hector-test</bundle.symbolicName>
-    <bundle.namespace>me.prettyprint</bundle.namespace>
+    <bundle.symbolicName>org.hectorclient.hector-test</bundle.symbolicName>
+    <bundle.namespace>org.hectorclient</bundle.namespace>
   </properties>
 
   <build>
@@ -118,17 +118,4 @@
       <optional>true</optional>
     </dependency>
   </dependencies>
-
-  <repositories>
-    <repository>
-      <id>riptano</id>
-      <name>riptano</name>
-      <url>http://mvn.riptano.com/content/repositories/public/</url>
-    </repository>
-    <repository>
-      <id>riptano-snapshot</id>
-      <name>riptano-snapshot</name>
-      <url>http://mvn.riptano.com/content/repositories/snapshots/</url>
-    </repository>
-  </repositories>
 </project>
