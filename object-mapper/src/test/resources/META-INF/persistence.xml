@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" version="1.0">
+  <persistence-unit name="hom" transaction-type="RESOURCE_LOCAL">
+    <provider>me.prettyprint.hom.CassandraPersistenceProvider</provider>
+    <properties> <!-- optional for JPATest but mandatory for JPAEETest since the JEE container will
+manage it too -->
+      <property name="me.prettyprint.hom.classpathPrefix" value="me.prettyprint.hom.beans" />
+      <property name="me.prettyprint.keyspace" value="TestKeyspace" />
+      <property name="me.prettyprint.cluster" value="TestPool" />
+      <property name="me.prettyprint.host" value="localhost:9170" />
+      <property name="me.prettyprint.consistency" value="ONE" />
+    </properties>
+  </persistence-unit>
+  <persistence-unit name="homEE">
+    <provider>me.prettyprint.hom.CassandraPersistenceProvider</provider>
+    <class>me.prettyprint.hom.beans.MyTestBean</class>
+    <exclude-unlisted-classes>true</exclude-unlisted-classes>
+    <properties>
+      <property name="me.prettyprint.hom.classpathPrefix" value="me.prettyprint.hom.beans" />
+      <property name="me.prettyprint.keyspace" value="TestKeyspace" />
+      <property name="me.prettyprint.cluster" value="TestPool" />
+      <property name="me.prettyprint.host" value="localhost:9170" />
+      <property name="me.prettyprint.consistency" value="ONE" />
+    </properties>
+  </persistence-unit>
+</persistence>
+
