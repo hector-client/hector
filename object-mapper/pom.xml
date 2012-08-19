@@ -83,6 +83,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${org.springframework.version}</version>
+            <scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-aop</artifactId>
@@ -96,19 +97,23 @@
 			<version>${org.springframework.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.openjpa</groupId>
-			<artifactId>openjpa-persistence</artifactId>
-			<version>2.1.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>openjpa-kernel</artifactId>
-					<groupId>org.apache.openjpa</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-jpa_2.0_spec</artifactId>
+          <version>1.1</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency> <!-- to scan, it is less impacting than using spring -->
+          <groupId>org.apache.xbean</groupId>
+          <artifactId>xbean-finder-shaded</artifactId>
+          <version>3.11</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.openejb</groupId>
+          <artifactId>openejb-core</artifactId>
+          <version>4.0.0</version>
+          <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 </project>
