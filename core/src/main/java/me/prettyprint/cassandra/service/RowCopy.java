@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import java.nio.ByteBuffer;
+import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.service.template.ColumnFamilyTemplate;
 import me.prettyprint.cassandra.service.template.ColumnFamilyUpdater;
 import me.prettyprint.cassandra.service.template.ThriftColumnFamilyTemplate;
@@ -22,6 +24,7 @@ public class RowCopy<K, N, V> {
 	private Serializer<K> keySerializer;
 	private Serializer<N> nameSerializer;
 	private Serializer<V> valueSerializer;
+	private ByteBufferSerializer bs = ByteBufferSerializer.get();
 	private K rowKey;
 	private K destinationKey;
 	private String cf;
@@ -94,18 +97,17 @@ public class RowCopy<K, N, V> {
 			throw new HectorException("Unable to clone row with null clone key");
 		}
 
-		ColumnFamilyTemplate<K, N> template = new ThriftColumnFamilyTemplate<K, N>(this.keyspace, this.cf, this.keySerializer, this.nameSerializer);
+		ColumnFamilyTemplate<K, ByteBuffer> template = new ThriftColumnFamilyTemplate<K, ByteBuffer>(this.keyspace, this.cf, this.keySerializer, this.bs);
 		Mutator<K> mutator = HFactory.createMutator(this.keyspace, this.keySerializer, new BatchSizeHint(1, this.mutateInterval));
-		ColumnFamilyUpdater<K, N> updater = template.createUpdater(this.destinationKey, mutator);
+		ColumnFamilyUpdater<K, ByteBuffer> updater = template.createUpdater(this.destinationKey, mutator);
 
-		SliceQuery<K, N, V> query = HFactory.createSliceQuery(this.keyspace, this.keySerializer, this.nameSerializer, this.valueSerializer).
+		SliceQuery<K, ByteBuffer, V> query = HFactory.createSliceQuery(this.keyspace, this.keySerializer, this.bs, this.valueSerializer).
 						setColumnFamily(this.cf).
 						setKey(this.rowKey);
 
-		ColumnSliceIterator<K, N, V> iterator = new ColumnSliceIterator<K, N, V>(query, nameSerializer.
-						fromBytes(new byte[0]), nameSerializer.fromBytes(new byte[0]), false);
+		ColumnSliceIterator<K, ByteBuffer, V> iterator = new ColumnSliceIterator<K, ByteBuffer, V>(query, this.bs.fromBytes(new byte[0]), this.bs.fromBytes(new byte[0]), false);
 		while (iterator.hasNext()) {
-			HColumn<N, V> column = iterator.next();
+			HColumn<ByteBuffer, V> column = iterator.next();
 			updater.setValue(column.getName(), column.getValue(), this.valueSerializer);
 		}
 
