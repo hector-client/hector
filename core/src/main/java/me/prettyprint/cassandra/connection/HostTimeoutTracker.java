@@ -27,10 +27,10 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 public class HostTimeoutTracker extends BackgroundCassandraHostService {
   private static final Logger log = LoggerFactory.getLogger(HostTimeoutTracker.class);
 
-  private ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> timeouts;
+  private ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>> hostTimeouts;
   private ConcurrentHashMap<CassandraHost, Long> suspended;
-  private int timeoutCounter;
-  private int timeoutWindow;
+  private int hostTimeoutCounter;
+  private int hostTimeoutWindow;
   private int nodeSuspensionDurationInSeconds;
   
   public static final int DEF_TIMEOUT_COUNTER = 10;
@@ -43,29 +43,40 @@ public class HostTimeoutTracker extends BackgroundCassandraHostService {
       CassandraHostConfigurator cassandraHostConfigurator) {
     super(connectionManager, cassandraHostConfigurator);
     retryDelayInSeconds = cassandraHostConfigurator.getHostTimeoutUnsuspendCheckDelay();
-    timeouts = new ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>>();
+    hostTimeouts = new ConcurrentHashMap<CassandraHost, LinkedBlockingQueue<Long>>();
     suspended = new ConcurrentHashMap<CassandraHost, Long>();
     sf = executor.scheduleWithFixedDelay(new Unsuspender(), retryDelayInSeconds,retryDelayInSeconds, TimeUnit.SECONDS);
-    timeoutCounter = cassandraHostConfigurator.getHostTimeoutCounter();
-    timeoutWindow = cassandraHostConfigurator.getHostTimeoutWindow();
+    hostTimeoutCounter = cassandraHostConfigurator.getHostTimeoutCounter();
+    hostTimeoutWindow = cassandraHostConfigurator.getHostTimeoutWindow();
     nodeSuspensionDurationInSeconds = cassandraHostConfigurator.getHostTimeoutSuspensionDurationInSeconds();
   }
 
-  public boolean checkTimeout(CassandraHost cassandraHost) {
-    timeouts.putIfAbsent(cassandraHost, new LinkedBlockingQueue<Long>());
-    long currentTimeMillis = System.currentTimeMillis();
-    timeouts.get(cassandraHost).add(currentTimeMillis);
-    boolean timeout = false;
-    // if there are 3 timeouts within 500ms, return false
-    if ( timeouts.get(cassandraHost).size() > timeoutCounter) {
-      Long last = timeouts.get(cassandraHost).remove();      
-      if (last.longValue() < (currentTimeMillis - timeoutWindow)) {        
-        timeout = true;
+  public boolean penalizeTimeout(CassandraHost cassandraHost) {
+    final long currentTimeMillis = System.currentTimeMillis();
+    if (hostTimeoutCounter <= 1 )
+      {
         connectionManager.suspendCassandraHost(cassandraHost);
-        suspended.putIfAbsent(cassandraHost, currentTimeMillis);                                    
+        suspended.putIfAbsent(cassandraHost, currentTimeMillis); 
+        return true;  
+      }
+    
+    hostTimeouts.putIfAbsent(cassandraHost, new LinkedBlockingQueue<Long>(hostTimeoutCounter - 1 ));
+    
+    if(hostTimeouts.get(cassandraHost).offer(currentTimeMillis)) {
+      return false;
+    } else {
+      final long oldestTimeoutMillis = hostTimeouts.get(cassandraHost).peek();
+      hostTimeouts.get(cassandraHost).poll();
+      hostTimeouts.get(cassandraHost).offer(currentTimeMillis);
+      if (currentTimeMillis - oldestTimeoutMillis < hostTimeoutWindow) {
+        connectionManager.suspendCassandraHost(cassandraHost);
+        suspended.putIfAbsent(cassandraHost, currentTimeMillis);  
+        return true;
+      } else {
+        return false;
       }      
-    }
-    return timeout;
+    } 
+
   }
   
   class Unsuspender implements Runnable {
