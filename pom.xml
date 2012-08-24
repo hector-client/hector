@@ -75,6 +75,11 @@
       <id>btoddb</id>
       <email>btoddb@gmail.com</email>
     </developer>
+    <developer>
+      <name>Shane Perry</name>
+      <id>thrykol</id>
+      <email>thrykol@gmail.com</email>
+    </developer>
   </developers>
 
   <!-- Hector submodules -->
