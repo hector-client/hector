@@ -17,7 +17,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RowCopyTest extends BaseEmbededServerSetupTest {
+public class ColumnFamilyRowCopyTest extends BaseEmbededServerSetupTest {
 
 	private static final UUIDSerializer us = new UUIDSerializer();
 	private static final ByteBufferSerializer bs = ByteBufferSerializer.get();
@@ -51,7 +51,7 @@ public class RowCopyTest extends BaseEmbededServerSetupTest {
 
 	@Test
 	public void testCopy() {
-		new RowCopy<String, UUID, String>(keyspace, ss, us, ss).setColumnFamily(CF).
+		new ColumnFamilyRowCopy<String, UUID>(keyspace, ss).setColumnFamily(CF).
 						setRowKey(SOURCE_KEY).
 						setDestinationKey(DESTINATION_KEY).
 						setMutateInterval(150).copy();

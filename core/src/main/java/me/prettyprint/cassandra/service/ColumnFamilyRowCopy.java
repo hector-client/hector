@@ -18,23 +18,19 @@ import me.prettyprint.hector.api.query.SliceQuery;
  *
  * @author thrykol
  */
-public class RowCopy<K, N, V> {
+public class ColumnFamilyRowCopy<K, N> {
 
 	private Keyspace keyspace;
 	private Serializer<K> keySerializer;
-	private Serializer<N> nameSerializer;
-	private Serializer<V> valueSerializer;
 	private ByteBufferSerializer bs = ByteBufferSerializer.get();
 	private K rowKey;
 	private K destinationKey;
 	private String cf;
 	private int mutateInterval = 100;
 
-	public RowCopy(Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer, Serializer<V> valueSerializer) {
+	public ColumnFamilyRowCopy(Keyspace keyspace, Serializer<K> keySerializer) {
 		this.keyspace = keyspace;
 		this.keySerializer = keySerializer;
-		this.nameSerializer = nameSerializer;
-		this.valueSerializer = valueSerializer;
 	}
 
 	/**
@@ -43,7 +39,7 @@ public class RowCopy<K, N, V> {
 	 * @param cf Column family name
 	 * @return <code>this</code>
 	 */
-	public RowCopy setColumnFamily(String cf) {
+	public ColumnFamilyRowCopy setColumnFamily(String cf) {
 		this.cf = cf;
 		return this;
 	}
@@ -54,7 +50,7 @@ public class RowCopy<K, N, V> {
 	 * @param rowKey Row key
 	 * @return <code>this</code>
 	 */
-	public RowCopy setRowKey(K rowKey) {
+	public ColumnFamilyRowCopy setRowKey(K rowKey) {
 		this.rowKey = rowKey;
 		return this;
 	}
@@ -65,7 +61,7 @@ public class RowCopy<K, N, V> {
 	 * @param destinationKey Destination row key
 	 * @return <code>this</code>
 	 */
-	public RowCopy setDestinationKey(K destinationKey) {
+	public ColumnFamilyRowCopy setDestinationKey(K destinationKey) {
 		this.destinationKey = destinationKey;
 		return this;
 	}
@@ -76,7 +72,7 @@ public class RowCopy<K, N, V> {
 	 * @param interval Mutation interval
 	 * @return <code>this</code>
 	 */
-	public RowCopy setMutateInterval(int interval) {
+	public ColumnFamilyRowCopy setMutateInterval(int interval) {
 		this.mutateInterval = interval;
 		return this;
 	}
@@ -101,14 +97,14 @@ public class RowCopy<K, N, V> {
 		Mutator<K> mutator = HFactory.createMutator(this.keyspace, this.keySerializer, new BatchSizeHint(1, this.mutateInterval));
 		ColumnFamilyUpdater<K, ByteBuffer> updater = template.createUpdater(this.destinationKey, mutator);
 
-		SliceQuery<K, ByteBuffer, V> query = HFactory.createSliceQuery(this.keyspace, this.keySerializer, this.bs, this.valueSerializer).
+		SliceQuery<K, ByteBuffer, ByteBuffer> query = HFactory.createSliceQuery(this.keyspace, this.keySerializer, this.bs, this.bs).
 						setColumnFamily(this.cf).
 						setKey(this.rowKey);
 
-		ColumnSliceIterator<K, ByteBuffer, V> iterator = new ColumnSliceIterator<K, ByteBuffer, V>(query, this.bs.fromBytes(new byte[0]), this.bs.fromBytes(new byte[0]), false);
+		ColumnSliceIterator<K, ByteBuffer, ByteBuffer> iterator = new ColumnSliceIterator<K, ByteBuffer, ByteBuffer>(query, this.bs.fromBytes(new byte[0]), this.bs.fromBytes(new byte[0]), false);
 		while (iterator.hasNext()) {
-			HColumn<ByteBuffer, V> column = iterator.next();
-			updater.setValue(column.getName(), column.getValue(), this.valueSerializer);
+			HColumn<ByteBuffer, ByteBuffer> column = iterator.next();
+			updater.setValue(column.getName(), column.getValue(), this.bs);
 		}
 
 		template.update(updater);
