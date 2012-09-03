@@ -19,6 +19,7 @@ Hector documentation contents:
    content/virtual_keyspaces
    content/security
    content/speed4j
+   content/guice_integration
    content/HOM/hector-object-mapper
 
 Indices and tables
