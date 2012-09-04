@@ -198,4 +198,18 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     }
     assertEquals(4, cnt);
   }
+
+  @Test
+  public void testFloatColumnValue() {
+    final float EPSILON = 0.0000001f;
+
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
+
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("key1");
+    updater.setFloat("column1",3.14159265f);
+    template.update(updater);
+    template.addColumn("column1", se);
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("key1");
+    assertEquals(3.14159265f,wrapper.getFloat("column1"), EPSILON);
+  }
 }

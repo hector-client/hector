@@ -19,6 +19,7 @@ import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -167,6 +168,11 @@ public class SuperCfResultWrapper<K,SN,N> extends AbstractResultWrapper<K,N> imp
   @Override
   public Long getLong(SN sColumnName, N columnName) {
     return extractType(sColumnName, columnName, LongSerializer.get());
+  }
+
+  @Override
+  public Float getFloat(SN sColumnName, N columnName) {
+    return extractType(sColumnName, columnName, FloatSerializer.get());
   }
   
   @Override
