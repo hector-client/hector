@@ -85,6 +85,12 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
         template.getTopSerializer(), IntegerSerializer.get());
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
+
+  public void setFloat(N columnName, Float value) {
+    HColumn<N, Float> column = columnFactory.createColumn(columnName, value, clock,
+        template.getTopSerializer(), FloatSerializer.get());
+    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+  }
   
   public void setDouble(N columnName, Double value) {
     HColumn<N, Double> column = columnFactory.createColumn(columnName, value, clock,
