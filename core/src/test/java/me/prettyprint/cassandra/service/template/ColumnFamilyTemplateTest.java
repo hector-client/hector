@@ -1,13 +1,16 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import org.apache.cassandra.thrift.IndexOperator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
 
 public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
@@ -200,16 +203,35 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   }
 
   @Test
-  public void testFloatColumnValue() {
+  public void testColumnValueTypes() {
     final float EPSILON = 0.0000001f;
 
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
 
     ColumnFamilyUpdater<String,String> updater = template.createUpdater("key1");
-    updater.setFloat("column1",3.14159265f);
+    updater.setString("column1","string value");
+    updater.setUUID("column2", UUID.fromString("cf316d50-f7c0-11e1-a21f-0800200c9a66"));
+    updater.setLong("column3", 829398278497234L);
+    updater.setInteger("column4", 27344);
+    updater.setFloat("column5",3.14159265f);
+    updater.setDouble("column6",3.14159265358979323846264338327950288);
+    updater.setBoolean("column7", true);
+    updater.setByteArray("column8", new byte[] {97, 91, 99});
+    Date date = new Date();
+    updater.setDate("column9", date);
+
     template.update(updater);
-    template.addColumn("column1", se);
+
     ColumnFamilyResult<String,String> wrapper = template.queryColumns("key1");
-    assertEquals(3.14159265f,wrapper.getFloat("column1"), EPSILON);
+    assertEquals("string value",wrapper.getString("column1"));
+    assertEquals(UUID.fromString("cf316d50-f7c0-11e1-a21f-0800200c9a66"), wrapper.getUUID("column2"));
+    assertEquals(Long.valueOf(829398278497234L), wrapper.getLong("column3"));
+    assertEquals(Integer.valueOf(27344), wrapper.getInteger("column4"));
+    assertEquals(3.14159265f,wrapper.getFloat("column5"), EPSILON);
+    assertEquals(3.14159265358979323846264338327950288, wrapper.getDouble("column6"), EPSILON);
+    assertEquals(true, wrapper.getBoolean("column7"));
+    assertArrayEquals(new byte[] {97, 91, 99}, wrapper.getByteArray("column8"));
+    assertEquals(date, wrapper.getDate("column9"));
+    assertEquals(9, wrapper.getColumnNames().size());
   }
 }
