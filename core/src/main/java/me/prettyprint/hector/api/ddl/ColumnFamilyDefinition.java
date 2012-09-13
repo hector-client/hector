@@ -50,7 +50,10 @@ public interface ColumnFamilyDefinition {
   
   String getKeyValidationClass();
   void setKeyValidationClass(String keyValidationClass);
-  
+
+	String getKeyValidationAlias();
+	void setKeyValidationAlias(String keyValidationAlias);
+	
   double getReadRepairChance();
   void setReadRepairChance(double readRepairChance);
   
