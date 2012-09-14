@@ -30,6 +30,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int gcGraceSeconds;
   private String defaultValidationClass;
   private String keyValidationClass;
+	private String keyValidationAlias = "";
   private int id;
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
@@ -188,6 +189,10 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
       this.keyValidationClass = keyValidationClass;
   }
 
+	public void setKeyValidationAlias(String keyValidationAlias) {
+		this.keyValidationAlias = keyValidationAlias;
+	}
+
   /**
    * SHOULD THIS BE HERE? A COLUMN DEFINITION IS PART OF A KEYSPACE BY VIRTUE
    * OF BEING IN A KEYSPACE LIST
@@ -303,6 +308,11 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   public String getKeyValidationClass() {
       return keyValidationClass;
   }
+
+	@Override
+	public String getKeyValidationAlias() {
+		return keyValidationAlias;
+	}
 
   @Override
   public String getCompactionStrategy() {
