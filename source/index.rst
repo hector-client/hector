@@ -48,7 +48,7 @@ Mailing lists
 Build resources
 ---------------
 
-	* Maven Central location (includes javadoc): http://repo2.maven.org/maven2/me/prettyprint/
+	* Maven Central location (includes javadoc): `Maven Central <http://search.maven.org/#search%7Cga%7C1%7Chectorclient>`_
 	* `Continuous Integration (Hudson/Jenkins) <https://hector-dev.ci.cloudbees.com>`_
 	* `Cloudbees maven repo with nightly snapshots <https://repository-hector-dev.forge.cloudbees.com/snapshot>`_
 
