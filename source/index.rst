@@ -33,7 +33,7 @@ Sources and download
 ---------------------
 
 https://github.com/rantav/hector
-or clone it directly from ``$ git clone git://github.com/rantav/hector``
+or clone it directly from ``$ git clone git://github.com/hector-client/hector.git``
 
 Mailing lists
 -------------
