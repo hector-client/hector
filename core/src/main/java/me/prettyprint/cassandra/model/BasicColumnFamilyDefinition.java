@@ -21,8 +21,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private ColumnType columnType = ColumnType.STANDARD;
   private ComparatorType comparatorType = ComparatorType.BYTESTYPE;
   private ComparatorType subComparatorType;
-	private String comparatorTypeAlias = "";
-	private String subComparatorTypeAlias = "";
+  private String comparatorTypeAlias = "";
+  private String subComparatorTypeAlias = "";
   private String comment;
   private double rowCacheSize;
   private double keyCacheSize;
@@ -30,7 +30,7 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
   private int gcGraceSeconds;
   private String defaultValidationClass;
   private String keyValidationClass;
-	private String keyValidationAlias = "";
+  private String keyValidationAlias = "";
   private int id;
   private int maxCompactionThreshold;
   private int minCompactionThreshold;
@@ -66,8 +66,8 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     columnType = columnFamilyDefinition.getColumnType();
     comparatorType = columnFamilyDefinition.getComparatorType();
     subComparatorType = columnFamilyDefinition.getSubComparatorType();
-		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
-		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
+    comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
+    subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
@@ -117,9 +117,13 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     this.subComparatorType = subComparitorType;
   }
 
-	public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
+  public void setComparatorTypeAlias(String alias) {
+    this.comparatorTypeAlias = alias;
+  }
 
-	public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
+  public void setSubComparatorTypeAlias(String alias) {
+    this.subComparatorTypeAlias = alias;
+  }
 
   public void setComment(String comment) {
     this.comment = comment;
@@ -189,9 +193,9 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
       this.keyValidationClass = keyValidationClass;
   }
 
-	public void setKeyValidationAlias(String keyValidationAlias) {
-		this.keyValidationAlias = keyValidationAlias;
-	}
+  public void setKeyValidationAlias(String keyValidationAlias) {
+    this.keyValidationAlias = keyValidationAlias;
+  }
 
   /**
    * SHOULD THIS BE HERE? A COLUMN DEFINITION IS PART OF A KEYSPACE BY VIRTUE
@@ -222,9 +226,13 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
     return this.subComparatorType;
   }
 
-	public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
+  public String getComparatorTypeAlias() {
+    return this.comparatorTypeAlias;
+  }
 
-	public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
+  public String getSubComparatorTypeAlias() {
+    return this.subComparatorTypeAlias;
+  }
 
   @Override
   public String getComment() {
@@ -306,13 +314,13 @@ public class BasicColumnFamilyDefinition implements ColumnFamilyDefinition {
 
   @Override
   public String getKeyValidationClass() {
-      return keyValidationClass;
+    return keyValidationClass;
   }
 
-	@Override
-	public String getKeyValidationAlias() {
-		return keyValidationAlias;
-	}
+  @Override
+  public String getKeyValidationAlias() {
+    return keyValidationAlias;
+  }
 
   @Override
   public String getCompactionStrategy() {
