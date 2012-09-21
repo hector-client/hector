@@ -7,7 +7,7 @@
   </parent>
   
   <artifactId>hector-core</artifactId>
-  <packaging>bundle</packaging>
+  <packaging>jar</packaging>
   <name>hector-core</name>
   <properties>
     <!-- OSGi bundle properties -->

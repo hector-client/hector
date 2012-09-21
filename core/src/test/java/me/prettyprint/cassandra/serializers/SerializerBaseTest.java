@@ -1,12 +1,12 @@
 package me.prettyprint.cassandra.serializers;
 
+import java.nio.ByteBuffer;
 import java.util.Collection;
 
 import junit.framework.Assert;
+import me.prettyprint.hector.api.Serializer;
 
 import org.junit.Test;
-
-import me.prettyprint.hector.api.Serializer;
 
 /**
  * A base test class for {@link Serializer}s. <br>
@@ -39,6 +39,29 @@ public abstract class SerializerBaseTest<T> {
   public void testNullObjectRoundTrip() {
     Assert.assertNull(getSerializer().fromByteBuffer(
         getSerializer().toByteBuffer(null)));
+  }
+  
+  @Test
+  public void testByteBufferWithSharedBackingArrayIsOk()
+  {
+	  for (T object : getTestData()) {
+		  byte[] bytes = getSerializer().toBytes(object);
+		  ByteBuffer byteBufferWithSharedBackingArray = copyIntoLargerArrayAndWrap(bytes);
+	      T deserialized = getSerializer().fromByteBuffer(byteBufferWithSharedBackingArray);
+	      Assert.assertEquals(object, deserialized);
+	  }
+  }
+
+  private ByteBuffer copyIntoLargerArrayAndWrap(byte[] bytes) {
+	int paddingLeft = 5;
+	  int paddingRight = 5;		  
+	  byte[] sharedBytesWithOtherStuff = new byte[bytes.length+paddingLeft+paddingRight];
+	  for (int i=0; i<bytes.length; i++)
+	  {
+		  sharedBytesWithOtherStuff[i+paddingLeft] = bytes[i];
+	  }
+	  ByteBuffer byteBufferWithSharedBackingArray = ByteBuffer.wrap(sharedBytesWithOtherStuff, paddingLeft, bytes.length);
+	return byteBufferWithSharedBackingArray;
   }
 
   /**
