@@ -42,8 +42,7 @@ public abstract class SerializerBaseTest<T> {
   }
   
   @Test
-  public void testByteBufferWithSharedBackingArrayIsOk()
-  {
+  public void testByteBufferWithSharedBackingArrayIsOk() {
 	  for (T object : getTestData()) {
 		  byte[] bytes = getSerializer().toBytes(object);
 		  ByteBuffer byteBufferWithSharedBackingArray = copyIntoLargerArrayAndWrap(bytes);
