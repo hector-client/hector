@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import me.prettyprint.cassandra.connection.factory.HKerberosSecuredThriftClientFactoryImpl;
+import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.hector.api.ClockResolution;
 import org.junit.Before;
 import org.junit.Test;
@@ -116,5 +118,28 @@ public class CassandraHostConfiguratorTest {
 
     //TODO: define equality for CassandraHostConfigurator
     //assertSame(cassandraHostConfigurator, cassandraHostConfiguratorDeserialized);
+  }
+
+  @Test
+  public void testSettingCorrectClientFactory() {
+    CassandraHostConfigurator chc = new CassandraHostConfigurator("localhost");
+
+    chc.setClientFactoryClass(HKerberosSecuredThriftClientFactoryImpl.class.getSimpleName());
+    assertEquals(chc.getClientFactoryClass(), HKerberosSecuredThriftClientFactoryImpl.class);
+
+    chc.setClientFactoryClass(HThriftClientFactoryImpl.class.getCanonicalName());
+    assertEquals(chc.getClientFactoryClass(), HThriftClientFactoryImpl.class);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSettingNotFoundClientFactory() {
+    CassandraHostConfigurator chc = new CassandraHostConfigurator("localhost");
+    chc.setClientFactoryClass("NotARealClass");
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testSettingInvalidExistingClassClientFactory() {
+    CassandraHostConfigurator chc = new CassandraHostConfigurator("localhost");
+    chc.setClientFactoryClass(CassandraHostConfigurator.class.getCanonicalName());
   }
 }
