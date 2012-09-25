@@ -340,8 +340,7 @@ public final class CassandraHostConfigurator implements Serializable {
     clientFactoryClass = temp;
   }
 
-  public Class<? extends HClientFactory> getClientFactoryClass()
-  {
+  public Class<? extends HClientFactory> getClientFactoryClass() {
     return clientFactoryClass;
   }
 }
