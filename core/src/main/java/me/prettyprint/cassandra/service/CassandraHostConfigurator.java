@@ -11,6 +11,8 @@ import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
 import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
 import me.prettyprint.cassandra.connection.NullOpTimer;
 import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
+import me.prettyprint.cassandra.connection.factory.HClientFactory;
+import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.factory.HFactory;
 
@@ -47,7 +49,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean runAutoDiscoveryAtStartup = false;
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
-  private boolean useKerberosAuthentication = false;
+  private Class<? extends HClientFactory> clientFactoryClass = HThriftClientFactoryImpl.class;
 
 
   public CassandraHostConfigurator() {
@@ -322,20 +324,23 @@ public final class CassandraHostConfigurator implements Serializable {
     this.useSocketKeepalive = useSocketKeepalive;
   }
 
-  /**
-   * Retrieves whether Kerberos authentication is enabled or not.
-   * @return <code>TRUE</code> if Kerberos in enabled. <code>FALSE</code> otherwise.
-   */
-  public boolean isUseKerberosAuthentication() {
-    return useKerberosAuthentication;
+  public void setClientFactoryClass(String cls) {
+    String className = cls.contains(".") ? cls : "me.prettyprint.cassandra.connection.factory." + cls;
+
+    Class<? extends HClientFactory> temp;
+
+    try {
+      temp = Class.forName(className).asSubclass(HClientFactory.class);
+    } catch (ClassNotFoundException e) {
+      throw new IllegalArgumentException(String.format("Unable to find '%s' class.", className), e);
+    } catch (ClassCastException e) {
+      throw new IllegalArgumentException("ClientFactoryClass should be extended from HClientFactory.", e);
+    }
+
+    clientFactoryClass = temp;
   }
 
-  /**
-   * Set Kerberos Authentication.
-   * @param useKerberosAuthentication 
-   */
-  public void setUseKerberosAuthentication(boolean useKerberosAuthentication) {
-    this.useKerberosAuthentication = useKerberosAuthentication;
+  public Class<? extends HClientFactory> getClientFactoryClass() {
+    return clientFactoryClass;
   }
-
 }
