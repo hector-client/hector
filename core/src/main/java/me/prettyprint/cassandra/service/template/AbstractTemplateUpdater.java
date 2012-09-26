@@ -14,6 +14,7 @@ public abstract class AbstractTemplateUpdater<K,N> {
   protected AbstractColumnFamilyTemplate<K,N> template;
   protected Mutator<K> mutator;
   protected long clock;
+  protected int globalTtl = -1; 
   
   public AbstractTemplateUpdater(AbstractColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory, Mutator<K> mutator) {
     this.template = template;
@@ -62,5 +63,15 @@ public abstract class AbstractTemplateUpdater<K,N> {
    */
   public void setClock(long clock) {
     this.clock = clock;
+  }
+  
+  
+  /**
+   * Globally sets the ttl for this updater instance. Any columns created via the updater will use this ttl value unless a ttl is explicitly provided 
+   * to one of the set* methods of subclasses. 
+   * @param ttl
+   */
+  public void setTtl(int ttl) { 
+    this.globalTtl = ttl; 
   }
 }
