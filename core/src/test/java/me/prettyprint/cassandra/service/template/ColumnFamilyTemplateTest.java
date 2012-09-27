@@ -77,6 +77,34 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(ts3,wrapper.getColumn("longval").getClock());
     assertEquals(3,wrapper.getColumnNames().size());
   }
+    
+  @Test 
+  public void testTtl() throws InterruptedException { 
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace,"Standard1", se, se);
+    
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("test_ttl_key1"); 
+    updater.setString("expired_string", "value1",1);
+    updater.setString("unexpired_string", "value2"); 
+    
+    updater.setBoolean("unexpired_bool", true); 
+    updater.setBoolean("expired_bool", true, 1); 
+   
+    
+    template.update(updater); 
+    
+    Thread.sleep(1000); 
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("test_ttl_key1"); 
+    
+    HColumn<String,ByteBuffer> col = wrapper.getColumn("unexpired_string");
+    assertNotNull(col); 
+    assertNotNull(col.getValue()); 
+    
+    HColumn<String,ByteBuffer> expiredStringCol = wrapper.getColumn("expired_string"); 
+    assertNull(expiredStringCol);
+    
+    HColumn<String,ByteBuffer> expiredBooleanCol = wrapper.getColumn("expired_bool"); 
+    assertNull(expiredBooleanCol);
+  }
 
 
   @Test

@@ -174,7 +174,17 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   }
   
   public <V> void setValue(N subColumnName, V value, Serializer<V> serializer) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), serializer));
+    addToSubColumns(subColumnName, value, serializer, globalTtl);
+  }
+  
+  
+  private <V> void addToSubColumns(N subColumnName, V value, Serializer<V> valueSerializer, int ttl) { 
+    HColumn<N,V> col = columnFactory.createColumn(subColumnName, value, template.getSubSerializer(), valueSerializer); 
+    
+    if(ttl > DEF_TTL) { 
+      col.setTtl(globalTtl); 
+    }
+    
+    subColumns.add(col); 
   }
 }
