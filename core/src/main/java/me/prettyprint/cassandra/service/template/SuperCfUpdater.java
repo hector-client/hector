@@ -172,7 +172,7 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
   private <V> void addToSubColumns(N subColumnName, V value, Serializer<V> valueSerializer, int ttl) { 
     HColumn<N,V> col = columnFactory.createColumn(subColumnName, value, template.getSubSerializer(), valueSerializer); 
     
-    if(ttl > -1) { 
+    if(ttl > DEF_TTL) { 
       col.setTtl(globalTtl); 
     }
     

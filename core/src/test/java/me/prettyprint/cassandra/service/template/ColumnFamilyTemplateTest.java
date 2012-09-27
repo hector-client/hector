@@ -92,6 +92,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     
     updater.setBoolean("unexpired_bool", true); 
     updater.setBoolean("expired_bool", true, 1); 
+   
     
     template.update(updater); 
     
@@ -105,7 +106,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     HColumn<String,ByteBuffer> expiredStringCol = wrapper.getColumn("expired_string"); 
     assertNull(expiredStringCol);
     
-    HColumn<String,ByteBuffer> expiredBooleanCol = wrapper.getColumn("expired_string"); 
+    HColumn<String,ByteBuffer> expiredBooleanCol = wrapper.getColumn("expired_bool"); 
     assertNull(expiredBooleanCol);
   }
 

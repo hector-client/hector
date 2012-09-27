@@ -161,12 +161,13 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
   private <V> void addInsertion(N columnName, V value, Serializer<V> valueSerializer, int ttl) { 
     HColumn<N,V> column = columnFactory.createColumn(columnName, value, clock, template.getTopSerializer(), valueSerializer);
     
-    if(ttl > -1) { 
+    if(ttl > DEF_TTL) { 
       column.setTtl(ttl);
-    }
+    } 
     
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
+  
   public <V> void setColumn(HColumn<N, V> column) {
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }

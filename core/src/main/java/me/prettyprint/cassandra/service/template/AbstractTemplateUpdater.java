@@ -8,19 +8,22 @@ import me.prettyprint.hector.api.mutation.Mutator;
 
 public abstract class AbstractTemplateUpdater<K,N> {
 
+  protected static final int DEF_TTL = -1; 
+  
   protected List<K> keys;
   protected int keyPos = 0;
   protected ColumnFactory columnFactory;
   protected AbstractColumnFamilyTemplate<K,N> template;
   protected Mutator<K> mutator;
   protected long clock;
-  protected int globalTtl = -1; 
+  protected int globalTtl;   
   
   public AbstractTemplateUpdater(AbstractColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory, Mutator<K> mutator) {
     this.template = template;
     this.columnFactory = columnFactory;
     this.mutator = mutator;
     this.clock = template.getClock();
+    this.globalTtl = DEF_TTL; 
   }
   
   public AbstractTemplateUpdater<K,N> addKey(K key) {
