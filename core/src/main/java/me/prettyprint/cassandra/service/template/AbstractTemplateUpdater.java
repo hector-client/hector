@@ -8,7 +8,7 @@ import me.prettyprint.hector.api.mutation.Mutator;
 
 public abstract class AbstractTemplateUpdater<K,N> {
 
-  protected static final int DEF_TTL = -1; 
+  protected static final int DEF_TTL = 0; 
   
   protected List<K> keys;
   protected int keyPos = 0;
