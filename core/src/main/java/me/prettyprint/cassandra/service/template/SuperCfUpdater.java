@@ -127,54 +127,55 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
     mutator.addSubDelete(getCurrentKey(), template.getColumnFamily(), 
         getCurrentSuperColumn(), columnName, template.getTopSerializer(), template.getSubSerializer());
   }
-
+  
   public void setString(N subColumnName, String value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), StringSerializer.get() ));
+    addToSubColumns(subColumnName, value, StringSerializer.get(), globalTtl); 
   }
 
   public void setUUID(N subColumnName, UUID value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), UUIDSerializer.get()));
+    addToSubColumns(subColumnName, value, UUIDSerializer.get(), globalTtl);
   }
 
   public void setLong(N subColumnName, Long value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), LongSerializer.get()));
+    addToSubColumns(subColumnName, value, LongSerializer.get(), globalTtl);
   }
 
   public void setInteger(N subColumnName, Integer value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), IntegerSerializer.get()));
+    addToSubColumns(subColumnName, value, IntegerSerializer.get(), globalTtl);
   }
 
   public void setBoolean(N subColumnName, Boolean value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), BooleanSerializer.get())); 
+    addToSubColumns(subColumnName, value, BooleanSerializer.get(), globalTtl);
   }
 
   public void setByteArray(N subColumnName, byte[] value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), BytesArraySerializer.get()));
+    addToSubColumns(subColumnName, value, BytesArraySerializer.get(), globalTtl);
   }
 
   public void setByteBuffer(N subColumnName, ByteBuffer value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), ByteBufferSerializer.get()));
+    addToSubColumns(subColumnName, value, ByteBufferSerializer.get(), globalTtl);
   }
   
   public void setDate(N subColumnName, Date value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), DateSerializer.get()));
+    addToSubColumns(subColumnName, value, DateSerializer.get(), globalTtl);
   }
   
   public void setDouble(N subColumnName, Double value) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), DoubleSerializer.get()));
+    addToSubColumns(subColumnName, value, DoubleSerializer.get(), globalTtl);
   }
   
   public <V> void setValue(N subColumnName, V value, Serializer<V> serializer) {
-    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
-        template.getSubSerializer(), serializer));
+    addToSubColumns(subColumnName, value, serializer, globalTtl);
+  }
+  
+  
+  private <V> void addToSubColumns(N subColumnName, V value, Serializer<V> valueSerializer, int ttl) { 
+    HColumn<N,V> col = columnFactory.createColumn(subColumnName, value, template.getSubSerializer(), valueSerializer); 
+    
+    if(ttl > DEF_TTL) { 
+      col.setTtl(globalTtl); 
+    }
+    
+    subColumns.add(col); 
   }
 }

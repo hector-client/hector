@@ -7,11 +7,15 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.hector.api.beans.HColumn;
+
 import org.apache.cassandra.thrift.IndexOperator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
@@ -76,6 +80,34 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(ts2,wrapper.getColumn("curdate").getClock());
     assertEquals(ts3,wrapper.getColumn("longval").getClock());
     assertEquals(3,wrapper.getColumnNames().size());
+  }
+    
+  @Test 
+  public void testTtl() throws InterruptedException { 
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace,"Standard1", se, se);
+    
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("test_ttl_key1"); 
+    updater.setString("expired_string", "value1",1);
+    updater.setString("unexpired_string", "value2"); 
+    
+    updater.setBoolean("unexpired_bool", true); 
+    updater.setBoolean("expired_bool", true, 1); 
+   
+    
+    template.update(updater); 
+    
+    Thread.sleep(1000); 
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("test_ttl_key1"); 
+    
+    HColumn<String,ByteBuffer> col = wrapper.getColumn("unexpired_string");
+    assertNotNull(col); 
+    assertNotNull(col.getValue()); 
+    
+    HColumn<String,ByteBuffer> expiredStringCol = wrapper.getColumn("expired_string"); 
+    assertNull(expiredStringCol);
+    
+    HColumn<String,ByteBuffer> expiredBooleanCol = wrapper.getColumn("expired_bool"); 
+    assertNull(expiredBooleanCol);
   }
 
 
