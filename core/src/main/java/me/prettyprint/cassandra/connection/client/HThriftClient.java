@@ -38,7 +38,6 @@ public class HThriftClient implements HClient {
   protected String keyspaceName;
   private long useageStartTime;
 
-  protected TSocket socket;
   protected TTransport transport;
   protected Cassandra.Client cassandraClient;
 
@@ -121,7 +120,7 @@ public class HThriftClient implements HClient {
       log.debug("Creating a new thrift connection to {}", cassandraHost);
     }
 
-    socket = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
+    TSocket socket = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
     if ( cassandraHost.getUseSocketKeepalive() ) {
       try {
         socket.getSocket().setKeepAlive(true);
@@ -245,20 +244,5 @@ public class HThriftClient implements HClient {
   public void setAuthenticated(Map<String, String> credentials) {
     clearAuthentication();
     this.credentials.putAll(credentials);
-  }
-
-  public boolean testClient(int timeout) {
-    try {
-      //test client with "low" timeout
-      socket.setTimeout(timeout);
-      getCassandra().describe_cluster_name();
-    } catch (TException te) {
-      log.info("connection " + socket.toString() + " tested bad with timeout of " + timeout + " ms");
-      close();
-      return false;
-    }
-    //restore timeout if test was successful
-    socket.setTimeout(cassandraHost.getCassandraThriftSocketTimeout());
-    return true;
   }
 }
