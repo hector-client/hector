@@ -15,7 +15,6 @@ import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
-import org.apache.thrift.TException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,19 +63,6 @@ public class ConcurrentHClientPool implements HClientPool {
 
   @Override
   public HClient borrowClient() throws HectorException {
-
-    HClient client = borrowClientImpl();
-    //TODO: make timeout configurable, 0 to disable
-    while ( !client.testClient(100) ) {
-      client.close();
-      releaseClient(client);
-      client = borrowClientImpl();
-    }
-    return client;
-  }
-
-  protected HClient borrowClientImpl() throws HectorException {
-
     if ( !active.get() ) {
       throw new HInactivePoolException("Attempt to borrow on in-active pool: " + getName());
     }
