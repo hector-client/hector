@@ -34,13 +34,17 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.UUIDType");
   public static final ComparatorType COUNTERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CounterColumnType");
+  public static final ComparatorType DOUBLETYPE = new ComparatorType(
+		  "org.apache.cassandra.db.marshal.DoubleType");
+  public static final ComparatorType FLOATTYPE = new ComparatorType(
+		  "org.apache.cassandra.db.marshal.FloatType");  
 
   private static final Map<String, ComparatorType> valuesMap;
 
   static {
     ComparatorType[] types = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
         LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
+        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE, DOUBLETYPE, FLOATTYPE };
 
     ImmutableMap.Builder<String, ComparatorType> builder =
         new ImmutableMap.Builder<String, ComparatorType>();
