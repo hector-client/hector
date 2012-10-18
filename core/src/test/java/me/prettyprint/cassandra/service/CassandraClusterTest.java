@@ -1,7 +1,10 @@
 package me.prettyprint.cassandra.service;
 
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
@@ -152,6 +155,26 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
     KeyspaceDefinition fromCluster = cassandraCluster.describeKeyspace("DynKeyspace2");
     assertEquals(2,fromCluster.getReplicationFactor());
     cassandraCluster.dropKeyspace("DynKeyspace2");
+  }
+  
+  @Test
+  public void testAddColumnDefinitionWhenNoneOnConstructor() {
+		ColumnFamilyDefinition cfDef = HFactory.createColumnFamilyDefinition("blah-ks", "blah-cf", ComparatorType.BYTESTYPE);
+		
+		assertSame( Collections.emptyList(), cfDef.getColumnMetadata());
+
+		//
+		// column defs are not required but are nice for validating data and displaying meaningful values in
+		// cassandra-cli
+		//
+
+		BasicColumnDefinition cd = new BasicColumnDefinition();
+		cd.setName(ByteBuffer.wrap("colname".getBytes()));
+		cd.setValidationClass("org.apache.cassandra.db.marshal.UTF8Type");
+		cfDef.addColumnDefinition(cd);
+
+		assertEquals( 1, cfDef.getColumnMetadata().size());
+		assertEquals( cd, cfDef.getColumnMetadata().get(0));
   }
   
   @Test

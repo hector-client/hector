@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -376,6 +377,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   
   @Override
   public void addColumnDefinition(ColumnDefinition columnDefinition) {
+	if ( null == this.columnMetadata || this.columnMetadata.isEmpty()) {
+      this.columnMetadata = new LinkedList<ColumnDefinition>();
+	}
     this.columnMetadata.add(columnDefinition);
   }
 
