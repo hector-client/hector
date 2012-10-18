@@ -15,6 +15,7 @@ import me.prettyprint.cassandra.serializers.ByteBufferSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -160,6 +161,11 @@ public class SuperCfUpdater<K,SN,N> extends AbstractTemplateUpdater<K, N> {
     addToSubColumns(subColumnName, value, DateSerializer.get(), globalTtl);
   }
   
+  public void setFloat(N subColumnName, Float value) {
+    subColumns.add(columnFactory.createColumn(subColumnName, value, clock,
+        template.getSubSerializer(), FloatSerializer.get()));
+  }
+
   public void setDouble(N subColumnName, Double value) {
     addToSubColumns(subColumnName, value, DoubleSerializer.get(), globalTtl);
   }
