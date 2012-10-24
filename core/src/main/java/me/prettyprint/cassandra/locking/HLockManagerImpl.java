@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -46,9 +49,12 @@ import com.google.common.collect.Maps;
  */
 public class HLockManagerImpl extends AbstractLockManager {
 
+  private static final Logger logger = LoggerFactory.getLogger(HLockManagerImpl.class);
   
-  private final ScheduledExecutorService scheduler;
+  private ScheduledExecutorService scheduler;
   private long lockTtl = 5000;
+  private int colTtl = (int) (lockTtl/1000);
+  
   
 
   public HLockManagerImpl(Cluster cluster, HLockManagerConfigurator hlc) {
@@ -143,6 +149,14 @@ public class HLockManagerImpl extends AbstractLockManager {
     }
 
     ((HLockImpl) lock).setAcquired(true);
+  }
+  
+ 
+  /**
+   * Here for testing purposes only, this should never really be invoked
+   */
+  public void shutdownScheduler(){
+    scheduler.shutdownNow();
   }
   
   private void cleanupStates(HLock lock){
@@ -287,7 +301,7 @@ public class HLockManagerImpl extends AbstractLockManager {
   }
 
   private HColumn<String, String> createColumnForLock(String name, String value) {
-    return createColumn(name, value, lockManagerConfigurator.getLocksTTLInMillis(), StringSerializer.get(),
+    return createColumn(name, value, keyspace.createClock(), colTtl, StringSerializer.get(),
         StringSerializer.get());
   }
 
@@ -328,11 +342,14 @@ public class HLockManagerImpl extends AbstractLockManager {
      */
     @Override
     public Void call() throws Exception {
+      logger.debug("heartbeat firing for lock {}", lock);
+      
       //update the lock
       LockState state = states.get(lock);
       
       //Lock has been removed
       if(state == null){
+        logger.debug("Lock state for lock {} has been removed.  Short circuiting", lock);
         return null;
       }
       
