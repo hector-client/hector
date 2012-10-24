@@ -11,9 +11,13 @@ import me.prettyprint.hector.api.exceptions.HectorException;
  */
 public class HLockTimeoutException extends HectorException {
 
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+
   public HLockTimeoutException(String msg) {
     super(msg);
-    // TODO Auto-generated constructor stub
   }
 
 }

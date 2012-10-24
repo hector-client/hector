@@ -38,17 +38,32 @@ public interface HLockManager {
 
   /**
    * Acquires a lock represented by lock.getPath and filling up the lockId with
-   * a unique client/caller lock id.
+   * a unique client/caller lock id.  This method will block until a lock is returned, or timeout is reached
+   * 
+   * @param lock
+   *          a lock object with path identifying the lock path to lock on
+   * @param timeout
+   *          The time to wait for acquiring a lock in milliseconds
+   * @throws HLockTimeoutException
+   *           if the waiting time for acquiring a lock has elapsed
+   * @throws HectorException
+   *           if any other error has occurred
+   */
+  void acquire(HLock lock, long timeout);
+
+  /**
+   * Acquires a lock represented by lock.getPath and filling up the lockId with
+   * a unique client/caller lock id.  This method will block until a lock is returned
    * 
    * @param lock
    *          a lock object with path identifying the lock path to lock on
    * @throws HLockTimeoutException
-   *           if the waiting time for acquiring a lot has elapsed
+   *           if the waiting time for acquiring a lock has elapsed
    * @throws HectorException
    *           if any other error has occurred
    */
   void acquire(HLock lock);
-
+  
   /**
    * Releases the lock
    * 

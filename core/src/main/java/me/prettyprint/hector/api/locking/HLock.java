@@ -7,6 +7,7 @@ package me.prettyprint.hector.api.locking;
  * Lock("/Users/patricioe")
  * 
  * @author patricioe (Patricio Echague - patricioe@gmail.com)
+ * @author tnine (Todd Nine)
  * 
  */
 public interface HLock {
@@ -45,5 +46,17 @@ public interface HLock {
    * @return whether this lock as been successfully acquired or not
    */
   boolean isAcquired();
+  
+  /**
+   * Set the observer to receive events 
+   * @param observer
+   */
+  void setObserver(HLockObserver observer);
+  
+  /**
+   * Get the observer for this lock
+   * @return
+   */
+  HLockObserver getObserver();
 
 }

@@ -1,13 +1,13 @@
 package me.prettyprint.cassandra.locking;
 
-import java.util.Comparator;
-
 import me.prettyprint.hector.api.locking.HLock;
+import me.prettyprint.hector.api.locking.HLockObserver;
 
 /**
  * Default Lock implementation of {@link HLock}
  * 
  * @author patricioe (Patricio Echague - patricioe@gmail.com)
+ * @author tnine (Todd Nine)
  * 
  */
 public class HLockImpl implements HLock {
@@ -15,6 +15,7 @@ public class HLockImpl implements HLock {
   private String lockPath;
   private String lockId;
   private boolean acquired = false;
+  private HLockObserver observer;
 
   public HLockImpl(String lockPath, String lockId) {
     this.lockPath = lockPath;
@@ -43,7 +44,6 @@ public class HLockImpl implements HLock {
 
   @Override
   public boolean isAcquired() {
-
     return acquired;
   }
 
@@ -51,6 +51,18 @@ public class HLockImpl implements HLock {
     this.acquired = acquired;
   }
 
+  @Override
+  public void setObserver(HLockObserver observer) {
+      this.observer = observer;
+  }
+
+  /**
+   * @return the observer
+   */
+  public HLockObserver getObserver() {
+      return observer;
+  }
+  
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -81,6 +93,11 @@ public class HLockImpl implements HLock {
       return false;
     return true;
   }
+
+
+
+
+
   
   
 

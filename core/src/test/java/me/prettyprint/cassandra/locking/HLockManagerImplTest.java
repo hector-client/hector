@@ -21,11 +21,12 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
 
   Cluster cluster;
   HLockManager lm;
+  HLockManagerConfigurator hlc;
 
   @Before
   public void setupTest() {
     cluster = getOrCreateCluster("MyCluster", getCHCForTest());
-    HLockManagerConfigurator hlc = new HLockManagerConfigurator();
+    hlc = new HLockManagerConfigurator();
     hlc.setReplicationFactor(1);
     lm = new HLockManagerImpl(cluster, hlc);
     lm.init();
@@ -40,6 +41,32 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
+  public void testLockExpiration() throws InterruptedException{
+      HLock lock = lm.createLock("/Testtimeout");
+      lm.acquire(lock);
+      
+      assertTrue(lock.isAcquired());
+      
+      //Force timeout if heartbeat isn't working
+      Thread.sleep(hlc.getLocksTTLInMillis()+2000);
+      
+      HLock newLock = lm.createLock("/Testtimeout");
+      
+      
+      boolean locked = false;
+      
+      try{
+        lm.acquire(newLock, 0);
+      }catch(HLockTimeoutException te){
+        locked = true;
+      }
+      
+      assertTrue(lock.isAcquired());
+      assertTrue(locked);
+      
+  }
+  
+  @Test
   public void testNonConcurrentLockUnlock() {
     HLock lock = lm.createLock("/Users/patricioe");
     lm.acquire(lock);
@@ -48,13 +75,20 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     
     try {
       HLock lock2 = lm.createLock("/Users/patricioe");
-      lm.acquire(lock2);
+      lm.acquire(lock2, 1000);
       fail();
     } catch (HLockTimeoutException e) {
-      // ok
+      // ok, this should happen
     }
       
     lm.release(lock);
+    
+    assertFalse(lock.isAcquired());
+    
+    //test we can re-acquire it
+    HLock nextLock = lm.createLock("/Users/patricioe");
+    lm.acquire(nextLock, 0);
+    assertTrue(nextLock.isAcquired());
   }
 
   private boolean verifyCFCreation(List<ColumnFamilyDefinition> cfDefs) {

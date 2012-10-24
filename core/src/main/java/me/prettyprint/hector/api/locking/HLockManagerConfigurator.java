@@ -16,6 +16,7 @@ public class HLockManagerConfigurator {
   private long locksTTLInMillis = 5000L;
   private long backOffRetryDelayInMillis = 100L;
   private int replicationFactor = 3;
+  private int numberOfLockObserverThreads = 1;
 
   public String getLockManagerCF() {
     return lockManagerCF;
@@ -65,6 +66,20 @@ public class HLockManagerConfigurator {
     this.replicationFactor = replicationFactor;
   }
 
+  /**
+   * @return the numberOfLockObserverThreads
+   */
+  public int getNumberOfLockObserverThreads() {
+    return numberOfLockObserverThreads;
+  }
+
+  /**
+   * @param numberOfLockObserverThreads the numberOfLockObserverThreads to set
+   */
+  public void setNumberOfLockObserverThreads(int numberOfLockObserverThreads) {
+    this.numberOfLockObserverThreads = numberOfLockObserverThreads;
+  }
+
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder();
@@ -80,6 +95,8 @@ public class HLockManagerConfigurator {
     builder.append(backOffRetryDelayInMillis);
     builder.append(", replicationFactor=");
     builder.append(replicationFactor);
+    builder.append(", numberOfLockObserverThreads=");
+    builder.append(numberOfLockObserverThreads);
     builder.append("]");
     return builder.toString();
   }

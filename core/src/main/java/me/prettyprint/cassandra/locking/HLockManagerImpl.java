@@ -3,10 +3,18 @@ package me.prettyprint.cassandra.locking;
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 
+import java.sql.Time;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,6 +26,8 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.locking.HLock;
 import me.prettyprint.hector.api.locking.HLockManagerConfigurator;
+import me.prettyprint.hector.api.locking.HLockObserver;
+import me.prettyprint.hector.api.locking.HLockTimeoutException;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
@@ -31,38 +41,45 @@ import com.google.common.collect.Maps;
  * Morton and Patricio Echague.
  * 
  * @author patricioe (Patricio Echague - patricioe@gmail.com)
+ * @author tnine (Todd Nine)
  * 
  */
 public class HLockManagerImpl extends AbstractLockManager {
 
-  public HLockManagerImpl(Cluster cluster, Keyspace keyspace) {
-    super(cluster, keyspace);
-  }
-
-  public HLockManagerImpl(Cluster cluster, Keyspace keyspace, HLockManagerConfigurator lockManagerConfigurator) {
-    super(cluster, keyspace, lockManagerConfigurator);
-  }
-
-  public HLockManagerImpl(Cluster cluster) {
-    super(cluster);
-  }
+  
+  private final ScheduledExecutorService scheduler;
+  private long lockTtl = 5000;
+  
 
   public HLockManagerImpl(Cluster cluster, HLockManagerConfigurator hlc) {
     super(cluster, hlc);
+    scheduler = Executors.newScheduledThreadPool(lockManagerConfigurator.getNumberOfLockObserverThreads());
+    lockTtl = lockManagerConfigurator.getLocksTTLInMillis();
+  }
+
+  /* (non-Javadoc)
+   * @see me.prettyprint.hector.api.locking.HLockManager#acquire(me.prettyprint.hector.api.locking.HLock)
+   */
+  @Override
+  public void acquire(HLock lock) {
+    acquire(lock, Long.MAX_VALUE);
   }
 
   /**
    * {@inheritDoc}
    */
   @Override
-  public void acquire(HLock lock) {
+  public void acquire(HLock lock, long timeout) {
     verifyPrecondition(lock);
 
     // Generate the internal lock id (CLID)
     maybeSetInternalLockId(lock);
 
     writeLock(lock);
-
+    
+    startHeartBeat(lock);
+    
+    
     // Pairs of type <LockId, CommandSeparatedSeenLockIds>
     Map<String, String> canBeEarlier = readExistingLocks(lock.getPath());
 
@@ -75,6 +92,7 @@ public class HLockManagerImpl extends AbstractLockManager {
     String nextWaitingClientId = null;
     final long SAY_CONTINUE = 15 * 1000L;
     long last_write_acks = 0L;
+    long waitStart = System.currentTimeMillis();
 
     while (true) {
       boolean recv_all_acks = true;
@@ -96,6 +114,7 @@ public class HLockManagerImpl extends AbstractLockManager {
         // sort them
         Collections.sort(canBeEarlierSortedList);
         nextWaitingClientId = canBeEarlierSortedList.get(0);
+       
         // check if we are the first ones
         if (nextWaitingClientId.equals(lock.getLockId())) {
           break;
@@ -110,14 +129,43 @@ public class HLockManagerImpl extends AbstractLockManager {
         last_write_acks = System.currentTimeMillis();
       }
 
+      //We can't get the lock, and we've timed out, give out
+      if(waitStart+timeout < System.currentTimeMillis()){
+        cleanupStates(lock);
+        throw new HLockTimeoutException(String.format("Unable to get lock before %d ", waitStart+timeout));
+        
+      }
+      
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
-
+      
       // Refresh the list
       canBeEarlier = readExistingLocks(lock.getPath(), canBeEarlierSortedList);
     }
 
     ((HLockImpl) lock).setAcquired(true);
   }
+  
+  private void cleanupStates(HLock lock){
+    LockState state = states.get(lock);
+    
+    if(state == null){
+      return;
+    }
+    
+    state.heartbeat.cancel(false);
+    
+    states.remove(lock);
+  }
+  
+  private void startHeartBeat(HLock lock){
+    LockState state = new LockState();
+    state.heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl/2, TimeUnit.MILLISECONDS);
+//    state.timeout = scheduler.schedule(new Timeout(lock), timeout, TimeUnit.MILLISECONDS);
+    
+    states.put(lock, state);
+  }
+
+
 
 
   private void smartWait(long sleepTime) {
@@ -155,7 +203,9 @@ public class HLockManagerImpl extends AbstractLockManager {
   @Override
   public void release(HLock lock) {
     verifyPrecondition(lock);
+    cleanupStates(lock);
     deleteLock(lock);
+    ((HLockImpl)lock).setAcquired(false);
   }
 
   /**
@@ -196,6 +246,11 @@ public class HLockManagerImpl extends AbstractLockManager {
     mutator.addDeletion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(), lock.getLockId(),
         StringSerializer.get());
     mutator.execute();
+    
+    /**
+     * Remove the lock from states
+     */
+    states.remove(lock);
   }
 
   /**
@@ -240,4 +295,93 @@ public class HLockManagerImpl extends AbstractLockManager {
   public HLock createLock(String lockPath) {
     return new HLockImpl(lockPath, generateLockId());
   }
+  
+  
+  private Map<HLock, LockState> states = new HashMap<HLock, LockState>();
+  
+  /**
+   * Internal state for a lock.  Contains the last seen keys, as well as futures for cancellation
+   * @author tnine
+   *
+   */
+  private class LockState{
+      private Set<String> seenLocks;
+      Future<Void> heartbeat;
+      Future<Void> timeout;
+  }
+  
+  /**
+   * Simple scheduled class to write heart beats to the column families.  This heart beat should be used to signal we're still waiting for a lock
+   * @author tnine
+   *
+   */
+  private class Heartbeat implements Callable<Void>{
+
+    private HLock lock;
+    
+    private Heartbeat(HLock lock){
+      this.lock = lock;
+    }
+    
+    /* (non-Javadoc)
+     * @see java.util.concurrent.Callable#call()
+     */
+    @Override
+    public Void call() throws Exception {
+      //update the lock
+      LockState state = states.get(lock);
+      
+      //Lock has been removed
+      if(state == null){
+        return null;
+      }
+      
+      writeLock(lock, state.seenLocks);
+      state.heartbeat = scheduler.schedule(this, lockTtl/2, TimeUnit.MILLISECONDS);
+      return null;
+    }
+    
+  }
+//  
+//  /**
+//   * Fired when a lock times out waiting
+//   * @author tnine
+//   *
+//   */
+//  private class Timeout implements Callable<Void>{
+//    private HLock lock;
+//    
+//    private Timeout(HLock lock){
+//      this.lock = lock;
+//    }
+//
+//    /* (non-Javadoc)
+//     * @see java.util.concurrent.Callable#call()
+//     */
+//    @Override
+//    public Void call() throws Exception {
+//      LockState state = states.get(lock);
+//      
+//      //do nothing, it's already been removed
+//      if(state == null){
+//        return null;
+//      }
+//      
+//      //cancel the heartbeat
+//      state.heartbeat.cancel(false);
+//      
+//      //delete the pending lock
+//      deleteLock(lock);
+//      
+//      //signal we've timed out to the observer
+//      
+//      HLockObserver observer = lock.getObserver();
+//      
+//      if(observer != null){
+//        observer.timeout(lock);
+//      }
+//      
+//      return null;
+//    }
+//  }
 }
