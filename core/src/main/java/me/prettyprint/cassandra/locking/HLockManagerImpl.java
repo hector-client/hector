@@ -53,7 +53,7 @@ public class HLockManagerImpl extends AbstractLockManager {
   
   private ScheduledExecutorService scheduler;
   private long lockTtl = 5000;
-  private int colTtl = (int) (lockTtl/1000);
+  private int colTtl = 5;
   
   
 
@@ -61,6 +61,7 @@ public class HLockManagerImpl extends AbstractLockManager {
     super(cluster, hlc);
     scheduler = Executors.newScheduledThreadPool(lockManagerConfigurator.getNumberOfLockObserverThreads());
     lockTtl = lockManagerConfigurator.getLocksTTLInMillis();
+    colTtl = (int) (lockTtl/1000);
   }
 
   /* (non-Javadoc)
