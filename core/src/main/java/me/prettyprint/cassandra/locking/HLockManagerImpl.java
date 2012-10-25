@@ -84,11 +84,12 @@ public class HLockManagerImpl extends AbstractLockManager {
 
     writeLock(lock);
     
-    startHeartBeat(lock);
-    
-    
     // Pairs of type <LockId, CommandSeparatedSeenLockIds>
     Map<String, String> canBeEarlier = readExistingLocks(lock.getPath());
+    
+    
+    startHeartBeat(lock, canBeEarlier.keySet());
+   
 
     // If it is just me...
     if (canBeEarlier.size() <= 1) {
@@ -172,9 +173,10 @@ public class HLockManagerImpl extends AbstractLockManager {
     states.remove(lock);
   }
   
-  private void startHeartBeat(HLock lock){
+  private void startHeartBeat(HLock lock, Set<String> seenLocks){
     LockState state = new LockState();
     state.heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl/2, TimeUnit.MILLISECONDS);
+    state.seenLocks = seenLocks;
 //    state.timeout = scheduler.schedule(new Timeout(lock), timeout, TimeUnit.MILLISECONDS);
     
     states.put(lock, state);
