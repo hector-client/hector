@@ -69,7 +69,7 @@ public class HLockManagerImpl extends AbstractLockManager {
    */
   @Override
   public void acquire(HLock lock) {
-    acquire(lock, Long.MAX_VALUE);
+    acquire(lock, Long.MAX_VALUE-System.currentTimeMillis()-10000);
   }
 
   /**
@@ -140,6 +140,7 @@ public class HLockManagerImpl extends AbstractLockManager {
       //We can't get the lock, and we've timed out, give out
       if(waitStart+timeout < System.currentTimeMillis()){
         cleanupStates(lock);
+        deleteLock(lock);
         throw new HLockTimeoutException(String.format("Unable to get lock before %d ", waitStart+timeout));
         
       }
@@ -261,7 +262,7 @@ public class HLockManagerImpl extends AbstractLockManager {
   private void deleteLock(HLock lock) {
     Mutator<String> mutator = createMutator(keyspace, StringSerializer.get());
     mutator.addDeletion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(), lock.getLockId(),
-        StringSerializer.get());
+        StringSerializer.get(), keyspace.createClock());
     mutator.execute();
     
     /**

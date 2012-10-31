@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 
@@ -73,6 +74,8 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     assertFalse(newLock.isAcquired());
     assertTrue(lockTimedOut);
 
+    lm.release(lock);
+
   }
 
   @Test
@@ -106,18 +109,20 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     assertFalse(lockTimedOut);
     assertTrue(newLock.isAcquired());
 
+    lm.release(newLock);
+
   }
 
-  
   @Test
   public void testNonConcurrentLockUnlock() {
-    HLock lock = lm.createLock("/Users/patricioe");
+    HLock lock = lm.createLock("/testNonConcurrentLockUnlock");
     lm.acquire(lock);
 
     assertTrue(lock.isAcquired());
 
+    //should time out.  Part of timing out is cleanup, we want to be sure we can immediately acquire a lock on the same path after timing out
     try {
-      HLock lock2 = lm.createLock("/Users/patricioe");
+      HLock lock2 = lm.createLock("/testNonConcurrentLockUnlock");
       lm.acquire(lock2, 1000);
       fail();
     } catch (HLockTimeoutException e) {
@@ -129,20 +134,21 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     assertFalse(lock.isAcquired());
 
     // test we can re-acquire it
-    HLock nextLock = lm.createLock("/Users/patricioe");
+    HLock nextLock = lm.createLock("/testNonConcurrentLockUnlock");
     lm.acquire(nextLock, 0);
     assertTrue(nextLock.isAcquired());
+
+    lm.release(nextLock);
   }
-  
+
   @Test
   public void testNoConflict() throws InterruptedException {
-    LockWorkerPool pool = new LockWorkerPool(1000, lm);
-    pool.runEm("/testNoConflict");
-    
-    
+    LockWorkerPool pool = new LockWorkerPool(100, "/testNoConflict", lm);
+    pool.go();
+
+    assertFalse(pool.isFailed());
+
   }
-  
- 
 
   private boolean verifyCFCreation(List<ColumnFamilyDefinition> cfDefs) {
     for (ColumnFamilyDefinition cfDef : cfDefs) {
@@ -154,25 +160,30 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
 
   private static class LockWorkerPool {
     private int numberLocks;
-    private Executor executor;
-    private CountDownLatch startLatch;
-    private CountDownLatch finishLatch;
+    private String path;
     private HLockManager lm;
 
-    
-    private LockWorkerPool(int numberLocks, HLockManager lm) {
+    private ExecutorService executor;
+    private CountDownLatch startLatch;
+    private CountDownLatch finishLatch;
+    private Semaphore failSemaphore = new Semaphore(1);
+    private boolean failed;
+
+    private LockWorkerPool(int numberLocks, String path, HLockManager lm) {
       this.numberLocks = numberLocks;
+      this.path = path;
       this.lm = lm;
       this.executor = Executors.newFixedThreadPool(8);
       startLatch = new CountDownLatch(1);
       finishLatch = new CountDownLatch(numberLocks);
+      failed = false;
     }
 
-    private void runEm(String lockPath) throws InterruptedException {
+    private void go() throws InterruptedException {
 
       // fire up the executors so they're running and blocking
       for (int i = 0; i < numberLocks; i++) {
-        executor.execute(new LockWorker(lockPath, lm, startLatch, finishLatch));
+        executor.execute(new LockWorker(this));
       }
 
       // now release the latch
@@ -182,27 +193,35 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
       finishLatch.await();
 
     }
-    
-    
+
+    private void setFailed() {
+      failed = true;
+      // kill the test
+      List<Runnable> waiting = executor.shutdownNow();
+
+      // Countdown the finish latch so the test continues
+      for (int i = 0; i < waiting.size() + 1; i++) {
+        finishLatch.countDown();
+      }
+
+    }
+
+    private boolean isFailed() {
+      return failed;
+    }
 
   }
 
   private static class LockWorker implements Runnable {
-    private String path;
-    private HLockManager lm;
-    private CountDownLatch startLatch;
-    private CountDownLatch finishLatch;
+
+    private LockWorkerPool pool;
 
     /**
      * @param path
      * @param lm
      */
-    public LockWorker(String path, HLockManager lm, CountDownLatch startLatch, CountDownLatch finishLatch) {
-      super();
-      this.path = path;
-      this.lm = lm;
-      this.startLatch = startLatch;
-      this.finishLatch = finishLatch;
+    public LockWorker(LockWorkerPool pool) {
+      this.pool = pool;
     }
 
     /*
@@ -212,24 +231,43 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
      */
     @Override
     public void run() {
-      HLock lock = lm.createLock(path);
+      HLock lock = pool.lm.createLock(pool.path);
 
-      // sync up all threads to wait to acquire lock at the same time
       try {
-        startLatch.await();
-      } catch (InterruptedException e) {
+        // sync up all threads to wait to acquire lock at the same time
+        try {
+          pool.startLatch.await();
+        } catch (InterruptedException e) {
+        }
+
+        // get our lock
+        pool.lm.acquire(lock);
+
+        logger.info("Acquired lock {}", lock);
+
+        if (!pool.failSemaphore.tryAcquire()) {
+          pool.setFailed();
+        }
+
+        // sleep for 100 ms, to allow a conflict to occur
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+        }
+
+        // release the semaphore
+        pool.failSemaphore.release();
+
+        // release the lock
+        pool.lm.release(lock);
+      } catch (Exception e) {
+        logger.error("Error when trying to acquire lock", e);
+        pool.setFailed();
+      } finally {
+       
+        pool.finishLatch.countDown();
+
       }
-
-      // get our lock
-      lm.acquire(lock);
-
-      logger.info("Acquired lock {}", lock);
-      
-
-      // release the lock
-      lm.release(lock);
-
-      finishLatch.countDown();
 
     }
 
