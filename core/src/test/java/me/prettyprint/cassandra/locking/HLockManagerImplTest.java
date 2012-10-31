@@ -1,12 +1,13 @@
 package me.prettyprint.cassandra.locking;
 
 import static me.prettyprint.hector.api.factory.HFactory.getOrCreateCluster;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -195,6 +196,8 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     }
 
     private void setFailed() {
+      
+      logger.error("Failed flag set");
       failed = true;
       // kill the test
       List<Runnable> waiting = executor.shutdownNow();
@@ -240,12 +243,15 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
         } catch (InterruptedException e) {
         }
 
+        logger.info("{} trying", lock);
+        
         // get our lock
         pool.lm.acquire(lock);
 
-        logger.info("Acquired lock {}", lock);
+        logger.info("{} acquired", lock);
 
         if (!pool.failSemaphore.tryAcquire()) {
+          logger.error("Acquired semaphore when we shouldn't.  Failing test");
           pool.setFailed();
         }
 
@@ -260,8 +266,10 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
 
         // release the lock
         pool.lm.release(lock);
-      } catch (Exception e) {
-        logger.error("Error when trying to acquire lock", e);
+        
+        logger.info("{} released", lock);
+      } catch (Throwable t) {
+        logger.error("Error when trying to acquire lock", t);
         pool.setFailed();
       } finally {
        

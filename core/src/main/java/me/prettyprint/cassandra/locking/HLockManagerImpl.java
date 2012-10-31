@@ -3,37 +3,33 @@ package me.prettyprint.cassandra.locking;
 import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 
-import java.sql.Time;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.Set;
-import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.beans.ColumnSlice;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.locking.HLock;
 import me.prettyprint.hector.api.locking.HLockManagerConfigurator;
-import me.prettyprint.hector.api.locking.HLockObserver;
 import me.prettyprint.hector.api.locking.HLockTimeoutException;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.SliceQuery;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
@@ -177,7 +173,6 @@ public class HLockManagerImpl extends AbstractLockManager {
   private void startHeartBeat(HLock lock, Set<String> seenLocks){
     LockState state = new LockState();
     state.heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl/2, TimeUnit.MILLISECONDS);
-    state.seenLocks = seenLocks;
 //    state.timeout = scheduler.schedule(new Timeout(lock), timeout, TimeUnit.MILLISECONDS);
     
     states.put(lock, state);
@@ -190,7 +185,9 @@ public class HLockManagerImpl extends AbstractLockManager {
     try {
       Thread.sleep((sleepTime + (long) (Math.random() * sleepTime)));
     } catch (InterruptedException e) {
-      throw new RuntimeException();
+//      throw new RuntimeException();
+      //swallow, we woke up early, not worth re-throwing an exception
+      logger.warn("Interrupted while waiting", e);
     }
   }
 
@@ -199,6 +196,7 @@ public class HLockManagerImpl extends AbstractLockManager {
     String[] seenLocksIds = commaSeparatedLockIds.split(",");
 
     for (int i = 0; i < seenLocksIds.length; i++) {
+      logger.debug("{} comparing to {}", myLockId, seenLocksIds[i]);
       if (seenLocksIds[i].equals(myLockId))
         return true;
     }
@@ -325,7 +323,6 @@ public class HLockManagerImpl extends AbstractLockManager {
   private class LockState{
       private Set<String> seenLocks;
       Future<Void> heartbeat;
-      Future<Void> timeout;
   }
   
   /**
@@ -346,18 +343,36 @@ public class HLockManagerImpl extends AbstractLockManager {
      */
     @Override
     public Void call() throws Exception {
-      logger.debug("heartbeat firing for lock {}", lock);
+      logger.debug("{} heartbeat", lock);
       
       //update the lock
       LockState state = states.get(lock);
       
       //Lock has been removed
       if(state == null){
-        logger.debug("Lock state for lock {} has been removed.  Short circuiting", lock);
+        logger.debug("{} lock state has been removed.  Short circuiting", lock);
+        deleteLock(lock);
         return null;
       }
       
-      writeLock(lock, state.seenLocks);
+      //We're not locked, re-read to get our latest state update for the heartbeat.  If we have the lock, we'll never have to do this, that last state we wrote/read is sufficient
+      if(!lock.isAcquired()){
+        writeLock(lock, readExistingLocks(lock.getPath()).keySet());
+      } else{
+        //we haven't saved the state since we acquired the lock, do it now to prevent furthur reads
+        if(state.seenLocks == null){
+          state.seenLocks = readExistingLocks(lock.getPath()).keySet();
+        }
+        
+        writeLock(lock, state.seenLocks);
+      }
+      
+      
+      
+      
+      
+      
+     
       state.heartbeat = scheduler.schedule(this, lockTtl/2, TimeUnit.MILLISECONDS);
       return null;
     }
