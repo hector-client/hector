@@ -51,12 +51,6 @@
 			<groupId>org.hectorclient</groupId>
 			<artifactId>hector-core</artifactId>
 			<version>1.1-2-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.hectorclient</groupId>
@@ -73,11 +67,6 @@
           <artifactId>jamm</artifactId>
           <scope>test</scope>
       </dependency>   
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>test</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>org.springframework</groupId>

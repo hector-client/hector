@@ -135,11 +135,6 @@
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-log4j12</artifactId>
-        <version>${slf4j.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.slf4j</groupId>
         <artifactId>jul-to-slf4j</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
@@ -148,11 +143,6 @@
         <artifactId>jcl-over-slf4j</artifactId>
         <version>${slf4j.version}</version>
       </dependency>
-      <dependency>
-        <groupId>log4j</groupId>
-        <artifactId>log4j</artifactId>
-        <version>1.2.16</version>
-      </dependency>      
       <!-- common test dependencies -->
       <dependency>
         <groupId>junit</groupId>
@@ -373,7 +363,6 @@
         <configuration>
           <links>
             <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
-            <link>http://logging.apache.org/log4j/docs/api/</link>
           </links>
           <linksource>true</linksource>
           <maxmemory>900m</maxmemory>
