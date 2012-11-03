@@ -6,7 +6,8 @@
 			<param name="ConversionPattern" value="%d{ABSOLUTE} %5p %c{1}:%L - %m%n" />
 		</layout>
 	</appender>
-	 <logger name="me.prettyprint.cassandra.locking" additivity="false">
+	<!-- -->
+	<logger name="me.prettyprint.cassandra.locking" additivity="false">
 		<level value="debug" />
 		<appender-ref ref="stdout" />
 	</logger>

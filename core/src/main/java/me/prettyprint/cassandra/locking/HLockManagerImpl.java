@@ -81,24 +81,28 @@ public class HLockManagerImpl extends AbstractLockManager {
     writeLock(lock);
     
     // Pairs of type <LockId, CommandSeparatedSeenLockIds>
-    Map<String, String> canBeEarlier = readExistingLocks(lock.getPath());
+    Map<String, String> canBeEarlier = readExistingLocks(lock);
     
-    
-    startHeartBeat(lock, canBeEarlier.keySet());
-   
 
     // If it is just me...
     if (canBeEarlier.size() <= 1) {
-      ((HLockImpl) lock).setAcquired(true);
+      setAcquired(lock, canBeEarlier);
       return;
     }
 
     String nextWaitingClientId = null;
-    final long SAY_CONTINUE = 15 * 1000L;
-    long last_write_acks = 0L;
     long waitStart = System.currentTimeMillis();
 
     while (true) {
+      
+      //We can't get the lock, and we've timed out, give up
+      if(waitStart+timeout < System.currentTimeMillis()){
+        cleanupStates(lock);
+        deleteLock(lock);
+        throw new HLockTimeoutException(String.format("Unable to get lock before %d ", waitStart+timeout));
+        
+      }
+      
       boolean recv_all_acks = true;
 
       // Let's see of other nodes know me
@@ -125,40 +129,46 @@ public class HLockManagerImpl extends AbstractLockManager {
         }
       }
 
+     
       // Let everyone know what I have already seen
-      if (System.currentTimeMillis() - last_write_acks > SAY_CONTINUE) {
-        // Write this lock again with the list of Lock Id I have seen
-        writeLock(lock, canBeEarlier.keySet());
-        // Set the flag so we don't do it again
-        last_write_acks = System.currentTimeMillis();
-      }
-
-      //We can't get the lock, and we've timed out, give out
-      if(waitStart+timeout < System.currentTimeMillis()){
-        cleanupStates(lock);
-        deleteLock(lock);
-        throw new HLockTimeoutException(String.format("Unable to get lock before %d ", waitStart+timeout));
-        
-      }
+      writeLock(lock, canBeEarlier.keySet());
       
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
       
       // Refresh the list
-      canBeEarlier = readExistingLocks(lock.getPath(), canBeEarlierSortedList);
+      canBeEarlier = readExistingLocks(lock);
     }
 
     if(logger.isDebugEnabled()){
-      List<String> canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
-      // sort them
-      Collections.sort(canBeEarlierSortedList);
-      
-      String peers = Joiner.on(", ").join(canBeEarlierSortedList);
-      logger.debug("{} acquired lock.  Peers are {}", lock, peers);
+     logLock(lock, canBeEarlier.keySet());
     }
     
-    ((HLockImpl) lock).setAcquired(true);
+    setAcquired(lock, canBeEarlier);
   }
   
+  /**
+   * Start the heartbeat thread before we return
+   * @param lock
+   */
+  private void setAcquired(HLock lock, Map<String, String> canBeEarlier){
+    startHeartBeat(lock);
+   
+    ((HLockImpl) lock).setAcquired(true);
+    
+    if(logger.isDebugEnabled()){
+      logLock(lock, canBeEarlier.keySet());
+    }
+    
+  }
+  
+  private static void logLock(HLock lock, Set<String> earlier){
+    List<String> canBeEarlierSortedList = Lists.newArrayList(earlier);
+    // sort them
+    Collections.sort(canBeEarlierSortedList);
+    
+    String peers = Joiner.on(", ").join(canBeEarlierSortedList);
+    logger.debug("{} acquired lock.  Peers are {}", lock, peers);
+  }
  
   /**
    * Here for testing purposes only, this should never really be invoked
@@ -179,7 +189,7 @@ public class HLockManagerImpl extends AbstractLockManager {
     states.remove(lock);
   }
   
-  private void startHeartBeat(HLock lock, Set<String> seenLocks){
+  private void startHeartBeat(HLock lock){
     LockState state = new LockState();
     state.heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl/2, TimeUnit.MILLISECONDS);
 //    state.timeout = scheduler.schedule(new Timeout(lock), timeout, TimeUnit.MILLISECONDS);
@@ -205,7 +215,6 @@ public class HLockManagerImpl extends AbstractLockManager {
     String[] seenLocksIds = commaSeparatedLockIds.split(",");
 
     for (int i = 0; i < seenLocksIds.length; i++) {
-      logger.debug("{} comparing to {}", myLockId, seenLocksIds[i]);
       if (seenLocksIds[i].equals(myLockId))
         return true;
     }
@@ -285,17 +294,13 @@ public class HLockManagerImpl extends AbstractLockManager {
    *          a lock path
    * @return a list of locks waiting on this lockpath
    */
-  private Map<String, String> readExistingLocks(String lockPath, List<String> columnNames) {
+  private Map<String, String> readExistingLocks(HLock lock) {
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
-        .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lockPath);
+        .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
     
-    if (columnNames == null) {
-      sliceQuery.setRange(null, null, false, Integer.MAX_VALUE);
-    } else {
-      sliceQuery.setColumnNames(columnNames.toArray(new String[columnNames.size()]));
-    }
-
+    sliceQuery.setRange(null, lock.getLockId(), false, Integer.MAX_VALUE);
+   
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
     Map<String, String> result = Maps.newHashMap();
@@ -305,10 +310,6 @@ public class HLockManagerImpl extends AbstractLockManager {
     }
 
     return result;
-  }
-
-  private Map<String, String> readExistingLocks(String path) {
-    return readExistingLocks(path, null);
   }
 
   private HColumn<String, String> createColumnForLock(String name, String value) {
@@ -330,7 +331,6 @@ public class HLockManagerImpl extends AbstractLockManager {
    *
    */
   private class LockState{
-      private Set<String> seenLocks;
       Future<Void> heartbeat;
   }
   
@@ -364,17 +364,8 @@ public class HLockManagerImpl extends AbstractLockManager {
         return null;
       }
       
-      //We're not locked, re-read to get our latest state update for the heartbeat.  If we have the lock, we'll never have to do this, that last state we wrote/read is sufficient
-      if(!lock.isAcquired()){
-        writeLock(lock, readExistingLocks(lock.getPath()).keySet());
-      } else{
-        //we haven't saved the state since we acquired the lock, do it now to prevent furthur reads
-        if(state.seenLocks == null){
-          state.seenLocks = readExistingLocks(lock.getPath()).keySet();
-        }
-        
-        writeLock(lock, state.seenLocks);
-      }
+      writeLock(lock, readExistingLocks(lock).keySet());
+    
       
       
       
