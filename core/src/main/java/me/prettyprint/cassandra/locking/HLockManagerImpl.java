@@ -147,6 +147,15 @@ public class HLockManagerImpl extends AbstractLockManager {
       canBeEarlier = readExistingLocks(lock.getPath(), canBeEarlierSortedList);
     }
 
+    if(logger.isDebugEnabled()){
+      List<String> canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
+      // sort them
+      Collections.sort(canBeEarlierSortedList);
+      
+      String peers = Joiner.on(", ").join(canBeEarlierSortedList);
+      logger.debug("{} acquired lock.  Peers are {}", lock, peers);
+    }
+    
     ((HLockImpl) lock).setAcquired(true);
   }
   
