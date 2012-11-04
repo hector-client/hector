@@ -12,6 +12,8 @@ public final class ComparatorType {
 
   public static final ComparatorType ASCIITYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.AsciiType");
+  public static final ComparatorType BOOLEANTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.BooleanType");
   public static final ComparatorType BYTESTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.BytesType");
   public static final ComparatorType DECIMALTYPE = new ComparatorType(
@@ -42,7 +44,7 @@ public final class ComparatorType {
   private static final Map<String, ComparatorType> valuesMap;
 
   static {
-    ComparatorType[] types = { ASCIITYPE, BYTESTYPE, DECIMALTYPE, FLOATTYPE, INTEGERTYPE,
+    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DECIMALTYPE, FLOATTYPE, INTEGERTYPE,
         LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
         UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
 
