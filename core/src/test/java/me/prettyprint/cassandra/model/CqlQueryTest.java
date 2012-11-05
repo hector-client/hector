@@ -56,12 +56,23 @@ public class CqlQueryTest extends BaseEmbededServerSetupTest {
     assertNotNull(rows.getList().get(0).getColumnSlice().getColumnByName("KEY"));
     assertEquals(6,rows.getCount());    
   }
-    
+
+   @Test
+  public void testSimpleSelect20() {
+    CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
+    cqlQuery.setQuery("select birth .. birthzz from StandardLong1");
+    cqlQuery.setCqlVersion("2.0.0");
+    QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
+    CqlRows<String, String, Long> rows = result.get();
+    assertEquals(6,rows.getCount());    
+  }
+
   @Test
   public void testSelectAllSuppressesKeyColumn() {
     CqlQuery<String,String,Long> cqlQuery = new CqlQuery<String,String,Long>(keyspace, se, se, le);
     cqlQuery.setQuery("select * from StandardLong1");
     cqlQuery.setSuppressKeyInColumns(true);
+
     QueryResult<CqlRows<String,String,Long>> result = cqlQuery.execute();
     CqlRows<String, String, Long> rows = result.get();
     // check that we contain a 'key' column

@@ -30,6 +30,7 @@ public abstract class Operation<T> {
   public ConsistencyLevelPolicy consistencyLevelPolicy;
   
   public String keyspaceName;
+  
 
   public Map<String, String> credentials;
   
