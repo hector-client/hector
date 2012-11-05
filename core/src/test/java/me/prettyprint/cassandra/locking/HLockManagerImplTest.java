@@ -41,6 +41,7 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     hlc.setReplicationFactor(1);
     lm = new HLockManagerImpl(cluster, hlc);
     lm.init();
+    
   }
 
   @Test
@@ -144,11 +145,31 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
 
   @Test
   public void testNoConflict() throws InterruptedException {
-    LockWorkerPool pool = new LockWorkerPool(100, "/testNoConflict", lm);
-    pool.go();
-
-    assertFalse(pool.isFailed());
-
+       
+    //the semaphore all workers point to.  We should never have more than 1 worker acquire this at any point in time
+    Semaphore failSemaphore = new Semaphore(1);
+    
+    int lockManagers = 5;
+    int lockClients = 100;
+    
+    LockWorkerPool[] pools = new LockWorkerPool[lockManagers];
+    
+    //start everything
+    for(int i = 0; i < lockManagers; i ++){
+      HLockManager lm = new HLockManagerImpl(cluster, hlc);
+      lm.init();
+      
+      pools[i] = new LockWorkerPool(lockClients, "/testNoConflict", lm, failSemaphore);
+      pools[i].go();
+      
+    }
+    
+    //wait for completion
+    for(int i = 0; i < lockManagers; i ++){
+      pools[i].waitToFinish();
+      assertFalse(pools[i].isFailed());
+    }
+    
   }
 
   private boolean verifyCFCreation(List<ColumnFamilyDefinition> cfDefs) {
@@ -160,21 +181,22 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
   }
 
   private static class LockWorkerPool {
-    private int numberLocks;
-    private String path;
-    private HLockManager lm;
+    private final int numberLocks;
+    private final String path;
+    private final HLockManager lm;
 
-    private ExecutorService executor;
-    private CountDownLatch startLatch;
-    private CountDownLatch finishLatch;
-    private Semaphore failSemaphore = new Semaphore(1);
+    private final ExecutorService executor;
+    private final CountDownLatch startLatch;
+    private final CountDownLatch finishLatch;
+    private final Semaphore failSemaphore;
     private boolean failed;
 
-    private LockWorkerPool(int numberLocks, String path, HLockManager lm) {
+    private LockWorkerPool(int numberLocks, String path, HLockManager lm, Semaphore failSemaphore) {
       this.numberLocks = numberLocks;
       this.path = path;
       this.lm = lm;
       this.executor = Executors.newFixedThreadPool(8);
+      this.failSemaphore = failSemaphore;
       startLatch = new CountDownLatch(1);
       finishLatch = new CountDownLatch(numberLocks);
       failed = false;
@@ -190,11 +212,15 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
       // now release the latch
       startLatch.countDown();
 
-      // wait for workers to finish
-      finishLatch.await();
 
     }
 
+    private void waitToFinish() throws InterruptedException{
+
+      // wait for workers to finish
+      finishLatch.await();
+    }
+    
     private void setFailed() {
       
       logger.error("Failed flag set");

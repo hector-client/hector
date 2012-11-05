@@ -4,7 +4,6 @@ import static me.prettyprint.hector.api.factory.HFactory.createColumn;
 import static me.prettyprint.hector.api.factory.HFactory.createMutator;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,7 +11,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -46,26 +44,28 @@ import com.google.common.collect.Maps;
 public class HLockManagerImpl extends AbstractLockManager {
 
   private static final Logger logger = LoggerFactory.getLogger(HLockManagerImpl.class);
-  
+
   private ScheduledExecutorService scheduler;
   private long lockTtl = 5000;
   private int colTtl = 5;
-  
-  
 
   public HLockManagerImpl(Cluster cluster, HLockManagerConfigurator hlc) {
     super(cluster, hlc);
     scheduler = Executors.newScheduledThreadPool(lockManagerConfigurator.getNumberOfLockObserverThreads());
     lockTtl = lockManagerConfigurator.getLocksTTLInMillis();
-    colTtl = (int) (lockTtl/1000);
+    colTtl = (int) (lockTtl / 1000);
   }
 
-  /* (non-Javadoc)
-   * @see me.prettyprint.hector.api.locking.HLockManager#acquire(me.prettyprint.hector.api.locking.HLock)
+  /*
+   * (non-Javadoc)
+   * 
+   * @see
+   * me.prettyprint.hector.api.locking.HLockManager#acquire(me.prettyprint.hector
+   * .api.locking.HLock)
    */
   @Override
   public void acquire(HLock lock) {
-    acquire(lock, Long.MAX_VALUE-System.currentTimeMillis()-10000);
+    acquire(lock, Long.MAX_VALUE - System.currentTimeMillis() - 10000);
   }
 
   /**
@@ -79,10 +79,9 @@ public class HLockManagerImpl extends AbstractLockManager {
     maybeSetInternalLockId(lock);
 
     writeLock(lock);
-    
+
     // Pairs of type <LockId, CommandSeparatedSeenLockIds>
     Map<String, String> canBeEarlier = readExistingLocks(lock);
-    
 
     // If it is just me...
     if (canBeEarlier.size() <= 1) {
@@ -94,15 +93,14 @@ public class HLockManagerImpl extends AbstractLockManager {
     long waitStart = System.currentTimeMillis();
 
     while (true) {
-      
-      //We can't get the lock, and we've timed out, give up
-      if(waitStart+timeout < System.currentTimeMillis()){
-        cleanupStates(lock);
+
+      // We can't get the lock, and we've timed out, give up
+      if (waitStart + timeout < System.currentTimeMillis()) {
         deleteLock(lock);
-        throw new HLockTimeoutException(String.format("Unable to get lock before %d ", waitStart+timeout));
-        
+        throw new HLockTimeoutException(String.format("Unable to get lock before %d ", waitStart + timeout));
+
       }
-      
+
       boolean recv_all_acks = true;
 
       // Let's see of other nodes know me
@@ -115,97 +113,75 @@ public class HLockManagerImpl extends AbstractLockManager {
       }
 
       List<String> canBeEarlierSortedList = null;
-      
+
       // If everyone acknowledged to have seen me then ...
       if (recv_all_acks) {
         canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
         // sort them
         Collections.sort(canBeEarlierSortedList);
         nextWaitingClientId = canBeEarlierSortedList.get(0);
-       
+
         // check if we are the first ones
         if (nextWaitingClientId.equals(lock.getLockId())) {
           break;
         }
       }
 
-     
       // Let everyone know what I have already seen
       writeLock(lock, canBeEarlier.keySet());
-      
+
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
-      
+
       // Refresh the list
       canBeEarlier = readExistingLocks(lock);
     }
 
-    if(logger.isDebugEnabled()){
-     logLock(lock, canBeEarlier.keySet());
-    }
-    
-    setAcquired(lock, canBeEarlier);
-  }
-  
-  /**
-   * Start the heartbeat thread before we return
-   * @param lock
-   */
-  private void setAcquired(HLock lock, Map<String, String> canBeEarlier){
-    startHeartBeat(lock);
-   
-    ((HLockImpl) lock).setAcquired(true);
-    
-    if(logger.isDebugEnabled()){
+    if (logger.isDebugEnabled()) {
       logLock(lock, canBeEarlier.keySet());
     }
-    
+
+    setAcquired(lock, canBeEarlier);
   }
-  
-  private static void logLock(HLock lock, Set<String> earlier){
+
+  /**
+   * Start the heartbeat thread before we return
+   * 
+   * @param lock
+   */
+  private void setAcquired(HLock lock, Map<String, String> canBeEarlier) {
+    // start the heartbeat
+    scheduler.schedule(new Heartbeat(lock), lockTtl / 2, TimeUnit.MILLISECONDS);
+
+    ((HLockImpl) lock).setAcquired(true);
+
+    if (logger.isDebugEnabled()) {
+      logLock(lock, canBeEarlier.keySet());
+    }
+
+  }
+
+  private static void logLock(HLock lock, Set<String> earlier) {
     List<String> canBeEarlierSortedList = Lists.newArrayList(earlier);
     // sort them
     Collections.sort(canBeEarlierSortedList);
-    
+
     String peers = Joiner.on(", ").join(canBeEarlierSortedList);
     logger.debug("{} acquired lock.  Peers are {}", lock, peers);
   }
- 
+
   /**
    * Here for testing purposes only, this should never really be invoked
    */
-  public void shutdownScheduler(){
+  public void shutdownScheduler() {
     scheduler.shutdownNow();
   }
-  
-  private void cleanupStates(HLock lock){
-    LockState state = states.get(lock);
-    
-    if(state == null){
-      return;
-    }
-    
-    state.heartbeat.cancel(false);
-    
-    states.remove(lock);
-  }
-  
-  private void startHeartBeat(HLock lock){
-    LockState state = new LockState();
-    state.heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl/2, TimeUnit.MILLISECONDS);
-//    state.timeout = scheduler.schedule(new Timeout(lock), timeout, TimeUnit.MILLISECONDS);
-    
-    states.put(lock, state);
-  }
-
-
-
 
   private void smartWait(long sleepTime) {
     try {
       Thread.sleep((sleepTime + (long) (Math.random() * sleepTime)));
     } catch (InterruptedException e) {
-//      throw new RuntimeException();
-      //swallow, we woke up early, not worth re-throwing an exception
+      // throw new RuntimeException();
+      // swallow, we woke up early, not worth re-throwing an exception
       logger.warn("Interrupted while waiting", e);
     }
   }
@@ -237,9 +213,8 @@ public class HLockManagerImpl extends AbstractLockManager {
   @Override
   public void release(HLock lock) {
     verifyPrecondition(lock);
-    cleanupStates(lock);
     deleteLock(lock);
-    ((HLockImpl)lock).setAcquired(false);
+    ((HLockImpl) lock).setAcquired(false);
   }
 
   /**
@@ -259,17 +234,16 @@ public class HLockManagerImpl extends AbstractLockManager {
   }
 
   private void writeLock(HLock lock) {
-    Mutator<String> mutator = createMutator(keyspace, StringSerializer.get());
-    mutator.addInsertion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(),
-        createColumnForLock(lock.getLockId(), lock.getLockId()));
-    mutator.execute();
+    writeLock(lock, lock.getLockId().toString());
   }
 
   private void writeLock(HLock lock, Set<String> keySet) {
-    Mutator<String> mutator = createMutator(keyspace, StringSerializer.get());
-    // Of course I have seen myself
-    keySet.remove(lock.getLockId());
     String seenLockIds = Joiner.on(",").join(keySet);
+    writeLock(lock, seenLockIds);
+  }
+
+  private void writeLock(HLock lock, String seenLockIds) {
+    Mutator<String> mutator = createMutator(keyspace, StringSerializer.get());
     mutator.addInsertion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(),
         createColumnForLock(lock.getLockId(), seenLockIds));
     mutator.execute();
@@ -280,11 +254,7 @@ public class HLockManagerImpl extends AbstractLockManager {
     mutator.addDeletion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(), lock.getLockId(),
         StringSerializer.get(), keyspace.createClock());
     mutator.execute();
-    
-    /**
-     * Remove the lock from states
-     */
-    states.remove(lock);
+
   }
 
   /**
@@ -298,9 +268,9 @@ public class HLockManagerImpl extends AbstractLockManager {
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
         .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
-    
-    sliceQuery.setRange(null, lock.getLockId(), false, Integer.MAX_VALUE);
-   
+
+    sliceQuery.setRange(null, null, false, Integer.MAX_VALUE);
+
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
     Map<String, String> result = Maps.newHashMap();
@@ -313,111 +283,64 @@ public class HLockManagerImpl extends AbstractLockManager {
   }
 
   private HColumn<String, String> createColumnForLock(String name, String value) {
-    return createColumn(name, value, keyspace.createClock(), colTtl, StringSerializer.get(),
-        StringSerializer.get());
+    return createColumn(name, value, keyspace.createClock(), colTtl, StringSerializer.get(), StringSerializer.get());
   }
 
   @Override
   public HLock createLock(String lockPath) {
     return new HLockImpl(lockPath, generateLockId());
   }
-  
-  
-  private Map<HLock, LockState> states = new HashMap<HLock, LockState>();
-  
+
   /**
-   * Internal state for a lock.  Contains the last seen keys, as well as futures for cancellation
+   * Simple scheduled class to write heart beats to the column families. This
+   * heart beat should be used to signal we're still waiting for a lock
+   * 
    * @author tnine
-   *
+   * 
    */
-  private class LockState{
-      Future<Void> heartbeat;
-  }
-  
-  /**
-   * Simple scheduled class to write heart beats to the column families.  This heart beat should be used to signal we're still waiting for a lock
-   * @author tnine
-   *
-   */
-  private class Heartbeat implements Callable<Void>{
+  private class Heartbeat implements Callable<Void> {
 
     private HLock lock;
-    
-    private Heartbeat(HLock lock){
+
+    private Heartbeat(HLock lock) {
       this.lock = lock;
     }
-    
-    /* (non-Javadoc)
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see java.util.concurrent.Callable#call()
      */
     @Override
     public Void call() throws Exception {
       logger.debug("{} heartbeat", lock);
-      
-      //update the lock
-      LockState state = states.get(lock);
-      
-      //Lock has been removed
-      if(state == null){
-        logger.debug("{} lock state has been removed.  Short circuiting", lock);
-        deleteLock(lock);
+
+      /**
+       * We check that we still exist in Cassandra, then re write our state for
+       * 2 reasons.
+       * 
+       * Cassandra is the authoritative system for locking
+       * 
+       * If there is lag and another client appears before us in the list
+       * after we acquire the lock, we never want to acknowledge it. We simply
+       * keep writing the state we had when we acquired the lock originally.
+       * This ensures that we never get a race condition on initial lock due to
+       * clock drift or column ordering in Cassandra
+       */
+
+      Map<String, String> existing = readExistingLocks(lock);
+
+      String values = existing.get(lock.getLockId());
+
+      if (values == null) {
+        logger.debug("{} lock has been removed from cassandra.  Short circuiting", lock);
         return null;
       }
-      
-      writeLock(lock, readExistingLocks(lock).keySet());
-    
-      
-      
-      
-      
-      
-      
-     
-      state.heartbeat = scheduler.schedule(this, lockTtl/2, TimeUnit.MILLISECONDS);
+
+      writeLock(lock, values);
+
+      scheduler.schedule(this, lockTtl / 2, TimeUnit.MILLISECONDS);
       return null;
     }
-    
   }
-//  
-//  /**
-//   * Fired when a lock times out waiting
-//   * @author tnine
-//   *
-//   */
-//  private class Timeout implements Callable<Void>{
-//    private HLock lock;
-//    
-//    private Timeout(HLock lock){
-//      this.lock = lock;
-//    }
-//
-//    /* (non-Javadoc)
-//     * @see java.util.concurrent.Callable#call()
-//     */
-//    @Override
-//    public Void call() throws Exception {
-//      LockState state = states.get(lock);
-//      
-//      //do nothing, it's already been removed
-//      if(state == null){
-//        return null;
-//      }
-//      
-//      //cancel the heartbeat
-//      state.heartbeat.cancel(false);
-//      
-//      //delete the pending lock
-//      deleteLock(lock);
-//      
-//      //signal we've timed out to the observer
-//      
-//      HLockObserver observer = lock.getObserver();
-//      
-//      if(observer != null){
-//        observer.timeout(lock);
-//      }
-//      
-//      return null;
-//    }
-//  }
 }
