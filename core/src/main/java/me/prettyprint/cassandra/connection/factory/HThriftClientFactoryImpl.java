@@ -30,7 +30,6 @@ public class HThriftClientFactoryImpl implements HClientFactory {
     log.info("SSL enabled for client<->server communications.");
     log.info("Properties:");
     log.info("  ssl.truststore = {}", System.getProperty("ssl.truststore"));
-    log.info("  ssl.truststore.password = {}", System.getProperty("ssl.truststore.password"));
     log.info("  ssl.protocol = {}", System.getProperty("ssl.protocol"));
     log.info("  ssl.store.type = {}", System.getProperty("ssl.store.type"));
     log.info("  ssl.cipher.suites = {}", System.getProperty("ssl.cipher.suites"));

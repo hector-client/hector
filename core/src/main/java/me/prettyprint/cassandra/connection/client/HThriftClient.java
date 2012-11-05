@@ -150,7 +150,7 @@ public class HThriftClient implements HClient {
                                 new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout)
                                 : TSSLTransportFactory.getClientSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout, params);
     } catch (TTransportException e) {
-        throw new HectorTransportException("Could not get clinet socket: ", e);
+        throw new HectorTransportException("Could not get client socket: ", e);
     }
     
     if ( cassandraHost.getUseSocketKeepalive() ) {
