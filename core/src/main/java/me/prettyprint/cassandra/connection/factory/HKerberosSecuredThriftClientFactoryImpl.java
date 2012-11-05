@@ -6,8 +6,10 @@ import javax.security.auth.login.LoginException;
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.client.HKerberosThriftClient;
 import me.prettyprint.cassandra.connection.security.KerberosHelper;
+import me.prettyprint.cassandra.connection.security.SSLHelper;
 import me.prettyprint.cassandra.service.CassandraHost;
 
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +29,12 @@ import org.slf4j.LoggerFactory;
  * <li><code>kerberos.service.principal.name</code> Kerberos Service principal name without the domain. Default: "cassandra".
  * <li><code>kerberos.client.principal.name</code> Username for when .keytab file is not specified.
  * <li><code>kerberos.client.password</code> Password for then .keytab file is not specified.
+ * 
+ * <li><code>ssl.truststore</code> File path for trust store
+ * <li><code>ssl.truststore.password</code> Password for trust store
+ * <li><code>ssl.protocol</code> SSL protocol, default SSL
+ * <li><code>ssl.store.type</code> Store type, default JKS
+ * <li><code>ssl.cipher.suites</code> Cipher suites
  * </ul>
  * <p>
  * 
@@ -75,8 +83,20 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
 
   private final Subject kerberosTicket;
   private String krbServicePrincipalName;
+  private TSSLTransportParameters params;
 
   public HKerberosSecuredThriftClientFactoryImpl() {
+
+    params = SSLHelper.getTSSLTransportParameters();
+    
+    log.info("SSL enabled for client<->server communications.");
+    log.info("Properties:");
+    log.info("  ssl.truststore = {}", System.getProperty("ssl.truststore"));
+    log.info("  ssl.truststore.password = {}", System.getProperty("ssl.truststore.password"));
+    log.info("  ssl.protocol = {}", System.getProperty("ssl.protocol"));
+    log.info("  ssl.store.type = {}", System.getProperty("ssl.store.type"));
+    log.info("  ssl.cipher.suites = {}", System.getProperty("ssl.cipher.suites")); 
+    
     String jaasConf = System.getProperty("java.security.auth.login.config");
     String krb5Conf = System.getProperty("java.security.krb5.conf");
     String krbDebug = System.getProperty("sun.security.krb5.debug");
@@ -134,7 +154,10 @@ public class HKerberosSecuredThriftClientFactoryImpl implements HClientFactory {
     if (log.isDebugEnabled()) {
       log.debug("Creation of new client");
     }
-    return new HKerberosThriftClient(kerberosTicket, ch, krbServicePrincipalName);
+    
+    return params == null ?
+                new HKerberosThriftClient(kerberosTicket, ch, krbServicePrincipalName)
+                : new HKerberosThriftClient(kerberosTicket, ch, krbServicePrincipalName, params);
   }
 
 }
