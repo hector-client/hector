@@ -67,6 +67,10 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
         template.getTopSerializer(), StringSerializer.get());
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
+  
+  public void setString(N columnName, String value, int ttl) {
+	  addInsertion(columnName, value, StringSerializer.get(), ttl);
+  }
 
   public void setUUID(N columnName, UUID value) {
     HColumn<N, UUID> column = columnFactory.createColumn(columnName, value, clock,
@@ -102,6 +106,10 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
     HColumn<N, Boolean> column = columnFactory.createColumn(columnName, value, clock,
         template.getTopSerializer(), BooleanSerializer.get());
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+  }
+  
+  public void setBoolean(N columnName, Boolean value, int ttl) {
+	  addInsertion(columnName, value, BooleanSerializer.get(), ttl);
   }
 
   public void setByteArray(N columnName, byte[] value) {

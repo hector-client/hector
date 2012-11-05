@@ -7,11 +7,11 @@ import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.hector.api.beans.HColumn;
+
 import org.apache.cassandra.thrift.IndexOperator;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
