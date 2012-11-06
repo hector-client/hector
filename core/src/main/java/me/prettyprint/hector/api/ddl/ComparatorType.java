@@ -12,8 +12,14 @@ public final class ComparatorType {
 
   public static final ComparatorType ASCIITYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.AsciiType");
+  public static final ComparatorType BOOLEANTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.BooleanType");
   public static final ComparatorType BYTESTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.BytesType");
+  public static final ComparatorType DECIMALTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DecimalType");
+  public static final ComparatorType FLOATTYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.FloatType");
   public static final ComparatorType INTEGERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.IntegerType");
   public static final ComparatorType LEXICALUUIDTYPE = new ComparatorType(
@@ -34,17 +40,13 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.UUIDType");
   public static final ComparatorType COUNTERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CounterColumnType");
-  public static final ComparatorType DOUBLETYPE = new ComparatorType(
-		  "org.apache.cassandra.db.marshal.DoubleType");
-  public static final ComparatorType FLOATTYPE = new ComparatorType(
-		  "org.apache.cassandra.db.marshal.FloatType");  
 
   private static final Map<String, ComparatorType> valuesMap;
 
   static {
-    ComparatorType[] types = { ASCIITYPE, BYTESTYPE, INTEGERTYPE,
+    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DECIMALTYPE, FLOATTYPE, INTEGERTYPE,
         LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE, DOUBLETYPE, FLOATTYPE };
+        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
 
     ImmutableMap.Builder<String, ComparatorType> builder =
         new ImmutableMap.Builder<String, ComparatorType>();
@@ -111,3 +113,4 @@ public final class ComparatorType {
     return true;
   }
 }
+
