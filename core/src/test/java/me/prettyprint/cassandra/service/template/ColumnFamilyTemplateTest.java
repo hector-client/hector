@@ -92,7 +92,7 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     
     template.update(updater); 
     
-    Thread.sleep(1000); 
+    Thread.sleep(2000); 
     ColumnFamilyResult<String,String> wrapper = template.queryColumns("test_ttl_key1"); 
     
     HColumn<String,ByteBuffer> col = wrapper.getColumn("unexpired_string");
