@@ -290,15 +290,15 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
         // release the semaphore
         pool.failSemaphore.release();
 
-        // release the lock
-        pool.lm.release(lock);
-        
+  
         logger.info("{} released", lock);
       } catch (Throwable t) {
         logger.error("Error when trying to acquire lock", t);
         pool.setFailed();
       } finally {
-       
+        // release the lock
+        pool.lm.release(lock);
+        
         pool.finishLatch.countDown();
 
       }

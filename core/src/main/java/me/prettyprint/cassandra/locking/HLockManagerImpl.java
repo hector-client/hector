@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -119,6 +120,7 @@ public class HLockManagerImpl extends AbstractLockManager {
         canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
         // sort them
         Collections.sort(canBeEarlierSortedList);
+        
         nextWaitingClientId = canBeEarlierSortedList.get(0);
 
         // check if we are the first ones
@@ -133,7 +135,7 @@ public class HLockManagerImpl extends AbstractLockManager {
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
 
       // Refresh the list, but only read locks we read at our initial acquire for optimization
-      canBeEarlier = readExistingLocks(lock, canBeEarlier.keySet());
+      canBeEarlier = readExistingLocks(lock);
     }
 
     if (logger.isDebugEnabled()) {
@@ -150,7 +152,9 @@ public class HLockManagerImpl extends AbstractLockManager {
    */
   private void setAcquired(HLock lock, Map<String, String> canBeEarlier) {
     // start the heartbeat
-    scheduler.schedule(new Heartbeat(lock), lockTtl / 2, TimeUnit.MILLISECONDS);
+    Future<Void> heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl / 2, TimeUnit.MILLISECONDS);
+    
+    ((HLockImpl)lock).setHeartbeat(heartbeat);
 
     ((HLockImpl) lock).setAcquired(true);
 
@@ -250,6 +254,13 @@ public class HLockManagerImpl extends AbstractLockManager {
   }
 
   private void deleteLock(HLock lock) {
+    //cancel the heartbeat task if it exists
+    Future<Void> heartbeat = ((HLockImpl)lock).getHeartbeat();
+    
+    if(heartbeat != null){
+      heartbeat.cancel(false);
+    }
+    
     Mutator<String> mutator = createMutator(keyspace, StringSerializer.get());
     mutator.addDeletion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(), lock.getLockId(),
         StringSerializer.get(), keyspace.createClock());
@@ -265,6 +276,7 @@ public class HLockManagerImpl extends AbstractLockManager {
    * @return a list of locks waiting on this lockpath
    */
   private Map<String, String> readExistingLocks(HLock lock) {
+//    logger.debug("Started reading all columns");
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
         .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
@@ -273,6 +285,7 @@ public class HLockManagerImpl extends AbstractLockManager {
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
+//    logger.debug("Finished reading all columns");
     return  getResults(queryResult);
   }
   
@@ -283,15 +296,17 @@ public class HLockManagerImpl extends AbstractLockManager {
    *          a lock path
    * @return a list of locks waiting on this lockpath
    */
-  private Map<String, String> readExistingLocks(HLock lock, Set<String> locks) {
+  private Map<String, String> readExistingLocks(HLock lock, String lockName) {
+//    logger.debug("Started reading existing columns");
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
         .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
 
-    sliceQuery.setColumnNames(locks.toArray(new String[]{}));
+    sliceQuery.setColumnNames(lockName);
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
+//    logger.debug("Finished reading existing columns");
     return getResults(queryResult);
     
   }
@@ -353,7 +368,7 @@ public class HLockManagerImpl extends AbstractLockManager {
        * clock drift or column ordering in Cassandra
        */
 
-      Map<String, String> existing = readExistingLocks(lock);
+      Map<String, String> existing = readExistingLocks(lock, lock.getLockId());
 
       String values = existing.get(lock.getLockId());
 

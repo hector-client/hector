@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.locking;
 
+import java.util.concurrent.Future;
+
 import me.prettyprint.hector.api.locking.HLock;
 import me.prettyprint.hector.api.locking.HLockObserver;
 
@@ -16,6 +18,7 @@ public class HLockImpl implements HLock {
   private String lockId;
   private boolean acquired = false;
   private HLockObserver observer;
+  private Future<Void> heartbeat;
 
   public HLockImpl(String lockPath, String lockId) {
     this.lockPath = lockPath;
@@ -63,6 +66,20 @@ public class HLockImpl implements HLock {
       return observer;
   }
   
+  /**
+   * @return the heartbeat
+   */
+  public Future<Void> getHeartbeat() {
+    return heartbeat;
+  }
+
+  /**
+   * @param heartbeat the heartbeat to set
+   */
+  public void setHeartbeat(Future<Void> heartbeat) {
+    this.heartbeat = heartbeat;
+  }
+
   @Override
   public int hashCode() {
     final int prime = 31;
@@ -101,6 +118,8 @@ public class HLockImpl implements HLock {
   public String toString() {
     return "HLockImpl [lockPath=" + lockPath + ", lockId=" + lockId + ", acquired=" + acquired + "]";
   }
+  
+  
 
 
 
