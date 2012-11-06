@@ -132,8 +132,8 @@ public class HLockManagerImpl extends AbstractLockManager {
 
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
 
-      // Refresh the list
-      canBeEarlier = readExistingLocks(lock);
+      // Refresh the list, but only read locks we read at our initial acquire for optimization
+      canBeEarlier = readExistingLocks(lock, canBeEarlier.keySet());
     }
 
     if (logger.isDebugEnabled()) {
@@ -273,6 +273,31 @@ public class HLockManagerImpl extends AbstractLockManager {
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
+    return  getResults(queryResult);
+  }
+  
+  /**
+   * Reads all existing locks for this lock path
+   * 
+   * @param lockPath
+   *          a lock path
+   * @return a list of locks waiting on this lockpath
+   */
+  private Map<String, String> readExistingLocks(HLock lock, Set<String> locks) {
+    SliceQuery<String, String, String> sliceQuery = HFactory
+        .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
+        .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
+
+    sliceQuery.setColumnNames(locks.toArray(new String[]{}));
+
+    QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
+
+    return getResults(queryResult);
+    
+  }
+
+  
+  private Map<String, String> getResults(QueryResult<ColumnSlice<String, String>> queryResult){
     Map<String, String> result = Maps.newHashMap();
 
     for (HColumn<String, String> col : queryResult.get().getColumns()) {
