@@ -30,6 +30,8 @@ public interface ColumnFamilyResult<K, N> extends Iterator<ColumnFamilyResult<K,
   Long getLong(N columnName);
 
   Integer getInteger(N columnName);
+
+  Float getFloat(N columnName);
   
   Double getDouble(N columnName);
 

@@ -1,14 +1,21 @@
 package me.prettyprint.cassandra.service.template;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.UUID;
 
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
+import me.prettyprint.hector.api.beans.HColumn;
+
 import org.apache.cassandra.thrift.IndexOperator;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
   
@@ -73,6 +80,34 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(ts2,wrapper.getColumn("curdate").getClock());
     assertEquals(ts3,wrapper.getColumn("longval").getClock());
     assertEquals(3,wrapper.getColumnNames().size());
+  }
+    
+  @Test 
+  public void testTtl() throws InterruptedException { 
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace,"Standard1", se, se);
+    
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("test_ttl_key1"); 
+    updater.setString("expired_string", "value1",1);
+    updater.setString("unexpired_string", "value2"); 
+    
+    updater.setBoolean("unexpired_bool", true); 
+    updater.setBoolean("expired_bool", true, 1); 
+   
+    
+    template.update(updater); 
+    
+    Thread.sleep(1000); 
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("test_ttl_key1"); 
+    
+    HColumn<String,ByteBuffer> col = wrapper.getColumn("unexpired_string");
+    assertNotNull(col); 
+    assertNotNull(col.getValue()); 
+    
+    HColumn<String,ByteBuffer> expiredStringCol = wrapper.getColumn("expired_string"); 
+    assertNull(expiredStringCol);
+    
+    HColumn<String,ByteBuffer> expiredBooleanCol = wrapper.getColumn("expired_bool"); 
+    assertNull(expiredBooleanCol);
   }
 
 
@@ -197,5 +232,38 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
       cnt += result.next().getColumnNames().size();
     }
     assertEquals(4, cnt);
+  }
+
+  @Test
+  public void testColumnValueTypes() {
+    final float EPSILON = 0.0000001f;
+
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
+
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("key1");
+    updater.setString("column1","string value");
+    updater.setUUID("column2", UUID.fromString("cf316d50-f7c0-11e1-a21f-0800200c9a66"));
+    updater.setLong("column3", 829398278497234L);
+    updater.setInteger("column4", 27344);
+    updater.setFloat("column5",3.14159265f);
+    updater.setDouble("column6",3.14159265358979323846264338327950288);
+    updater.setBoolean("column7", true);
+    updater.setByteArray("column8", new byte[] {97, 91, 99});
+    Date date = new Date();
+    updater.setDate("column9", date);
+
+    template.update(updater);
+
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("key1");
+    assertEquals("string value",wrapper.getString("column1"));
+    assertEquals(UUID.fromString("cf316d50-f7c0-11e1-a21f-0800200c9a66"), wrapper.getUUID("column2"));
+    assertEquals(Long.valueOf(829398278497234L), wrapper.getLong("column3"));
+    assertEquals(Integer.valueOf(27344), wrapper.getInteger("column4"));
+    assertEquals(3.14159265f,wrapper.getFloat("column5"), EPSILON);
+    assertEquals(3.14159265358979323846264338327950288, wrapper.getDouble("column6"), EPSILON);
+    assertEquals(true, wrapper.getBoolean("column7"));
+    assertArrayEquals(new byte[] {97, 91, 99}, wrapper.getByteArray("column8"));
+    assertEquals(date, wrapper.getDate("column9"));
+    assertEquals(9, wrapper.getColumnNames().size());
   }
 }

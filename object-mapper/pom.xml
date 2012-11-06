@@ -2,13 +2,13 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>me.prettyprint</groupId>
+		<groupId>org.hectorclient</groupId>
 		<artifactId>hector</artifactId>
-		<version>1.0-6-SNAPSHOT</version>
+		<version>1.1-2-SNAPSHOT</version>
 	</parent>
 	<artifactId>hector-object-mapper</artifactId>
 	<name>hector-object-mapper</name>
-	<version>3.0-05-SNAPSHOT</version>
+	<version>3.1-07-SNAPSHOT</version>
 
 	<build>
 		<extensions>
@@ -31,10 +31,26 @@
 	</build>
 
 	<dependencies>
+
+                <!--for abstract types? -->
+                <dependency>
+                        <groupId>org.apache.cassandra</groupId>
+                        <artifactId>cassandra-all</artifactId>
+                </dependency>
+
+
+                <!-- for junit -->
+                <dependency>
+                        <groupId>junit</groupId>
+                        <artifactId>junit</artifactId>
+                        <scope>test</scope>
+                </dependency>
+
+
 		<dependency>
-			<groupId>me.prettyprint</groupId>
+			<groupId>org.hectorclient</groupId>
 			<artifactId>hector-core</artifactId>
-			<version>1.0-6-SNAPSHOT</version>
+			<version>1.1-2-SNAPSHOT</version>
 			<exclusions>
 				<exclusion>
 					<groupId>log4j</groupId>
@@ -43,9 +59,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>me.prettyprint</groupId>
+			<groupId>org.hectorclient</groupId>
 			<artifactId>hector-test</artifactId>
-			<version>1.0-6-SNAPSHOT</version>
+			<version>1.1-2-SNAPSHOT</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -67,6 +83,7 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<version>${org.springframework.version}</version>
+            <scope>test</scope>
 			<exclusions>
 				<exclusion>
 					<artifactId>spring-aop</artifactId>
@@ -80,19 +97,23 @@
 			<version>${org.springframework.version}</version>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.openjpa</groupId>
-			<artifactId>openjpa-persistence</artifactId>
-			<version>2.1.0</version>
-			<type>jar</type>
-			<scope>compile</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>openjpa-kernel</artifactId>
-					<groupId>org.apache.openjpa</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
+        <dependency>
+          <groupId>org.apache.geronimo.specs</groupId>
+          <artifactId>geronimo-jpa_2.0_spec</artifactId>
+          <version>1.1</version>
+          <scope>provided</scope>
+        </dependency>
+        <dependency> <!-- to scan, it is less impacting than using spring -->
+          <groupId>org.apache.xbean</groupId>
+          <artifactId>xbean-finder-shaded</artifactId>
+          <version>3.11</version>
+        </dependency>
+        <dependency>
+          <groupId>org.apache.openejb</groupId>
+          <artifactId>openejb-core</artifactId>
+          <version>4.0.0</version>
+          <scope>test</scope>
+        </dependency>
 	</dependencies>
 
 </project>

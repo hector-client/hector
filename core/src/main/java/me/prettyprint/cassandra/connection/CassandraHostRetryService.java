@@ -181,7 +181,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           if (!keyspaceDefinition.getName().equals(Keyspace.KEYSPACE_SYSTEM)) {
             List<TokenRange> tokenRanges = cluster.describeRing(keyspaceDefinition.getName());
             for (TokenRange tokenRange : tokenRanges) {
-              for (String host : tokenRange.getEndpoints()) {
+              for (String host : tokenRange.getRpc_endpoints()) {
                 CassandraHost aHost = new CassandraHost(host, cassandraHostConfigurator.getPort());
                 if (!ringInfo.contains(aHost) ) {
                   ringInfo.add(aHost);

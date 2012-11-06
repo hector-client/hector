@@ -7,10 +7,10 @@
     <version>5</version>
   </parent>
 
-  <groupId>me.prettyprint</groupId>
+  <groupId>org.hectorclient</groupId>
   <artifactId>hector</artifactId>
   <packaging>pom</packaging>
-  <version>1.0-6-SNAPSHOT</version>
+  <version>1.1-2-SNAPSHOT</version>
   <name>hector</name>
   <description>Cassandra Java Client Library</description>
   <url>http://github.com/hector-client/hector</url>
@@ -75,6 +75,11 @@
       <id>btoddb</id>
       <email>btoddb@gmail.com</email>
     </developer>
+    <developer>
+      <name>Shane Perry</name>
+      <id>thrykol</id>
+      <email>thrykol@gmail.com</email>
+    </developer>
   </developers>
 
   <!-- Hector submodules -->
@@ -89,7 +94,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>1.0.12</version>
+        <version>1.1.0</version>
         <exclusions>
           <exclusion>
 	    <groupId>com.github.stephenc</groupId>
@@ -100,7 +105,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
-        <version>1.0.12</version>
+        <version>1.1.0</version>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>

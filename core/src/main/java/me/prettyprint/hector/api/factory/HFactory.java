@@ -473,7 +473,11 @@ public final class HFactory {
   }
 
 
-
+  /**
+   * This method will soon be removed. Please use
+   * {@link #createRangeSlicesQuery(Keyspace, Serializer, Serializer, Serializer)} instead.
+   */
+  @Deprecated
   public static <K, N, V> IndexedSlicesQuery<K, N, V> createIndexedSlicesQuery(
       Keyspace keyspace, Serializer<K> keySerializer,
       Serializer<N> nameSerializer, Serializer<V> valueSerializer) {

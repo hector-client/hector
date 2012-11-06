@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.service;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +25,8 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private ColumnType columnType;
   private ComparatorType comparatorType;
   private ComparatorType subComparatorType;
-	private String comparatorTypeAlias = "";
-	private String subComparatorTypeAlias = "";
+  private String comparatorTypeAlias = "";
+  private String subComparatorTypeAlias = "";
   private String comment;
   private double rowCacheSize;
   private int rowCacheSavePeriodInSeconds;
@@ -34,6 +35,7 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   private List<ColumnDefinition> columnMetadata;
   private int gcGraceSeconds;
   private String keyValidationClass;
+  private String keyValidationAlias = "";
   private String defaultValidationClass;
   private int id;
   private int maxCompactionThreshold;
@@ -98,14 +100,15 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     columnType = columnFamilyDefinition.getColumnType();
     comparatorType = columnFamilyDefinition.getComparatorType();
     subComparatorType = columnFamilyDefinition.getSubComparatorType();
-		comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
-		subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
+    comparatorTypeAlias = columnFamilyDefinition.getComparatorTypeAlias();
+    subComparatorTypeAlias = columnFamilyDefinition.getSubComparatorTypeAlias();
     comment = columnFamilyDefinition.getComment();
     rowCacheSize = columnFamilyDefinition.getRowCacheSize();
     rowCacheSavePeriodInSeconds = columnFamilyDefinition.getRowCacheSavePeriodInSeconds();
     keyCacheSize = columnFamilyDefinition.getKeyCacheSize();
     keyCacheSavePeriodInSeconds = columnFamilyDefinition.getKeyCacheSavePeriodInSeconds();
     keyValidationClass = columnFamilyDefinition.getKeyValidationClass();
+    keyValidationAlias = columnFamilyDefinition.getKeyValidationAlias();
     readRepairChance = columnFamilyDefinition.getReadRepairChance();
     columnMetadata = columnFamilyDefinition.getColumnMetadata();
     gcGraceSeconds = columnFamilyDefinition.getGcGraceSeconds();
@@ -203,9 +206,13 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     return subComparatorType;
   }
 
-	public String getComparatorTypeAlias() { return this.comparatorTypeAlias; }
+  public String getComparatorTypeAlias() {
+    return this.comparatorTypeAlias;
+  }
 
-	public String getSubComparatorTypeAlias() { return this.subComparatorTypeAlias; }
+  public String getSubComparatorTypeAlias() {
+    return this.subComparatorTypeAlias;
+  }
 
   @Override
   public String getComment() {
@@ -266,7 +273,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     
     d.setKey_cache_size(keyCacheSize);
     d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds);
-    d.setKey_validation_class(keyValidationClass);
+    if(false || keyValidationClass != null) {
+      d.setKey_validation_class(keyValidationClass + keyValidationAlias);
+    } else {
+      d.setKey_validation_class(keyValidationClass);
+    }
+
     d.setMax_compaction_threshold(maxCompactionThreshold);
     d.setMin_compaction_threshold(minCompactionThreshold);
     d.setRead_repair_chance(readRepairChance);
@@ -296,7 +308,12 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
 
   @Override
   public String getKeyValidationClass(){
-      return keyValidationClass;
+    return keyValidationClass;
+  }
+
+  @Override
+  public String getKeyValidationAlias() {
+    return keyValidationAlias;
   }
 
   @Override
@@ -326,9 +343,13 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
     this.subComparatorType = subComparatorType;
   }
 
-	public void setComparatorTypeAlias(String alias) { this.comparatorTypeAlias = alias; }
+  public void setComparatorTypeAlias(String alias) {
+    this.comparatorTypeAlias = alias;
+  }
 
-	public void setSubComparatorTypeAlias(String alias) { this.subComparatorTypeAlias = alias; }
+  public void setSubComparatorTypeAlias(String alias) {
+    this.subComparatorTypeAlias = alias;
+  }
 
   public void setComment(String comment) {
     this.comment = comment;
@@ -356,6 +377,9 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   
   @Override
   public void addColumnDefinition(ColumnDefinition columnDefinition) {
+	if ( null == this.columnMetadata || this.columnMetadata.isEmpty()) {
+      this.columnMetadata = new LinkedList<ColumnDefinition>();
+	}
     this.columnMetadata.add(columnDefinition);
   }
 
@@ -368,7 +392,11 @@ public class ThriftCfDef implements ColumnFamilyDefinition {
   }
 
   public void setKeyValidationClass(String keyValidationClass){
-      this.keyValidationClass = keyValidationClass;
+    this.keyValidationClass = keyValidationClass;
+  }
+
+  public void setKeyValidationAlias(String keyValidationAlias) {
+    this.keyValidationAlias = keyValidationAlias;
   }
 
   public void setId(int id) {
