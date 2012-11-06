@@ -61,14 +61,14 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     bytes.rewind();
 
     if (bytes.limit() < prefixBytes.remaining()) {
-        log.error("Unprefixed value received, throwing exception...");
-        throw new HectorSerializationException("Unexpected prefix value");
+      log.error("Unprefixed value received, throwing exception...");
+      throw new HectorSerializationException("Unexpected prefix value");
     }
 
     if (compareByteArrays(prefixBytes.array(), prefixBytes.arrayOffset()
         + prefixBytes.position(), prefixBytes.remaining(), bytes.array(),
         bytes.arrayOffset() + bytes.position(), prefixBytes.remaining()) != 0) {
-        return null; // incorrect prefix, return nothing
+      return null; // incorrect prefix, return nothing
     }
     bytes.position(prefixBytes.remaining());
 
