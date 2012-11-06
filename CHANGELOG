@@ -28,6 +28,7 @@ code after any upgrade.
 
 1.0-6
 =====
+set the ClockResolution for all clusters in a static way #479
 changed storage_port from 7000 to 7070 so as not to conflict with a "normal" running cassandra instance on same machine
 
 1.0-5
