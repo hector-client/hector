@@ -49,12 +49,14 @@ public class HLockManagerImpl extends AbstractLockManager {
   private ScheduledExecutorService scheduler;
   private long lockTtl = 5000;
   private int colTtl = 5;
-
+  private int maxSelectSize = 10;
+  
   public HLockManagerImpl(Cluster cluster, HLockManagerConfigurator hlc) {
     super(cluster, hlc);
     scheduler = Executors.newScheduledThreadPool(lockManagerConfigurator.getNumberOfLockObserverThreads());
     lockTtl = lockManagerConfigurator.getLocksTTLInMillis();
     colTtl = (int) (lockTtl / 1000);
+    maxSelectSize = hlc.getMaxSelectSize();
   }
 
   /*
@@ -281,7 +283,8 @@ public class HLockManagerImpl extends AbstractLockManager {
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
         .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
 
-    sliceQuery.setRange(null, null, false, Integer.MAX_VALUE);
+    //we only care about the first 2 locks, anything else is simply queued.  Select 10 just to be safe if the clients aren't ordered properly
+    sliceQuery.setRange(null, null, false, maxSelectSize);
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 

@@ -3,6 +3,7 @@ package me.prettyprint.hector.api.locking;
 /**
  * 
  * @author patricioe (Patricio Echague - patricioe@gmail.com)
+ * @author tnine (Todd Nine)
  * 
  */
 public class HLockManagerConfigurator {
@@ -17,6 +18,7 @@ public class HLockManagerConfigurator {
   private long backOffRetryDelayInMillis = 100L;
   private int replicationFactor = 3;
   private int numberOfLockObserverThreads = 1;
+  private int maxSelectSize = 10;
 
   public String getLockManagerCF() {
     return lockManagerCF;
@@ -80,25 +82,31 @@ public class HLockManagerConfigurator {
     this.numberOfLockObserverThreads = numberOfLockObserverThreads;
   }
 
+  /**
+   * @return the maxSelectSize
+   */
+  public int getMaxSelectSize() {
+    return maxSelectSize;
+  }
+
+  /**
+   * @param maxSelectSize the maxSelectSize to set
+   */
+  public void setMaxSelectSize(int maxSelectSize) {
+    this.maxSelectSize = maxSelectSize;
+  }
+
+  /* (non-Javadoc)
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("HLockManagerConfigurator [keyspaceName=");
-    builder.append(keyspaceName);
-    builder.append(", lockManagerCF=");
-    builder.append(lockManagerCF);
-    builder.append(", rowsCacheEnabled=");
-    builder.append(rowsCacheEnabled);
-    builder.append(", locksTTLInMillis=");
-    builder.append(locksTTLInMillis);
-    builder.append(", backOffRetryDelayInMillis=");
-    builder.append(backOffRetryDelayInMillis);
-    builder.append(", replicationFactor=");
-    builder.append(replicationFactor);
-    builder.append(", numberOfLockObserverThreads=");
-    builder.append(numberOfLockObserverThreads);
-    builder.append("]");
-    return builder.toString();
+    return "HLockManagerConfigurator [keyspaceName=" + keyspaceName + ", lockManagerCF=" + lockManagerCF
+        + ", rowsCacheEnabled=" + rowsCacheEnabled + ", locksTTLInMillis=" + locksTTLInMillis
+        + ", backOffRetryDelayInMillis=" + backOffRetryDelayInMillis + ", replicationFactor=" + replicationFactor
+        + ", numberOfLockObserverThreads=" + numberOfLockObserverThreads + ", maxSelectSize=" + maxSelectSize + "]";
   }
+
+ 
 
 }
