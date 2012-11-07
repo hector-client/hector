@@ -7,6 +7,7 @@ me.prettyprint.cassandra.dao
 me.prettyprint.cassandra.examples
 me.prettyprint.cassandra.io
 me.prettyprint.cassandra.jndi
+me.prettyprint.cassandra.locking
 me.prettyprint.cassandra.model
 me.prettyprint.cassandra.model.thrift
 me.prettyprint.cassandra.serializers
@@ -20,5 +21,6 @@ me.prettyprint.hector.api.beans
 me.prettyprint.hector.api.ddl
 me.prettyprint.hector.api.exceptions
 me.prettyprint.hector.api.factory
+me.prettyprint.hector.api.locking
 me.prettyprint.hector.api.mutation
 me.prettyprint.hector.api.query
