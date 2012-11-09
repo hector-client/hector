@@ -52,7 +52,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-            <Bundle-Version>${project.version}</Bundle-Version>
+            <Bundle-Version>${pom.version}</Bundle-Version>
             <Embed-Dependency>
               libthrift;scope=compile|runtime;type=!pom;inline=false,
               cassandra;scope=compile|runtime;type=!pom;inline=false,
@@ -61,7 +61,7 @@
 
             <Export-Package>
               <!-- !${bundle.namespace}.internal.*, -->
-              ${bundle.namespace}.*;version="${project.version}"
+              ${bundle.namespace}.*;version="${pom.version}"
             </Export-Package>
 
             <Import-Package>
