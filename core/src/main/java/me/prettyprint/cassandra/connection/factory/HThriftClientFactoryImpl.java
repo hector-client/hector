@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class HThriftClientFactoryImpl implements HClientFactory {
-  
+
   private static final Logger log = LoggerFactory.getLogger(HThriftClientFactoryImpl.class);
   private TSSLTransportParameters params;
 
@@ -26,18 +26,19 @@ public class HThriftClientFactoryImpl implements HClientFactory {
    */
   public HClient createClient(CassandraHost ch) {
     params = SSLHelper.getTSSLTransportParameters();
-      
-    log.info("SSL enabled for client<->server communications.");
-    log.info("Properties:");
-    log.info("  ssl.truststore = {}", System.getProperty("ssl.truststore"));
-    log.info("  ssl.protocol = {}", System.getProperty("ssl.protocol"));
-    log.info("  ssl.store.type = {}", System.getProperty("ssl.store.type"));
-    log.info("  ssl.cipher.suites = {}", System.getProperty("ssl.cipher.suites"));
-    
-    if ( log.isDebugEnabled() ) {
-      log.debug("Creation of new client for host: " + ch.getIp());
+
+    if ( params != null ) {
+      log.info("SSL enabled for client<->server communications.");
+      if ( log.isDebugEnabled() ) {
+        log.debug("Properties:");
+        log.debug("  ssl.truststore = {}", System.getProperty("ssl.truststore"));
+        log.debug("  ssl.protocol = {}", System.getProperty("ssl.protocol"));
+        log.debug("  ssl.store.type = {}", System.getProperty("ssl.store.type"));
+        log.debug("  ssl.cipher.suites = {}", System.getProperty("ssl.cipher.suites"));
+        log.debug("Creation of new client for host: " + ch.getIp());
+      }
     }
-    
+
     return params == null ? new HThriftClient(ch) : new HThriftClient(ch, params);
   }
 
