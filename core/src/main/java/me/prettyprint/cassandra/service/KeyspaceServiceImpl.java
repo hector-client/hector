@@ -66,7 +66,8 @@ public class KeyspaceServiceImpl implements KeyspaceService {
       HConnectionManager connectionManager,
       FailoverPolicy failoverPolicy)
       throws HectorTransportException {
-    this(keyspaceName, consistencyLevel, connectionManager, failoverPolicy, EMPTY_CREDENTIALS);
+    this(keyspaceName, consistencyLevel, connectionManager, failoverPolicy, 
+            EMPTY_CREDENTIALS);
   }
 
   public KeyspaceServiceImpl(String keyspaceName,
