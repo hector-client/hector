@@ -166,15 +166,20 @@ public class HThriftClient implements HClient {
       transport = socket;
     }
 
-    try {
-      transport.open();
-    } catch (TTransportException e) {
-      // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
-      // add details to it.
-      log.debug("Unable to open transport to " + cassandraHost.getName());
-      //clientMonitor.incCounter(Counter.CONNECT_ERROR);
-      throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
-          e.getLocalizedMessage(), e);
+    // If using SSL, the socket will already be connected, and TFramedTransport and
+    // TSocket just wind up calling socket.isConnected(), so check this before calling
+    // open() to avoid a "Socket already connected" error.
+    if (!transport.isOpen()) {
+      try {
+        transport.open();
+      } catch (TTransportException e) {
+        // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
+        // add details to it.
+        log.debug("Unable to open transport to " + cassandraHost.getName());
+        //clientMonitor.incCounter(Counter.CONNECT_ERROR);
+        throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
+            e.getLocalizedMessage(), e);
+      }
     }
     return this;
   }
