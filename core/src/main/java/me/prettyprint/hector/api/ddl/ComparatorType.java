@@ -16,12 +16,16 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.BooleanType");
   public static final ComparatorType BYTESTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.BytesType");
+  public static final ComparatorType DATETYPE = new ComparatorType(
+	  "org.apache.cassandra.db.marshal.DateType");
   public static final ComparatorType DECIMALTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.DecimalType");
   public static final ComparatorType FLOATTYPE = new ComparatorType(
 	      "org.apache.cassandra.db.marshal.FloatType");
   public static final ComparatorType INTEGERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.IntegerType");
+  public static final ComparatorType INT32TYPE = new ComparatorType(
+	  "org.apache.cassandra.db.marshal.Int32Type");
   public static final ComparatorType LEXICALUUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LexicalUUIDType");
   public static final ComparatorType LOCALBYPARTITIONERTYPE = new ComparatorType(
@@ -44,7 +48,8 @@ public final class ComparatorType {
   private static final Map<String, ComparatorType> valuesMap;
 
   static {
-    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DECIMALTYPE, FLOATTYPE, INTEGERTYPE,
+    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DATETYPE, 
+    	DECIMALTYPE, FLOATTYPE, INTEGERTYPE, INT32TYPE,
         LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
         UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
 
@@ -113,4 +118,3 @@ public final class ComparatorType {
     return true;
   }
 }
-
