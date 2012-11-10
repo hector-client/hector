@@ -25,6 +25,7 @@ public class ClearCounterRow<K, N> {
 	private K rowKey;
 	private String cf;
 	private int mutateInterval = 100;
+	private int count = 100;
 
 	public ClearCounterRow(Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer) {
 		this.keyspace = keyspace;
@@ -66,6 +67,16 @@ public class ClearCounterRow<K, N> {
 	}
 
 	/**
+	 * Set the number of columns to retrieve per slice.
+	 *
+	 * @param count The number of columns to retrieve per slice
+	 * @return &lt;this&gt;
+	 */
+	public ClearCounterRow setCount(int count) {
+		this.count = count;
+		return this;
+	}
+	/**
 	 * Clear the counter columns.
 	 */
 	public void clear() {
@@ -76,7 +87,7 @@ public class ClearCounterRow<K, N> {
 						setKey(this.rowKey);
 
 		SliceCounterIterator<K, N> iterator =
-						new SliceCounterIterator<K, N>(query, null, (N) null, false, 2000);
+						new SliceCounterIterator<K, N>(query, null, (N) null, false, this.count);
 
 		while(iterator.hasNext()) {
 			HCounterColumn<N> column = iterator.next();
