@@ -18,7 +18,7 @@ import me.prettyprint.hector.api.query.SliceCounterQuery;
  *
  * @author thrykol
  */
-public class CounterColumnFamilyRowClear<K, N> {
+public class ClearCounterRow<K, N> {
 	private Keyspace keyspace;
 	private Serializer<K> keySerializer;
 	private Serializer<N> nameSerializer;
@@ -26,7 +26,7 @@ public class CounterColumnFamilyRowClear<K, N> {
 	private String cf;
 	private int mutateInterval = 100;
 
-	public CounterColumnFamilyRowClear(Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer) {
+	public ClearCounterRow(Keyspace keyspace, Serializer<K> keySerializer, Serializer<N> nameSerializer) {
 		this.keyspace = keyspace;
 		this.keySerializer =keySerializer;
 		this.nameSerializer = nameSerializer;
@@ -38,7 +38,7 @@ public class CounterColumnFamilyRowClear<K, N> {
 	 * @param cf Column family name
 	 * @return <code>this</code>
 	 */
-	public CounterColumnFamilyRowClear setColumnFamily(String cf) {
+	public ClearCounterRow setColumnFamily(String cf) {
 		this.cf = cf;
 		return this;
 	}
@@ -49,7 +49,7 @@ public class CounterColumnFamilyRowClear<K, N> {
 	 * @param rowKey Row key
 	 * @return <code>this</code>
 	 */
-	public CounterColumnFamilyRowClear setRowKey(K rowKey) {
+	public ClearCounterRow setRowKey(K rowKey) {
 		this.rowKey = rowKey;
 		return this;
 	}
@@ -60,7 +60,7 @@ public class CounterColumnFamilyRowClear<K, N> {
 	 * @param interval Mutation interval
 	 * @return <code>this</code>
 	 */
-	public CounterColumnFamilyRowClear setMutateInterval(int interval) {
+	public ClearCounterRow setMutateInterval(int interval) {
 		this.mutateInterval = interval;
 		return this;
 	}

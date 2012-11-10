@@ -14,7 +14,7 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 
-public class CounterColumnFamilyRowClearTest extends BaseEmbededServerSetupTest {
+public class ClearCounterRowTest extends BaseEmbededServerSetupTest {
 
 	private static final StringSerializer ss = new StringSerializer();
 	private static final String cf = "Counter1";
@@ -56,7 +56,7 @@ public class CounterColumnFamilyRowClearTest extends BaseEmbededServerSetupTest 
 			assertEquals(expected, (long) column.getValue());
 		}
 
-		new CounterColumnFamilyRowClear(keyspace, ss, ss).setColumnFamily(cf).setRowKey(key).clear();
+		new ClearCounterRow(keyspace, ss, ss).setColumnFamily(cf).setRowKey(key).clear();
 
 		iterator = new SliceCounterIterator<String, String>(query, null, (String) null, false, 10);
 		while(iterator.hasNext()) {
