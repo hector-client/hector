@@ -8,18 +8,22 @@ import me.prettyprint.hector.api.mutation.Mutator;
 
 public abstract class AbstractTemplateUpdater<K,N> {
 
+  protected static final int DEF_TTL = 0; 
+  
   protected List<K> keys;
   protected int keyPos = 0;
   protected ColumnFactory columnFactory;
   protected AbstractColumnFamilyTemplate<K,N> template;
   protected Mutator<K> mutator;
   protected long clock;
+  protected int globalTtl;   
   
   public AbstractTemplateUpdater(AbstractColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory, Mutator<K> mutator) {
     this.template = template;
     this.columnFactory = columnFactory;
     this.mutator = mutator;
     this.clock = template.getClock();
+    this.globalTtl = DEF_TTL; 
   }
   
   public AbstractTemplateUpdater<K,N> addKey(K key) {
@@ -62,5 +66,15 @@ public abstract class AbstractTemplateUpdater<K,N> {
    */
   public void setClock(long clock) {
     this.clock = clock;
+  }
+  
+  
+  /**
+   * Globally sets the ttl for this updater instance. Any columns created via the updater will use this ttl value unless a ttl is explicitly provided 
+   * to one of the set* methods of subclasses. 
+   * @param ttl
+   */
+  public void setTtl(int ttl) { 
+    this.globalTtl = ttl; 
   }
 }

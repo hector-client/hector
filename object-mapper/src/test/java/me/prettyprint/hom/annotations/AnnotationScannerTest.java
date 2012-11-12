@@ -14,7 +14,7 @@ public class AnnotationScannerTest {
 
   @Test
   public void testScanForAnnotation() {
-    AnnotationScanner scanner = new AnnotationScanner();
+    AnnotationScanner scanner = new DefaultAnnotationScanner();
     Set<Class<?>> classSet = scanner.scan("me.prettyprint.hom.beans", javax.persistence.Entity.class);
 
     int count = 0;

@@ -6,6 +6,29 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.1-2
+=====
+DynamiCompositeType now supported by SerializingTypeInferer @mebigfatguy
+RangeSlicesIterator for merged get_indexed_slices/range_slices functionality @thrykol
+PersistenceProvider and EntityManagerFactory impls, switch to xbean for scanning HOM instead 
+of spring. https://github.com/hector-client/hector/pull/509 thanks to @rmannibucau for the patch
+New RowCopy utility class does precisely what it says on the tin https://github.com/hector-client/hector/pull/513 @thrykol  
+Fix Issue (#540) so ThriftCfDef will handle adding ColumnDefinitions after constuction when there were none on constructor.
+Iterator for SliceCounter https://github.com/hector-client/hector/pull/514 thanks to @thrykol 
+Huge pile of formatting fixes and test coverage by @edgurgel 
+Ability to specify impelementation of HClientFactory https://github.com/hector-client/hector/pull/533 thanks to @xedin 
+Key validation alias support on BasicColumnFamilyDefinition. https://github.com/hector-client/hector/pull/523 @thrykol 
+Column TTL now supported in ColumnFamilyTemplate API. https://github.com/hector-client/hector/pull/535 thanks to @jkowalewski
+Support Double and Float directly. See https://github.com/hector-client/hector/pull/539 thanks to @feob
+BooleanType and FloatType now supported in ComparatorType Thanks to @woolfel
+CqlQuery now support version attribute. Thanks to @edwardcapriolo https://github.com/hector-client/hector/pull/547
+Pure cassandra-based locking implementation. Thanks to @tnine and @patricioe for the effort. https://github.com/hector-client/hector/pull/550
+SSL support. Thanks to @alexliu68 for the patch. See https://github.com/hector-client/hector/pull/548 for details.
+Change PrefixSerializer to only raise the "unprefixed" error when the system really recognizes that the retrieved value has 
+no prefix. If the prefix is different, discard the value. Thanks to @scottganyo for the patch.
+
+
+
 1.1-1
 =====
 add DynamicComposites to the list of types supported by SerializerTypeInferer
@@ -23,6 +46,7 @@ code after any upgrade.
 
 1.0-6
 =====
+set the ClockResolution for all clusters in a static way #479
 changed storage_port from 7000 to 7070 so as not to conflict with a "normal" running cassandra instance on same machine
 
 1.0-5

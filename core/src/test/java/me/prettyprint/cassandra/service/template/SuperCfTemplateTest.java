@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.UUID;
 
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
@@ -230,4 +232,35 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(1, result.getSuperColumns().size());
   }
   
+  @Test
+  public void testSuperCfColumnValueTypes() {
+    final float EPSILON = 0.0000001f;
+
+    SuperCfTemplate<String, String, String> sTemplate =
+      new ThriftSuperCfTemplate<String, String, String>(keyspace, "Super1", se, se, se);
+    SuperCfUpdater<String,String,String> sUpdater = sTemplate.createUpdater("skey1","super1");
+    sUpdater.setString("subcolumn1","string value");
+    sUpdater.setUUID("subcolumn2", UUID.fromString("cf316d50-f7c0-11e1-a21f-0800200c9a66"));
+    sUpdater.setLong("subcolumn3", 829398278497234L);
+    sUpdater.setInteger("subcolumn4", 27344);
+    sUpdater.setFloat("subcolumn5",3.14159265f);
+    sUpdater.setDouble("subcolumn6",3.14159265358979323846264338327950288);
+    sUpdater.setBoolean("subcolumn7", true);
+    sUpdater.setByteArray("subcolumn8", new byte[] {97, 91, 99});
+    final Date date = new Date();
+    sUpdater.setDate("subcolumn9", date);
+
+    sTemplate.update(sUpdater);
+
+    SuperCfResult<String,String,String> result = sTemplate.querySuperColumn("skey1", "super1");
+    assertEquals("string value",result.getString("subcolumn1"));
+    assertEquals(UUID.fromString("cf316d50-f7c0-11e1-a21f-0800200c9a66"), result.getUUID("subcolumn2"));
+    assertEquals(Long.valueOf(829398278497234L), result.getLong("subcolumn3"));
+    assertEquals(Integer.valueOf(27344), result.getInteger("subcolumn4"));
+    assertEquals(3.14159265f,result.getFloat("subcolumn5"), EPSILON);
+    assertEquals(3.14159265358979323846264338327950288, result.getDouble("subcolumn6"), EPSILON);
+    assertEquals(true, result.getBoolean("subcolumn7"));
+    assertArrayEquals(new byte[] {97, 91, 99}, result.getByteArray("subcolumn8"));
+    assertEquals(date, result.getDate("subcolumn9"));
+  }
 }

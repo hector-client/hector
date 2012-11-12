@@ -110,7 +110,9 @@ public class JaxbSerializer extends AbstractSerializer<Object> {
       return null;
     }
 
-    ByteArrayInputStream bais = new ByteArrayInputStream(bytes.array());
+    int l = bytes.remaining();
+    ByteArrayInputStream bais = new ByteArrayInputStream(bytes.array(),
+        bytes.arrayOffset() + bytes.position(), l);
     try {
       XMLStreamReader reader = createStreamReader(bais);
       Object ret = unmarshaller.get().unmarshal(reader);

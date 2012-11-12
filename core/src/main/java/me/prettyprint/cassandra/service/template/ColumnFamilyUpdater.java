@@ -46,7 +46,7 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
   public ColumnFamilyUpdater(ColumnFamilyTemplate<K, N> template, ColumnFactory columnFactory) {
     super(template, columnFactory, template.createMutator());
   }
-  
+   
   /**
    * Same as 2-arg version, except we use the provided {@link Mutator} 
    * @param template
@@ -61,85 +61,113 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
     mutator.addDeletion(getCurrentKey(), template.getColumnFamily(),
         columnName, template.getTopSerializer());
   }
-
+ 
   public void setString(N columnName, String value) {
-    HColumn<N, String> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), StringSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName,value,StringSerializer.get(), globalTtl); 
   }
-
+  
+  public void setString(N columnName, String value, int ttl) { 
+    addInsertion(columnName,value,StringSerializer.get(),ttl); 
+  }
+  
   public void setUUID(N columnName, UUID value) {
-    HColumn<N, UUID> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), UUIDSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, UUIDSerializer.get(), globalTtl); 
+  }
+  
+  public void setUUID(N columnName, UUID value, int ttl) { 
+    addInsertion(columnName, value, UUIDSerializer.get(), ttl); 
   }
 
   public void setLong(N columnName, Long value) {
-    HColumn<N, Long> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), LongSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, LongSerializer.get(), globalTtl); 
+  }
+  
+  public void setLong(N columnName, Long value, int ttl) { 
+    addInsertion(columnName, value, LongSerializer.get(), ttl);
   }
 
   public void setInteger(N columnName, Integer value) {
-    HColumn<N, Integer> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), IntegerSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, IntegerSerializer.get(), globalTtl); 
+  }
+  
+  public void setInteger(N columnName, Integer value, int ttl) {
+    addInsertion(columnName, value, IntegerSerializer.get(), ttl); 
+  }
+  
+  public void setFloat(N columnName, Float value) {
+    addInsertion(columnName, value, FloatSerializer.get(), globalTtl); 
+  }
+
+  public void setFloat(N columnName, Float value, int ttl) {
+    addInsertion(columnName, value, FloatSerializer.get(), ttl); 
   }
   
   public void setDouble(N columnName, Double value) {
-    HColumn<N, Double> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), DoubleSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, DoubleSerializer.get(), globalTtl);
+  }
+  
+  public void setDouble(N columnName, Double value, int ttl) {
+    addInsertion(columnName, value, DoubleSerializer.get(), ttl);
   }  
   
   public void setBoolean(N columnName, Boolean value) {
-    HColumn<N, Boolean> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), BooleanSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, BooleanSerializer.get(), globalTtl);
   }
-
+  
+  public void setBoolean(N columnName, Boolean value, int ttl) {
+    addInsertion(columnName, value, BooleanSerializer.get(), ttl);
+  }
+  
   public void setByteArray(N columnName, byte[] value) {
-    HColumn<N, byte[]> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), BytesArraySerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, BytesArraySerializer.get(), globalTtl);
   }
 
+  public void setByteArray(N columnName, byte[] value, int ttl) {
+    addInsertion(columnName, value, BytesArraySerializer.get(), ttl);
+  }
+  
   public void setByteBuffer(N columnName, ByteBuffer value) {
-    HColumn<N, ByteBuffer> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), ByteBufferSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, ByteBufferSerializer.get(), globalTtl);
+  }
+  
+  public void setByteBuffer(N columnName, ByteBuffer value, int ttl) {
+    addInsertion(columnName, value, ByteBufferSerializer.get(), globalTtl);
   }
   
   public void setDate(N columnName, Date value) {
-    HColumn<N, Date> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), DateSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, DateSerializer.get(), globalTtl);
   }
 
   public <V> void setFloat(N columnName, float value) {
-    HColumn<N, Float> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), FloatSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, value, FloatSerializer.get(), globalTtl);
   }
 
   public <V> void setComposite(N columnName, Composite composite) {
-    HColumn<N, Composite> column = columnFactory.createColumn(columnName, composite, clock,
-        template.getTopSerializer(), CompositeSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, composite, CompositeSerializer.get(), globalTtl);
   }
 
   public <V> void setDynamicComposite(N columnName, DynamicComposite composite) {
-    HColumn<N, DynamicComposite> column = columnFactory.createColumn(columnName, composite, clock,
-        template.getTopSerializer(), DynamicCompositeSerializer.get());
-    mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
+    addInsertion(columnName, composite, DynamicCompositeSerializer.get(), globalTtl);
   }
 
   public <V> void setValue(N columnName, V value, Serializer<V> serializer) {
-    HColumn<N, V> column = columnFactory.createColumn(columnName, value, clock,
-        template.getTopSerializer(), serializer);
+    addInsertion(columnName, value, serializer, globalTtl);
+  }
+  
+  public <V> void setValue(N columnName, V value, Serializer<V> serializer, int ttl) {
+    addInsertion(columnName, value, serializer, ttl);
+  }
+  
+  private <V> void addInsertion(N columnName, V value, Serializer<V> valueSerializer, int ttl) { 
+    HColumn<N,V> column = columnFactory.createColumn(columnName, value, clock, template.getTopSerializer(), valueSerializer);
+    
+    if(ttl > DEF_TTL) { 
+      column.setTtl(ttl);
+    } 
+    
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }
-
+  
   public <V> void setColumn(HColumn<N, V> column) {
     mutator.addInsertion(getCurrentKey(), template.getColumnFamily(), column);
   }

@@ -434,6 +434,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     }
     components.add(index, new Component(element, null, s, c,
         equality));
+    setSerializerByPosition(index, s);
     return this;
   }
     

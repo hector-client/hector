@@ -16,4 +16,6 @@ public interface Keyspace {
   
   long createClock();
 
+  void setCqlVersion(String version);
+
 }

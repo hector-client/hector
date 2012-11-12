@@ -20,6 +20,7 @@ public abstract class AbstractBasicQuery<K, N, T> implements Query<T> {
   protected Serializer<K> keySerializer;
   protected Serializer<N> columnNameSerializer;
   // add: FailoverPolicy, ConsistencyLevelPolicy, Credentials?
+  protected String cqlVersion;
 
   protected AbstractBasicQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
@@ -51,5 +52,16 @@ public abstract class AbstractBasicQuery<K, N, T> implements Query<T> {
     this.columnNameSerializer = columnNameSerializer;
     return this;
   }
+
+  public String getCqlVersion() {
+    return cqlVersion;
+  }
+
+  public AbstractBasicQuery setCqlVersion(String cqlVersion) {
+    this.cqlVersion = cqlVersion;
+    return this;
+  }
+
+
 
 }

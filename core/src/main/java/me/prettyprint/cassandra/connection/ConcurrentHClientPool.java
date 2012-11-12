@@ -61,7 +61,6 @@ public class ConcurrentHClientPool implements HClientPool {
     }
   }
 
-
   @Override
   public HClient borrowClient() throws HectorException {
     if ( !active.get() ) {
@@ -228,6 +227,9 @@ public String getStatusAsString() {
 
 @Override
 public void releaseClient(HClient client) throws HectorException {
+    if ( cassandraHost.getMaxActive() == 0 ) {
+      client.close();
+    }
     boolean open = client.isOpen();
     if ( open ) {
       if ( active.get() ) {

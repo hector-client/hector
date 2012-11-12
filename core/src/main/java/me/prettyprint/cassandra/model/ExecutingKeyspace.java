@@ -14,6 +14,7 @@ import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
+import org.apache.cassandra.thrift.Cassandra;
 
 /**
  * Thread Safe
@@ -27,11 +28,13 @@ public class ExecutingKeyspace implements Keyspace {
 
   protected ConsistencyLevelPolicy consistencyLevelPolicy;
   protected FailoverPolicy failoverPolicy;
+  protected String cqlVersion;
 
   protected final HConnectionManager connectionManager;
   protected final String keyspace;
   protected final Map<String, String> credentials;
   private final ExceptionsTranslator exceptionTranslator;
+
 
   public ExecutingKeyspace(String keyspace,
       HConnectionManager connectionManager,
@@ -39,6 +42,7 @@ public class ExecutingKeyspace implements Keyspace {
       FailoverPolicy failoverPolicy) {
     this(keyspace, connectionManager, consistencyLevelPolicy, failoverPolicy,
         EMPTY_CREDENTIALS);
+
   }
 
   public ExecutingKeyspace(String keyspace,
@@ -51,6 +55,7 @@ public class ExecutingKeyspace implements Keyspace {
     this.consistencyLevelPolicy = consistencyLevelPolicy;
     this.failoverPolicy = failoverPolicy;
     this.credentials = credentials;
+    //this.cqlVersion = cqlVersion;
     // TODO make this plug-able
     exceptionTranslator = new ExceptionsTranslatorImpl();
   }
@@ -75,6 +80,17 @@ public class ExecutingKeyspace implements Keyspace {
   public long createClock() {
     return connectionManager.createClock();
   }
+
+  public String getCqlVersion() {
+    return cqlVersion;
+  }
+
+  @Override
+  public void setCqlVersion(String cqlVersion) {
+    this.cqlVersion = cqlVersion;
+  }
+
+
 
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc)
       throws HectorException {

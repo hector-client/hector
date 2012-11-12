@@ -8,6 +8,7 @@ import me.prettyprint.cassandra.serializers.BooleanSerializer;
 import me.prettyprint.cassandra.serializers.BytesArraySerializer;
 import me.prettyprint.cassandra.serializers.DateSerializer;
 import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.serializers.IntegerSerializer;
 import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
@@ -65,6 +66,10 @@ public abstract class AbstractResultWrapper<K, N> implements ColumnFamilyResult<
 
   public Integer getInteger(N columnName) {
     return IntegerSerializer.get().fromByteBuffer(getColumnValue(columnName));
+  }
+
+  public Float getFloat(N columnName) {
+    return FloatSerializer.get().fromByteBuffer(getColumnValue(columnName));
   }
   
   public Double getDouble(N columnName) {
