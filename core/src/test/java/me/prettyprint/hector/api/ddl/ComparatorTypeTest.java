@@ -2,7 +2,7 @@ package me.prettyprint.hector.api.ddl;
 
 import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
-import static me.prettyprint.hector.api.ddl.ComparatorType.INT32TYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.BIGINTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LOCALBYPARTITIONERTYPE;
@@ -51,9 +51,9 @@ public class ComparatorTypeTest {
     assertEquals(BYTESTYPE,
         ComparatorType.getByClassName("BytesType"));
 
-    assertEquals(INT32TYPE,
+    assertEquals(INTEGERTYPE,
         ComparatorType.getByClassName("org.apache.cassandra.db.marshal.Int32Type"));
-    assertEquals(INT32TYPE,
+    assertEquals(INTEGERTYPE,
         ComparatorType.getByClassName("Int32Type"));
     assertEquals(BIGINTEGERTYPE,
         ComparatorType.getByClassName("org.apache.cassandra.db.marshal.IntegerType"));

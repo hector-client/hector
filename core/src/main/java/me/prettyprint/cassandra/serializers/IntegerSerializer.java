@@ -46,7 +46,7 @@ public final class IntegerSerializer extends AbstractSerializer<Integer> {
 
     @Override
     public ComparatorType getComparatorType() {
-        return ComparatorType.INT32TYPE;
+        return ComparatorType.INTEGERTYPE;
     }
 
 }
