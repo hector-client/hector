@@ -1,8 +1,7 @@
 package me.prettyprint.hector.api.ddl;
 
-import java.util.Map;
-
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 
 /**
  * @author peter
@@ -47,7 +46,7 @@ public final class ComparatorType {
     private static final Map<String, ComparatorType> valuesMap;
 
     static {
-    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DECIMALTYPE, FLOATTYPE, INTEGERTYPE,BIGINTEGERTYPE
+    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DECIMALTYPE, FLOATTYPE, INTEGERTYPE,BIGINTEGERTYPE,
             LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, DOUBLETYPE, TIMEUUIDTYPE,
             UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE};
 
