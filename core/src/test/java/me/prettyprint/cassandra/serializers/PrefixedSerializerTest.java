@@ -1,10 +1,12 @@
 package me.prettyprint.cassandra.serializers;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
+import me.prettyprint.hector.api.exceptions.HectorSerializationException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,10 +56,33 @@ public class PrefixedSerializerTest {
     Assert.assertNotSame(prefixUUID, testUUID);
     PrefixedSerializer<UUID, String> pe2 = new PrefixedSerializer<UUID, String>(
         testUUID, ue, se);
+    String result = pe2.fromByteBuffer(pe1.toByteBuffer(str));
+    Assert.assertNull("Different prefixes should fail comparison", result);
+  }
+
+  @Test
+  public void testNoPrefix() {
+    if (str == null) {
+      // null serialization is always null,
+      // so no prefix comparison takes place to test
+      return;
+    }
+    UUIDSerializer ue = new UUIDSerializer();
+    StringSerializer se = new StringSerializer();
+    PrefixedSerializer<UUID, String> pe1 = new PrefixedSerializer<UUID, String>(
+        prefixUUID, ue, se);
+    UUID testUUID = UUID.randomUUID();
+    Assert.assertNotSame(prefixUUID, testUUID);
+    PrefixedSerializer<UUID, String> pe2 = new PrefixedSerializer<UUID, String>(
+        testUUID, ue, se);
     try {
-      pe2.fromByteBuffer(pe1.toByteBuffer(str));
-      Assert.fail("Different prefixes should fail comparison");
-    } catch (Exception e) {
+      ByteBuffer bb = pe1.toByteBuffer(str);
+      bb.limit(5);
+//      bb.get(new byte[bb.limit() - 5]);
+      pe2.fromByteBuffer(bb);
+      Assert.fail("Lack of prefix should raise exception");
+    } catch (HectorSerializationException e) {
+      // yea
     }
   }
 }
