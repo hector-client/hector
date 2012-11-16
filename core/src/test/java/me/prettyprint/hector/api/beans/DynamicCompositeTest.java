@@ -1,32 +1,51 @@
 package me.prettyprint.hector.api.beans;
 
-import static org.junit.Assert.*;
-
 import java.nio.ByteBuffer;
-import java.util.UUID;
-
-import me.prettyprint.cassandra.serializers.AsciiSerializer;
-import me.prettyprint.cassandra.serializers.BytesArraySerializer;
-import me.prettyprint.cassandra.serializers.DynamicCompositeSerializer;
-import me.prettyprint.cassandra.serializers.IntegerSerializer;
-import me.prettyprint.cassandra.serializers.LongSerializer;
-import me.prettyprint.cassandra.serializers.StringSerializer;
-import me.prettyprint.cassandra.serializers.TimeUUIDSerializer;
-import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import java.util.Map.Entry;
+import java.util.*;
+import me.prettyprint.cassandra.serializers.*;
+import me.prettyprint.cassandra.service.ColumnSliceIterator;
+import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
-
+import me.prettyprint.hector.api.factory.HFactory;
+import static me.prettyprint.hector.api.factory.HFactory.*;
+import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.SliceQuery;
+import me.prettyprint.hector.testutils.EmbeddedServerHelper;
+import org.junit.AfterClass;
+import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class DynamicCompositeTest {
+	private static DynamicCompositeSerializer ds = DynamicCompositeSerializer.get();
+	private static StringSerializer ss = StringSerializer.get();
+	private static UUIDSerializer us = UUIDSerializer.get();
+	private static Serializer<UUID> uss = UUIDSerializer.get();
+
+  private static EmbeddedServerHelper embedded;
+
+	@BeforeClass
+	public static void setup() throws Exception {
+    embedded = new EmbeddedServerHelper();
+    embedded.setup();
+	}
+
+	@AfterClass
+	public static void teardown() throws Exception {
+    EmbeddedServerHelper.teardown();
+	}
 
 	@Test
 	public void allTypesSerialize() {
 		DynamicComposite composite = new DynamicComposite();
-		
+
 		UUID lexUUID = UUID.randomUUID();
 		com.eaio.uuid.UUID timeUUID = new com.eaio.uuid.UUID();
-		
-	
+
+
 		//add all forward comparators
 		composite.addComponent(0, "AsciiText", AsciiSerializer.get(), "AsciiType", ComponentEquality.EQUAL);
 		composite.addComponent(1, new byte[]{0, 1, 2, 3}, BytesArraySerializer.get(), "BytesType", ComponentEquality.EQUAL);
@@ -36,7 +55,7 @@ public class DynamicCompositeTest {
 		composite.addComponent(5, timeUUID, TimeUUIDSerializer.get(), "TimeUUIDType", ComponentEquality.EQUAL);
 		composite.addComponent(6, "UTF8Text", StringSerializer.get(), "UTF8Type", ComponentEquality.EQUAL);
 		composite.addComponent(7,  lexUUID, UUIDSerializer.get(), "UUIDType", ComponentEquality.EQUAL);
-		
+
 		//add all reverse comparators
 		composite.addComponent(8, "AsciiText", AsciiSerializer.get(), "AsciiType(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(9, new byte[]{0, 1, 2, 3}, BytesArraySerializer.get(), "BytesType(reversed=true)", ComponentEquality.EQUAL);
@@ -47,15 +66,15 @@ public class DynamicCompositeTest {
 		composite.addComponent(14, "UTF8Text", StringSerializer.get(), "UTF8Type(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(15,  lexUUID, UUIDSerializer.get(), "UUIDType(reversed=true)", ComponentEquality.EQUAL);
 		composite.addComponent(16, "My element", ComponentEquality.EQUAL);
-		
+
 		//serialize to the native bytes value
-		
+
 		ByteBuffer buffer = DynamicCompositeSerializer.get().toByteBuffer(composite);
-		
-	
+
+
 		//now deserialize and ensure the values are the same
 		DynamicComposite parsed = DynamicCompositeSerializer.get().fromByteBuffer(buffer);
-		
+
 		assertEquals("AsciiText", parsed.get(0, AsciiSerializer.get()));
 		assertArrayEquals(new byte[]{0, 1, 2, 3}, parsed.get(1, BytesArraySerializer.get()));
 		assertEquals(Integer.valueOf(-1), parsed.get(2, IntegerSerializer.get()));
@@ -64,7 +83,7 @@ public class DynamicCompositeTest {
 		assertEquals(timeUUID, parsed.get(5, TimeUUIDSerializer.get()));
 		assertEquals("UTF8Text", parsed.get(6, StringSerializer.get()));
 		assertEquals(lexUUID, parsed.get(7, UUIDSerializer.get()));
-		
+
 		//now test all the reversed values
 		assertEquals("AsciiText", parsed.get(8, AsciiSerializer.get()));
 		assertArrayEquals(new byte[]{0, 1, 2, 3}, parsed.get(9, BytesArraySerializer.get()));
@@ -75,8 +94,195 @@ public class DynamicCompositeTest {
 		assertEquals("UTF8Text", parsed.get(14, StringSerializer.get()));
 		assertEquals(lexUUID, parsed.get(15, UUIDSerializer.get()));
 		assertEquals("My element", parsed.get(16, StringSerializer.get()));
-		
+
 
 	}
 
+	@Test
+	public void testUUIDGetAll() {
+		// Gets all columns in the row regardless of the column name
+    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
+    Keyspace ks = createKeyspace("Keyspace1", c);
+		String key = "rowKey";
+		String cf = "DynamicComposite1";
+
+		init(ks, key, cf);
+
+		// Get all rows
+		Set<UUID> results = new HashSet<UUID>();
+		ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(ks, cf, key, null, null);
+		while(iterator.hasNext()) {
+			HColumn<DynamicComposite, String> column = iterator.next();
+			DynamicComposite composite = column.getName();
+			UUID component1 = composite.get(1, us);
+			results.add(component1);
+		}
+
+		assertEquals("Failed to retrieve all columns", 8, results.size());
+
+		clear(ks, key, cf);
+	}
+
+	@Test
+	public void testUUIDGetSlice() {
+		// Gets all columns based on the first component in the column name
+    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
+    Keyspace ks = createKeyspace("Keyspace1", c);
+		String key = "rowKey";
+		String cf = "DynamicComposite1";
+
+		Map<UUID, Set<UUID>> ids = init(ks, key, cf);
+
+		for(Entry<UUID, Set<UUID>> entry : ids.entrySet()) {
+			UUID component0 = entry.getKey();
+
+			// start at first column who's single component == component0
+			DynamicComposite start = new DynamicComposite();
+			start.addComponent(component0, us);
+
+			// up to and including any column whose first component == component0 regardless of remaining component values
+			DynamicComposite end = new DynamicComposite();
+			end.addComponent(component0, us, us.getComparatorType().getTypeName(), ComponentEquality.GREATER_THAN_EQUAL);
+
+			ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(ks, cf, key, start, end);
+			while(iterator.hasNext()) {
+				HColumn<DynamicComposite, String> column = iterator.next();
+				DynamicComposite composite = column.getName();
+
+				assertEquals(component0, composite.get(0, us));
+				assertTrue(ids.get(component0).contains(composite.get(1, us)));
+			}
+		}
+
+		clear(ks, key, cf);
+	}
+
+	@Test
+	public void testStringGetSlice() {
+    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
+    Keyspace ks = createKeyspace("Keyspace1", c);
+		String key = "rowKey";
+		String cf = "DynamicComposite1";
+		Mutator<String> mutator = createMutator(ks, ss);
+
+		DynamicComposite composite = (DynamicComposite) new DynamicComposite().
+						addComponent("a", ss).
+						addComponent("ba", ss).
+						addComponent("ca", ss).
+						addComponent("da", ss);
+		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+
+		composite = (DynamicComposite) new DynamicComposite().
+						addComponent("a", ss).
+						addComponent("bb", ss).
+						addComponent("cb", ss).
+						addComponent("db", ss);
+		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+
+		composite = (DynamicComposite) new DynamicComposite().
+						addComponent("b", ss).
+						addComponent("ba", ss).
+						addComponent("ca", ss).
+						addComponent("da", ss);
+		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+
+		composite = (DynamicComposite) new DynamicComposite().
+						addComponent("b", ss).
+						addComponent("bb", ss).
+						addComponent("cb", ss).
+						addComponent("db", ss);
+		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+
+		mutator.execute();
+
+		String compType = ss.getComparatorType().getTypeName();
+
+		System.out.println("LESS_THAN_EQUAL");
+		DynamicComposite end = (DynamicComposite) new DynamicComposite().
+						addComponent("b", ss, compType).
+						addComponent("ba", ss).
+						addComponent("ca", ss).
+						addComponent("da", ss, compType, ComponentEquality.LESS_THAN_EQUAL); // s@a:s@ba:s@ca:s@da thru s@a:s@bb:s@cb:s@db
+
+		ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(ks, cf, key, null, end);
+		while(iterator.hasNext()) {
+			System.out.println(iterator.next().getName());
+		}
+
+		System.out.println("EQUAL");
+		end = (DynamicComposite) new DynamicComposite().
+						addComponent("b", ss, compType).
+						addComponent("ba", ss).
+						addComponent("ca", ss).
+						addComponent("da", ss, compType, ComponentEquality.EQUAL); // s@a:s@ba:s@ca:s@da thru s@b:s@ba:s@ca:s@da
+
+		iterator = getIterator(ks, cf, key, null, end);
+		while(iterator.hasNext()) {
+			System.out.println(iterator.next().getName());
+		}
+
+		System.out.println("GREATER_THAN_EQUAL");
+		end = (DynamicComposite) new DynamicComposite().
+						addComponent("b", ss, compType).
+						addComponent("bb", ss, compType, ComponentEquality.GREATER_THAN_EQUAL); // s@a:s@ba:s@ca:s@da thru s@b:s@bb:s@cb:s@db
+
+		iterator = getIterator(ks, cf, key, null, end);
+		while(iterator.hasNext()) {
+			System.out.println(iterator.next().getName());
+		}
+	}
+
+	private ColumnSliceIterator<String, DynamicComposite, String> getIterator(Keyspace ks, String cf, String key, DynamicComposite start, DynamicComposite end) {
+		SliceQuery<String, DynamicComposite, String> query = HFactory.createSliceQuery(ks, ss, ds, ss).
+						setColumnFamily(cf).
+						setKey(key);
+		return new ColumnSliceIterator<String, DynamicComposite, String>(query, start, end, false);
+	}
+
+	/**
+	 * Initializes a row whose DynamicComposite column name components are two UUIDs.
+	 * Sample row:
+	 *
+	 * RowKey: ROW_KEY
+	 *		=> (column=u@77df3aa8-f8b2-4658-be4d-ad9401f4388a:u@222c532f-e310-4803-8119-3a96f770b763, value=[77df3aa8-f8b2-4658-be4d-ad9401f4388a, 222c532f-e310-4803-8119-3a96f770b763], timestamp=1353028069149000)
+	 *		=> (column=u@77df3aa8-f8b2-4658-be4d-ad9401f4388a:u@acf45bbe-4b2d-4f90-80d3-3b2288ccb13a, value=[77df3aa8-f8b2-4658-be4d-ad9401f4388a, acf45bbe-4b2d-4f90-80d3-3b2288ccb13a], timestamp=1353028069149002)
+	 *		=> (column=u@77df3aa8-f8b2-4658-be4d-ad9401f4388a:u@b1015157-e030-45dd-b5a3-67a11f7e6350, value=[77df3aa8-f8b2-4658-be4d-ad9401f4388a, b1015157-e030-45dd-b5a3-67a11f7e6350], timestamp=1353028069138000)
+	 *		=> (column=u@77df3aa8-f8b2-4658-be4d-ad9401f4388a:u@f42dc238-7fab-48ec-b831-632bd1adaad9, value=[77df3aa8-f8b2-4658-be4d-ad9401f4388a, f42dc238-7fab-48ec-b831-632bd1adaad9], timestamp=1353028069149001)
+	 *		=> (column=u@def2ce2c-a77d-48de-8072-1b5c06fb0e07:u@20624858-77fb-495b-9886-12b7ff230da9, value=[def2ce2c-a77d-48de-8072-1b5c06fb0e07, 20624858-77fb-495b-9886-12b7ff230da9], timestamp=1353028069150002)
+	 *		=> (column=u@def2ce2c-a77d-48de-8072-1b5c06fb0e07:u@bff9acb8-2b61-420a-b6ad-4095bc87f32c, value=[def2ce2c-a77d-48de-8072-1b5c06fb0e07, bff9acb8-2b61-420a-b6ad-4095bc87f32c], timestamp=1353028069150001)
+	 *		=> (column=u@def2ce2c-a77d-48de-8072-1b5c06fb0e07:u@c9b0bfc4-b756-43f8-bcd9-1ec6680b4bde, value=[def2ce2c-a77d-48de-8072-1b5c06fb0e07, c9b0bfc4-b756-43f8-bcd9-1ec6680b4bde], timestamp=1353028069150003)
+	 *		=> (column=u@def2ce2c-a77d-48de-8072-1b5c06fb0e07:u@decaf265-1213-42e8-a489-a991d4d00d97, value=[def2ce2c-a77d-48de-8072-1b5c06fb0e07, decaf265-1213-42e8-a489-a991d4d00d97], timestamp=1353028069150000)
+	 *
+	 * @return Map of first component to a set of the corresponding second components
+	 */
+	private Map<UUID, Set<UUID>> init(Keyspace ks, String key, String cf) {
+		Mutator<String> mutator = createMutator(ks, ss);
+		Map<UUID, Set<UUID>> ids = new HashMap<UUID, Set<UUID>>();
+		ids.put(UUID.randomUUID(), new HashSet<UUID>());
+		ids.put(UUID.randomUUID(), new HashSet<UUID>());
+
+		for(Entry<UUID, Set<UUID>> entry : ids.entrySet()) {
+			for(int i = 0; i < 4; i++) {
+				UUID uuid = UUID.randomUUID();
+
+				DynamicComposite composite = (DynamicComposite) new DynamicComposite().addComponent(entry.getKey(), uss).addComponent(uuid, uss);
+				mutator.addInsertion(key, cf,	HFactory.createColumn(composite, composite.toString(), ds, ss));
+
+				entry.getValue().add(uuid);
+			}
+		}
+
+		mutator.execute();
+
+		return ids;
+	}
+
+	/**
+	 * Helper function to remove a row after the test has completed.
+	 */
+	private void clear(Keyspace ks, String key, String cf) {
+		Mutator<String> mutator = createMutator(ks, ss);
+		mutator.addDeletion(key, cf);
+		mutator.execute();
+	}
 }
