@@ -31,7 +31,8 @@ public final class CassandraHostConfigurator implements Serializable {
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
-  
+  private int maxFrameSize = CassandraHost.DEFAULT_MAX_FRAME_SIZE;
+
   private boolean retryDownedHosts = true;
   private int retryDownedHostsQueueSize = CassandraHostRetryService.DEF_QUEUE_SIZE;
   private int retryDownedHostsDelayInSeconds = CassandraHostRetryService.DEF_RETRY_DELAY;
@@ -80,6 +81,7 @@ public final class CassandraHostConfigurator implements Serializable {
     cassandraHost.setLifo(lifo);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
     cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
+    cassandraHost.setMaxFrameSize(maxFrameSize);
     cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
 
     // this is special as it can be passed in as a system property
@@ -167,6 +169,8 @@ public final class CassandraHostConfigurator implements Serializable {
     s.append(hosts);
     s.append("&useThriftFramedTransport=");
     s.append(useThriftFramedTransport);
+    s.append("&maxFrameSize=");
+    s.append(maxFrameSize);
     s.append("&retryDownedHosts=");
     s.append(retryDownedHosts);
     s.append("&opTimer=");
@@ -193,6 +197,10 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
     this.useThriftFramedTransport = useThriftFramedTransport;
+  }
+
+  public void setMaxFrameSize(int maxFrameSize) {
+    this.maxFrameSize = maxFrameSize;
   }
 
   public static ClockResolution getClockResolution() {

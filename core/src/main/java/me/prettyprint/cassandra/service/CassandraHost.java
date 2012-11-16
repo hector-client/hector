@@ -29,6 +29,11 @@ public final class CassandraHost {
   public static final boolean DEFAULT_USE_FRAMED_THRIFT_TRANSPORT = true;
 
   /**
+   * By default, match TFramedTransport's default max frame size (Integer.MAX_VALUE).
+   */
+  public static final int DEFAULT_MAX_FRAME_SIZE = 0x7FFFFFFF;
+
+  /**
    * The default max wait time when exhausted happens, default value is negative, which means
    * it'll block indefinitely.
    */
@@ -47,6 +52,7 @@ public final class CassandraHost {
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
   private int cassandraThriftSocketTimeout;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
+  private int maxFrameSize = DEFAULT_MAX_FRAME_SIZE;
   private boolean useSocketKeepalive;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
@@ -164,6 +170,14 @@ public final class CassandraHost {
 
   public void setUseThriftFramedTransport(boolean useThriftFramedTransport) {
     this.useThriftFramedTransport = useThriftFramedTransport;
+  }
+
+  public int getMaxFrameSize() {
+      return maxFrameSize;
+  }
+
+  public void setMaxFrameSize(int maxFrameSize) {
+      this.maxFrameSize = maxFrameSize;
   }
 
   public static String parseHostFromUrl(String urlPort) {

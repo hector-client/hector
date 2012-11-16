@@ -128,11 +128,8 @@ public class HThriftClient implements HClient {
         throw new HectorTransportException("Could not set SO_KEEPALIVE on socket: ", se);
       }
     }
-    if (cassandraHost.getUseThriftFramedTransport()) {
-      transport = new TFramedTransport(socket);
-    } else {
-      transport = socket;
-    }
+
+    transport = maybeWrapWithTFramedTransport(socket);
 
     try {
       transport.open();
@@ -145,6 +142,14 @@ public class HThriftClient implements HClient {
           e.getLocalizedMessage(), e);
     }
     return this;
+  }
+
+  protected TTransport maybeWrapWithTFramedTransport(TTransport transport) {
+    if (cassandraHost.getUseThriftFramedTransport()) {
+      return new TFramedTransport(transport, cassandraHost.getMaxFrameSize());
+    } else {
+      return transport;
+    }
   }
 
   /**
