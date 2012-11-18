@@ -137,6 +137,7 @@
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-log4j12</artifactId>
         <version>${slf4j.version}</version>
+        <scope>test</scope>
       </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
@@ -373,7 +374,6 @@
         <configuration>
           <links>
             <link>http://java.sun.com/j2se/1.6.0/docs/api/</link>
-            <link>http://logging.apache.org/log4j/docs/api/</link>
           </links>
           <linksource>true</linksource>
           <maxmemory>900m</maxmemory>
