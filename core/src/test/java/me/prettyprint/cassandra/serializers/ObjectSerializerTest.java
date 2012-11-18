@@ -59,8 +59,18 @@ public class ObjectSerializerTest {
     //get a constructor we can access, we are not able to see the default
     //constructor without going through some hoops as we are no longer
     //the same class
-    Constructor<?> constructor = sampleObjectClassOtherClassLoader.getDeclaredConstructors()[0];
-    constructor.setAccessible(true);
+	Constructor<?> constructor = null;
+	final Constructor<?>[] declaredConstructors = sampleObjectClassOtherClassLoader.getDeclaredConstructors();
+	// find the constructor w/o parameters
+	for (Constructor<?> con : declaredConstructors)
+	{
+		if(con.getParameterTypes().length == 0) {
+			con.setAccessible(true);
+			constructor = con;
+			break;
+		}
+		
+	}
     //create the object
     //this is an instance of SampleObject, but from another class loader, so
     //we can't assign it to a variable of type SampleObject
