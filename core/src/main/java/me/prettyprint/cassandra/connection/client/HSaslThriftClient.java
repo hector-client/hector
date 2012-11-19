@@ -121,7 +121,7 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
         throw new HectorTransportException("Kerberos context couldn't be established with client: ", e);
       }
 
-      transport = maybeWrapWithTFramedTransport(socket);
+      transport = maybeWrapWithTFramedTransport(transport);
 
       return this;
     }
