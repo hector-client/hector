@@ -39,7 +39,6 @@ public class HKerberosSaslThriftClientFactoryImpl implements HClientFactory {
     public static final String KRB5_CONFIG = "krb5.conf";
 
     private String krbServicePrincipalName;
-    private String krbClientPrincipalName;
     private TSSLTransportParameters params;
 
     public HKerberosSaslThriftClientFactoryImpl() {
@@ -54,11 +53,8 @@ public class HKerberosSaslThriftClientFactoryImpl implements HClientFactory {
       }
 
       krbServicePrincipalName = System.getProperty("kerberos.service.principal.name");
-      krbClientPrincipalName = System.getProperty("kerberos.client.principal.name");
       if (krbServicePrincipalName != null) {
-        log.debug("Kerberos properties:");
-        log.debug("  kerberos.service.principal.name = {}", krbServicePrincipalName);
-        log.debug("  kerberos.client.principal.name = {}", krbClientPrincipalName);
+        log.debug("Kerberos service principal name = {}", krbServicePrincipalName);
       }
     }
 
@@ -71,8 +67,8 @@ public class HKerberosSaslThriftClientFactoryImpl implements HClientFactory {
       }
 
       if (params == null)
-        return new HSaslThriftClient(ch, krbServicePrincipalName, krbClientPrincipalName);
+        return new HSaslThriftClient(ch, krbServicePrincipalName);
       else
-        return new HSaslThriftClient(ch, krbServicePrincipalName, krbClientPrincipalName, params);
+        return new HSaslThriftClient(ch, krbServicePrincipalName, params);
     }
 }

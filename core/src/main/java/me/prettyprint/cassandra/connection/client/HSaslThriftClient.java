@@ -54,7 +54,6 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
     private static Logger log = LoggerFactory.getLogger(HSaslThriftClient.class);
 
     private String servicePrincipalName;
-    private String clientPrincipalName;
     private TSSLTransportParameters params;
 
     /**
@@ -62,10 +61,9 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
      * @param cassandraHost
      * @param servicePrincipalName, name/_HOST@DOMAIN,  e.g. mapred/bdplab0.datastax.com@EXAMPLE.COM
      */
-    public HSaslThriftClient(CassandraHost cassandraHost, String servicePrincipalName, String clientPrincipalName) {
+    public HSaslThriftClient(CassandraHost cassandraHost, String servicePrincipalName) {
       super(cassandraHost);
       this.servicePrincipalName = servicePrincipalName;
-      this.clientPrincipalName = clientPrincipalName;
     }
 
     /**
@@ -74,10 +72,9 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
      * @param servicePrincipalName, name/_HOST@DOMAIN,  e.g. mapred/bdplab0.datastax.com@EXAMPLE.COM
      * @param params
      */
-    public HSaslThriftClient(CassandraHost cassandraHost, String servicePrincipalName, String clientPrincipalName, TSSLTransportParameters params) {
+    public HSaslThriftClient(CassandraHost cassandraHost, String servicePrincipalName, TSSLTransportParameters params) {
       super(cassandraHost);
       this.servicePrincipalName = servicePrincipalName;
-      this.clientPrincipalName = clientPrincipalName;
       this.params = params;
     }
 
@@ -94,9 +91,10 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
 
       TSocket socket;
       try {
-        socket = params == null ?
-                                  new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout)
-                                  : TSSLTransportFactory.getClientSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout, params);
+        if (params == null)
+          socket = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
+        else
+          socket = TSSLTransportFactory.getClientSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout, params);
       } catch (TTransportException e) {
         throw new HectorTransportException("Could not get client socket: ", e);
       }
@@ -110,7 +108,7 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
       }
 
       try {
-        transport = openKerberosTransport(socket, servicePrincipalName, clientPrincipalName);
+        transport = openKerberosTransport(socket, servicePrincipalName);
       } catch (LoginException e) {
         log.error("Kerberos login failed: ", e);
         close();
@@ -128,11 +126,11 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
       return this;
     }
 
-    public static TTransport openKerberosTransport(TTransport socket, String kerberosServicePrincipal, String kerberosClientPrincipal) throws LoginException, TTransportException {
+    public static TTransport openKerberosTransport(TTransport socket, String kerberosServicePrincipal) throws LoginException, TTransportException {
       try {
         log.debug("Opening kerberos transport...");
         Subject kerberosTicket = new Subject();
-        KerberosUserConfiguration kerberosConfig = new KerberosUserConfiguration(kerberosClientPrincipal);
+        KerberosUserConfiguration kerberosConfig = new KerberosUserConfiguration();
         LoginContext login = new LoginContext("Client", kerberosTicket, null, kerberosConfig);
         login.login();
 
@@ -182,17 +180,28 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
         DEFAULT_KERBEROS_OPTIONS.put("doNotPrompt", "true");
         DEFAULT_KERBEROS_OPTIONS.put("useTicketCache", "true");
         DEFAULT_KERBEROS_OPTIONS.put("renewTGT", "true");
-        String ticketCache = System.getenv("KRB5CCNAME");
-        if (ticketCache != null)
-          DEFAULT_KERBEROS_OPTIONS.put("ticketCache", ticketCache);
+        DEFAULT_KERBEROS_OPTIONS.put("useKeyTab", "true");
       }
+
+      private static final String[] recognizedOptions = {
+          "debug", "useTicketCache", "ticketCache", "renewTGT", "useKeyTab",
+          "keyTab", "principal"
+      };
 
       private HashMap<String, String> options;
 
-      public KerberosUserConfiguration(String clientPrincipalName) {
+      public KerberosUserConfiguration() {
         this.options = new HashMap<String, String>(DEFAULT_KERBEROS_OPTIONS);
-        if (clientPrincipalName != null)
-          this.options.put("principal", clientPrincipalName);
+
+        log.debug("Setting Kerberos options:");
+        for (int i = 0; i < recognizedOptions.length; i++) {
+          String option = recognizedOptions[i];
+          String value = System.getProperty("kerberos." + option);
+          if (value != null) {
+            log.debug("  " + option + ": " + value);
+            this.options.put(option, value);
+          }
+        }
       }
 
       @Override
