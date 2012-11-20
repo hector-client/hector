@@ -28,8 +28,20 @@ import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.IndexType;
 
 import com.google.common.base.Charsets;
+import org.apache.cassandra.db.marshal.*;
 
 public class EmbeddedSchemaLoader {
+	private static final Map<Byte, AbstractType<?>> alias;
+	static {
+		alias = new HashMap<Byte, AbstractType<?>>();
+		alias.put((byte) 'a', AsciiType.instance);
+		alias.put((byte) 'i', IntegerType.instance);
+		alias.put((byte) 'x', LexicalUUIDType.instance);
+		alias.put((byte) 'l', LongType.instance);
+		alias.put((byte) 't', TimeUUIDType.instance);
+		alias.put((byte) 's', UTF8Type.instance);
+		alias.put((byte) 'u', UUIDType.instance);
+	}
   public static void loadSchema() {
     try
     {
@@ -51,16 +63,16 @@ public class EmbeddedSchemaLoader {
     Class<? extends AbstractReplicationStrategy> simple = SimpleStrategy.class;
     Map<String, String> opts = new HashMap<String, String>();
     opts.put("replication_factor", Integer.toString(1));
-    
+
     ColumnFamilyType st = ColumnFamilyType.Standard;
     ColumnFamilyType su = ColumnFamilyType.Super;
     AbstractType bytes = BytesType.instance;
-    
+
     List<AbstractType> subComparators = new ArrayList<AbstractType>();
     subComparators.add(BytesType.instance);
     subComparators.add(TimeUUIDType.instance);
     subComparators.add(IntegerType.instance);
-    
+
     // Keyspace 1
     schema.add(KSMetaData.testMetadata(
         ks1,
@@ -70,7 +82,8 @@ public class EmbeddedSchemaLoader {
         // Column Families
         standardCFMD(ks1, "Standard1"), standardCFMD(ks1, "Standard2"),
         standardCFMD(ks1, "Standard3"), standardCFMD(ks1, "Standard4"),
-        cqlTestCf(ks1, "StandardLong1",UTF8Type.instance), 
+				dynamicCompositeCFMD(ks1, "DynamicComposite1"),
+        cqlTestCf(ks1, "StandardLong1",UTF8Type.instance),
         standardCFMD(ks1, "StandardLong2").keyValidator(UTF8Type.instance),
         superCFMD(ks1, "Super1", BytesType.instance),
         superCFMD(ks1, "Super2", LongType.instance),
@@ -90,14 +103,18 @@ public class EmbeddedSchemaLoader {
         jdbcCFMD(ks1, "JdbcAscii", AsciiType.instance)));
 
     // Keyspace 2
-   
+
     return schema;
   }
 
   private static CFMetaData compositeCFMD(String ksName, String cfName, AbstractType<?>... types) {
-      return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, CompositeType.getInstance(Arrays.asList(types)), null);      
+      return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, CompositeType.getInstance(Arrays.asList(types)), null);
   }
-  
+
+	private static CFMetaData dynamicCompositeCFMD(String ksName, String cfName) {
+		return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, DynamicCompositeType.getInstance(alias), null);
+	}
+
   private static CFMetaData standardCFMD(String ksName, String cfName) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard,
         BytesType.instance, null);
@@ -128,11 +145,11 @@ public class EmbeddedSchemaLoader {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
         .defaultValidator(comp);
   }
-  
+
   private static CFMetaData cqlTestCf(String ksName, String cfName,
       AbstractType comp)
   throws ConfigurationException
-  {     
+  {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
             {{

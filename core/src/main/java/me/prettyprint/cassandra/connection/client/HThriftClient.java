@@ -16,13 +16,25 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
+/*
+ * It expects few system properties to be set up if it uses SSL:
+ * <ul>
+ * <li><code>ssl.truststore</code> File path for trust store
+ * <li><code>ssl.truststore.password</code> Password for trust store
+ * <li><code>ssl.protocol</code> SSL protocol, default SSL
+ * <li><code>ssl.store.type</code> Store type, default JKS
+ * <li><code>ssl.cipher.suites</code> Cipher suites
+ * </ul>
+ * <p>
+*/
 public class HThriftClient implements HClient {
 
   private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
@@ -40,6 +52,7 @@ public class HThriftClient implements HClient {
 
   protected TTransport transport;
   protected Cassandra.Client cassandraClient;
+  private TSSLTransportParameters params;
 
   private final Map<String, String> credentials = new HashMap<String, String>();
 
@@ -53,6 +66,17 @@ public class HThriftClient implements HClient {
     mySerial = serial.incrementAndGet();
   }
 
+  /**
+   * Constructor
+   * @param cassandraHost
+   * @param params
+   */
+  public HThriftClient(CassandraHost cassandraHost, TSSLTransportParameters params) {
+    this.cassandraHost = cassandraHost;
+    this.timeout = getTimeout(cassandraHost);
+    this.params = params;
+    mySerial = serial.incrementAndGet();
+  }
   /**
    * {@inheritDoc}
    */
@@ -120,7 +144,15 @@ public class HThriftClient implements HClient {
       log.debug("Creating a new thrift connection to {}", cassandraHost);
     }
 
-    TSocket socket = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
+    TSocket socket;    
+    try {
+        socket = params == null ? 
+                                new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout)
+                                : TSSLTransportFactory.getClientSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout, params);
+    } catch (TTransportException e) {
+        throw new HectorTransportException("Could not get client socket: ", e);
+    }
+    
     if ( cassandraHost.getUseSocketKeepalive() ) {
       try {
         socket.getSocket().setKeepAlive(true);
@@ -128,23 +160,33 @@ public class HThriftClient implements HClient {
         throw new HectorTransportException("Could not set SO_KEEPALIVE on socket: ", se);
       }
     }
-    if (cassandraHost.getUseThriftFramedTransport()) {
-      transport = new TFramedTransport(socket);
-    } else {
-      transport = socket;
-    }
 
-    try {
-      transport.open();
-    } catch (TTransportException e) {
-      // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
-      // add details to it.
-      log.debug("Unable to open transport to " + cassandraHost.getName());
-      //clientMonitor.incCounter(Counter.CONNECT_ERROR);
-      throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
-          e.getLocalizedMessage(), e);
+    transport = maybeWrapWithTFramedTransport(socket);
+
+    // If using SSL, the socket will already be connected, and TFramedTransport and
+    // TSocket just wind up calling socket.isConnected(), so check this before calling
+    // open() to avoid a "Socket already connected" error.
+    if (!transport.isOpen()) {
+      try {
+        transport.open();
+      } catch (TTransportException e) {
+        // Thrift exceptions aren't very good in reporting, so we have to catch the exception here and
+        // add details to it.
+        log.debug("Unable to open transport to " + cassandraHost.getName());
+        //clientMonitor.incCounter(Counter.CONNECT_ERROR);
+        throw new HectorTransportException("Unable to open transport to " + cassandraHost.getName() +" , " +
+            e.getLocalizedMessage(), e);
+      }
     }
     return this;
+  }
+
+  protected TTransport maybeWrapWithTFramedTransport(TTransport transport) {
+    if (cassandraHost.getUseThriftFramedTransport()) {
+      return new TFramedTransport(transport, cassandraHost.getMaxFrameSize());
+    } else {
+      return transport;
+    }
   }
 
   /**

@@ -10,6 +10,8 @@ import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
 
 import org.apache.thrift.transport.TFramedTransport;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.ietf.jgss.GSSContext;
@@ -27,6 +29,7 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
   
   private Subject kerberosTicket;
   private String servicePrincipalName;
+  private TSSLTransportParameters params;
 
   /**
    * Constructor
@@ -40,6 +43,19 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
   }
 
   /**
+   * Constructor
+   * @param kerberosTicket 
+   * @param cassandraHost
+   * @param params
+   */
+  public HKerberosThriftClient(Subject kerberosTicket, CassandraHost cassandraHost, String servicePrincipalName, TSSLTransportParameters params) {
+    super(cassandraHost);
+    this.kerberosTicket = kerberosTicket;
+    this.servicePrincipalName = servicePrincipalName;
+    this.params = params;
+  }
+  
+  /**
    * {@inheritDoc}
    */
   public HKerberosThriftClient open() {
@@ -49,8 +65,16 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
     if ( log.isDebugEnabled() ) {
       log.debug("Creating a new thrift connection to {}", cassandraHost);
     }
-
-    TSocket socket = new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout);
+    
+    TSocket socket;    
+    try {
+        socket = params == null ? 
+                                new TSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout)
+                                : TSSLTransportFactory.getClientSocket(cassandraHost.getHost(), cassandraHost.getPort(), timeout, params);
+    } catch (TTransportException e) {
+        throw new HectorTransportException("Could not get client socket: ", e);
+    }
+            
     if ( cassandraHost.getUseSocketKeepalive() ) {
       try {
         socket.getSocket().setKeepAlive(true);
@@ -61,12 +85,7 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
 
     // TODO (patricioe) What should I do with it ?
     // KerberosHelper.getSourcePrinciple(clientContext));
-
-    if (cassandraHost.getUseThriftFramedTransport()) {
-      transport = new TFramedTransport(socket);
-    } else {
-      transport = socket;
-    }
+    transport = maybeWrapWithTFramedTransport(socket);
 
     try {
       transport.open();

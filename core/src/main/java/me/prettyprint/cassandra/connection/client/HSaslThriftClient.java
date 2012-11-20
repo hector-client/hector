@@ -119,9 +119,7 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
         throw new HectorTransportException("Kerberos context couldn't be established with client: ", e);
       }
 
-      if (cassandraHost.getUseThriftFramedTransport()) {
-        transport = new TFramedTransport(transport);
-      }
+      transport = maybeWrapWithTFramedTransport(transport);
 
       return this;
     }

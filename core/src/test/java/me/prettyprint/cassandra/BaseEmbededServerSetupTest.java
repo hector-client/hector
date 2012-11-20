@@ -52,4 +52,10 @@ public abstract class BaseEmbededServerSetupTest {
     cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
     connectionManager = new HConnectionManager(clusterName,cassandraHostConfigurator);
   }
+  
+  protected CassandraHostConfigurator getCHCForTest() {
+    CassandraHostConfigurator chc = new CassandraHostConfigurator("127.0.0.1:9170");
+    chc.setMaxActive(2);
+    return chc;
+  }
 }

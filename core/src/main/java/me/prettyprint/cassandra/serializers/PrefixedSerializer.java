@@ -60,11 +60,15 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     bytes = bytes.duplicate();
     bytes.rewind();
 
+    if (bytes.limit() < prefixBytes.remaining()) {
+      log.error("Unprefixed value received, throwing exception...");
+      throw new HectorSerializationException("Unexpected prefix value");
+    }
+
     if (compareByteArrays(prefixBytes.array(), prefixBytes.arrayOffset()
         + prefixBytes.position(), prefixBytes.remaining(), bytes.array(),
         bytes.arrayOffset() + bytes.position(), prefixBytes.remaining()) != 0) {
-      log.error("Unprefixed value received, throwing exception...");
-      throw new HectorSerializationException("Unexpected prefix value");
+      return null; // incorrect prefix, return nothing
     }
     bytes.position(prefixBytes.remaining());
 
@@ -78,10 +82,12 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     for (ByteBuffer s : list) {
       try {
         ByteBuffer bb = s.slice();
-        objList.add(fromByteBuffer(bb));
+        S fbb = fromByteBuffer(bb);
+        if (fbb != null) {
+          objList.add(fbb);
+        }
       } catch (HectorSerializationException e) {
         // not a prefixed key, discard
-        log.warn("Unprefixed value received, discarding...");
       }
     }
     return objList;
@@ -94,10 +100,12 @@ public class PrefixedSerializer<P, S> extends AbstractSerializer<S> {
     for (Entry<ByteBuffer, V> entry : map.entrySet()) {
       try {
         ByteBuffer bb = entry.getKey().slice();
-        objMap.put(fromByteBuffer(bb), entry.getValue());
+        S fbb = fromByteBuffer(bb);
+        if (fbb != null) {
+          objMap.put(fbb, entry.getValue());
+        }
       } catch (HectorSerializationException e) {
         // not a prefixed key, discard
-        log.warn("Unprefixed value received, discarding...");
       }
     }
     return objMap;
