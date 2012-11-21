@@ -181,6 +181,8 @@ public class HSaslThriftClient extends HThriftClient implements HClient {
         DEFAULT_KERBEROS_OPTIONS.put("useKeyTab", "true");
       }
 
+      // See http://docs.oracle.com/javase/1.5.0/docs/guide/security/jaas/spec/com/sun/security/auth/module/Krb5LoginModule.html
+      // for the meaning of these options.
       private static final String[] recognizedOptions = {
           "debug", "useTicketCache", "ticketCache", "renewTGT", "useKeyTab",
           "keyTab", "principal"
