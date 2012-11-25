@@ -2,9 +2,11 @@ package me.prettyprint.hector.api.beans;
 
 import static me.prettyprint.hector.api.ddl.ComparatorType.ASCIITYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.BYTESTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.BIGINTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LEXICALUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.DOUBLETYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
@@ -37,6 +39,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableClassToInstanceMap;
+import me.prettyprint.cassandra.serializers.DoubleSerializer;
+import me.prettyprint.cassandra.serializers.IntegerSerializer;
 
 /**
  * Parent class of Composite and DynamicComposite. Acts as a list of objects
@@ -79,29 +83,37 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public static final BiMap<Class<? extends Serializer>, String> DEFAULT_SERIALIZER_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Class<? extends Serializer>, String>()
       .put(AsciiSerializer.class,
           AsciiSerializer.get().getComparatorType().getTypeName())
+      .put(IntegerSerializer.class,
+          IntegerSerializer.get().getComparatorType().getTypeName())
       .put(BigIntegerSerializer.class,
           BigIntegerSerializer.get().getComparatorType().getTypeName())
       .put(LongSerializer.class,
           LongSerializer.get().getComparatorType().getTypeName())
       .put(StringSerializer.class,
           StringSerializer.get().getComparatorType().getTypeName())
+      .put(DoubleSerializer.class,
+          DoubleSerializer.get().getComparatorType().getTypeName())
       .put(UUIDSerializer.class,
           UUIDSerializer.get().getComparatorType().getTypeName()).build();
 
   static final ImmutableClassToInstanceMap<Serializer> SERIALIZERS = new ImmutableClassToInstanceMap.Builder<Serializer>()
       .put(AsciiSerializer.class, AsciiSerializer.get())
+      .put(IntegerSerializer.class, IntegerSerializer.get())
       .put(BigIntegerSerializer.class, BigIntegerSerializer.get())
       .put(ByteBufferSerializer.class, ByteBufferSerializer.get())
       .put(LongSerializer.class, LongSerializer.get())
+      .put(DoubleSerializer.class, DoubleSerializer.get())
       .put(StringSerializer.class, StringSerializer.get())
       .put(UUIDSerializer.class, UUIDSerializer.get()).build();
 
   public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
       .put((byte) 'a', ASCIITYPE.getTypeName())
       .put((byte) 'b', BYTESTYPE.getTypeName())
+      .put((byte) 'm', BIGINTEGERTYPE.getTypeName())
       .put((byte) 'i', INTEGERTYPE.getTypeName())
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
+      .put((byte) 'd', DOUBLETYPE.getTypeName())
       .put((byte) 't', TIMEUUIDTYPE.getTypeName())
       .put((byte) 's', UTF8TYPE.getTypeName())
       .put((byte) 'u', UUIDTYPE.getTypeName()).build();
@@ -405,7 +417,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   @SuppressWarnings("unchecked")
   public <T> AbstractComposite addComponent(int index, T element, ComponentEquality equality) {
     serialized = null;
-
+    
     if (element instanceof Component) {
       components.add(index, (Component<?>) element);
       return this;
@@ -414,6 +426,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     Serializer s = serializerForPosition(index);
     if (s == null) {
       s = SerializerTypeInferer.getSerializer(element);
+       setSerializerByPosition(index, s);
     }
     String c = comparatorForPosition(index);
     if (c == null) {
@@ -455,7 +468,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public <T> AbstractComposite addComponent(int index, T value,
       Serializer<T> s, String comparator, ComponentEquality equality) {
     serialized = null;
-
+    
     if (value == null) {
         throw new NullPointerException("Unable able to add null component");
     }
@@ -467,6 +480,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     while (components.size() < index) {
       components.add(null);
     }
+    setSerializerByPosition(index, s);
     components.add(index, new Component(value, null, s, comparator, equality));
 
     return this;
@@ -474,7 +488,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   }
 
   private static Object mapIfNumber(Object o) {
-    if ((o instanceof Byte) || (o instanceof Integer) || (o instanceof Short)) {
+    if ((o instanceof Byte) ||  (o instanceof Short)) {
       return BigInteger.valueOf(((Number) o).longValue());
     }
     return o;

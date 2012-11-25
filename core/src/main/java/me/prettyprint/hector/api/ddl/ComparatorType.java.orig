@@ -13,6 +13,7 @@ public final class ComparatorType {
             "org.apache.cassandra.db.marshal.AsciiType");
   public static final ComparatorType BOOLEANTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.BooleanType");
+<<<<<<< HEAD
     public static final ComparatorType BYTESTYPE = new ComparatorType(
             "org.apache.cassandra.db.marshal.BytesType");
     public static final ComparatorType BIGINTEGERTYPE = new ComparatorType(
@@ -23,8 +24,6 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.DecimalType");
     public static final ComparatorType INTEGERTYPE = new ComparatorType(
             "org.apache.cassandra.db.marshal.Int32Type");
-  public static final ComparatorType INT32TYPE = new ComparatorType(
-	  "org.apache.cassandra.db.marshal.Int32Type");
     public static final ComparatorType LEXICALUUIDTYPE = new ComparatorType(
             "org.apache.cassandra.db.marshal.LexicalUUIDType");
     public static final ComparatorType LOCALBYPARTITIONERTYPE = new ComparatorType(
@@ -60,6 +59,52 @@ public final class ComparatorType {
         }
 
         valuesMap = builder.build();
+=======
+  public static final ComparatorType BYTESTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.BytesType");
+  public static final ComparatorType DATETYPE = new ComparatorType(
+	  "org.apache.cassandra.db.marshal.DateType");
+  public static final ComparatorType DECIMALTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DecimalType");
+  public static final ComparatorType FLOATTYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.FloatType");
+  public static final ComparatorType INTEGERTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.IntegerType");
+  public static final ComparatorType INT32TYPE = new ComparatorType(
+	  "org.apache.cassandra.db.marshal.Int32Type");
+  public static final ComparatorType LEXICALUUIDTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.LexicalUUIDType");
+  public static final ComparatorType LOCALBYPARTITIONERTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.LocalByPartionerType");
+  public static final ComparatorType LONGTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.LongType");
+  public static final ComparatorType TIMEUUIDTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.TimeUUIDType");
+  public static final ComparatorType UTF8TYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.UTF8Type");
+  public static final ComparatorType COMPOSITETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.CompositeType");
+  public static final ComparatorType DYNAMICCOMPOSITETYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.DynamicCompositeType");
+  public static final ComparatorType UUIDTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.UUIDType");
+  public static final ComparatorType COUNTERTYPE = new ComparatorType(
+      "org.apache.cassandra.db.marshal.CounterColumnType");
+
+  private static final Map<String, ComparatorType> valuesMap;
+
+  static {
+    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DATETYPE, 
+    	DECIMALTYPE, FLOATTYPE, INTEGERTYPE, INT32TYPE,
+        LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
+        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
+
+    ImmutableMap.Builder<String, ComparatorType> builder =
+        new ImmutableMap.Builder<String, ComparatorType>();
+
+    for (ComparatorType type : types){
+      builder.put(type.getClassName(), type).put(type.getTypeName(), type);
+>>>>>>> 2bf74f9177c2489e69397695e304dc08430db166
     }
     private final String className;
     private final String typeName;
