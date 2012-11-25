@@ -85,12 +85,7 @@ public class HKerberosThriftClient extends HThriftClient implements HClient {
 
     // TODO (patricioe) What should I do with it ?
     // KerberosHelper.getSourcePrinciple(clientContext));
-
-    if (cassandraHost.getUseThriftFramedTransport()) {
-      transport = new TFramedTransport(socket);
-    } else {
-      transport = socket;
-    }
+    transport = maybeWrapWithTFramedTransport(socket);
 
     try {
       transport.open();
