@@ -59,7 +59,7 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
   
   public void deleteColumn(N columnName) {
     mutator.addDeletion(getCurrentKey(), template.getColumnFamily(),
-        columnName, template.getTopSerializer());
+        columnName, template.getTopSerializer(), clock);
   }
  
   public void setString(N columnName, String value) {
