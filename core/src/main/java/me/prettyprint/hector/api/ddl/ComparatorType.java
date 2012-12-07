@@ -44,6 +44,8 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.UUIDType");
   public static final ComparatorType COUNTERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.CounterColumnType");
+  public static final ComparatorType REVERSEDTYPE = new ComparatorType(
+	  "org.apache.cassandra.db.marshal.ReversedType");
 
   private static final Map<String, ComparatorType> valuesMap;
 
@@ -51,7 +53,8 @@ public final class ComparatorType {
     ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DATETYPE, 
     	DECIMALTYPE, FLOATTYPE, INTEGERTYPE, INT32TYPE,
         LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE };
+        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE,
+        REVERSEDTYPE};
 
     ImmutableMap.Builder<String, ComparatorType> builder =
         new ImmutableMap.Builder<String, ComparatorType>();
