@@ -73,6 +73,7 @@
               !org.antlr.*,
               !jline.*,
               !sun.misc.*,
+              org.apache.cassandra.thrift,
               *;resolution:=optional
             </Import-Package>
             <Private-Package>
