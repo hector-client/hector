@@ -50,13 +50,27 @@ public class KeyIteratorTest extends BaseEmbededServerSetupTest {
     assertKeys(5, "k5", null);
     assertKeys(9, null, null);
     assertKeys(7, null, "k7");
+
+    assertStringKeys(5, "k5", null);
+    assertStringKeys(9, null, null);
+    assertStringKeys(7, null, "k7");
   }
 
   private void assertKeys(int expected, String start, String end) {
-    Iterable<String> it = new KeyIterator<String>(keyspace, CF, se, start, end);
+    Iterable<String> it = new KeyIterator.Builder<String>(keyspace, CF, se).start(start).end(end).build();
 
     int tot = 0;
     for (String key : it)
+      tot++;
+
+    assertEquals(expected, tot);
+  }
+
+  private void assertStringKeys(int expected, String start, String end) {
+    StringKeyIterator sk = new StringKeyIterator.Builder(keyspace, CF).start(start).end(end).build();
+
+    int tot = 0;
+    for (String key : sk)
       tot++;
 
     assertEquals(expected, tot);
