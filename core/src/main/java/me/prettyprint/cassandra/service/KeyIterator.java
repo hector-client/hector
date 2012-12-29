@@ -35,6 +35,7 @@ public class KeyIterator<K> implements Iterable<K> {
   private K lastReadValue = null;
   private K endKey;
   private boolean firstRun = true;
+  private int rowCount = MAX_ROW_COUNT_DEFAULT;
 
   private Iterator<K> keyIterator = new Iterator<K>() {
     @Override
@@ -99,12 +100,17 @@ public class KeyIterator<K> implements Iterable<K> {
       .setRowCount(maxRowCount);
 
     endKey = end;
+    if(maxRowCount < Integer.MAX_VALUE) {
+      rowCount = maxRowCount+1; //to compensate the first entry skip (except in first run)
+    }
     runQuery(start, end);
   }
 
   private void runQuery(K start, K end) {
     query.setKeys(start, end);
-
+    if(!firstRun) {
+        query.setRowCount(rowCount);
+    }
     rowsIterator = null;
     QueryResult<OrderedRows<K, String, String>> result = query.execute();
     OrderedRows<K, String, String> rows = (result != null) ? result.get() : null;
