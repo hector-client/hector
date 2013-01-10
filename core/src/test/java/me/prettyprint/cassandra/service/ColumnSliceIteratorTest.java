@@ -8,6 +8,7 @@ import java.util.UUID;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.service.template.SliceFilter;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -56,7 +57,7 @@ public class ColumnSliceIteratorTest extends BaseEmbededServerSetupTest {
 		m.execute();
 	}
 
-	//@Test
+	@Test
 	public void testIterator() {
 		SliceQuery<String, UUID, String> query = HFactory.createSliceQuery(keyspace, se, us, se).setKey(KEY).setColumnFamily(CF);
 		ColumnSliceIterator<String, UUID, String> it = new ColumnSliceIterator<String, UUID, String>(query, null, FINISH, false, 100);
@@ -69,7 +70,7 @@ public class ColumnSliceIteratorTest extends BaseEmbededServerSetupTest {
 		assertEquals(1000, results.size());
 	}
 
-	//@Test
+	@Test
 	public void testModificationIterator() {
 		Mutator mutator = HFactory.createMutator(keyspace, se);
 		SliceQuery<String, UUID, String> query = HFactory.createSliceQuery(keyspace, se, us, se).setKey(KEY).setColumnFamily(CF);
@@ -101,7 +102,7 @@ public class ColumnSliceIteratorTest extends BaseEmbededServerSetupTest {
 						.setKey(KEY)
 						.setColumnFamily(CF);
 		ColumnSliceIterator<String, String, String> it = new ColumnSliceIterator<String, String, String>(query, "a", "d", false, 2).
-						setFilter(new ColumnSliceIterator.ColumnSliceFilter<HColumn<String, String>>() {
+						setFilter(new SliceFilter<HColumn<String, String>>() {
 
 			@Override
 			public boolean accept(HColumn<String, String> column) {

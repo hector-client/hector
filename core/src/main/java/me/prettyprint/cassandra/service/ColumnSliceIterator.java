@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import java.util.Iterator;
 import java.util.List;
+import me.prettyprint.cassandra.service.template.SliceFilter;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.query.SliceQuery;
 
@@ -21,7 +22,7 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 	private PeekingIterator<HColumn<N, V>> iterator;
 	private N start;
 	private ColumnSliceFinish<N> finish;
-	private ColumnSliceFilter<HColumn<N, V>> filter = null;
+	private SliceFilter<HColumn<N, V>> filter = null;
 	private boolean reversed;
 	private int count = DEFAULT_COUNT;
 	private int columns = 0;
@@ -89,7 +90,13 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		this.query.setRange(this.start, this.finish.function(), this.reversed, this.count);
 	}
 
-	public ColumnSliceIterator setFilter(ColumnSliceFilter<HColumn<N, V>> filter) {
+	/**
+	 * Set a filter to determine which columns will be returned.
+	 *
+	 * @param filter Filter to determine which columns will be returned
+	 * @return &lt;this&gt;
+	 */
+	public ColumnSliceIterator setFilter(SliceFilter<HColumn<N, V>> filter) {
 		this.filter = filter;
 		return this;
 	}
@@ -158,9 +165,5 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		 * @return New finish point
 		 */
 		N function();
-	}
-
-	public interface ColumnSliceFilter<C> {
-		boolean accept(C column);
 	}
 }
