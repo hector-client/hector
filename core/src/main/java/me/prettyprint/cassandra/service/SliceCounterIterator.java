@@ -1,7 +1,10 @@
 package me.prettyprint.cassandra.service;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import java.util.Iterator;
 import java.util.List;
+import me.prettyprint.cassandra.service.template.SliceFilter;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.query.SliceCounterQuery;
 
@@ -17,9 +20,10 @@ public class SliceCounterIterator<K, N> implements Iterator<HCounterColumn<N>> {
 
 	private static final int DEFAULT_COUNT = 100;
 	private SliceCounterQuery<K, N> query;
-	private Iterator<HCounterColumn<N>> iterator;
+	private PeekingIterator<HCounterColumn<N>> iterator;
 	private N start;
 	private SliceCounterFinish<N> finish;
+	private SliceFilter<HCounterColumn<N>> filter = null;
 	private boolean reversed;
 	private int count = DEFAULT_COUNT;
 	private int columns = 0;
@@ -87,24 +91,30 @@ public class SliceCounterIterator<K, N> implements Iterator<HCounterColumn<N>> {
 		this.query.setRange(this.start, this.finish.function(), this.reversed, this.count);
 	}
 
+	/**
+	 * Set a filter to determine which columns will be returned.
+	 *
+	 * @param filter Filter to determine which columns will be returned
+	 * @return &lt;this&gt;
+	 */
+	public SliceCounterIterator setFilter(SliceFilter<HCounterColumn<N>> filter) {
+		this.filter = filter;
+		return this;
+	}
+
 	@Override
 	public boolean hasNext() {
 		if (iterator == null) {
-			iterator = query.execute().get().getColumns().iterator();
+			iterator = Iterators.peekingIterator(query.execute().get().getColumns().iterator());
 		} else if (!iterator.hasNext() && columns == count) {  // only need to do another query if maximum columns were retrieved
-			query.setRange(start, finish.function(), reversed, count);
-			columns = 0;
-			List<HCounterColumn<N>> list = query.execute().get().getColumns();
-			iterator = list.iterator();
+			refresh();
+		}
 
-			if (iterator.hasNext()) {
-				// The lower bound column may have been removed prior to the query executing,
-				// so check to see if the first column returned by the current query is the same
-				// as the lower bound column.  If both columns are the same, skip the column
-				N first = list.get(0).getName();
-				if (first.equals(start)) {
-					next();
-				}
+		while(filter != null && iterator != null && iterator.hasNext() && !filter.accept(iterator.peek())) {
+			next();
+
+			if(!iterator.hasNext() && columns == count) {
+				refresh();
 			}
 		}
 
@@ -125,6 +135,22 @@ public class SliceCounterIterator<K, N> implements Iterator<HCounterColumn<N>> {
 		iterator.remove();
 	}
 
+	private void refresh() {
+		query.setRange(start, finish.function(), reversed, count);
+		columns = 0;
+		List<HCounterColumn<N>> list = query.execute().get().getColumns();
+		iterator = Iterators.peekingIterator(list.iterator());
+
+		if (iterator.hasNext()) {
+			// The lower bound column may have been removed prior to the query executing,
+			// so check to see if the first column returned by the current query is the same
+			// as the lower bound column.  If both columns are the same, skip the column
+			N first = list.get(0).getName();
+			if (first.equals(start)) {
+				next();
+			}
+		}
+	}
 	/**
 	 * When iterating over a SliceCounter, it may be desirable to move the finish
 	 * point for each query. This interface allows for a user defined function

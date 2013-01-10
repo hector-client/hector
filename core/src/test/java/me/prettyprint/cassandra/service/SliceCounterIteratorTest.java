@@ -1,11 +1,14 @@
 package me.prettyprint.cassandra.service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.service.template.SliceFilter;
 import me.prettyprint.cassandra.utils.TimeUUIDUtils;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
@@ -18,6 +21,7 @@ import org.junit.After;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class SliceCounterIteratorTest extends BaseEmbededServerSetupTest {
 
@@ -80,6 +84,41 @@ public class SliceCounterIteratorTest extends BaseEmbededServerSetupTest {
 			mutator.addDeletion(KEY, CF, c.getName(), us);
 			mutator.execute();
 		}
+		assertEquals(1000, results.size());
+	}
+
+	@Test
+	public void testFilter() {
+		cluster.truncate(keyspace.getKeyspaceName(), CF);
+
+		Mutator<String> m = createMutator(keyspace, se);
+		for (int i = 0; i < 500; i++) {
+			m.addCounter(KEY, CF, createCounterColumn("a" + i, 1, se));
+			m.addCounter(KEY, CF, createCounterColumn("b" + i, 1, se));
+			m.addCounter(KEY, CF, createCounterColumn("c" + i, 1, se));
+		}
+		m.execute();
+
+		SliceCounterQuery<String, String> query = HFactory.createCounterSliceQuery(keyspace, se, se).setKey(KEY).setColumnFamily(CF);
+		SliceCounterIterator<String, String> it = new SliceCounterIterator<String, String>(query, "a", "d", false, 100).setFilter(new SliceFilter<HCounterColumn<String>>() {
+
+			@Override
+			public boolean accept(HCounterColumn<String> column)
+			{
+				return !column.getName().startsWith("b");
+			}
+
+		});
+
+		List<String> results = new ArrayList<String>(1000);
+		while(it.hasNext()) {
+			HCounterColumn<String> c = it.next();
+			String name = c.getName();
+
+			assertFalse(name.equals("b"));
+			results.add(name);
+		}
+
 		assertEquals(1000, results.size());
 	}
 }
