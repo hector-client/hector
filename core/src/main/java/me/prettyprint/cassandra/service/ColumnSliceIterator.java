@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.service;
 
+import com.google.common.collect.Iterators;
+import com.google.common.collect.PeekingIterator;
 import java.util.Iterator;
 import java.util.List;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -16,9 +18,10 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 
 	private static final int DEFAULT_COUNT = 100;
 	private SliceQuery<K, N, V> query;
-	private Iterator<HColumn<N, V>> iterator;
+	private PeekingIterator<HColumn<N, V>> iterator;
 	private N start;
 	private ColumnSliceFinish<N> finish;
+	private ColumnSliceFilter<HColumn<N, V>> filter = null;
 	private boolean reversed;
 	private int count = DEFAULT_COUNT;
 	private int columns = 0;
@@ -86,24 +89,24 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		this.query.setRange(this.start, this.finish.function(), this.reversed, this.count);
 	}
 
+	public ColumnSliceIterator setFilter(ColumnSliceFilter<HColumn<N, V>> filter) {
+		this.filter = filter;
+		return this;
+	}
+
 	@Override
 	public boolean hasNext() {
 		if (iterator == null) {
-			iterator = query.execute().get().getColumns().iterator();
+			iterator = Iterators.peekingIterator(query.execute().get().getColumns().iterator());
 		} else if (!iterator.hasNext() && columns == count) {  // only need to do another query if maximum columns were retrieved
-			query.setRange(start, finish.function(), reversed, count);
-			columns = 0;
-			List<HColumn<N, V>> list = query.execute().get().getColumns();
-			iterator = list.iterator();
+			refresh();
+		}
 
-			if (iterator.hasNext()) {
-				// The lower bound column may have been removed prior to the query executing,
-				// so check to see if the first column returned by the current query is the same
-				// as the lower bound column.  If both columns are the same, skip the column
-				N first = list.get(0).getName();
-				if (first.equals(start)) {
-					next();
-				}
+		while(filter != null && iterator != null && iterator.hasNext() && !filter.accept(iterator.peek())) {
+			next();
+
+			if(!iterator.hasNext() && columns == count) {
+				refresh();
 			}
 		}
 
@@ -124,6 +127,23 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		iterator.remove();
 	}
 
+	private void refresh() {
+		query.setRange(start, finish.function(), reversed, count);
+			columns = 0;
+			List<HColumn<N, V>> list = query.execute().get().getColumns();
+			iterator = Iterators.peekingIterator(list.iterator());
+
+			if (iterator.hasNext()) {
+				// The lower bound column may have been removed prior to the query executing,
+				// so check to see if the first column returned by the current query is the same
+				// as the lower bound column.  If both columns are the same, skip the column
+				N first = list.get(0).getName();
+				if (first.equals(start)) {
+					next();
+				}
+			}
+	}
+
 	/**
 	 * When iterating over a ColumnSlice, it may be desirable to move the finish
 	 * point for each query. This interface allows for a user defined function
@@ -138,5 +158,9 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		 * @return New finish point
 		 */
 		N function();
+	}
+
+	public interface ColumnSliceFilter<C> {
+		boolean accept(C column);
 	}
 }
