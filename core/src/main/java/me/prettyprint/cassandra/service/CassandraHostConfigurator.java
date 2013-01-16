@@ -51,7 +51,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private boolean useSocketKeepalive = false;
   private HOpTimer opTimer = new NullOpTimer();
   private Class<? extends HClientFactory> clientFactoryClass = HThriftClientFactoryImpl.class;
-
+  private long maxConnectTimeMillis = CassandraHost.DEFAULT_MAX_CONNECT_TIME;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -88,6 +88,7 @@ public final class CassandraHostConfigurator implements Serializable {
     cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
     cassandraHost.setMaxFrameSize(maxFrameSize);
     cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
+    cassandraHost.setMaxConnectTimeMillis(maxConnectTimeMillis);
 
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
@@ -360,5 +361,26 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public Class<? extends HClientFactory> getClientFactoryClass() {
     return clientFactoryClass;
+  }
+
+  /**
+   * The maximum time in milliseconds that we'll allow a connection to stay open to a host.  A negative
+   * value indicates indefinitely (and is the default).
+   * 
+   * @return the number of milliseconds
+   */
+  public long getMaxConnectTimeMillis() {
+    return maxConnectTimeMillis;
+  }
+
+  /**
+   * Set the maximum time in milliseconds that we'll allow a connection to stay open to a host. A negative
+   * value indicates indefinitely.  This setting is useful if you you need to work around a firewall that 
+   * forcefully closes connections after a fixed amount of time regardless of activity.
+   * 
+   * @param maxConnectTimeMillis the maximum time to use a connection
+   */
+  public void setMaxConnectTimeMillis(long maxConnectTimeMillis) {
+    this.maxConnectTimeMillis = maxConnectTimeMillis;
   }
 }

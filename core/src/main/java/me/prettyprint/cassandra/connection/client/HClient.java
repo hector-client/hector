@@ -17,6 +17,12 @@ import org.apache.cassandra.thrift.Cassandra;
  * 
  */
 public interface HClient {
+  /**
+   * Returns the time that this HClient was created.
+   * 
+   * @return the time this client was created
+   */
+  long getCreatedTime();
 
   /**
    * Returns a new Cassandra.Client on each invocation using the underlying
