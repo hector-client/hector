@@ -57,6 +57,11 @@ public final class CassandraHostConfigurator implements Serializable {
     this.hosts = null;
   }
 
+	/**
+	 * Creates a new {@code CassandraHostConfigurator} from the specified hosts String, formatted as
+   * {@code host[:port][,host[:port]...]}.
+   * @param hosts The hosts to create {@link CassandraHost}s from.
+	 */
   public CassandraHostConfigurator(String hosts) {
     this.hosts = hosts;
   }
@@ -90,6 +95,11 @@ public final class CassandraHostConfigurator implements Serializable {
     }
   }
 
+  /**
+   * Specifies the hosts String, formatted as
+   * {@code host[:port][,host[:port]...]}.
+   * @param hosts The hosts to create {@link CassandraHost}s from.
+   */
   public void setHosts(String hosts) {
     this.hosts = hosts;
   }
