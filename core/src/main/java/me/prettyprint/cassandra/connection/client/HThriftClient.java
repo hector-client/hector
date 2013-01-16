@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * <p>
 */
 public class HThriftClient implements HClient {
+  private long createdTime = System.currentTimeMillis();
 
   private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
 
@@ -286,5 +287,12 @@ public class HThriftClient implements HClient {
   public void setAuthenticated(Map<String, String> credentials) {
     clearAuthentication();
     this.credentials.putAll(credentials);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public long getCreatedTime() {
+    return createdTime;
   }
 }
