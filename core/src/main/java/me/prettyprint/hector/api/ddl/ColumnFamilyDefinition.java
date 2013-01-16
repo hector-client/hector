@@ -28,6 +28,14 @@ public interface ColumnFamilyDefinition {
   void setSubComparatorType(ComparatorType subComparitorType);
 
 	String getComparatorTypeAlias();
+
+  /**
+   * Sets the type alias for the comparator to be used for the row keys of the column family.
+   * For composite types, supply the alias in the following format:
+   * {@code (TypeName1, TypeName2, ...)}.
+   * @param alias An alias String defining the comparator to be used for the row keys.
+   * @see <a href="http://www.datastax.com/docs/1.1/ddl/column_family#about-data-types-comparators-and-validators">DataStax column family reference</a>
+   */
 	void setComparatorTypeAlias(String alias);
 
 	String getSubComparatorTypeAlias();
