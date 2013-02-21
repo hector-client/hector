@@ -52,6 +52,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private HOpTimer opTimer = new NullOpTimer();
   private Class<? extends HClientFactory> clientFactoryClass = HThriftClientFactoryImpl.class;
   private long maxConnectTimeMillis = CassandraHost.DEFAULT_MAX_CONNECT_TIME;
+  private long maxLastSuccessTimeMillis = CassandraHost.DEFAULT_MAX_LAST_SUCCESS_TIME;
 
   public CassandraHostConfigurator() {
     this.hosts = null;
@@ -89,6 +90,7 @@ public final class CassandraHostConfigurator implements Serializable {
     cassandraHost.setMaxFrameSize(maxFrameSize);
     cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
     cassandraHost.setMaxConnectTimeMillis(maxConnectTimeMillis);
+    cassandraHost.setMaxLastSuccessTimeMillis(maxLastSuccessTimeMillis);
 
     // this is special as it can be passed in as a system property
     if (cassandraThriftSocketTimeout > 0) {
