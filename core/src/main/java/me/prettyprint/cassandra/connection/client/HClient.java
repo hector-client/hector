@@ -117,4 +117,16 @@ public interface HClient {
    */
   void clearAuthentication();
 
+  /**
+   * Retrieves the time of the last success in milliseconds.
+   *
+   * @return -1 if no successful operation has already happened, or the time 
+   * of the last success in milliseconds.
+   */
+  long getLastSuccessTime();
+
+  /**
+   * Update the time of the last success with the current time. 
+   */
+  void updateLastSuccessTime();
 }

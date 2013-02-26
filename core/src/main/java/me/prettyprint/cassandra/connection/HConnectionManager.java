@@ -257,6 +257,7 @@ public class HConnectionManager {
 
         op.executeAndSetResult(c, pool.getCassandraHost());
         success = true;
+        client.updateLastSuccessTime();
         timer.stop(timerToken, op.stopWatchTagName, true);
         break;
 
