@@ -81,6 +81,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           AsciiSerializer.get().getComparatorType().getTypeName())
       .put(BigIntegerSerializer.class,
           BigIntegerSerializer.get().getComparatorType().getTypeName())
+      .put(ByteBufferSerializer.class,
+          ByteBufferSerializer.get().getComparatorType().getTypeName())
       .put(LongSerializer.class,
           LongSerializer.get().getComparatorType().getTypeName())
       .put(StringSerializer.class,
