@@ -26,19 +26,23 @@ public class ColumnFamilyResultIterator implements Iterator<ColumnFamilyResult<?
             this.res = res;
         }
         
-        public boolean hasNext()
-        {
-            boolean retval = false;
-            if (isStart)
-            {
-                retval = res.hasResults();
-            }
-            else
-            {
-                retval = res.hasNext();
-            }
-            return retval;
-        }
+		public boolean hasNext() 
+		{
+			boolean retval = false;
+			if (isStart) 
+			{
+				if(res.hasResults() || res.hasNext()) 
+				{
+					retval = true; 
+				}
+			} 
+			else 
+			{
+				retval = res.hasNext();
+			}
+			return retval;
+		}
+
 
         public ColumnFamilyResult<?, ?> getRes()
         {
