@@ -16,7 +16,7 @@ public class SpeedForJOpTimer implements HOpTimer {
   }
 
   @Override
-  public Object start() {
+  public Object start(String tagName) {
     return stopWatchFactory.getStopWatch();
   }
 
