@@ -122,6 +122,10 @@
       <groupId>com.ecyrd.speed4j</groupId>
       <artifactId>speed4j</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.yammer.metrics</groupId>
+      <artifactId>metrics-core</artifactId>
+    </dependency>
 	<!-- Note the optional tag. If you need to use fastinfoset serialization, you must include this dependency in your project! -->
     <dependency>
       <artifactId>FastInfoset</artifactId>
