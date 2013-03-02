@@ -11,7 +11,7 @@ public interface HOpTimer {
    * @return - a token that will be returned to the timer when stop(...) in
    *         invoked
    */
-  Object start();
+  Object start(String tagName);
 
   /**
    * 
