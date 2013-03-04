@@ -94,7 +94,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.10</version>
         <exclusions>
           <exclusion>
 	    <groupId>com.github.stephenc</groupId>
@@ -105,7 +105,7 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.10</version>
       </dependency>
       <dependency>
         <groupId>commons-lang</groupId>
