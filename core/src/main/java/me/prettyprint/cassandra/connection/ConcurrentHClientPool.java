@@ -71,7 +71,23 @@ public class ConcurrentHClientPool implements HClientPool {
     int currentActiveClients = activeClientsCount.incrementAndGet();
 
     try {
-
+      if (cassandraClient != null) {
+	    if (cassandraClient.getCassandraHost().getMaxLastSuccessTimeMillis() > 0
+            && cassandraClient.getLastSuccessTime() > 0
+            && System.currentTimeMillis() - cassandraClient.getLastSuccessTime() > cassandraClient.getCassandraHost().getMaxLastSuccessTimeMillis()) {
+          log.info("Closing connection to {} due to too long idle time of {} ms", cassandraClient.getCassandraHost().getHost(),
+              System.currentTimeMillis() - cassandraClient.getLastSuccessTime());
+          cassandraClient.close();
+          cassandraClient = null;
+		}
+	    if (cassandraClient.getCassandraHost().getMaxConnectTimeMillis() > 0
+            && System.currentTimeMillis() - cassandraClient.getCreatedTime() > cassandraClient.getCassandraHost().getMaxConnectTimeMillis()) {
+          log.info("Closing connection to {} due to too long existence time of {} ms", cassandraClient.getCassandraHost().getHost(),
+              System.currentTimeMillis() - cassandraClient.getCreatedTime());
+          cassandraClient.close();
+          cassandraClient = null;
+		}
+      }
       if ( cassandraClient == null ) {
 
         if (currentActiveClients <= cassandraHost.getMaxActive()) {

@@ -7,7 +7,7 @@ public class NullOpTimer implements HOpTimer, Serializable {
   private static final long serialVersionUID = -4762728985083933452L;
 
   @Override
-  public Object start() {
+  public Object start(String tagName) {
     return this;
   }
 

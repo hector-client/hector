@@ -235,7 +235,7 @@ public class HConnectionManager {
 
 
   public void operateWithFailover(Operation<?> op) throws HectorException {
-    final Object timerToken = timer.start();
+    final Object timerToken = timer.start(op.stopWatchTagName); 
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HClient client = null;
     HClientPool pool = null;
@@ -257,6 +257,7 @@ public class HConnectionManager {
 
         op.executeAndSetResult(c, pool.getCassandraHost());
         success = true;
+        client.updateLastSuccessTime();
         timer.stop(timerToken, op.stopWatchTagName, true);
         break;
 

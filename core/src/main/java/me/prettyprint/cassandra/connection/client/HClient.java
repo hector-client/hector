@@ -17,6 +17,12 @@ import org.apache.cassandra.thrift.Cassandra;
  * 
  */
 public interface HClient {
+  /**
+   * Returns the time that this HClient was created.
+   * 
+   * @return the time this client was created
+   */
+  long getCreatedTime();
 
   /**
    * Returns a new Cassandra.Client on each invocation using the underlying
@@ -111,4 +117,16 @@ public interface HClient {
    */
   void clearAuthentication();
 
+  /**
+   * Retrieves the time of the last success in milliseconds.
+   *
+   * @return -1 if no successful operation has already happened, or the time 
+   * of the last success in milliseconds.
+   */
+  long getLastSuccessTime();
+
+  /**
+   * Update the time of the last success with the current time. 
+   */
+  void updateLastSuccessTime();
 }

@@ -40,6 +40,16 @@ public final class CassandraHost {
   public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
 
   public static final boolean DEFAULT_LIFO = true;
+  /**
+   * The default number of milliseconds (since creation time) we'll allow a connection 
+   * to stay open. Default value is negative which means indefinitely.
+   */
+  public static final long DEFAULT_MAX_CONNECT_TIME = -1;
+  /**
+   * The default number of milliseconds (since last success) we'll allow a connection 
+   * to stay open. Default value is negative which means indefinitely.
+   */
+  public static final long DEFAULT_MAX_LAST_SUCCESS_TIME = -1;
 
   private final String host, ip, url;
   private final int port;
@@ -54,6 +64,8 @@ public final class CassandraHost {
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private int maxFrameSize = DEFAULT_MAX_FRAME_SIZE;
   private boolean useSocketKeepalive;
+  private long maxConnectTimeMillis = DEFAULT_MAX_CONNECT_TIME;
+  private long maxLastSuccessTimeMillis = DEFAULT_MAX_LAST_SUCCESS_TIME;
   //TODO(ran): private FailoverPolicy failoverPolicy = DEFAULT_FAILOVER_POLICY;
 
   public CassandraHost(String url) {
@@ -202,6 +214,22 @@ public final class CassandraHost {
 
   public void setUseSocketKeepalive(boolean useSocketKeepalive) {
     this.useSocketKeepalive = useSocketKeepalive;
+  }
+
+  public long getMaxConnectTimeMillis() {
+    return this.maxConnectTimeMillis ;
+  }
+
+  public void setMaxConnectTimeMillis(long maxConnectTimeMillis) {
+    this.maxConnectTimeMillis = maxConnectTimeMillis;
+  }
+
+  public long getMaxLastSuccessTimeMillis() {
+    return this.maxLastSuccessTimeMillis;
+  }
+
+  public void setMaxLastSuccessTimeMillis(long maxLastSuccessTimeMillis) {
+    this.maxLastSuccessTimeMillis = maxLastSuccessTimeMillis;
   }
 
   

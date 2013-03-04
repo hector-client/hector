@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
  * <p>
 */
 public class HThriftClient implements HClient {
+  private long createdTime = System.currentTimeMillis();
 
   private static Logger log = LoggerFactory.getLogger(HThriftClient.class);
 
@@ -53,6 +54,8 @@ public class HThriftClient implements HClient {
   protected TTransport transport;
   protected Cassandra.Client cassandraClient;
   private TSSLTransportParameters params;
+  
+  private volatile long lastSuccessTime;
 
   private final Map<String, String> credentials = new HashMap<String, String>();
 
@@ -286,5 +289,28 @@ public class HThriftClient implements HClient {
   public void setAuthenticated(Map<String, String> credentials) {
     clearAuthentication();
     this.credentials.putAll(credentials);
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public long getCreatedTime() {
+    return createdTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public long getLastSuccessTime() {
+    return lastSuccessTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateLastSuccessTime() {
+    lastSuccessTime = System.currentTimeMillis();
   }
 }
