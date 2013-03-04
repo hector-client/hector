@@ -34,7 +34,14 @@ public class RangeSlicesIterator<K, N, V> implements Iterator<Row<K, N, V>> {
 			// First time through
 			iterator = Iterators.peekingIterator(query.execute().get().getList().iterator());
 		} else if (!iterator.hasNext() && rows == query.getRowCount()) {  // only need to do another query if maximum rows were retrieved
-			
+			query.setKeys(startKey, endKey);
+			iterator = Iterators.peekingIterator(query.execute().get().getList().iterator());
+			rows = 0;
+
+			if (iterator.hasNext()) {
+				// First element is startKey which was the last element on the previous query result - skip it
+				next();
+			}
 		}
 
 		while(filter != null && iterator != null && iterator.hasNext() && !filter.accept(iterator.peek())) {
@@ -62,6 +69,12 @@ public class RangeSlicesIterator<K, N, V> implements Iterator<Row<K, N, V>> {
 		iterator.remove();
 	}
 
+	public RangeSlicesIterator<K, N, V> setFilter(SliceFilter<Row<K, N, V>> filter) {
+		this.filter = filter;
+
+		return this;
+	}
+	
 	private void refresh() {
 		query.setKeys(startKey, endKey);
 		iterator = Iterators.peekingIterator(query.execute().get().getList().iterator());
