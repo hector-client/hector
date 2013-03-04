@@ -26,49 +26,40 @@ public class ColumnFamilyResultIterator implements Iterator<ColumnFamilyResult<?
             this.res = res;
         }
         
-		public boolean hasNext() 
-		{
+		public boolean hasNext() {
 			boolean retval = false;
-			if (isStart) 
-			{
-				if(res.hasResults() || res.hasNext()) 
-				{
+			if (isStart) {
+				if(res.hasResults() || res.hasNext()) {
 					retval = true; 
 				}
 			} 
-			else 
-			{
+			else {
 				retval = res.hasNext();
 			}
 			return retval;
 		}
 
 
-        public ColumnFamilyResult<?, ?> getRes()
-        {
+        public ColumnFamilyResult<?, ?> getRes() {
             return res;
         }
 
-        public void setRes(ColumnFamilyResult<?, ?> res)
-        {
+        public void setRes(ColumnFamilyResult<?, ?> res) {
             this.res = res;
         }
 
         public ColumnFamilyResult<?, ?> next()
         {
-            if (isStart) 
-            {
+            if (isStart) {
                 isStart = false;
                 return res;
             }
-            else 
-            {
+            else {
                 return (ColumnFamilyResult<?, ?>) res.next();
             }
         }
         
-        public void remove()
-        {
+        public void remove() {
             res.remove();
         }
 }
