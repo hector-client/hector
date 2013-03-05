@@ -6,6 +6,24 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.1-3
+=====
+Configurable ACK size in locking impl https://github.com/hector-client/hector/pull/551 @tnine
+Bunch of stuff with Kerberos and related transport refactoring https://github.com/hector-client/hector/issues/565 @thobbs
+deleteColumn in ColumnFamilyUpdater now respects clock https://github.com/hector-client/hector/pull/568 @memoleaf
+Fix ClassNotFoundException when running from OSGi container https://github.com/hector-client/hector/pull/572 @amichair
+Fix issue in hasNext with ColumnFamilyResultsIterator see https://github.com/hector-client/hector/issues/592 @ctcttest
+ColumnSliceIterator now takes a filter https://github.com/hector-client/hector/pull/578 @thrykol
+Easier, more concise construction of KeyIterator https://github.com/hector-client/hector/pull/573 @mastersenthilkumar 
+Support maximum connect time on a connections. https://github.com/hector-client/hector/issues/580 @alcanzar
+Documentation of comparator types and host parameters @akaidiot
+RangeSliceIterator fix for SliceFilter support https://github.com/hector-client/hector/pull/593 @thrykol
+Cut idle connections after configurable timeout. This addresses firewall heisenbug-ish issue that I think a number of people
+have hit in the past couple of months. Huge thanks to @dmdevito for the patch. https://github.com/hector-client/hector/pull/588
+Add support for metrics library in HOpTimer https://github.com/hector-client/hector/pull/515 @erezmazor
+Updated guava version to 14.0 (Lauri Auvinen)
+Upgrade Cassandra dependencies to 1.1.10
+
 1.1-2
 =====
 DynamiCompositeType now supported by SerializingTypeInferer @mebigfatguy
