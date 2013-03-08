@@ -131,6 +131,10 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
       if( checkRing) {
         // Let's check the ring just once per cycle.
         ringInfo = buildRingInfo();
+        if (ringInfo!=null && ringInfo.isEmpty()) {
+          ringInfo = null;
+          log.warn("Got an empty ring info, maybe not enough permission");
+        }
       }
 
       Iterator<CassandraHost> iter = downedHostQueue.iterator();
