@@ -55,9 +55,13 @@ public class CassandraHostConfiguratorTest {
   public void testApplyConfig() {
     CassandraHostConfigurator cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
     cassandraHostConfigurator.setMaxActive(15);
+    cassandraHostConfigurator.setMaxConnectTimeMillis(30000);
+    cassandraHostConfigurator.setMaxLastSuccessTimeMillis(40000);
     CassandraHost extraHost = new CassandraHost("localhost:9171");
     cassandraHostConfigurator.applyConfig(extraHost);
     assertEquals(15, extraHost.getMaxActive());
+    assertEquals(30000, extraHost.getMaxConnectTimeMillis());
+    assertEquals(40000, extraHost.getMaxLastSuccessTimeMillis());
   }
 
   @Test

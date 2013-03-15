@@ -80,6 +80,8 @@ public class ConcurrentHClientPool implements HClientPool {
           cassandraClient.close();
           cassandraClient = null;
 		}
+      }
+      if (cassandraClient != null) {
 	    if (cassandraClient.getCassandraHost().getMaxConnectTimeMillis() > 0
             && System.currentTimeMillis() - cassandraClient.getCreatedTime() > cassandraClient.getCassandraHost().getMaxConnectTimeMillis()) {
           log.info("Closing connection to {} due to too long existence time of {} ms", cassandraClient.getCassandraHost().getHost(),
