@@ -29,29 +29,23 @@ public class HClientRenewTest extends BaseEmbededServerSetupTest {
   
   protected void configure(CassandraHostConfigurator configurator) {
     configurator.setMaxActive(1);
-    configurator.setMaxLastSuccessTimeMillis(10 * 1000);
+    configurator.setMaxLastSuccessTimeMillis(3 * 1000);
   }
   
   @Test
   public void testBorrowAndRenew() {
-    System.out.println("******************** testBorrowAndRenew");
     HClient client1 = clientPool.borrowClient();
     assertEquals(1, clientPool.getNumActive());
 	client1.updateLastSuccessTime();
     clientPool.releaseClient(client1);
     assertEquals(0, clientPool.getNumActive());
 	try {
-	
-    System.out.println("******************** testBorrowAndRenew.1");
-	  Thread.sleep(11 * 1000);
+	  Thread.sleep(4 * 1000);
     } catch(InterruptedException ex) {
 	  fail();
 	}
-    System.out.println("******************** testBorrowAndRenew.2");
     HClient client2 = clientPool.borrowClient();
-    System.out.println("******************** testBorrowAndRenew.3");
     assertEquals(1, clientPool.getNumActive());
-    System.out.println("******************** testBorrowAndRenew.4");
 	assertNotSame(client1, client2);
   }
 }
