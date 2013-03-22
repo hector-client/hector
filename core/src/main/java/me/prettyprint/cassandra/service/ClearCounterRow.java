@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package me.prettyprint.cassandra.service;
 
 import me.prettyprint.hector.api.Keyspace;
@@ -39,7 +35,7 @@ public class ClearCounterRow<K, N> {
 	 * @param cf Column family name
 	 * @return <code>this</code>
 	 */
-	public ClearCounterRow setColumnFamily(String cf) {
+	public ClearCounterRow<K, N> setColumnFamily(String cf) {
 		this.cf = cf;
 		return this;
 	}
@@ -50,7 +46,7 @@ public class ClearCounterRow<K, N> {
 	 * @param rowKey Row key
 	 * @return <code>this</code>
 	 */
-	public ClearCounterRow setRowKey(K rowKey) {
+	public ClearCounterRow<K, N> setRowKey(K rowKey) {
 		this.rowKey = rowKey;
 		return this;
 	}
@@ -61,7 +57,7 @@ public class ClearCounterRow<K, N> {
 	 * @param interval Mutation interval
 	 * @return <code>this</code>
 	 */
-	public ClearCounterRow setMutateInterval(int interval) {
+	public ClearCounterRow<K, N> setMutateInterval(int interval) {
 		this.mutateInterval = interval;
 		return this;
 	}
@@ -72,7 +68,7 @@ public class ClearCounterRow<K, N> {
 	 * @param count The number of columns to retrieve per slice
 	 * @return &lt;this&gt;
 	 */
-	public ClearCounterRow setCount(int count) {
+	public ClearCounterRow<K, N> setCount(int count) {
 		this.count = count;
 		return this;
 	}
