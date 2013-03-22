@@ -17,7 +17,20 @@
 
   <build>
     <plugins>
-
+             <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                           
+                            <packageName>org.hectorclient</packageName>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+            </plugin>
       <!--
         run examples thusly: mvn exec:java
         -Dexec.mainClass="me.prettyprint.cassandra.examples.ExampleDao"
