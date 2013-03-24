@@ -40,6 +40,8 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
     RECOVERABLE_LB_CONNECT_ERRORS,
     /** Connection time errors - unable to connect to host or something... */
     CONNECT_ERROR,
+    RENEWED_IDLE_CONNECTIONS,
+    RENEWED_TOO_LONG_CONNECTIONS
   }
 
   public CassandraClientMonitor(HConnectionManager connectionManager) {
@@ -247,7 +249,14 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
       return false;
     }
   }
-  
-  
 
+  @Override
+  public int getNumRenewedIdleConnections() {
+    return counters.get(Counter.RENEWED_IDLE_CONNECTIONS).intValue();
+  }
+
+  @Override
+  public int getNumRenewedTooLongConnections() {
+    return counters.get(Counter.RENEWED_TOO_LONG_CONNECTIONS).intValue();
+  }
 }

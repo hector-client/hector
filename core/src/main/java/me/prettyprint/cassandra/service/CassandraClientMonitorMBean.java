@@ -152,4 +152,16 @@ public interface CassandraClientMonitorMBean {
   Set<String> getSuspendedCassandraHosts();
 
   boolean setCassandraHostRetryDelay(String retryDelay);
+
+
+  /**
+   * Total number of connections created due to previous idle connections.
+   */
+  int getNumRenewedIdleConnections();
+
+
+  /**
+   * Total number of connections created due to previous too long connections.
+   */
+  int getNumRenewedTooLongConnections();
 }
