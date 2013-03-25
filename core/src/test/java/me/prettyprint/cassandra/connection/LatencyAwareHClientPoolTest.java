@@ -5,6 +5,7 @@ import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class LatencyAwareHClientPoolTest extends BaseEmbededServerSetupTest {
     setupClient();
     cassandraHost = cassandraHostConfigurator.buildCassandraHosts()[0];
     HClientFactory factory = new HThriftClientFactoryImpl();
-    clientPool = new LatencyAwareHClientPool(factory, cassandraHost);
+    clientPool = new LatencyAwareHClientPool(factory, cassandraHost, new CassandraClientMonitor(connectionManager));
   }
 
   @Test

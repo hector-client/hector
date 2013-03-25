@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
 import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -36,9 +38,12 @@ public class ConcurrentHClientPool implements HClientPool {
 
   private final HClientFactory clientFactory;
 
-  public ConcurrentHClientPool(HClientFactory clientFactory, CassandraHost host) {
+  private final CassandraClientMonitor monitor;
+
+  public ConcurrentHClientPool(HClientFactory clientFactory, CassandraHost host, CassandraClientMonitor monitor) {
     this.clientFactory = clientFactory;
     this.cassandraHost = host;
+    this.monitor = monitor;
 
     availableClientQueue = new ArrayBlockingQueue<HClient>(cassandraHost.getMaxActive(), true);
     // This counter can be offset by as much as the number of threads.
@@ -79,6 +84,8 @@ public class ConcurrentHClientPool implements HClientPool {
               System.currentTimeMillis() - cassandraClient.getLastSuccessTime());
           cassandraClient.close();
           cassandraClient = null;
+
+          monitor.incCounter(Counter.RENEWED_IDLE_CONNECTIONS);
 		}
       }
       if (cassandraClient != null) {
@@ -88,6 +95,8 @@ public class ConcurrentHClientPool implements HClientPool {
               System.currentTimeMillis() - cassandraClient.getCreatedTime());
           cassandraClient.close();
           cassandraClient = null;
+
+          monitor.incCounter(Counter.RENEWED_TOO_LONG_CONNECTIONS);
 		}
       }
       if ( cassandraClient == null ) {
