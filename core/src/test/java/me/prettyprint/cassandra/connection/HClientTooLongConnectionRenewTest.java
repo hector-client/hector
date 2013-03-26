@@ -15,7 +15,7 @@ import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import org.junit.Before;
 import org.junit.Test;
 
-public class HClientRenewTest extends BaseEmbededServerSetupTest {
+public class HClientTooLongConnectionRenewTest extends BaseEmbededServerSetupTest {
     
   private CassandraHost cassandraHost;
   private ConcurrentHClientPool clientPool;
@@ -32,7 +32,7 @@ public class HClientRenewTest extends BaseEmbededServerSetupTest {
   
   protected void configure(CassandraHostConfigurator configurator) {
     configurator.setMaxActive(1);
-    configurator.setMaxLastSuccessTimeMillis(3 * 1000);
+    configurator.setMaxConnectTimeMillis(3 * 1000);
   }
   
   @Test
@@ -42,7 +42,7 @@ public class HClientRenewTest extends BaseEmbededServerSetupTest {
 	client1.updateLastSuccessTime();
     clientPool.releaseClient(client1);
     assertEquals(0, clientPool.getNumActive());
-    int count = monitor.getNumRenewedIdleConnections();
+    int count = monitor.getNumRenewedTooLongConnections();
 	try {
 	  Thread.sleep(4 * 1000);
     } catch(InterruptedException ex) {
@@ -50,7 +50,7 @@ public class HClientRenewTest extends BaseEmbededServerSetupTest {
 	}
     HClient client2 = clientPool.borrowClient();
     assertEquals(1, clientPool.getNumActive());
-    assertEquals(count + 1, monitor.getNumRenewedIdleConnections());
+    assertEquals(count + 1, monitor.getNumRenewedTooLongConnections());
 	assertNotSame(client1, client2);
   }
 }
