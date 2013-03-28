@@ -366,7 +366,7 @@ public final class CassandraHostConfigurator implements Serializable {
   }
 
   /**
-   * The maximum time in milliseconds that we'll allow a connection to stay open to a host.  A negative
+   * The maximum time in milliseconds that we'll allow a connection to stay open to a host. A negative
    * value indicates indefinitely (and is the default).
    * 
    * @return the number of milliseconds
@@ -377,12 +377,35 @@ public final class CassandraHostConfigurator implements Serializable {
 
   /**
    * Set the maximum time in milliseconds that we'll allow a connection to stay open to a host. A negative
-   * value indicates indefinitely.  This setting is useful if you you need to work around a firewall that 
+   * value indicates indefinitely. This setting is useful if you you need to work around a firewall that 
    * forcefully closes connections after a fixed amount of time regardless of activity.
    * 
    * @param maxConnectTimeMillis the maximum time to use a connection
    */
   public void setMaxConnectTimeMillis(long maxConnectTimeMillis) {
     this.maxConnectTimeMillis = maxConnectTimeMillis;
+  }
+
+  /**
+   * The maximum time in milliseconds that we'll allow a connection to stay idle to a host. A negative
+   * value indicates indefinitely (and is the default).
+   * 
+   * @return the number of milliseconds
+   */
+  public long getMaxLastSuccessTimeMillis() {
+    return this.maxLastSuccessTimeMillis;
+  }
+
+  /**
+   * Set the maximum time in milliseconds that we'll allow a connection to stay idle to a host. A negative
+   * value indicates indefinitely. This setting is useful if you you need to work around a firewall that 
+   * forcefully closes connections after a fixed amount of idle time. Example: if your firewall cuts
+   * connections after an idle time of 30 mn, one could set this property with the duration 29 mn 30s
+   * to have a margin.
+   * 
+   * @param maxLastSuccessTimeMillis the maximum idle time for a connection
+   */
+  public void setMaxLastSuccessTimeMillis(long maxLastSuccessTimeMillis) {
+    this.maxLastSuccessTimeMillis = maxLastSuccessTimeMillis;
   }
 }

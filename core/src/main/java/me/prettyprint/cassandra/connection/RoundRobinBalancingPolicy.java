@@ -5,6 +5,7 @@ import java.util.Set;
 
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 
 import com.google.common.collect.Iterables;
 
@@ -63,7 +64,7 @@ public class RoundRobinBalancingPolicy implements LoadBalancingPolicy {
   }
 
   @Override
-  public HClientPool createConnection(HClientFactory clientFactory, CassandraHost host) {
-  	return new ConcurrentHClientPool(clientFactory, host);
+  public HClientPool createConnection(HClientFactory clientFactory, CassandraHost host, CassandraClientMonitor monitor) {
+    return new ConcurrentHClientPool(clientFactory, host, monitor);
   }
 }

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.utils.DaemonThreadPoolFactory;
 
 import org.slf4j.Logger;
@@ -119,8 +120,8 @@ public class DynamicLoadBalancingPolicy implements LoadBalancingPolicy {
   }
 
   @Override
-  public HClientPool createConnection(HClientFactory clientFactory, CassandraHost host) {
-    LatencyAwareHClientPool pool = new LatencyAwareHClientPool(clientFactory, host);
+  public HClientPool createConnection(HClientFactory clientFactory, CassandraHost host, CassandraClientMonitor monitor) {
+    LatencyAwareHClientPool pool = new LatencyAwareHClientPool(clientFactory, host, monitor);
     add(pool);
     return pool;
   }
