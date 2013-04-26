@@ -9,11 +9,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.commitlog.CommitLog;
 import org.apache.cassandra.io.util.FileUtils;
-import org.apache.cassandra.thrift.CassandraDaemon;
+import org.apache.cassandra.service.CassandraDaemon;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,14 +162,7 @@ public class EmbeddedServerHelper {
 
   public static void mkdirs()
   {
-      try
-      {
-          DatabaseDescriptor.createAllDirectories();
-      }
-      catch (IOException e)
-      {
-          throw new RuntimeException(e);
-      }
+    DatabaseDescriptor.createAllDirectories();
   }  
   
   public static void loadSchemaFromYaml()  
