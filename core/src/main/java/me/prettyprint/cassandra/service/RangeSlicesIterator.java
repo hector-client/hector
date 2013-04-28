@@ -24,6 +24,7 @@ public class RangeSlicesIterator<K, N, V> implements Iterator<Row<K, N, V>> {
 	public RangeSlicesIterator(RangeSlicesQuery<K, N, V> query, K startKey, K endKey) {
 		this.query = query;
 		this.startKey = startKey;
+		this.endKey = endKey;
 
 		this.query.setKeys(startKey, endKey);
 	}
