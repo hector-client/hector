@@ -84,16 +84,16 @@ public class HLockManagerImpl extends AbstractLockManager {
     // Pairs of type <LockId, CommandSeparatedSeenLockIds>
     Map<String, String> canBeEarlier = readExistingLocks(lock);
 
-    // If it is just me...
-    if (canBeEarlier.size() <= 1) {
-      setAcquired(lock, canBeEarlier);
-      return;
-    }
-
     String nextWaitingClientId = null;
     long waitStart = System.currentTimeMillis();
 
     while (true) {
+
+      // If it is just me...
+      if (canBeEarlier.size() <= 1) {
+        setAcquired(lock, canBeEarlier);
+        return;
+      }
 
       // We can't get the lock, and we've timed out, give up
       if (waitStart + timeout < System.currentTimeMillis()) {
@@ -120,7 +120,7 @@ public class HLockManagerImpl extends AbstractLockManager {
         canBeEarlierSortedList = Lists.newArrayList(canBeEarlier.keySet());
         // sort them
         Collections.sort(canBeEarlierSortedList);
-        
+
         nextWaitingClientId = canBeEarlierSortedList.get(0);
 
         // check if we are the first ones
@@ -134,7 +134,8 @@ public class HLockManagerImpl extends AbstractLockManager {
 
       smartWait(lockManagerConfigurator.getBackOffRetryDelayInMillis());
 
-      // Refresh the list, but only read locks we read at our initial acquire for optimization
+      // Refresh the list, but only read locks we read at our initial acquire
+      // for optimization
       canBeEarlier = readExistingLocks(lock);
     }
 
@@ -153,8 +154,8 @@ public class HLockManagerImpl extends AbstractLockManager {
   private void setAcquired(HLock lock, Map<String, String> canBeEarlier) {
     // start the heartbeat
     Future<Void> heartbeat = scheduler.schedule(new Heartbeat(lock), lockTtl / 2, TimeUnit.MILLISECONDS);
-    
-    ((HLockImpl)lock).setHeartbeat(heartbeat);
+
+    ((HLockImpl) lock).setHeartbeat(heartbeat);
 
     ((HLockImpl) lock).setAcquired(true);
 
@@ -254,13 +255,13 @@ public class HLockManagerImpl extends AbstractLockManager {
   }
 
   private void deleteLock(HLock lock) {
-    //cancel the heartbeat task if it exists
-    Future<Void> heartbeat = ((HLockImpl)lock).getHeartbeat();
-    
-    if(heartbeat != null){
+    // cancel the heartbeat task if it exists
+    Future<Void> heartbeat = ((HLockImpl) lock).getHeartbeat();
+
+    if (heartbeat != null) {
       heartbeat.cancel(false);
     }
-    
+
     Mutator<String> mutator = createMutator(keyspace, StringSerializer.get());
     mutator.addDeletion(lock.getPath(), lockManagerConfigurator.getLockManagerCF(), lock.getLockId(),
         StringSerializer.get(), keyspace.createClock());
@@ -276,7 +277,7 @@ public class HLockManagerImpl extends AbstractLockManager {
    * @return a list of locks waiting on this lockpath
    */
   private Map<String, String> readExistingLocks(HLock lock) {
-//    logger.debug("Started reading all columns");
+    // logger.debug("Started reading all columns");
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
         .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
@@ -285,10 +286,10 @@ public class HLockManagerImpl extends AbstractLockManager {
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
-//    logger.debug("Finished reading all columns");
-    return  getResults(queryResult);
+    // logger.debug("Finished reading all columns");
+    return getResults(queryResult);
   }
-  
+
   /**
    * Reads all existing locks for this lock path
    * 
@@ -297,7 +298,7 @@ public class HLockManagerImpl extends AbstractLockManager {
    * @return a list of locks waiting on this lockpath
    */
   private Map<String, String> readExistingLocks(HLock lock, String lockName) {
-//    logger.debug("Started reading existing columns");
+    // logger.debug("Started reading existing columns");
     SliceQuery<String, String, String> sliceQuery = HFactory
         .createSliceQuery(keyspace, StringSerializer.get(), StringSerializer.get(), StringSerializer.get())
         .setColumnFamily(lockManagerConfigurator.getLockManagerCF()).setKey(lock.getPath());
@@ -306,13 +307,12 @@ public class HLockManagerImpl extends AbstractLockManager {
 
     QueryResult<ColumnSlice<String, String>> queryResult = sliceQuery.execute();
 
-//    logger.debug("Finished reading existing columns");
+    // logger.debug("Finished reading existing columns");
     return getResults(queryResult);
-    
+
   }
 
-  
-  private Map<String, String> getResults(QueryResult<ColumnSlice<String, String>> queryResult){
+  private Map<String, String> getResults(QueryResult<ColumnSlice<String, String>> queryResult) {
     Map<String, String> result = Maps.newHashMap();
 
     for (HColumn<String, String> col : queryResult.get().getColumns()) {
@@ -361,11 +361,11 @@ public class HLockManagerImpl extends AbstractLockManager {
        * 
        * Cassandra is the authoritative system for locking
        * 
-       * If there is lag and another client appears before us in the list
-       * after we acquire the lock, we never want to acknowledge it. We simply
-       * keep writing the state we had when we acquired the lock originally.
-       * This ensures that we never get a race condition on initial lock due to
-       * clock drift or column ordering in Cassandra
+       * If there is lag and another client appears before us in the list after
+       * we acquire the lock, we never want to acknowledge it. We simply keep
+       * writing the state we had when we acquired the lock originally. This
+       * ensures that we never get a race condition on initial lock due to clock
+       * drift or column ordering in Cassandra
        */
 
       Map<String, String> existing = readExistingLocks(lock, lock.getLockId());
