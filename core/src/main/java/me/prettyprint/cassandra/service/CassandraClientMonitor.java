@@ -98,7 +98,7 @@ public class CassandraClientMonitor implements CassandraClientMonitorMBean {
   @Override
   public void updateKnownHosts() throws HectorTransportException {
    log.info("Updating all known cassandra hosts on all clients");
-
+   connectionManager.doAddNodes();
   }
 
 
