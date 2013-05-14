@@ -338,8 +338,13 @@ public final class CassandraHostConfigurator implements Serializable {
   }
 
   /**
-   * Enable SO_KEEPALIVE on the underlying socket. OFF by default (per java.net.Socket) 
-   * 
+   * Enable SO_KEEPALIVE on the underlying socket. OFF by default (per java.net.Socket).<br/>
+   * Enabling the socket keepalive is the usual way to work around a firewall problem
+   * (that is, a firewall that cuts idle connections between the Hector's host and the Cassandra
+   * nodes, Hector being unaware of these cuts). To do so, this method must be used
+   * in accordance with the appropriate "tcp_keepalive" settings of the machine that runs Hector,
+   * to deal with the firewall own settings (that is, how long a connection should be detected
+   * idle before the firewall cuts it).
    */
   public void setUseSocketKeepalive(boolean useSocketKeepalive) {
     this.useSocketKeepalive = useSocketKeepalive;
@@ -398,11 +403,15 @@ public final class CassandraHostConfigurator implements Serializable {
 
   /**
    * Set the maximum time in milliseconds that we'll allow a connection to stay idle to a host. A negative
-   * value indicates indefinitely. This setting is useful if you you need to work around a firewall that 
-   * forcefully closes connections after a fixed amount of idle time. Example: if your firewall cuts
-   * connections after an idle time of 30 mn, one could set this property with the duration 29 mn 30s
-   * to have a margin.
-   * 
+   * value indicates indefinitely. <br/>
+   * This setting is useful if you you need to work around a firewall that forcefully closes connections
+   * after a fixed amount of idle time. Example: if your firewall cuts connections after an idle time
+   * of 30 mn, one could set this property with the duration 29 mn 30s to have a margin. <br/>
+   * But before using <code>setMaxLastSuccessTimeMillis</code>, the first way, that is, the most used way,
+   * to try to work around a firewall problem should be to use the socket "keepalive" mechanism, see
+   * <code>setUseSocketKeepalive</code> method. The current method <code>setMaxLastSuccessTimeMillis</code>
+   * is generally used for dealing with firewalls when the "keepalive" mechanism could not be used.  
+   *
    * @param maxLastSuccessTimeMillis the maximum idle time for a connection
    */
   public void setMaxLastSuccessTimeMillis(long maxLastSuccessTimeMillis) {
