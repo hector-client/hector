@@ -14,8 +14,7 @@ import org.apache.cassandra.thrift.KeyRange;
 /**
  * A helper class for range queries.
  * <p>
- * We allow only keys range, no tokens range since if you want to use tokens and you're not hadoop
- * then you're (probably) doing something wrong (JE)
+ * We allow only keys range or tokens range at a time.
  *
  * @author Ran Tavory
  * @author Javier A. Sotelo
@@ -24,6 +23,8 @@ public final class HKeyRange<K> {
 
   private K startKey;
   private K endKey;
+  private String startToken;
+  private String endToken;
   private List<IndexExpression> rowFilters;
 
   private int rowCount = 100;
@@ -38,8 +39,19 @@ public final class HKeyRange<K> {
   public HKeyRange<K> setKeys(K start, K end) {
     this.startKey = start;
     this.endKey = end;
+    this.startToken = null;
+    this.endToken = null;
     return this;
   }
+  
+  public HKeyRange<K> setTokens(K startKey, String startToken, String endToken) {
+    this.startKey = startKey;
+    this.endKey = null;
+    this.startToken = startToken;
+    this.endToken = endToken;
+    return this;
+  }
+  
   public HKeyRange<K> setRowCount(int rowCount) {
     this.rowCount = rowCount;
     return this;
@@ -62,10 +74,19 @@ public final class HKeyRange<K> {
    */
   public KeyRange toThrift() {
     KeyRange keyRange = new KeyRange(rowCount);
-    keyRange.setStart_key(startKey == null ? ByteBuffer.wrap(new byte[0]) :
-        keySerializer.toByteBuffer(startKey));
-    keyRange.setEnd_key(endKey == null ? ByteBuffer.wrap(new byte[0]) :
-        keySerializer.toByteBuffer(endKey));
+    
+    if(startToken != null)
+        keyRange.setStart_token(startToken);
+    else
+        keyRange.setStart_key(startKey == null ? ByteBuffer.wrap(new byte[0]) :
+            keySerializer.toByteBuffer(startKey));
+
+    if(endToken != null)
+        keyRange.setEnd_token(endToken);
+    else
+        keyRange.setEnd_key(endKey == null ? ByteBuffer.wrap(new byte[0]) :
+            keySerializer.toByteBuffer(endKey));
+
     if (rowFilters != null)
       for (IndexExpression filter : rowFilters) {
         keyRange.addToRow_filter(filter);
