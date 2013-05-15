@@ -15,6 +15,8 @@ public interface RangeSlicesCounterQuery<K, N> extends Query<OrderedCounterRows<
 
   RangeSlicesCounterQuery<K, N> setKeys(K start, K end);
 
+  RangeSlicesCounterQuery<K, N> setTokens(K startKey, String startToken, String endToken);
+
   RangeSlicesCounterQuery<K, N> setRowCount(int rowCount);
 
   RangeSlicesCounterQuery<K, N> setColumnNames(N... columnNames);
