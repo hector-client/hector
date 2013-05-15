@@ -18,6 +18,7 @@ import me.prettyprint.hector.api.beans.OrderedCounterRows;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
 import me.prettyprint.hector.api.query.RangeSlicesCounterQuery;
+import me.prettyprint.hector.api.query.RangeSlicesQuery;
 
 import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.CounterColumn;
@@ -47,6 +48,12 @@ public final class ThriftRangeSlicesCounterQuery<K, N> extends AbstractSliceQuer
     return this;
   }
 
+  @Override
+  public RangeSlicesCounterQuery<K, N> setTokens(K startKey, String startToken, String endToken) {
+    keyRange.setTokens(startKey, startToken, endToken);
+    return this;
+  }
+  
   @Override
   public RangeSlicesCounterQuery<K, N> setRowCount(int rowCount) {
     keyRange.setRowCount(rowCount);
