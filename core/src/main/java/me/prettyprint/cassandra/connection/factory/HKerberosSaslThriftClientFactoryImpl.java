@@ -33,7 +33,7 @@ import me.prettyprint.cassandra.service.CassandraHost;
 public class HKerberosSaslThriftClientFactoryImpl implements HClientFactory {
 
 
-    private static final Logger log = LoggerFactory.getLogger(HKerberosSecuredThriftClientFactoryImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HKerberosSaslThriftClientFactoryImpl.class);
 
     public static final String JAAS_CONFIG = "jaas.conf";
     public static final String KRB5_CONFIG = "krb5.conf";
