@@ -54,6 +54,30 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(3,wrapper.getColumnNames().size());
   }
 
+  @Test
+  public void testCreateSelectSpecifiedColumn() {
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
+    
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("csskey1"); 
+    updater.setString("col1","value1");
+    updater.setString("col2","value2");
+    updater.setString("col3","value3");
+    updater.setString("col4","value4");
+    updater.setString("col5","value5");
+    template.update(updater);
+    
+    template.addColumn("stringval", se);
+    template.addColumn("curdate", DateSerializer.get());
+    template.addColumn("longval", LongSerializer.get());
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns("csskey1", Arrays.asList("col1", "col3", "col5"));    
+    assertEquals("value1",wrapper.getString("col1"));
+    assertNull(wrapper.getString("col2"));
+    assertEquals("value3",wrapper.getString("col3"));
+    assertNull(wrapper.getString("col4"));
+    assertEquals("value5",wrapper.getString("col5"));
+    assertEquals(3,wrapper.getColumnNames().size());
+  }
+
     @Test
   public void testCompareClocks() {
     ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);
@@ -171,6 +195,42 @@ public class ColumnFamilyTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals("value2",wrapper.getString("column1"));
     wrapper.next();
     assertEquals("value3",wrapper.getString("column1"));
+  }
+  
+  @Test
+  public void testQueryMultigetSpecificColumns() {
+    ColumnFamilyTemplate<String, String> template = new ThriftColumnFamilyTemplate<String, String>(keyspace, "Standard1", se, se);    
+    ColumnFamilyUpdater<String,String> updater = template.createUpdater("mgs_key1"); 
+    updater.setString("column1","value1-1");
+    updater.setString("column2","value2-1");
+    updater.setString("column3","value3-1");
+    updater.addKey("mgs_key2");
+    updater.setString("column1","value1-2");
+    updater.setString("column2","value2-2");
+    updater.setString("column3","value3-2");
+    updater.addKey("mgs_key3");
+    updater.setString("column1","value1-3");
+    updater.setString("column2","value2-3");
+    updater.setString("column3","value3-3");
+    template.update(updater);
+    
+    template.addColumn("column1", se);
+    template.addColumn("column2", se);
+    template.addColumn("column3", se);
+    ColumnFamilyResult<String,String> wrapper = template.queryColumns(Arrays.asList("mgs_key1", "mgs_key2", "mgs_key3"), Arrays.asList("column1", "column3"));
+    assertEquals("value1-1",wrapper.getString("column1")); 
+    assertNull(wrapper.getString("column2")); 
+    assertEquals("value3-1",wrapper.getString("column3")); 
+    wrapper.next();
+
+    assertEquals("value1-2",wrapper.getString("column1"));
+    assertNull(wrapper.getString("column2")); 
+    assertEquals("value3-2",wrapper.getString("column3")); 
+    wrapper.next();
+
+    assertEquals("value1-3",wrapper.getString("column1"));
+    assertNull(wrapper.getString("column2")); 
+    assertEquals("value3-3",wrapper.getString("column3")); 
   }
   
   @Test
