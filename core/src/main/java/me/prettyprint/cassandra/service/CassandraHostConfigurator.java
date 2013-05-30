@@ -15,6 +15,7 @@ import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.factory.HFactory;
+import org.apache.commons.lang.StringUtils;
 
 
 public final class CassandraHostConfigurator implements Serializable {
@@ -247,11 +248,15 @@ public final class CassandraHostConfigurator implements Serializable {
 
   /**
    * Sets the local datacenter for the DiscoveryService. Nodes out of this 
-   * datacenter will be discarded.
+   * datacenter will be discarded. For configuration simplicity, you can provide
+   * an empty or null string with the effect being the same as if you had not set
+   * this property.
    * @param dataCenter DataCenter name
    */
   public void setAutoDiscoveryDataCenter(String dataCenter) {
-    this.autoDiscoveryDataCenters = Arrays.asList(dataCenter);
+    if (StringUtils.isNotBlank(dataCenter)) {
+      this.autoDiscoveryDataCenters = Arrays.asList(dataCenter);
+    }
   }
 
   /**
