@@ -6,6 +6,22 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.1-4
+=====
+The master branch has been moved to tracking 1.2.x (@patricioe and @thrykol)
+Check for null or empty on CHC#setAutoDiscoveryDataCenter for safer config-driven setups (@zznate)
+Add ability to specify columns for multiget queryColumns (Tom Martin)
+Tokens now supported in getRangeSlices invocations (huge thanks to @horschi)
+JavaDoc additions for configuration (@dmdevito)
+updateKnownHosts in JMX actually does something now (@clohfink)
+Fixed issue where all locks are release, but the wait run loop is still executing (@tnine)
+Included endKey field in constructor of RangeSlicesIterator (@mebigfatguy)
+Patch for issue #584: operateWithFailover fails against c* 1.2.1 when authentication is enabled (@jbojar)
+Issue #594, handle SocketTimeoutException differently (Wei Zhu)
+Added JMX counters for renewed idle and too long connections + added/modified tests (@dmdevito)
+Added MultigetSliceIterator (@vinaykumarchella)
+Updated DynamicComposite to override super's addComponent methods (@thrykol)
+
 1.1-3
 =====
 Configurable ACK size in locking impl https://github.com/hector-client/hector/pull/551 @tnine
