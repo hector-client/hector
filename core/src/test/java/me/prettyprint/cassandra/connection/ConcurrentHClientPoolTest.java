@@ -7,6 +7,7 @@ import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 
 import org.junit.Before;
@@ -22,7 +23,7 @@ public class ConcurrentHClientPoolTest extends BaseEmbededServerSetupTest {
     setupClient();
     cassandraHost = cassandraHostConfigurator.buildCassandraHosts()[0];
     HClientFactory factory = new HThriftClientFactoryImpl();
-    clientPool = new ConcurrentHClientPool(factory, cassandraHost);
+    clientPool = new ConcurrentHClientPool(factory, cassandraHost, new CassandraClientMonitor(connectionManager));
   }
   
   @Test

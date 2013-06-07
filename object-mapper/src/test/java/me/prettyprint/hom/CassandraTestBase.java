@@ -13,7 +13,7 @@ import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
-import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.db.marshal.BytesType;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.thrift.CfDef;
@@ -38,9 +38,6 @@ public class CassandraTestBase {
       FileUtils.deleteRecursive(new File(pathToDataDir));
     }
     catch (AssertionError e) {
-      // eat
-    }
-    catch (IOException e) {
       // eat
     }
 

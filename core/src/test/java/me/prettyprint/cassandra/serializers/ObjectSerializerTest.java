@@ -48,32 +48,42 @@ public class ObjectSerializerTest {
   @Test
   public void testCustomClassLoader() throws Exception {
     ClassLoader bootstrapClassLoader = ClassLoader.getSystemClassLoader().getParent();
-    
+
     //create a new class loader which has the same urls as the class loader used to load this class
     //the new class loader will create classes that are independent of this class
     URLClassLoader thisClassLoader = (URLClassLoader) SampleObject.class.getClassLoader();
     ClassLoader customClassLoader = new URLClassLoader(thisClassLoader.getURLs() , bootstrapClassLoader);
-    
+
     //load the SampleObjectClass from the other class loader
     Class<?> sampleObjectClassOtherClassLoader = customClassLoader.loadClass(SampleObject.class.getName());
     //get a constructor we can access, we are not able to see the default
     //constructor without going through some hoops as we are no longer
     //the same class
-    Constructor<?> constructor = sampleObjectClassOtherClassLoader.getDeclaredConstructors()[0];
-    constructor.setAccessible(true);
+    Constructor<?> constructor = null;
+	final Constructor<?>[] declaredConstructors = sampleObjectClassOtherClassLoader.getDeclaredConstructors();
+	// find the constructor w/o parameters
+	for (Constructor<?> con : declaredConstructors) {
+		if(con.getParameterTypes().length == 0) {
+			con.setAccessible(true);
+		 	constructor = con;
+		  	break;
+		}
+	}
     //create the object
     //this is an instance of SampleObject, but from another class loader, so
     //we can't assign it to a variable of type SampleObject
+
+
     Object sampleObjectOtherCl = constructor.newInstance();
-    
+
     ObjectSerializer ser = new ObjectSerializer(customClassLoader);
     Object deserialized = ser.fromByteBuffer(ser.toByteBuffer(sampleObjectOtherCl));
-    
+
     assertFalse(deserialized.getClass() == SampleObject.class);
     assertTrue(deserialized.getClass() == sampleObjectClassOtherClassLoader);
     assertEquals(sampleObjectOtherCl, deserialized);
   }
-  
+
   private void test(Object object) {
     ObjectSerializer ser = ObjectSerializer.get();
     assertEquals(object, ser.fromByteBuffer(ser.toByteBuffer(object)));

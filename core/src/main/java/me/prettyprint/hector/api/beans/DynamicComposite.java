@@ -2,6 +2,7 @@ package me.prettyprint.hector.api.beans;
 
 import java.nio.ByteBuffer;
 import java.util.List;
+import me.prettyprint.hector.api.Serializer;
 
 public class DynamicComposite extends AbstractComposite {
 
@@ -35,5 +36,46 @@ public class DynamicComposite extends AbstractComposite {
   public static ByteBuffer toByteBuffer(List<?> l) {
     DynamicComposite composite = new DynamicComposite(l);
     return composite.serialize();
+  }
+	
+	@Override
+	public <T> DynamicComposite addComponent(int index, T element, ComponentEquality equality) {
+    super.addComponent(index, element, equality);
+		
+    return this;
+  }
+
+	@Override
+	public <T> DynamicComposite addComponent(T value, Serializer<T> s) {
+		super.addComponent(value, s);
+
+		return this;
+	}
+
+	@Override
+  public <T> DynamicComposite addComponent(T value, Serializer<T> s,
+      String comparator) {
+    super.addComponent(value, s, comparator);
+
+    return this;
+
+  }
+
+	@Override
+  public <T> DynamicComposite addComponent(T value, Serializer<T> s,
+      String comparator, ComponentEquality equality) {
+    super.addComponent(value, s, comparator, equality);
+
+    return this;
+
+  }
+
+	@Override
+  public <T> DynamicComposite addComponent(int index, T value,
+      Serializer<T> s, String comparator, ComponentEquality equality) {
+    super.addComponent(index, value, s, comparator, equality);
+		
+    return this;
+
   }
 }

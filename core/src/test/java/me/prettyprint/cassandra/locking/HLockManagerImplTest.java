@@ -150,7 +150,7 @@ public class HLockManagerImplTest extends BaseEmbededServerSetupTest {
     Semaphore failSemaphore = new Semaphore(1);
     
     int lockManagers = 5;
-    int lockClients = 100;
+    int lockClients = 30;
     
     LockWorkerPool[] pools = new LockWorkerPool[lockManagers];
     

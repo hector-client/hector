@@ -6,7 +6,7 @@ import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
-import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -50,9 +50,13 @@ public abstract class BaseEmbededServerSetupTest {
 
   protected void setupClient() {
     cassandraHostConfigurator = new CassandraHostConfigurator("127.0.0.1:9170");
+    configure(cassandraHostConfigurator);
     connectionManager = new HConnectionManager(clusterName,cassandraHostConfigurator);
   }
   
+  protected void configure(CassandraHostConfigurator configurator) {
+  }
+
   protected CassandraHostConfigurator getCHCForTest() {
     CassandraHostConfigurator chc = new CassandraHostConfigurator("127.0.0.1:9170");
     chc.setMaxActive(2);

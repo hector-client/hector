@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.service.CassandraHost;
+import me.prettyprint.cassandra.service.ExceptionsTranslator;
+import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
 import me.prettyprint.cassandra.service.SystemProperties;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorTransportException;
@@ -45,6 +47,7 @@ public class HThriftClient implements HClient {
   private static final AtomicLong serial = new AtomicLong(0);
 
   final CassandraHost cassandraHost;
+  final ExceptionsTranslator exceptionsTranslator;
 
   private final long mySerial;
   protected final int timeout;
@@ -54,6 +57,8 @@ public class HThriftClient implements HClient {
   protected TTransport transport;
   protected Cassandra.Client cassandraClient;
   private TSSLTransportParameters params;
+  
+  private volatile long lastSuccessTime;
 
   private final Map<String, String> credentials = new HashMap<String, String>();
 
@@ -65,6 +70,7 @@ public class HThriftClient implements HClient {
     this.cassandraHost = cassandraHost;
     this.timeout = getTimeout(cassandraHost);
     mySerial = serial.incrementAndGet();
+    exceptionsTranslator = new ExceptionsTranslatorImpl();
   }
 
   /**
@@ -77,6 +83,7 @@ public class HThriftClient implements HClient {
     this.timeout = getTimeout(cassandraHost);
     this.params = params;
     mySerial = serial.incrementAndGet();
+    exceptionsTranslator = new ExceptionsTranslatorImpl();
   }
   /**
    * {@inheritDoc}
@@ -104,7 +111,7 @@ public class HThriftClient implements HClient {
       } catch (InvalidRequestException ire) {
         throw new HInvalidRequestException(ire);
       } catch (TException e) {
-        throw new HectorTransportException(e);
+    	throw exceptionsTranslator.translate(e);
       }
       keyspaceName = keyspaceNameArg;
     }
@@ -294,5 +301,21 @@ public class HThriftClient implements HClient {
    */
   public long getCreatedTime() {
     return createdTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public long getLastSuccessTime() {
+    return lastSuccessTime;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public void updateLastSuccessTime() {
+    lastSuccessTime = System.currentTimeMillis();
   }
 }

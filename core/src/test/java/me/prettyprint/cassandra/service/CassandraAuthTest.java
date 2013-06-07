@@ -29,7 +29,7 @@ import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
-import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.io.util.FileUtils;
 import org.apache.cassandra.thrift.AuthenticationException;
 import org.apache.cassandra.thrift.Column;

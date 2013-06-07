@@ -15,7 +15,7 @@ import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.testutils.EmbeddedServerHelper;
 
-import org.apache.cassandra.config.ConfigurationException;
+import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.thrift.transport.TTransportException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
