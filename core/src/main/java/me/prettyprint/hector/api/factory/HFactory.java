@@ -202,6 +202,10 @@ public final class HFactory {
       return cluster;
     }
   }
+
+	public static void setClusterForTest(Cluster cluster) {
+		clusters.put(cluster.getName(), cluster);
+	}
   
   /**
    * Shutdown this cluster, removing it from the Map. This operation is

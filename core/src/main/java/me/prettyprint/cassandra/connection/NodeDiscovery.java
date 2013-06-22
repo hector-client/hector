@@ -7,6 +7,7 @@ import java.util.Set;
 import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
+import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 import me.prettyprint.hector.api.factory.HFactory;
@@ -24,22 +25,12 @@ public class NodeDiscovery {
   private CassandraHostConfigurator cassandraHostConfigurator;
   private HConnectionManager connectionManager;
   private DataCenterValidator dataCenterValidator;
-  private ThriftCluster cluster;
-   
+
   public NodeDiscovery(CassandraHostConfigurator cassandraHostConfigurator, HConnectionManager connectionManager) {
-    this((ThriftCluster) HFactory.getCluster(connectionManager.getClusterName()), cassandraHostConfigurator, connectionManager);
+    this.cassandraHostConfigurator = cassandraHostConfigurator;
+    this.connectionManager = connectionManager;
+    this.dataCenterValidator = new DataCenterValidator(cassandraHostConfigurator.getAutoDiscoveryDataCenters());
   }
-  
-  /** 
-   * Package scoped constructor that allows cluster to be overriden for tests
-   */
-  @VisibleForTesting
-  NodeDiscovery(ThriftCluster cluster, CassandraHostConfigurator cassandraHostConfigurator, HConnectionManager connectionManager) {
-	    this.cassandraHostConfigurator = cassandraHostConfigurator;
-	    this.connectionManager = connectionManager;
-	    this.dataCenterValidator = new DataCenterValidator(cassandraHostConfigurator.getAutoDiscoveryDataCenters());
-	    this.cluster = cluster;
-	  }
   
   /**
    * Find any nodes that are not already in the connection manager but are in
@@ -67,6 +58,11 @@ public class NodeDiscovery {
    * Find any unknown nodes in the cassandra ring
    */
   public Set<CassandraHost> discoverNodes() {
+    Cluster cluster =  HFactory.getCluster(connectionManager.getClusterName());
+    if (cluster == null) {
+      return null;
+    }
+
     Set<CassandraHost> existingHosts = connectionManager.getHosts();
     Set<CassandraHost> foundHosts = new HashSet<CassandraHost>();
 

@@ -9,6 +9,7 @@ import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.cassandra.service.ThriftCluster;
 import me.prettyprint.hector.api.ddl.KeyspaceDefinition;
 
+import me.prettyprint.hector.api.factory.HFactory;
 import org.apache.cassandra.thrift.EndpointDetails;
 import org.apache.cassandra.thrift.TokenRange;
 import org.junit.Before;
@@ -17,8 +18,9 @@ import org.mockito.Mockito;
 
 import com.google.common.collect.Sets;
 
-public class NodeDiscoveryTest { 
-	
+public class NodeDiscoveryTest {
+
+	public static final String TEST_CLUSTER_NAME = "TestCluster";
 	CassandraHostConfigurator cassandraHostConfigurator;
 	HConnectionManager connectionManager;
 	ThriftCluster cluster;
@@ -41,11 +43,14 @@ public class NodeDiscoveryTest {
 	public void testDoAdd() { 
 		List<TokenRange> tokens = createRange("localhost", "google.com");
 		Mockito.when(cluster.describeRing("TestKeyspace")).thenReturn(tokens);
+		Mockito.when(cluster.getName()).thenReturn(TEST_CLUSTER_NAME);
+		Mockito.when(connectionManager.getClusterName()).thenReturn(TEST_CLUSTER_NAME);
 		Mockito.when(connectionManager.getHosts()).thenReturn(Sets.newHashSet(new CassandraHost("localhost",9160)));
-		
-		NodeDiscovery q = new NodeDiscovery(cluster, cassandraHostConfigurator, connectionManager);
+		HFactory.setClusterForTest(cluster);
+
+		NodeDiscovery q = new NodeDiscovery(cassandraHostConfigurator, connectionManager);
 		q.doAddNodes();
-		
+
 		Mockito.verify(connectionManager).addCassandraHost(new CassandraHost("google.com",9160));
 	}
 	
@@ -53,9 +58,12 @@ public class NodeDiscoveryTest {
 	public void testMultipleAdded() { 
 		List<TokenRange> tokens = createRange("localhost", "google.com", "yahoo.com", "datastax.com");
 		Mockito.when(cluster.describeRing("TestKeyspace")).thenReturn(tokens);
+		Mockito.when(cluster.getName()).thenReturn(TEST_CLUSTER_NAME);
+		Mockito.when(connectionManager.getClusterName()).thenReturn(TEST_CLUSTER_NAME);
 		Mockito.when(connectionManager.getHosts()).thenReturn(Sets.newHashSet(new CassandraHost("localhost",9160)));
-		
-		NodeDiscovery q = new NodeDiscovery(cluster, cassandraHostConfigurator, connectionManager);
+		HFactory.setClusterForTest(cluster);
+
+		NodeDiscovery q = new NodeDiscovery(cassandraHostConfigurator, connectionManager);
 		q.doAddNodes();
 		
 		Mockito.verify(connectionManager).addCassandraHost(new CassandraHost("google.com",9160));
@@ -67,9 +75,12 @@ public class NodeDiscoveryTest {
 	public void testNoneAdded() { 
 		List<TokenRange> tokens = createRange("localhost");
 		Mockito.when(cluster.describeRing("TestKeyspace")).thenReturn(tokens);
+		Mockito.when(cluster.getName()).thenReturn(TEST_CLUSTER_NAME);
+		Mockito.when(connectionManager.getClusterName()).thenReturn(TEST_CLUSTER_NAME);
 		Mockito.when(connectionManager.getHosts()).thenReturn(Sets.newHashSet(new CassandraHost("localhost",9160)));
+		HFactory.setClusterForTest(cluster);
 		
-		NodeDiscovery q = new NodeDiscovery(cluster, cassandraHostConfigurator, connectionManager);
+		NodeDiscovery q = new NodeDiscovery(cassandraHostConfigurator, connectionManager);
 		Assert.assertEquals(0, q.discoverNodes().size());
 	}
 	
