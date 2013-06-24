@@ -148,7 +148,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           continue;
         }
 
-        if ( !checkRing) {
+        if (connectionManager.getHosts().size() == 0) {
           listenerHandler.fireOnAllHostsDown();
           log.info("Not checking that {} is a member of the ring since there are no live hosts", cassandraHost);
         }
