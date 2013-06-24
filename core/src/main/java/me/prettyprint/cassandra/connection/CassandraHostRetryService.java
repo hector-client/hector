@@ -31,6 +31,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
   private final HClientFactory clientFactory;
   private final LinkedBlockingQueue<CassandraHost> downedHostQueue;
   private ConnectionManagerListenersHandler listenerHandler;
+  private boolean autoDiscoverHosts;
 
   public CassandraHostRetryService(HConnectionManager connectionManager, HClientFactory clientFactory,
       CassandraHostConfigurator cassandraHostConfigurator, ConnectionManagerListenersHandler listenerHandler) {
@@ -40,6 +41,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
 
     this.listenerHandler = listenerHandler;
     this.retryDelayInSeconds = cassandraHostConfigurator.getRetryDownedHostsDelayInSeconds();
+    this.autoDiscoverHosts = cassandraHostConfigurator.getAutoDiscoverHosts();
     downedHostQueue = new LinkedBlockingQueue<CassandraHost>(cassandraHostConfigurator.getRetryDownedHostsQueueSize() < 1
         ? Integer.MAX_VALUE : cassandraHostConfigurator.getRetryDownedHostsQueueSize());
 
@@ -126,7 +128,8 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
     
     private void retryDownedHosts() {
       // we only check the ring if we have nodes in the cluster to query
-      boolean checkRing = connectionManager.getHosts().size() > 0 ? true : false;
+      // and auto discovery is on. Otherwise we risk removing hosts from the ring with no way to re-add them
+      boolean checkRing = connectionManager.getHosts().size() > 0 && autoDiscoverHosts ? true : false;
       Set<CassandraHost> ringInfo = null;
       if( checkRing) {
         // Let's check the ring just once per cycle.
@@ -145,7 +148,7 @@ public class CassandraHostRetryService extends BackgroundCassandraHostService {
           continue;
         }
 
-        if ( !checkRing) {
+        if (connectionManager.getHosts().size() == 0) {
           listenerHandler.fireOnAllHostsDown();
           log.info("Not checking that {} is a member of the ring since there are no live hosts", cassandraHost);
         }
