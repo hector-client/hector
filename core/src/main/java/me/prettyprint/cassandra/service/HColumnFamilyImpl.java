@@ -303,7 +303,7 @@ public class HColumnFamilyImpl<K,N> implements HColumnFamily<K, N> {
             queryLogger.debug("---------\nColumnFamily: {} slicePredicate: {}", columnFamilyName, activeSlicePredicate.toString());
           }
 
-          K key = _keys.iterator().next();
+          K key = _keys.get(0);
           List<ColumnOrSuperColumn> cosclist = cassandra.get_slice(keySerializer.toByteBuffer(key), columnParent,
             activeSlicePredicate.toThrift(), 
             ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
