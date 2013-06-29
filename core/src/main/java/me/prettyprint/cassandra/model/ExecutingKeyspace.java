@@ -81,17 +81,6 @@ public class ExecutingKeyspace implements Keyspace {
     return connectionManager.createClock();
   }
 
-  public String getCqlVersion() {
-    return cqlVersion;
-  }
-
-  @Override
-  public void setCqlVersion(String cqlVersion) {
-    this.cqlVersion = cqlVersion;
-  }
-
-
-
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc)
       throws HectorException {
     KeyspaceService ks = null;

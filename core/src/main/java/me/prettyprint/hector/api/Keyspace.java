@@ -15,7 +15,4 @@ public interface Keyspace {
   String getKeyspaceName();
   
   long createClock();
-
-  void setCqlVersion(String version);
-
 }
