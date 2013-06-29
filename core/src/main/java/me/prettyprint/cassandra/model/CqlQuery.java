@@ -109,11 +109,8 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
           public CqlRows<K, N, V> execute(Client cassandra) throws HectorException {
             CqlRows<K, N, V> rows = null;
             try {
-              if (cqlVersion != null){
-                if (! cqlVersion.equals(keyspace.cqlVersion)){
+              if (cqlVersion != null) {
                   cassandra.set_cql_version(cqlVersion);
-                  keyspace.setCqlVersion(cqlVersion);
-                }
               }
               CqlResult result = cassandra.execute_cql_query(query, 
                   useCompression ? Compression.GZIP : Compression.NONE);
