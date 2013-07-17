@@ -16,17 +16,21 @@ import me.prettyprint.hector.api.ConsistencyLevelPolicy;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.beans.HCounterColumn;
+import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
 import me.prettyprint.hector.api.factory.HFactory;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.ColumnQuery;
 import me.prettyprint.hector.api.query.CountQuery;
+import me.prettyprint.hector.api.query.CounterQuery;
 import me.prettyprint.hector.api.query.MultigetSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSubSliceQuery;
 import me.prettyprint.hector.api.query.MultigetSuperSliceQuery;
 import me.prettyprint.hector.api.query.RangeSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSubSlicesQuery;
 import me.prettyprint.hector.api.query.RangeSuperSlicesQuery;
+import me.prettyprint.hector.api.query.SliceCounterQuery;
 import me.prettyprint.hector.api.query.SliceQuery;
 import me.prettyprint.hector.api.query.SubCountQuery;
 import me.prettyprint.hector.api.query.SubSliceQuery;
@@ -297,6 +301,34 @@ public class HectorTemplateImpl implements HectorTemplate {
     return createSuperSliceQuery(TypeInferringSerializer.<K>get(), ByteBufferSerializer.get(), ByteBufferSerializer.get(), ByteBufferSerializer.get());
   }
 
+  @Override
+  public <N> HCounterColumn<N> createCounterColumn(N name, long value, Serializer<N> nameSerializer) {
+    return HFactory.createCounterColumn(name, value, nameSerializer);
+  }
+
+  @Override
+  public HCounterColumn<String> createCounterColumn(String name, long value) {
+    return HFactory.createCounterColumn(name, value);
+  }
+
+  @Override
+  public <K, N> CounterQuery<K, N> createCounterColumnQuery(Serializer<K> keySerializer,
+        Serializer<N> nameSerializer) {
+    return HFactory.createCounterColumnQuery(keyspace, keySerializer, nameSerializer);
+  }
+
+  @Override
+  public <K, N> SliceCounterQuery<K, N> createCounterSliceQuery(Serializer<K> keySerializer,
+        Serializer<N> nameSerializer) {
+    return HFactory.createCounterSliceQuery(keyspace, keySerializer, nameSerializer);
+  }
+
+  @Override
+  public <SN, N> HCounterSuperColumn<SN, N> createCounterSuperColumn(SN name, List<HCounterColumn<N>> columns,
+        Serializer<SN> superNameSerializer, Serializer<N> nameSerializer) {
+    return HFactory.createCounterSuperColumn(name, columns, superNameSerializer, nameSerializer);
+  }
+  
   @Override
   public String getKeyspaceName() {
     return keyspaceName;
