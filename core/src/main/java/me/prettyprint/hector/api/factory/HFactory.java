@@ -213,8 +213,8 @@ public final class HFactory {
    * @param cluster
    */
   public static void shutdownCluster(Cluster cluster) {
-    synchronized (clusters) {
       String clusterName = cluster.getName();
+      synchronized (clusters) {
       if (clusters.get(clusterName) != null ) {
         cluster.getConnectionManager().shutdown();
         clusters.remove(clusterName);
