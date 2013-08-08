@@ -16,10 +16,14 @@ public final class ComparatorType {
       "org.apache.cassandra.db.marshal.BooleanType");
   public static final ComparatorType BYTESTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.BytesType");
+  public static final ComparatorType COLLECTIONTYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.CollectionType");
   public static final ComparatorType DATETYPE = new ComparatorType(
 	  "org.apache.cassandra.db.marshal.DateType");
   public static final ComparatorType DECIMALTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.DecimalType");
+  public static final ComparatorType DOUBLETYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.DoubleType");
   public static final ComparatorType FLOATTYPE = new ComparatorType(
 	      "org.apache.cassandra.db.marshal.FloatType");
   public static final ComparatorType INTEGERTYPE = new ComparatorType(
@@ -28,10 +32,16 @@ public final class ComparatorType {
 	  "org.apache.cassandra.db.marshal.Int32Type");
   public static final ComparatorType LEXICALUUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LexicalUUIDType");
+  public static final ComparatorType LISTTYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.ListType");
   public static final ComparatorType LOCALBYPARTITIONERTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LocalByPartionerType");
   public static final ComparatorType LONGTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.LongType");
+  public static final ComparatorType MAPTYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.MapType");
+  public static final ComparatorType SETTYPE = new ComparatorType(
+	      "org.apache.cassandra.db.marshal.SetType");
   public static final ComparatorType TIMEUUIDTYPE = new ComparatorType(
       "org.apache.cassandra.db.marshal.TimeUUIDType");
   public static final ComparatorType UTF8TYPE = new ComparatorType(
@@ -50,11 +60,11 @@ public final class ComparatorType {
   private static final Map<String, ComparatorType> valuesMap;
 
   static {
-    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, DATETYPE, 
-    	DECIMALTYPE, FLOATTYPE, INTEGERTYPE, INT32TYPE,
-        LEXICALUUIDTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE, TIMEUUIDTYPE,
-        UTF8TYPE, COMPOSITETYPE, DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE,
-        REVERSEDTYPE};
+    ComparatorType[] types = { ASCIITYPE, BOOLEANTYPE, BYTESTYPE, COLLECTIONTYPE,
+    	DATETYPE, DECIMALTYPE, DOUBLETYPE, FLOATTYPE, INTEGERTYPE, INT32TYPE,
+        LEXICALUUIDTYPE, LISTTYPE, LOCALBYPARTITIONERTYPE, LONGTYPE,
+        MAPTYPE, SETTYPE, TIMEUUIDTYPE, UTF8TYPE, COMPOSITETYPE,
+        DYNAMICCOMPOSITETYPE, UUIDTYPE, COUNTERTYPE, REVERSEDTYPE};
 
     ImmutableMap.Builder<String, ComparatorType> builder =
         new ImmutableMap.Builder<String, ComparatorType>();
