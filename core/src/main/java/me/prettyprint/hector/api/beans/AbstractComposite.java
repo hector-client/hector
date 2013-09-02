@@ -508,6 +508,20 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
     return newList;
   }
 
+  /**
+   * For education purposes, when addAll is called, it ultimately
+   * ends up calling add(int,Object). The call stack using JDK7
+   * is the following.
+   * 1. addAll
+   * 2. AbstractCollection<E>.addAll(Collection<Object>)
+   * 3. AbstractList<E>.add(E)
+   * 4. AbstractComposite.add(int,Object)
+   * 
+   * What happens is AbstractList<E>.add(E) does this add(size(),E).
+   * Neither java.util.AbstractList or java.util.AbstractCollection 
+   * provide storage in the base class. It expects the subclass to
+   * provide the storage.
+   */
   @Override
   public boolean addAll(Collection<? extends Object> c) {
     return super.addAll(flatten(c));
@@ -527,18 +541,31 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public boolean retainAll(Collection<?> c) {
     return super.retainAll(flatten(c));
   }
-
+  
+  /**
+   * Method is similar to addAll(Collection<? extends Object>) in that
+   * it ends up calling AbstractComposite.add(int,Object).
+   */
   @Override
   public boolean addAll(int i, Collection<? extends Object> c) {
     return super.addAll(i, flatten(c));
   }
-
+	
+	/**
+	 * add(int,Object) is the primary method that adds elements
+	 * to the list. All other add methods end up here.
+	 */
   @Override
   public void add(int index, Object element) {    
     element = mapIfNumber(element);
     addComponent(index, element, ComponentEquality.EQUAL);
   }  
 
+	/**
+	 * remove(int) is the primary method that removes elements
+	 * from the list. All other remove methods end up calling
+	 * AbstractComposite.remove(int).
+	 */
   @Override
   public Object remove(int index) {
     serialized = null;
