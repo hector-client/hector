@@ -39,14 +39,20 @@ public final class CassandraHost {
    */
   public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
 
+  /**
+   * The default max exhausted time before suspending.  Default value is
+   * negative which means it won't suspend.
+   */
+  public static final long DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING = -1;
+
   public static final boolean DEFAULT_LIFO = true;
   /**
-   * The default number of milliseconds (since creation time) we'll allow a connection 
+   * The default number of milliseconds (since creation time) we'll allow a connection
    * to stay open. Default value is negative which means indefinitely.
    */
   public static final long DEFAULT_MAX_CONNECT_TIME = -1;
   /**
-   * The default number of milliseconds (since last success) we'll allow a connection 
+   * The default number of milliseconds (since last success) we'll allow a connection
    * to stay open. Default value is negative which means indefinitely.
    */
   public static final long DEFAULT_MAX_LAST_SUCCESS_TIME = -1;
@@ -60,6 +66,7 @@ public final class CassandraHost {
   private boolean lifo = DEFAULT_LIFO;
 
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
+  private long maxExhaustedTimeBeforeSuspending = DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING;
   private int cassandraThriftSocketTimeout;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private int maxFrameSize = DEFAULT_MAX_FRAME_SIZE;
@@ -168,6 +175,14 @@ public final class CassandraHost {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
   }
 
+  public long getMaxExhaustedTimeBeforeSuspending() {
+    return maxExhaustedTimeBeforeSuspending;
+  }
+
+  public void setMaxExhaustedTimeBeforeSuspending(long maxExhaustedTimeBeforeSuspending) {
+    this.maxExhaustedTimeBeforeSuspending = maxExhaustedTimeBeforeSuspending;
+  }
+
   public int getCassandraThriftSocketTimeout() {
     return cassandraThriftSocketTimeout;
   }
@@ -232,5 +247,5 @@ public final class CassandraHost {
     this.maxLastSuccessTimeMillis = maxLastSuccessTimeMillis;
   }
 
-  
+
 }

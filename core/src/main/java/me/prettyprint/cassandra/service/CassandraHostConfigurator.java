@@ -4,17 +4,12 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 
-import me.prettyprint.cassandra.connection.CassandraHostRetryService;
-import me.prettyprint.cassandra.connection.HOpTimer;
-import me.prettyprint.cassandra.connection.HostTimeoutTracker;
-import me.prettyprint.cassandra.connection.LoadBalancingPolicy;
-import me.prettyprint.cassandra.connection.NodeAutoDiscoverService;
-import me.prettyprint.cassandra.connection.NullOpTimer;
-import me.prettyprint.cassandra.connection.RoundRobinBalancingPolicy;
+import me.prettyprint.cassandra.connection.*;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HThriftClientFactoryImpl;
 import me.prettyprint.hector.api.ClockResolution;
 import me.prettyprint.hector.api.factory.HFactory;
+
 import org.apache.commons.lang.StringUtils;
 
 
@@ -30,6 +25,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
   private boolean lifo = CassandraHost.DEFAULT_LIFO;
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
+  private long maxExhaustedTimeBeforeSuspending = CassandraHost.DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING;
   private int cassandraThriftSocketTimeout;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private int maxFrameSize = CassandraHost.DEFAULT_MAX_FRAME_SIZE;
@@ -87,6 +83,7 @@ public final class CassandraHostConfigurator implements Serializable {
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setLifo(lifo);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
+    cassandraHost.setMaxExhaustedTimeBeforeSuspending(maxExhaustedTimeBeforeSuspending);
     cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
     cassandraHost.setMaxFrameSize(maxFrameSize);
     cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
@@ -115,6 +112,10 @@ public final class CassandraHostConfigurator implements Serializable {
 
   public void setMaxWaitTimeWhenExhausted(long maxWaitTimeWhenExhausted) {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
+  }
+
+  public void setMaxExhaustedTimeBeforeSuspending(long maxExhaustedTimeBeforeSuspending) {
+    this.maxExhaustedTimeBeforeSuspending = maxExhaustedTimeBeforeSuspending;
   }
 
   /**
@@ -177,6 +178,8 @@ public final class CassandraHostConfigurator implements Serializable {
     s.append(cassandraThriftSocketTimeout);
     s.append("&maxWaitTimeWhenExhausted=");
     s.append(maxWaitTimeWhenExhausted);
+    s.append("&maxExhaustedTimeBeforeSuspending=");
+    s.append(maxExhaustedTimeBeforeSuspending);
     s.append("&maxActive=");
     s.append(maxActive);
     s.append("&hosts=");

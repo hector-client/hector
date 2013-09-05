@@ -1,33 +1,21 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.*;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
-import me.prettyprint.cassandra.service.FailoverPolicy;
-import me.prettyprint.cassandra.service.JmxMonitor;
-import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
-import me.prettyprint.hector.api.exceptions.HPoolRecoverableException;
-import me.prettyprint.hector.api.exceptions.HTimedOutException;
-import me.prettyprint.hector.api.exceptions.HUnavailableException;
-import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.*;
+
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class HConnectionManager {
 
@@ -90,7 +78,7 @@ public class HConnectionManager {
   }
 
   public void doAddNodes() {
-    new NodeDiscovery(cassandraHostConfigurator, this).doAddNodes(); 
+    new NodeDiscovery(cassandraHostConfigurator, this).doAddNodes();
   }
 
   /**
@@ -230,7 +218,7 @@ public class HConnectionManager {
 
 
   public void operateWithFailover(Operation<?> op) throws HectorException {
-    final Object timerToken = timer.start(op.stopWatchTagName); 
+    final Object timerToken = timer.start(op.stopWatchTagName);
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HClient client = null;
     HClientPool pool = null;
@@ -258,7 +246,7 @@ public class HConnectionManager {
 
       } catch (Exception ex) {
         HectorException he = exceptionsTranslator.translate(ex);
-        if ( he instanceof HUnavailableException) {
+        if (he instanceof HUnavailableException) {
           // break out on HUnavailableException as well since we can no longer satisfy the CL
           throw he;
         } else if (he instanceof HInvalidRequestException || he instanceof HCassandraInternalException) {
@@ -284,6 +272,10 @@ public class HConnectionManager {
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
         } else if ( he instanceof HPoolRecoverableException ) {
+          if (he instanceof HPoolExhaustedException &&
+              pool.getExhaustedTime() >= pool.getCassandraHost().getMaxExhaustedTimeBeforeSuspending()) {
+            markHostAsDown(pool.getCassandraHost());
+          }
           retryable = op.failoverPolicy.shouldRetryFor(HPoolRecoverableException.class);;
           if ( hostPools.size() == 1 ) {
             throw he;
