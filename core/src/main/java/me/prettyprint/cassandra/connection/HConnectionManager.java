@@ -1,33 +1,21 @@
 package me.prettyprint.cassandra.connection;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
 import me.prettyprint.cassandra.connection.factory.HClientFactoryProvider;
-import me.prettyprint.cassandra.service.CassandraClientMonitor;
+import me.prettyprint.cassandra.service.*;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
-import me.prettyprint.cassandra.service.CassandraHost;
-import me.prettyprint.cassandra.service.CassandraHostConfigurator;
-import me.prettyprint.cassandra.service.ExceptionsTranslator;
-import me.prettyprint.cassandra.service.ExceptionsTranslatorImpl;
-import me.prettyprint.cassandra.service.FailoverPolicy;
-import me.prettyprint.cassandra.service.JmxMonitor;
-import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.hector.api.ClockResolution;
-import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
-import me.prettyprint.hector.api.exceptions.HPoolRecoverableException;
-import me.prettyprint.hector.api.exceptions.HTimedOutException;
-import me.prettyprint.hector.api.exceptions.HUnavailableException;
-import me.prettyprint.hector.api.exceptions.HectorException;
-import me.prettyprint.hector.api.exceptions.HectorTransportException;
+import me.prettyprint.hector.api.exceptions.*;
+
 import org.apache.cassandra.thrift.AuthenticationRequest;
 import org.apache.cassandra.thrift.Cassandra;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 public class HConnectionManager {
 
@@ -257,7 +245,8 @@ public class HConnectionManager {
         break;
 
       } catch (Exception ex) {
-        HectorException he = exceptionsTranslator.translate(ex);
+        CassandraHost host = getHost(pool, client);
+        HectorException he = exceptionsTranslator.translate(ex, host);
         if ( he instanceof HUnavailableException) {
           // break out on HUnavailableException as well since we can no longer satisfy the CL
           throw he;
@@ -313,6 +302,17 @@ public class HConnectionManager {
         client = null;
       }
     }
+  }
+
+  private CassandraHost getHost(HClientPool pool, HClient client) {
+    CassandraHost host = null;
+    if (pool != null) {
+      host = pool.getCassandraHost();
+    }
+    if (host == null && client != null) {
+      host = client.getCassandraHost();
+    }
+    return host;
   }
 
   private void closeClient(HClient client) {
