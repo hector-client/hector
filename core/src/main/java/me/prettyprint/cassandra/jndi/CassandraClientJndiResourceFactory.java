@@ -8,13 +8,13 @@ import javax.naming.RefAddr;
 import javax.naming.Reference;
 import javax.naming.spi.ObjectFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
 import me.prettyprint.hector.api.Cluster;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.factory.HFactory;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A factory for JNDI Resource managed objects. Responsible for creating a 
@@ -93,6 +93,7 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
     // optional
     RefAddr maxActiveRefAddr = resourceRef.get("maxActive");
     RefAddr maxWaitTimeWhenExhausted = resourceRef.get("maxWaitTimeWhenExhausted");
+    RefAddr maxExhaustedTimeBeforeMarkingAsDown = resourceRef.get("maxExhaustedTimeBeforeMarkingAsDown");
     RefAddr autoDiscoverHosts = resourceRef.get("autoDiscoverHosts");
     RefAddr runAutoDiscoverAtStartup = resourceRef.get("runAutoDiscoveryAtStartup");
     RefAddr retryDownedHostDelayInSeconds = resourceRef.get("retryDownedHostDelayInSeconds");
@@ -119,6 +120,9 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
       cassandraHostConfigurator.setMaxActive(Integer.parseInt((String)maxActiveRefAddr.getContent()));
     if ( maxWaitTimeWhenExhausted != null ) 
       cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(Integer.parseInt((String)maxWaitTimeWhenExhausted.getContent()));
+      if (maxExhaustedTimeBeforeMarkingAsDown != null) {
+        cassandraHostConfigurator.setMaxExhaustedTimeBeforeMarkingAsDown(Integer.parseInt((String) maxExhaustedTimeBeforeMarkingAsDown.getContent()));
+      }
     
     if ( log.isDebugEnabled() )
       log.debug("JNDI resource created with CassandraHostConfiguration: {}", cassandraHostConfigurator.getAutoDiscoverHosts());

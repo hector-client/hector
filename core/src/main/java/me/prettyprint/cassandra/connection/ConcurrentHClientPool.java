@@ -6,12 +6,13 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import me.prettyprint.cassandra.connection.client.HClient;
 import me.prettyprint.cassandra.connection.factory.HClientFactory;
-import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.cassandra.service.CassandraClientMonitor;
 import me.prettyprint.cassandra.service.CassandraClientMonitor.Counter;
+import me.prettyprint.cassandra.service.CassandraHost;
 import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -27,6 +28,7 @@ public class ConcurrentHClientPool implements HClientPool {
   private final ArrayBlockingQueue<HClient> availableClientQueue;
   private final AtomicInteger activeClientsCount;
   private final AtomicInteger realActiveClientsCount;
+  private final AtomicLong exhaustedStartTime;
 
   private final CassandraHost cassandraHost;
 
@@ -49,6 +51,7 @@ public class ConcurrentHClientPool implements HClientPool {
     // This counter can be offset by as much as the number of threads.
     activeClientsCount = new AtomicInteger(0);
     realActiveClientsCount = new AtomicInteger(0);
+    exhaustedStartTime = new AtomicLong(-1);
     numBlocked = new AtomicInteger();
     active = new AtomicBoolean(true);
 
@@ -119,6 +122,9 @@ public class ConcurrentHClientPool implements HClientPool {
     }
 
     realActiveClientsCount.incrementAndGet();
+    if (isExhausted()) {
+      exhaustedStartTime.set(System.currentTimeMillis());
+    }
     return cassandraClient;
   }
 
@@ -246,6 +252,12 @@ public boolean getIsActive() {
     return active.get();
   }
 
+  @Override
+  public long getExhaustedTime() {
+    long startTime = exhaustedStartTime.get();
+    return (startTime == -1) ? -1 : System.currentTimeMillis() - startTime;
+  }
+
 @Override
 public String getStatusAsString() {
     return String.format("%s; IsActive?: %s; Active: %d; Blocked: %d; Idle: %d; NumBeforeExhausted: %d",
@@ -275,6 +287,7 @@ public void releaseClient(HClient client) throws HectorException {
     }
 
     realActiveClientsCount.decrementAndGet();
+    exhaustedStartTime.set(-1);
     activeClientsCount.decrementAndGet();
 
     if ( log.isTraceEnabled() ) {

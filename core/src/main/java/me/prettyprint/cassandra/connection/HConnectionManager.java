@@ -78,7 +78,7 @@ public class HConnectionManager {
   }
 
   public void doAddNodes() {
-    new NodeDiscovery(cassandraHostConfigurator, this).doAddNodes(); 
+    new NodeDiscovery(cassandraHostConfigurator, this).doAddNodes();
   }
 
   /**
@@ -130,8 +130,8 @@ public class HConnectionManager {
     boolean removed = getHosts().contains(cassandraHost);
     String message;
     if ( removed ) {
-    	HClientPool pool = hostPools.remove(cassandraHost);
-        message = "Removed from hostPools";
+      HClientPool pool = hostPools.remove(cassandraHost);
+      message = "Removed from hostPools";
       if ( pool == null ) {
         log.info("removeCassandraHost looking for host {} in suspendedHostPools", cassandraHost);
         pool = suspendedHostPools.remove(cassandraHost);
@@ -145,12 +145,12 @@ public class HConnectionManager {
         log.info("removeCassandraHost attempt miss for CassandraHost {} May have been beaten by another thread?", cassandraHost);
       }
     } else if ( cassandraHostRetryService != null && cassandraHostRetryService.contains(cassandraHost)) {
-        log.info("Host {} not in active pools, but found in retry service.", cassandraHost);
-        removed = cassandraHostRetryService.remove(cassandraHost);
-        message = "Removed from Downed hosts";
+      log.info("Host {} not in active pools, but found in retry service.", cassandraHost);
+      removed = cassandraHostRetryService.remove(cassandraHost);
+      message = "Removed from Downed hosts";
     } else {
-        message = "Host not found";
-        log.info("Remove requested on a host that was not found in active or disabled pools: {}", cassandraHost);
+      message = "Host not found";
+      log.info("Remove requested on a host that was not found in active or disabled pools: {}", cassandraHost);
     }
     log.info("Remove status for CassandraHost pool {} was {}", cassandraHost, removed);
     listenerHandler.fireOnRemoveHost(cassandraHost, removed, message);
@@ -211,14 +211,14 @@ public class HConnectionManager {
   public List<String> getStatusPerPool() {
     List<String> stats = new ArrayList<String>();
     for (HClientPool clientPool : hostPools.values()) {
-        stats.add(clientPool.getStatusAsString());
+      stats.add(clientPool.getStatusAsString());
     }
     return stats;
   }
 
 
   public void operateWithFailover(Operation<?> op) throws HectorException {
-    final Object timerToken = timer.start(op.stopWatchTagName); 
+    final Object timerToken = timer.start(op.stopWatchTagName);
     int retries = Math.min(op.failoverPolicy.numRetries, hostPools.size());
     HClient client = null;
     HClientPool pool = null;
@@ -272,6 +272,17 @@ public class HConnectionManager {
           client.close();
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
+        } else if (he instanceof HPoolExhaustedException) {
+          if (pool.getExhaustedTime() >= pool.getCassandraHost().getMaxExhaustedTimeBeforeMarkingAsDown()) {
+            markHostAsDown(pool.getCassandraHost());
+            log.warn("Client pool for {} was exhausted for {} ms and was marked as down", pool.getCassandraHost(), pool.getExhaustedTime());
+          }
+          if (hostPools.isEmpty()) {
+            throw he;
+          }
+          excludeHosts.add(pool.getCassandraHost());
+          retryable = op.failoverPolicy.shouldRetryFor(HPoolExhaustedException.class);
+          monitor.incCounter(Counter.POOL_EXHAUSTED);
         } else if ( he instanceof HPoolRecoverableException ) {
           retryable = op.failoverPolicy.shouldRetryFor(HPoolRecoverableException.class);;
           if ( hostPools.size() == 1 ) {
@@ -336,7 +347,7 @@ public class HConnectionManager {
    * @param listener - a {@link me.prettyprint.cassandra.connection.ConnectionManagerListener} listener
    */
   public void addListener(String listenerName, ConnectionManagerListener listener){
-      listenerHandler.put(listenerName, listener);
+    listenerHandler.put(listenerName, listener);
   }
 
   /**
@@ -344,14 +355,14 @@ public class HConnectionManager {
    * @param listenerName - the name of the listener to remove
    */
   public void removeListener(String listenerName){
-      listenerHandler.remove(listenerName);
+    listenerHandler.remove(listenerName);
   }
 
   /**
    * removes all listeners from the connectionManager
    */
   public void removeAllListeners(){
-      listenerHandler.clear();
+    listenerHandler.clear();
   }
 
   /**
@@ -368,22 +379,22 @@ public class HConnectionManager {
   }
 
   /**
-  * Sleeps for the specified time as determined by sleepBetweenHostsMilli.
-  * In many cases failing over to other hosts is done b/c the cluster is too busy, so the sleep b/w
-  * hosts may help reduce load on the cluster.
-  */
-    private void sleepBetweenHostSkips(FailoverPolicy failoverPolicy) {
-      if (failoverPolicy.sleepBetweenHostsMilli > 0) {
-        if ( log.isDebugEnabled() ) {
-          log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
-        }
-        try {
-          Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
-        } catch (InterruptedException e) {
-          log.warn("Sleep between hosts interrupted", e);
-        }
+   * Sleeps for the specified time as determined by sleepBetweenHostsMilli.
+   * In many cases failing over to other hosts is done b/c the cluster is too busy, so the sleep b/w
+   * hosts may help reduce load on the cluster.
+   */
+  private void sleepBetweenHostSkips(FailoverPolicy failoverPolicy) {
+    if (failoverPolicy.sleepBetweenHostsMilli > 0) {
+      if ( log.isDebugEnabled() ) {
+        log.debug("Will sleep for {} millisec", failoverPolicy.sleepBetweenHostsMilli);
+      }
+      try {
+        Thread.sleep(failoverPolicy.sleepBetweenHostsMilli);
+      } catch (InterruptedException e) {
+        log.warn("Sleep between hosts interrupted", e);
       }
     }
+  }
 
   private HClientPool getClientFromLBPolicy(Set<CassandraHost> excludeHosts) {
     if ( hostPools.isEmpty() ) {
