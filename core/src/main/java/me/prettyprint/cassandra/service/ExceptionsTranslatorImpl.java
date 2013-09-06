@@ -4,11 +4,9 @@ import java.net.SocketTimeoutException;
 import java.util.NoSuchElementException;
 
 import me.prettyprint.hector.api.exceptions.HCassandraInternalException;
-import me.prettyprint.hector.api.exceptions.HInactivePoolException;
 import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HNotFoundException;
 import me.prettyprint.hector.api.exceptions.HPoolExhaustedException;
-import me.prettyprint.hector.api.exceptions.HPoolRecoverableException;
 import me.prettyprint.hector.api.exceptions.HTimedOutException;
 import me.prettyprint.hector.api.exceptions.HUnavailableException;
 import me.prettyprint.hector.api.exceptions.HectorException;
