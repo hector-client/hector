@@ -272,21 +272,19 @@ public class HConnectionManager {
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
         } else if (he instanceof HPoolExhaustedException) {
-          CassandraHost host = pool.getCassandraHost();
-          long exhaustedTime = pool.getExhaustedTime();
-          if (exhaustedTime >= host.getMaxExhaustedTimeBeforeSuspending()) {
-            if (suspendCassandraHost(host)) {
-              log.warn("Client pool for {} was exhausted for {} ms and was suspended", host, exhaustedTime);
+          if (pool.getExhaustedTime() >= pool.getCassandraHost().getMaxExhaustedTimeBeforeSuspending()) {
+            if (suspendCassandraHost(pool.getCassandraHost())) {
+              log.warn("Client pool for {} was exhausted for {} ms and was suspended", pool.getCassandraHost(), pool.getExhaustedTime());
             } else {
-              log.warn("Client pool for {} was exhausted for {} ms but could not be suspended", host, exhaustedTime);
+              log.warn("Client pool for {} was exhausted for {} ms but could not be suspended", pool.getCassandraHost(), pool.getExhaustedTime());
             }
-            if (hostPools.isEmpty()) {
-              throw he;
-            }
-            excludeHosts.add(pool.getCassandraHost());
-            retryable = op.failoverPolicy.shouldRetryFor(HPoolExhaustedException.class);
-            monitor.incCounter(Counter.POOL_EXHAUSTED);
           }
+          if (hostPools.isEmpty()) {
+            throw he;
+          }
+          excludeHosts.add(pool.getCassandraHost());
+          retryable = op.failoverPolicy.shouldRetryFor(HPoolExhaustedException.class);
+          monitor.incCounter(Counter.POOL_EXHAUSTED);
         } else if ( he instanceof HPoolRecoverableException ) {
           retryable = op.failoverPolicy.shouldRetryFor(HPoolRecoverableException.class);;
           if ( hostPools.size() == 1 ) {
