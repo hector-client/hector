@@ -39,7 +39,7 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
     	// if the underlying cause is a scoket timeout, reflect that directly
     	// TODO this may be an issue on the Cassandra side which warrants investigation.
     	// I seem to remember these coming back as TimedOutException previously
-    	if (((TTransportException) original).getCause() instanceof SocketTimeoutException) {
+    	if (original.getCause() instanceof SocketTimeoutException) {
     		he = new HTimedOutException(original);
     	} else {
     		he = new HectorTransportException(original);
@@ -59,12 +59,6 @@ public final class ExceptionsTranslatorImpl implements ExceptionsTranslator {
         e.setWhy(why);
         he = e;
       }
-    } else if (original instanceof HPoolExhaustedException ) {
-      he = (HPoolExhaustedException) original;
-    } else if (original instanceof HPoolRecoverableException ) {
-      he = (HPoolRecoverableException) original;
-    } else if (original instanceof HInactivePoolException ) {
-      he = (HInactivePoolException) original;
     } else if (original instanceof TProtocolException) {
       he = new HInvalidRequestException(original);
     } else if (original instanceof org.apache.cassandra.thrift.NotFoundException) {
