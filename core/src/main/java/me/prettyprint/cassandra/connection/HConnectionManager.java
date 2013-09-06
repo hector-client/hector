@@ -245,8 +245,9 @@ public class HConnectionManager {
         break;
 
       } catch (Exception ex) {
-        HectorException he = exceptionsTranslator.translate(ex);
-        if (he instanceof HUnavailableException) {
+        CassandraHost host = getHost(pool, client);
+        HectorException he = exceptionsTranslator.translate(ex, host);
+        if ( he instanceof HUnavailableException) {
           // break out on HUnavailableException as well since we can no longer satisfy the CL
           throw he;
         } else if (he instanceof HInvalidRequestException || he instanceof HCassandraInternalException) {
@@ -312,6 +313,17 @@ public class HConnectionManager {
         client = null;
       }
     }
+  }
+
+  private CassandraHost getHost(HClientPool pool, HClient client) {
+    CassandraHost host = null;
+    if (pool != null) {
+      host = pool.getCassandraHost();
+    }
+    if (host == null && client != null) {
+      host = client.getCassandraHost();
+    }
+    return host;
   }
 
   private void closeClient(HClient client) {
