@@ -121,11 +121,9 @@ public class ConcurrentHClientPool implements HClientPool {
       throw e;
     }
 
-    synchronized (this) {
-      realActiveClientsCount.incrementAndGet();
-      if (isExhausted()) {
-        exhaustedStartTime.set(System.currentTimeMillis());
-      }
+    realActiveClientsCount.incrementAndGet();
+    if (isExhausted()) {
+      exhaustedStartTime.set(System.currentTimeMillis());
     }
     return cassandraClient;
   }
@@ -288,10 +286,8 @@ public void releaseClient(HClient client) throws HectorException {
       }
     }
 
-    synchronized (this) {
-      realActiveClientsCount.decrementAndGet();
-      exhaustedStartTime.set(-1);
-    }
+    realActiveClientsCount.decrementAndGet();
+    exhaustedStartTime.set(-1);
     activeClientsCount.decrementAndGet();
 
     if ( log.isTraceEnabled() ) {
