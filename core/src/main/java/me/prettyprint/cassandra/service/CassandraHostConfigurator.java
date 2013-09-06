@@ -25,7 +25,7 @@ public final class CassandraHostConfigurator implements Serializable {
   private int maxActive = CassandraHost.DEFAULT_MAX_ACTIVE;
   private boolean lifo = CassandraHost.DEFAULT_LIFO;
   private long maxWaitTimeWhenExhausted = CassandraHost.DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
-  private long maxExhaustedTimeBeforeSuspending = CassandraHost.DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING;
+  private long maxExhaustedTimeBeforeMarkingAsDown = CassandraHost.DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_MARKING_AS_DOWN;
   private int cassandraThriftSocketTimeout;
   private boolean useThriftFramedTransport = CassandraHost.DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private int maxFrameSize = CassandraHost.DEFAULT_MAX_FRAME_SIZE;
@@ -83,7 +83,7 @@ public final class CassandraHostConfigurator implements Serializable {
     cassandraHost.setMaxActive(maxActive);
     cassandraHost.setLifo(lifo);
     cassandraHost.setMaxWaitTimeWhenExhausted(maxWaitTimeWhenExhausted);
-    cassandraHost.setMaxExhaustedTimeBeforeSuspending(maxExhaustedTimeBeforeSuspending);
+    cassandraHost.setMaxExhaustedTimeBeforeMarkingAsDown(maxExhaustedTimeBeforeMarkingAsDown);
     cassandraHost.setUseThriftFramedTransport(useThriftFramedTransport);
     cassandraHost.setMaxFrameSize(maxFrameSize);
     cassandraHost.setUseSocketKeepalive(useSocketKeepalive);
@@ -114,8 +114,8 @@ public final class CassandraHostConfigurator implements Serializable {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
   }
 
-  public void setMaxExhaustedTimeBeforeSuspending(long maxExhaustedTimeBeforeSuspending) {
-    this.maxExhaustedTimeBeforeSuspending = maxExhaustedTimeBeforeSuspending;
+  public void setMaxExhaustedTimeBeforeMarkingAsDown(long maxExhaustedTimeBeforeMarkingAsDown) {
+    this.maxExhaustedTimeBeforeMarkingAsDown = maxExhaustedTimeBeforeMarkingAsDown;
   }
 
   /**
@@ -178,8 +178,8 @@ public final class CassandraHostConfigurator implements Serializable {
     s.append(cassandraThriftSocketTimeout);
     s.append("&maxWaitTimeWhenExhausted=");
     s.append(maxWaitTimeWhenExhausted);
-    s.append("&maxExhaustedTimeBeforeSuspending=");
-    s.append(maxExhaustedTimeBeforeSuspending);
+    s.append("&maxExhaustedTimeBeforeMarkingAsDown=");
+    s.append(maxExhaustedTimeBeforeMarkingAsDown);
     s.append("&maxActive=");
     s.append(maxActive);
     s.append("&hosts=");

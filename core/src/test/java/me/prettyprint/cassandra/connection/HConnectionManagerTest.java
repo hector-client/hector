@@ -1,8 +1,5 @@
 package me.prettyprint.cassandra.connection;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -20,6 +17,9 @@ import org.apache.commons.lang.mutable.MutableBoolean;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+
+import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
 
@@ -83,19 +83,20 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
     configurator.setClientFactoryClass(TestClientFactory.class.getName());
     configurator.setMaxActive(maxActive);
     configurator.setMaxWaitTimeWhenExhausted(50);
-    configurator.setMaxExhaustedTimeBeforeSuspending(0);
+    configurator.setMaxExhaustedTimeBeforeMarkingAsDown(0);
+    configurator.setRetryDownedHosts(false);
 
     final HConnectionManager connectionManager = new HConnectionManager("TestCluster", configurator);
     CassandraHost host = connectionManager.getHosts().iterator().next();
     ConnectionManagerListener listener = mock(ConnectionManagerListener.class);
-    final MutableBoolean wasSuspended = new MutableBoolean();
+    final MutableBoolean wasRemoved = new MutableBoolean();
     doAnswer(new Answer() {
       @Override
       public Object answer(InvocationOnMock invocationOnMock) throws Throwable {
-        wasSuspended.setValue(true);
+        wasRemoved.setValue(true);
         return null;
       }
-    }).when(listener).onSuspendHost(host, true);
+    }).when(listener).onHostDown(host);
     connectionManager.addListener("TestListener", listener);
 
     ExecutorService exec = Executors.newCachedThreadPool();
@@ -116,7 +117,7 @@ public class HConnectionManagerTest extends BaseEmbededServerSetupTest {
 
     latch.await();
 
-    assertTrue(wasSuspended.booleanValue());
+    assertTrue(wasRemoved.booleanValue());
 
     exec.shutdownNow();
   }

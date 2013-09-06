@@ -43,13 +43,13 @@ public class CassandraHostConfiguratorTest {
     cassandraHostConfigurator.setMaxActive(20);
     cassandraHostConfigurator.setCassandraThriftSocketTimeout(3000);
     cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(4000);
-    cassandraHostConfigurator.setMaxExhaustedTimeBeforeSuspending(5000);
+    cassandraHostConfigurator.setMaxExhaustedTimeBeforeMarkingAsDown(5000);
     CassandraHost[] cassandraHosts = cassandraHostConfigurator.buildCassandraHosts();
     // no need to test all, just a smattering
     assertEquals(20, cassandraHosts[1].getMaxActive());
     assertEquals(20, cassandraHosts[0].getMaxActive());
     assertEquals(4000, cassandraHosts[1].getMaxWaitTimeWhenExhausted());
-    assertEquals(5000, cassandraHosts[0].getMaxExhaustedTimeBeforeSuspending());
+    assertEquals(5000, cassandraHosts[0].getMaxExhaustedTimeBeforeMarkingAsDown());
     assertEquals(3000, cassandraHosts[2].getCassandraThriftSocketTimeout());
     assertEquals(3000, cassandraHosts[0].getCassandraThriftSocketTimeout());
   }

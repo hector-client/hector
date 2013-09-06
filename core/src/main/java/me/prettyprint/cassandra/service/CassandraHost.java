@@ -43,7 +43,7 @@ public final class CassandraHost {
    * The default max exhausted time before suspending.  Default value is set to
    * maximum so that it won't suspend.
    */
-  public static final long DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING = Long.MAX_VALUE;
+  public static final long DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_MARKING_AS_DOWN = Long.MAX_VALUE;
 
   public static final boolean DEFAULT_LIFO = true;
   /**
@@ -66,7 +66,7 @@ public final class CassandraHost {
   private boolean lifo = DEFAULT_LIFO;
 
   private long maxWaitTimeWhenExhausted = DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED;
-  private long maxExhaustedTimeBeforeSuspending = DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING;
+  private long maxExhaustedTimeBeforeMarkingAsDown = DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_MARKING_AS_DOWN;
   private int cassandraThriftSocketTimeout;
   private boolean useThriftFramedTransport = DEFAULT_USE_FRAMED_THRIFT_TRANSPORT;
   private int maxFrameSize = DEFAULT_MAX_FRAME_SIZE;
@@ -175,12 +175,12 @@ public final class CassandraHost {
     this.maxWaitTimeWhenExhausted = maxWaitTimeWhenExhausted;
   }
 
-  public long getMaxExhaustedTimeBeforeSuspending() {
-    return maxExhaustedTimeBeforeSuspending;
+  public long getMaxExhaustedTimeBeforeMarkingAsDown() {
+    return maxExhaustedTimeBeforeMarkingAsDown;
   }
 
-  public void setMaxExhaustedTimeBeforeSuspending(long maxExhaustedTimeBeforeSuspending) {
-    this.maxExhaustedTimeBeforeSuspending = maxExhaustedTimeBeforeSuspending;
+  public void setMaxExhaustedTimeBeforeMarkingAsDown(long maxExhaustedTimeBeforeMarkingAsDown) {
+    this.maxExhaustedTimeBeforeMarkingAsDown = maxExhaustedTimeBeforeMarkingAsDown;
   }
 
   public int getCassandraThriftSocketTimeout() {

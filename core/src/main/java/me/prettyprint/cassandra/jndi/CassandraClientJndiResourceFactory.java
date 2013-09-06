@@ -93,7 +93,7 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
     // optional
     RefAddr maxActiveRefAddr = resourceRef.get("maxActive");
     RefAddr maxWaitTimeWhenExhausted = resourceRef.get("maxWaitTimeWhenExhausted");
-    RefAddr maxExhaustedTimeBeforeSuspending = resourceRef.get("maxExhaustedTimeBeforeSuspending");
+    RefAddr maxExhaustedTimeBeforeMarkingAsDown = resourceRef.get("maxExhaustedTimeBeforeMarkingAsDown");
     RefAddr autoDiscoverHosts = resourceRef.get("autoDiscoverHosts");
     RefAddr runAutoDiscoverAtStartup = resourceRef.get("runAutoDiscoveryAtStartup");
     RefAddr retryDownedHostDelayInSeconds = resourceRef.get("retryDownedHostDelayInSeconds");
@@ -120,8 +120,8 @@ public class CassandraClientJndiResourceFactory implements ObjectFactory {
       cassandraHostConfigurator.setMaxActive(Integer.parseInt((String)maxActiveRefAddr.getContent()));
     if ( maxWaitTimeWhenExhausted != null ) 
       cassandraHostConfigurator.setMaxWaitTimeWhenExhausted(Integer.parseInt((String)maxWaitTimeWhenExhausted.getContent()));
-      if (maxExhaustedTimeBeforeSuspending != null) {
-        cassandraHostConfigurator.setMaxExhaustedTimeBeforeSuspending(Integer.parseInt((String) maxExhaustedTimeBeforeSuspending.getContent()));
+      if (maxExhaustedTimeBeforeMarkingAsDown != null) {
+        cassandraHostConfigurator.setMaxExhaustedTimeBeforeMarkingAsDown(Integer.parseInt((String) maxExhaustedTimeBeforeMarkingAsDown.getContent()));
       }
     
     if ( log.isDebugEnabled() )
