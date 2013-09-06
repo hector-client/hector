@@ -271,11 +271,17 @@ public class HConnectionManager {
           client.close();
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
-        } else if ( he instanceof HPoolRecoverableException ) {
-          if (he instanceof HPoolExhaustedException &&
-              pool.getExhaustedTime() >= pool.getCassandraHost().getMaxExhaustedTimeBeforeSuspending()) {
-            markHostAsDown(pool.getCassandraHost());
+        } else if (he instanceof HPoolExhaustedException) {
+          if (pool.getExhaustedTime() >= pool.getCassandraHost().getMaxExhaustedTimeBeforeSuspending()) {
+            suspendCassandraHost(pool.getCassandraHost());
+            if (hostPools.isEmpty()) {
+              throw he;
+            }
+            retryable = op.failoverPolicy.shouldRetryFor(HPoolExhaustedException.class);
+            excludeHosts.add(pool.getCassandraHost());
+            monitor.incCounter(Counter.POOL_EXHAUSTED);
           }
+        } else if ( he instanceof HPoolRecoverableException ) {
           retryable = op.failoverPolicy.shouldRetryFor(HPoolRecoverableException.class);;
           if ( hostPools.size() == 1 ) {
             throw he;
