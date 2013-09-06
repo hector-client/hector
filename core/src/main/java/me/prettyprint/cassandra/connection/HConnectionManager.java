@@ -277,8 +277,8 @@ public class HConnectionManager {
             if (hostPools.isEmpty()) {
               throw he;
             }
-            retryable = op.failoverPolicy.shouldRetryFor(HPoolExhaustedException.class);
             excludeHosts.add(pool.getCassandraHost());
+            retryable = op.failoverPolicy.shouldRetryFor(HPoolExhaustedException.class);
             monitor.incCounter(Counter.POOL_EXHAUSTED);
           }
         } else if ( he instanceof HPoolRecoverableException ) {

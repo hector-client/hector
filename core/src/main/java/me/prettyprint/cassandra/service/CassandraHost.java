@@ -40,10 +40,10 @@ public final class CassandraHost {
   public static final long DEFAULT_MAX_WAITTIME_WHEN_EXHAUSTED = -1;
 
   /**
-   * The default max exhausted time before suspending.  Default value is
-   * negative which means it won't suspend.
+   * The default max exhausted time before suspending.  Default value is set to
+   * maximum so that it won't suspend.
    */
-  public static final long DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING = -1;
+  public static final long DEFAULT_MAX_EXHAUSTED_TIME_BEFORE_SUSPENDING = Long.MAX_VALUE;
 
   public static final boolean DEFAULT_LIFO = true;
   /**
