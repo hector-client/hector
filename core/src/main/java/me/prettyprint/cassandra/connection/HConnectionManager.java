@@ -272,8 +272,14 @@ public class HConnectionManager {
           // TODO timecheck on how long we've been waiting on timeouts here
           // suggestion per user moores on hector-users
         } else if (he instanceof HPoolExhaustedException) {
-          if (pool.getExhaustedTime() >= pool.getCassandraHost().getMaxExhaustedTimeBeforeSuspending()) {
-            suspendCassandraHost(pool.getCassandraHost());
+          CassandraHost host = pool.getCassandraHost();
+          long exhaustedTime = pool.getExhaustedTime();
+          if (exhaustedTime >= host.getMaxExhaustedTimeBeforeSuspending()) {
+            if (suspendCassandraHost(host)) {
+              log.warn("Client pool for {} was exhausted for {} ms and was suspended", host, exhaustedTime);
+            } else {
+              log.warn("Client pool for {} was exhausted for {} ms but could not be suspended", host, exhaustedTime);
+            }
             if (hostPools.isEmpty()) {
               throw he;
             }
