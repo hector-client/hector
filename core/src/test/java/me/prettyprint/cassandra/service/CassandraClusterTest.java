@@ -1,12 +1,5 @@
 package me.prettyprint.cassandra.service;
 
-import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import me.prettyprint.cassandra.BaseEmbededServerSetupTest;
 import me.prettyprint.cassandra.model.BasicColumnDefinition;
 import me.prettyprint.cassandra.model.BasicColumnFamilyDefinition;
@@ -27,6 +20,13 @@ import org.apache.thrift.transport.TTransportException;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import static org.junit.Assert.*;
 
 
@@ -39,8 +39,8 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   @Before
   public void setupCase() throws TTransportException, TException, IllegalArgumentException,
           NotFoundException, UnknownHostException, Exception {
-    cassandraHostConfigurator = new CassandraHostConfigurator("localhost:9170");
-    cassandraCluster = new ThriftCluster("Test Cluster", cassandraHostConfigurator);
+    cassandraHostConfigurator = getCHCForTest();
+    cassandraCluster = new ThriftCluster(clusterName, cassandraHostConfigurator);
   }
 
   @Test
