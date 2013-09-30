@@ -6,6 +6,17 @@ Changes by version:
 Versions above 0.7.0-17 work well with cassandra's 0.7.* (after 0.7.0-beta2)
 See object-mapper/CHANGELOG for HOM specifics
 
+1.1-5
+=====
+added limit on how long client pool can be exhausted (@shaunkalley)
+added support to hector exceptions to (@shuankalley)
+some javadoc clarifications and enhancements (@wolfel)
+Hectortemplate now has columnCounter methods (@awoodbury)
+Fix for issue 600: critical bug in CQL version selection (@malexejev)
+Modify retryDownedHosts() to only delete hosts not in the ring if autoDiscoverHosts is true (@jancona)
+Fix all hosts down check (@jancona)
+don't use an iterator just to get item 0 of a List (@mebigfatguy)
+
 1.1-4
 =====
 The master branch has been moved to tracking 1.2.x (@patricioe and @thrykol)
