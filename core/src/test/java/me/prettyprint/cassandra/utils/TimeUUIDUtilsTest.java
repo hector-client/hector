@@ -31,6 +31,7 @@ public class TimeUUIDUtilsTest {
    * @throws Exception
    */
   @Test
+  @Ignore
   public void testTimeUUIDWithClockResolution() throws Exception {
     ClockResolution clock = new MicrosecondsClockResolution();
     long time = clock.createClock();
