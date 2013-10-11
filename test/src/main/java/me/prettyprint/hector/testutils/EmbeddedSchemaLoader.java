@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ColumnDefinition;
+import org.apache.cassandra.config.ColumnDefinition.Type;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.config.KSMetaData;
 import org.apache.cassandra.config.Schema;
@@ -26,7 +26,6 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.IndexType;
-
 import com.google.common.base.Charsets;
 import org.apache.cassandra.db.marshal.*;
 
@@ -135,7 +134,7 @@ public class EmbeddedSchemaLoader {
                       ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
                       IndexType keys = withIdxType ? IndexType.KEYS : null;
                       //TODO: that last null is for composites. Need to understand that better, but null is reasonable
-                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null);
+                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null, Type.REGULAR);
                       put (cName,def);
                   }});
   }
@@ -154,7 +153,7 @@ public class EmbeddedSchemaLoader {
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
             {{
               ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
-              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null));
+              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null, Type.REGULAR));
           }});
   }
 }
