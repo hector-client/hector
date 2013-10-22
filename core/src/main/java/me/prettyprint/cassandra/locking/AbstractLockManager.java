@@ -1,6 +1,7 @@
 package me.prettyprint.cassandra.locking;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 import me.prettyprint.cassandra.service.AbstractCluster;
 import me.prettyprint.cassandra.service.CassandraHostConfigurator;
@@ -16,6 +17,8 @@ import me.prettyprint.hector.api.locking.HLockManagerConfigurator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.primitives.Ints;
 
 /**
  * 
@@ -106,6 +109,7 @@ public abstract class AbstractLockManager implements HLockManager {
         lockManagerConfigurator.getLockManagerCF(), ComparatorType.UTF8TYPE);
     cfDef.setKeyValidationClass(ComparatorType.UTF8TYPE.getClassName());
     cfDef.setRowCacheSize(lockManagerConfigurator.isRowsCacheEnabled() ? 10000 : 0);
+    cfDef.setGcGraceSeconds(Ints.saturatedCast(TimeUnit.MILLISECONDS.toSeconds(lockManagerConfigurator.getLocksTTLInMillis())));
     return cfDef;
   }
 
