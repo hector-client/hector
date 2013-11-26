@@ -91,10 +91,11 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- Cassansdra Dependencies -->
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-all</artifactId>
-        <version>1.2.5</version>
+        <version>${cassandra.version}</version>
         <exclusions>
           <exclusion>
 	    <groupId>com.github.stephenc</groupId>
@@ -105,8 +106,10 @@
       <dependency>
         <groupId>org.apache.cassandra</groupId>
         <artifactId>cassandra-thrift</artifactId>
-        <version>1.2.5</version>
+        <version>${cassandra.version}</version>
       </dependency>
+      <!-- END OF Cassansdra Dependencies -->
+      <!-- Commons Dependencies -->
       <dependency>
         <groupId>commons-lang</groupId>
         <artifactId>commons-lang</artifactId>
@@ -117,17 +120,15 @@
         <artifactId>commons-pool</artifactId>
         <version>1.5.3</version>
       </dependency>
-       <dependency>
-        <groupId>commons-collections</groupId>
-        <artifactId>commons-collections</artifactId>
-        <version>3.2.1</version>
-        <scope>test</scope>
-      </dependency>
+      <!-- END OF Commons Dependencies -->
+      <!-- Misc. Dependencies-->
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>14.0</version>
       </dependency>
+      <!-- END OF Misc. Dependencies-->
+      <!-- Logging Dependencies -->
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -152,8 +153,9 @@
         <groupId>log4j</groupId>
         <artifactId>log4j</artifactId>
         <version>1.2.16</version>
-      </dependency>      
-      <!-- common test dependencies -->
+      </dependency>    
+      <!-- END OF Logging Dependencies -->  
+      <!-- Common test dependencies -->
       <dependency>
         <groupId>junit</groupId>
         <artifactId>junit</artifactId>
@@ -188,16 +190,23 @@
         <version>2.2.0</version>
       </dependency>
       <dependency>
-          <groupId>joda-time</groupId>
-          <artifactId>joda-time</artifactId>
-          <version>1.6.1</version>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>1.6.1</version>
       </dependency>
       <dependency>
-          <groupId>com.github.stephenc</groupId>
-          <artifactId>jamm</artifactId>
-          <version>0.2.5</version>
-          <scope>test</scope>
+        <groupId>com.github.stephenc</groupId>
+        <artifactId>jamm</artifactId>
+        <version>0.2.5</version>
+        <scope>test</scope>
       </dependency>   
+      <dependency>
+        <groupId>commons-collections</groupId>
+        <artifactId>commons-collections</artifactId>
+        <version>3.2.1</version>
+        <scope>test</scope>
+      </dependency>
+      <!-- END OF common test dependencies -->
     </dependencies>
   </dependencyManagement>
 
@@ -220,58 +229,33 @@
       </extension>
     </extensions>
     <plugins>
+      <!-- always attach sources -->
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>${maven.source.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+      <!-- attach sources -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-          <executions>
-          <!--
-          The following plugin definition will create a test-jar for any
-          project at compile time. This is useful for reusing test code b/w
-          project. Taken from:
-          http://www.waltercedric.com/java-j2ee-mainmenu-53/361-maven-build-system/1307-maven2-unit-test-code-reuse-and-dependencies.html
-
-          For example, if project A reuses test code from project core, in
-          A/pom.xml you should have:
-          <dependency>
-            <groupId>me.prettyprint</groupId>
-            <artifactId>hector-core</artifactId>
-            <version>hector-version-here</version>
-            <type>test-jar</type>
-            <scope>test</scope>
-          </dependency>
-          -->
-            <execution>
-              <goals>
-                <goal>test-jar</goal>
-              </goals>
-            </execution>
-          </executions>
-        </plugin>
-       	<!-- always attach sources -->
-		<plugin>
-			<groupId>org.apache.maven.plugins</groupId>
-			<artifactId>maven-source-plugin</artifactId>
-            <executions>
-               <execution>
-                   	<id>attach-sources</id>
-                   	<goals>
-               		   <goal>jar</goal>
-                   	</goals>
-               </execution>
-            </executions>
-		</plugin>
-		<!-- attach sources -->
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>test-jar</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-      </plugins>
+        <executions>
+          <execution>
+            <goals>
+              <goal>test-jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -403,8 +387,13 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.build.outputEncoding>UTF-8</project.build.outputEncoding>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    
+    <!-- Dependency versioning-->
+    <cassandra.version>1.2.5</cassandra.version>
     <org.springframework.version>3.0.6.RELEASE</org.springframework.version>
     <slf4j.version>1.6.1</slf4j.version>
+    <!-- Maven plugin versioning -->
+    <maven.source.plugin.version>2.2.1</maven.source.plugin.version>
   </properties>
 
 </project>
