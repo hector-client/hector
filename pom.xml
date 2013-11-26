@@ -229,16 +229,6 @@
       </extension>
     </extensions>
     <plugins>
-      <plugin>
-        <artifactId>maven-jar-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>test-jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
       <!-- always attach sources -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
