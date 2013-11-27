@@ -1,6 +1,6 @@
 package me.prettyprint.cassandra.serializers;
 
-import static me.prettyprint.hector.api.ddl.ComparatorType.BIGINTEGERTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.INTEGERTYPE;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -41,7 +41,7 @@ public final class BigIntegerSerializer extends AbstractSerializer<BigInteger> {
 
   @Override
   public ComparatorType getComparatorType() {
-    return BIGINTEGERTYPE;
+    return INTEGERTYPE;
   }
 
 }
