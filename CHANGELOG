@@ -17,6 +17,7 @@ Modify retryDownedHosts() to only delete hosts not in the ring if autoDiscoverHo
 Fix all hosts down check (@jancona)
 don't use an iterator just to get item 0 of a List (@mebigfatguy)
 Upgrade Cassandra dependencies to 1.2.11 (@pauloricardomg)
+Add support to LOCAL_ONE consistency level (@pauloricardomg)
 
 1.1-4
 =====
