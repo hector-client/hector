@@ -13,6 +13,7 @@ import org.apache.cassandra.config.ColumnDefinition;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.config.KSMetaData;
 import org.apache.cassandra.config.Schema;
+import org.apache.cassandra.cql3.ColumnIdentifier;
 import org.apache.cassandra.db.ColumnFamilyType;
 import org.apache.cassandra.db.marshal.AbstractType;
 import org.apache.cassandra.db.marshal.AsciiType;
@@ -135,7 +136,7 @@ public class EmbeddedSchemaLoader {
                       ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
                       IndexType keys = withIdxType ? IndexType.KEYS : null;
                       //TODO: that last null is for composites. Need to understand that better, but null is reasonable
-                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null);
+                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null,null);
                       put (cName,def);
                   }});
   }
@@ -154,7 +155,7 @@ public class EmbeddedSchemaLoader {
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
             {{
               ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
-              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null));
+              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null,null));
           }});
   }
 }
