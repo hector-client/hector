@@ -6,9 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.service.OperationType;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -107,11 +109,11 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
     return this;
   }
   
-  protected ConsistencyLevel getConsistency() {
+  protected HConsistencyLevel getConsistency() {
 	  if (consistency != null) {
 		  return consistency;
 	  } else {
-		  return ConsistencyLevel.ONE;
+		  return HConsistencyLevel.ONE;
 	  }
   }
   
@@ -143,7 +145,7 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
               CqlResult result = null;
               if (cql3) {
                   result = cassandra.execute_cql3_query(query, 
-                          useCompression ? Compression.GZIP : Compression.NONE, getConsistency());
+                          useCompression ? Compression.GZIP : Compression.NONE, ThriftConverter.consistencyLevel(getConsistency()));
               } else {
                   result = cassandra.execute_cql_query(query, 
                           useCompression ? Compression.GZIP : Compression.NONE);
