@@ -1,5 +1,7 @@
 package me.prettyprint.cassandra.model;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
+
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
@@ -19,8 +21,14 @@ public abstract class AbstractBasicQuery<K, N, T> implements Query<T> {
   protected String columnFamilyName;
   protected Serializer<K> keySerializer;
   protected Serializer<N> columnNameSerializer;
-  // add: FailoverPolicy, ConsistencyLevelPolicy, Credentials?
+  // For now keep it simple and use the Thrift consistency level directly
+  protected ConsistencyLevel consistency;
+  // add: FailoverPolicy, Credentials?
   protected String cqlVersion;
+  // default is set to false. Subclasses should check the cqlVersion and
+  // set the flag as needed. Cassandra.Client class has CQL3 specific
+  // method that differs from CQL1 and 2.
+  protected boolean cql3 = false;
 
   protected AbstractBasicQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
@@ -61,7 +69,12 @@ public abstract class AbstractBasicQuery<K, N, T> implements Query<T> {
     this.cqlVersion = cqlVersion;
     return this;
   }
+  
+  public ConsistencyLevel getConsistencyLevel() {
+	  return this.consistency;
+  }
 
-
-
+  public void setConsistencyLevel(ConsistencyLevel level) {
+	  this.consistency = level;
+  }
 }
