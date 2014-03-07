@@ -39,12 +39,12 @@ public class ConfigurableConsistencyLevel implements ConsistencyLevelPolicy {
 
   public void setReadCfConsistencyLevels(Map<String, HConsistencyLevel> columnFamilyConsistencyLevels) {
     this.readCfConsistencyLevels = columnFamilyConsistencyLevels;
-    log.info("Read ColumnFamily ConsistencyLevels set to: " + columnFamilyConsistencyLevels);
+    log.info("Read ColumnFamily ConsistencyLevels set to: {}", columnFamilyConsistencyLevels);
   }
 
   public void setWriteCfConsistencyLevels(Map<String, HConsistencyLevel> columnFamilyConsistencyLevels) {
     this.writeCfConsistencyLevels = columnFamilyConsistencyLevels;
-    log.info("Write ColumnFamily ConsistencyLevels set to: " + columnFamilyConsistencyLevels);
+    log.info("Write ColumnFamily ConsistencyLevels set to: {}", columnFamilyConsistencyLevels);
   }
 
   public void setConsistencyLevelForCfOperation(HConsistencyLevel consistencyLevel,
@@ -61,12 +61,12 @@ public class ConfigurableConsistencyLevel implements ConsistencyLevelPolicy {
 
   public void setDefaultReadConsistencyLevel(HConsistencyLevel defaultReadConsistencyLevel) {
     this.defaultReadConsistencyLevel = defaultReadConsistencyLevel;
-    log.info("Default read ConsistencyLevel set to: " + defaultReadConsistencyLevel.toString() + ".");
+    log.info("Default read ConsistencyLevel set to: {}", defaultReadConsistencyLevel.toString() + ".");
   }
 
   public void setDefaultWriteConsistencyLevel(HConsistencyLevel defaultWriteConsistencyLevel) {
     this.defaultWriteConsistencyLevel = defaultWriteConsistencyLevel;
-    log.info("Default write ConsistencyLevel set to: " + defaultWriteConsistencyLevel.toString() + ".");
+    log.info("Default write ConsistencyLevel set to: {}", defaultWriteConsistencyLevel.toString() + ".");
   }
 
 
