@@ -3,7 +3,7 @@ The currently active branch is 1.0. The master tracks Apache Cassandra active de
 For the impatient: 
 http://hector-client.github.com/hector/build/html/index.html
 
-All Hector artificats are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
+All Hector artifacts are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
 ----------------------------------------------------------------------------------------------------
 
 Hector is a high level Java client for Apache Cassandra.
