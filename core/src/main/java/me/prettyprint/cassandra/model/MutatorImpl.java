@@ -1,5 +1,6 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
@@ -18,6 +19,7 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 
 
 
@@ -224,6 +226,26 @@ public final class MutatorImpl<K> implements Mutator<K> {
     } else { 
       d = new Deletion().setTimestamp(clock);
     }
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnNameStart, N columnNameFinish, Serializer<N> nameSerializer) {
+    return addDeletion(key, cf, columnNameStart, columnNameFinish, nameSerializer, keyspace.createClock());
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnNameStart, N columnNameFinish, Serializer<N> nameSerializer, long clock) {
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(new SliceRange(nameSerializer.toByteBuffer(columnNameStart), nameSerializer.toByteBuffer(columnNameFinish), false, Integer.MAX_VALUE));
+    Deletion d = new Deletion().setTimestamp(clock).setPredicate(sp);
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }
