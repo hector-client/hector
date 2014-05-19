@@ -146,8 +146,16 @@ public class ColumnFamilyUpdater<K, N> extends AbstractTemplateUpdater<K,N> {
     addInsertion(columnName, composite, CompositeSerializer.get(), globalTtl);
   }
 
+  public <V> void setComposite(N columnName, Composite composite, int ttl) {
+    addInsertion(columnName, composite, CompositeSerializer.get(), ttl);
+  }
+  
   public <V> void setDynamicComposite(N columnName, DynamicComposite composite) {
     addInsertion(columnName, composite, DynamicCompositeSerializer.get(), globalTtl);
+  }
+  
+  public <V> void setDynamicComposite(N columnName, DynamicComposite composite, int ttl) {
+    addInsertion(columnName, composite, DynamicCompositeSerializer.get(), ttl);
   }
 
   public <V> void setValue(N columnName, V value, Serializer<V> serializer) {
