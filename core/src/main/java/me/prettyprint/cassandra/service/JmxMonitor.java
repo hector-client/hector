@@ -4,16 +4,8 @@ import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.management.InstanceAlreadyExistsException;
-import javax.management.MBeanRegistrationException;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.NotCompliantMBeanException;
-import javax.management.ObjectName;
-
+import javax.management.*;
 import me.prettyprint.cassandra.connection.HConnectionManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,6 +52,31 @@ public class JmxMonitor {
     }
 
     mbs.registerMBean(monitoringInterface, oName);
+  }
+  
+  public void unregisterMonitor(String name, String monitorType)
+      throws MalformedObjectNameException, InstanceAlreadyExistsException,
+      MBeanRegistrationException, NotCompliantMBeanException {
+
+    String monitorName = generateMonitorName(name, monitorType);
+    log.info("Unregistering JMX {}", monitorName);
+
+    ObjectName oName = new ObjectName(monitorName);
+
+    // Check if the monitor is already registered
+    if (!mbs.isRegistered(oName)) {
+    	log.info("Monitor is not registered: {}", oName);
+      return;
+    }
+
+    try
+    {
+	    mbs.unregisterMBean(oName);
+    }
+    catch(InstanceNotFoundException e)
+    {
+    	log.warn("Failed to unregister monitor: {}" + oName.toString(), e);
+    }
   }
 
   private String generateMonitorName(String className, String monitorType) {
@@ -132,4 +149,29 @@ public class JmxMonitor {
     return cassandraClientMonitor;
   }
 
+  public void removeCassandraMonitor(HConnectionManager connectionManager) {
+  	CassandraClientMonitor cassandraClientMonitor = monitors.remove(connectionManager.getClusterName());
+  	if(cassandraClientMonitor != null) {
+  		try
+      {
+	      unregisterMonitor("me.prettyprint.cassandra.service_"+connectionManager.getClusterName(), "hector");
+      }
+      catch(MalformedObjectNameException e)
+      {
+        log.error("Unable to unregister JMX monitor", e);
+      }
+      catch(InstanceAlreadyExistsException e)
+      {
+        log.error("Unable to unregister JMX monitor", e);
+      }
+      catch(MBeanRegistrationException e)
+      {
+        log.error("Unable to unregister JMX monitor", e);
+      }
+      catch(NotCompliantMBeanException e)
+      {
+        log.error("Unable to unregister JMX monitor", e);
+      }
+  	}
+  }
 }

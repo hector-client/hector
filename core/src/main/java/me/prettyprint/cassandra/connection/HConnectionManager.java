@@ -461,7 +461,9 @@ public class HConnectionManager {
       nodeAutoDiscoverService.shutdown();
     if ( hostTimeoutTracker != null )
       hostTimeoutTracker.shutdown();
-
+    
+    JmxMonitor.getInstance().removeCassandraMonitor(this);
+    
     for (HClientPool pool : hostPools.values()) {
       try {
         pool.shutdown();
