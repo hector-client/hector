@@ -33,11 +33,13 @@ public class ThriftConverter {
       return ConsistencyLevel.EACH_QUORUM;
     case LOCAL_QUORUM:
       return ConsistencyLevel.LOCAL_QUORUM;
+    case LOCAL_ONE:
+        return ConsistencyLevel.LOCAL_ONE;
     default:
       throw new RuntimeException("Unregornized consistency level " + c);
     }
   }
-  
+
   /**
    * Converts a list of ColumnOrSuperColumn to Column
    * @param columns
@@ -50,5 +52,5 @@ public class ThriftConverter {
     }
     return list;
   }
-  
+
 }

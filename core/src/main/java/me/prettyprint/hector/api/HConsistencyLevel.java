@@ -7,5 +7,5 @@ package me.prettyprint.hector.api;
  * @author zznate
  */
 public enum HConsistencyLevel {
-    ONE, TWO, THREE, QUORUM, ALL, ANY, EACH_QUORUM, LOCAL_QUORUM;
+    ONE, TWO, THREE, QUORUM, ALL, ANY, EACH_QUORUM, LOCAL_QUORUM, LOCAL_ONE;
 }

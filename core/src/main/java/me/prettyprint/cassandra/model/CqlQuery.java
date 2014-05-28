@@ -6,14 +6,17 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.service.Operation;
 import me.prettyprint.cassandra.service.OperationType;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.query.QueryResult;
 
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.Compression;
 import org.apache.cassandra.thrift.CqlResult;
@@ -82,9 +85,17 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
     return this;
   }
 
+  /**
+   * Method will check to see if the version starts with "3" and set
+   * the boolean cql3 to true. This makes it easier for execute 
+   * method and avoids doing lots of cqlVersion.startsWith() tests.
+   */
   @Override
   public CqlQuery<K, N, V> setCqlVersion(String version){
     this.cqlVersion=version;
+    if (this.cqlVersion.startsWith("3")) {
+    	cql3 = true;
+    }
     return this;
   }
   
@@ -98,7 +109,26 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
     return this;
   }
   
+  protected HConsistencyLevel getConsistency() {
+	  if (consistency != null) {
+		  return consistency;
+	  } else {
+		  return HConsistencyLevel.ONE;
+	  }
+  }
   
+  /**
+   * For future releases, we should consider refactoring how execute
+   * method converts the thrift CqlResult to Hector CqlRows. Starting
+   * with CQL3 the KEY is no longer returned by default and is no
+   * longer treated as a "special" thing. To get the KEY from the
+   * resultset, we have to look at the columns. Using the KEY
+   * in CqlRows is nice, and makes it easy to get results by the KEY.
+   * The downside is that users have to explicitly include the KEY in
+   * the statement. Changing how CqlRows work "might" break some
+   * existing use cases. For now, the implementation finds the column
+   * and expects the statement to have the KEY.
+   */
   @Override
   public QueryResult<CqlRows<K, N, V>> execute() {
     
@@ -112,8 +142,14 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
               if (cqlVersion != null) {
                   cassandra.set_cql_version(cqlVersion);
               }
-              CqlResult result = cassandra.execute_cql_query(query, 
-                  useCompression ? Compression.GZIP : Compression.NONE);
+              CqlResult result = null;
+              if (cql3) {
+                  result = cassandra.execute_cql3_query(query, 
+                          useCompression ? Compression.GZIP : Compression.NONE, ThriftConverter.consistencyLevel(getConsistency()));
+              } else {
+                  result = cassandra.execute_cql_query(query, 
+                          useCompression ? Compression.GZIP : Compression.NONE);
+              }
               if ( log.isDebugEnabled() ) {
                 log.debug("Found CqlResult: {}", result);
               }
@@ -125,10 +161,30 @@ public class CqlQuery<K, N, V> extends AbstractBasicQuery<K, N, CqlRows<K,N,V>> 
               default:
                 if ( result.getRowsSize() > 0 ) {
                   LinkedHashMap<ByteBuffer, List<Column>> ret = new LinkedHashMap<ByteBuffer, List<Column>>(result.getRowsSize());
-                  
+                  int keyColumnIndex = -1;
                   for (Iterator<CqlRow> rowsIter = result.getRowsIterator(); rowsIter.hasNext(); ) {
                     CqlRow row = rowsIter.next();
-                    ret.put(ByteBuffer.wrap(row.getKey()), filterKeyColumn(row));
+                    ByteBuffer kbb = ByteBuffer.wrap(row.getKey());
+                    // if CQL3 is used row.getKey() always returns null, so we have
+                    // to find the KEY in the columns.
+                    if (cql3) {
+                    	List<Column> rowcolumns = row.getColumns();
+                    	// first time through we find the column and then use the
+                    	// column index to avoid needless work.
+                    	if (keyColumnIndex == -1) {
+                        	for (Column c: rowcolumns) {
+                        		keyColumnIndex++;
+                        		String name = StringSerializer.get().fromBytes(c.getName());
+                        		if (name.toUpperCase().equals("KEY")) {
+                        			kbb = ByteBuffer.wrap(c.getValue());
+                        			break;
+                        		}
+                        	}
+                    	} else {
+                    		kbb = ByteBuffer.wrap(row.getColumns().get(keyColumnIndex).getValue());
+                    	}
+                    }
+                    ret.put(kbb, filterKeyColumn(row));
                   }
                   Map<K, List<Column>> thriftRet = keySerializer.fromBytesMap(ret);
                   rows = new CqlRows<K, N, V>((LinkedHashMap<K, List<Column>>)thriftRet, columnNameSerializer, valueSerializer);

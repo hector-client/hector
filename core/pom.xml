@@ -52,7 +52,7 @@
         <configuration>
           <instructions>
             <Bundle-SymbolicName>${bundle.symbolicName}</Bundle-SymbolicName>
-            <Bundle-Version>${pom.version}</Bundle-Version>
+            <Bundle-Version>${project.version}</Bundle-Version>
             <Embed-Dependency>
               libthrift;scope=compile|runtime;type=!pom;inline=false,
               cassandra;scope=compile|runtime;type=!pom;inline=false,
@@ -61,7 +61,7 @@
 
             <Export-Package>
               <!-- !${bundle.namespace}.internal.*, -->
-              me.prettyprint.*;version="${pom.version}"
+              me.prettyprint.*;version="${project.version}"
             </Export-Package>
 
             <Import-Package>
@@ -163,7 +163,7 @@
     <dependency>
       <groupId>org.hectorclient</groupId>
       <artifactId>hector-test</artifactId>
-      <version>${pom.version}</version>
+      <version>${project.version}</version>
       <scope>test</scope>      
     </dependency>     
     <dependency>

@@ -134,6 +134,14 @@ public class ColumnSliceIterator<K, N, V> implements Iterator<HColumn<N, V>> {
 		iterator.remove();
 	}
 
+	public HColumn<N, V> peek() {
+		if(hasNext()){
+			return iterator.peek();
+		}
+		
+		return null;
+	}
+	
 	private void refresh() {
 		query.setRange(start, finish.function(), reversed, count);
 			columns = 0;
