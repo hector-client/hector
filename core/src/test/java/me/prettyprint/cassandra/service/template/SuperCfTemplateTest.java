@@ -1,20 +1,21 @@
 package me.prettyprint.cassandra.service.template;
 
 import static org.junit.Assert.*;
-
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.UUID;
-
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
-
 import org.junit.Test;
 
 
 public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
 
+	public void afterTest() {
+		cluster.truncate(keyspace.getKeyspaceName(), "Super1");
+	}
+	
   @Test
   public void testSuperCfInsertReadTemplate() {
     SuperCfTemplate<String, String, String> sTemplate = 

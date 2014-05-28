@@ -7,9 +7,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.ColumnDefinition;
+import org.apache.cassandra.config.ColumnDefinition.Type;
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.config.KSMetaData;
 import org.apache.cassandra.config.Schema;
@@ -27,7 +27,6 @@ import org.apache.cassandra.db.marshal.UTF8Type;
 import org.apache.cassandra.locator.AbstractReplicationStrategy;
 import org.apache.cassandra.locator.SimpleStrategy;
 import org.apache.cassandra.thrift.IndexType;
-
 import com.google.common.base.Charsets;
 import org.apache.cassandra.db.marshal.*;
 
@@ -94,9 +93,9 @@ public class EmbeddedSchemaLoader {
         indexCFMD(ks1, "Indexed1", true),
         indexCFMD(ks1, "Indexed2", false),
         //new CFMetaData(ks1, "StandardInteger1", st, IntegerType.instance, null).keyCacheSize(0),
-        new CFMetaData(ks1, "Counter1", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
-        new CFMetaData(ks1, "Counter2", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
-        new CFMetaData(ks1, "SuperCounter1", su, bytes, bytes).replicateOnWrite(true).defaultValidator(CounterColumnType.instance),
+        new CFMetaData(ks1, "Counter1", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance).rebuild(),
+        new CFMetaData(ks1, "Counter2", st, bytes, null).replicateOnWrite(true).defaultValidator(CounterColumnType.instance).rebuild(),
+        new CFMetaData(ks1, "SuperCounter1", su, bytes, bytes).replicateOnWrite(true).defaultValidator(CounterColumnType.instance).rebuild(),
         jdbcCFMD(ks1, "JdbcInteger", IntegerType.instance),
         jdbcCFMD(ks1, "JdbcUtf8", UTF8Type.instance),
         jdbcCFMD(ks1, "JdbcLong", LongType.instance),
@@ -109,22 +108,22 @@ public class EmbeddedSchemaLoader {
   }
 
   private static CFMetaData compositeCFMD(String ksName, String cfName, AbstractType<?>... types) {
-      return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, CompositeType.getInstance(Arrays.asList(types)), null);
+      return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, CompositeType.getInstance(Arrays.asList(types)), null).rebuild();
   }
 
 	private static CFMetaData dynamicCompositeCFMD(String ksName, String cfName) {
-		return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, DynamicCompositeType.getInstance(alias), null);
+		return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, DynamicCompositeType.getInstance(alias), null).rebuild();
 	}
 
   private static CFMetaData standardCFMD(String ksName, String cfName) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard,
-        BytesType.instance, null);
+        BytesType.instance, null).rebuild();
   }
 
   private static CFMetaData superCFMD(String ksName, String cfName,
       AbstractType subcc) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Super,
-        BytesType.instance, subcc);
+        BytesType.instance, subcc).rebuild();
   }
 
   private static CFMetaData indexCFMD(String ksName, String cfName, final Boolean withIdxType)
@@ -136,15 +135,15 @@ public class EmbeddedSchemaLoader {
                       ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
                       IndexType keys = withIdxType ? IndexType.KEYS : null;
                       //TODO: that last null is for composites. Need to understand that better, but null is reasonable
-                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null,null);
+                      ColumnDefinition def = new org.apache.cassandra.config.ColumnDefinition(cName,LongType.instance,IndexType.KEYS,null,"birthyear_index",null, Type.REGULAR);
                       put (cName,def);
-                  }});
+                  }}).rebuild();
   }
 
   private static CFMetaData jdbcCFMD(String ksName, String cfName,
       AbstractType comp) {
     return new CFMetaData(ksName, cfName, ColumnFamilyType.Standard, comp, null)
-        .defaultValidator(comp);
+        .defaultValidator(comp).rebuild();
   }
 
   private static CFMetaData cqlTestCf(String ksName, String cfName,
@@ -155,8 +154,8 @@ public class EmbeddedSchemaLoader {
         .keyValidator(UTF8Type.instance).columnMetadata(new HashMap<ByteBuffer, ColumnDefinition>()
             {{
               ByteBuffer cName = ByteBuffer.wrap("birthyear".getBytes(Charsets.UTF_8));
-              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null,null));
-          }});
+              put(cName, new ColumnDefinition(cName, LongType.instance, null, null, null,null, Type.REGULAR));
+          }}).rebuild();
   }
 }
 
