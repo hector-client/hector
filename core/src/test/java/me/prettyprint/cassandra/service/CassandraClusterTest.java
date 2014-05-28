@@ -44,16 +44,6 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
-  public void testDescribeKeyspaces() throws Exception {
-    List<KeyspaceDefinition> keyspaces = cassandraCluster.describeKeyspaces();
-	// System
-	// Keyspace1
-	// system_auth
-	// system_traces
-    assertEquals(4,keyspaces.size());
-  }
-
-  @Test
   public void testDescribeClusterName() throws Exception {
     assertEquals("Test Cluster",cassandraCluster.describeClusterName());
   }
@@ -72,15 +62,6 @@ public class CassandraClusterTest extends BaseEmbededServerSetupTest {
   public void testDescribeRing() throws Exception {
     List<TokenRange> ring = cassandraCluster.describeRing("Keyspace1");
     assertEquals(1, ring.size());
-  }
-
-
-
-  @Test
-  public void testDescribeKeyspace() throws Exception {
-    KeyspaceDefinition keyspaceDetail = cassandraCluster.describeKeyspace("Keyspace1");
-    assertNotNull(keyspaceDetail);
-    assertEquals(22, keyspaceDetail.getCfDefs().size());
   }
 
   @Test

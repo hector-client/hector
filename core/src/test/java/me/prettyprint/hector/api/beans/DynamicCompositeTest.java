@@ -1,43 +1,40 @@
 package me.prettyprint.hector.api.beans;
 
+import static me.prettyprint.hector.api.factory.HFactory.createMutator;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Map.Entry;
-import java.util.*;
+import java.util.Set;
+import java.util.UUID;
 import me.prettyprint.cassandra.serializers.*;
 import me.prettyprint.cassandra.service.ColumnSliceIterator;
-import me.prettyprint.hector.api.Cluster;
-import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.cassandra.service.template.BaseColumnFamilyTemplateTest;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.AbstractComposite.ComponentEquality;
 import me.prettyprint.hector.api.factory.HFactory;
-import static me.prettyprint.hector.api.factory.HFactory.*;
 import me.prettyprint.hector.api.mutation.Mutator;
 import me.prettyprint.hector.api.query.SliceQuery;
-import me.prettyprint.hector.testutils.EmbeddedServerHelper;
-import org.junit.AfterClass;
-import static org.junit.Assert.*;
-import org.junit.BeforeClass;
+import org.junit.After;
 import org.junit.Test;
 
-public class DynamicCompositeTest {
+public class DynamicCompositeTest extends BaseColumnFamilyTemplateTest {
 	private static DynamicCompositeSerializer ds = DynamicCompositeSerializer.get();
 	private static StringSerializer ss = StringSerializer.get();
 	private static UUIDSerializer us = UUIDSerializer.get();
 	private static Serializer<UUID> uss = UUIDSerializer.get();
+	private static String columnFamily = "DynamicComposite1";
+	private static String rowKey = "rowKey";
 
-  private static EmbeddedServerHelper embedded;
-
-	@BeforeClass
-	public static void setup() throws Exception {
-    embedded = new EmbeddedServerHelper();
-    embedded.setup();
+	@After
+	public void after() {
+		cluster.truncate(keyspace.getKeyspaceName(), columnFamily);
 	}
-
-	@AfterClass
-	public static void teardown() throws Exception {
-    EmbeddedServerHelper.teardown();
-	}
-
+	
 	@Test
 	public void allTypesSerialize() {
 		DynamicComposite composite = new DynamicComposite();
@@ -100,17 +97,12 @@ public class DynamicCompositeTest {
 
 	@Test
 	public void testUUIDGetAll() {
-		// Gets all columns in the row regardless of the column name
-    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
-    Keyspace ks = createKeyspace("Keyspace1", c);
-		String key = "rowKey";
-		String cf = "DynamicComposite1";
-
-		init(ks, key, cf);
+		// Gets all columns in the row regardless of the column name		
+		init();
 
 		// Get all rows
 		Set<UUID> results = new HashSet<UUID>();
-		ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(ks, cf, key, null, null);
+		ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(rowKey, null, null);
 		while(iterator.hasNext()) {
 			HColumn<DynamicComposite, String> column = iterator.next();
 			DynamicComposite composite = column.getName();
@@ -119,19 +111,12 @@ public class DynamicCompositeTest {
 		}
 
 		assertEquals("Failed to retrieve all columns", 8, results.size());
-
-		clear(ks, key, cf);
 	}
 
 	@Test
 	public void testUUIDGetSlice() {
 		// Gets all columns based on the first component in the column name
-    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
-    Keyspace ks = createKeyspace("Keyspace1", c);
-		String key = "rowKey";
-		String cf = "DynamicComposite1";
-
-		Map<UUID, Set<UUID>> ids = init(ks, key, cf);
+		Map<UUID, Set<UUID>> ids = init();
 
 		for(Entry<UUID, Set<UUID>> entry : ids.entrySet()) {
 			UUID component0 = entry.getKey();
@@ -144,7 +129,7 @@ public class DynamicCompositeTest {
 			DynamicComposite end = new DynamicComposite();
 			end.addComponent(component0, us, us.getComparatorType().getTypeName(), ComponentEquality.GREATER_THAN_EQUAL);
 
-			ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(ks, cf, key, start, end);
+			ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(rowKey, start, end);
 			while(iterator.hasNext()) {
 				HColumn<DynamicComposite, String> column = iterator.next();
 				DynamicComposite composite = column.getName();
@@ -153,45 +138,39 @@ public class DynamicCompositeTest {
 				assertTrue(ids.get(component0).contains(composite.get(1, us)));
 			}
 		}
-
-		clear(ks, key, cf);
 	}
 
 	@Test
 	public void testStringGetSlice() {
-    Cluster c = getOrCreateCluster("MyCluster", "localhost:9170");
-    Keyspace ks = createKeyspace("Keyspace1", c);
-		String key = "rowKey";
-		String cf = "DynamicComposite1";
-		Mutator<String> mutator = createMutator(ks, ss);
+		Mutator<String> mutator = createMutator(keyspace, ss);
 
 		DynamicComposite composite = (DynamicComposite) new DynamicComposite().
 						addComponent("a", ss).
 						addComponent("ba", ss).
 						addComponent("ca", ss).
 						addComponent("da", ss);
-		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+		mutator.addInsertion(rowKey, columnFamily, HFactory.createColumn(composite, composite.toString(), ds, ss));
 
 		composite = (DynamicComposite) new DynamicComposite().
 						addComponent("a", ss).
 						addComponent("bb", ss).
 						addComponent("cb", ss).
 						addComponent("db", ss);
-		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+		mutator.addInsertion(rowKey, columnFamily, HFactory.createColumn(composite, composite.toString(), ds, ss));
 
 		composite = (DynamicComposite) new DynamicComposite().
 						addComponent("b", ss).
 						addComponent("ba", ss).
 						addComponent("ca", ss).
 						addComponent("da", ss);
-		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+		mutator.addInsertion(rowKey, columnFamily, HFactory.createColumn(composite, composite.toString(), ds, ss));
 
 		composite = (DynamicComposite) new DynamicComposite().
 						addComponent("b", ss).
 						addComponent("bb", ss).
 						addComponent("cb", ss).
 						addComponent("db", ss);
-		mutator.addInsertion(key, cf, HFactory.createColumn(composite, composite.toString(), ds, ss));
+		mutator.addInsertion(rowKey, columnFamily, HFactory.createColumn(composite, composite.toString(), ds, ss));
 
 		mutator.execute();
 
@@ -204,7 +183,7 @@ public class DynamicCompositeTest {
 						addComponent("ca", ss).
 						addComponent("da", ss, compType, ComponentEquality.LESS_THAN_EQUAL); // s@a:s@ba:s@ca:s@da thru s@a:s@bb:s@cb:s@db
 
-		ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(ks, cf, key, null, end);
+		ColumnSliceIterator<String, DynamicComposite, String> iterator = getIterator(rowKey, null, end);
 		while(iterator.hasNext()) {
 			System.out.println(iterator.next().getName());
 		}
@@ -216,7 +195,7 @@ public class DynamicCompositeTest {
 						addComponent("ca", ss).
 						addComponent("da", ss, compType, ComponentEquality.EQUAL); // s@a:s@ba:s@ca:s@da thru s@b:s@ba:s@ca:s@da
 
-		iterator = getIterator(ks, cf, key, null, end);
+		iterator = getIterator(rowKey, null, end);
 		while(iterator.hasNext()) {
 			System.out.println(iterator.next().getName());
 		}
@@ -226,15 +205,15 @@ public class DynamicCompositeTest {
 						addComponent("b", ss, compType).
 						addComponent("bb", ss, compType, ComponentEquality.GREATER_THAN_EQUAL); // s@a:s@ba:s@ca:s@da thru s@b:s@bb:s@cb:s@db
 
-		iterator = getIterator(ks, cf, key, null, end);
+		iterator = getIterator(rowKey, null, end);
 		while(iterator.hasNext()) {
 			System.out.println(iterator.next().getName());
 		}
 	}
 
-	private ColumnSliceIterator<String, DynamicComposite, String> getIterator(Keyspace ks, String cf, String key, DynamicComposite start, DynamicComposite end) {
-		SliceQuery<String, DynamicComposite, String> query = HFactory.createSliceQuery(ks, ss, ds, ss).
-						setColumnFamily(cf).
+	private ColumnSliceIterator<String, DynamicComposite, String> getIterator(String key, DynamicComposite start, DynamicComposite end) {
+		SliceQuery<String, DynamicComposite, String> query = HFactory.createSliceQuery(keyspace, ss, ds, ss).
+						setColumnFamily(columnFamily).
 						setKey(key);
 		return new ColumnSliceIterator<String, DynamicComposite, String>(query, start, end, false);
 	}
@@ -255,8 +234,8 @@ public class DynamicCompositeTest {
 	 *
 	 * @return Map of first component to a set of the corresponding second components
 	 */
-	private Map<UUID, Set<UUID>> init(Keyspace ks, String key, String cf) {
-		Mutator<String> mutator = createMutator(ks, ss);
+	private Map<UUID, Set<UUID>> init() {
+		Mutator<String> mutator = createMutator(keyspace, ss);
 		Map<UUID, Set<UUID>> ids = new HashMap<UUID, Set<UUID>>();
 		ids.put(UUID.randomUUID(), new HashSet<UUID>());
 		ids.put(UUID.randomUUID(), new HashSet<UUID>());
@@ -266,7 +245,7 @@ public class DynamicCompositeTest {
 				UUID uuid = UUID.randomUUID();
 
 				DynamicComposite composite = (DynamicComposite) new DynamicComposite().addComponent(entry.getKey(), uss).addComponent(uuid, uss);
-				mutator.addInsertion(key, cf,	HFactory.createColumn(composite, composite.toString(), ds, ss));
+				mutator.addInsertion(rowKey, columnFamily,	HFactory.createColumn(composite, composite.toString(), ds, ss));
 
 				entry.getValue().add(uuid);
 			}
@@ -275,14 +254,5 @@ public class DynamicCompositeTest {
 		mutator.execute();
 
 		return ids;
-	}
-
-	/**
-	 * Helper function to remove a row after the test has completed.
-	 */
-	private void clear(Keyspace ks, String key, String cf) {
-		Mutator<String> mutator = createMutator(ks, ss);
-		mutator.addDeletion(key, cf);
-		mutator.execute();
 	}
 }
