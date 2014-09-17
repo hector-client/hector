@@ -73,7 +73,7 @@ public final class ThriftRangeSuperSlicesCounterQuery<K, SN, N> extends
                 (LinkedHashMap<K, List<CounterSuperColumn>>) thriftRet, keySerializer,
                 columnNameSerializer, nameSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

@@ -50,6 +50,6 @@ public class MultigetSubCountQuery<K,SN,N> extends MultigetCountQuery<K, N> {
                 ks.multigetCount(keySerializer.toBytesList(keys), columnParent, slicePredicate.toThrift()));
             return counts;
           }
-        }), this);
+        }, consistency), this);
   }
 }

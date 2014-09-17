@@ -53,7 +53,7 @@ public final class ThriftSliceCounterQuery<K, N> extends AbstractSliceQuery<K, N
             List<CounterColumn> thriftRet = ks.getCounterSlice(keySerializer.toByteBuffer(key), columnParent, getPredicate());
             return new CounterSliceImpl<N>(thriftRet, columnNameSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

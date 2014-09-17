@@ -69,7 +69,7 @@ public final class ThriftMultigetSuperSliceQuery<K, SN, N, V> extends
             return new SuperRowsImpl<K, SN, N, V>(thriftRet, keySerializer, columnNameSerializer,
                 nameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

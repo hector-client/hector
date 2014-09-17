@@ -7,9 +7,11 @@ import me.prettyprint.cassandra.connection.HConnectionManager;
 import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.cassandra.service.VirtualKeyspaceOperation;
 import me.prettyprint.cassandra.service.VirtualKeyspaceServiceImpl;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
 
@@ -41,14 +43,39 @@ public class ExecutingVirtualKeyspace<E> extends ExecutingKeyspace {
     this.keyPrefixSerializer = keyPrefixSerializer;
     prefixBytes = keyPrefixSerializer.toByteBuffer(keyPrefix);
   }
-
+  
   @Override
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc)
       throws HectorException {
+	  return doExecute(koc, null);
+  }
+  
+  @Override
+  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc,
+		  final HConsistencyLevel level) throws HectorException {
     KeyspaceService ks = null;
     try {
+      final ConsistencyLevelPolicy policy;
+      if(level != null) {
+        policy = new ConsistencyLevelPolicy() {
+      	
+      	@Override
+      	public HConsistencyLevel get(OperationType op, String cfName) {
+      		return level;
+      	}
+      	
+      	@Override
+      	public HConsistencyLevel get(OperationType op) {
+      		return level;
+      	}
+       };
+      }
+      else {
+        policy = consistencyLevelPolicy;
+      }
+      	  
       ks = new VirtualKeyspaceServiceImpl(keyspace, keyPrefix,
-          keyPrefixSerializer, consistencyLevelPolicy, connectionManager,
+          keyPrefixSerializer, policy, connectionManager,
           failoverPolicy, credentials);
       return koc.doInKeyspaceAndMeasure(ks);
     } finally {

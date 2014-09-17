@@ -6,6 +6,7 @@ import java.util.Map;
 
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -20,7 +21,8 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
   protected final Serializer<K> keySerializer;
   protected String columnFamily;
   protected List<K> keys;
-
+  protected HConsistencyLevel consistency;
+  
   /** The slice predicate for which the count it performed*/
   protected final HSlicePredicate<N> slicePredicate;
 
@@ -55,6 +57,16 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
   }
 
   @Override
+  public HConsistencyLevel getConsistencyLevel() {
+	  return this.consistency;
+  }
+
+  @Override
+  public void setConsistencyLevel(HConsistencyLevel level) {
+	  this.consistency = level;
+  }
+
+  @Override
   public QueryResult<Map<K, Integer>> execute() {
     Assert.notNull(keys, "keys list is null");
     Assert.notNull(columnFamily, "columnFamily is null");
@@ -67,7 +79,7 @@ public class MultigetCountQuery<K,N> implements Query<Map<K, Integer>> {
                 ks.multigetCount(keySerializer.toBytesList(keys), columnParent, slicePredicate.toThrift()));
             return counts;
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

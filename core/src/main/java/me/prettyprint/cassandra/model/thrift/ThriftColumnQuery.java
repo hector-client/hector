@@ -61,6 +61,6 @@ public class ThriftColumnQuery<K, N, V> extends AbstractColumnQuery<K, N, V> imp
               return null;
             }
           }
-        }), this);
+        }, consistency), this);
   }
 }

@@ -69,7 +69,7 @@ public final class ThriftMultigetSuperSliceCounterQuery<K, SN, N> extends
             return new CounterSuperRowsImpl<K, SN, N>(thriftRet, keySerializer, columnNameSerializer,
                 nameSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

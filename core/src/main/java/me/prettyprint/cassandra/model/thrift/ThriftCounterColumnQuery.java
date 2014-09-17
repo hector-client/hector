@@ -72,7 +72,7 @@ public class ThriftCounterColumnQuery<K, N> extends AbstractBasicQuery<K, N, HCo
               return null;
             }
           }
-        }), this);
+        }, consistency), this);
   }
 
 }

@@ -81,7 +81,7 @@ public final class ThriftRangeSlicesQuery<K, N,V> extends AbstractSliceQuery<K, 
                 ks.getRangeSlices(columnParent, getPredicate(), keyRange.toThrift()));
             return new OrderedRowsImpl<K,N,V>((LinkedHashMap<K, List<Column>>) thriftRet, columnNameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

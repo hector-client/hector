@@ -1,5 +1,6 @@
 package me.prettyprint.hector.api.mutation;
 
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
@@ -19,6 +20,10 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
  */
 public interface Mutator<K> {
 
+  public HConsistencyLevel getConsistencyLevel();
+  
+  public void setConsistencyLevel(HConsistencyLevel level);
+	  
   // Simple and immediate insertion of a column
   <N, V> MutationResult insert(final K key, final String cf, final HColumn<N, V> c);
 
