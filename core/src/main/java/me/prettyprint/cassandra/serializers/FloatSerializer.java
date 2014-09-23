@@ -1,6 +1,10 @@
 package me.prettyprint.cassandra.serializers;
 
+import static me.prettyprint.hector.api.ddl.ComparatorType.FLOATTYPE;
+
 import java.nio.ByteBuffer;
+
+import me.prettyprint.hector.api.ddl.ComparatorType;
 
 /**
  * Uses IntSerializer via translating Float objects to and from raw long bytes form.
@@ -23,6 +27,11 @@ public class FloatSerializer extends AbstractSerializer<Float> {
   @Override
   public Float fromByteBuffer(ByteBuffer bytes) {
     return Float.intBitsToFloat(IntegerSerializer.get().fromByteBuffer(bytes));
+  }
+
+  @Override
+      public ComparatorType getComparatorType() {
+      return FLOATTYPE;
   }
 
 }
