@@ -69,6 +69,15 @@ public class CompositeTest {
     o = c.get(0);
     assertTrue(o instanceof Long);
 
+    // test serialization and deserialization of floats
+    c = new DynamicComposite();
+    c.add(new Float(10));
+    b = c.serialize();
+    c = new DynamicComposite();
+    c.deserialize(b);
+    o = c.get(0);
+    assertTrue(o instanceof Float);
+
     // test serialization and deserialization of random UUIDS
     c = new DynamicComposite();
     c.add(UUID.randomUUID());

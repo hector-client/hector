@@ -8,6 +8,7 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.LONGTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.FLOATTYPE;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -27,6 +28,7 @@ import me.prettyprint.cassandra.serializers.LongSerializer;
 import me.prettyprint.cassandra.serializers.SerializerTypeInferer;
 import me.prettyprint.cassandra.serializers.StringSerializer;
 import me.prettyprint.cassandra.serializers.UUIDSerializer;
+import me.prettyprint.cassandra.serializers.FloatSerializer;
 import me.prettyprint.cassandra.utils.ByteBufferOutputStream;
 import me.prettyprint.hector.api.Serializer;
 
@@ -87,6 +89,8 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
           LongSerializer.get().getComparatorType().getTypeName())
       .put(StringSerializer.class,
           StringSerializer.get().getComparatorType().getTypeName())
+      .put(FloatSerializer.class,
+          FloatSerializer.get().getComparatorType().getTypeName())
       .put(UUIDSerializer.class,
           UUIDSerializer.get().getComparatorType().getTypeName()).build();
 
@@ -94,6 +98,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put(AsciiSerializer.class, AsciiSerializer.get())
       .put(BigIntegerSerializer.class, BigIntegerSerializer.get())
       .put(ByteBufferSerializer.class, ByteBufferSerializer.get())
+      .put(FloatSerializer.class, FloatSerializer.get())
       .put(LongSerializer.class, LongSerializer.get())
       .put(StringSerializer.class, StringSerializer.get())
       .put(UUIDSerializer.class, UUIDSerializer.get()).build();
@@ -101,6 +106,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
   public static final BiMap<Byte, String> DEFAULT_ALIAS_TO_COMPARATOR_MAPPING = new ImmutableBiMap.Builder<Byte, String>()
       .put((byte) 'a', ASCIITYPE.getTypeName())
       .put((byte) 'b', BYTESTYPE.getTypeName())
+      .put((byte) 'f', FLOATTYPE.getTypeName())
       .put((byte) 'i', INTEGERTYPE.getTypeName())
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
