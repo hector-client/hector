@@ -74,7 +74,7 @@ public final class ThriftRangeSuperSlicesQuery<K, SN, N, V> extends
                 (LinkedHashMap<K, List<SuperColumn>>) thriftRet, keySerializer,
                 columnNameSerializer, nameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

@@ -53,7 +53,7 @@ public final class ThriftSliceQuery<K, N, V> extends AbstractSliceQuery<K, N, V,
             List<Column> thriftRet = ks.getSlice(keySerializer.toByteBuffer(key), columnParent, getPredicate());
             return new ColumnSliceImpl<N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

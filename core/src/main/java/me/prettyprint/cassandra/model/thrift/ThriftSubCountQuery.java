@@ -55,7 +55,7 @@ public final class ThriftSubCountQuery<K,SN,N> extends AbstractThriftCountQuery<
                 slicePredicate.toThrift());
             return count;
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

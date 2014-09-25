@@ -69,10 +69,12 @@ public abstract class AbstractBasicQuery<K, N, T> implements Query<T> {
     return this;
   }
   
+  @Override
   public HConsistencyLevel getConsistencyLevel() {
 	  return this.consistency;
   }
 
+  @Override
   public void setConsistencyLevel(HConsistencyLevel level) {
 	  this.consistency = level;
   }

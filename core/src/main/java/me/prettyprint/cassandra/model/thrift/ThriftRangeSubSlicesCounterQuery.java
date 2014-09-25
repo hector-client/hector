@@ -82,7 +82,7 @@ public final class ThriftRangeSubSlicesCounterQuery<K,SN,N> extends AbstractSlic
                 ks.getRangeCounterSlices(columnParent, getPredicate(), keyRange.toThrift()));
             return new OrderedCounterRowsImpl<K,N>((LinkedHashMap<K, List<CounterColumn>>) thriftRet, columnNameSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

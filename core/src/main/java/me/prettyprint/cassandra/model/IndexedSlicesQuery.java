@@ -152,7 +152,7 @@ public class IndexedSlicesQuery<K, N, V> extends
                 (LinkedHashMap<K, List<Column>>) thriftRet,
                 columnNameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
 }

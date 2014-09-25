@@ -58,6 +58,6 @@ public final class ThriftSuperColumnQuery<K, SN,N,V> extends AbstractSuperColumn
               return null;
             }
           }
-        }), this);
+        }, consistency), this);
   }
 }

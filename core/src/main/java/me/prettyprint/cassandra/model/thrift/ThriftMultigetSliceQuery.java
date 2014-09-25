@@ -69,7 +69,7 @@ public final class ThriftMultigetSliceQuery<K, N, V> extends AbstractSliceQuery<
                 ks.multigetSlice(keysList, columnParent, getPredicate()));
             return new RowsImpl<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

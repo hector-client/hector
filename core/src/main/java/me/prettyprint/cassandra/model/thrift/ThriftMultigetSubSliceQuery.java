@@ -80,7 +80,7 @@ public final class ThriftMultigetSubSliceQuery<K, SN, N, V> extends AbstractSlic
                 keySerializer.toBytesList(keysList), columnParent, getPredicate()));
             return new RowsImpl<K, N, V>(thriftRet, columnNameSerializer, valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

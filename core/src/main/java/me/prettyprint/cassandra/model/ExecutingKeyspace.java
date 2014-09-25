@@ -10,8 +10,10 @@ import me.prettyprint.cassandra.service.FailoverPolicy;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.service.KeyspaceServiceImpl;
 import me.prettyprint.cassandra.service.Operation;
+import me.prettyprint.cassandra.service.OperationType;
 import me.prettyprint.cassandra.utils.Assert;
 import me.prettyprint.hector.api.ConsistencyLevelPolicy;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import org.apache.cassandra.thrift.Cassandra;
@@ -80,12 +82,36 @@ public class ExecutingKeyspace implements Keyspace {
   public long createClock() {
     return connectionManager.createClock();
   }
-
+  
   public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc)
-      throws HectorException {
+                  throws HectorException {
+      return doExecute(koc, null);
+  }
+  
+  public <T> ExecutionResult<T> doExecute(KeyspaceOperationCallback<T> koc, 
+                  final HConsistencyLevel level) throws HectorException {
     KeyspaceService ks = null;
     try {
-      ks = new KeyspaceServiceImpl(keyspace, consistencyLevelPolicy,
+      final ConsistencyLevelPolicy policy;
+      if(level != null) {
+    	  policy = new ConsistencyLevelPolicy() {
+			
+			@Override
+			public HConsistencyLevel get(OperationType op, String cfName) {
+				return level;
+			}
+			
+			@Override
+			public HConsistencyLevel get(OperationType op) {
+				return level;
+			}
+		};
+      }
+      else {
+    	  policy = consistencyLevelPolicy;
+      }
+    	  
+      ks = new KeyspaceServiceImpl(keyspace, policy,
           connectionManager, failoverPolicy, credentials);
       return koc.doInKeyspaceAndMeasure(ks);
     } finally {

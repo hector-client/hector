@@ -3,6 +3,7 @@ package me.prettyprint.cassandra.model;
 import java.util.List;
 
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.ColumnSlice;
@@ -53,6 +54,16 @@ public class AbstractSubColumnQuery<K, SN, N, V> implements SubColumnQuery<K, SN
   public SubColumnQuery<K, SN, N, V> setColumnFamily(String cf) {
     subSliceQuery.setColumnFamily(cf);
     return this;
+  }
+
+  @Override
+  public HConsistencyLevel getConsistencyLevel() {
+	  return this.subSliceQuery.getConsistencyLevel();
+  }
+
+  @Override
+  public void setConsistencyLevel(HConsistencyLevel level) {
+	  this.subSliceQuery.setConsistencyLevel(level);
   }
 
   @Override

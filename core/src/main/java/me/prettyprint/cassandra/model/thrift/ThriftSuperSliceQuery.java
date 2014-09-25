@@ -63,7 +63,7 @@ public final class ThriftSuperSliceQuery<K, SN, N, V> extends
             return new SuperSliceImpl<SN, N, V>(thriftRet, columnNameSerializer, nameSerializer,
                 valueSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

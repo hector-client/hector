@@ -69,7 +69,7 @@ public final class ThriftMultigetSliceCounterQuery<K, N> extends AbstractSliceQu
                 ks.multigetCounterSlice(keysList, columnParent, getPredicate()));
             return new CounterRowsImpl<K, N>(thriftRet, columnNameSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override

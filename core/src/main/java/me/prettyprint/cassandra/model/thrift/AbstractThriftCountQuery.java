@@ -6,6 +6,7 @@ import me.prettyprint.cassandra.model.KeyspaceOperationCallback;
 import me.prettyprint.cassandra.model.QueryResultImpl;
 import me.prettyprint.cassandra.service.KeyspaceService;
 import me.prettyprint.cassandra.utils.Assert;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.exceptions.HectorException;
@@ -27,7 +28,8 @@ import org.apache.cassandra.thrift.ColumnParent;
   protected final Serializer<K> keySerializer;
   /** The slice predicate for which the count it performed*/
   protected final HSlicePredicate<N> slicePredicate;
-
+  protected HConsistencyLevel consistency;
+  
   public AbstractThriftCountQuery(Keyspace k, Serializer<K> keySerializer,
       Serializer<N> nameSerializer) {
     Assert.notNull(k, "keyspaceOperator can't be null");
@@ -48,6 +50,16 @@ import org.apache.cassandra.thrift.ColumnParent;
     return this;
   }
 
+  @Override
+  public HConsistencyLevel getConsistencyLevel() {
+	  return this.consistency;
+  }
+
+  @Override
+  public void setConsistencyLevel(HConsistencyLevel level) {
+	  this.consistency = level;
+  }
+  
   protected  QueryResult<Integer> countColumns() {
     Assert.notNull(key, "key is null");
     Assert.notNull(columnFamily, "columnFamily is null");
@@ -59,7 +71,7 @@ import org.apache.cassandra.thrift.ColumnParent;
             return ks.getCount(keySerializer.toByteBuffer(key), columnParent,
                 slicePredicate.toThrift());
           }
-        }), this);
+        }, consistency), this);
   }
 
   public Query<Integer> setColumnNames(N... columnNames) {

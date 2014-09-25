@@ -1,6 +1,7 @@
 package me.prettyprint.hector.api.query;
 
 import me.prettyprint.cassandra.model.thrift.ThriftColumnQuery;
+import me.prettyprint.hector.api.HConsistencyLevel;
 
 
 /**
@@ -29,4 +30,7 @@ public interface Query<T> {
 
   QueryResult<T> execute();
 
+  public HConsistencyLevel getConsistencyLevel();
+  
+  public void setConsistencyLevel(HConsistencyLevel level);
 }

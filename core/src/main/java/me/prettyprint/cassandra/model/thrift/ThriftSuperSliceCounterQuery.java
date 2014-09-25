@@ -61,7 +61,7 @@ public final class ThriftSuperSliceCounterQuery<K, SN, N> extends
                     columnParent, getPredicate());
             return new CounterSuperSliceImpl<SN, N>(thriftRet, columnNameSerializer, nameSerializer);
           }
-        }), this);
+        }, consistency), this);
   }
 
   @Override
