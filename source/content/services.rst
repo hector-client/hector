@@ -32,7 +32,7 @@ An example to set up this service with just space to check 10 hosts and check th
 	// This first line is not really needed but it makes things clear :)
 	cassandraHostConfigurator.setRetryDownedHosts(true);
 	cassandraHostConfigurator.setRetryDownedHostsQueueSize(10);
-	cassandraHostConfigurator.retryDownedHostsDelayInSeconds(30);
+	cassandraHostConfigurator.setRetryDownedHostsDelayInSeconds(30);
 
 
 NodeAutoDiscoverService
