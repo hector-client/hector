@@ -35,6 +35,10 @@ public class ThriftConverter {
       return ConsistencyLevel.LOCAL_QUORUM;
     case LOCAL_ONE:
         return ConsistencyLevel.LOCAL_ONE;
+    case SERIAL:
+    	return ConsistencyLevel.SERIAL;
+    case LOCAL_SERIAL:
+    	return ConsistencyLevel.LOCAL_SERIAL;
     default:
       throw new RuntimeException("Unregornized consistency level " + c);
     }

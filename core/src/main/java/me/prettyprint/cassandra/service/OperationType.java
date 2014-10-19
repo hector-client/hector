@@ -11,6 +11,8 @@ public enum OperationType {
   READ,
   /** Write operations */
   WRITE,
+  /** CAS opertaions must be serial or local_serial */
+  SERIAL,
   /** Meta read operations, such as describe*() */
   META_READ,
   /** Operation on one of the system_ methods */

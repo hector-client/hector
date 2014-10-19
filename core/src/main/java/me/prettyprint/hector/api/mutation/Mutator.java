@@ -6,6 +6,7 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 
 /**
  * A Mutator inserts or deletes values from the cluster.
@@ -71,6 +72,8 @@ public interface Mutator<K> {
    */
   <SN, N, V> Mutator<K> addInsertion(K key, String cf, HSuperColumn<SN, N, V> sc);
 
+  public <N,V> Mutator<K> addCASInsertion(K key, String cf, HColumn<N,V> expected, HColumn<N,V> update);
+  
   /**
    * Adds a Deletion to the underlying batch_mutate call. The columnName argument can be null
    * in which case Deletion is created with only the Clock, in this case user defined,
@@ -183,6 +186,14 @@ public interface Mutator<K> {
    * @return A MutationResult holds the status.
    */
   MutationResult execute();
+  
+  /**
+   * Executes light weight transaction, which is also known as CAS (compare and swap) mutation.
+   * To add 
+   * @return
+   * @throws HInvalidRequestException
+   */
+  MutationResult executeWithCAS() throws HInvalidRequestException;
 
   /**
    * Discards all pending mutations.
