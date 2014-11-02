@@ -9,6 +9,7 @@ import static me.prettyprint.hector.api.ddl.ComparatorType.TIMEUUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UTF8TYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.UUIDTYPE;
 import static me.prettyprint.hector.api.ddl.ComparatorType.FLOATTYPE;
+import static me.prettyprint.hector.api.ddl.ComparatorType.DATETYPE;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -111,6 +112,7 @@ public abstract class AbstractComposite extends AbstractList<Object> implements
       .put((byte) 'x', LEXICALUUIDTYPE.getTypeName())
       .put((byte) 'l', LONGTYPE.getTypeName())
       .put((byte) 't', TIMEUUIDTYPE.getTypeName())
+      .put((byte) 'z', DATETYPE.getTypeName())
       .put((byte) 's', UTF8TYPE.getTypeName())
       .put((byte) 'u', UUIDTYPE.getTypeName()).build();
 
