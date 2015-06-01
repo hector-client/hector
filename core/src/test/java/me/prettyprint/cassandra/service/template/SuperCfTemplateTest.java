@@ -172,10 +172,12 @@ public class SuperCfTemplateTest extends BaseColumnFamilyTemplateTest {
     assertEquals(3, result.getColumnNames().size());
     
     sUpdater.deleteSubColumn("sub1_col_1");
+    sUpdater.deleteSubColumn("sub1_col_2");
+    sUpdater.deleteSubColumn("sub1_col_3");
     sTemplate.update(sUpdater);
     
     result = sTemplate.querySuperColumn("skey3","super1");
-    assertEquals(2, result.getColumnNames().size());
+    assertEquals(0, result.getColumnNames().size());
   }
   
   @Test
