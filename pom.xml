@@ -87,6 +87,7 @@
     <module>core</module>
     <module>object-mapper</module>
     <module>test</module>
+
   </modules>
 
   <dependencyManagement>
@@ -125,7 +126,7 @@
       <dependency>
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
-        <version>14.0</version>
+        <version>15.0</version>
       </dependency>
       <!-- END OF Misc. Dependencies-->
       <!-- Logging Dependencies -->
@@ -389,7 +390,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     
     <!-- Dependency versioning-->
-    <cassandra.version>2.0.4</cassandra.version>
+    <cassandra.version>2.0.15</cassandra.version>
     <org.springframework.version>3.0.6.RELEASE</org.springframework.version>
     <slf4j.version>1.6.1</slf4j.version>
     <!-- Maven plugin versioning -->
