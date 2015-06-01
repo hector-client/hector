@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.config.DatabaseDescriptor;
@@ -69,8 +68,16 @@ public class EmbeddedServerHelper {
     log.info("Started executor");
     try
     {
-        TimeUnit.SECONDS.sleep(3);
-        log.info("Done sleeping");
+        while(true) 
+        {
+        	if(cassandraDaemon != null && cassandraDaemon.thriftServer != null && cassandraDaemon.thriftServer.isRunning())
+        	{
+        		log.info("thrift server is now up...");
+        		break;
+        	}
+        	log.info("wait for thrift server to be up...");
+        	Thread.sleep(500);
+        }
     }
     catch (InterruptedException e)
     {
@@ -174,6 +181,7 @@ public class EmbeddedServerHelper {
   
   class CassandraRunner implements Runnable {    
     
+	  
     @Override
     public void run() {
 
