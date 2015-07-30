@@ -2,6 +2,7 @@ package me.prettyprint.cassandra.model;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
@@ -14,10 +15,12 @@ import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
 import me.prettyprint.hector.api.beans.HCounterSuperColumn;
 import me.prettyprint.hector.api.beans.HSuperColumn;
+import me.prettyprint.hector.api.exceptions.HInvalidRequestException;
 import me.prettyprint.hector.api.exceptions.HectorException;
 import me.prettyprint.hector.api.mutation.MutationResult;
 import me.prettyprint.hector.api.mutation.Mutator;
 import org.apache.cassandra.thrift.Cassandra;
+import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.cassandra.thrift.SliceRange;
@@ -44,6 +47,8 @@ public final class MutatorImpl<K> implements Mutator<K> {
   protected final Serializer<K> keySerializer;
 
   private BatchMutation<K> pendingMutations;
+  
+  private CASMutation<K> pendingCASMutation;
   
   private BatchSizeHint sizeHint;
   
@@ -187,6 +192,29 @@ public final class MutatorImpl<K> implements Mutator<K> {
   }
 
   /**
+   * Method expects the key to be the same as the existing key if it
+   * has already been set. CAS operation is designed to handle 1 row
+   * at a time.
+   */
+  public <N,V> Mutator<K> addCASInsertion(K key, String cf, HColumn<N,V> expected, HColumn<N,V> update) {
+	  CASMutation<K> cas = getPendingCASMutation();
+	  // we check to make sure the Key's are equal
+	  if (cas.getKey() != null && cas.getKey() != key) {
+		  throw new HInvalidRequestException("Key is not equal to existing key.");
+	  } else {
+		  cas.setKey(key);
+	  }
+	  cas.setColumnFamily(cf);
+	  if (expected != null) {
+		  cas.addExpected(((HColumnImpl<N,V>)expected).toThrift());
+	  } else {
+		  cas.addExpected(null);
+	  }
+	  cas.addUpdates(((HColumnImpl<N,V>)update).toThrift());
+	  return this;
+  }
+  
+  /**
    * {@inheritDoc}
    */
   @Override
@@ -285,6 +313,32 @@ public final class MutatorImpl<K> implements Mutator<K> {
     }));
 
   }
+  
+  /***
+   * There are some important differences with CAS "aka light weight transactions" operations
+   * that make it tricky. A regular mutation returns void, whereas CAS results thrift CASResult.
+   * Another difference is the CassandraHost isn't returned in CASResult.
+   */
+  public MutationResult executeWithCAS() throws HInvalidRequestException {
+	  if (pendingCASMutation == null || pendingCASMutation.getUpdates().isEmpty()) {
+		  return new MutationResultImpl(true, 0, null);
+	  }
+      final ByteBuffer key = pendingCASMutation.getKeyBuffer();
+      final String colfamily = pendingCASMutation.getColumnFamily();
+      final List<Column> expected = pendingCASMutation.getExpected();
+      final List<Column> updates = pendingCASMutation.getUpdates();
+
+      return new CASMutationResultImpl(keyspace.doExecuteOperation(new Operation<org.apache.cassandra.thrift.CASResult>(OperationType.WRITE) {
+        @Override
+        public org.apache.cassandra.thrift.CASResult execute(Cassandra.Client cassandra) throws Exception {
+        	org.apache.cassandra.thrift.CASResult result = cassandra.cas(key, colfamily, expected, updates,
+        			ThriftConverter.consistencyLevel(HConsistencyLevel.SERIAL),
+        			ThriftConverter.consistencyLevel(consistencyLevelPolicy.get(operationType)));
+          // Note: we have to return the CASResult in the event the operation wasn't successful
+          return result;
+        }
+      }));
+  }
 
   /**
    * Discards all pending mutations.
@@ -310,6 +364,13 @@ public final class MutatorImpl<K> implements Mutator<K> {
       pendingMutations = new BatchMutation<K>(keySerializer, sizeHint);
     }
     return pendingMutations;
+  }
+
+  private CASMutation<K> getPendingCASMutation() {
+	  if (pendingCASMutation == null) {
+		  pendingCASMutation = new CASMutation<K>(keySerializer);
+	  }
+	  return pendingCASMutation;
   }
   
   // Counters support.

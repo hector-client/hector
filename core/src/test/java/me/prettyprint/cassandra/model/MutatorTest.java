@@ -233,4 +233,21 @@ public class MutatorTest extends BaseEmbededServerSetupTest {
     //cluster.releaseClient(client);
   }
 
+  @Test
+  public void testInsertCAS() {
+    String cf = "Standard1";
+    String key = "username1";
+    Mutator<String> m = createMutator(keyspace, se);
+    HColumn<String,String> c = createColumn("age","30");
+    m.addInsertion(key, cf, c);
+    MutationResult r1 = m.execute();
+    assertTrue(r1 != null);
+    // now do CAS
+    HColumn<String,String> expected = c;
+    HColumn<String,String> update = createColumn("age","31");
+    m.addCASInsertion(key, cf, expected, update);
+    MutationResult mr = m.executeWithCAS();
+    assertTrue(mr != null);
+  }
+
 }
