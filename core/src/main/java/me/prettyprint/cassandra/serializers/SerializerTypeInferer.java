@@ -112,21 +112,7 @@ public class SerializerTypeInferer {
     if (null == clazz || null == target) {
       return false;
     }
-
-    Class<?>[] interArr = clazz.getInterfaces();
-    if (null == interArr) {
-      return false;
-    }
-
-    for (Class<?> interfa : interArr) {
-      if (interfa.equals(target)) {
-        return true;
-      }
-    }
-    if(clazz.getSuperclass()!=null) {
-      return isImplementedBy(clazz.getSuperclass(), target);
-    }
-    return false;
+    return target.isAssignableFrom(clazz);
   }
 
 }
