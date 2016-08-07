@@ -991,6 +991,59 @@ public class ApiV2SystemTest extends BaseEmbededServerSetupTest {
   }
 
   @Test
+  public void testRangeSuperSlicesQuery_order() {
+     /*
+     Test that OrderedSuperRows.getList and OrderedSuperRows..iterator are in the same order
+      */
+    String cf = "Super1";
+
+    TestCleanupDescriptor cleanup = insertSuperColumns(cf, 4,
+        "testRangeSuperSlicesQuery", 3, "testRangeSuperSlicesQuery");
+
+    // get value
+    RangeSuperSlicesQuery<String, String, String, String> q = createRangeSuperSlicesQuery(
+        ko, se, se, se, se);
+    q.setColumnFamily(cf);
+    q.setKeys("testRangeSuperSlicesQuery0", "testRangeSuperSlicesQuery1");
+    // try with column name first
+    q.setColumnNames("testRangeSuperSlicesQuery1", "testRangeSuperSlicesQuery2");
+
+     {
+        QueryResult<OrderedSuperRows<String, String, String, String>> r = q
+                .execute();
+        OrderedSuperRows<String, String, String, String> rows = r.get();
+        assertEquals(2, rows.getCount());
+
+        int i=0;
+        Iterator<SuperRow<String, String, String, String>> iterator = rows.getList().iterator();
+        while ( iterator.hasNext()) {
+           SuperRow<String, String, String, String> row = iterator.next();
+           assertNotNull(row);
+           assertEquals("testRangeSuperSlicesQuery" + i, row.getKey());
+           i++;
+        }
+     }
+
+     {
+        QueryResult<OrderedSuperRows<String, String, String, String>> r = q.execute();
+        OrderedSuperRows<String, String, String, String> rows = r.get();
+        assertEquals(2, rows.getCount());
+
+        int i=0;
+        Iterator<SuperRow<String, String, String, String>> iterator = rows.iterator();
+        while ( iterator.hasNext()) {
+           SuperRow<String, String, String, String> row = iterator.next();
+           assertNotNull(row);
+           assertEquals("testRangeSuperSlicesQuery" + i, row.getKey());
+           i++;
+        }
+     }
+
+     // Delete values
+    deleteColumns(cleanup);
+  }
+
+  @Test
   public void testRangeSubSlicesQuery() {
     String cf = "Super1";
 
